@@ -1,0 +1,569 @@
+{
+  "campaignMeta": {
+    "campaignId": "smoke-campaign-v7",
+    "startedAt": "2026-02-14T22:42:28.749Z",
+    "finishedAt": "2026-02-14T22:44:34.064Z",
+    "durationMs": 125315,
+    "seed": 1337,
+    "totalRequested": 2,
+    "randomCountRequested": 1,
+    "scenarioCountRequested": 2,
+    "analyze": true,
+    "failFast": true,
+    "outDir": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-campaign-v7"
+  },
+  "runStats": {
+    "total": 2,
+    "success": 2,
+    "failed": 0,
+    "scenarioRuns": 2,
+    "randomRuns": 0,
+    "analyzedRuns": 2,
+    "successRate": 1
+  },
+  "scoreStats": {
+    "average": 98,
+    "min": 97,
+    "max": 99,
+    "p50": 97,
+    "p90": 99,
+    "sectionAverages": {
+      "schedule": 99,
+      "geography": 96.5,
+      "budget": 97,
+      "links": 100,
+      "dataQuality": 98,
+      "rhythm": 97.5,
+      "relevance": 97,
+      "realism": 98.5
+    }
+  },
+  "issuesByCode": [
+    {
+      "key": "geography:Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "code": "geography:Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre",
+      "code": "geography:Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "code": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 50min de temps libre — pas de pause",
+      "code": "rhythm:Jour 3: seulement 50min de temps libre — pas de pause",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3: seulement 50min de temps libre — pas de pause"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): colisée",
+      "code": "relevance:Must-see manquants (1/2): colisée",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): colisée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "code": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14.1km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit",
+      "code": "budget:Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (0/1): sagrada familia",
+      "code": "relevance:Must-see manquants (0/1): sagrada familia",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (0/1): sagrada familia"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 3,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "Jour 3: \"Piazza di Spagna\" n'a pas de description",
+        "Jour 3: \"Musées Capitolins\" n'a pas de description"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "code": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "code": "rhythm:Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "code": "rhythm:Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:0",
+      "code": "schedule:Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:0",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:00) et \"Vol TO 4756\" (début 17:00)"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "issuesByComponent": [
+    {
+      "component": "unknown",
+      "total": 14,
+      "critical": 0,
+      "warning": 8,
+      "info": 6
+    },
+    {
+      "component": "pipeline/content",
+      "total": 3,
+      "critical": 0,
+      "warning": 0,
+      "info": 3
+    }
+  ],
+  "topRegressions": [
+    {
+      "key": "geography:Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "code": "geography:Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre",
+      "code": "geography:Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "code": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 50min de temps libre — pas de pause",
+      "code": "rhythm:Jour 3: seulement 50min de temps libre — pas de pause",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3: seulement 50min de temps libre — pas de pause"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): colisée",
+      "code": "relevance:Must-see manquants (1/2): colisée",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): colisée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "code": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14.1km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit",
+      "code": "budget:Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (0/1): sagrada familia",
+      "code": "relevance:Must-see manquants (0/1): sagrada familia",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (0/1): sagrada familia"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 3,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "Jour 3: \"Piazza di Spagna\" n'a pas de description",
+        "Jour 3: \"Musées Capitolins\" n'a pas de description"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "code": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "code": "rhythm:Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "code": "rhythm:Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:0",
+      "code": "schedule:Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:0",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:00) et \"Vol TO 4756\" (début 17:00)"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "stratification": {
+    "groupTypes": {
+      "solo": 1,
+      "couple": 1,
+      "friends": 0,
+      "family_with_kids": 0,
+      "family_without_kids": 0
+    },
+    "budgetLevels": {
+      "economic": 1,
+      "moderate": 1,
+      "comfort": 0,
+      "luxury": 0
+    },
+    "transports": {
+      "optimal": 1,
+      "plane": 1,
+      "train": 0,
+      "car": 0,
+      "bus": 0
+    },
+    "multiCityRuns": 0
+  },
+  "exitCriteria": {
+    "successRate": {
+      "value": 1,
+      "target": 0.9,
+      "pass": true
+    },
+    "noApiKeyLeaks": {
+      "count": 0,
+      "pass": true
+    },
+    "noHotelBoundaryIncoherent": {
+      "count": 0,
+      "pass": true
+    },
+    "urbanLegPolicy": {
+      "count": 0,
+      "pass": true
+    },
+    "averageScore": {
+      "value": 98,
+      "target": 85,
+      "pass": true
+    },
+    "noCriticalRemaining": {
+      "count": 0,
+      "pass": true
+    },
+    "overallPass": true
+  },
+  "runs": [
+    {
+      "runId": "S01-paris-rome-4d",
+      "runKind": "scenario",
+      "scenarioId": "paris-rome-4d",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-campaign-v7/S01-paris-rome-4d.json",
+      "startedAt": "2026-02-14T22:42:28.749Z",
+      "durationMs": 61455,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-campaign-v7/S01-paris-rome-4d-report.json",
+      "score": 97,
+      "critical": 0,
+      "warning": 6,
+      "info": 7
+    },
+    {
+      "runId": "S02-1day-express",
+      "runKind": "scenario",
+      "scenarioId": "1day-express",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-campaign-v7/S02-1day-express.json",
+      "startedAt": "2026-02-14T22:43:30.208Z",
+      "durationMs": 63854,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-campaign-v7/S02-1day-express-report.json",
+      "score": 99,
+      "critical": 0,
+      "warning": 2,
+      "info": 2
+    }
+  ]
+}

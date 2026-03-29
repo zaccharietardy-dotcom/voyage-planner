@@ -1,0 +1,1576 @@
+{
+  "tripId": "d998ba62-356a-487b-ae99-b91c4d3570d8",
+  "scenarioId": "14day-long",
+  "generatedAt": "2026-02-23T14:32:38.168Z",
+  "destination": "Tokyo",
+  "summary": {
+    "totalIssues": 114,
+    "critical": 14,
+    "warning": 45,
+    "info": 55,
+    "score": 74,
+    "weightedScore": 74
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 94,
+      "critical": 0,
+      "warning": 0,
+      "info": 8,
+      "totalIssues": 8,
+      "weightedPenalty": 5.6
+    },
+    "geography": {
+      "score": 0,
+      "critical": 14,
+      "warning": 31,
+      "info": 0,
+      "totalIssues": 45,
+      "weightedPenalty": 452.55
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 82,
+      "critical": 0,
+      "warning": 0,
+      "info": 26,
+      "totalIssues": 26,
+      "weightedPenalty": 18.2
+    },
+    "dataQuality": {
+      "score": 82,
+      "critical": 0,
+      "warning": 1,
+      "info": 21,
+      "totalIssues": 22,
+      "weightedPenalty": 18.2
+    },
+    "rhythm": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "relevance": {
+      "score": 90,
+      "critical": 0,
+      "warning": 3,
+      "info": 0,
+      "totalIssues": 3,
+      "weightedPenalty": 10.5
+    },
+    "realism": {
+      "score": 72,
+      "critical": 0,
+      "warning": 8,
+      "info": 0,
+      "totalIssues": 8,
+      "weightedPenalty": 28
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 7,
+      "impactScore": 154,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: segment 17.7km entre \"Tokyo Disneyland\" et \"Fūunji Shinjuku\" sans assez de temps (10min, besoin ~22min)",
+        "Jour 2: segment 95.7km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Mont Fuji\" sans assez de temps (95min, besoin ~115min)",
+        "Jour 2: segment 101.7km entre \"Mont Fuji\" et \"Gyukatsu Ichinisan\" sans assez de temps (10min, besoin ~123min)"
+      ]
+    },
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 7,
+      "impactScore": 140,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: 17.7km entre \"Tokyo Disneyland\" et \"Fūunji Shinjuku\" avec seulement 10min de battement (besoin ~22min)",
+        "Jour 2: 95.7km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Mont Fuji\" avec seulement 95min de battement (besoin ~115min)",
+        "Jour 2: 101.7km entre \"Mont Fuji\" et \"Gyukatsu Ichinisan\" avec seulement 10min de battement (besoin ~123min)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 9,
+      "impactScore": 57.6,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: 3 segments > 2.5km (max cible: 1)",
+        "Jour 2: 2 segments > 2.5km (max cible: 1)",
+        "Jour 4: 6 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 8,
+      "impactScore": 57.6,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: itinéraire en zigzag (4 demi-tours détectés)",
+        "Jour 4: itinéraire en zigzag (3 demi-tours détectés)",
+        "Jour 5: itinéraire en zigzag (3 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 5,
+      "impactScore": 30,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: efficacité de route faible (1.85x du minimum MST)",
+        "Jour 2: efficacité de route faible (1.92x du minimum MST)",
+        "Jour 4: efficacité de route faible (2.49x du minimum MST)"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 26,
+      "impactScore": 26,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Tokyo Disneyland\" n'a aucun lien (booking, viator, maps)",
+        "Jour 3: \"Shinjuku Gyoen Park\" n'a aucun lien (booking, viator, maps)",
+        "Jour 3: \"Tokyo Metropolitan Government Building | North Observation Deck\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "GEO_VERY_LONG_DAY_LEG",
+      "code": "GEO_VERY_LONG_DAY_LEG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/geography",
+      "count": 5,
+      "impactScore": 24,
+      "avgFrequencyWeight": 1.2,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: 95.7km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Mont Fuji\" — trajet long",
+        "Jour 2: 101.7km entre \"Mont Fuji\" et \"Gyukatsu Ichinisan\" — trajet long",
+        "Jour 7: 70.0km entre \"Splash Tokyo\" et \"Tokyo DisneySea\" — trajet long"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 19,
+      "impactScore": 19,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: \"Shinjuku Gyoen Park\" n'a pas de description",
+        "Jour 3: \"Tokyo Metropolitan Government Building | North Observation Deck\" n'a pas de description",
+        "Jour 3: \"Tokyo Night & Light\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "GEO_LONG_LEG_OK",
+      "code": "GEO_LONG_LEG_OK",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 4,
+      "avgFrequencyWeight": 0.5,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: segment long 17.2km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Tokyo Disneyland\" (310min de battement)",
+        "Jour 7: segment long 70.0km entre \"Splash Tokyo\" et \"Tokyo DisneySea\" (200min de battement)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "geography:Jour 2: \"Mont Fuji\" est à 96.1km du centre — trop loin ?",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Mont Fuji\" est à 96.1km du centre — trop loin ?"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 1: 5h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 08:10) et \"Tokyo Disneyland\" (début 13:20)",
+        "dayNumber": 1,
+        "details": {
+          "gapMinutes": 310
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 2: 5h de vide entre \"Gyukatsu Ichinisan\" (fin 14:15) et \"Tapas Molecular Bar\" (début 19:00)",
+        "dayNumber": 2,
+        "details": {
+          "gapMinutes": 285
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 7: 3h de vide entre \"Splash Tokyo\" (fin 09:40) et \"Tokyo DisneySea\" (début 13:00)",
+        "dayNumber": 7,
+        "details": {
+          "gapMinutes": 200
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 8: 8h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 09:15) et \"Obtenez des vues uniques sur Tokyo - Visite privée avec Guide local\" (début 17:00)",
+        "dayNumber": 8,
+        "details": {
+          "gapMinutes": 465
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 9: 3h de vide entre \"Tapas Molecular Bar\" (fin 15:40) et \"Gyukatsu Ichinisan\" (début 19:00)",
+        "dayNumber": 9,
+        "details": {
+          "gapMinutes": 200
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 12: 3h de vide entre \"teamLab Planets TOKYO DMM\" (fin 13:35) et \"Tokyo JDM Experience : Daikoku PA & Fast & Furious Night Drive\" (début 17:00)",
+        "dayNumber": 12,
+        "details": {
+          "gapMinutes": 205
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 13: 3h de vide entre \"Gyukatsu Ichinisan\" (fin 15:45) et \"GYOPAO Gyoza Roppongi\" (début 19:00)",
+        "dayNumber": 13,
+        "details": {
+          "gapMinutes": 195
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 14: 4h de vide entre \"Rikugi-en\" (fin 15:00) et \"Mark's Tokyo\" (début 19:00)",
+        "dayNumber": 14,
+        "details": {
+          "gapMinutes": 240
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: segment long 17.2km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Tokyo Disneyland\" (310min de battement)",
+        "dayNumber": 1,
+        "details": {
+          "distanceKm": 17.23,
+          "gapMinutes": 310
+        },
+        "code": "GEO_LONG_LEG_OK",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 0.5
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: 17.7km entre \"Tokyo Disneyland\" et \"Fūunji Shinjuku\" avec seulement 10min de battement (besoin ~22min)",
+        "dayNumber": 1,
+        "details": {
+          "distanceKm": "17.7",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 22
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: segment 17.7km entre \"Tokyo Disneyland\" et \"Fūunji Shinjuku\" sans assez de temps (10min, besoin ~22min)",
+        "dayNumber": 1,
+        "details": {
+          "distanceKm": 17.65,
+          "thresholdKm": 4,
+          "gapMinutes": 10,
+          "estimatedTravelMin": 22
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 1,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: efficacité de route faible (1.85x du minimum MST)",
+        "dayNumber": 1,
+        "details": {
+          "routeInefficiencyRatio": 1.85,
+          "threshold": 1.75,
+          "totalLegKm": 37.78,
+          "mstLowerBoundKm": 20.44
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: \"Mont Fuji\" est à 96.1km du centre — trop loin ?",
+        "dayNumber": 2,
+        "itemTitle": "Mont Fuji",
+        "details": {
+          "distanceKm": 96
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 95.7km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Mont Fuji\" — trajet long",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 96,
+          "gapMinutes": 95
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 95.7km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Mont Fuji\" avec seulement 95min de battement (besoin ~115min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "95.7",
+          "gapMinutes": 95,
+          "estimatedTravelMin": 115
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment 95.7km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Mont Fuji\" sans assez de temps (95min, besoin ~115min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 95.69,
+          "thresholdKm": 4,
+          "gapMinutes": 95,
+          "estimatedTravelMin": 115
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 101.7km entre \"Mont Fuji\" et \"Gyukatsu Ichinisan\" — trajet long",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 102,
+          "gapMinutes": 10
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 101.7km entre \"Mont Fuji\" et \"Gyukatsu Ichinisan\" avec seulement 10min de battement (besoin ~123min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "101.7",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 123
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment 101.7km entre \"Mont Fuji\" et \"Gyukatsu Ichinisan\" sans assez de temps (10min, besoin ~123min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 101.75,
+          "thresholdKm": 4,
+          "gapMinutes": 10,
+          "estimatedTravelMin": 123
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (1.92x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 1.92,
+          "threshold": 1.75,
+          "totalLegKm": 199.11,
+          "mstLowerBoundKm": 103.53
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.72,
+          "totalLegKm": 4.54
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: 6 segments > 2.5km (max cible: 1)",
+        "dayNumber": 4,
+        "details": {
+          "longLegCount": 6,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.49,
+          "totalLegKm": 21.18
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: efficacité de route faible (2.49x du minimum MST)",
+        "dayNumber": 4,
+        "details": {
+          "routeInefficiencyRatio": 2.49,
+          "threshold": 1.75,
+          "totalLegKm": 21.18,
+          "mstLowerBoundKm": 8.49
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: 4 segments > 2.5km (max cible: 1)",
+        "dayNumber": 5,
+        "details": {
+          "longLegCount": 4,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 5,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.59,
+          "totalLegKm": 19.88
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: efficacité de route faible (2.59x du minimum MST)",
+        "dayNumber": 5,
+        "details": {
+          "routeInefficiencyRatio": 2.59,
+          "threshold": 1.75,
+          "totalLegKm": 19.88,
+          "mstLowerBoundKm": 7.68
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 6: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 6,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.49,
+          "totalLegKm": 11.36
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: \"Splash Tokyo\" est à 52.3km du centre — trop loin ?",
+        "dayNumber": 7,
+        "itemTitle": "Splash Tokyo",
+        "details": {
+          "distanceKm": 52
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: 70.0km entre \"Splash Tokyo\" et \"Tokyo DisneySea\" — trajet long",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": 70,
+          "gapMinutes": 200
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: segment long 70.0km entre \"Splash Tokyo\" et \"Tokyo DisneySea\" (200min de battement)",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": 70.04,
+          "gapMinutes": 200
+        },
+        "code": "GEO_LONG_LEG_OK",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 0.5
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: 41.7km entre \"Tokyo DisneySea\" et \"Hachikokuyama Park\" — trajet long",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": 42,
+          "gapMinutes": 0
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 7: 41.7km entre \"Tokyo DisneySea\" et \"Hachikokuyama Park\" avec seulement 0min de battement (besoin ~50min)",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": "41.7",
+          "gapMinutes": 0,
+          "estimatedTravelMin": 50
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 7: segment 41.7km entre \"Tokyo DisneySea\" et \"Hachikokuyama Park\" sans assez de temps (0min, besoin ~50min)",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": 41.67,
+          "thresholdKm": 4,
+          "gapMinutes": 0,
+          "estimatedTravelMin": 50
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: 23.4km entre \"Hachikokuyama Park\" et \"Fūunji Shinjuku\" — trajet long",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": 23,
+          "gapMinutes": 10
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 7: 23.4km entre \"Hachikokuyama Park\" et \"Fūunji Shinjuku\" avec seulement 10min de battement (besoin ~29min)",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": "23.4",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 29
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 7: segment 23.4km entre \"Hachikokuyama Park\" et \"Fūunji Shinjuku\" sans assez de temps (10min, besoin ~29min)",
+        "dayNumber": 7,
+        "details": {
+          "distanceKm": 23.38,
+          "thresholdKm": 4,
+          "gapMinutes": 10,
+          "estimatedTravelMin": 29
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 7,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 7,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.92,
+          "totalLegKm": 135.09
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: efficacité de route faible (1.92x du minimum MST)",
+        "dayNumber": 7,
+        "details": {
+          "routeInefficiencyRatio": 1.92,
+          "threshold": 1.75,
+          "totalLegKm": 135.09,
+          "mstLowerBoundKm": 70.47
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 8: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 8,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.35,
+          "totalLegKm": 9.09
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 11: 4 segments > 2.5km (max cible: 1)",
+        "dayNumber": 11,
+        "details": {
+          "longLegCount": 4,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 11: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 11,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.67,
+          "totalLegKm": 20.29
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 12: 6.1km entre \"Tokyo JDM Experience : Daikoku PA & Fast & Furious Night Drive\" et \"NOBU Tokyo\" avec seulement 0min de battement (besoin ~13min)",
+        "dayNumber": 12,
+        "details": {
+          "distanceKm": "6.1",
+          "gapMinutes": 0,
+          "estimatedTravelMin": 13
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 12: segment 6.1km entre \"Tokyo JDM Experience : Daikoku PA & Fast & Furious Night Drive\" et \"NOBU Tokyo\" sans assez de temps (0min, besoin ~13min)",
+        "dayNumber": 12,
+        "details": {
+          "distanceKm": 6.12,
+          "thresholdKm": 4,
+          "gapMinutes": 0,
+          "estimatedTravelMin": 13
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 12: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 12,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 13: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 13,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 14: 16.3km entre \"Musée Ghibli\" et \"Rikugi-en\" avec seulement 5min de battement (besoin ~20min)",
+        "dayNumber": 14,
+        "details": {
+          "distanceKm": "16.3",
+          "gapMinutes": 5,
+          "estimatedTravelMin": 20
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 14: segment 16.3km entre \"Musée Ghibli\" et \"Rikugi-en\" sans assez de temps (5min, besoin ~20min)",
+        "dayNumber": 14,
+        "details": {
+          "distanceKm": 16.35,
+          "thresholdKm": 4,
+          "gapMinutes": 5,
+          "estimatedTravelMin": 20
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 14: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 14,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 14: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 14,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.63,
+          "totalLegKm": 39.72
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Tokyo Disneyland\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Tokyo Disneyland",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Shinjuku Gyoen Park\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Shinjuku Gyoen Park",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Tokyo Metropolitan Government Building | North Observation Deck\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Tokyo Metropolitan Government Building | North Observation Deck",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Tokyo Night & Light\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Tokyo Night & Light",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Shibuya Sky\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Shibuya Sky",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Hachiko Statue\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Hachiko Statue",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Fushimi Sanpō Inari-jinja\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Fushimi Sanpō Inari-jinja",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Yoyogi-kōen\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Yoyogi-kōen",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 5: \"Ikedayama Park\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 5,
+        "itemTitle": "Ikedayama Park",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 5: \"Meiji-jingū\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 5,
+        "itemTitle": "Meiji-jingū",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: \"Zojo-ji Temple\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 6,
+        "itemTitle": "Zojo-ji Temple",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: \"Jardin Hama-Rikyū\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 6,
+        "itemTitle": "Jardin Hama-Rikyū",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 7: \"Splash Tokyo\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 7,
+        "itemTitle": "Splash Tokyo",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 7: \"Tokyo DisneySea\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 7,
+        "itemTitle": "Tokyo DisneySea",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 7: \"Hachikokuyama Park\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 7,
+        "itemTitle": "Hachikokuyama Park",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 8: \"Wadakura Fountain National Park\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 8,
+        "itemTitle": "Wadakura Fountain National Park",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 9: \"Jardin national de Kokyo Gaien\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 9,
+        "itemTitle": "Jardin national de Kokyo Gaien",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 10: \"Parc d'Ueno\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 10,
+        "itemTitle": "Parc d'Ueno",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 10: \"Akihabara Electric Town\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 10,
+        "itemTitle": "Akihabara Electric Town",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 11: \"Sanctuaire Asakusa\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 11,
+        "itemTitle": "Sanctuaire Asakusa",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 11: \"Temple Senso-ji\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 11,
+        "itemTitle": "Temple Senso-ji",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 11: \"Nakamise Shopping Street\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 11,
+        "itemTitle": "Nakamise Shopping Street",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 11: \"Kaminarimon Gate\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 11,
+        "itemTitle": "Kaminarimon Gate",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 11: \"Tokyo Skytree\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 11,
+        "itemTitle": "Tokyo Skytree",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 12: \"teamLab Planets TOKYO DMM\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 12,
+        "itemTitle": "teamLab Planets TOKYO DMM",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 14: \"Rikugi-en\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 14,
+        "itemTitle": "Rikugi-en",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Shinjuku Gyoen Park\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Shinjuku Gyoen Park",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Tokyo Metropolitan Government Building | North Observation Deck\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Tokyo Metropolitan Government Building | North Observation Deck",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Tokyo Night & Light\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Tokyo Night & Light",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Shibuya Sky\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Shibuya Sky",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Hachiko Statue\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Hachiko Statue",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Yoyogi-kōen\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Yoyogi-kōen",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Meiji-jingū\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Meiji-jingū",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 6: \"La Tour de Tokyo\" n'a pas de description",
+        "dayNumber": 6,
+        "itemTitle": "La Tour de Tokyo",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 6: \"Jardin Hama-Rikyū\" n'a pas de description",
+        "dayNumber": 6,
+        "itemTitle": "Jardin Hama-Rikyū",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 7: \"Tokyo DisneySea\" n'a pas de description",
+        "dayNumber": 7,
+        "itemTitle": "Tokyo DisneySea",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 9: \"Jardins Est du Palais Impérial\" n'a pas de description",
+        "dayNumber": 9,
+        "itemTitle": "Jardins Est du Palais Impérial",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 10: \"Musée national de Tokyo\" n'a pas de description",
+        "dayNumber": 10,
+        "itemTitle": "Musée national de Tokyo",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 10: \"Parc d'Ueno\" n'a pas de description",
+        "dayNumber": 10,
+        "itemTitle": "Parc d'Ueno",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 11: \"Sanctuaire Asakusa\" n'a pas de description",
+        "dayNumber": 11,
+        "itemTitle": "Sanctuaire Asakusa",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 11: \"Nakamise Shopping Street\" n'a pas de description",
+        "dayNumber": 11,
+        "itemTitle": "Nakamise Shopping Street",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 11: \"Kaminarimon Gate\" n'a pas de description",
+        "dayNumber": 11,
+        "itemTitle": "Kaminarimon Gate",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 11: \"Tokyo Skytree\" n'a pas de description",
+        "dayNumber": 11,
+        "itemTitle": "Tokyo Skytree",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 12: \"teamLab Planets TOKYO DMM\" n'a pas de description",
+        "dayNumber": 12,
+        "itemTitle": "teamLab Planets TOKYO DMM",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 14: \"Musée Ghibli\" n'a pas de description",
+        "dayNumber": 14,
+        "itemTitle": "Musée Ghibli",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 11: 9 activités/restaurants — journée surchargée",
+        "dayNumber": 11,
+        "details": {
+          "activityCount": 9
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (2/3): sanctuaire fushimi inari",
+        "details": {
+          "found": 2,
+          "total": 3,
+          "missing": [
+            "sanctuaire fushimi inari"
+          ]
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"adventure\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "adventure"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 1: restaurant \"Fūunji Shinjuku\" à 17.7km de l'activité précédente (\"Tokyo Disneyland\") avec seulement 10min de battement",
+        "dayNumber": 1,
+        "itemTitle": "Fūunji Shinjuku",
+        "details": {
+          "distKm": "17.7",
+          "gapMin": 10
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Gyukatsu Ichinisan\" à 101.7km de l'activité précédente (\"Mont Fuji\") avec seulement 10min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Gyukatsu Ichinisan",
+        "details": {
+          "distKm": "101.7",
+          "gapMin": 10
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 3.4km de l'activité précédente (\"Yoyogi-kōen\") avec seulement 0min de battement",
+        "dayNumber": 4,
+        "itemTitle": "GYOPAO Gyoza Roppongi",
+        "details": {
+          "distKm": "3.4",
+          "gapMin": 0
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 5: restaurant \"Mark's Tokyo\" à 4.7km de l'activité précédente (\"Meiji-jingū\") avec seulement 10min de battement",
+        "dayNumber": 5,
+        "itemTitle": "Mark's Tokyo",
+        "details": {
+          "distKm": "4.7",
+          "gapMin": 10
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 7: restaurant \"Fūunji Shinjuku\" à 23.4km de l'activité précédente (\"Hachikokuyama Park\") avec seulement 10min de battement",
+        "dayNumber": 7,
+        "itemTitle": "Fūunji Shinjuku",
+        "details": {
+          "distKm": "23.4",
+          "gapMin": 10
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 11: restaurant \"Tapas Molecular Bar\" à 3.7km de l'activité précédente (\"Tokyo Sushi Making Class : Sake Ceremony & Matcha Experience\") avec seulement 10min de battement",
+        "dayNumber": 11,
+        "itemTitle": "Tapas Molecular Bar",
+        "details": {
+          "distKm": "3.7",
+          "gapMin": 10
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 12: restaurant \"NOBU Tokyo\" à 6.1km de l'activité précédente (\"Tokyo JDM Experience : Daikoku PA & Fast & Furious Night Drive\") avec seulement 0min de battement",
+        "dayNumber": 12,
+        "itemTitle": "NOBU Tokyo",
+        "details": {
+          "distKm": "6.1",
+          "gapMin": 0
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 13: restaurant \"Gyukatsu Ichinisan\" à 4.2km de l'activité précédente (\"Classe Tokyo confortable : Ramen, Sushi, Sake Pairing & Cultural Exchange\") avec seulement 10min de battement",
+        "dayNumber": 13,
+        "itemTitle": "Gyukatsu Ichinisan",
+        "details": {
+          "distKm": "4.2",
+          "gapMin": 10
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 14,
+    "totalItems": 74,
+    "activitiesCount": 37,
+    "restaurantsCount": 37,
+    "avgItemsPerDay": 5.285714285714286,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

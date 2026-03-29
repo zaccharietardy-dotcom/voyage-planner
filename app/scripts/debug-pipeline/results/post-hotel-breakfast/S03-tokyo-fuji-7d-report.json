@@ -1,0 +1,387 @@
+{
+  "tripId": "ad7f913f-bee2-4535-8352-ee32287c26c3",
+  "scenarioId": "tokyo-fuji-7d",
+  "generatedAt": "2026-03-20T21:41:11.183Z",
+  "destination": "Tokyo",
+  "summary": {
+    "totalIssues": 17,
+    "critical": 0,
+    "warning": 7,
+    "info": 10,
+    "score": 96,
+    "weightedScore": 96
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "links": {
+      "score": 96,
+      "critical": 0,
+      "warning": 0,
+      "info": 6,
+      "totalIssues": 6,
+      "weightedPenalty": 4.2
+    },
+    "dataQuality": {
+      "score": 91,
+      "critical": 0,
+      "warning": 2,
+      "info": 3,
+      "totalIssues": 5,
+      "weightedPenalty": 9.1
+    },
+    "rhythm": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "LINK_RESTAURANT_MAPS_MISSING",
+      "code": "LINK_RESTAURANT_MAPS_MISSING",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/restaurants",
+      "count": 6,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 3: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 4: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps"
+      ]
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "realism:Dernier jour: dernière activité (16:20) à seulement 40min avant le vol",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Dernier jour: dernière activité (16:20) à seulement 40min avant le vol (17:00) — risqué"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): mont fuji",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): mont fuji"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 55min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: seulement 55min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2: ~8.4km de marche implicite entre activités",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: ~8.4km de marche implicite entre activités"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      },
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas d'hébergement défini dans le voyage"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 2,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 3,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 4,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 5: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 5,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 6,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 7: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 7,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas d'hébergement défini"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2: ~8.4km de marche implicite entre activités",
+        "dayNumber": 2,
+        "details": {
+          "walkKm": "8.4"
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: seulement 55min de temps libre — pas de pause",
+        "dayNumber": 3,
+        "details": {
+          "freeMinutes": 55,
+          "occupiedMinutes": 665
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): mont fuji",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "mont fuji"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Dernier jour: dernière activité (16:20) à seulement 40min avant le vol (17:00) — risqué",
+        "dayNumber": 7,
+        "details": {
+          "gapMinutes": 40
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 7,
+    "totalItems": 46,
+    "activitiesCount": 14,
+    "restaurantsCount": 15,
+    "avgItemsPerDay": 6.571428571428571,
+    "totalEstimatedCost": null,
+    "hasAccommodation": false,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

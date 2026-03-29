@@ -1,0 +1,571 @@
+{
+  "tripId": "88b80d6f-adf6-478e-9ce0-af18333188e0",
+  "scenarioId": "paris-rome-4d",
+  "generatedAt": "2026-02-23T14:09:39.054Z",
+  "destination": "Rome",
+  "summary": {
+    "totalIssues": 32,
+    "critical": 1,
+    "warning": 8,
+    "info": 23,
+    "score": 89,
+    "weightedScore": 89
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 49,
+      "critical": 1,
+      "warning": 5,
+      "info": 0,
+      "totalIssues": 6,
+      "weightedPenalty": 50.7
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 94,
+      "critical": 0,
+      "warning": 0,
+      "info": 8,
+      "totalIssues": 8,
+      "weightedPenalty": 5.6
+    },
+    "dataQuality": {
+      "score": 87,
+      "critical": 0,
+      "warning": 1,
+      "info": 14,
+      "totalIssues": 15,
+      "weightedPenalty": 13.3
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 22,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: segment urbain dur 4.1km entre \"Trattoria Vecchia Roma\" et \"Basilique St Pierre\" (> 4km)"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 14.4,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (4 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (5 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 12,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: efficacité de route faible (2.00x du minimum MST)",
+        "Jour 2: efficacité de route faible (2.49x du minimum MST)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 11,
+      "impactScore": 11,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Le Forum Romain\" n'a pas de description",
+        "Jour 1: \"Basilique St Pierre\" n'a pas de description",
+        "Jour 2: \"Fontaine de Trevi\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 8,
+      "impactScore": 8,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Basilique St Pierre\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Chiostro del Bramante\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Piazza Navona\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: 2 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: segment urbain dur 4.1km entre \"Trattoria Vecchia Roma\" et \"Basilique St Pierre\" (> 4km)",
+        "dayNumber": 1,
+        "details": {
+          "distanceKm": 4.12,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 1,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 2,
+          "totalLegKm": 11.44
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: efficacité de route faible (2.00x du minimum MST)",
+        "dayNumber": 1,
+        "details": {
+          "routeInefficiencyRatio": 2,
+          "threshold": 1.75,
+          "totalLegKm": 11.44,
+          "mstLowerBoundKm": 5.71
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (5 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 5,
+          "routeInefficiencyRatio": 2.49,
+          "totalLegKm": 6.32
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (2.49x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 2.49,
+          "threshold": 1.75,
+          "totalLegKm": 6.32,
+          "mstLowerBoundKm": 2.54
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Basilique St Pierre\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Basilique St Pierre",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Chiostro del Bramante\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Chiostro del Bramante",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Piazza Navona\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Piazza Navona",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Panthéon\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Panthéon",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Église Saint - Ignace - de - Loyola de Rome\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Église Saint - Ignace - de - Loyola de Rome",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Piazza di Spagna\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Piazza di Spagna",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Villa Borghese\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Villa Borghese",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Piazza del Popolo\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Piazza del Popolo",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Le Forum Romain\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Le Forum Romain",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Basilique St Pierre\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Basilique St Pierre",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Fontaine de Trevi\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Fontaine de Trevi",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Piazza Navona\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Piazza Navona",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Panthéon\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Panthéon",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Galerie Doria-Pamphilj\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Galerie Doria-Pamphilj",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Piazza di Spagna\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Piazza di Spagna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Galerie Borghèse\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Galerie Borghèse",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Villa Borghese\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Villa Borghese",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Piazza del Popolo\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Piazza del Popolo",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Musées du Vatican\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Musées du Vatican",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [
+      {
+        "severity": "info",
+        "category": "relevance",
+        "message": "Tous les must-see présents (2/2)"
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 27,
+    "activitiesCount": 15,
+    "restaurantsCount": 12,
+    "avgItemsPerDay": 6.75,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

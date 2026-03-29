@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { MessageCircle, Loader2, Compass } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/components/auth';
 import { cn } from '@/lib/utils';
@@ -45,8 +48,21 @@ export default function MessagesPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto max-w-2xl px-4 py-8">
+          <Skeleton className="h-8 w-40 mb-6" />
+          <div className="space-y-1 rounded-xl border overflow-hidden">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -63,7 +79,13 @@ export default function MessagesPage() {
           <div className="text-center py-16 text-muted-foreground">
             <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
             <p className="text-lg font-medium mb-1">Aucune conversation</p>
-            <p className="text-sm">Envoyez un message depuis le profil d&apos;un voyageur</p>
+            <p className="text-sm mb-6">Envoyez un message depuis le profil d&apos;un voyageur</p>
+            <Button asChild variant="outline" className="gap-2">
+              <Link href="/explore">
+                <Compass className="h-4 w-4" />
+                Découvrir des voyageurs
+              </Link>
+            </Button>
           </div>
         ) : (
           <div className="divide-y rounded-xl border overflow-hidden">

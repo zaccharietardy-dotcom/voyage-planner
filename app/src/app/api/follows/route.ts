@@ -1,6 +1,7 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { notifyFollow } from '@/lib/services/notifications';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 // POST /api/follows - Follow a user
 export async function POST(request: Request) {
@@ -8,6 +9,12 @@ export async function POST(request: Request) {
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+
+    const rateLimitKey = `follows:${user.id}`;
+    const { allowed } = checkRateLimit(rateLimitKey, { windowMs: 3_600_000, maxRequests: 10 });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    }
 
     const { following_id } = await request.json();
     if (!following_id) return NextResponse.json({ error: 'following_id requis' }, { status: 400 });

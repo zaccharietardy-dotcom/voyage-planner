@@ -525,7 +525,7 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep, ques
         </div>
 
         {/* Pipeline step */}
-        <div className="mb-12 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-white/40" aria-live="polite" aria-atomic="true">
+        <div className="mb-12 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-white/60" aria-live="polite" aria-atomic="true">
           <span className="flex items-center gap-2">
             <div className="h-1 w-1 rounded-full bg-gold animate-ping" />
             {displayedStep}

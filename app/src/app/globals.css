@@ -148,10 +148,34 @@
     @apply border-border outline-ring/50;
   }
   
+  html {
+    scroll-behavior: smooth;
+  }
+
   html,
   body {
     max-width: 100%;
     overflow-x: hidden;
+    /* Elastic scroll feel (rubber banding) - Premium native experience */
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(197, 160, 89, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(197, 160, 89, 0.5);
   }
   
   input, textarea, [contenteditable] {
@@ -162,8 +186,6 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-geist-sans);
-    -webkit-user-select: none;
-    user-select: none;
     -webkit-touch-callout: none;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -176,5 +198,30 @@
   
   .sticky, .fixed {
     padding-top: env(safe-area-inset-top);
+  }
+
+  /* Premium Gold Gradient */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #E2B35C 0%, #C5A059 50%, #8B6E37 100%);
+  }
+
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #E2B35C 0%, #C5A059 50%, #8B6E37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

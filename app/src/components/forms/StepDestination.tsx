@@ -359,482 +359,166 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="text-center space-y-3">
-        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+    <div className="space-y-12 max-w-[600px] mx-auto w-full">
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
           Où allez-vous ?
         </h2>
-        <p className="text-lg text-muted-foreground/80 max-w-md mx-auto">
+        <p className="text-[17px] text-[#94a3b8] font-light">
           Explorez le monde, nous planifions le reste.
         </p>
       </div>
 
-      {/* Mode selector — hidden (origin moved to StepOrigin, default to precise) */}
-      <div className="hidden grid grid-cols-2 gap-4">
-        <button
-          type="button"
-          onClick={() => setMode('precise')}
-          className={cn(
-            'flex flex-col items-center gap-4 p-6 rounded-[2rem] border-2 transition-all text-center relative overflow-hidden group',
-            mode === 'precise'
-              ? 'border-gold bg-gold/10 shadow-[0_15px_35px_rgba(197,160,89,0.2)]'
-              : 'border-white/5 bg-white/5 hover:border-white/20'
-          )}
-        >
-          <div className={cn(
-            'p-4 rounded-2xl transition-all duration-300',
-            mode === 'precise' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/60 group-hover:text-white/80'
-          )}>
-            <MapPin className="h-6 w-6" />
-          </div>
-          <div>
-            <p className={cn('font-bold text-sm tracking-tight transition-colors', mode === 'precise' ? 'text-white' : 'text-white/60')}>
-              Je sais où je vais
-            </p>
-            <p className="text-[10px] text-white/60 mt-1 uppercase tracking-[0.2em] font-black">
-              Précis
-            </p>
-          </div>
-          {mode === 'precise' && (
-            <motion.div layoutId="mode-glow" className="absolute inset-0 bg-gold/5 pointer-events-none" />
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('inspired')}
-          className={cn(
-            'flex flex-col items-center gap-4 p-6 rounded-[2rem] border-2 transition-all text-center relative overflow-hidden group',
-            mode === 'inspired'
-              ? 'border-gold bg-gold/10 shadow-[0_15px_35px_rgba(197,160,89,0.2)]'
-              : 'border-white/5 bg-white/5 hover:border-white/20'
-          )}
-        >
-          <div className={cn(
-            'p-4 rounded-2xl transition-all duration-300',
-            mode === 'inspired' ? 'bg-gold text-black shadow-lg shadow-gold/30 scale-110' : 'bg-white/5 text-white/60 group-hover:text-white/80'
-          )}>
-            <Compass className="h-6 w-6" />
-          </div>
-          <div>
-            <p className={cn('font-bold text-sm tracking-tight transition-colors', mode === 'inspired' ? 'text-white' : 'text-white/60')}>
-              Inspirez-moi
-            </p>
-            <p className="text-[10px] text-white/60 mt-1 uppercase tracking-[0.2em] font-black">
-              Découverte
-            </p>
-          </div>
-          {mode === 'inspired' && (
-            <motion.div layoutId="mode-glow" className="absolute inset-0 bg-gold/5 pointer-events-none" />
-          )}
-        </button>
-      </div>
-
-      {/* Origin — moved to StepOrigin (step 2) */}
-      <div className="hidden space-y-2">
-        <Label htmlFor="origin" className="text-base font-medium">
-          D&apos;où partez-vous ?
-        </Label>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="origin"
-              placeholder="Adresse ou ville de départ"
-              value={departureInputValue}
-              onChange={(e) => {
-                const value = e.target.value;
-                const trimmed = value.trim();
-                const isAddressLike = looksLikeStreetQuery(value);
-
-                onChange({
-                  homeAddress: value,
-                  homeCoords: undefined,
-                  ...(!trimmed ? { origin: '' } : {}),
-                  ...(!isAddressLike ? { origin: trimmed } : {}),
-                });
-              }}
-              onFocus={() => {
-                setShowOriginSuggestions(true);
-                maybeTriggerGeoPrompt();
-              }}
-              onBlur={() => window.setTimeout(() => setShowOriginSuggestions(false), 120)}
-              className="pl-10 h-12 text-base"
-            />
-            {showOriginSuggestions && (departureInputValue.trim().length >= 2) && (
-              <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
-                <div className="max-h-64 overflow-y-auto">
-                  {originSuggestionsLoading ? (
-                    <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {originQueryIsAddress ? 'Recherche des adresses...' : 'Recherche des villes...'}
-                    </div>
-                  ) : originSuggestions.length > 0 ? (
-                    originSuggestions.map((suggestion, index) => (
-                      <button
-                        key={`${suggestion.displayName}-${index}`}
-                        type="button"
-                        className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => applyOriginSuggestion(suggestion)}
-                      >
-                        <div className="text-sm font-medium line-clamp-1">{suggestion.label || suggestion.displayName}</div>
-                        {originQueryIsAddress && suggestion.subtitle && (
-                          <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.subtitle}</div>
+      <div className="space-y-8">
+        {/* City stages */}
+        <div className="space-y-4">
+          {stages.map((stage, index) => (
+            <div key={index} className="space-y-3 relative">
+              <div className="flex gap-3 items-center">
+                {/* City name */}
+                <div className="flex-1 relative group">
+                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-white/50 group-focus-within:text-white transition-colors z-10" strokeWidth={2} />
+                  <Input
+                    placeholder={index === 0 ? 'Ex: Tokyo, Barcelone, Marrakech...' : `Étape ${index + 1}`}
+                    value={stage.city}
+                    onChange={(e) => {
+                      updateStage(index, { city: e.target.value });
+                      setActiveDestStage(index);
+                    }}
+                    onFocus={() => setActiveDestStage(index)}
+                    onBlur={() => window.setTimeout(() => {
+                      setActiveDestStage(prev => {
+                        if (prev === index) { setDestSuggestions([]); return null; }
+                        return prev;
+                      });
+                    }, 120)}
+                    className="pl-[3.25rem] pr-6 h-[56px] text-[15px] rounded-[1.2rem] bg-[#0e1220]/50 border-white/[0.08] text-white placeholder:text-white/40 focus:border-white/20 focus:bg-[#0f1429] focus-visible:ring-0 shadow-inner transition-all"
+                  />
+                  {activeDestStage === index && stage.city.trim().length >= 2 && (
+                    <div className="absolute z-50 mt-3 w-full rounded-[1.2rem] border border-white/10 bg-[#0f1629] shadow-2xl overflow-hidden backdrop-blur-xl">
+                      <div className="max-h-64 overflow-y-auto py-3">
+                        {destSuggestionsLoading ? (
+                          <div className="px-6 py-4 text-sm text-muted-foreground flex items-center gap-3">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Recherche des villes...
+                          </div>
+                        ) : destSuggestions.length > 0 ? (
+                          destSuggestions.map((suggestion, si) => (
+                            <button
+                              key={`dest-${suggestion.displayName}-${si}`}
+                              type="button"
+                              className="w-full text-left px-6 py-3.5 hover:bg-white/5 transition-colors flex flex-col gap-1"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => applyDestSuggestion(index, suggestion)}
+                            >
+                              <div className="text-base font-medium text-white line-clamp-1">{suggestion.label || suggestion.displayName}</div>
+                              {suggestion.country && (
+                                <div className="text-sm text-muted-foreground line-clamp-1">{suggestion.country}</div>
+                              )}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-6 py-4 text-sm text-muted-foreground">
+                            Aucune ville trouvée.
+                          </div>
                         )}
-                      </button>
-                    ))
-                  ) : (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      Aucune suggestion.
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-12 w-full sm:w-auto"
-            onClick={() => handleUseCurrentLocation({ forceOriginUpdate: true })}
-            disabled={geoLoading}
-          >
-            {geoLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Localisation...
-              </>
-            ) : (
-              <>
-                <Navigation className="mr-2 h-4 w-4" />
-                Ma position actuelle
-              </>
-            )}
-          </Button>
-        </div>
-        {data.homeCoords && detectedOriginText && (
-          <p className="text-xs text-muted-foreground">
-            Position détectée: {detectedOriginText}
-          </p>
-        )}
-        {geoError && (
-          <p className="text-xs text-destructive">{geoError}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          Astuce: vous pouvez saisir une adresse exacte ou utiliser <span className="font-medium">Ma position actuelle</span>.
-        </p>
-      </div>
 
-      {/* ============ MODE PRECISE ============ */}
-      {mode === 'precise' && (
-        <div className="space-y-8 max-w-xl mx-auto">
-          {/* City stages */}
-          <div className="space-y-4">
-            {stages.map((stage, index) => (
-              <div key={index} className="space-y-3">
-                <div className="flex gap-3 items-start">
-                  {/* City name */}
-                  <div className="flex-1 relative group">
-                    <div className="absolute -inset-0.5 bg-gold/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gold/50 group-focus-within:text-gold transition-colors" />
-                    <Input
-                      placeholder={index === 0 ? 'Ex: Tokyo, Barcelone, Marrakech...' : `Étape ${index + 1}`}
-                      value={stage.city}
-                      onChange={(e) => {
-                        updateStage(index, { city: e.target.value });
-                        setActiveDestStage(index);
-                      }}
-                      onFocus={() => setActiveDestStage(index)}
-                      onBlur={() => window.setTimeout(() => {
-                        setActiveDestStage(prev => {
-                          if (prev === index) { setDestSuggestions([]); return null; }
-                          return prev;
-                        });
-                      }, 120)}
-                      className="pl-12 h-16 text-xl rounded-2xl bg-white/[0.03] border-white/10 focus:border-gold/50 focus:bg-white/[0.05] transition-all"
-                    />
-                    {activeDestStage === index && stage.city.trim().length >= 2 && (
-                      <div className="absolute z-20 mt-1 w-full rounded-md border border-border bg-background shadow-lg overflow-hidden">
-                        <div className="max-h-64 overflow-y-auto">
-                          {destSuggestionsLoading ? (
-                            <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Recherche des villes...
-                            </div>
-                          ) : destSuggestions.length > 0 ? (
-                            destSuggestions.map((suggestion, si) => (
-                              <button
-                                key={`dest-${suggestion.displayName}-${si}`}
-                                type="button"
-                                className="w-full text-left px-3 py-2 hover:bg-muted transition-colors"
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => applyDestSuggestion(index, suggestion)}
-                              >
-                                <div className="text-sm font-medium line-clamp-1">{suggestion.label || suggestion.displayName}</div>
-                                {suggestion.country && (
-                                  <div className="text-xs text-muted-foreground line-clamp-1">{suggestion.country}</div>
-                                )}
-                              </button>
-                            ))
-                          ) : (
-                            <div className="px-3 py-2 text-sm text-muted-foreground">
-                              Aucune suggestion.
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Duration for this stage */}
-                  {stages.length > 1 && (
-                    <div className="flex items-center gap-1.5 shrink-0">
+                {/* Duration & Remove - only show if multiple stages */}
+                {stages.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center bg-[#0e1220]/50 border border-white/[0.08] rounded-[1.2rem] p-1 h-[56px]">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-12 w-10"
+                        className="h-full w-10 rounded-xl hover:bg-white/10"
                         onClick={() => stage.days > 1 && updateStage(index, { days: stage.days - 1 })}
                         disabled={stage.days <= 1}
                       >
                         -
                       </Button>
-                      <div className="h-12 w-16 flex items-center justify-center border rounded-md text-sm font-semibold">
+                      <div className="w-12 text-center text-sm font-semibold text-white">
                         {stage.days}j
                       </div>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-12 w-10"
+                        className="h-full w-10 rounded-xl hover:bg-white/10"
                         onClick={() => stage.days < 30 && updateStage(index, { days: stage.days + 1 })}
                         disabled={stage.days >= 30}
                       >
                         +
                       </Button>
                     </div>
-                  )}
-
-                  {/* Remove stage button */}
-                  {stages.length > 1 && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-12 w-10 text-muted-foreground hover:text-destructive shrink-0"
+                      className="h-[56px] w-[56px] rounded-[1.2rem] bg-[#0e1220]/50 border border-white/[0.08] text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 shrink-0 transition-all"
                       onClick={() => removeStage(index)}
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-4 w-4" strokeWidth={2} />
                     </Button>
-                  )}
-                </div>
-
-                {/* Duration suggestion and style match */}
-                {stage.city.length > 2 && (
-                  <div className="flex items-center gap-3 ml-1">
-                    {stages.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleDurationSuggestion(index)}
-                        disabled={loadingDuration && durationSuggestionForStage === index}
-                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        {loadingDuration && durationSuggestionForStage === index ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Clock className="h-3 w-3" />
-                        )}
-                        Combien de jours ?
-                      </button>
-                    )}
-
-                    {/* Show style match if user has preferences */}
-                    {preferences && (
-                      <StyleMatchBadge
-                        destination={stage.city}
-                        preferences={preferences}
-                        showIcon={false}
-                      />
-                    )}
                   </div>
                 )}
-
-                {/* Duration suggestion display for this stage */}
-                {stages.length > 1 && durationSuggestion && durationSuggestionForStage === index && (
-                  <DurationSuggestionCard
-                    suggestion={durationSuggestion}
-                    onApply={applyDurationChip}
-                    onClose={() => { clearDuration(); setDurationSuggestionForStage(null); }}
-                  />
-                )}
-              </div>
-            ))}
-
-            {/* Add stage button */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addStage}
-              className="w-full border-dashed"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter une étape
-            </Button>
-
-            {/* Total duration display */}
-            {stages.length > 1 && (
-              <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
-                <span className="text-sm text-muted-foreground">Durée totale</span>
-                <span className="text-lg font-bold text-primary">{totalDays} jours</span>
-              </div>
-            )}
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Fonctionne dans toutes les langues (français, anglais, chinois, arabe...)
-          </p>
-
-          {/* Popular destinations */}
-          {!stages[0]?.city && (
-            <div className="space-y-4 pt-4">
-              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Destinations populaires</p>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { name: 'Paris', emoji: '🗼', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300&h=200&fit=crop' },
-                  { name: 'Rome', emoji: '🏛️', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=300&h=200&fit=crop' },
-                  { name: 'Barcelona', emoji: '🏖️', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=300&h=200&fit=crop' },
-                  { name: 'Tokyo', emoji: '🏯', img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300&h=200&fit=crop' },
-                  { name: 'Amsterdam', emoji: '🚲', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=300&h=200&fit=crop' },
-                  { name: 'Marrakech', emoji: '🕌', img: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=300&h=200&fit=crop' },
-                ].map((dest) => (
-                  <button
-                    key={dest.name}
-                    type="button"
-                    onClick={() => {
-                      hapticSelection();
-                      updateStage(0, { city: dest.name, days: getSuggestedDuration(dest.name, data.origin) });
-                    }}
-                    className="relative overflow-hidden rounded-2xl aspect-[4/3] group border border-white/5 hover:border-gold/30 transition-all"
-                  >
-                    <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute bottom-3 left-3">
-                      <p className="text-white font-bold text-sm">{dest.emoji} {dest.name}</p>
-                    </div>
-                  </button>
-                ))}
               </div>
             </div>
-          )}
-        </div>
-      )}
+          ))}
 
-      {/* ============ MODE INSPIRED ============ */}
-      {mode === 'inspired' && (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label className="text-base font-medium">
-              Décrivez votre envie de voyage
-            </Label>
-            <Textarea
-              placeholder="Japon, vacances plage, road trip Italie du sud, city break en Europe..."
-              value={inspireQuery}
-              onChange={(e) => setInspireQuery(e.target.value)}
-              className="min-h-20 text-base"
-            />
-          </div>
-
+          {/* Add stage button */}
           <Button
             type="button"
-            onClick={() => fetchDestinationSuggestions(inspireQuery, {
-              origin: data.origin,
-              activities: data.activities,
-              budgetLevel: data.budgetLevel,
-              groupType: data.groupType,
-              durationDays: data.durationDays,
-            })}
-            disabled={!inspireQuery.trim() || loadingDestination}
-            className="w-full"
+            variant="outline"
+            onClick={addStage}
+            className="w-full h-[52px] rounded-[1.2rem] border border-dashed border-white/[0.15] bg-transparent text-white/90 hover:text-white hover:border-white/30 hover:bg-white/[0.03] transition-all gap-3"
           >
-            {loadingDestination ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Génération en cours...
-              </>
-            ) : (
-              <>
-                <Compass className="h-4 w-4 mr-2" />
-                Suggérer des itinéraires
-              </>
-            )}
+            <Plus className="h-4 w-4" strokeWidth={1.5} />
+            <span className="font-medium tracking-wide">Ajouter une étape</span>
           </Button>
-
-          {/* Destination suggestions */}
-          {destinationSuggestions && destinationSuggestions.length > 0 && (
-            <div className="space-y-3 pt-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                Itinéraires suggérés
-              </p>
-              {destinationSuggestions.map((suggestion, index) => {
-                const TypeIcon = TYPE_LABELS[suggestion.type]?.icon || Map;
-                return (
-                  <Card
-                    key={index}
-                    className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
-                    onClick={() => applyDestinationSuggestion(suggestion)}
-                  >
-                    <CardContent className="p-4 space-y-3">
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base truncate">{suggestion.title}</h3>
-                          <p className="text-sm text-muted-foreground mt-0.5">
-                            {suggestion.description}
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className="shrink-0 gap-1">
-                          <TypeIcon className="h-3 w-3" />
-                          {TYPE_LABELS[suggestion.type]?.label}
-                        </Badge>
-                      </div>
-
-                      {/* Stages */}
-                      <div className="flex items-center gap-1.5 text-sm flex-wrap">
-                        {suggestion.stages.map((stage, si) => (
-                          <span key={si} className="flex items-center gap-1">
-                            {si > 0 && <span className="text-muted-foreground">→</span>}
-                            <span className="font-medium">{stage.city}</span>
-                            <span className="text-muted-foreground">{stage.days}j</span>
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Highlights */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {suggestion.highlights.slice(0, 3).map((h, hi) => (
-                          <Badge key={hi} variant="outline" className="text-xs font-normal">
-                            {h}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t">
-                        <span>{suggestion.estimatedBudget}</span>
-                        {suggestion.bestSeason && <span>{suggestion.bestSeason}</span>}
-                        <span className="text-primary font-medium group-hover:underline">
-                          Choisir →
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
         </div>
-      )}
+
+        <p className="text-[13px] text-muted-foreground/60 text-center font-light pt-2">
+          Fonctionne dans toutes les langues (français, anglais, chinois, arabe...)
+        </p>
+
+        {/* Popular destinations */}
+        {!stages[0]?.city && (
+          <div className="space-y-6 pt-10">
+            <h3 className="text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-4">Destinations populaires</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {[
+                { name: 'Paris', emoji: '🗼', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=400&fit=crop' },
+                { name: 'Rome', emoji: '🏛️', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&h=400&fit=crop' },
+                { name: 'Barcelona', emoji: '🏖️', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600&h=400&fit=crop' },
+                { name: 'Tokyo', emoji: '🏯', img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&h=400&fit=crop' },
+                { name: 'Amsterdam', emoji: '🚲', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&h=400&fit=crop' },
+                { name: 'Marrakech', emoji: '🕌', img: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=600&h=400&fit=crop' },
+              ].map((dest) => (
+                <button
+                  key={dest.name}
+                  type="button"
+                  onClick={() => {
+                    hapticSelection();
+                    updateStage(0, { city: dest.name, days: getSuggestedDuration(dest.name, data.origin) });
+                  }}
+                  className="relative overflow-hidden rounded-[20px] aspect-[1.4] group transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(197,160,89,0.2)]"
+                >
+                  <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-black/20 to-transparent opacity-80" />
+                  <div className="absolute inset-x-0 bottom-4 flex justify-center items-center gap-2">
+                    <span className="text-white font-bold text-[15px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">{dest.emoji} {dest.name}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

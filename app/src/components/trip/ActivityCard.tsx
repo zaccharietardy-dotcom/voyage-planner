@@ -426,110 +426,77 @@ export const ActivityCard = memo(function ActivityCard({
         </div>
       )}
 
-      {/* Standard card layout (hero + content) */}
+      {/* Horizontal Magazine-Style Card */}
       {!isCompactCheckin && (
-        <div className="relative">
-          {isHeroType && (
-            <div className="relative h-44 sm:h-52 w-full overflow-hidden">
-              {/* Gradient base */}
-              <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
+        <div className="flex items-stretch h-36 w-full">
+          {/* Left Side: Photo with Badge Overlay */}
+          <div className="relative w-36 h-full shrink-0 overflow-hidden">
+            {/* Gradient base if image fails */}
+            <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
+            
+            {showImage ? (
+              <img
+                src={imageUrl}
+                alt={item.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                loading="lazy"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gold/10">
+                <ItemTypeIcon item={item} className="h-8 w-8 text-gold/30" />
+              </div>
+            )}
+            
+            {/* Top left time badge */}
+            <div className="absolute top-2 left-2 z-10 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1">
+              <Clock className="h-2.5 w-2.5 text-gold" />
+              <span className="text-[10px] font-black text-white">{item.startTime}</span>
+            </div>
+            
+            {/* Bottom rating badge (on gold bg, black text is OK here as background is bright gold) */}
+            {item.rating && (
+              <div className="absolute bottom-2 left-2 z-10 bg-gold-gradient px-1.5 py-0.5 rounded shadow-lg flex items-center gap-0.5">
+                <Star className="h-2.5 w-2.5 fill-black stroke-black" />
+                <span className="text-[10px] font-black text-black">{item.rating.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side: Content */}
+          <div className="flex-1 min-w-0 p-3 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
+            <div className="min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-[9px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
+                  {TYPE_LABELS[item.type]}
+                </span>
+                {item.estimatedCost && (
+                  <span className="text-[10px] font-bold text-white/60">{item.estimatedCost}€</span>
+                )}
+              </div>
               
-              {showImage ? (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="absolute inset-0"
-                >
-                  {item.photoGallery && item.photoGallery.length > 1 ? (
-                    <PhotoCarousel
-                      photos={item.photoGallery}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={imageUrl}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  {/* Heavy bottom gradient for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/60 to-transparent" />
-                </motion.div>
-              ) : (
-                <ItemTypeIcon
-                  item={item}
-                  className="absolute right-4 bottom-4 h-20 w-20 text-white/5"
-                  testId={transportIconTestId}
-                />
+              <h4 className="text-base font-bold text-white tracking-tight leading-tight truncate">
+                {item.title}
+              </h4>
+              
+              {item.description && (
+                <p className="text-[11px] text-white/50 line-clamp-2 leading-snug mt-1 italic font-serif">
+                  {item.description}
+                </p>
               )}
-
-              {/* Content Overlay (Title, Desc, Badges) */}
-              <div className="absolute inset-0 p-4 flex flex-col justify-between z-10">
-                {/* Top row */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-black/60 backdrop-blur-md text-white/90 text-[10px] font-black px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1">
-                      <Clock className="h-3 w-3 text-gold" />
-                      {item.startTime}
-                    </span>
-                    <span
-                      className="text-white text-[10px] font-black px-2 py-1 rounded-lg border border-white/10 backdrop-blur-md uppercase tracking-wider"
-                      style={{ backgroundColor: `${color}60` }}
-                    >
-                      {TYPE_LABELS[item.type]}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bottom row: Title & Meta */}
-                <div className="space-y-1">
-                  <h4 className="text-lg font-black text-white tracking-tight leading-tight drop-shadow-lg">
-                    {item.title}
-                  </h4>
-                  {item.description && (
-                    <p className="text-[11px] text-white/70 line-clamp-1 leading-relaxed drop-shadow-md italic">
-                      {item.description}
-                    </p>
-                  )}
-                  
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/10">
-                    <div className="flex items-center gap-2">
-                      {item.rating && (
-                        <span className="bg-gold-gradient text-black text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg flex items-center gap-0.5">
-                          <Star className="h-2.5 w-2.5 fill-black" />
-                          {item.rating.toFixed(1)}
-                        </span>
-                      )}
-                      {item.estimatedCost ? (
-                        <span className="text-white text-[10px] font-bold">
-                          {item.estimatedCost}€
-                        </span>
-                      ) : null}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <BookingButtons item={item} isCompact={true} />
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-          )}
 
-          {/* Fallback for non-hero cards or extra info */}
-          {!isHeroType && (
-            <div className="p-4 flex items-center justify-between">
-               <div className="flex-1 min-w-0">
-                <h4 className="text-base font-bold text-white tracking-tight leading-snug">{item.title}</h4>
-                <p className="text-xs text-white/60 line-clamp-1 mt-1">{item.description}</p>
+            <div className="flex items-center justify-between mt-auto">
+              <div className="flex items-center gap-2">
+                <BookingButtons item={item} isCompact={true} />
               </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                <ItemTypeIcon item={item} className="h-5 w-5 text-gold" />
-              </div>
+              
+              {!isHeroType && (
+                <div className="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                  <ItemTypeIcon item={item} className="h-3.5 w-3.5 text-gold" />
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -569,7 +536,8 @@ export const ActivityCard = memo(function ActivityCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-9 w-9 bg-black/60 hover:bg-black/80 rounded-full border border-white/10"
+                className="h-11 w-11 bg-black/60 hover:bg-black/80 rounded-full border border-white/10"
+                aria-label="Plus d'options"
                 onClick={(e) => {
                   e.stopPropagation();
                   hapticImpactLight();

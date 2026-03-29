@@ -1,0 +1,1747 @@
+{
+  "scenarioId": "amsterdam-weekend-2d",
+  "preferences": {
+    "origin": "Bruxelles",
+    "destination": "Amsterdam",
+    "startDate": "2026-02-24T13:17:16.475Z",
+    "durationDays": 2,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "economic",
+    "activities": [
+      "nightlife",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Rijksmuseum",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Amsterdam",
+        "days": 2
+      }
+    ]
+  },
+  "trip": {
+    "id": "a8cab965-ece5-4039-b453-49187328cb98",
+    "createdAt": "2026-02-20T13:18:32.512Z",
+    "updatedAt": "2026-02-20T13:18:32.512Z",
+    "preferences": {
+      "origin": "Bruxelles",
+      "destination": "Amsterdam",
+      "startDate": "2026-02-24T13:17:16.475Z",
+      "durationDays": 2,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "economic",
+      "activities": [
+        "nightlife",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Rijksmuseum",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Amsterdam",
+          "days": 2
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-24T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "06:00",
+            "endTime": "08:30",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Bruxelles → Amsterdam (estimation)",
+            "locationName": "Bruxelles → Amsterdam",
+            "latitude": 52.3848407,
+            "longitude": 4.9169338,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 21,
+            "bookingUrl": "https://www.google.com/maps/dir/Bruxelles/Amsterdam",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "e15612cd-31bf-4964-9ee8-02831725397c",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Cups & Chapters Cafe",
+            "description": "Repas sur place",
+            "locationName": "Meeuwenlaan 145b, 1021 JA Amsterdam",
+            "latitude": 52.3848407,
+            "longitude": 4.9169338,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.364278,4.883984",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ2WlP9AUJxkcRcdR2CCBxD-8",
+              "name": "Cups & Chapters Cafe",
+              "address": "Meeuwenlaan 145b, 1021 JA Amsterdam",
+              "latitude": 52.3848407,
+              "longitude": 4.9169338,
+              "rating": 5,
+              "reviewCount": 82,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "http://www.cupsandchapters.nl/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cups%20%26%20Chapters%20Cafe%2C%20Meeuwenlaan%20145b%2C%201021%20JA%20Amsterdam",
+              "googlePlaceId": "ChIJ2WlP9AUJxkcRcdR2CCBxD-8",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "15:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "15:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "15:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "15:00"
+                },
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": {
+                  "open": "08:00",
+                  "close": "15:00"
+                }
+              },
+              "distance": 0.403625963659202,
+              "walkingTime": 5
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJV1gpKLMJxkcRIxhmHd7v5LU",
+                "name": "Café Keppler",
+                "address": "Van der Pekstraat 1, 1031 CN Amsterdam",
+                "latitude": 52.386958899999996,
+                "longitude": 4.9080783,
+                "rating": 4.5,
+                "reviewCount": 664,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "diner",
+                  "diner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 737 0838",
+                "website": "http://cafekeppler.nl/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Keppler%2C%20Van%20der%20Pekstraat%201%2C%201031%20CN%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo6Vj92b91X0t_68B24_Cq-DXrWETC23s0gqZXDhhiqi5sUFb2gmdtTYlOhSh8YqzdnePw1hMKEGIuIpJs--PgeqgyqAWg6s6C3rjbcUEDeanLrafPwKxc0xKhs2ixb75ZlQKAvlg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJV1gpKLMJxkcRIxhmHd7v5LU",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "18:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.43699575875407937,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJEVveaLQJxkcRjImHlRfdFw8",
+                "name": "The Coffee Virus",
+                "address": "Overhoeksplein 2, 1031 KS Amsterdam",
+                "latitude": 52.384204999999994,
+                "longitude": 4.902947999999999,
+                "rating": 4.7,
+                "reviewCount": 148,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café spécialisé dans les boissons expresso",
+                  "café spécialisé dans les boissons expresso",
+                  "fournisseur de paniers-repas",
+                  "fournisseur alimentaire pour traiteur",
+                  "traiteur",
+                  "café",
+                  "espace événementiel",
+                  "restaurant diététique",
+                  "pâtisserie",
+                  "saladerie",
+                  "sandwicherie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 244 2340",
+                "website": "http://thecoffeevirus.nl/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Coffee%20Virus%2C%20Overhoeksplein%202%2C%201031%20KS%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipN49ZRMzO0Wq1dnPhUayl9D7abY4Rq_4ZCX3oSj=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJEVveaLQJxkcRjImHlRfdFw8",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "saturday": null,
+                  "sunday": null,
+                  "monday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "tuesday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.8797647425997163,
+                "walkingTime": 11
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Cups%20%26%20Chapters%20Cafe%2C%20Meeuwenlaan%20145b%2C%201021%20JA%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cups%20%26%20Chapters%20Cafe%2C%20Meeuwenlaan%20145b%2C%201021%20JA%20Amsterdam",
+            "selectionSource": "api"
+          },
+          {
+            "id": "a8ebfc19-1418-4227-af05-176a7a564f25",
+            "dayNumber": 1,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Rijksmuseum Amsterdam",
+            "description": "Het Rijksmuseum in Amsterdam is een van de zestien rijksmusea in Nederland.  De collectie biedt een overzicht van de Nederlandse kunst en geschiedenis met onder andere werken van 17e-eeuwse Nederlands",
+            "locationName": "Rijksmuseum Amsterdam",
+            "latitude": 52.3599976,
+            "longitude": 4.8852188,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.3599976,4.8852188",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rijksmuseum%20Amsterdam&query_place_id=&center=52.3599976,4.8852188",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWXv2p6sSxtFX7LNwu0ZkijSG5PdWjIx969zUFWL4_aWdXu1Ky85NTHe5S108OxkFOHaR1fy-1ezAiA883nCfH_609hJbPCyKHe-uBdwqbl1FEOgvU41Kmp29JZSO4rA4zhAU2LhZHXkX_KY6vTXXPrWM9Z_kiKe565FLv3yLg8MoZ4EA3Hnocy6G2HdFz6wPnZN4EEScIagCE5o1TaekqxyKgvwRtUov4hhxfcw2_K9EfZ8LdB5bbnOiRMag1KrvJCNoFsIJ-Hu_rM2EWo-BnqQ361bW7eEg9Nix4RRMLF8rf1Evsq8xTxTfhzDNNFXA0elC-sczKsD3yPA-RH_Q-UT_E7ZfAcplpyoHtGnfiE4f0W5UZB_P0IF-4FlQvqwQbMvfbNxBmoTwAccMwjasI7aB_rLQqynoEVTSpv9636PUGPOYOTrXBHX6q0AtYztKCtMZNz-W_NAuvR4VzRadeDmlQUyQ2CVsG4IROPFxN134yt0p63C0gsZF5LPmOAU7gy23SZfIvJXtMjne7uxbfYZbbEwdUQgh0wDHlFSg6yqht2w4hg-jmq6p9dTHpbT1nfMVlE&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.48,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "1793cecc-911c-4e68-ab5e-48c0f0c90bbd",
+            "dayNumber": 1,
+            "startTime": "11:15",
+            "endTime": "13:15",
+            "type": "activity",
+            "title": "Musée van Gogh",
+            "description": "Vincent Willem van Gogh was een Nederlands kunstschilder.  Zijn werk valt onder het postimpressionisme, een kunststroming die het negentiende-eeuwse impressionisme opvolgde.",
+            "locationName": "Musée van Gogh",
+            "latitude": 52.3580757,
+            "longitude": 4.8812053,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.3580757,4.8812053",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20van%20Gogh&query_place_id=&center=52.3580757,4.8812053",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUZ-zvg9K9cKeLEMLdpWC8Ctp7v51v7YuO9KQT-M9P_UCMhUYLb6t70sxS4JI4nR8Lke_xvqv87iRQnv5cMTQ-qb-7GJ_0MRLcDQmWgKtSZArs6k14fBDB3f59H3mTmRubZEShf_f25h93ogUaZ1yeTEoVfeHURHzXXyPfJ2HOAR97_qx8CBNuOhoDT_xQlVdZKj7Ax2ScioVcIP4_MOxZ27yEMksrgQTNMz7e9FjR1sciujiPvhYqtuwa97y-CmZ0c8HmhUWSBsTl1MKgbxliE_ocHYN0ON3NWgam8133bP98xDD2v3Zu25n77fJGf--6UvV-NvH5Ud4Rltg_8unjLQ_5Y2XboFB3pe-Pu6WmZbAAJ-sm0JLHXkl5VM8tIl9zCrmn8qct-fBYnZRml3MXwSicg-mV5NjteEt6ANN5VTsaGkx2ybggZcTuVqzbuPRVn4eLSgxYs19Yy33ta_yU4zepymzAYHYl6PJ0ZEY0Q-wb6n9mSucZZhvXjYANQBKbfiygapElByZvhRREl6YMm3jMAuOR7B0hx2LQ_EkckxbEN42kht4qan2-rafuvCeiEWxl5&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.35,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e0e5650b-c6ff-41b5-843b-c3500a6079b6",
+            "dayNumber": 1,
+            "startTime": "13:30",
+            "endTime": "14:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Boka's",
+            "description": "Restaurant chaleureux, plats classiques copieux",
+            "locationName": "Van der Pekstraat 40HS, 1031 EB Amsterdam",
+            "latitude": 52.3880938,
+            "longitude": 4.9094264999999995,
+            "orderIndex": 4,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.363485,4.884943",
+            "restaurant": {
+              "id": "serp-nearby-ChIJKxJ4Ok0IxkcR5AT1Q4ERz_g",
+              "name": "Boka's",
+              "address": "Van der Pekstraat 40HS, 1031 EB Amsterdam",
+              "latitude": 52.3880938,
+              "longitude": 4.9094264999999995,
+              "rating": 4.8,
+              "reviewCount": 671,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café",
+                "café",
+                "restaurant ouvert le midi"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "06 43227885",
+              "website": "https://www.bokas.nl/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Boka's%2C%20Van%20der%20Pekstraat%2040HS%2C%201031%20EB%20Amsterdam",
+              "googlePlaceId": "ChIJKxJ4Ok0IxkcR5AT1Q4ERz_g",
+              "openingHours": {
+                "friday": {
+                  "open": "09:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "17:00"
+                },
+                "sunday": {
+                  "open": "10:00",
+                  "close": "17:00"
+                },
+                "monday": null,
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "17:00"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "17:00"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.3273425279360944,
+              "walkingTime": 4
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJV1gpKLMJxkcRIxhmHd7v5LU",
+                "name": "Café Keppler",
+                "address": "Van der Pekstraat 1, 1031 CN Amsterdam",
+                "latitude": 52.386958899999996,
+                "longitude": 4.9080783,
+                "rating": 4.5,
+                "reviewCount": 664,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "diner",
+                  "diner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 737 0838",
+                "website": "http://cafekeppler.nl/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Keppler%2C%20Van%20der%20Pekstraat%201%2C%201031%20CN%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo6Vj92b91X0t_68B24_Cq-DXrWETC23s0gqZXDhhiqi5sUFb2gmdtTYlOhSh8YqzdnePw1hMKEGIuIpJs--PgeqgyqAWg6s6C3rjbcUEDeanLrafPwKxc0xKhs2ixb75ZlQKAvlg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJV1gpKLMJxkcRIxhmHd7v5LU",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "18:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.43699575875407937,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJEVveaLQJxkcRjImHlRfdFw8",
+                "name": "The Coffee Virus",
+                "address": "Overhoeksplein 2, 1031 KS Amsterdam",
+                "latitude": 52.384204999999994,
+                "longitude": 4.902947999999999,
+                "rating": 4.7,
+                "reviewCount": 148,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café spécialisé dans les boissons expresso",
+                  "café spécialisé dans les boissons expresso",
+                  "fournisseur de paniers-repas",
+                  "fournisseur alimentaire pour traiteur",
+                  "traiteur",
+                  "café",
+                  "espace événementiel",
+                  "restaurant diététique",
+                  "pâtisserie",
+                  "saladerie",
+                  "sandwicherie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 244 2340",
+                "website": "http://thecoffeevirus.nl/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Coffee%20Virus%2C%20Overhoeksplein%202%2C%201031%20KS%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipN49ZRMzO0Wq1dnPhUayl9D7abY4Rq_4ZCX3oSj=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJEVveaLQJxkcRjImHlRfdFw8",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "saturday": null,
+                  "sunday": null,
+                  "monday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "tuesday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.8797647425997163,
+                "walkingTime": 11
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.65,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Boka's%2C%20Van%20der%20Pekstraat%2040HS%2C%201031%20EB%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Boka's%2C%20Van%20der%20Pekstraat%2040HS%2C%201031%20EB%20Amsterdam",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "d1275018-610b-488c-85d5-2fcc6570ee7e",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in Bunk Hotel Amsterdam",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Bunk Hotel Amsterdam",
+            "latitude": 52.38808,
+            "longitude": 4.91425,
+            "orderIndex": 5,
+            "accommodation": {
+              "id": "booking-3226748",
+              "name": "Bunk Hotel Amsterdam",
+              "type": "hotel",
+              "address": "Hagedoornplein 2, 1031 BV Amsterdam, Netherlands",
+              "latitude": 52.38808,
+              "longitude": 4.91425,
+              "rating": 8.4,
+              "reviewCount": 7300,
+              "stars": 3,
+              "pricePerNight": 41,
+              "totalPrice": 41,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/438750118.jpg?k=28033fb94be4a27be99543f1431ac93202ebc52cd79a62a06c5cb164e947ad2f&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/hotel/nl/bunk.html?checkin=2026-02-24&checkout=2026-02-25&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.booking.com/hotel/nl/bunk.html?checkin=2026-02-24&checkout=2026-02-26&group_adults=1&group_children=0&no_rooms=1",
+            "distanceFromPrevious": 3.38,
+            "timeFromPrevious": 43,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "bb5c4dd1-9f22-44de-a7e5-c8f317db378c",
+            "dayNumber": 1,
+            "startTime": "15:15",
+            "endTime": "17:15",
+            "type": "activity",
+            "title": "Ons' Lieve Heer op Solder",
+            "description": "Maison du XVIIe siècle avec église cachée. Visites audio d'une maison mystérieuse du XVIIe siècle avec une église catholique richement décorée cachée au dernier étage.",
+            "locationName": "Ons' Lieve Heer op Solder",
+            "latitude": 52.3751438,
+            "longitude": 4.8994358,
+            "orderIndex": 6,
+            "estimatedCost": 17,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.3751438,4.8994358",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ons'%20Lieve%20Heer%20op%20Solder&query_place_id=&center=52.3751438,4.8994358",
+            "mustSee": true,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Amsterdam_-_Museum_Ons%27_Lieve_Heer_op_Solder_-_hidden_church.JPG/330px-Amsterdam_-_Museum_Ons%27_Lieve_Heer_op_Solder_-_hidden_church.JPG",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.76,
+            "timeFromPrevious": 22,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a8e0b0e1-51c0-4922-a3e5-e89c7e939e7e",
+            "dayNumber": 1,
+            "startTime": "17:30",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Quartier du Jordaan",
+            "description": "Châteaurenard is een gemeente in het Franse departement Bouches-du-Rhône in de regio Provence-Alpes-Côte d'Azur.  De plaats maakt deel uit van het arrondissement Arles.",
+            "locationName": "Quartier du Jordaan",
+            "latitude": 52.3749,
+            "longitude": 4.8807,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.3749,4.8807",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Quartier%20du%20Jordaan&query_place_id=&center=52.3749,4.8807",
+            "mustSee": true,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/View_on_Ch%C3%A2teaurenard.jpg/330px-View_on_Ch%C3%A2teaurenard.jpg",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.27,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "488c4fd9-b66c-407e-af95-0eebb96176d0",
+            "dayNumber": 1,
+            "startTime": "19:15",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Assaggi",
+            "description": "Café simple, menu récité par les serveurs",
+            "locationName": "Tweede Egelantiersdwarsstraat 6, 1015 SC Amsterdam",
+            "latitude": 52.376820099999996,
+            "longitude": 4.881959,
+            "orderIndex": 8,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.37154,4.893685",
+            "restaurant": {
+              "id": "serp-nearby-ChIJE3NyudoJxkcRFxu65ItxYh4",
+              "name": "Assaggi",
+              "address": "Tweede Egelantiersdwarsstraat 6, 1015 SC Amsterdam",
+              "latitude": 52.376820099999996,
+              "longitude": 4.881959,
+              "rating": 4.7,
+              "reviewCount": 5242,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant italien",
+                "restaurant italien",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "020 420 5589",
+              "website": "http://www.assaggi.nl/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Assaggi%2C%20Tweede%20Egelantiersdwarsstraat%206%2C%201015%20SC%20Amsterdam",
+              "googlePlaceId": "ChIJE3NyudoJxkcRFxu65ItxYh4",
+              "openingHours": {
+                "friday": {
+                  "open": "12:30",
+                  "close": "16:00"
+                },
+                "saturday": {
+                  "open": "12:30",
+                  "close": "16:00"
+                },
+                "sunday": {
+                  "open": "13:00",
+                  "close": "16:00"
+                },
+                "monday": {
+                  "open": "17:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "14:30",
+                  "close": "16:00"
+                },
+                "wednesday": {
+                  "open": "17:00",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "14:30",
+                  "close": "16:00"
+                }
+              },
+              "distance": 0.22997517271316356,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJrRtggNsJxkcRIpqO9nQb448",
+                "name": "Pesca Seafood Restaurant Amsterdam",
+                "address": "Rozengracht 133, 1016 LV Amsterdam",
+                "latitude": 52.372763,
+                "longitude": 4.8788041,
+                "rating": 4.6,
+                "reviewCount": 4204,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "restaurant de fruits de mer",
+                  "restaurant de fruits de mer",
+                  "restaurant de poisson",
+                  "restaurant ouvert le midi",
+                  "restaurant",
+                  "marché aux poissons et fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant original, produits de la mer locaux. Restaurant innovant doté d'une poissonnerie ouverte, proposant un menu de poissons et fruits de mer frais qui change chaque jour."
+                ],
+                "description": "Restaurant original, produits de la mer locaux. Restaurant innovant doté d'une poissonnerie ouverte, proposant un menu de poissons et fruits de mer frais qui change chaque jour.",
+                "phoneNumber": "020 334 5136",
+                "website": "https://pesca.restaurant/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pesca%20Seafood%20Restaurant%20Amsterdam%2C%20Rozengracht%20133%2C%201016%20LV%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqh1cSqPyb-H95p8k3iLeqCK9DLNuQwgHKCWnOBc1KzuGcm4rOVsRZkyLAgWWzXXxUD2VrBVJDSnf6_nnkgf7A9y3_H-rHHngRq6pfYnSRSbG1FvUsyz7AYNaWfnQzz8Fn1VQo=w138-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJrRtggNsJxkcRIpqO9nQb448",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  },
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "14:30"
+                  }
+                },
+                "distance": 0.27023988745022254,
+                "walkingTime": 3
+              },
+              {
+                "id": "ta-Restaurant_Review-g188590-d33337500-Reviews-Restaurant_Black_Blue-Amsterdam_North_Holland_Province",
+                "name": "Restaurant Black & Blue",
+                "address": "Adresse non disponible",
+                "latitude": 52.37,
+                "longitude": 4.89,
+                "rating": 4,
+                "reviewCount": 60,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Steakhouse",
+                  "European"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Black%20%26%20Blue%2C%20Amsterdam",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/1c/c4/18/aperitif-bar.jpg?w=1000&h=600&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.96,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Assaggi%2C%20Tweede%20Egelantiersdwarsstraat%206%2C%201015%20SC%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Assaggi%2C%20Tweede%20Egelantiersdwarsstraat%206%2C%201015%20SC%20Amsterdam",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Rijksmuseum Amsterdam et Musée van Gogh",
+        "dayNarrative": "Cette journée est dédiée à la découverte des trésors culturels d'Amsterdam, avec des visites intérieures pour s'adapter à la météo pluvieuse. Elle inclut deux musées incontournables et une balade dans un quartier emblématique, suivie d'un dîner.",
+        "geoDiagnostics": {
+          "maxLegKm": 3.85,
+          "p95LegKm": 3.5,
+          "totalTravelMin": 143,
+          "totalLegKm": 11.69,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.06,
+          "mstLowerBoundKm": 5.68
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-25T13:17:16.475Z",
+        "items": [
+          {
+            "id": "7f762f9e-6cee-4ce3-bf6b-af30e6a171ed",
+            "dayNumber": 2,
+            "startTime": "07:45",
+            "endTime": "08:30",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Cups & Chapters Cafe",
+            "description": "Repas sur place",
+            "locationName": "Meeuwenlaan 145b, 1021 JA Amsterdam",
+            "latitude": 52.3848407,
+            "longitude": 4.9169338,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.364278,4.883984",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ2WlP9AUJxkcRcdR2CCBxD-8",
+              "name": "Cups & Chapters Cafe",
+              "address": "Meeuwenlaan 145b, 1021 JA Amsterdam",
+              "latitude": 52.3848407,
+              "longitude": 4.9169338,
+              "rating": 5,
+              "reviewCount": 82,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "http://www.cupsandchapters.nl/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cups%20%26%20Chapters%20Cafe%2C%20Meeuwenlaan%20145b%2C%201021%20JA%20Amsterdam",
+              "googlePlaceId": "ChIJ2WlP9AUJxkcRcdR2CCBxD-8",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "15:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "15:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "15:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "15:00"
+                },
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": {
+                  "open": "08:00",
+                  "close": "15:00"
+                }
+              },
+              "distance": 0.403625963659202,
+              "walkingTime": 5
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJV1gpKLMJxkcRIxhmHd7v5LU",
+                "name": "Café Keppler",
+                "address": "Van der Pekstraat 1, 1031 CN Amsterdam",
+                "latitude": 52.386958899999996,
+                "longitude": 4.9080783,
+                "rating": 4.5,
+                "reviewCount": 664,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "diner",
+                  "diner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 737 0838",
+                "website": "http://cafekeppler.nl/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Keppler%2C%20Van%20der%20Pekstraat%201%2C%201031%20CN%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo6Vj92b91X0t_68B24_Cq-DXrWETC23s0gqZXDhhiqi5sUFb2gmdtTYlOhSh8YqzdnePw1hMKEGIuIpJs--PgeqgyqAWg6s6C3rjbcUEDeanLrafPwKxc0xKhs2ixb75ZlQKAvlg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJV1gpKLMJxkcRIxhmHd7v5LU",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "18:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.43699575875407937,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJEVveaLQJxkcRjImHlRfdFw8",
+                "name": "The Coffee Virus",
+                "address": "Overhoeksplein 2, 1031 KS Amsterdam",
+                "latitude": 52.384204999999994,
+                "longitude": 4.902947999999999,
+                "rating": 4.7,
+                "reviewCount": 148,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café spécialisé dans les boissons expresso",
+                  "café spécialisé dans les boissons expresso",
+                  "fournisseur de paniers-repas",
+                  "fournisseur alimentaire pour traiteur",
+                  "traiteur",
+                  "café",
+                  "espace événementiel",
+                  "restaurant diététique",
+                  "pâtisserie",
+                  "saladerie",
+                  "sandwicherie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 244 2340",
+                "website": "http://thecoffeevirus.nl/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Coffee%20Virus%2C%20Overhoeksplein%202%2C%201031%20KS%20Amsterdam",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipN49ZRMzO0Wq1dnPhUayl9D7abY4Rq_4ZCX3oSj=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJEVveaLQJxkcRjImHlRfdFw8",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "saturday": null,
+                  "sunday": null,
+                  "monday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "tuesday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "08:45",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.8797647425997163,
+                "walkingTime": 11
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Cups%20%26%20Chapters%20Cafe%2C%20Meeuwenlaan%20145b%2C%201021%20JA%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cups%20%26%20Chapters%20Cafe%2C%20Meeuwenlaan%20145b%2C%201021%20JA%20Amsterdam",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "20a98dca-b875-4a57-a94a-511dc2b27d7f",
+            "dayNumber": 2,
+            "startTime": "08:45",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Maison Anne Frank",
+            "description": "Anna (Ans) van Dijk was een Nederlandse collaborateur tijdens de Tweede Wereldoorlog.  In totaal verraadde zij 145 mensen, voor het merendeel Joodse onderduikers, aan de Duitse bezetters.",
+            "locationName": "Maison Anne Frank",
+            "latitude": 52.3752182,
+            "longitude": 4.8839765,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.3752182,4.8839765",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Anne%20Frank&query_place_id=&center=52.3752182,4.8839765",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUccaFWrRJ4b3GkB6Mg7YzewUcSnxISjAYTaoHsQfd02Ecu7oOmm2XHtkyxpzSwIUV7fVykVGeu9Frb82A-UDxwDbT-9sCe8yDeJYkgqRfevTuamJTOSizHEab_T6JBn-EodRIYH6ydDCV5hX_px0UA8ByeVwVufOR0_Jrq7u4TKorUbfWWAXHUMv9Mc_OunZi12-xUzJUINV07ENqHWtajso--rcUYaKZGM9Z2G-_e4vS5M-oppBHInkG0AXDSizsNO9PlU1JPCaC4rdZ6CWX3R0iC75iRAR8si07imZX4kcKliGvl2nvsuxuNb-Kiactw7Bler8QBpmANPw1wvmUVKRaLA6vG4Vpq91_ys54RVyJPDTmtzpRneky63tbjga-1m5X7GrgQGMomuoTHHbMTHZsheEl2ixLXDB7Ee1wnozSRr7T0qiWXRaazxHHWTH51TRg55L4xyteI8dchQDVTFUijbrg_FqsDhZzhkRAr4fjgOcQPii1g-LCvtSuZcuvE8fXra72gBzsssZlMNMLRgvz3k7nk8Gko_2GLEWygrvM6TTjJVI136-NNrfTbIzncOxwU&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.22,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "52094c78-bb05-4ba1-bf40-8aa536d3f8fa",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "11:15",
+            "type": "checkout",
+            "title": "Check-out Bunk Hotel Amsterdam",
+            "description": "Départ de l'hôtel",
+            "locationName": "Bunk Hotel Amsterdam",
+            "latitude": 52.38808,
+            "longitude": 4.91425,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "booking-3226748",
+              "name": "Bunk Hotel Amsterdam",
+              "type": "hotel",
+              "address": "Hagedoornplein 2, 1031 BV Amsterdam, Netherlands",
+              "latitude": 52.38808,
+              "longitude": 4.91425,
+              "rating": 8.4,
+              "reviewCount": 7300,
+              "stars": 3,
+              "pricePerNight": 41,
+              "totalPrice": 41,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/438750118.jpg?k=28033fb94be4a27be99543f1431ac93202ebc52cd79a62a06c5cb164e947ad2f&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/hotel/nl/bunk.html?checkin=2026-02-24&checkout=2026-02-25&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 2.5,
+            "timeFromPrevious": 32,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "5be469e4-a839-43dc-a959-0d2ebe0640ee",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "The 9 Streets",
+            "description": "The Wolf of Wall Street is een Amerikaanse misdaadkomedie uit 2013 van regisseur Martin Scorsese.  De biografische film is gebaseerd op de gelijknamige memoires van beursmakelaar Jordan Belfort.  In j",
+            "locationName": "The 9 Streets",
+            "latitude": 52.3702625,
+            "longitude": 4.8860546,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.3702625,4.8860546",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=The%209%20Streets&query_place_id=&center=52.3702625,4.8860546",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWVD2MCcNC5i65ztDJwSMUVzPdc1TRhV6qx1xxdz-SLHGRhZ9NvjPXKoQ1s2Xw03XPkX9Et-yE7UFIJzpyKyOC0240sI6WI0W17uog7pnHcxBRJrViKhu3TdIz-CZKYz7ShI25LAu4bEEvF_rTVUNTnjUIu4u78oxkOsEd-dLuKKmWwd7KKlvFBBbJ6aGgvDOUz1plDMouHzd04IHL9d34mEVbxuZ18hy8bKr3BRVTHzXZRRFoRu295QgydupfunpSv4RdKqXyWDzq4N_LN11cfBK57p1YahKxF7d7FYnoyZjd0ugXp-VxrxO3hAat_DywjMhxlg4Bdxd9L8DWsFV8iw0eTjDlTl_qNo0KVD7j8dMJbhk9dGB0gqbiSItYOWlJMFpwkwm9QREfeN-j1ahuvEsQgwhjMMtcfANUN6Dk6GipUK9l1L7TclEteM-uNFSqfM4Q0_Gr-6C0Wge-d_D2ydKzLgPEsrvAbYg4GcK6kaUaxSuPupHcW4a98O3e5p_HF5u9jqWq6lLMShzBFpfLJ-q2jlKIjGjxDGlkBitdnVkpvXhq5r83xipK7Ic1Wxmh3ZD-L&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.75,
+            "timeFromPrevious": 35,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "849a6c24-51a7-4975-82d0-ff22e2f74737",
+            "dayNumber": 2,
+            "startTime": "12:15",
+            "endTime": "13:30",
+            "type": "restaurant",
+            "title": "Déjeuner — Cannibale Royale Handboogstraat",
+            "description": "Repas sur place",
+            "locationName": "Handboogstraat 17a, 1012 XM Amsterdam",
+            "latitude": 52.368045,
+            "longitude": 4.890342,
+            "orderIndex": 4,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=52.368045,4.890342",
+            "restaurant": {
+              "id": "serp-16718953429362947787",
+              "name": "Cannibale Royale Handboogstraat",
+              "address": "Handboogstraat 17a, 1012 XM Amsterdam",
+              "latitude": 52.368045,
+              "longitude": 4.890342,
+              "rating": 4.5,
+              "reviewCount": 6653,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "020 233 7160",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cannibale%20Royale%20Handboogstraat%2C%20Handboogstraat%2017a%2C%201012%20XM%20Amsterdam",
+              "photos": [
+                "https://serpapi.com/searches/69985edcd3c5126ef3ca267c/images/WgpDVTqcNEaDpiVXomi2GHibao6l4a-rIsSSsQHDJ1g.jpeg"
+              ],
+              "googlePlaceId": "16718953429362947787",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "ta-Restaurant_Review-g188590-d33337500-Reviews-Restaurant_Black_Blue-Amsterdam_North_Holland_Province",
+                "name": "Restaurant Black & Blue",
+                "address": "Adresse non disponible",
+                "latitude": 52.37,
+                "longitude": 4.89,
+                "rating": 4,
+                "reviewCount": 60,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Steakhouse",
+                  "European"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Black%20%26%20Blue%2C%20Amsterdam",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/1c/c4/18/aperitif-bar.jpg?w=1000&h=600&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "ta-Restaurant_Review-g188590-d32999666-Reviews-Specht_Bar_Lounge-Amsterdam_North_Holland_Province",
+                "name": "Specht Bar & Lounge",
+                "address": "Adresse non disponible",
+                "latitude": 52.37,
+                "longitude": 4.89,
+                "rating": 5,
+                "reviewCount": 91,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Bar",
+                  "International",
+                  "Pub",
+                  "Dining bars"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": true,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Specht%20Bar%20%26%20Lounge%2C%20Amsterdam",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/31/00/d6/b3/specht-bar-lounge.jpg?w=6300&h=4200&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.38,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-2-fallback",
+            "dayNumber": 2,
+            "startTime": "14:00",
+            "endTime": "16:30",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "Amsterdam → Bruxelles (estimation)",
+            "locationName": "Amsterdam → Bruxelles",
+            "latitude": 52.3848407,
+            "longitude": 4.9169338,
+            "orderIndex": 5,
+            "duration": 150,
+            "estimatedCost": 21,
+            "bookingUrl": "https://www.google.com/maps/dir/Bruxelles/Amsterdam",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "Maison Anne Frank et The 9 Streets",
+        "dayNarrative": "La deuxième journée débute par un petit-déjeuner avant de plonger dans l'histoire avec la Maison Anne Frank et une balade dans le quartier des 9 Rues, offrant une dernière immersion dans l'atmosphère d'Amsterdam avant le départ.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.48,
+          "p95LegKm": 0.57,
+          "totalTravelMin": 42,
+          "totalLegKm": 3.43,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 3.43
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Bruxelles",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 50.8503,
+              "lng": 4.3517
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 104,
+            "price": 21,
+            "co2": 9,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Bruxelles/Amsterdam"
+          }
+        ],
+        "totalDuration": 119,
+        "totalPrice": 21,
+        "totalCO2": 9,
+        "score": 5.4,
+        "scoreDetails": {
+          "priceScore": 6.3,
+          "timeScore": 10,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Bruxelles/Amsterdam",
+        "dataSource": "estimated",
+        "recommended": true,
+        "recommendationReason": "Option rapide"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Bruxelles",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 50.8503,
+              "lng": 4.3517
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 130,
+            "price": 7,
+            "co2": 5,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/brussels/amsterdam?departure_date=2026-02-24"
+          }
+        ],
+        "totalDuration": 185,
+        "totalPrice": 7,
+        "totalCO2": 5,
+        "score": 5.2,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 5.7
+        },
+        "bookingUrl": "https://www.omio.fr/bus/brussels/amsterdam?departure_date=2026-02-24"
+      },
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Bruxelles",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 50.8503,
+              "lng": 4.3517
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 115,
+            "price": 45,
+            "co2": 2,
+            "operator": "Eurostar / NS International",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/brussels/amsterdam?departure_date=2026-02-24"
+          }
+        ],
+        "totalDuration": 155,
+        "totalPrice": 45,
+        "totalCO2": 2,
+        "score": 4.9,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 4.5,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/brussels/amsterdam?departure_date=2026-02-24",
+        "dataSource": "api",
+        "priceRange": [
+          25,
+          80
+        ],
+        "recommendationReason": "Option la plus écologique"
+      }
+    ],
+    "selectedTransport": {
+      "id": "car",
+      "mode": "car",
+      "segments": [
+        {
+          "mode": "car",
+          "from": "Bruxelles",
+          "to": "Amsterdam",
+          "fromCoords": {
+            "lat": 50.8503,
+            "lng": 4.3517
+          },
+          "toCoords": {
+            "lat": 52.3676,
+            "lng": 4.9041
+          },
+          "duration": 104,
+          "price": 21,
+          "co2": 9,
+          "frequency": "Flexible",
+          "bookingUrl": "https://www.google.com/maps/dir/Bruxelles/Amsterdam"
+        }
+      ],
+      "totalDuration": 119,
+      "totalPrice": 21,
+      "totalCO2": 9,
+      "score": 5.4,
+      "scoreDetails": {
+        "priceScore": 6.3,
+        "timeScore": 10,
+        "co2Score": 0
+      },
+      "bookingUrl": "https://www.google.com/maps/dir/Bruxelles/Amsterdam",
+      "dataSource": "estimated",
+      "recommended": true,
+      "recommendationReason": "Option rapide"
+    },
+    "accommodation": {
+      "id": "booking-3226748",
+      "name": "Bunk Hotel Amsterdam",
+      "type": "hotel",
+      "address": "Hagedoornplein 2, 1031 BV Amsterdam, Netherlands",
+      "latitude": 52.38808,
+      "longitude": 4.91425,
+      "rating": 8.4,
+      "reviewCount": 7300,
+      "stars": 3,
+      "pricePerNight": 41,
+      "totalPrice": 41,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/438750118.jpg?k=28033fb94be4a27be99543f1431ac93202ebc52cd79a62a06c5cb164e947ad2f&o="
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.booking.com/hotel/nl/bunk.html?checkin=2026-02-24&checkout=2026-02-25&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-3226748",
+        "name": "Bunk Hotel Amsterdam",
+        "type": "hotel",
+        "address": "Hagedoornplein 2, 1031 BV Amsterdam, Netherlands",
+        "latitude": 52.38808,
+        "longitude": 4.91425,
+        "rating": 8.4,
+        "reviewCount": 7300,
+        "stars": 3,
+        "pricePerNight": 41,
+        "totalPrice": 41,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/438750118.jpg?k=28033fb94be4a27be99543f1431ac93202ebc52cd79a62a06c5cb164e947ad2f&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/nl/bunk.html?checkin=2026-02-24&checkout=2026-02-25&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-2593669",
+        "name": "Via Amsterdam",
+        "type": "hotel",
+        "address": "Diemerhof 20, 1112 XN Diemen, Netherlands",
+        "latitude": 52.326207,
+        "longitude": 4.953709,
+        "rating": 8.1,
+        "reviewCount": 14444,
+        "stars": 3,
+        "pricePerNight": 50,
+        "totalPrice": 50,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/113582055.jpg?k=fd57b367a485771c39223a68cf92091ddb784679e6434dce1a95cd3bd35afb61&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Via+Amsterdam+Amsterdam&checkin=2026-02-24&checkout=2026-02-25&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-14226",
+        "name": "XO Hotels Blue Square",
+        "type": "hotel",
+        "address": "Slotermeerlaan 80, 1064 HD Amsterdam, Netherlands",
+        "latitude": 52.3785865880488,
+        "longitude": 4.82055857777596,
+        "rating": 8,
+        "reviewCount": 8078,
+        "stars": 3,
+        "pricePerNight": 49,
+        "totalPrice": 49,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/274397934.jpg?k=aea9ee8c82682331a35c9b1404ae6b68a3b442dd97b6f7d5804f284f7bda6177&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=XO+Hotels+Blue+Square+Amsterdam&checkin=2026-02-24&checkout=2026-02-25&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 159,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 82,
+      "food": 60,
+      "activities": 17,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Néerlandais",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Goedemorgen",
+            "phonetic": "Khoudemorguen",
+            "context": "Salutation le matin"
+          },
+          {
+            "original": "Bonsoir",
+            "translation": "Goedenavond",
+            "phonetic": "Khoudenafront",
+            "context": "Salutation le soir"
+          },
+          {
+            "original": "S'il vous plaît",
+            "translation": "Alstublieft",
+            "phonetic": "Alstou-blift",
+            "context": "Demande polite"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Dank u wel",
+            "phonetic": "Dank ou vèl",
+            "context": "Remerciement"
+          },
+          {
+            "original": "Excusez-moi",
+            "translation": "Excuseert u mij",
+            "phonetic": "Exkouzert ou meï",
+            "context": "Attirer l'attention poliment"
+          },
+          {
+            "original": "Parlez-vous français?",
+            "translation": "Spreekt u Frans?",
+            "phonetic": "Sprékt ou Frans",
+            "context": "Vérifier la compréhension linguistique"
+          },
+          {
+            "original": "Je voudrais un café, s'il vous plaît",
+            "translation": "Ik wil graag een koffie, alstublieft",
+            "phonetic": "Ik vil khraakh un koffi, alstou-blift",
+            "context": "Commander au café"
+          },
+          {
+            "original": "L'addition, s'il vous plaît",
+            "translation": "De rekening, alstublieft",
+            "phonetic": "De rékenink, alstou-blift",
+            "context": "Demander la note au restaurant"
+          },
+          {
+            "original": "Où se trouve la gare?",
+            "translation": "Waar is het station?",
+            "phonetic": "Vaar is het statsioun?",
+            "context": "Demander des directions"
+          },
+          {
+            "original": "Combien ça coûte?",
+            "translation": "Hoeveel kost het?",
+            "phonetic": "Houfél kost het?",
+            "context": "S'informer sur le prix"
+          },
+          {
+            "original": "Appelez une ambulance!",
+            "translation": "Bel een ambulance!",
+            "phonetic": "Bèl un ambulance!",
+            "context": "Urgence médicale"
+          },
+          {
+            "original": "Au secours!",
+            "translation": "Help!",
+            "phonetic": "Help!",
+            "context": "Urgence générale"
+          },
+          {
+            "original": "Je suis perdu",
+            "translation": "Ik ben verdwaald",
+            "phonetic": "Ik ben ferdvaalt",
+            "context": "Demander de l'aide pour s'orienter"
+          },
+          {
+            "original": "Quelle heure est-il?",
+            "translation": "Hoe laat is het?",
+            "phonetic": "Hou laat is het?",
+            "context": "S'informer de l'heure"
+          },
+          {
+            "original": "Bonne nuit",
+            "translation": "Goedenacht",
+            "phonetic": "Khoudennacht",
+            "context": "Salutation le soir au coucher"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Manteau ou veste imperméable",
+            "reason": "Février à Amsterdam est froid et humide avec possibilité de pluie"
+          },
+          {
+            "item": "Pulls et sweats chauds",
+            "reason": "Températures entre 0-5°C en février"
+          },
+          {
+            "item": "Écharpe, bonnet et gants",
+            "reason": "Protection contre le froid et le vent"
+          },
+          {
+            "item": "Chaussures imperméables et robustes",
+            "reason": "Climat humide et déplacements à vélo ou à pied sur pavés"
+          },
+          {
+            "item": "Adaptateur de prise type C/E",
+            "reason": "Les Pays-Bas utilisent les prises types C et E"
+          },
+          {
+            "item": "Parapluie compact",
+            "reason": "Pluie fréquente en février"
+          },
+          {
+            "item": "Crème hydratante et baume à lèvres",
+            "reason": "Protection contre le froid et le vent sec"
+          },
+          {
+            "item": "Maillot de bain",
+            "reason": "Accès aux piscines publiques chauffées et saunas"
+          }
+        ],
+        "plugType": "C/E",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "Belgique",
+            "requirement": "Citoyens belges: pièce d'identité valide suffisante. Pas de visa requis pour circuler librement dans l'espace Schengen. Passeport ou carte d'identité valide nécessaire."
+          }
+        ],
+        "importantLaws": [
+          "Port du casque obligatoire à vélo (amende si non-respect)",
+          "Respect du code de la route pour piétons et cyclistes: traverser aux passages protégés uniquement",
+          "Interdiction de fumer dans les lieux publics fermés, transports publics et certains espaces",
+          "Les drogues douces (cannabis) sont tolérées dans les coffee shops agréés, mais illégales ailleurs",
+          "Consommation d'alcool interdite pour les moins de 18 ans; limite légale de 0,5 mg/ml d'alcool dans le sang pour la conduite"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles (ambassade belge, ministère des affaires étrangères) avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "112",
+        "fire": "112",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Assistance touristique et informations",
+            "number": "+31 20 702 6000"
+          },
+          {
+            "label": "Pharmacie de nuit (Amsterdam)",
+            "number": "+31 20 694 8709"
+          },
+          {
+            "label": "Centre antipoison",
+            "number": "030 274 8888"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 80,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 22,
+      "transportTips": "Achetez un jour pass GVB (8€) pour accès illimité tram/bus/métro. Amsterdam est très vélo-friendly : location vélo 12-15€/jour ou emprunt gratuit via certaines auberges.",
+      "reasoning": "Avec 125€/jour, le budget est serré pour Amsterdam. L'accommodation Airbnb avec cuisine (80€) permet d'économiser par rapport aux 100€ hôtel standard. Petit-déj self-catered (3-4€). Midi: alternance entre course supermarché et petit resto local (moyenne 10€). Soir: restaurant une fois par jour (18€) pour profiter de la nightlife locale sans exploser le budget. Activités: privilégier musées gratuits/réduits (Stedelijk gratuit certains jours), walking tours gratuits, explorations des canals à pied, bars à happy hour pour nightlife. Reste ~22€/jour pour culture (1-2 musées payants sur 2 jours) + nightlife (bières à 4-5€ en terrasse).",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: amsterdam-weekend-2d",
+    "   Bruxelles → Amsterdam (2j)",
+    "   solo (1p) | economic | nightlife, culture",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Amsterdam\", ll=\"@52.3676,4.9041,14z\", gl=\"nl\"",
+    "[Weather] 2 days fetched for 2026-02-24 → 2026-02-25",
+    "[Google Places] ✅ 25 attractions found for Amsterdam",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Hotels] Disponibilité live: 9/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (369ms)",
+    "[Pipeline V2] Resolving GPS for 17 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 2/17 activities",
+    "[Pipeline V2] Injected 4 curated must-see attractions for \"Amsterdam\" from local database",
+    "[Pipeline V2]   → Rijksmuseum, Maison d'Anne Frank, Musée Van Gogh, Quartier du Jordaan, Croisière sur les canaux",
+    "[Pipeline V2] Step 1: All data fetched in 50127ms",
+    "[Pipeline V2]   Activities: 25 Google + 25 SerpAPI + 1 Overpass + 17 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 9 | Transport options: 3",
+    "[Pipeline V2 LLM] Step 1 done in 50127ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Bunk Hotel Amsterdam\" (8.4★, €41/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 73 activities → 41 after dedup (dropped 32)",
+    "[Pipeline V2 LLM] Step 2: Selected 14 activities (2 must-sees, 12 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 40 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 374 pairs",
+    "[Pipeline V2 LLM] Step 2: 14 activities, 18 restaurants, 374 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 18ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 16424 in + 956 out, ~$0.0030, 11490ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Découverte culturelle et quartier historique\",\n      \"narrative\": \"Après l'arrivée et le check-in, cette journée se concentre sur des visites ...",
+    "[Pipeline V2 LLM] Retrying Gemini with corrections...",
+    "[Pipeline V2 LLM] Gemini retry completed",
+    "[Pipeline V2 LLM] Plan: 2 days, 6 activities, 5 meals",
+    "[Pipeline V2 LLM] Step 3 done in 25887ms — 2 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 14 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 2 days with 11 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 1945ms",
+    "[Pipeline V2 LLM] Step 4 done in 1945ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 4 restaurants swapped, 0 kept as fallback (2860ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 10 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 5ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 84/100",
+    "  📦 Complétude: 23/25",
+    "  ⏱️  Rythme:     18/25",
+    "  🗺️  Géo:        18/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 2: transport retour manquant",
+    "  ⚠️ Jour 1: chevauchement Transport inter-ville aller / Petit-déjeuner — Cups & Chapters Cafe",
+    "  ⚠️ Jour 2: chevauchement Check-out Bunk Hotel Amsterdam / The 9 Streets",
+    "  ⚠️ Jour 1: Déjeuner — Boka's est à 1592m de l'activité la plus proche",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 2: transport retour inséré (fallback)",
+    "  🔧 Jour 1: thème régénéré \"Immersion culturelle et historique\" → \"Rijksmuseum Amsterdam et Musée van Gogh\"",
+    "  🔧 Jour 2: thème régénéré \"Découverte historique et départ\" → \"Maison Anne Frank et The 9 Streets\"",
+    "[Pipeline V2 LLM] Step 5 done in 4ms — score: 84/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 80846ms ==="
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite de la campagne d'Amsterdam en voiture, Amsterdam\": 5334.3km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Amsterdam City Center  à pied Semi-privé 12ppl Max, Amsterdam\": 850.4km de la destination (max 30km)",
+    "[Pipeline V2 LLM] Gemini plan has errors: Plan too sparse: only 5 items for 2 days (expected ≥8)"
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite de la campagne d'Amsterdam en voiture, Amsterdam\" à Amsterdam — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 80847,
+  "generatedAt": "2026-02-20T13:17:16.476Z",
+  "success": true
+}

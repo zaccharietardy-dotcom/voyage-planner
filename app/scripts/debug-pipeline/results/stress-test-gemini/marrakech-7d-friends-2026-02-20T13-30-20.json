@@ -1,0 +1,2554 @@
+{
+  "scenarioId": "marrakech-7d-friends",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Marrakech",
+    "startDate": "2026-03-04T13:17:16.475Z",
+    "durationDays": 7,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 6,
+    "groupType": "friends",
+    "budgetLevel": "economic",
+    "activities": [
+      "culture",
+      "adventure",
+      "gastronomy"
+    ],
+    "dietary": [
+      "halal"
+    ],
+    "mustSee": "Jardin Majorelle, Médina, Jemaa el-Fna",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Marrakech",
+        "days": 7
+      }
+    ]
+  },
+  "trip": {
+    "id": "4edd0db0-b434-4ed6-a7a2-419516d5f67e",
+    "createdAt": "2026-02-20T13:30:10.064Z",
+    "updatedAt": "2026-02-20T13:30:10.064Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Marrakech",
+      "startDate": "2026-03-04T13:17:16.475Z",
+      "durationDays": 7,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 6,
+      "groupType": "friends",
+      "budgetLevel": "economic",
+      "activities": [
+        "culture",
+        "adventure",
+        "gastronomy"
+      ],
+      "dietary": [
+        "halal"
+      ],
+      "mustSee": "Jardin Majorelle, Médina, Jemaa el-Fna",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Marrakech",
+          "days": 7
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-04T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "12:30",
+            "endTime": "15:00",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Paris → Marrakech (estimation)",
+            "locationName": "Paris → Marrakech",
+            "latitude": 31.6298,
+            "longitude": -8.0092,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 214,
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "86c1d335-fc50-45d9-abe9-6ea8bebb2f9e",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in Dar Waiba",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Dar Waiba",
+            "latitude": 31.6298,
+            "longitude": -8.0092,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "dar-waiba",
+              "name": "Dar Waiba",
+              "type": "hotel",
+              "address": "Derb Sidi Bouaazza n°41, Kasbah, Marrakech 40000",
+              "latitude": 31.6298,
+              "longitude": -8.0092,
+              "rating": 8.9,
+              "reviewCount": 876,
+              "stars": 3,
+              "pricePerNight": 68,
+              "currency": "EUR",
+              "amenities": [
+                "WiFi gratuit",
+                "Climatisation",
+                "Petit-déjeuner inclus",
+                "Piscine chauffée",
+                "Spa",
+                "Rooftop"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Dar+Waiba+Marrakech&checkin=2026-03-04&checkout=2026-03-10&group_adults=6&group_children=0&no_rooms=1",
+              "distanceToCenter": 1.3,
+              "description": "Riad de charme avec piscine chauffée et spa traditionnel hammam. Décoration raffinée, service personnalisé et calme garanti loin de l'agitation.",
+              "dataReliability": "verified",
+              "totalPrice": 408
+            },
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Dar+Waiba+Marrakech&checkin=2026-03-04&checkout=2026-03-11&group_adults=6&group_children=0&no_rooms=1"
+          },
+          {
+            "id": "c3711cd6-96d9-4d56-b363-86e3c48712f6",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Le Jardin Secret Médina Marrakech",
+            "description": "La médina de Marrakech est une médina marocaine, cœur historique de Marrakech.  Elle forme un des cinq arrondissements que compte la commune urbaine de Marrakech.",
+            "locationName": "Le Jardin Secret Médina Marrakech",
+            "latitude": 31.6306908,
+            "longitude": -7.98952,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6306908,-7.98952",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Jardin%20Secret%20M%C3%A9dina%20Marrakech&query_place_id=&center=31.6306908,-7.98952",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVRoMyOwLRE_ooPlRe2Tj8xpWZxuVIXWcebEY0PDAFwtiQDhTS-ktBiw6qYj1lRrrgZ0V45I_gIKJjm_tp4Rx3SmOUTX2Ja4EUjRxMG3oib4q3kSdN0fBov_-eaojb2AkV3bkLsIGngioiPElxIjeS8IjjjM0eYwpsyHlDDc-hc7gWrzRBzaguKQ2XdZrbnrdPqGRhScObdfKTVdMRdaEXTqdqHrtFpfgxwmN5UN1eJKmvCCkJv-6PyfxmKJ7IxKZgLHyZHTmaoa0OzZPwfhPFToT0JvebEQesuFqG58tRiY3m4XtcNQeUTMQl_0h5LU1uGT6spLAap2585GjyYIxnJaj7zpdbp5TbzRlokk4ZjytC2VgU3I7qmez58nHQkQBiZO5XMhektW5GvnOcY7TVrEuaHX9FnFfKOvs17LKQnREuejOEW03WATi8Gp1UyY7cK0eWGRR2nkARTzq6yU4H6iuKRQRewMXd1tp9irRa4l7aDkVJ9fhcjFJDdIWPGND_2YBKvYeLC-Hzzf-CQMCk6bAyPDPTjo8zuuKZLlC-Jc_st-PrdiCRiWZvgzhwo-gbO6wHZnUx2Ow&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.87,
+            "timeFromPrevious": 24,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "9b61b95b-2934-494d-ad6b-d09b026f4db6",
+            "dayNumber": 1,
+            "startTime": "18:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Souk Semmarine",
+            "description": "Les souks de Marrakech sont des souks de la médina de Marrakech, un des principaux lieux du commerce et du tourisme au Maroc.",
+            "locationName": "Souk Semmarine",
+            "latitude": 31.6280373,
+            "longitude": -7.988067000000001,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6280373,-7.988067000000001",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Souk%20Semmarine&query_place_id=&center=31.6280373,-7.988067000000001",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1ePaOXELGU1K5OeP14FT7i6pn0syeOX-H3G05V0UQneBiIYjHhY6qgQxNukTpKTpnNy3IgI02WWsOGPW3uZSt1foOiz9hzTxKNSYf1ijqcTWtSsb236ZeCo4u8oxXy0AjOL6g89KN2AkCyok8XBPNKNkVXi6jlFLFhgT2ZHwMN88k0DQ8G-5BpVtONME_UxOYWprOrLLao_U3epXAYmfhGs6zTpNhFeJ-SpCpLuOBA1f47nG6Ie-5oVZSB6V93d4i0BLwlt3DBy1O2JgvR29YYXSRY1osuy8rsCImpXiRzuQRfc20t3LIQCL35s1pOmp48Vo2FjiC2PbbOs7IcQ2nwifBPIXyVpGXXHsKdfT7ecPAy-lsa_xM8wWtiAT7aqeo8ppeewOX1TS182Zw7Kf7Zc5AlGQU5bJ19q4abwnyuciCZEOdL1g_kmLPZLpwlGoegU3LOENqK5FzwFwC3BvStQgY_bDsvH7vOflGAZqFjTgusP2oZYxAYLc8ya3uFJiM4i5pbs3WzTSZn9oQaawZHjWr9h2Ukg3L-huLJBbFCUAgvnfTNjnjCKJ9MEBfJk6XKw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.33,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "f4ad73ee-31d9-4a9e-89eb-59d6fa341230",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Restaurant Le Grand Bazar Marrakech",
+            "description": "\"Très bonne cuisine, ambiance et lieu très sympathique, service au top.\"",
+            "locationName": "Place Jemaa El Fna",
+            "latitude": 31.62689,
+            "longitude": -7.986877,
+            "orderIndex": 4,
+            "estimatedCost": 24,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.62689,-7.986877",
+            "restaurant": {
+              "id": "serp-1048671783082590775",
+              "name": "Restaurant Le Grand Bazar Marrakech",
+              "address": "Place Jemaa El Fna",
+              "latitude": 31.62689,
+              "longitude": -7.986877,
+              "rating": 4.7,
+              "reviewCount": 6000,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bonne cuisine, ambiance et lieu très sympathique, service au top.\""
+              ],
+              "description": "\"Très bonne cuisine, ambiance et lieu très sympathique, service au top.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Le%20Grand%20Bazar%20Marrakech%2C%20Place%20Jemaa%20El%20Fna",
+              "photos": [
+                "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/5cI22LNnzcjnnuMGcs3e2hrcNMYzvxJacz2ygvF-s9g.jpeg"
+              ],
+              "googlePlaceId": "1048671783082590775",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-9866616092924858481",
+                "name": "Le Bistro Arabe - Restaurant et jazz marocain à Marrakech",
+                "address": "7/8, Rue Riad Zitoun el Kdim",
+                "latitude": 31.624475,
+                "longitude": -7.9870377,
+                "rating": 4.8,
+                "reviewCount": 14000,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine incroyable, service impeccable et attentionné.\""
+                ],
+                "description": "\"Cuisine incroyable, service impeccable et attentionné.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bistro%20Arabe%20-%20Restaurant%20et%20jazz%20marocain%20%C3%A0%20Marrakech%2C%207%2F8%2C%20Rue%20Riad%20Zitoun%20el%20Kdim",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/_CUSUPusmopJ3qXDwDFAxALSNHnRU6slmRQzXoz5WFc.jpeg"
+                ],
+                "googlePlaceId": "9866616092924858481",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-12192940853382553315",
+                "name": "Rooftop Restaurant El Kennaria",
+                "address": "10 rue El Kennaria, Derb Dabachi",
+                "latitude": 31.626282,
+                "longitude": -7.986224,
+                "rating": 4.7,
+                "reviewCount": 1900,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Délicieux : cuisine, ambiance et service irréprochable !\""
+                ],
+                "description": "\"Délicieux : cuisine, ambiance et service irréprochable !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Rooftop%20Restaurant%20El%20Kennaria%2C%2010%20rue%20El%20Kennaria%2C%20Derb%20Dabachi",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/RAgBNdba1l8hsICy67irk-Q-DRuI7CH9an2zSPN1sp0.jpeg"
+                ],
+                "googlePlaceId": "12192940853382553315",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.17,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "78f11792-8a83-4656-a167-df24197da022",
+            "dayNumber": 1,
+            "startTime": "21:00",
+            "endTime": "22:00",
+            "type": "activity",
+            "title": "Place Jemaa el fna",
+            "description": "La place Jamaa Alfna est une célèbre place publique au sud-ouest de la médina de Marrakech au Maroc.  Ce haut-lieu traditionnel, populaire et animé notamment la nuit qui attire plus d'un million de vi",
+            "locationName": "Place Jemaa el fna",
+            "latitude": 31.6259521,
+            "longitude": -7.989049099999999,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6259521,-7.989049099999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Place%20Jemaa%20el%20fna&query_place_id=&center=31.6259521,-7.989049099999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUFurJ1GE2sXE8_RHwm_fsYp1XSBiXAGPCMX480LG_-R8kJvTfxeph9y7MpJezWvkW7TqYdZnBOm93ow-sLb-JNYaQ0n5aMOSKTSyGqI0EtmpTnvIiCFJoTaf6GDJZY75cInuXQx9pzDCqph2jk78GyGhIYC5AJroubqaPS-RDr8X8qO3NcdNkP5qsqntiTQWc6UpX8G-JN7cstggf85lpd00cE7FWLxhbJ8Nko8KcgfHbQlixvHjNMWb-9uvscJeU8Qb5qJtU0engvDLUoiUMrQ918s5s-AygHVBxt3u38sFvY2TqWyHOqtWY4ud4fT9Jv4ZBkCmsDSz-6B9NaJGZvLEtjoLTaPf4YmkgYKY2w02hpyHrLFbNCdZ2KCjiSKI4Apyhn_5iankOLCAs7oaAE8lEuMS9rVf6XVk-xT4UQxLh_Whn_AxKb7po6ItTcxhZ9XsvXJ-ruY0GwCiJ1Jvp5-H6pkhIgMyzQ9_6QLNOGIY6DeP3p40TeiihoLc0iVLLDBG3E_XbxOFHpafrMpg5LG513oRRYrjQF7O7hKqAm_zURpb36rUkKozOblw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.23,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          }
+        ],
+        "theme": "Arrivée et immersion en Médina",
+        "dayNarrative": "Après le check-in, plongez directement dans l'ambiance de la Médina avec une visite culturelle et une balade dans les souks, avant de profiter de l'animation de la Place Jemaa el-Fna en soirée.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.33,
+          "p95LegKm": 0.23,
+          "totalTravelMin": 11,
+          "totalLegKm": 0.73,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.01,
+          "mstLowerBoundKm": 0.73
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-05T13:17:16.475Z",
+        "items": [
+          {
+            "id": "2955f4e2-3a88-49f7-942a-e86dec75e424",
+            "dayNumber": 2,
+            "startTime": "09:15",
+            "endTime": "10:15",
+            "type": "activity",
+            "title": "Medersa Ben Youssef",
+            "description": "La médersa Ben Youssef est une médersa, école coranique.  Joyau de l'architecture saadienne, elle est située à Marrakech, au Maroc.",
+            "locationName": "Medersa Ben Youssef",
+            "latitude": 31.6320537,
+            "longitude": -7.9862761,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6320537,-7.9862761",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Medersa%20Ben%20Youssef&query_place_id=&center=31.6320537,-7.9862761",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUvWkSbk0oEvKDZImfxLA2FpLUbbwxjX_pFcS3av6JC3LYOCKoG206ufbi-jN9wiFvGWNuxdSGE7ljWFBW47cn-pkFsh9O1ebL_kuOrSj0j1WJdTWcNsh6BMkmIfMWDqboFSz4f27jlXcS9juLeHkFj0O3EigJc5BuSicRDBm9jzjB_POT8RpvxdYQZWd0f-A3cHNhyI8XpOlI_k-5TJFbTy3UnGDON-dOagGTvnO5_n2bXhbh8zc4MNnzDZvucPj6mMglFhDFy46wp3qFGcJ48CRMo2RJWtwwFJbqMd07l-aTPCRK8vpSp-XNwzlzVbd0QVsBxarRphnl8WaKM2PD_uciz3iY_Jkm5M5Hf75bNb5qmdpY5EzBdR_8HbBYY0WkR8SWWMpSs3_vfmpx032-igkXWZBW-pW5bPbSuPmZvOYypcsaDL7-fPzQ1VeKLeqoZhNRdTT0PbKPQ2juP2Q6X-0zM6B-cLOwAXH831T6sPQE0mAlrFib7r4yiCiFE2ry8_WuaehLBGJaSA50JUR8sntGwftiejnLJUuwdQqQqjdXpuDBCjdZO1h4zLk8m2IMUjTNCSbfq3Q&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "17a5e103-6731-4ffb-a02a-8d363bae3084",
+            "dayNumber": 2,
+            "startTime": "10:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Dôme des Almoravides",
+            "description": "L’empire du Ghana, également désigné sous le nom d'empire Wagadou, est un État médiéval d'Afrique de l'Ouest dont la fondation pourrait se situer au VIe siècle et s'étendant jusqu'au XIIIe siècle.  Il",
+            "locationName": "Dôme des Almoravides",
+            "latitude": 31.6313969,
+            "longitude": -7.9871851,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 3.9,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6313969,-7.9871851",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=D%C3%B4me%20des%20Almoravides&query_place_id=&center=31.6313969,-7.9871851",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXzvnmFzCUBq5LaZAi9jZDRyXqv1fa0BwmgfVI1vwOAIc0Z8Ovrii4f9r8q9csIaGXVIIyP1j5u4yVRxAxgFQK9-zkk0sq_WpKNNC5l6YA_1MmmURFRTcmkPxtT4bq5tyNESvkihe0b1ulTbhVqtvscvAk8JFhJt1-sDLhIxLftBeTG8HsC_97c-2wXH19vhdU5jpVfMQGNC7t6xuE5L3IDI0PlQOqoAaUFptpOtZ51KkBUGvyXnVo7qAm6jfh73fGA6ah7n0Rro2ePI1GShazY8SODSQPtugsKEOxDpIJBr9R4m26s1Xh1dQPcCwJi6rhqO63kZ4y67e3i3dNIq4R5qqu98ZHl1600b_GE7Ds_aEtc_sU7TbqF2LKPaMHjVI46LVrq6bLR_-yA3y180WEO4JElInW5YKnlF0q9waJ2EQY2_2dwE4_GFJYZRqbx1yNHJcJMJnlDXGNDFVavTHecv6s1KLHZTt2s1Hg5vyfMNNe4AdLPuaX3PsvY1ux4yp5q-UAf4tsvT1MzZ4R-ghEAhBlPfKtWlLUrusWbpRf5C1Hr5RECDZ7VVVRq-ws-pHwG5odi&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.11,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "c697bb2d-92be-4678-9999-c041609d72de",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Le Slimana Restaurant & Rooftop",
+            "description": "\"Très bonne cuisine, super cadre et service impeccable !\"",
+            "locationName": "53 Kaat Benahid",
+            "latitude": 31.631025,
+            "longitude": -7.9854417,
+            "orderIndex": 2,
+            "estimatedCost": 24,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.631025,-7.9854417",
+            "restaurant": {
+              "id": "serp-769399143695530638",
+              "name": "Le Slimana Restaurant & Rooftop",
+              "address": "53 Kaat Benahid",
+              "latitude": 31.631025,
+              "longitude": -7.9854417,
+              "rating": 4.8,
+              "reviewCount": 6700,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bonne cuisine, super cadre et service impeccable !\""
+              ],
+              "description": "\"Très bonne cuisine, super cadre et service impeccable !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Slimana%20Restaurant%20%26%20Rooftop%2C%2053%20Kaat%20Benahid",
+              "photos": [
+                "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/0baf4aMea7luH9-TGXVArrch_MQme15Wqdas3db2pb8.jpeg"
+              ],
+              "googlePlaceId": "769399143695530638",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11260425291208752391",
+                "name": "Dar Cherifa",
+                "address": "8 Derb Chorfa Lakbir",
+                "latitude": 31.629213,
+                "longitude": -7.9901094,
+                "rating": 4.5,
+                "reviewCount": 2400,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "marocaine"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Excellent repas, cadre sublime et service impeccable.\""
+                ],
+                "description": "\"Excellent repas, cadre sublime et service impeccable.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Dar%20Cherifa%2C%208%20Derb%20Chorfa%20Lakbir",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/Vkzh0uEX_AVPZ0DubbGIg-horxvjjY1qxR3OLK4BNwU.jpeg"
+                ],
+                "googlePlaceId": "11260425291208752391",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-1022399431039962219",
+                "name": "L'mida Marrakech",
+                "address": "Derb Nkhal, 78 Rahba Lakdima",
+                "latitude": 31.629225,
+                "longitude": -7.9864335,
+                "rating": 4.6,
+                "reviewCount": 3200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bien cuisiné, ambiance cosy et soignée, belle identité culinaire.\""
+                ],
+                "description": "\"Très bien cuisiné, ambiance cosy et soignée, belle identité culinaire.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=L'mida%20Marrakech%2C%20Derb%20Nkhal%2C%2078%20Rahba%20Lakdima",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/C6Km8AGdK48BWu2MJddaPMMjcOSoN2ydAgpHzzp7Oys.jpeg"
+                ],
+                "googlePlaceId": "1022399431039962219",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.17,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "68ef9e1f-70ee-4426-96ef-ab42a3b0ccbc",
+            "dayNumber": 2,
+            "startTime": "13:45",
+            "endTime": "14:45",
+            "type": "activity",
+            "title": "Palais de la Bahia",
+            "description": "Le palais de la Bahia est un ancien palais du XIXe siècle de huit hectares de style mauresque / islamique, à Marrakech au Maroc.  Actuel musée, il est un des chefs-d'œuvre de l'architecture marocaine ",
+            "locationName": "Palais de la Bahia",
+            "latitude": 31.6217067,
+            "longitude": -7.981968800000001,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6217067,-7.981968800000001",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20de%20la%20Bahia&query_place_id=&center=31.6217067,-7.981968800000001",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXJ5r7sywINeuzf-IfH3zyh5QlhtI4wck7kyZXYBf0zeX9MBq5FbkSWKP39dwfJvUepBHfmf-acAkmMc11_FGyalknbgBi4XeYPVNLGejIB83Me-9F9bUy98HO3-V4liSqFSrYcg6il43r3dLn9NZ7ptd9Xpb5VEys0e3GOChHuDy9gctpX-5sIcmqOf3OQn3aNHmNL-xHHc_RDvGrRQuqP4r-VioJuNRggXo1aZZ4bsRmZXkW616tj0uSLvJ9JdqlynFV9vf-9iSkXfWE6Zc-D3lrTqwVoGppNGxZhJY84GNm3hni-t1yet4doaycrrIDbYzFcFA8uhv3ItY8hQ-1u4HUbTBwcLCB87m-j21u_yfAgDD8_o7Sgw7YgD5udVxdArRb6lduAthwH3yfWuZnyCuuioNwlh0lF0FB5zjRIKR2F0pzW0LVlh72PDbYPEdtf1qC51T7zWSBkX6n7fJo-ZxysrOwosjPcfoRzNMmAOuivy3tUVRQ5Aeys1J45jgeoHtLxOGwEWbHMj09XQKik7eVi-sOlxSW9KjrTRs5In81LaXB2MEfZKeceDw2TVdiEjDepCpjDiA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.09,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "c0ae423c-2a6a-47bd-be66-6499b9f1e04d",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "16:00",
+            "type": "activity",
+            "title": "Les Tombeaux Saadiens",
+            "description": "Les Tombeaux saadiens sont une nécropole royale historique à Marrakech, au Maroc.  Ils datent de l'époque de la dynastie saadienne, et en particulier du règne d'Ahmad al-Mansur (1578-1603).",
+            "locationName": "Les Tombeaux Saadiens",
+            "latitude": 31.6173553,
+            "longitude": -7.9887607,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 3.9,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6173553,-7.9887607",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Tombeaux%20Saadiens&query_place_id=&center=31.6173553,-7.9887607",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWTAeZcws7fkT8CEJlFzVeadh73UiAWEY6Qu_tZj42Ly2-JniSTwdHOyOB-HapK1oS1W258Ui0QwMBEsCrGva2ccX44iJgWO-84YekRpP7S4pPe1trBQuBbDJrqqYVFj8OQDX38EDbA2iZGRuQwuXg8rOXV8Tw4Z20QdjZL3IgfLv902EPqi9Iki12ub438SOPu8g_N26evhcvlD3oOz1dkVzgjJzfwLhg5mpy8azY1RjxoS8AY-A-GeNhwewHbipIuyu_7gBl4ROL7W2ebzYSdcZoyTuQjM9dGbLUFfwQUaU42aV0HAxALeoRi3shzYH9eEu3G5ZjUb5KzZL3nKECH62E11ARfhPmm3V9lLUOKv-5YLNFOWqKyef_-hlKNb-u73sT_UsbVy_X4wsNPqu-9jfGoDTrrZEXGyLoz-Wl56eXHi0TnO_H5Tu1KeUN_QcjhRhN2B2Ss1cmzGaG0cFtL1ACMIo8M2tTYLTTr7OVPvWCqeHN7GWY5xjNsQf7n9zuqPW51yZcRbRST0Xu51QpyuowoFUlfJoAw61Qe0G0V-x0fEqJfpCIdx1t-9Lqh3lVOkj7Q&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.8,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "19e1bee1-9fc2-46a4-af12-6fcc2c644798",
+            "dayNumber": 2,
+            "startTime": "16:30",
+            "endTime": "18:30",
+            "type": "activity",
+            "title": "Cyber Parc Arsat Moulay Abdeslam",
+            "description": "Au centre de Marrakech, le très ancien jardin Arsat Moulay Abdessalam est devenu le Cyber Parc Arsat Moulay Abdessalam",
+            "locationName": "Cyber Parc Arsat Moulay Abdeslam",
+            "latitude": 31.626536,
+            "longitude": -7.996418,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.626536,-7.996418",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cyber%20Parc%20Arsat%20Moulay%20Abdeslam&query_place_id=&center=31.626536,-7.996418",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUz-H-l5WzZU6HW5dRHy_Ri9bpkcaLXvHIYc6lmW4UOospDUnik1tz1kawapqlL4FZbjndDg9RKj2LxTCvP-91pJHOr987YK7r-YkX-Xu8WNoev9cIHJHD5_jwtXySwxr1hG6u-iCOQQgA4_KCgNuPHeHw08vjJ_8GvsNbzJUYICjes5givpTd37UqAeSxMgk-h7-HwYGMkfpwr9GWK2-aAyyRjfs64GqhO6yq2r6mxglEbfDi-_uACtTb6xTeHsw0hoMg_axr1lLSCqlM-8h6Cec4aesOkuS6ehZe02Mysv3A4-cbURbT3Yd8qAMHB65ZsNXinBoBK1ZnDDfIx8n7reBn0POSLlJKNHkPc8VaDK2pxHxdYL2G1w9eGBNCYLNAs_P9Qfy5ImHlTgPNTPuJN7HVcwtRzJnp5b3mWcGMQ2ZbhQ_SiwVct5ncGB6B7_B_8gT8xsMSUYe8WVFKoIqS2baMWoRqFy6nqAQg-TrYXgzxi4rPpeoTC0yxkyRewfEg3nwbcrDn9ROkrIST-qtjGCScyQ-vNy8X-ri30_8GF0PG1z59Gcxk_122ewr_FYTPeqKUs&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.25,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "7997309f-3112-49bd-9464-6cc854efd551",
+            "dayNumber": 2,
+            "startTime": "18:45",
+            "endTime": "19:45",
+            "type": "activity",
+            "title": "Cascades d'Ouzoud",
+            "description": "Les cascades d'Ouzoud sont des chutes d'eau d'environ 110 m de haut, sur trois paliers, sur un site géologique pittoresque de l'oued Tissakht, à 1 060 m d'altitude du massif de l'Atlas, dans le Haut A",
+            "locationName": "Cascades d'Ouzoud",
+            "latitude": 32.0151371,
+            "longitude": -6.7201469,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=32.0151371,-6.7201469",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cascades%20d'Ouzoud&query_place_id=&center=32.0151371,-6.7201469",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUOKZtpwfXKzPiUOtVry8SNzIIXCQxLeAliBAc7PSQ9rsKirznONeS6RmAEgE8evlsAUd6el1vi8Jm-dEXVF74ppKp4_zHhBqtusS58YBUpAEyjcrGTSJg92rnC13Aw0nbp5ljv9-3-pTR-pRAuGC6MhaAZ1WGIPzzyKGn2tujLHt5M6aOgLlhBwWdgk2hwFex167of8cJ_MeQ_6JHCUBHpbPl1KCAejriyLGXVvCNyj9_b60fds43-kfc2SAiwRlqDLtA58bihjRkCP-ajEPKw5_oK--rPOKCxatQSFP1K4nFyL-otXHclwpeM8wwuMSqdMzqJm9_9Fr9SkpRzVV0lx1fyyFDP0zZERDbh1NZZLM3LkWXf0CItV9vrRvKzj8Wr493TObYmYCow0snepAlwTyBcQX4VCsS0oGrBSVDgEmJ15Paze7UMVM29i9-VTToxCGLMNNdGlXHMX-UFj4E3buptITcelpoBBGx3bPEWGhFD44SDsxOE8dIfp4dLjLquFIyUY2-1bOh29qJ2ytcgyE0M558k64OaGE70jvP_x_Wv8f_XI2WcT6Asu3_chbDttZvI&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 128.09,
+            "timeFromPrevious": 1602,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "0411433e-652b-4cf7-90fd-33b8cd895e00",
+            "dayNumber": 2,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — Chez Mounir",
+            "description": "\"Très bon restaurant, ambiance au top et nourriture délicieuse !\"",
+            "locationName": "Ouzoud",
+            "latitude": 32.0141291,
+            "longitude": -6.7192966,
+            "orderIndex": 7,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.9,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.627604,-7.994585",
+            "restaurant": {
+              "id": "serp-nearby-ChIJWTplSV2NpA0RtJO2Eq_nQvE",
+              "name": "Chez Mounir",
+              "address": "Ouzoud",
+              "latitude": 32.0141291,
+              "longitude": -6.7192966,
+              "rating": 4.9,
+              "reviewCount": 1720,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "06 59 40 89 20",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Mounir%2C%20Ouzoud",
+              "googlePlaceId": "ChIJWTplSV2NpA0RtJO2Eq_nQvE",
+              "openingHours": {
+                "friday": {
+                  "open": "09:00",
+                  "close": "22:30"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.1378044086804522,
+              "walkingTime": 2
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ29IV4DiNpA0RlnMtrnodFBM",
+                "name": "Restaurant chez Rachid",
+                "address": "277J+J5H, Ouzoud",
+                "latitude": 32.0139851,
+                "longitude": -6.7196732,
+                "rating": 4.2,
+                "reviewCount": 173,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 66 67 26 40",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20chez%20Rachid%2C%20277J%2BJ5H%2C%20Ouzoud",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepibb8FW9p9GDCCBAJg5W_jUtDOUpv9NmD0hemSJWnsmZT5botSKnFeZnekin5uBZf5C5DPCwdtzb9y8UgQebsXhOOqvbYMbtLchZ9YST3KV6oOJ-mR050ibcAxPgYvjbZYwL5K3Q=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ29IV4DiNpA0RlnMtrnodFBM",
+                "openingHours": {},
+                "distance": 0.13565926900230996,
+                "walkingTime": 2
+              },
+              {
+                "id": "serp-nearby-ChIJVWd4pCONpA0RKOHs5ovgOKU",
+                "name": "كافي ريسطوا املوا",
+                "address": "277J+9XW",
+                "latitude": 32.0134821,
+                "longitude": -6.7175439,
+                "rating": 4.6,
+                "reviewCount": 181,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 71 16 68 09",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%D9%83%D8%A7%D9%81%D9%8A%20%D8%B1%D9%8A%D8%B3%D8%B7%D9%88%D8%A7%20%D8%A7%D9%85%D9%84%D9%88%D8%A7%2C%20277J%2B9XW",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwep68TkHeoiuLZNZCjcH91Tqsx3ieYYIBaHnVFtlEGn1J8S8sf5fF6VTiEMJnj9TG-oDmZymly4B-SYbwlexF6arvnSVE3NcTzHtAXreT4EUmHaPZm3YRi81PQ_whjpJdrKe32O-=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJVWd4pCONpA0RKOHs5ovgOKU",
+                "openingHours": {
+                  "friday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  },
+                  "saturday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  },
+                  "sunday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  },
+                  "monday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "06:00",
+                    "close": "22:30"
+                  }
+                },
+                "distance": 0.30675341235268255,
+                "walkingTime": 4
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 127.89,
+            "timeFromPrevious": 1599,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Mounir%2C%20Ouzoud",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Mounir%2C%20Ouzoud",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Palais et Jardins de la Médina",
+        "dayNarrative": "Découvrez les splendeurs architecturales de Marrakech avec la Medersa Ben Youssef, le Palais de la Bahia et les Tombeaux Saadiens, entrecoupées de pauses gourmandes et d'une balade au Cyber Parc.",
+        "geoDiagnostics": {
+          "maxLegKm": 128.09,
+          "p95LegKm": 1.25,
+          "totalTravelMin": 1653,
+          "totalLegKm": 131.65,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.01,
+          "mstLowerBoundKm": 130.25
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-06T13:17:16.475Z",
+        "items": [
+          {
+            "id": "d01a20f1-2e34-44ca-8246-8c21f7bec4b1",
+            "dayNumber": 3,
+            "startTime": "09:15",
+            "endTime": "10:15",
+            "type": "activity",
+            "title": "Jardin Majorelle",
+            "description": "Le jardin Majorelle est un jardin botanique touristique d'environ 300 espèces sur près d'1 hectare, une villa Art déco labellisée Maisons des Illustres depuis 2011, et un musée de l'Histoire des Berbè",
+            "locationName": "Jardin Majorelle",
+            "latitude": 31.6412031,
+            "longitude": -8.0032397,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6412031,-8.0032397",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20Majorelle&query_place_id=&center=31.6412031,-8.0032397",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXWZuLqEi9cSWKOAlabg5sjoOh0hN8CofbRFCWIwYhw33UY65LQYzpLuRboiI_2cZaiENhnEnpaS7XhPoQOrbE7tPuoCQOSvBAbktYdYvjngx8azREG3wthCsjck4utrBqauRtSvCe9z3Xqt-Bqo_H1Vdb2_wyWwelPhlvbw73Pyb5jjJVg4AiqtuGz2pJY4XSt9Py-HY2C9ZpL8l3aTcuqsHMHkegsUqcFjdwnpH_NfRMk3UbB1UbgTCGCDtzf_nA2Y_lTrZ35Zlurqnk1ZHMW55q3LVtiGaurS4zgtPM0kectAuIAQP0WhSuOeT1nEum7waI3tkY-e2ZjP3BmqiFtY3YliU9WspqyHqh68CT2insVKrx0y0a8rRW0JetnXSkrISUNJLZyiJIFEUK3jmEN0upMLz7CD9uqhQmWR2n-A27OPg0fDLVGY9TUl2QvEqlYjL1UBgIgf_dk9kB81s4qe3ia1wxIOvrwCX9YCfIpkD2JhQnxQyqmR84i_RtUDXvdaKjzay3itk91sg2dzEUgqgmEOOu8giT1QkZrvwBxWLLnbrIHPO17K2jb0RxeNMq14RicJ5HpYw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "dd8cad37-f785-4757-96f3-b61c3d50a276",
+            "dayNumber": 3,
+            "startTime": "10:30",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "musée YVES SAINT LAURENT marrakech",
+            "description": "Le musée Yves-Saint-Laurent de Marrakech (MYSLM) est un musée consacré au couturier Yves Saint Laurent à Marrakech, au Maroc, ainsi qu'à Jacques Majorelle et à l'art marocain.",
+            "locationName": "musée YVES SAINT LAURENT marrakech",
+            "latitude": 31.6425905,
+            "longitude": -8.0031482,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6425905,-8.0031482",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=mus%C3%A9e%20YVES%20SAINT%20LAURENT%20marrakech&query_place_id=&center=31.6425905,-8.0031482",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXfLl4KyL7pxqIpZFhKuWvObdpe-HCJiRX1MZkKDQ9SV-QD27ZINSbHknmEXo9E0Z11t1N7Wc4MX6ggLwLt9o9hoblec7LOIN2iaw7y1ns3BlpwXTnK3yUfG9_cJmR9jidpUZpl93XTWfQMDdxAbmc17cnQhGwVkt-oY40LFXJ08GqmYeGyOgv1mmSkgVmU8EOAk8hJxcisCGhPfgiljsxmdvCjQGmhVxR0qPBwVdirajF5ZonVtcXgwXuiDp37rxmSuXIohRdwsOhMJ8bQDwH-tzn_gPEhzHe3BR6GYdF_PSRoK9-3qbt0ER-tcRQhD2sta6mwRkIRilV6TvWwW14OJVsGECINO26lSMDiOYr8M_0OZ4lQFvUF_ZTuPUteWzd8wNwiPCdzHpBJxvHVGYo_NWgkxo07l1SHil7eCRtV18UYBFF7RJjRSvGClnw2tXy1gKPqdntfcJ_4Q5kckkwzGRouDVUNXPnI2V4_IoKEEBo80lUzvnznza8tmtu1EFtspqCO-wfu4kM35kY3J_YjRSmqhKTj01nh9TFFEzWHtFeaTmbh1jn-95oz8tTOrLnBLCvOdythqw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.15,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "28e2b60c-82fd-41bf-800a-c22b179b1a45",
+            "dayNumber": 3,
+            "startTime": "12:45",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — La fontaine des épices",
+            "description": "\"Très bonne cuisine et très bon expérience, avec un service irréprochable.\"",
+            "locationName": "à, côté de jardin secret, 131 Rue Mouassine",
+            "latitude": 31.631014,
+            "longitude": -7.9894238,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.64144,-8.01753",
+            "restaurant": {
+              "id": "serp-4385015598154195812",
+              "name": "La fontaine des épices",
+              "address": "à, côté de jardin secret, 131 Rue Mouassine",
+              "latitude": 31.631014,
+              "longitude": -7.9894238,
+              "rating": 4.8,
+              "reviewCount": 8000,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Nourriture impeccable, service excellent et ambiance tamisée.\""
+              ],
+              "description": "\"Nourriture impeccable, service excellent et ambiance tamisée.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20fontaine%20des%20%C3%A9pices%2C%20%C3%A0%2C%20c%C3%B4t%C3%A9%20de%20jardin%20secret%2C%20131%20Rue%20Mouassine",
+              "googlePlaceId": "4385015598154195812",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11260425291208752391",
+                "name": "Dar Cherifa",
+                "address": "8 Derb Chorfa Lakbir",
+                "latitude": 31.629213,
+                "longitude": -7.9901094,
+                "rating": 4.5,
+                "reviewCount": 2400,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "marocaine"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Excellent repas, cadre sublime et service impeccable.\""
+                ],
+                "description": "\"Excellent repas, cadre sublime et service impeccable.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Dar%20Cherifa%2C%208%20Derb%20Chorfa%20Lakbir",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/Vkzh0uEX_AVPZ0DubbGIg-horxvjjY1qxR3OLK4BNwU.jpeg"
+                ],
+                "googlePlaceId": "11260425291208752391",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "ta-Restaurant_Review-g293734-d23911960-Reviews-Poka_By_Katsura-Marrakech_Marrakech_Safi",
+                "name": "Poka By Katsura",
+                "address": "Adresse non disponible",
+                "latitude": 31.632172,
+                "longitude": -8.002955,
+                "rating": 4.9,
+                "reviewCount": 1286,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "Japanese",
+                  "Sushi",
+                  "Asian",
+                  "Thai",
+                  "Healthy"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Poka%20By%20Katsura%2C%20Marrakech",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/33/60/6b/restaurant-interieur.jpg?w=1600&h=1000&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 1.37,
+            "timeFromPrevious": 18,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20fontaine%20des%20%C3%A9pices%2C%20%C3%A0%2C%20c%C3%B4t%C3%A9%20de%20jardin%20secret%2C%20131%20Rue%20Mouassine",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20fontaine%20des%20%C3%A9pices%2C%20%C3%A0%2C%20c%C3%B4t%C3%A9%20de%20jardin%20secret%2C%20131%20Rue%20Mouassine",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "d61606ca-03c4-4fcb-9821-ca286b4eb3ac",
+            "dayNumber": 3,
+            "startTime": "14:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Musée Dar El Bacha",
+            "description": "Dar el Bacha, plus rarement appelé Dar el Glaoui, est un palais situé dans la médina de Marrakech, au Maroc.  Il a appartenu à Thami El Glaoui, puissant pacha de Marrakech pendant le protectorat.",
+            "locationName": "Musée Dar El Bacha",
+            "latitude": 31.6314376,
+            "longitude": -7.9922895,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6314376,-7.9922895",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Dar%20El%20Bacha&query_place_id=&center=31.6314376,-7.9922895",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU2bSH4ehQMBFDYU2lHaOt7AcLOuaqbmiaEcNKwzklaWVqT1wLEGiS2nJyFLAqpCWjJj7LX9X319_Lx2CchY_BCM-gNLUVXl2ZxXs4vB-CGrtlwftR7ajBKoBaE_5RKqzOOc9IeJmsKgRE-hGtRpER6E-x_h8lrOa_LnAq0w4vHuz_yG2hnTuBnJtGMAg__L9DLiWyTkYBmcXvtAL39cIZpSyXW_MqtJ59ca5vRrhA1xFoNvWOgTgrQk_27QsY51ELwHCYrOBCkzIi_PPQgNKXuFjmkvtKQkucB168LNRTAkzoN70OOmOeNKpxIeMgsuoWsnm3pU-ZbF7Svde8lYQYoHKEx5SsT1yGi7yZo8QxtPbcxa32jqoE9v36hu6RcFKxhhE1IyJYkQQ8KnpkO4RIfrjEWN08kV8Xz105O-PsLZjG_Pf-Xwty9XxWdnFneqDlziCvQpSBTKaaj38PtCq8KkhwkOnWD4IY1QqEsFKnG3y39WVcdYpoWoGBqEMUwFv9edceDUNOAsRZ5X6LZUSFgNb1u_kYBUQ5moGz2IJsphx9We9XBh2RMtKShJhwa6uKAEi5g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.64,
+            "timeFromPrevious": 33,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a1021c0f-87dd-4070-88d7-1881e74c52f1",
+            "dayNumber": 3,
+            "startTime": "16:45",
+            "endTime": "17:15",
+            "type": "activity",
+            "title": "Koutoubia Marrakech",
+            "description": "La mosquée Koutoubia est un édifice religieux construit au XIIe siècle à Marrakech, Maroc.  Elle est la plus grande mosquée de la ville.  Son architecture et son décor ascétique reflètent l'art des Al",
+            "locationName": "Koutoubia Marrakech",
+            "latitude": 31.6237205,
+            "longitude": -7.993619599999999,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6237205,-7.993619599999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Koutoubia%20Marrakech&query_place_id=&center=31.6237205,-7.993619599999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9-6BeN9ouwN4S-XkwSXYGTjSj3XAAFsREhJCQ9HKo603YP6fPoKr2mh_9a8wMhCVjaQQCrGkz0JT0ZYSWxrWVF3ZCBtRssPghDq-RKYKTzdoDBfWztrdKmWhkKzLQKnoVQJUWBFhpcf2cPI4O90IRaBXMTmGVyQ01kfHFoE-xV6iAq8VNIbQsYuW-JCtwk8X2dzX4qSqH9oQ8t5cfYjCmJrLMYwEdL42buFeoyc8nZwHilXGaLzdbzEj3YUEmCS0hK_d4ittjD79noOYgoCfUtUb8AvVwcS3CYCpSnEBDxGVy0q-zseYkpBv71YLsQLUrokopo6qx5jg1OsfY8gJSgfm5jI2jBELtF2ped6G3lmhfEU5tqsRw20JmMEW62osTKJSXqwedzLJh1GqHQMUzmyIGpQolfmJmf5zvhc2YcaFaS8Xy3NsdjYMPvszmOehnOI71o2fpRWbEUh9wkB4Cfsbl0jyRRvbCaqM8AJRXGyfTO2Gv_NTx3xCNK_HsyojgMQQ4waPX2P77LEGJKRw3UDF-e6iyn5zcbxLt9ygqCVF0vgmidrwpaS5vZ83dDibH6OR3WjV-Lw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.87,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "2af09b2f-1bff-4051-b1bf-8cc84fc85791",
+            "dayNumber": 3,
+            "startTime": "17:30",
+            "endTime": "18:30",
+            "type": "activity",
+            "title": "Anima (André Heller Garden)",
+            "description": "Le jardin Anima est un jardin botanique situé aux abords de la ville de Marrakech, au Maroc.",
+            "locationName": "Anima (André Heller Garden)",
+            "latitude": 31.4007468,
+            "longitude": -7.8259577,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.4007468,-7.8259577",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Anima%20(Andr%C3%A9%20Heller%20Garden)&query_place_id=&center=31.4007468,-7.8259577",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXA_AMUYWdNQ5yt0P1kx0XrEahHEJHDuD1Cn0Nyn8RfOIOdOBVliIO8Nx0EWAx5OqSb-2F0aNMpjLWjJiy64kiAXCCGKGzTxNyZtQIUCiPrepusHoSujVvE0XWp3ZoiiwZWjugrWPRgTkcMSEn2jVHjOWiwf6g2_cy0c-u8WwT97ZX1k4fvl7pl5BmL_uyq8hoZVVTwX6JaH5ynHNu9hYn1AbehcSFC5g42dm7tsfu5adzjuujmwTsXylj8NGL5BnSJNk_nHlbLTmq2eZ_m9EG8bCkmhCsx95ror9vX38ulzY4OVmZJYO5zpFIQRw27dWm8TrWJwFF9ZcejXJkWAjMYkpFo3D4l2vh3t_djVc0KCD0m-ctGhAC6SH6WBltU8C1zAZKfnTFoT8_vO1KlZv543AilZStFRsOqCgFTxGfFcBaHeINis13e4tFP2rPykiUDCH1-Hrqdiki4JBFgBzkbcDlj-oKHeCu1rUneLA69jYG5COmCWa_jm9QlccORg7csCQUBiBrIyIn7UW-7gy7X690W2f1bp7WbVeklnlrfK9oBhU8lzm8FzxWVuZAhOkfIvDyV&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 29.45,
+            "timeFromPrevious": 369,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "1a8c5518-bc20-42d4-91fb-4e6734b3ec5c",
+            "dayNumber": 3,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Dar Essalam",
+            "description": "\"Excellent repas, la nourriture est bonne et l ambiance au top !!\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "170 Riad Zitoun Kedim",
+            "latitude": 31.622349,
+            "longitude": -7.9864006,
+            "orderIndex": 6,
+            "estimatedCost": 24,
+            "duration": 75,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.622349,-7.9864006",
+            "restaurant": {
+              "id": "serp-5791456983246198824",
+              "name": "Dar Essalam",
+              "address": "170 Riad Zitoun Kedim",
+              "latitude": 31.622349,
+              "longitude": -7.9864006,
+              "rating": 4.6,
+              "reviewCount": 5900,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "marocaine"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Excellent repas, la nourriture est bonne et l ambiance au top !!\""
+              ],
+              "description": "\"Excellent repas, la nourriture est bonne et l ambiance au top !!\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Dar%20Essalam%2C%20170%20Riad%20Zitoun%20Kedim",
+              "photos": [
+                "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/ISbAgyc-J8752tG8lUnDYr4MJCciXmeVV-vHNJ6NG58.jpeg"
+              ],
+              "googlePlaceId": "5791456983246198824",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3820608120491403033",
+                "name": "Cuisine De Terroir",
+                "address": "118 Rue Kennaria",
+                "latitude": 31.625628,
+                "longitude": -7.986302,
+                "rating": 4.7,
+                "reviewCount": 2700,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Super expérience Service au top jolie décoration Et cuisine exceptionnelle !\""
+                ],
+                "description": "\"Super expérience Service au top jolie décoration Et cuisine exceptionnelle !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cuisine%20De%20Terroir%2C%20118%20Rue%20Kennaria",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/xtF8jUk87qbMYK4r2Arn9OdF7TvcB5T3oeH3boHTaOY.jpeg"
+                ],
+                "googlePlaceId": "3820608120491403033",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-11334533580595191476",
+                "name": "Cafe Restaurant Dar L'hssira",
+                "address": "13 Rue Riad Zitoun el Jdid",
+                "latitude": 31.62296,
+                "longitude": -7.9851346,
+                "rating": 4.7,
+                "reviewCount": 2800,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "marocaine"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Bon accueil, bonne cuisine, rooftop bien décoré !\""
+                ],
+                "description": "\"Bon accueil, bonne cuisine, rooftop bien décoré !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cafe%20Restaurant%20Dar%20L'hssira%2C%2013%20Rue%20Riad%20Zitoun%20el%20Jdid",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/ThLUhSLRRd5brUqPl4I7PRUve9k1uDY-_h_n6tebZQI.jpeg"
+                ],
+                "googlePlaceId": "11334533580595191476",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 28.96,
+            "timeFromPrevious": 362,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Art, Mode et Jardins Majorelle",
+        "dayNarrative": "Explorez l'héritage de Yves Saint Laurent avec le musée et le Jardin Majorelle, puis découvrez l'art contemporain africain. Terminez la journée par une expérience culinaire marocaine.",
+        "geoDiagnostics": {
+          "maxLegKm": 29.45,
+          "p95LegKm": 28.96,
+          "totalTravelMin": 767,
+          "totalLegKm": 61.08,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.88,
+          "mstLowerBoundKm": 32.46
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-07T13:17:16.475Z",
+        "items": [
+          {
+            "id": "d0c95255-33e0-40e1-ac57-1fad524c7ce8",
+            "dayNumber": 4,
+            "startTime": "09:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Marrakech : Promenade en quad et dîner spectacle dans le désert d'Agafay",
+            "description": "• Transfert panoramique (45–50 minutes) : Détendez-vous sur une route climatisée de Marrakech au désert d’Agafay. En chemin, visitez une coopérative d'huile d'argan dirigée par des femmes et découvrez",
+            "locationName": "Marrakech : Promenade en quad et dîner spectacle dans le désert d'Agafay",
+            "latitude": 31.6242722,
+            "longitude": -7.9863959,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 360,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Marrakech/Agafay-Desert-Package-Quad-bike-and-Camel-ride-and-Dinner/d5408-5575748P11?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6242722,-7.9863959",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Marrakech%20%3A%20Promenade%20en%20quad%20et%20d%C3%AEner%20spectacle%20dans%20le%20d%C3%A9sert%20d'Agafay&query_place_id=&center=31.6242722,-7.9863959",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/e2/aa/1b.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Marrakech : Promenade en quad et dîner spectacle dans le désert d'Agafay",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/e2/aa/1b.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 58,
+            "viatorPrice": 15,
+            "viatorDuration": 360
+          },
+          {
+            "id": "3e6d0f71-6f63-40ef-8b6f-e654ae945dd9",
+            "dayNumber": 4,
+            "startTime": "15:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Oasiria Marrakech",
+            "description": "Oasiria est le premier parc aquatique du Maroc, situé à Marrakech.",
+            "locationName": "Oasiria Marrakech",
+            "latitude": 31.5815118,
+            "longitude": -8.0143387,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 240,
+            "rating": 3.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.5815118,-8.0143387",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Oasiria%20Marrakech&query_place_id=&center=31.5815118,-8.0143387",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVZ_butIsth721xWzjKmSvyKzVLSDU1S1dUHGGTGM_FDs-aH_ujgtLmBDa6ylW_jwvQuGXxgD5NgEiE7ENBIrcJuxSRYs6aMvk8MNT_jbg-W3Ikn4H8aaHGsVhg17XM8ttoY2IfFSpfCG3OcoDXNO_6FxOpsQ8Ea7z1zruJEI9FFSP7Np6yAY-ocoLnAHykEIbyOFpi2rZasa6iBWeTIZmsNSZ3OpAs3OsdA_2fo8myoReQdNmUUqU4v1cvFoYozHmcORDQQA1sCrpm_1uCvoXSVvKlYJHLLiWV4vGYiRUGlEIx2jBUeZok5UZp6UDhS2hjdzkq3LKn32ua-xl6n178mvL_yU4UXL9ZfQujqjKtIej8lfaOsbWPlj8p8yfYkF7QscOT8x4r5b6Xdhi9_7P5ifoDwn9O9lFyUPO2pMY5owWRsFPgNjzvWcT8CB8RE0iKtjIYNo5rol-CwEl6PAp7_oe2XLXmXZYHq85psEV4J8VQBv13-dLf5zS7BPMtXk0WO__eOhbcHbxKlOoLGuNGzKmF7PqKUnIWEfZxJuYAWcLHSqTOmSaNaPbqRI6wNXqPHNt0&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 5.44,
+            "timeFromPrevious": 69,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "133f456e-6086-4443-b042-2e4bc4462a38",
+            "dayNumber": 4,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — La Paillote Marrakech",
+            "description": "Dîner — American, Moroccan, International, Mediterranean, Healthy",
+            "locationName": "HXJP+77, KM 4, Route d'Amizmiz, Marrakech 40000",
+            "latitude": 31.5806413,
+            "longitude": -8.0143186,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.632172,-8.002955",
+            "restaurant": {
+              "id": "serp-nearby-ChIJDQh_XW3vrw0RTBg1gkQCubU",
+              "name": "La Paillote Marrakech",
+              "address": "HXJP+77, KM 4, Route d'Amizmiz, Marrakech 40000",
+              "latitude": 31.5806413,
+              "longitude": -8.0143186,
+              "rating": 4.4,
+              "reviewCount": 868,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant français",
+                "restaurant français"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "06 63 87 96 05",
+              "website": "https://www.lapaillote.ma/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Paillote%20Marrakech%2C%20HXJP%2B77%2C%20KM%204%2C%20Route%20d'Amizmiz%2C%20Marrakech%2040000",
+              "googlePlaceId": "ChIJDQh_XW3vrw0RTBg1gkQCubU",
+              "openingHours": {
+                "friday": {
+                  "open": "12:00",
+                  "close": "01:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "01:00"
+                },
+                "sunday": {
+                  "open": "12:00",
+                  "close": "01:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "01:00"
+                },
+                "tuesday": null,
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "01:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "01:00"
+                }
+              },
+              "distance": 0.09681390828504872,
+              "walkingTime": 1
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJe6drd0Dvrw0RhOAeVjCsTtM",
+                "name": "Grillade Hammoud",
+                "address": "Mosque, Marrakech",
+                "latitude": 31.576574299999997,
+                "longitude": -8.0163278,
+                "rating": 4.1,
+                "reviewCount": 91,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "grillades",
+                  "grillades"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Grillade%20Hammoud%2C%20Mosque%2C%20Marrakech",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqSkt-oyNq1jGwzVEqkbQqOLBm0-KBtvzESA6LlcmePRsTCpCbOXWj-OkpzCMGUgVRinqBzOURERaNvwb4dt-PIU_8xOwHHjtM0O_dwmy9Hg1dRpLzsp8KIKkgACNg-r5_Q6FsSuA=w80-h168-k-no"
+                ],
+                "googlePlaceId": "ChIJe6drd0Dvrw0RhOAeVjCsTtM",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.49065001352819787,
+                "walkingTime": 6
+              },
+              {
+                "id": "serp-nearby-ChIJL7wyJhLvrw0R7GpbBQSLuwo",
+                "name": "La terrasse, restaurants & Lounge Atlas Golf Marrakech",
+                "address": "Atlas Golf Marrakech, km1 Route d'Amizmiz ( Route du Barrage), (à300m avant Oisiria), Marrakesh 40000",
+                "latitude": 31.5872177,
+                "longitude": -8.0153494,
+                "rating": 4.4,
+                "reviewCount": 220,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "bar lounge"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "05 24 37 66 66",
+                "website": "http://www.atlasgolfmarrakech.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20terrasse%2C%20restaurants%20%26%20Lounge%20Atlas%20Golf%20Marrakech%2C%20Atlas%20Golf%20Marrakech%2C%20km1%20Route%20d'Amizmiz%20(%20Route%20du%20Barrage)%2C%20(%C3%A0300m%20avant%20Oisiria)%2C%20Marrakesh%2040000",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerxZPxRXEGUYG-NacD0wsQyKhRNxXcy33a1cKOtuFzKCAsrkNtkj5y3YQyAZLspM3zs6dSYjg1C-46KKOLwyslHhybkHvUC7xCqjoPo4wB8kWOqnmm9ZYLTz_AkISQ1Ge30ZzjM=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJL7wyJhLvrw0R7GpbBQSLuwo",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.7377522938632842,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 5.74,
+            "timeFromPrevious": 72,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20Paillote%20Marrakech%2C%20HXJP%2B77%2C%20KM%204%2C%20Route%20d'Amizmiz%2C%20Marrakech%2040000",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Paillote%20Marrakech%2C%20HXJP%2B77%2C%20KM%204%2C%20Route%20d'Amizmiz%2C%20Marrakech%2040000",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Aventure dans le désert d'Agafay",
+        "dayNarrative": "Une journée dédiée à l'aventure avec une excursion en quad dans le désert d'Agafay, suivie d'un dîner spectacle sous les étoiles, offrant une expérience mémorable hors de la ville.",
+        "geoDiagnostics": {
+          "maxLegKm": 5.44,
+          "p95LegKm": 0.1,
+          "totalTravelMin": 74,
+          "totalLegKm": 5.54,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 5.54
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-03-08T13:17:16.475Z",
+        "items": [
+          {
+            "id": "2a694dd5-dd49-4574-98ac-f414c55daa22",
+            "dayNumber": 5,
+            "startTime": "09:45",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Les Jardins de la Ménara",
+            "description": "La Ménara est un vaste jardin planté d'oliviers aménagé sous la dynastie des Almoahades à environ 45 minutes à pied de la place Jemaa el-Fna, au centre de Marrakech, au Maroc.  Au cœur de ce jardin, u",
+            "locationName": "Les Jardins de la Ménara",
+            "latitude": 31.61432709999999,
+            "longitude": -8.0225425,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.1,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.61432709999999,-8.0225425",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Jardins%20de%20la%20M%C3%A9nara&query_place_id=&center=31.61432709999999,-8.0225425",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXSw9C9wKwBuXOBqJCzthrNYO0hisvIHuyoO79u6vZoFQS_RJ-RSpUwazd5ncZ2013n_BApvCWqoPMfrofiBv-8EorhqclxdO-9WM_73qbagmYoNyhf74JLVQKac4-dDEc3bnmtcYn0ii3D1tKghyaWDjO4nrGMWwmKyZguvguWpBmmAR43W9HoK_5ewcMvI2u8juTHY2PxA1RDGJE5Vz78AC7uiXjsh5vqQ5WMFEz2462PmniWo3qQQ9AOP5XynLi9BaRZFwG_wPuDf-DVqFDwDNWy0GmWyw81nUnn5LQGchVoHBEWVB0G3DGJe9dVCrZeMB6cdZRcXzH6Yel0tw__GZOUMjWZtg3rHDO4DB0COwSr-HquwITN9gYYcXw_IQtT6wcCmUhw7s1msJoiHJ74wh6QAOIxOsthiefnk6r8SbjAaoB2NeGwlFd9a8QSWnPPB5RKwlwG5IehiJyMrlOTdbCCt1psDJ-b_sbAbAsEU7f7spmqZt53BLdnlFWFJRqIZEJJXSmJxvAxfBMhfh01HF8iMszEgouNlulFXLTEhExXrNcUo6a4B0jTtmlVnVL4NWGPTe9Tvw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "5e12a486-f8db-4c6f-a7e5-6f817f028f3a",
+            "dayNumber": 5,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "La Ménara Pavilion",
+            "description": "Cet article concerne une liste des plus hauts gratte-ciels de Kuala Lumpur, l'une des deux capitales de la Malaisie.  Depuis la construction du Bangunan Sime Bank en 1971, des centaines de gratte-ciel",
+            "locationName": "La Ménara Pavilion",
+            "latitude": 31.6124183,
+            "longitude": -8.0211259,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.1,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6124183,-8.0211259",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20M%C3%A9nara%20Pavilion&query_place_id=&center=31.6124183,-8.0211259",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXIN3aN8uvh6kEMzawp_lB8EREyo0MtB1cT8ASBdqpqImw4Ae4p5knHRvcXCqi9tmtiOQwvpTB44WoY8rm1mPpKctUh7q4qvfTaEjcDAQh6k9Pi_5DucjC1T7nDhckvmhF3bDYs1D23UTs1geGvkk5HqAiIqi1xePOoK5BmiQho5nuQfIQBGlL-Nj1fjujsbwOPK0-Pz8-tmLFrlvVLykz-aMxeH4X3TOUhXIzvi2w-wVowj9Km64T4dX1A4KbvQIsj5dJU4BKnFscKGKEufp8G5ctKrdaDhDjj9vinYayXhP3fb0IZotvirzZNAsqUvhnl3vlMEPk0XiIwh1kSEOPTmOKsVjWg1FRWuglBLm_6OGYD65E0bHYjOR0P4C3isvjq_iRqiFfxplgUMktTM8Pb0Uc4Iwgvn-3fKPR1vhJTK53jO1up93vjpV5V2otrbLp-qpkrHn8CAOhOkT_2vqZLAqS7lAGMtjcunvFZSJJZGVIB53MH4sc8daAx0oTQAJNL4yBoIoJcbLIW8T6DeO1DWy-goc2dkYZlLf3JiZZTO9_dWRHRjEbXeR_LXi4VpnWUhXZdnXRmIkg_bZrjI0hHBNsLWQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.25,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "15d318fe-c069-41d0-805d-ac7189cf1f01",
+            "dayNumber": 5,
+            "startTime": "12:30",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Safran by Kôya",
+            "description": "\"Cuisine délicieuse, service impeccable et ambiance exceptionnelle.\"",
+            "locationName": "Rue Jbel Lakhdar",
+            "latitude": 31.627604,
+            "longitude": -7.994585,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.620136,-8.009863",
+            "restaurant": {
+              "id": "serp-16978953807293655422",
+              "name": "Safran by Kôya",
+              "address": "Rue Jbel Lakhdar",
+              "latitude": 31.627604,
+              "longitude": -7.994585,
+              "rating": 4.7,
+              "reviewCount": 14000,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "marocaine"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bon restaurant, ambiance au top et nourriture délicieuse !\""
+              ],
+              "description": "\"Très bon restaurant, ambiance au top et nourriture délicieuse !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Safran%20by%20K%C3%B4ya%2C%20Rue%20Jbel%20Lakhdar",
+              "googlePlaceId": "16978953807293655422",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-1022399431039962219",
+                "name": "L'mida Marrakech",
+                "address": "Derb Nkhal, 78 Rahba Lakdima",
+                "latitude": 31.629225,
+                "longitude": -7.9864335,
+                "rating": 4.6,
+                "reviewCount": 3200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bien cuisiné, ambiance cosy et soignée, belle identité culinaire.\""
+                ],
+                "description": "\"Très bien cuisiné, ambiance cosy et soignée, belle identité culinaire.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=L'mida%20Marrakech%2C%20Derb%20Nkhal%2C%2078%20Rahba%20Lakdima",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/C6Km8AGdK48BWu2MJddaPMMjcOSoN2ydAgpHzzp7Oys.jpeg"
+                ],
+                "googlePlaceId": "1022399431039962219",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "ta-Restaurant_Review-g293734-d23911960-Reviews-Poka_By_Katsura-Marrakech_Marrakech_Safi",
+                "name": "Poka By Katsura",
+                "address": "Adresse non disponible",
+                "latitude": 31.632172,
+                "longitude": -8.002955,
+                "rating": 4.9,
+                "reviewCount": 1286,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "Japanese",
+                  "Sushi",
+                  "Asian",
+                  "Thai",
+                  "Healthy"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Poka%20By%20Katsura%2C%20Marrakech",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/33/60/6b/restaurant-interieur.jpg?w=1600&h=1000&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 1.37,
+            "timeFromPrevious": 18,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Safran%20by%20K%C3%B4ya%2C%20Rue%20Jbel%20Lakhdar",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Safran%20by%20K%C3%B4ya%2C%20Rue%20Jbel%20Lakhdar",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "3a0eb4f4-6923-4cef-adc5-258bf0b91fc0",
+            "dayNumber": 5,
+            "startTime": "14:15",
+            "endTime": "15:15",
+            "type": "activity",
+            "title": "Parc Lalla Hasna",
+            "description": "Hajja Lalla Latifa, née Latifa Amahzoune en 1943 ou 1944 à Khénifra, et morte le 29 juin 2024 à Rabat, au Maroc, est la princesse consort du Maroc du 9 novembre 1961 jusqu’à la mort du roi Hassan II l",
+            "locationName": "Parc Lalla Hasna",
+            "latitude": 31.6232841,
+            "longitude": -7.995052400000001,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6232841,-7.995052400000001",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20Lalla%20Hasna&query_place_id=&center=31.6232841,-7.995052400000001",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWyZCJAn8AgV5QT94MwZunr3Gf_TsWYl3Mw9ZsE33MJR_sgGNs4E4akM-M1DDjRhcEWf0QDLsRREQgLR2PrKjQ2YhvVo4e5rM3tZVYZSrYmHo0x9PbNESiWh-jkXceHD9lLIyvQ-xr-faySJTVkz0i23D7P29iLFddmtT5rOXfP81UahInE7D2fYy-gxa-81NkdLv5-tU8XB4Eed9vBg0p-tK07kwB-dl1RoTgv19MWuas5asKMm2aiRBdhcESz0rFRb2DX9--_jivrBG8IsCJfC14rJ7KEpIsnzzVrYSvWgX6BhVU5owZW15JXRFC-p6XuR-yWkWo8drHvGbAZMoDhKu-piR_7jFJFmxI7q0n0xjUryjP57TrdTpoUK0Kq6jm3jHCsGLJUdUm0VAVVOVrFth9fF5kXKFRYvpOFqoDGiEW49997r_IwG_C8TNsEKV_2bYWoBEIfnPy7HPDqpjLH8oOfnbqKpW7aSdlj5UgV3VF3c9gi2hRnc3oEKEb2dtL3nKRU5Ilslt0czl81B_lPGmC7Mxk-rNF4F_HD4LIMrsV94A1XadO2uqitPySAe5CXUAzS0HP3lg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.45,
+            "timeFromPrevious": 19,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a4f3f593-8d84-4cb9-9d2e-b7d89b3caf57",
+            "dayNumber": 5,
+            "startTime": "15:30",
+            "endTime": "17:30",
+            "type": "activity",
+            "title": "Palais El Badiî",
+            "description": "Le palais El Badi signifie littéralement « palais de l'incomparable », situé à Marrakech au Maroc, est un palais, édifié par le sultan saadien Ahmed al-Mansur ad-Dhahbî pour célébrer la victoire sur l",
+            "locationName": "Palais El Badiî",
+            "latitude": 31.6182777,
+            "longitude": -7.985875199999999,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6182777,-7.985875199999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20El%20Badi%C3%AE&query_place_id=&center=31.6182777,-7.985875199999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX_XRBlGpTpm9iw0GlKZDelKoRAA2hyvYcMflDTpko1-_kafxHiVhcb-Mz-4wXlbh4mXL1By4-TZJz3jAG0mYB0HmpIPphGWfJxmNnR7S9qo--M5c-bpdn_A5FPbTqUUJfvBsdnvUtZRRiMTVDUVx_aXqDd0gy19Pmyabhv4N1n0htHx6c_cjXyzafSVvIIXoozoJ1szUqKGN6HRCCS4DBQtAfey1lsJNlNl2m10ibgU0aMNqHcwTOV1_LeGhGiYhrTPIizp7wGtW87QZ_l8caib2rcptuKNzOlDtbEX_sDiZdB_SXrGFz7zhTI7_v08d5jXSQhYV-CmQ0MKAki0NdfUnMbNefomsRL2Gm76LKkKWSIFnS4Kfu08-qaN4u57ATI15bKSULAcrp7RViCNAGA2kJsKfXI6aRPbAhGoFZ__DLQALlOByTBq4B2C6U-xubrYgL-NMf6xLJxRU8ju1TpWvGxuQViHuCAImhc1rSrjUgo3r7-xGvHAe5-Wtfwzxq6oqdJXrtyfNqknEZsnlCw0VASMdv6yNLUgpKnjmr5qrSL_4tK87DfvqNPy83hTRC_gYcH&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.03,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e95f1e64-3963-4931-893e-60869e90c873",
+            "dayNumber": 5,
+            "startTime": "17:45",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+            "description": "",
+            "locationName": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+            "latitude": 31.6306501,
+            "longitude": -8.004393199999999,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6306501,-8.004393199999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=The%20Beautiful%20Marrakech%20%7C%20Excursions%2C%20Balades%2C%20Piscines%20et%20Bien%20Plus%20Encore%20Avec%20Notre%20Agence&query_place_id=&center=31.6306501,-8.004393199999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUYb-S9bl3lu9vDLJkPJuuOpOC4voRGYUSrmg1xAKewLPGJqN-YYQVBCf_6pQrOmYmuzf1XKoEiH2mtyiM3hLnFjgeUAR_Ulbs212v9hr-AqvrsRzNk-LNJ70jJ-GCVBWRuqlYLln_uPKCxAKDH_9GAoX9R5qp4gC0mTmko5qtN50LBskCs-DNWgtntQXXTXlE8_aalQ5Xvl7Vv4oK6ibLA0VNlePqCJF0Qmw2QaKoivCWxRf8o2lTHpG_ZoVcbQcK6EdOR7_UI5CtWSxvuCBFKAZeujkXAH5tsnxG9vAa5ezaE9vhV6SCSnI2X9mD-fyOZRiFr3X5jcPETYk7PPN10ODPlTxJNXVLgb4QXxUVxRYK3qY2tSwApoE6I9s1nseI9IPj3Fm8ZGubQX9kumYbYoIPN-SoP_oEJbfY9M_BTdBSRApQ30s_gu4i5Aoiw5e9D6uuUIOdq4NiiFhYrH3ITKFuFgnNbKUNave4LZc8RVXViqOF6p1X1RAqSR3ZkzSRJWq-idETpqeBwD2FIXFXORo0KtmA7s9wOYN2pv32DOcToCIiMnoOYJaRsgauqQautyO-g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.23,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "f0ddd590-831e-4505-8a86-34c9348b5e58",
+            "dayNumber": 5,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Mizaan",
+            "description": "\"Bon accueil, bonne cuisine, rooftop bien décoré !\"",
+            "locationName": "255 Av. Mohammed V",
+            "latitude": 31.630226,
+            "longitude": -8.004723,
+            "orderIndex": 6,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.62296,-7.9851346",
+            "restaurant": {
+              "id": "serp-5725060395519975098",
+              "name": "Mizaan",
+              "address": "255 Av. Mohammed V",
+              "latitude": 31.630226,
+              "longitude": -8.004723,
+              "rating": 4.7,
+              "reviewCount": 1300,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Cadre sublime, ambiance au top et plats à partager délicieux.\""
+              ],
+              "description": "\"Cadre sublime, ambiance au top et plats à partager délicieux.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mizaan%2C%20255%20Av.%20Mohammed%20V",
+              "googlePlaceId": "5725060395519975098",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "ta-Restaurant_Review-g293734-d23911960-Reviews-Poka_By_Katsura-Marrakech_Marrakech_Safi",
+                "name": "Poka By Katsura",
+                "address": "Adresse non disponible",
+                "latitude": 31.632172,
+                "longitude": -8.002955,
+                "rating": 4.9,
+                "reviewCount": 1286,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "Japanese",
+                  "Sushi",
+                  "Asian",
+                  "Thai",
+                  "Healthy"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Poka%20By%20Katsura%2C%20Marrakech",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/33/60/6b/restaurant-interieur.jpg?w=1600&h=1000&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "ta-Restaurant_Review-g293734-d32870040-Reviews-COCO_ROOFTOP_RESTAURANT-Marrakech_Marrakech_Safi",
+                "name": "COCO ROOFTOP RESTAURANT",
+                "address": "Adresse non disponible",
+                "latitude": 31.632172,
+                "longitude": -8.002955,
+                "rating": 4.8,
+                "reviewCount": 328,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Moroccan",
+                  "International",
+                  "Mediterranean",
+                  "Fusion",
+                  "Healthy"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": true,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=COCO%20ROOFTOP%20RESTAURANT%2C%20Marrakech",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/32/58/fb/cf/golden-hour-at-coco-rooftop.jpg?w=2700&h=1800&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 2.01,
+            "timeFromPrevious": 26,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Mizaan%2C%20255%20Av.%20Mohammed%20V",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mizaan%2C%20255%20Av.%20Mohammed%20V",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Jardins et Détente",
+        "dayNarrative": "Profitez de la sérénité des Jardins de la Ménara et du Parc Lalla Hasna, puis explorez le Palais El Badiî. La journée se termine par un dîner dans un restaurant local.",
+        "geoDiagnostics": {
+          "maxLegKm": 3.03,
+          "p95LegKm": 2.23,
+          "totalTravelMin": 92,
+          "totalLegKm": 7.08,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.35,
+          "mstLowerBoundKm": 5.25
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 6,
+        "date": "2026-03-09T13:17:16.475Z",
+        "items": [
+          {
+            "id": "86d4d84a-3e40-41c3-a6dc-dc3cff511f18",
+            "dayNumber": 6,
+            "startTime": "09:15",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Atelier de fabrication de tapis Myrugy-Petit Groupe à Marrakech avec Licence",
+            "description": "Embarquez pour une aventure marocaine : atelier de fabrication de tapis et salle d'exposition du marché\n\nRejoignez notre atelier unique pour plonger profondément dans la culture marocaine. Apprenez la",
+            "locationName": "Atelier de fabrication de tapis Myrugy-Petit Groupe à Marrakech avec Licence",
+            "latitude": 31.6295,
+            "longitude": -7.9811,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 120,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Marrakech/Handcraft-your-Moroccan-Rug-Traditional-Rug-Making-Workshop/d5408-432324P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6295,-7.9811",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Atelier%20de%20fabrication%20de%20tapis%20Myrugy-Petit%20Groupe%20%C3%A0%20Marrakech%20avec%20Licence&query_place_id=&center=31.6295,-7.9811",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/a0/46/4a.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "city_fallback",
+            "geoConfidence": "low",
+            "viatorTitle": "Atelier de fabrication de tapis Myrugy-Petit Groupe à Marrakech avec Licence",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/a0/46/4a.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 64,
+            "viatorPrice": 30,
+            "viatorDuration": 120
+          },
+          {
+            "id": "ebfd0670-89a8-4d2e-88b0-c7e72b81d133",
+            "dayNumber": 6,
+            "startTime": "11:30",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "Bab Agnaou",
+            "description": "Bab Agnaou est l'une des dix neuf Bab (portes) de Marrakech, au Maroc.  Elle a été construite au XIIe siècle, au temps de la dynastie des Almohade.",
+            "locationName": "Bab Agnaou",
+            "latitude": 31.6175601,
+            "longitude": -7.990717499999999,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6175601,-7.990717499999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bab%20Agnaou&query_place_id=&center=31.6175601,-7.990717499999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXSQm2xJiqZYbR9QkLRMOp0IKtJ0i89-0wozQeawB6MNSsYKas_xxwTF_6z2X5n4auqJKVyJ3B9AS9WUEXOggpdEpW0wszO2K3iibwQuNKN0Mm06xolkbillEDHBdSTMrg3LXk9sysR3nfJz2WIfVM_U9NwAOAK0O_wVmU_QxLvAocBiVTpZsCctyb5TvkSxRh6Mc9u45arbLD5iimHMZWNoj6sAX-ObNArGhbyBlljCDluzP15vD9Hb5zfQ-dFjbq32cn-rAwaGRbHOz-4A1B8FNU_M88cCta7LPkdDBqGNWzp7PG_lhjhCcsT4cPBJnOi9VAqM7yW9plUtJ01vivf_ENjyRwqpSzs__qAS4-cNPDu9cOI5Gd3f77ejMf21_GmyXZNS3LBWKEGiWG5oPHxirHlxGYYU4kBNhTad6GeXpAYB5WSJJPPscipcRtk6jp52iCrYlMGlcCXcKVR8CQZBIhSmasNUNSSn8moSEaCDktfI9xDcDpJ2dI4RFfz0ZEehtOhnrlSq77PkKhAhtiyLJB4LdW1vydWCqkT8o2nQNy2yVOceaLzjaiXGPxU-yd2r5i0&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.61,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "207010d9-4d2b-41c7-b20c-c1a5385256a4",
+            "dayNumber": 6,
+            "startTime": "12:45",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — La Table de la Kasbah",
+            "description": "\"Super expérience Service au top jolie décoration Et cuisine exceptionnelle !\"",
+            "locationName": "14 derb hajra",
+            "latitude": 31.617464,
+            "longitude": -7.990014,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.625628,-7.986302",
+            "restaurant": {
+              "id": "serp-15417777149371324050",
+              "name": "La Table de la Kasbah",
+              "address": "14 derb hajra",
+              "latitude": 31.617464,
+              "longitude": -7.990014,
+              "rating": 4.8,
+              "reviewCount": 941,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Cadre charmant, cuisine excellente, accueil et service irréprochable.\""
+              ],
+              "description": "\"Cadre charmant, cuisine excellente, accueil et service irréprochable.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Table%20de%20la%20Kasbah%2C%2014%20derb%20hajra",
+              "googlePlaceId": "15417777149371324050",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11334533580595191476",
+                "name": "Cafe Restaurant Dar L'hssira",
+                "address": "13 Rue Riad Zitoun el Jdid",
+                "latitude": 31.62296,
+                "longitude": -7.9851346,
+                "rating": 4.7,
+                "reviewCount": 2800,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "marocaine"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Bon accueil, bonne cuisine, rooftop bien décoré !\""
+                ],
+                "description": "\"Bon accueil, bonne cuisine, rooftop bien décoré !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cafe%20Restaurant%20Dar%20L'hssira%2C%2013%20Rue%20Riad%20Zitoun%20el%20Jdid",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/ThLUhSLRRd5brUqPl4I7PRUve9k1uDY-_h_n6tebZQI.jpeg"
+                ],
+                "googlePlaceId": "11334533580595191476",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-9866616092924858481",
+                "name": "Le Bistro Arabe - Restaurant et jazz marocain à Marrakech",
+                "address": "7/8, Rue Riad Zitoun el Kdim",
+                "latitude": 31.624475,
+                "longitude": -7.9870377,
+                "rating": 4.8,
+                "reviewCount": 14000,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine incroyable, service impeccable et attentionné.\""
+                ],
+                "description": "\"Cuisine incroyable, service impeccable et attentionné.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bistro%20Arabe%20-%20Restaurant%20et%20jazz%20marocain%20%C3%A0%20Marrakech%2C%207%2F8%2C%20Rue%20Riad%20Zitoun%20el%20Kdim",
+                "photos": [
+                  "https://serpapi.com/searches/6998617880f30ec75bcf3e58/images/_CUSUPusmopJ3qXDwDFAxALSNHnRU6slmRQzXoz5WFc.jpeg"
+                ],
+                "googlePlaceId": "9866616092924858481",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.99,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20Table%20de%20la%20Kasbah%2C%2014%20derb%20hajra",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Table%20de%20la%20Kasbah%2C%2014%20derb%20hajra",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "543524bf-e60f-4c72-abac-3a56b0758df1",
+            "dayNumber": 6,
+            "startTime": "14:30",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Marrakech E-Bike Tour : Explorez les joyaux cachés avec un Guide local",
+            "description": "Découvrez Marrakech de la façon la plus unique et écologique sur notre E-Bike Hidden Gems Tour. Parcourez sans effort les rues animées et les coins paisibles de la ville tout en découvrant des sites q",
+            "locationName": "Marrakech E-Bike Tour : Explorez les joyaux cachés avec un Guide local",
+            "latitude": 31.6467432,
+            "longitude": -8.000249799999999,
+            "orderIndex": 3,
+            "estimatedCost": 40,
+            "duration": 195,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Marrakech/Unieke-fietstocht-Marrakech-highlights/d5408-5547652P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6467432,-8.000249799999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Marrakech%20E-Bike%20Tour%20%3A%20Explorez%20les%20joyaux%20cach%C3%A9s%20avec%20un%20Guide%20local&query_place_id=&center=31.6467432,-8.000249799999999",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/40/90/0e.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Marrakech E-Bike Tour : Explorez les joyaux cachés avec un Guide local",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/40/90/0e.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 53,
+            "viatorPrice": 40,
+            "viatorDuration": 195,
+            "distanceFromPrevious": 2.69,
+            "timeFromPrevious": 34,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "8e9a77c4-4c7f-4c85-8e42-c4ac2e7b8258",
+            "dayNumber": 6,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Bab Doukkala",
+            "description": "Bab Doukkala est une porte fortifiée située à Marrakech.  Elle est située au nord-ouest de la médina et fait partie des portes majeures de la vieille ville.",
+            "locationName": "Bab Doukkala",
+            "latitude": 31.6334318,
+            "longitude": -7.999361500000001,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6334318,-7.999361500000001",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bab%20Doukkala&query_place_id=&center=31.6334318,-7.999361500000001",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9ikWTBvFUCANfhBWrD1cqTiReFJ-SLtADKlizScXQ_NbZaZswcQQiJ-EH0mczy3xGJlJ87DNVUEPNJYzm-Cu1-Q4ezmiT7MQHUN9LJQ_3e1TMSMORSmnfJNFPNOaqDggC_uI4M04sivFqOFuYXO5hgjFr2KlZldD0dxHNeVqYvb5WG3fVlui2vZHj4l7ZsyhUOfo1YrJxbJJDP0gLI_qfdvEZEnk58IaD2eELZcYMGy4C-sFgZdHvyDR5q8iA_n4Vkv74Rad7Z8mYxv8D5uT6cWjLAMrcVTPVuwAdkdv2aU7FcHUJZtfol8XMkyfG_RLPvVsGD-Rj-FNmN65m97Hhhi16qvys4cIptAL3Emtfno3CrMdGJhkK467ID3VHtobdQpIj1MXH2az2L8fuUYfzcb2mBJeeO-pLzta4kehRrzcdWnfbALncQe9hDk52-ggM_wfZ-hbngAZGIDNjAn_2WDIE2BfE6eekQV7JIORks6jGxi8WN2B7lUgy5zkT9ma9sHuzx4ESnSzCLaoiihnJAjyCrWmz3u9R7Th-Fekk55qVshtLqMUgdCqyY6lT4V4HGuxu&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.48,
+            "timeFromPrevious": 19,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "256bbac8-b813-473b-a1b4-025f81870058",
+            "dayNumber": 6,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Pointbar",
+            "description": "Dîner — Moroccan, International, Healthy",
+            "locationName": "Adresse non disponible",
+            "latitude": 31.632172,
+            "longitude": -8.002955,
+            "orderIndex": 5,
+            "estimatedCost": 36,
+            "duration": 75,
+            "rating": 4.9,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.632172,-8.002955",
+            "restaurant": {
+              "id": "ta-Restaurant_Review-g293734-d4953449-Reviews-Pointbar-Marrakech_Marrakech_Safi",
+              "name": "Pointbar",
+              "address": "Adresse non disponible",
+              "latitude": 31.632172,
+              "longitude": -8.002955,
+              "rating": 4.9,
+              "reviewCount": 2405,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "Moroccan",
+                "International",
+                "Healthy"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "openingHours": {},
+              "isOpenNow": false,
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pointbar%2C%20Marrakech",
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/d1/9b/3a/terrasse-pointbar-marrakech.jpg?w=3500&h=2600&s=1"
+              ],
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "ta-Restaurant_Review-g293734-d23911960-Reviews-Poka_By_Katsura-Marrakech_Marrakech_Safi",
+                "name": "Poka By Katsura",
+                "address": "Adresse non disponible",
+                "latitude": 31.632172,
+                "longitude": -8.002955,
+                "rating": 4.9,
+                "reviewCount": 1286,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "Japanese",
+                  "Sushi",
+                  "Asian",
+                  "Thai",
+                  "Healthy"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Poka%20By%20Katsura%2C%20Marrakech",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/22/33/60/6b/restaurant-interieur.jpg?w=1600&h=1000&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "ta-Restaurant_Review-g293734-d26584326-Reviews-Chouf_L_Or-Marrakech_Marrakech_Safi",
+                "name": "Chouf L'Or",
+                "address": "Adresse non disponible",
+                "latitude": 31.632172,
+                "longitude": -8.002955,
+                "rating": 4.9,
+                "reviewCount": 1971,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Seafood",
+                  "International",
+                  "Mediterranean"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": true,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Chouf%20L'Or%2C%20Marrakech",
+                "photos": [
+                  "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2a/6e/d3/7c/chouf-l-or.jpg?w=1000&h=1000&s=1"
+                ],
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.37,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Atelier de fabrication de tapis Myrugy-Petit Groupe à Marrakech avec Licence et Bab Agnaou",
+        "dayNarrative": "Découvrez l'artisanat local avec un atelier de fabrication de tapis, puis explorez les portes historiques de la Médina. Une balade à vélo électrique vous fera découvrir les joyaux cachés de Marrakech.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.69,
+          "p95LegKm": 1.61,
+          "totalTravelMin": 84,
+          "totalLegKm": 6.22,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.18,
+          "mstLowerBoundKm": 5.28
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 7,
+        "date": "2026-03-10T13:17:16.475Z",
+        "items": [
+          {
+            "id": "08b79cfa-905f-43d0-97b0-61af69fca314",
+            "dayNumber": 7,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Musée d’Art Contemporain Africain Al Maaden (MACAAL)",
+            "description": "Le musée d'Art contemporain africain Al Maaden (MACAAL) de Marrakech est un musée d'art contemporain indépendant à but non lucratif, ouvert en novembre 2016 à l’occasion de la COP 22 et officiellement",
+            "locationName": "Musée d’Art Contemporain Africain Al Maaden (MACAAL)",
+            "latitude": 31.6005322,
+            "longitude": -7.9501754,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=31.6005322,-7.9501754",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20d%E2%80%99Art%20Contemporain%20Africain%20Al%20Maaden%20(MACAAL)&query_place_id=&center=31.6005322,-7.9501754",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVQou5_EXwXqKaL0twklHLYHSw9PKO-tLXF-xiaJICTCpJgIBK9PTiN-hTAku2kpnXgpEUEEWVzW-VjxElAAjBlj6riivqLUqxOl35_RFek_98_kZyoSnPwUnwFalQ4c1Ska69gy35Yn6EUfibseaqz4CPxri0fcXIuKr8I4fQRqjya_3bsxTNEvcUy3rEA0cLD4bOYLTKSMWeWog9TXubUl9bS107AKu5IBcHGieAgcGX8XXAx81tFWISROckA7s17uRkyThzyOPttOxWRCci8BoFrjDHfl2RERPwNCuSI0F4T2NI&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "cee33018-e1a9-48d9-9265-3496dc947c0f",
+            "dayNumber": 7,
+            "startTime": "11:00",
+            "endTime": "11:15",
+            "type": "checkout",
+            "title": "Check-out Dar Waiba",
+            "description": "Départ de l'hôtel",
+            "locationName": "Dar Waiba",
+            "latitude": 31.6298,
+            "longitude": -8.0092,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "dar-waiba",
+              "name": "Dar Waiba",
+              "type": "hotel",
+              "address": "Derb Sidi Bouaazza n°41, Kasbah, Marrakech 40000",
+              "latitude": 31.6298,
+              "longitude": -8.0092,
+              "rating": 8.9,
+              "reviewCount": 876,
+              "stars": 3,
+              "pricePerNight": 68,
+              "currency": "EUR",
+              "amenities": [
+                "WiFi gratuit",
+                "Climatisation",
+                "Petit-déjeuner inclus",
+                "Piscine chauffée",
+                "Spa",
+                "Rooftop"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Dar+Waiba+Marrakech&checkin=2026-03-04&checkout=2026-03-10&group_adults=6&group_children=0&no_rooms=1",
+              "distanceToCenter": 1.3,
+              "description": "Riad de charme avec piscine chauffée et spa traditionnel hammam. Décoration raffinée, service personnalisé et calme garanti loin de l'agitation.",
+              "dataReliability": "verified",
+              "totalPrice": 408
+            },
+            "distanceFromPrevious": 6.47,
+            "timeFromPrevious": 81,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "transport-ret-7-fallback",
+            "dayNumber": 7,
+            "startTime": "11:45",
+            "endTime": "14:15",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "Marrakech → Paris (estimation)",
+            "locationName": "Marrakech → Paris",
+            "latitude": 31.6005322,
+            "longitude": -7.9501754,
+            "orderIndex": 2,
+            "duration": 150,
+            "estimatedCost": 214,
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "Musée d’Art Contemporain Africain Al Maaden (MACAAL)",
+        "dayNarrative": "Profitez d'une dernière matinée pour visiter le Musée d’Art Contemporain Africain Al Maaden avant de vous diriger vers l'aéroport.",
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 0,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Marrakech",
+            "duration": 143,
+            "price": 190,
+            "co2": 371
+          }
+        ],
+        "totalDuration": 431,
+        "totalPrice": 214,
+        "totalCO2": 372,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "recommended": true,
+        "recommendationReason": "Option rapide, écologique"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Marrakech",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 31.6295,
+              "lng": -7.9811
+            },
+            "duration": 158,
+            "price": 168,
+            "co2": 410,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/PARIS0403MARRAKECH6?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 448,
+        "totalPrice": 168,
+        "totalCO2": 410,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/PARIS0403MARRAKECH6?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/marrakech?departure_date=2026-03-04"
+      }
+    ],
+    "selectedTransport": {
+      "id": "combined_train_plane",
+      "mode": "combined",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Paris",
+          "to": "Paris",
+          "duration": 48,
+          "price": 24,
+          "co2": 1,
+          "operator": "Train grande vitesse"
+        },
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Marrakech",
+          "duration": 143,
+          "price": 190,
+          "co2": 371
+        }
+      ],
+      "totalDuration": 431,
+      "totalPrice": 214,
+      "totalCO2": 372,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 0,
+        "timeScore": 10,
+        "co2Score": 10
+      },
+      "recommended": true,
+      "recommendationReason": "Option rapide, écologique"
+    },
+    "accommodation": {
+      "id": "dar-waiba",
+      "name": "Dar Waiba",
+      "type": "hotel",
+      "address": "Derb Sidi Bouaazza n°41, Kasbah, Marrakech 40000",
+      "latitude": 31.6298,
+      "longitude": -8.0092,
+      "rating": 8.9,
+      "reviewCount": 876,
+      "stars": 3,
+      "pricePerNight": 68,
+      "currency": "EUR",
+      "amenities": [
+        "WiFi gratuit",
+        "Climatisation",
+        "Petit-déjeuner inclus",
+        "Piscine chauffée",
+        "Spa",
+        "Rooftop"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Dar+Waiba+Marrakech&checkin=2026-03-04&checkout=2026-03-10&group_adults=6&group_children=0&no_rooms=1",
+      "distanceToCenter": 1.3,
+      "description": "Riad de charme avec piscine chauffée et spa traditionnel hammam. Décoration raffinée, service personnalisé et calme garanti loin de l'agitation.",
+      "dataReliability": "verified",
+      "totalPrice": 408
+    },
+    "accommodationOptions": [
+      {
+        "id": "dar-waiba",
+        "name": "Dar Waiba",
+        "type": "hotel",
+        "address": "Derb Sidi Bouaazza n°41, Kasbah, Marrakech 40000",
+        "latitude": 31.6298,
+        "longitude": -8.0092,
+        "rating": 8.9,
+        "reviewCount": 876,
+        "stars": 3,
+        "pricePerNight": 68,
+        "currency": "EUR",
+        "amenities": [
+          "WiFi gratuit",
+          "Climatisation",
+          "Petit-déjeuner inclus",
+          "Piscine chauffée",
+          "Spa",
+          "Rooftop"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Dar+Waiba+Marrakech&checkin=2026-03-04&checkout=2026-03-10&group_adults=6&group_children=0&no_rooms=1",
+        "distanceToCenter": 1.3,
+        "description": "Riad de charme avec piscine chauffée et spa traditionnel hammam. Décoration raffinée, service personnalisé et calme garanti loin de l'agitation.",
+        "dataReliability": "verified",
+        "totalPrice": 408
+      },
+      {
+        "id": "riad-karmela",
+        "name": "Riad Karmela",
+        "type": "hotel",
+        "address": "Derb Sidi Bouaazza, Kasbah, Marrakech 40000",
+        "latitude": 31.6295,
+        "longitude": -8.0089,
+        "rating": 8.7,
+        "reviewCount": 1245,
+        "stars": 3,
+        "pricePerNight": 55,
+        "currency": "EUR",
+        "amenities": [
+          "WiFi gratuit",
+          "Climatisation",
+          "Petit-déjeuner inclus",
+          "Piscine",
+          "Terrasse",
+          "Vue sur l'Atlas"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Riad+Karmela+Marrakech&checkin=2026-03-04&checkout=2026-03-10&group_adults=6&group_children=0&no_rooms=1",
+        "distanceToCenter": 1.2,
+        "description": "Riad boutique authentique avec cour intérieure traditionnelle marocaine, ambiance familiale et accueil chaleureux. Idéal pour découvrir la vie locale.",
+        "dataReliability": "verified",
+        "totalPrice": 330
+      },
+      {
+        "id": "riad-ahlam",
+        "name": "Riad Ahlam",
+        "type": "hotel",
+        "address": "Derb Chorfa, Medina, Marrakech 40000",
+        "latitude": 31.6272,
+        "longitude": -8.0068,
+        "rating": 8.6,
+        "reviewCount": 1143,
+        "stars": 3,
+        "pricePerNight": 60,
+        "currency": "EUR",
+        "amenities": [
+          "WiFi gratuit",
+          "Climatisation",
+          "Petit-déjeuner inclus",
+          "Piscine",
+          "Bibliothèque",
+          "Salon marocain"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Riad+Ahlam+Marrakech&checkin=2026-03-04&checkout=2026-03-10&group_adults=6&group_children=0&no_rooms=1",
+        "distanceToCenter": 0.5,
+        "description": "Petit riad intime dans la médina authentique avec décoration traditionnelle marocaine, piscine rafraîchissante et atmosphère paisible et accueillante.",
+        "dataReliability": "verified",
+        "totalPrice": 360
+      }
+    ],
+    "totalEstimatedCost": 2210,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 476,
+      "food": 1224,
+      "activities": 510,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 20,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "restaurant",
+        "dinner": "mixed"
+      },
+      "groceryShoppingNeeded": true,
+      "activitiesLevel": "mostly_free",
+      "dailyActivityBudget": 1.5,
+      "transportTips": "Utilisez le bus urbain à 0.50€ par trajet ou négociez des tarifs fixes avec les taxis. Regroupez les trajets quotidiens pour minimiser les coûts.",
+      "reasoning": "Budget extrêmement serré (6€/pers/jour). Stratégie hybride: Airbnb avec cuisine pour économiser sur l'hébergement (20€/nuit pour 6 pers = 3.33€/pers). Au Maroc, restaurant est BON MARCHÉ (tagine 3-5€), donc privilégier lunch au resto. Petit-déj self-catered (pain, fromage local ~1€/pers). Dîner mixte: cuisiner 4 soirs, restaurant 3 soirs. Activités: priorité aux sites GRATUITS (médina, souks, parcs publics, mosquées extérieures). Musées limités à 2-3 pendant la semaine. Transport minimal via bus. Maroc est destination gastronomie bon marché - profiter des restaurants locaux plutôt que cuisiner systématiquement.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: marrakech-7d-friends",
+    "   Paris → Marrakech (7j)",
+    "   friends (6p) | economic | culture, adventure, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marrakech\", ll=\"@31.6295,-7.9811,14z\", gl=\"ma\"",
+    "[SerpAPI Places] Location \"Marrakech\" non supportée, fallback → query avec nom de ville",
+    "[Google Places] Filtered \"BABOUCHKA DISCOTHÈQUE BOÎTE DE NUIT MARRAKECH\" (types: night_club, point_of_interest, establishment)",
+    "[Google Places] Filtered \"Jungle Rooftop La Pergola - Jazz Bar & Restaurant\" (types: restaurant, night_club, bar, food, point_of_interest, establishment)",
+    "[Google Places] Filtered \"Rooftop Garden\" (types: restaurant, night_club, bar, food, point_of_interest, establishment)",
+    "[Google Places] ✅ 27 attractions found for Marrakech",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Hotels] Disponibilité live: 1/6 hôtels confirmés",
+    "[Hotels] Disponibilité live partielle (1 confirmés), complété à 5 options pour garder des hôtels centraux",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (370ms)",
+    "[Pipeline V2] Resolving GPS for 18 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/18 activities",
+    "[Pipeline V2] Injected 1 curated must-see attractions for \"Marrakech\" from local database",
+    "[Pipeline V2]   → Place Jemaa el-Fna, Palais de la Bahia, Jardin Majorelle",
+    "[Pipeline V2] Step 1: All data fetched in 83042ms",
+    "[Pipeline V2]   Activities: 27 Google + 31 SerpAPI + 0 Overpass + 18 Viator",
+    "[Pipeline V2]   Restaurants: 20 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 5 | Transport options: 2",
+    "[Pipeline V2 LLM] Step 1 done in 83042ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Dar Waiba\" (8.9★, €68/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 80 activities → 50 after dedup (dropped 30)",
+    "[Pipeline V2 LLM] Step 2: Selected 35 activities (0 must-sees, 35 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 40 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 953 pairs",
+    "[Pipeline V2 LLM] Step 2: 35 activities, 18 restaurants, 953 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 17ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 33887 in + 3904 out, ~$0.0074, 23327ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Arrivée et immersion en Médina\",\n      \"narrative\": \"Après le check-in, plongez directement dans l'ambiance de la Médina avec une visite cultu...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 6 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 90min gap on day 2 with \"Cascades d'Ouzoud\"",
+    "[Pipeline V2 LLM] Enrichment: filled 135min gap on day 3 with \"Anima (André Heller Garden)\"",
+    "[Pipeline V2 LLM] Enrichment: added \"Oasiria Marrakech\" to sparse day 4 (was 1 activities)",
+    "[Pipeline V2 LLM] Enrichment: filled 120min gap on day 5 with \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\"",
+    "[Pipeline V2 LLM] Enrichment complete: added 4 activities",
+    "[Pipeline V2 LLM] Plan: 7 days, 26 activities, 10 meals",
+    "[Pipeline V2 LLM] Step 3 done in 23329ms — 7 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 35 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 7 days with 36 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 5635ms",
+    "[Pipeline V2 LLM] Step 4 done in 5635ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 6 restaurants swapped, 1 kept as fallback (3275ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 20 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 1646ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 83/100",
+    "  📦 Complétude: 18/25",
+    "  ⏱️  Rythme:     24/25",
+    "  🗺️  Géo:        16/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 7: transport retour manquant",
+    "  ⚠️ Jour 3: Dîner — Dar Essalam est à 28957m de l'activité la plus proche",
+    "  ⚠️ Distance moyenne entre items: 7.3km (élevée)",
+    "  ⚠️ Hôtel à 6.7km du centre des activités",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 7: transport retour inséré (fallback)",
+    "  🔧 Jour 6: thème régénéré \"Culture et Artisanat\" → \"Atelier de fabrication de tapis Myrugy-Petit Groupe à Marrakech avec Licence et Bab Agnaou\"",
+    "  🔧 Jour 7: thème régénéré \"Derniers instants à Marrakech\" → \"Musée d’Art Contemporain Africain Al Maaden (MACAAL)\"",
+    "[Pipeline V2 LLM] Step 5 done in 2ms — score: 83/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 116946ms ==="
+  ],
+  "warnings": [
+    "[Weather] Fetch failed (non-critical): Open-Meteo forecast API error: 400",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Marrakech :  shopping dans les souks, Marrakech\": 2479.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite  de la ville culturelle de Marrakech, Marrakech\": 2308.5km de la destination (max 30km)",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"hotel\" from day 2",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"hotel\" from day 3",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"hotel\" from day 4",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"hotel\" from day 5",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"hotel\" from day 6",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"hotel\" from day 7"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5313 (line 148 column 8)",
+    "[SerpAPI Hotels] Erreur: Google Hotels hasn't returned any results for this query.",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite de Marrakech d'une demi-journée : Visite historique et culturelle de la ville, Marrakech\" à Marrakech — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Atelier de fabrication de tapis Myrugy-Petit Groupe à Marrakech avec Licence, Marrakech\" à Marrakech — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 116946,
+  "generatedAt": "2026-02-20T13:28:23.674Z",
+  "success": true
+}

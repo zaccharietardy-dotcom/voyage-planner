@@ -135,7 +135,7 @@ async function generateModifications(
   tripContext?: TripModificationContext
 ): Promise<ModificationResult> {
   const constraints = getConstraints(days);
-  const rollbackData = JSON.parse(JSON.stringify(days)); // Deep clone pour undo
+  const rollbackData = structuredClone(days); // Deep clone pour undo
 
   switch (intent.type) {
     case 'shift_times':
@@ -203,7 +203,7 @@ function shiftTimes(
   const shiftMinutes = direction === 'later' ? timeShift : -timeShift;
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Jours à modifier (tous si non spécifié)
@@ -396,7 +396,7 @@ function removeActivity(
   }
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Trouve l'item à supprimer
@@ -534,7 +534,7 @@ async function swapActivity(
   }
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Trouve l'item à remplacer
@@ -651,7 +651,7 @@ function extendFreeTime(
   const { dayNumbers = [] } = intent.parameters;
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Jours à modifier
@@ -748,7 +748,7 @@ function adjustDuration(
   }
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Par défaut, ajoute ou retire 30 minutes
@@ -853,7 +853,7 @@ function reorderDay(
   }
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   const dayNumber = dayNumbers[0];
@@ -957,7 +957,7 @@ async function addActivity(
     };
   }
 
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Trouve le meilleur jour (le moins chargé ou celui spécifié)
@@ -1073,7 +1073,7 @@ function changeRestaurant(
   const { targetActivity, newValue, mealType, cuisineType, dayNumbers = [] } = intent.parameters;
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   // Trouve le restaurant à modifier
@@ -1279,7 +1279,7 @@ async function handleIssueReport(
 
   // Applique automatiquement la première suggestion
   const bestSuggestion = suggestions[0];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const newDay = newDays.find(d => d.dayNumber === targetDay!.dayNumber);
 
   if (!newDay) {
@@ -1698,7 +1698,7 @@ function changePace(
   const { dayNumbers = [], paceDirection = 'relax' } = intent.parameters;
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   const constrainedIds = new Set(
@@ -1911,7 +1911,7 @@ function swapCategory(
   }
 
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   const constrainedIds = new Set(
@@ -2067,7 +2067,7 @@ function rebalanceDays(
   rollbackData: TripDay[]
 ): ModificationResult {
   const changes: TripChange[] = [];
-  const newDays = JSON.parse(JSON.stringify(days)) as TripDay[];
+  const newDays = structuredClone(days) as TripDay[];
   const warnings: string[] = [];
 
   const constrainedIds = new Set(

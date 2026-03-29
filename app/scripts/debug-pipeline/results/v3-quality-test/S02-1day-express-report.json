@@ -1,0 +1,280 @@
+{
+  "tripId": "0043f5f1-a942-447b-a16d-1d1d9525f344",
+  "scenarioId": "1day-express",
+  "generatedAt": "2026-02-23T11:57:15.451Z",
+  "destination": "Barcelone",
+  "summary": {
+    "totalIssues": 9,
+    "critical": 0,
+    "warning": 5,
+    "info": 4,
+    "score": 97,
+    "weightedScore": 97
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "links": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "dataQuality": {
+      "score": 91,
+      "critical": 0,
+      "warning": 2,
+      "info": 3,
+      "totalIssues": 5,
+      "weightedPenalty": 9.1
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (0/1): sagrada familia",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (0/1): sagrada familia"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Casa Batlló\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Sagrada Família\" n'a aucun lien (booking, viator, maps)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      },
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas d'hébergement défini dans le voyage"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Sagrada Família\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Sagrada Família",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas d'hébergement défini"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Casa Batlló\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Casa Batlló",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (0/1): sagrada familia",
+        "details": {
+          "found": 0,
+          "total": 1,
+          "missing": [
+            "sagrada familia"
+          ]
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 1,
+    "totalItems": 4,
+    "activitiesCount": 2,
+    "restaurantsCount": 2,
+    "avgItemsPerDay": 4,
+    "totalEstimatedCost": null,
+    "hasAccommodation": false,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

@@ -275,7 +275,7 @@ export async function textSearchPlaces(
   setInCache(textSearchCache, cacheKey, places);
   setCachedResponse('text-search', cacheKey, places, 30).catch(() => {});
 
-  console.log(`[Google Places New] Text search "${query}": ${places.length} results`);
+  console.debug(`[Google Places New] Text search "${query}": ${places.length} results`);
   return places;
 }
 
@@ -349,7 +349,7 @@ export async function nearbySearchPlaces(
   setInCache(nearbySearchCache, cacheKey, places);
   setCachedResponse('nearby-search', cacheKey, places, 30).catch(() => {});
 
-  console.log(`[Google Places New] Nearby search @${center.lat.toFixed(3)},${center.lng.toFixed(3)}: ${places.length} results`);
+  console.debug(`[Google Places New] Nearby search @${center.lat.toFixed(3)},${center.lng.toFixed(3)}: ${places.length} results`);
   return places;
 }
 
@@ -734,7 +734,7 @@ export async function searchRestaurantsGooglePlaces(
     .map(p => googlePlaceNewToRestaurant(p, destination))
     .slice(0, limit);
 
-  console.log(`[Google Places New] Found ${restaurants.length} restaurants for "${destination}" (${mealType || 'any'})`);
+  console.debug(`[Google Places New] Found ${restaurants.length} restaurants for "${destination}" (${mealType || 'any'})`);
   return restaurants;
 }
 
@@ -802,7 +802,7 @@ export async function searchRestaurantsNearbyGooglePlaces(
 
   restaurants.sort((a, b) => (a.distance || 0) - (b.distance || 0));
 
-  console.log(`[Google Places New] Found ${restaurants.length} nearby restaurants (${mealType})`);
+  console.debug(`[Google Places New] Found ${restaurants.length} nearby restaurants (${mealType})`);
   return restaurants.slice(0, limit);
 }
 
@@ -905,7 +905,7 @@ export async function searchAttractionsGooglePlacesNew(
     mustSee: false,
   }));
 
-  console.log(`[Google Places New] Found ${finalAttractions.length} attractions for "${destination}"`);
+  console.debug(`[Google Places New] Found ${finalAttractions.length} attractions for "${destination}"`);
   return finalAttractions;
 }
 
@@ -974,7 +974,7 @@ export async function searchMustSeeGooglePlaces(
     if (attr) results.push(attr);
   }
 
-  console.log(`[Google Places New] Found ${results.length}/${items.length} must-see attractions`);
+  console.debug(`[Google Places New] Found ${results.length}/${items.length} must-see attractions`);
   return results;
 }
 

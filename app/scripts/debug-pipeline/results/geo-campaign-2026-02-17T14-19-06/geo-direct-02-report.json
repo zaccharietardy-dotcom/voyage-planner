@@ -1,0 +1,289 @@
+{
+  "tripId": "226c8171-2889-4e3c-ae6b-97179541ab21",
+  "scenarioId": "geo-direct-02",
+  "generatedAt": "2026-02-17T14:22:32.325Z",
+  "destination": "Marrakech",
+  "summary": {
+    "totalIssues": 10,
+    "critical": 2,
+    "warning": 2,
+    "info": 6,
+    "score": 93,
+    "weightedScore": 93
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 55,
+      "critical": 2,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 4,
+      "weightedPenalty": 44.6
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 97,
+      "critical": 0,
+      "warning": 0,
+      "info": 5,
+      "totalIssues": 5,
+      "weightedPenalty": 3.5
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 22,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 5: segment urbain dur 4.3km entre \"Bab Agnaou\" et \"Musée d’Art Contemporain Africain Al Maaden (MACAAL)\" (> 4km)"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 14.4,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 4: itinéraire en zigzag (4 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "geography:Jour 5: \"Trajet vers RAK + check-in\" a des coordonnées (0, 0) — non gé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 5: \"Trajet vers RAK + check-in\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 4,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "Jour 4: \"Jardin Majorelle\" n'a pas de description",
+        "Jour 4: \"Place Jemaa el fna\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1 (1 activités) vs jour 2 (5 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1 (1 activités) vs jour 2 (5 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.47,
+          "totalLegKm": 1.38
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.71,
+          "totalLegKm": 7.61
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 5: \"Trajet vers RAK + check-in\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 5,
+        "itemTitle": "Trajet vers RAK + check-in"
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 5: segment urbain dur 4.3km entre \"Bab Agnaou\" et \"Musée d’Art Contemporain Africain Al Maaden (MACAAL)\" (> 4km)",
+        "dayNumber": 5,
+        "details": {
+          "distanceKm": 4.28,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Jardin Majorelle\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Jardin Majorelle",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Place Jemaa el fna\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Place Jemaa el fna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Musée d’Art Contemporain Africain Al Maaden (MACAAL)\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Musée d’Art Contemporain Africain Al Maaden (MACAAL)",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (1 activités) vs jour 2 (5 activités) — déséquilibre important",
+        "details": {
+          "day1": 1,
+          "day2": 5
+        }
+      }
+    ],
+    "relevance": [],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 5,
+    "totalItems": 30,
+    "activitiesCount": 12,
+    "restaurantsCount": 12,
+    "avgItemsPerDay": 6,
+    "totalEstimatedCost": 1164,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

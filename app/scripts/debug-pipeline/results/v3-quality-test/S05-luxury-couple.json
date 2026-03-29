@@ -1,0 +1,4114 @@
+{
+  "scenarioId": "luxury-couple",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Londres",
+    "startDate": "2026-03-25T11:55:16.864Z",
+    "durationDays": 5,
+    "transport": "train",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "luxury",
+    "activities": [
+      "culture",
+      "gastronomy",
+      "shopping",
+      "wellness"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "British Museum, Tower of London, Buckingham Palace",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Londres",
+        "days": 5
+      }
+    ]
+  },
+  "trip": {
+    "id": "a83ca55e-f9ba-423b-9b77-09c62a2dfc02",
+    "createdAt": "2026-02-23T12:00:42.952Z",
+    "updatedAt": "2026-02-23T12:00:42.952Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Londres",
+      "startDate": "2026-03-25T11:55:16.864Z",
+      "durationDays": 5,
+      "transport": "train",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "luxury",
+      "activities": [
+        "culture",
+        "gastronomy",
+        "shopping",
+        "wellness"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "British Museum, Tower of London, Buckingham Palace",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Londres",
+          "days": 5
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-25T11:55:16.864Z",
+        "items": [
+          {
+            "id": "gp-new-ChIJB9OTMDIbdkgRp0JWbQGZsS8",
+            "dayNumber": 1,
+            "startTime": "10:00",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "British Museum",
+            "description": "Véritable vitrine d'antiquités mondiales, avec momies égyptiennes et sculptures de la Grèce antique.",
+            "locationName": "British Museum",
+            "latitude": 51.5194133,
+            "longitude": -0.1269566,
+            "orderIndex": 0,
+            "duration": 150,
+            "rating": 4.7,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW7i8Uk_1oLDqbt17-njYzkyI02adrKtVwg2QtVnBnFhimE5iHQKkJGAM2xT-0y_D4ypu5jgOLIfwdy2JZnFJN1keuzFYVeYiEQlGqRR5OAuXr4UCPsbJhGFqQGfA0SbZiQGjwcpwlu82i7vW4NP8TwrR3vfu2JkwyMZQVDYjGguGeiXPZCuv3cWOkkwPzodqaQ3QmBEm1JSgBrGs1W53DO4zzpntNY6Y0MAKA4biSCmrKInVquVJ2I32g8horLDR153msOXACxb9QKqLv23shbie4QVIRT2GwYRDuhHcYzjhnk2EJnoBG2zuZCab5d4qZhA4i484ZDdtatUth4Cqy9C_3FMmnsUAW1NOuXv0t3OxGGDhk9hZefDPrKDB5JsgfV0Het8fcYUWJwp1jtd4du_NrywHQ2gby9-RbFIssozoS6&maxwidth=400",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=British%20Museum%20Guided%20Tour",
+            "mustSee": true,
+            "openingHours": {
+              "open": "10:00",
+              "close": "20:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "20:30"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "17:00"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=British%20Museum%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=British%20Museum%20Londres"
+          },
+          {
+            "id": "gp-new-ChIJQR9pg8sEdkgRKeWNNYlDdPU",
+            "dayNumber": 1,
+            "startTime": "12:55",
+            "endTime": "14:25",
+            "type": "activity",
+            "title": "Covent Garden",
+            "description": "Boutiques, cafés et bars aménagés dans les bâtiments d'un marché restauré. Artistes de rue sur la Piazza.",
+            "locationName": "Covent Garden",
+            "latitude": 51.512045,
+            "longitude": -0.12282539999999999,
+            "orderIndex": 1,
+            "duration": 90,
+            "rating": 4.6,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXIk2ebmNujp0dd1RuLaO5TC7CYY1rpksxf4L-9E3XBqjnoqx1ffHtgyE1RGKYd2o1UAjW6ZyM8dXXV4YQNy64og-iQWWzGCRKCaxPEaOKOjAWBQnHYHzfwB2rmBOFl-AgP4X70c_zsknWlghDtIBV4W-SPhJKQCyTrOckO4f-lRYZHJQ3JbrxuR3qo2wlvDCaYoE2CjVoRAYbgzdpzDQ383gUcucwY1EFgJX1mNjggXL-70DprJZ_nJdjtZi0zkjYLLyEV3paihJf6xWJW5yJ-Hj1zwSnmnQyxBDebIxfsw3SExtW8IqPc2OvWNnJH1NaJJpauik4bib_0K60HilJQYwZOJ32khvSS4IWo_eLwKeYbey0P02n1LAkF_QByHflRwa1Csk73O43IzqlT_CLp40alRxtJBB6HwChBao2nwOQLsdvr0R92XPRWJg&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "20:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:00",
+                "close": "18:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "20:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "20:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "20:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "20:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "20:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "20:00"
+              }
+            }
+          },
+          {
+            "id": "meal-1-lunch",
+            "dayNumber": 1,
+            "startTime": "14:35",
+            "endTime": "15:50",
+            "type": "restaurant",
+            "title": "Dishoom",
+            "description": "Lunch at Dishoom",
+            "locationName": "Dishoom",
+            "latitude": 51.512517599999995,
+            "longitude": -0.1268291,
+            "orderIndex": 2,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJxZXYx7cEdkgRdgAOZ6OHOJw",
+              "name": "Dishoom",
+              "address": "12 Upper St Martin's Ln, London",
+              "latitude": 51.512517599999995,
+              "longitude": -0.1268291,
+              "rating": 4.7,
+              "reviewCount": 28330,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "indian",
+                "vegan",
+                "vegetarian",
+                "café",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant animé de cuisine de rue indienne dans un cadre vintage typique de Mumbai avec des touches chics."
+              ],
+              "description": "Restaurant animé de cuisine de rue indienne dans un cadre vintage typique de Mumbai avec des touches chics.",
+              "phoneNumber": "020 7420 9320",
+              "website": "https://www.dishoom.com/covent-garden/?utm_source=google&utm_medium=organic&utm_campaign=Yext&utm_content=D1-CoventGarden&y_source=1_MjMwNDkyMDMtNzE1LWxvY2F0aW9uLndlYnNpdGU%3D",
+              "googleMapsUrl": "https://maps.google.com/?cid=11256896404490944630&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWpNPzhnYao_gtZ11hvXPe2Zpjb4SSCBX1a2fs9ShG4v22ThqUA37nUntcmtSk-EgEBIskEuIcl2EWxGihgP3G99bV95wFbM_IabmUECzxMYAGbzyA-jlMdBE9vEXV3OJ-yBt7dRYMBMWb9yKSLR460dIEmJY4JOoBJfKxi_qBcALqQZxx6FbD5UttbTxet-qikdVkyB3uG87hoQsf9JZ53CaN9OS_gznLfZemg83S5cPN1G-DtIrsZ5Gx2hZuiwcDBDiqNJYI9kqcK9rH421m7CMmtKeRuC-E88LEf2nuqiw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJxZXYx7cEdkgRdgAOZ6OHOJw",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJbUnC58oEdkgR4pwzPtYGrbY",
+                "name": "Rules",
+                "address": "35 Maiden Ln, London",
+                "latitude": 51.510833,
+                "longitude": -0.12316940000000001,
+                "rating": 4.6,
+                "reviewCount": 3463,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant de style édouardien établi en 1798 servant une cuisine britannique classique (surtout du gibier)."
+                ],
+                "description": "Restaurant de style édouardien établi en 1798 servant une cuisine britannique classique (surtout du gibier).",
+                "phoneNumber": "020 7836 5314",
+                "website": "http://www.rules.co.uk/",
+                "googleMapsUrl": "https://maps.google.com/?cid=13163184803110165730&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWKRdlUfTFMOrqHMVYx_ZF3OX30eiMgltZugpcOpEsCD5TycN-pQZgjTfyx1zYHWaVXPAB8YjsyByDeEvogkrUnIPqsj7efPsJhomodY6AWvCiUSNzLMIr990g1nb0yrsxjw26y2arqOtvWRKxfOIv4WiCqHAijiQLrQnz76rLGXkQ4A5FViXrTL4LmtulRV_InbwyY82JNE_DgKUWuFe1ctLycN7JRmEXczvcimjuV9l9qs5FACx5cUQXobgoTH6fPgvhH1WPknkQ99DQJBnEG_5wLu3-0B1F_doBC4LmsoizdHAj9Ehv-SbGQ_QNH_cpt5EYHjpHgkcK5SXW3CVkBb8u0ed7byjVRr4pXjQFEH34rl97aMr6eep2pC5vkiUv2Ea6uqLzfBUtnZQqd02TxlHClIXbj0v3QM9gNrcCOvYVO9T3oB0SY0FPpbvj5&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJbUnC58oEdkgR4pwzPtYGrbY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJFWhXXcwEdkgRkKBKheUNnC4",
+                "name": "Clos Maggiore",
+                "address": "Garrick House, 33 King St, London",
+                "latitude": 51.5116945,
+                "longitude": -0.12473010000000001,
+                "rating": 4.5,
+                "reviewCount": 2915,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "french"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant français moderne avec salle ornée de fleurs, feu de bois et sélection remarquable de vins."
+                ],
+                "description": "Restaurant français moderne avec salle ornée de fleurs, feu de bois et sélection remarquable de vins.",
+                "phoneNumber": "020 4580 1174",
+                "website": "http://www.closmaggiore.com/?utm_source=google&utm_medium=organic&utm_campaign=googlemybusiness",
+                "googleMapsUrl": "https://maps.google.com/?cid=3358574701546479760&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVYBOlddLe7mMh9TsXOlHE34keZqhLv8q3oMVm4bJRIahmlM8wgksbJNz5kMJWYwOQemMSZObERi_Jd3mD_MviYwu2tZem3I31d-bl85IqZTnimho6TkDHyeoM332vRvoVqbpHQBUz1uYnJ2PVRAKKZAzFUL03FtVkOigb3hjyh2DRfX5hTrT_MzqcBVAQdyErU0NODK7y4JSbWbZe-ZUTqaZnxM7HhtpnfUROgyh14Rj0hALv4k4JsjJIJKarWkn0eDyee7lnDiDer_chMHuMLV_kpgFktGEBLGpXdIyZNAQ&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJFWhXXcwEdkgRkKBKheUNnC4",
+                "openingHours": {
+                  "sunday": {
+                    "open": "17:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "friday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "saturday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-ChIJ2dGMjMMEdkgRqVqkuXQkj7c",
+            "dayNumber": 1,
+            "startTime": "16:05",
+            "endTime": "17:20",
+            "type": "activity",
+            "title": "Big Ben",
+            "description": "Marché couvert avec antiquités, objets de collection, œuvres d'art et d'artisanat, objets du quotidien et alimentation.",
+            "locationName": "Big Ben",
+            "latitude": 51.50072919999999,
+            "longitude": -0.1246254,
+            "orderIndex": 3,
+            "duration": 30,
+            "rating": 4.6,
+            "estimatedCost": 15,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg/400px-Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Houses%20of%20Parliament%20Big%20Ben%20Tour",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "gp-new-ChIJjaFZHUkFdkgRx1FRopPLqjQ",
+            "dayNumber": 1,
+            "startTime": "17:30",
+            "endTime": "18:30",
+            "type": "activity",
+            "title": "AIRE Ancient Baths London",
+            "description": "AIRE Ancient Baths London à Londres",
+            "locationName": "AIRE Ancient Baths London",
+            "latitude": 51.5088854,
+            "longitude": -0.122702,
+            "orderIndex": 4,
+            "duration": 60,
+            "rating": 4.6,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVyksTOB8uYmTkxnt58LNooPId63KAZOcd1FMyM7k31740th4UoUOF9HnxrlmOp1J-bq4D65qkjfridYIM6MgrZ9QjB08ziL_g3mOFclsMDKUeL19yGkuOzWuLIuG2p5PXASA0sTND2llMGUE_q6e0_Lx1umRBrWDrgBmiVKJNB7R5Co1omq3gDgxFHDF2tlgAHFjwTx5Q0ydqL_nz72xeg7se6yFyHLzQhfwj-zIpvApQMDUIjEeAJNIWddB-GEk_i7YuGFQnKGMj3sMSvoVeDiCjsxj4Lo5G_T2ElJMtSyw&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "08:00",
+              "close": "23:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "monday": {
+                "open": "08:00",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "08:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "08:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "08:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "09:00",
+                "close": "23:00"
+              },
+              "saturday": {
+                "open": "08:00",
+                "close": "23:00"
+              }
+            }
+          },
+          {
+            "id": "gp-ChIJoaH8k8YEdkgRnmDd5iuUl9Y",
+            "dayNumber": 1,
+            "startTime": "18:50",
+            "endTime": "19:35",
+            "type": "activity",
+            "title": "Pont de Westminster",
+            "description": "",
+            "locationName": "Pont de Westminster",
+            "latitude": 51.5008638,
+            "longitude": -0.1219645,
+            "orderIndex": 5,
+            "duration": 45,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX0XwJMnmbwWVTJaAiuAh1R8VxfG874UNsns5dTdoadKp70x0eoUGSq_WRLkYkH8OF4kp00785iRs_x1R2WtHqKmEIK71nnAG2tMqTRDqZ9cq-yB37xZZx4I3bfcpowueWF7bIZ2gVKCloPbuPjNq7Pr94ul-zd-SOLlQ-2-QuLV1u-Xv3rAla_xDamAN-jQGHcAu9zSp4y4QoP9An0UNIF5NcxHy1RLFaugqOPS-6DJCu6JJZlkRdJ_ighgryJXH00KID_TAUfYzsERo6-l-mb10-hT3Ooga2PKOMKN7aHpaQSAbc_lRy7yXqqpHGFNj78iPuks1KRVfl3WbMKcryjzBCnxiB7z0gvQxCbmfkHAsiuBR-v9LILDlKXHNvJ93dsha7KKkF6nydhjKVt5NARiNjPhYJBnvZyRKE1QoblsWxt-oqRDd-2c2tf6GXVBFXS3-NtZWRuUcbUq24svmh2-eTIBXsX42ycwlCnN9h_-2dl4btpztEzWagTUQbVNWouR02e_HNrKlST6eoHetyNzwxHdqkuYH-Wg1avYbYP6HsIISeLz-Fx_3N1sz3jndZnHmsOHo_svA&maxwidth=400",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "gp-ChIJH-tBOc4EdkgRJ8aJ8P1CUxo",
+            "dayNumber": 1,
+            "startTime": "20:00",
+            "endTime": "20:30",
+            "type": "activity",
+            "title": "Trafalgar Square",
+            "description": "",
+            "locationName": "Trafalgar Square",
+            "latitude": 51.508039,
+            "longitude": -0.128069,
+            "orderIndex": 6,
+            "duration": 30,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXfCJwbAr_Mfw43qpW7RE6xc-XMWUSbow4epZ7G6IOuHsOQ2ao07l8jBnPyDLVlfubAYc2i31A9bLKIAsRZTM90SV7NgjwL9RK_H0mCYKDpKhjvtxNbuggruCMjFiry-XImDGs7BS2MklJPi6Z0wpAxJHV_d6TTLGGFqhkN15wNxImhladfi-prcoCVqBJWdOkFW1JsjLAeLGrNQLzKIHflvbOAXVt-tN6upFTLdBb-jT1AtP0hdN-twfo1ILDu-ktm2tD-dyeA5zPymcaDeADSpOc74F2_kI7mcQTW4LaMv5mBlJlo0YKR995ebzhtmuW6thnH6m90CGST6Qn6hixMYfo5xFio6WFdO_qJfkxkucrK_N5AdhwOzN_7nAH1rLgw966rzTSnweG02qs0VNhIErBRmXbwlleJk9EzQ2Ml3mOv2SOEmyIcjXFT_JI85K4tsRWA0SLXDkk0Nzc9ACw8VsdN8SjTsJ8yo9mflDg5rvNHmcEWSlCpa01pSbMqcJxgnnMO3HzwtLrWTU1LyN6IQ_SNbwS5J-aURMdAoXMZPM1HtJA4U0dmpW7Sp1JpM-DtPqq9&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "20:40",
+            "endTime": "22:10",
+            "type": "restaurant",
+            "title": "The Seafood Bar",
+            "description": "Dinner at The Seafood Bar",
+            "locationName": "The Seafood Bar",
+            "latitude": 51.5140965,
+            "longitude": -0.1329194,
+            "orderIndex": 7,
+            "duration": 90,
+            "mealType": "dinner",
+            "restaurant": {
+              "id": "gp-new-ChIJESddrlUFdkgRVmxo2T1E1m0",
+              "name": "The Seafood Bar",
+              "address": "The Corner, 77 Dean St, London",
+              "latitude": 51.5140965,
+              "longitude": -0.1329194,
+              "rating": 4.8,
+              "reviewCount": 11229,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "seafood"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "020 4525 0733",
+              "website": "https://www.theseafoodbar.com/",
+              "googleMapsUrl": "https://maps.google.com/?cid=7914588427581418582&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXKIeuT7nKZeQl5ICSp4qkUAG_swTEz4jSuHA0CwGR2pCZrvpKAMNITpdykoWYBGcscc3s5V29vaD5sw51-BTTY-apLWSvJUsXMOAKSCv9q1OdIa6Ahl8sX5rrPgUNIsTaXeaEXhuskJGOg9jLVMQ9MI5hwXWQoeKdlqZXKhQFKGGp8zmInP4ytppVdmDS1YLCTY809eSYjngvtHAa4i6Zz9vG5Bo93sATqmDgqytMRNhm3kuH2HqyGXmMO6YpH4Wt7XWZfGUIAVijgO8lz1GrTn-FvyT3zM6eGt-lW3lhQng&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJESddrlUFdkgRVmxo2T1E1m0",
+              "openingHours": {
+                "sunday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJl-cjD9QEdkgRVkkQt3pySRI",
+                "name": "Brasserie Zedel",
+                "address": "Twenty Air Street, 20 Sherwood St, London",
+                "latitude": 51.510556099999995,
+                "longitude": -0.1355974,
+                "rating": 4.5,
+                "reviewCount": 9759,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "french"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Somptueux restaurant français de style Art déco, servant plats classiques de brasserie et choucroutes dans bâtiment des années 1930."
+                ],
+                "description": "Somptueux restaurant français de style Art déco, servant plats classiques de brasserie et choucroutes dans bâtiment des années 1930.",
+                "phoneNumber": "020 7734 4888",
+                "website": "http://www.brasseriezedel.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=1317710237365455190&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUSR41B0KdmKBoys4pwIuoen9qT4ngnG9a7xCmRt7TXPuZR892XlEw9lboW89-bWKitWZFzX6qtdHe0AvPZRGXbc9cPc-Ojsv0677WvyQcgK_HBDgKuVhn33Iw8wcP_OSS4OUkAMjkXev1zvSE8N3bezsmhiy4vzDfSrBmCHVeuPA7tNonJ5NwT6IhmI0eL_Rccsj1eRaAystB2R0bhJUmuUDoC7yvbOihbvtZ4azAVm6GPlUQ9cbBOIGR8SmUpXCJ_rG8AVdhzXs7d101kRV2QXzHErWzaiiiqd3JJNUuGsA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJl-cjD9QEdkgRVkkQt3pySRI",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJH5HoVsAFdkgRd4SH6P8VAhk",
+                "name": "Paro - Covent Garden & Strand",
+                "address": "21 Wellington St, London",
+                "latitude": 51.5115791,
+                "longitude": -0.1200931,
+                "rating": 4.7,
+                "reviewCount": 7262,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "indian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 3722 0951",
+                "website": "https://paroindian.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=1802026989763658871&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWhK6aJKPJeflX5pWmzXnDE20gGUS6AXn9VD9Nqcfh481DGYl4WtsC1WIdKtWCmeO2e5AjvcSrAgn9z8WCyKLf-LDkpshSu-7PMRH-kziJ8z7R0mSv8vwic3361wiph5luGOSqFC2vr-QcP2okLiZXwO5EhWvdXlnLu9LU3UjZ5Bc4_2JBnxBYojdepdPigJnOgzyBfjIBr4OB9_vzz2X1td1ftcTIIV-vsotPVgEI-8vYz2wHHjfRUkv5nnXsgspOLn3xrD3iGtAU04rhq9tFy96xa6Q2YLzC1Kv4l0eC91A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJH5HoVsAFdkgRd4SH6P8VAhk",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "monday": {
+                    "open": "15:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "15:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez British Museum, Covent Garden puis Big Ben."
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-26T11:55:16.864Z",
+        "items": [
+          {
+            "id": "gp-new-ChIJtV5bzSAFdkgRpwLZFPWrJgo",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Palais de Buckingham",
+            "description": "Il est possible de visiter les appartements officiels et privés du palais, et de voir la relève de la garde.",
+            "locationName": "Palais de Buckingham",
+            "latitude": 51.501363999999995,
+            "longitude": -0.14189,
+            "orderIndex": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVrX6DK0oKI4mwBVTuDpS37mimjdPzeX5ZaX-qVLscwDgrTLGoGiYwRt6lGmRA5GiZCtKXmn-R_6gT6lU32_aRWZtg_foki3X4-Pxw7bxudumwWjOar1mKQo0L3Nvx65sbqBEa8D0PX3iROrpUm3nd_dh-sMBTHlfV6TTlBZAWu9A1w-75BL2BvZfyjepSL9vXVsu4gahbLqoWXdvrGMYfvrcrNHOEwyp3bs8un4yeXTZu-fRGk8OMZTicOduu7LjyuZS2ztH_FRBzKduv7XA6zx6eoZ6niOlDTWtG9QBVXzrlHctehIYHSDXFpCMjYI7aLoQgk5omU140TumGnvnh99qVE5p2pwCvOOtBLRaBAPxBVtZgw3pz743W5qHhsym9p2cae7qnukXJmUE04vyJN_XpKrhM_QhzKFj0Q9RW_qVvA&maxwidth=400",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Palais%20de%20Buckingham%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Palais%20de%20Buckingham%20Londres"
+          },
+          {
+            "id": "gp-new-ChIJeclqF84EdkgRtKAjTmWFr0I",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "National Gallery",
+            "description": "Musée d'art à Trafalgar Square dont les œuvres retracent l'évolution de la peinture en Europe occidentale.",
+            "locationName": "National Gallery",
+            "latitude": 51.508928999999995,
+            "longitude": -0.128299,
+            "orderIndex": 1,
+            "duration": 120,
+            "rating": 4.8,
+            "estimatedCost": 15,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Galer%C3%ADa_Nacional%2C_Londres%2C_Inglaterra%2C_2014-08-07%2C_DD_036.JPG/400px-Galer%C3%ADa_Nacional%2C_Londres%2C_Inglaterra%2C_2014-08-07%2C_DD_036.JPG",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "21:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "21:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "18:00"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=National%20Gallery%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=National%20Gallery%20Londres"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "13:25",
+            "endTime": "14:40",
+            "type": "restaurant",
+            "title": "Circolo Popolare 🇮🇹",
+            "description": "Lunch at Circolo Popolare 🇮🇹",
+            "locationName": "Circolo Popolare 🇮🇹",
+            "latitude": 51.5171895,
+            "longitude": -0.13386789999999998,
+            "orderIndex": 2,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJK4j9CagbdkgRluwkqYLufoE",
+              "name": "Circolo Popolare 🇮🇹",
+              "address": "40-41 Rathbone Pl, London",
+              "latitude": 51.5171895,
+              "longitude": -0.13386789999999998,
+              "rating": 4.8,
+              "reviewCount": 36203,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "italian",
+                "pizza",
+                "mediterranean"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant glamour et pittoresque à la décoration opulente avec 20 000 bouteilles, servant des plats de trattoria et des boissons."
+              ],
+              "description": "Restaurant glamour et pittoresque à la décoration opulente avec 20 000 bouteilles, servant des plats de trattoria et des boissons.",
+              "website": "https://www.circolopopolare.com/restaurants/circolopopolare-london?utm_source=google&utm_medium=organic&utm_campaign=mybusiness-website",
+              "googleMapsUrl": "https://maps.google.com/?cid=9331157722909174934&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfX5ZO2wEKXzdh8AbcocbJXmZUV9XYCBJyj0EaQEKafKg9Uy74dx69uzwbByWzQ-OIUyacKp_v9THZg-9ks-y6BZsIXwb1T2aiw1A7vvpRdDBYolo9yQlsV_E7T8trFYp3a29teiu1NTlrYsb8xVbwk3vcC0nQSya5LpibozDOBipORsvUFiYnBZe94J1TaZbqOKd-aea1tX0jxmxROMwluAJtiSWQRQCVc8CD4h4cM6tgtD88AE25Bc95cKaszbL7_Jl-ff8V-Mw9QU1o4nCdLLI1vab3o4Laq2VtPTnDSI8g&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJK4j9CagbdkgRluwkqYLufoE",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "friday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "22:30"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJN4xC2ywbdkgRw6jKHfSG0sQ",
+                "name": "Govinda's Soho Street",
+                "address": "9 Soho St, London",
+                "latitude": 51.5158347,
+                "longitude": -0.13275979999999998,
+                "rating": 4.8,
+                "reviewCount": 27587,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "vegetarian",
+                  "vegan",
+                  "indian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Linked to the Radha Krishna Temple, serving vegetarian and vegan Indian thalis, salads and sweets."
+                ],
+                "description": "Linked to the Radha Krishna Temple, serving vegetarian and vegan Indian thalis, salads and sweets.",
+                "phoneNumber": "020 3687 0617",
+                "website": "https://govindas.london/",
+                "googleMapsUrl": "https://maps.google.com/?cid=14182546559573076163&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXwVO1VKjdHKphhbyHYIf5LXxn15_hsWpW2oBxeW1cdx9BOV_IaIy2Od_sunY21j8xDPbxrmIGkYYzKqBTNUwJU4pf8AhuoDojHCIlIEx98G4grRxViRnjATCwWNK_qOO6vHgDbZxQRZqwHHjWa2KNonKJBnABESq_fEdUQbHeeATexNebKbK7GF9emQGAgzyvpnPb5Erby_zSrB33PgbRXyfo9qoNrXOZ8kkuzGrjUeaOsYRit8sUx9T9HFb7P_dMK6fPSp4EqJb8pNDr5q6MluXm1DwOQc_CbqDDB6397ag&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJN4xC2ywbdkgRw6jKHfSG0sQ",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJESddrlUFdkgRVmxo2T1E1m0",
+                "name": "The Seafood Bar",
+                "address": "The Corner, 77 Dean St, London",
+                "latitude": 51.5140965,
+                "longitude": -0.1329194,
+                "rating": 4.8,
+                "reviewCount": 11229,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "seafood"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 4525 0733",
+                "website": "https://www.theseafoodbar.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=7914588427581418582&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXKIeuT7nKZeQl5ICSp4qkUAG_swTEz4jSuHA0CwGR2pCZrvpKAMNITpdykoWYBGcscc3s5V29vaD5sw51-BTTY-apLWSvJUsXMOAKSCv9q1OdIa6Ahl8sX5rrPgUNIsTaXeaEXhuskJGOg9jLVMQ9MI5hwXWQoeKdlqZXKhQFKGGp8zmInP4ytppVdmDS1YLCTY809eSYjngvtHAa4i6Zz9vG5Bo93sATqmDgqytMRNhm3kuH2HqyGXmMO6YpH4Wt7XWZfGUIAVijgO8lz1GrTn-FvyT3zM6eGt-lW3lhQng&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJESddrlUFdkgRVmxo2T1E1m0",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 45
+          },
+          {
+            "id": "gp-new-ChIJGyUuT8cFdkgRC1EqeTwdqbw",
+            "dayNumber": 2,
+            "startTime": "14:55",
+            "endTime": "16:25",
+            "type": "activity",
+            "title": "THE LUMI SPA",
+            "description": "THE LUMI SPA à Londres",
+            "locationName": "THE LUMI SPA",
+            "latitude": 51.514361799999996,
+            "longitude": -0.1394483,
+            "orderIndex": 3,
+            "duration": 90,
+            "rating": 4.6,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUj33xQXmTDBK0YEksShMnqvyBwVobIf5AedR6ueLL70X-hWic2PIORb2uLC7vIBWnlUowrLkZCLPSwLhMayDuoEQDaB1xXQ7vCogGLeQV93tGPZUQFsh3ZzF2u5GJZo7fC89EDB0EbaXhBjrXygNxeeA7Nvc8sJfmKe0wLXZSXvoQKN_D26Horzi7sV7OZ0wkedCgg2uW9mNnNgXfkxymRBIEFIkPHm99mSBkwjtRhlYtjEh7apZhSW-ygdRP_5PrJL1zov-uY2-iAjJi-Es8Qvl8FH8p6-14lIbkUQ1bnLQ&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "19:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "19:00"
+              }
+            }
+          },
+          {
+            "id": "gp-new-ChIJTXqIiSMbdkgRaJ4F-SvrI9c",
+            "dayNumber": 2,
+            "startTime": "16:45",
+            "endTime": "18:15",
+            "type": "activity",
+            "title": "7 Bali Spa",
+            "description": "7 Bali Spa à Londres",
+            "locationName": "7 Bali Spa",
+            "latitude": 51.5169108,
+            "longitude": -0.13501459999999998,
+            "orderIndex": 4,
+            "duration": 90,
+            "rating": 4.8,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUbqvMAyiF0fN98rzuKMPzEjWDiqrmh2eazAfEMJrScgJvWvVSKdt5LmlcJupZeESRK3YeNsSY0abS4uH-7gy3IVEWkCdsY9TMrmWibLcZ9aOOLBWs3awNQ__FuEQnpF0Ra1WMb1poNnppFC7Z6iswXEcskO7lM_q4pGnFMLhRh0zE8Snmf0PGyZrvSai4DdGGEV3F9gjRIkPKAlqIFOXhi126PlWwN4FywCF5NLkeFKt9Gp0Z8OZ9B1aAnw0uPRCwbLrmfvKgB7xLGuCDwTiPf2X3wdlNGtQubdMZcBRVNcw&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "22:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:00",
+                "close": "22:30"
+              },
+              "monday": {
+                "open": "09:00",
+                "close": "22:30"
+              },
+              "tuesday": {
+                "open": "09:00",
+                "close": "22:30"
+              },
+              "wednesday": {
+                "open": "09:00",
+                "close": "22:30"
+              },
+              "thursday": {
+                "open": "09:00",
+                "close": "22:30"
+              },
+              "friday": {
+                "open": "09:00",
+                "close": "22:30"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "22:30"
+              }
+            }
+          },
+          {
+            "id": "gp-new-ChIJD5ZQMiwFdkgRLSuZru8rY8o",
+            "dayNumber": 2,
+            "startTime": "19:05",
+            "endTime": "20:35",
+            "type": "activity",
+            "title": "Aman Spa",
+            "description": "Aman Spa à Londres",
+            "locationName": "Aman Spa",
+            "latitude": 51.510202,
+            "longitude": -0.149585,
+            "orderIndex": 5,
+            "duration": 90,
+            "rating": 4.7,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXxWKoi7Bpd4Yvsz08N4xZPkuKXGUZL2cGCSPAPsewQwc0D6zG6JQ-4fkqdpYHBhvaX9CqTntnmkFe0PTf6Ljeo7fHTAeqGkv3bZUSniUlATVlxULfA3bEWA9znxWAE8ZNX801u14K3Bh0fYAtU_Cc8yRqp9xLsSS1-THLV2-d1D9WOLfvYI55zJnTJ22_3wYS8lrr4i32tE4h8RScll_68jQbtcp28lHgCSC0uq9cZBt69mbANSTRg2kpiTLp6WxcUsw9BAbZZZO-3ImghnFFPY8B-8EFFaXh7SKpGxzkCvA&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "21:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:00",
+                "close": "21:00"
+              },
+              "monday": {
+                "open": "09:00",
+                "close": "21:00"
+              },
+              "tuesday": {
+                "open": "09:00",
+                "close": "21:00"
+              },
+              "wednesday": {
+                "open": "09:00",
+                "close": "21:00"
+              },
+              "thursday": {
+                "open": "09:00",
+                "close": "21:00"
+              },
+              "friday": {
+                "open": "09:00",
+                "close": "21:00"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "21:00"
+              }
+            }
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "20:45",
+            "endTime": "22:15",
+            "type": "restaurant",
+            "title": "Brasserie Zedel",
+            "description": "Dinner at Brasserie Zedel",
+            "locationName": "Brasserie Zedel",
+            "latitude": 51.510556099999995,
+            "longitude": -0.1355974,
+            "orderIndex": 6,
+            "duration": 90,
+            "mealType": "dinner",
+            "restaurant": {
+              "id": "gp-new-ChIJl-cjD9QEdkgRVkkQt3pySRI",
+              "name": "Brasserie Zedel",
+              "address": "Twenty Air Street, 20 Sherwood St, London",
+              "latitude": 51.510556099999995,
+              "longitude": -0.1355974,
+              "rating": 4.5,
+              "reviewCount": 9759,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "french"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Somptueux restaurant français de style Art déco, servant plats classiques de brasserie et choucroutes dans bâtiment des années 1930."
+              ],
+              "description": "Somptueux restaurant français de style Art déco, servant plats classiques de brasserie et choucroutes dans bâtiment des années 1930.",
+              "phoneNumber": "020 7734 4888",
+              "website": "http://www.brasseriezedel.com/",
+              "googleMapsUrl": "https://maps.google.com/?cid=1317710237365455190&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUSR41B0KdmKBoys4pwIuoen9qT4ngnG9a7xCmRt7TXPuZR892XlEw9lboW89-bWKitWZFzX6qtdHe0AvPZRGXbc9cPc-Ojsv0677WvyQcgK_HBDgKuVhn33Iw8wcP_OSS4OUkAMjkXev1zvSE8N3bezsmhiy4vzDfSrBmCHVeuPA7tNonJ5NwT6IhmI0eL_Rccsj1eRaAystB2R0bhJUmuUDoC7yvbOihbvtZ4azAVm6GPlUQ9cbBOIGR8SmUpXCJ_rG8AVdhzXs7d101kRV2QXzHErWzaiiiqd3JJNUuGsA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJl-cjD9QEdkgRVkkQt3pySRI",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:30",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.5,
+            "estimatedCost": 30
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Palais de Buckingham, National Gallery puis THE LUMI SPA."
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-27T11:55:16.864Z",
+        "items": [
+          {
+            "id": "natural-history-museum",
+            "dayNumber": 3,
+            "startTime": "10:00",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "Natural History Museum",
+            "description": "Spectacular dinosaur exhibits and natural world collections",
+            "locationName": "Natural History Museum",
+            "latitude": 51.4967,
+            "longitude": -0.1764,
+            "orderIndex": 0,
+            "duration": 150,
+            "rating": 4.8,
+            "estimatedCost": 0,
+            "mustSee": true,
+            "openingHours": {
+              "open": "10:00",
+              "close": "17:50"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Natural%20History%20Museum%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Natural%20History%20Museum%20Londres"
+          },
+          {
+            "id": "gp-new-ChIJw1d-sUMFdkgRH2XN_U0Jt54",
+            "dayNumber": 3,
+            "startTime": "12:40",
+            "endTime": "15:10",
+            "type": "activity",
+            "title": "Victoria and Albert Museum",
+            "description": "Expositions populaires, collection permanente d'arts décoratifs, boutique design et café richement décoré.",
+            "locationName": "Victoria and Albert Museum",
+            "latitude": 51.4966392,
+            "longitude": -0.17218,
+            "orderIndex": 1,
+            "duration": 150,
+            "rating": 4.7,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWA70oQvEv4TUS1L3eCoHKGnBV6aoT_iz6P_GWUQa_V2_BhxrVEUkzOGXFlLyINZvqBzsnQ8EiHdf-u4-9NlxDXZJmW8sw4UH_P_ljQu52_jED2qDc3-mFBkegQMkqN1wmJv-ZKYCKA5X-PBbyxJvDgLRCGw9OQCSreGgy1QkxDuf0ek7ehzqLeifB0VDeNh9ZSaaRLWmy6_pkOC4pJKmHmLhI8FkE0t3RrJ5ZWxrSKUh2YTdAp29xjoXURxfs3fI4EJmRBF4JkfP-qTbPHGwftvxTz7QoKLOkFIjX87H6JyVRcyQkSvYENCDD_Ou4TOP6R38NgUgo8NqcqnxmRrTAlVFWYDb_Alomts0DCd2dGvJzTrJfySwOF8L3ty3KZ9n6CnjN164yaJBfhBLdL3RyHqHBaypvuuPFkg8OrTw_XYA&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "22:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "17:45"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "17:45"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "17:45"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "17:45"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "17:45"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "17:45"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Victoria%20and%20Albert%20Museum%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Victoria%20and%20Albert%20Museum%20Londres"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "15:45",
+            "endTime": "17:00",
+            "type": "restaurant",
+            "title": "Dishoom",
+            "description": "Lunch at Dishoom",
+            "locationName": "Dishoom",
+            "latitude": 51.512517599999995,
+            "longitude": -0.1268291,
+            "orderIndex": 2,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJxZXYx7cEdkgRdgAOZ6OHOJw",
+              "name": "Dishoom",
+              "address": "12 Upper St Martin's Ln, London",
+              "latitude": 51.512517599999995,
+              "longitude": -0.1268291,
+              "rating": 4.7,
+              "reviewCount": 28330,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "indian",
+                "vegan",
+                "vegetarian",
+                "café",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant animé de cuisine de rue indienne dans un cadre vintage typique de Mumbai avec des touches chics."
+              ],
+              "description": "Restaurant animé de cuisine de rue indienne dans un cadre vintage typique de Mumbai avec des touches chics.",
+              "phoneNumber": "020 7420 9320",
+              "website": "https://www.dishoom.com/covent-garden/?utm_source=google&utm_medium=organic&utm_campaign=Yext&utm_content=D1-CoventGarden&y_source=1_MjMwNDkyMDMtNzE1LWxvY2F0aW9uLndlYnNpdGU%3D",
+              "googleMapsUrl": "https://maps.google.com/?cid=11256896404490944630&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWpNPzhnYao_gtZ11hvXPe2Zpjb4SSCBX1a2fs9ShG4v22ThqUA37nUntcmtSk-EgEBIskEuIcl2EWxGihgP3G99bV95wFbM_IabmUECzxMYAGbzyA-jlMdBE9vEXV3OJ-yBt7dRYMBMWb9yKSLR460dIEmJY4JOoBJfKxi_qBcALqQZxx6FbD5UttbTxet-qikdVkyB3uG87hoQsf9JZ53CaN9OS_gznLfZemg83S5cPN1G-DtIrsZ5Gx2hZuiwcDBDiqNJYI9kqcK9rH421m7CMmtKeRuC-E88LEf2nuqiw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJxZXYx7cEdkgRdgAOZ6OHOJw",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJl-cjD9QEdkgRVkkQt3pySRI",
+                "name": "Brasserie Zedel",
+                "address": "Twenty Air Street, 20 Sherwood St, London",
+                "latitude": 51.510556099999995,
+                "longitude": -0.1355974,
+                "rating": 4.5,
+                "reviewCount": 9759,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "french"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Somptueux restaurant français de style Art déco, servant plats classiques de brasserie et choucroutes dans bâtiment des années 1930."
+                ],
+                "description": "Somptueux restaurant français de style Art déco, servant plats classiques de brasserie et choucroutes dans bâtiment des années 1930.",
+                "phoneNumber": "020 7734 4888",
+                "website": "http://www.brasseriezedel.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=1317710237365455190&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUSR41B0KdmKBoys4pwIuoen9qT4ngnG9a7xCmRt7TXPuZR892XlEw9lboW89-bWKitWZFzX6qtdHe0AvPZRGXbc9cPc-Ojsv0677WvyQcgK_HBDgKuVhn33Iw8wcP_OSS4OUkAMjkXev1zvSE8N3bezsmhiy4vzDfSrBmCHVeuPA7tNonJ5NwT6IhmI0eL_Rccsj1eRaAystB2R0bhJUmuUDoC7yvbOihbvtZ4azAVm6GPlUQ9cbBOIGR8SmUpXCJ_rG8AVdhzXs7d101kRV2QXzHErWzaiiiqd3JJNUuGsA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJl-cjD9QEdkgRVkkQt3pySRI",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJbUnC58oEdkgR4pwzPtYGrbY",
+                "name": "Rules",
+                "address": "35 Maiden Ln, London",
+                "latitude": 51.510833,
+                "longitude": -0.12316940000000001,
+                "rating": 4.6,
+                "reviewCount": 3463,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant de style édouardien établi en 1798 servant une cuisine britannique classique (surtout du gibier)."
+                ],
+                "description": "Restaurant de style édouardien établi en 1798 servant une cuisine britannique classique (surtout du gibier).",
+                "phoneNumber": "020 7836 5314",
+                "website": "http://www.rules.co.uk/",
+                "googleMapsUrl": "https://maps.google.com/?cid=13163184803110165730&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWKRdlUfTFMOrqHMVYx_ZF3OX30eiMgltZugpcOpEsCD5TycN-pQZgjTfyx1zYHWaVXPAB8YjsyByDeEvogkrUnIPqsj7efPsJhomodY6AWvCiUSNzLMIr990g1nb0yrsxjw26y2arqOtvWRKxfOIv4WiCqHAijiQLrQnz76rLGXkQ4A5FViXrTL4LmtulRV_InbwyY82JNE_DgKUWuFe1ctLycN7JRmEXczvcimjuV9l9qs5FACx5cUQXobgoTH6fPgvhH1WPknkQ99DQJBnEG_5wLu3-0B1F_doBC4LmsoizdHAj9Ehv-SbGQ_QNH_cpt5EYHjpHgkcK5SXW3CVkBb8u0ed7byjVRr4pXjQFEH34rl97aMr6eep2pC5vkiUv2Ea6uqLzfBUtnZQqd02TxlHClIXbj0v3QM9gNrcCOvYVO9T3oB0SY0FPpbvj5&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJbUnC58oEdkgR4pwzPtYGrbY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-new-ChIJG-CxwNoEdkgRXx26gHZwVf8",
+            "dayNumber": 3,
+            "startTime": "17:15",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "St James's Park",
+            "description": "Espace vert, café au toit végétalisé, lac avec des pélicans nourris chaque jour et cérémonies officielles.",
+            "locationName": "St James's Park",
+            "latitude": 51.502967,
+            "longitude": -0.1339534,
+            "orderIndex": 3,
+            "duration": 90,
+            "rating": 4.7,
+            "estimatedCost": 15,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Londonstjamespark2.jpg/400px-Londonstjamespark2.jpg",
+            "mustSee": false,
+            "openingHours": {
+              "open": "05:00",
+              "close": "18:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "monday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "tuesday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "wednesday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "thursday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "friday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "saturday": {
+                "open": "05:00",
+                "close": "00:00"
+              }
+            }
+          },
+          {
+            "id": "gp-ChIJhRoYKUkFdkgRDL20SU9sr9E",
+            "dayNumber": 3,
+            "startTime": "19:30",
+            "endTime": "20:30",
+            "type": "activity",
+            "title": "Hyde Park",
+            "description": "",
+            "locationName": "Hyde Park",
+            "latitude": 51.5073638,
+            "longitude": -0.1641135,
+            "orderIndex": 4,
+            "duration": 60,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Hyde_Park_July_2015-1.jpg/400px-Hyde_Park_July_2015-1.jpg",
+            "mustSee": false,
+            "openingHours": {
+              "open": "05:00",
+              "close": "00:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "monday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "tuesday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "wednesday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "thursday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "friday": {
+                "open": "05:00",
+                "close": "00:00"
+              },
+              "saturday": {
+                "open": "05:00",
+                "close": "00:00"
+              }
+            }
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Natural History Museum, Victoria and Albert Museum puis St James's Park."
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-28T11:55:16.864Z",
+        "items": [
+          {
+            "id": "st-pauls-cathedral",
+            "dayNumber": 4,
+            "startTime": "09:05",
+            "endTime": "10:20",
+            "type": "activity",
+            "title": "St Paul's Cathedral",
+            "description": "Christopher Wren's masterpiece with iconic dome",
+            "locationName": "St Paul's Cathedral",
+            "latitude": 51.5138,
+            "longitude": -0.0984,
+            "orderIndex": 0,
+            "duration": 75,
+            "rating": 4.7,
+            "estimatedCost": 23,
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=St%20Pauls%20Cathedral%20Admission%20Ticket",
+            "mustSee": true,
+            "openingHours": {
+              "open": "08:30",
+              "close": "16:30"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=St%20Paul's%20Cathedral%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=St%20Paul's%20Cathedral%20Londres"
+          },
+          {
+            "id": "gp-new-ChIJscLxT6ccdkgR4JQC5l_JcD8",
+            "dayNumber": 4,
+            "startTime": "11:05",
+            "endTime": "12:35",
+            "type": "activity",
+            "title": "Banya No.1 - Hoxton",
+            "description": "Banya No.1 - Hoxton à Londres",
+            "locationName": "Banya No.1 - Hoxton",
+            "latitude": 51.53015,
+            "longitude": -0.094344,
+            "orderIndex": 1,
+            "duration": 90,
+            "rating": 4.8,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVuf0Z-Mfx838OFtnfkCitxZireB7wR3QfV2dSx97lg7AkU_pMw4vmHpfUfPrHymJ321k2165juEdVK0SNY5OczPbJCbWssN5Yv9IZDPt8Pt9trP1thBxoMcy_Wkc118J-qLPHTi2F49UWUm8dlI75yKM6HHT9TjcNi7m0h4_Dq-7IgLUyz_3UlsPDPLxlVmTds1d7MCMVci3Wcl98tQmO47JrMaOjnXeIuCoMFXk35ELAOvijrtLIV65AHVeUJ7O3HOZZOeg3SEKTsFr44GiHf9R_cpMoruGfeErpcoRM&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:30",
+              "close": "22:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:30",
+                "close": "22:30"
+              },
+              "monday": {
+                "open": "09:30",
+                "close": "22:30"
+              },
+              "tuesday": {
+                "open": "09:30",
+                "close": "22:30"
+              },
+              "wednesday": {
+                "open": "09:30",
+                "close": "22:30"
+              },
+              "thursday": {
+                "open": "09:30",
+                "close": "22:30"
+              },
+              "friday": {
+                "open": "09:30",
+                "close": "22:30"
+              },
+              "saturday": {
+                "open": "09:30",
+                "close": "22:30"
+              }
+            }
+          },
+          {
+            "id": "meal-4-lunch",
+            "dayNumber": 4,
+            "startTime": "13:35",
+            "endTime": "14:50",
+            "type": "restaurant",
+            "title": "Dishoom",
+            "description": "Lunch at Dishoom",
+            "locationName": "Dishoom",
+            "latitude": 51.512517599999995,
+            "longitude": -0.1268291,
+            "orderIndex": 2,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJxZXYx7cEdkgRdgAOZ6OHOJw",
+              "name": "Dishoom",
+              "address": "12 Upper St Martin's Ln, London",
+              "latitude": 51.512517599999995,
+              "longitude": -0.1268291,
+              "rating": 4.7,
+              "reviewCount": 28330,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "indian",
+                "vegan",
+                "vegetarian",
+                "café",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant animé de cuisine de rue indienne dans un cadre vintage typique de Mumbai avec des touches chics."
+              ],
+              "description": "Restaurant animé de cuisine de rue indienne dans un cadre vintage typique de Mumbai avec des touches chics.",
+              "phoneNumber": "020 7420 9320",
+              "website": "https://www.dishoom.com/covent-garden/?utm_source=google&utm_medium=organic&utm_campaign=Yext&utm_content=D1-CoventGarden&y_source=1_MjMwNDkyMDMtNzE1LWxvY2F0aW9uLndlYnNpdGU%3D",
+              "googleMapsUrl": "https://maps.google.com/?cid=11256896404490944630&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWpNPzhnYao_gtZ11hvXPe2Zpjb4SSCBX1a2fs9ShG4v22ThqUA37nUntcmtSk-EgEBIskEuIcl2EWxGihgP3G99bV95wFbM_IabmUECzxMYAGbzyA-jlMdBE9vEXV3OJ-yBt7dRYMBMWb9yKSLR460dIEmJY4JOoBJfKxi_qBcALqQZxx6FbD5UttbTxet-qikdVkyB3uG87hoQsf9JZ53CaN9OS_gznLfZemg83S5cPN1G-DtIrsZ5Gx2hZuiwcDBDiqNJYI9kqcK9rH421m7CMmtKeRuC-E88LEf2nuqiw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJxZXYx7cEdkgRdgAOZ6OHOJw",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJbUnC58oEdkgR4pwzPtYGrbY",
+                "name": "Rules",
+                "address": "35 Maiden Ln, London",
+                "latitude": 51.510833,
+                "longitude": -0.12316940000000001,
+                "rating": 4.6,
+                "reviewCount": 3463,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant de style édouardien établi en 1798 servant une cuisine britannique classique (surtout du gibier)."
+                ],
+                "description": "Restaurant de style édouardien établi en 1798 servant une cuisine britannique classique (surtout du gibier).",
+                "phoneNumber": "020 7836 5314",
+                "website": "http://www.rules.co.uk/",
+                "googleMapsUrl": "https://maps.google.com/?cid=13163184803110165730&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWKRdlUfTFMOrqHMVYx_ZF3OX30eiMgltZugpcOpEsCD5TycN-pQZgjTfyx1zYHWaVXPAB8YjsyByDeEvogkrUnIPqsj7efPsJhomodY6AWvCiUSNzLMIr990g1nb0yrsxjw26y2arqOtvWRKxfOIv4WiCqHAijiQLrQnz76rLGXkQ4A5FViXrTL4LmtulRV_InbwyY82JNE_DgKUWuFe1ctLycN7JRmEXczvcimjuV9l9qs5FACx5cUQXobgoTH6fPgvhH1WPknkQ99DQJBnEG_5wLu3-0B1F_doBC4LmsoizdHAj9Ehv-SbGQ_QNH_cpt5EYHjpHgkcK5SXW3CVkBb8u0ed7byjVRr4pXjQFEH34rl97aMr6eep2pC5vkiUv2Ea6uqLzfBUtnZQqd02TxlHClIXbj0v3QM9gNrcCOvYVO9T3oB0SY0FPpbvj5&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJbUnC58oEdkgR4pwzPtYGrbY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "22:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJFWhXXcwEdkgRkKBKheUNnC4",
+                "name": "Clos Maggiore",
+                "address": "Garrick House, 33 King St, London",
+                "latitude": 51.5116945,
+                "longitude": -0.12473010000000001,
+                "rating": 4.5,
+                "reviewCount": 2915,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "french"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant français moderne avec salle ornée de fleurs, feu de bois et sélection remarquable de vins."
+                ],
+                "description": "Restaurant français moderne avec salle ornée de fleurs, feu de bois et sélection remarquable de vins.",
+                "phoneNumber": "020 4580 1174",
+                "website": "http://www.closmaggiore.com/?utm_source=google&utm_medium=organic&utm_campaign=googlemybusiness",
+                "googleMapsUrl": "https://maps.google.com/?cid=3358574701546479760&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVYBOlddLe7mMh9TsXOlHE34keZqhLv8q3oMVm4bJRIahmlM8wgksbJNz5kMJWYwOQemMSZObERi_Jd3mD_MviYwu2tZem3I31d-bl85IqZTnimho6TkDHyeoM332vRvoVqbpHQBUz1uYnJ2PVRAKKZAzFUL03FtVkOigb3hjyh2DRfX5hTrT_MzqcBVAQdyErU0NODK7y4JSbWbZe-ZUTqaZnxM7HhtpnfUROgyh14Rj0hALv4k4JsjJIJKarWkn0eDyee7lnDiDer_chMHuMLV_kpgFktGEBLGpXdIyZNAQ&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJFWhXXcwEdkgRkKBKheUNnC4",
+                "openingHours": {
+                  "sunday": {
+                    "open": "17:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "friday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "saturday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-new-ChIJJUQ-d8oEdkgR-JVIDfRa6aY",
+            "dayNumber": 4,
+            "startTime": "15:05",
+            "endTime": "17:05",
+            "type": "activity",
+            "title": "Courtauld Gallery",
+            "description": "Galerie élégante avec grande collection d'art, dont des œuvres de Monet, Van Gogh et Cézanne.",
+            "locationName": "Courtauld Gallery",
+            "latitude": 51.5115865,
+            "longitude": -0.11755929999999999,
+            "orderIndex": 3,
+            "duration": 120,
+            "rating": 4.7,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX7LwORdDsJinmq0RL_zIesgpKS5fWg0HMlevtumOM8SjM3wSo5QfwmQZC7YWy8JQPz7basoDPodR17Pu9ybhWpdN3u6ary3CiDhL_YVCvZt25DDQ9XlG7-Mh8k-BHoNBaGjf6AMtYH29EUJnZPuLn4MaACuf_NqqDa9mBBlg3F0G2ItXnM44Uda9oO0wUb3mZ_o6j4AD1cwZbk-GX7n8zO3CKET8gAYKVjZG8garHlMiHqDgIC-RnzY9Alm1i0KZMmyLcNLGWf2WPAGbgQF-SqY6k_vBdeg16R2ixIuzKuRlnIjE9oaa9iS8S1at1VpHPZ-wp37OeINr_MPUowuHLSrzJnQnRdAJlXXjPMtG2tiEld4yBHySG4HAS3aCAHNh0oVsM6khZUXpoQIF5dwRw9QcLRdoQ8hC1nz0MO0WZYYiFD&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "18:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "18:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "18:00"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Courtauld%20Gallery%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Courtauld%20Gallery%20Londres"
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez St Paul's Cathedral, Banya No.1 - Hoxton puis Courtauld Gallery."
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-03-29T11:55:16.864Z",
+        "items": [
+          {
+            "id": "gp-new-ChIJ3TgfM0kDdkgRZ2TV4d1Jv6g",
+            "dayNumber": 5,
+            "startTime": "10:00",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Tour de Londres",
+            "description": "Château médiéval aux siècles d'histoire sanglants, abritant joyaux de la Couronne et gardiens emblématiques.",
+            "locationName": "Tour de Londres",
+            "latitude": 51.508112399999995,
+            "longitude": -0.0759493,
+            "orderIndex": 0,
+            "duration": 45,
+            "rating": 4.7,
+            "estimatedCost": 33,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Tower_of_London_viewed_from_the_River_Thames.jpg/400px-Tower_of_London_viewed_from_the_River_Thames.jpg",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Tower%20of%20London%20Ticket",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "16:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "16:30"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "16:30"
+              },
+              "tuesday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "wednesday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "thursday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "friday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "16:30"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Tour%20de%20Londres%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Tour%20de%20Londres%20Londres"
+          },
+          {
+            "id": "tower-of-london",
+            "dayNumber": 5,
+            "startTime": "10:55",
+            "endTime": "11:40",
+            "type": "activity",
+            "title": "Tower of London",
+            "description": "Historic castle and home to the Crown Jewels",
+            "locationName": "Tower of London",
+            "latitude": 51.5081,
+            "longitude": -0.0759,
+            "orderIndex": 1,
+            "duration": 45,
+            "rating": 4.7,
+            "estimatedCost": 34,
+            "bookingUrl": "https://www.hrp.org.uk/tower-of-london/",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "17:30"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Tower%20of%20London%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Tower%20of%20London%20Londres"
+          },
+          {
+            "id": "gp-ChIJSdtli0MDdkgRLW9aCBpCeJ4",
+            "dayNumber": 5,
+            "startTime": "11:50",
+            "endTime": "12:35",
+            "type": "activity",
+            "title": "Tower Bridge",
+            "description": "",
+            "locationName": "Tower Bridge",
+            "latitude": 51.5054564,
+            "longitude": -0.07535649999999999,
+            "orderIndex": 2,
+            "duration": 45,
+            "rating": 4.8,
+            "estimatedCost": 13,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/London_-_London_Tower_Bridge_-_140806_171049.jpg/400px-London_-_London_Tower_Bridge_-_140806_171049.jpg",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Tower%20Bridge%20Exhibition%20Ticket",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:30",
+              "close": "18:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:30",
+                "close": "18:00"
+              },
+              "monday": {
+                "open": "09:30",
+                "close": "18:00"
+              },
+              "tuesday": {
+                "open": "09:30",
+                "close": "18:00"
+              },
+              "wednesday": {
+                "open": "09:30",
+                "close": "18:00"
+              },
+              "thursday": {
+                "open": "09:30",
+                "close": "18:00"
+              },
+              "friday": {
+                "open": "09:30",
+                "close": "18:00"
+              },
+              "saturday": {
+                "open": "09:30",
+                "close": "18:00"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Tower%20Bridge%20Londres",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Tower%20Bridge%20Londres"
+          },
+          {
+            "id": "gp-ChIJ03GSCloDdkgRe_s-p2vyvQA",
+            "dayNumber": 5,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "activity",
+            "title": "The Shard",
+            "description": "",
+            "locationName": "The Shard",
+            "latitude": 51.5045,
+            "longitude": -0.0865,
+            "orderIndex": 3,
+            "duration": 60,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/The_Shard_from_the_Sky_Garden_2015.jpg/400px-The_Shard_from_the_Sky_Garden_2015.jpg",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "gp-new-ChIJD2bPdVcDdkgRuUSgnOXnKDE",
+            "dayNumber": 5,
+            "startTime": "14:10",
+            "endTime": "15:25",
+            "type": "activity",
+            "title": "Borough Market",
+            "description": "Immense marché sous des lignes ferroviaires proposant viande britannique, pâtisseries et produits laitiers.",
+            "locationName": "Borough Market",
+            "latitude": 51.505582600000004,
+            "longitude": -0.09048080000000001,
+            "orderIndex": 4,
+            "duration": 75,
+            "rating": 4.6,
+            "estimatedCost": 15,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV8hYblMfD3ALVcWst2_7nhqFOFGgyfUCbtzIxXi2mcWulZ9N0B349wxS_McZ7_EeyygNjlQxChXfb1RgKn-6R8mkvMMdkqOB0jOBcllLSsLmMK8luZY5cUYEPmXBGn2bvo89x2E6dokA5wkdb1eJ-wukrIQS7isHySTuc5_suWgxCwwJi6QVgkxK0JMqaj49E-ilP6EyUabHau4vs_J4LYbhmS9sjCayaVD1Drb0fgbZbOCqweUeqqrsiv73zlNaLyNh0zwZHz1ULGEO2e56fzTr8Wrz-3eMYdFYh9RC1BOuxzFsXSKk-6I4Tj2Bp0bMY4WD46lSZSdriV14AJCCoPx134nYSQbeAOh7245tUZiHYZWP2qLJ9EWv_dR08_-hGxzx_Cs4cOMo1Yjnt8U4g3eyzHb_NPJlTlK1fAxD5WgWQBYQyIb4naLN1mzW4t&maxwidth=400",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "17:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "16:00"
+              },
+              "monday": null,
+              "tuesday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "17:00"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "17:00"
+              }
+            }
+          },
+          {
+            "id": "gp-ChIJxRO7WVEDdkgRrGM1fCYoHqY",
+            "dayNumber": 5,
+            "startTime": "15:35",
+            "endTime": "16:20",
+            "type": "activity",
+            "title": "Pont de Londres",
+            "description": "",
+            "locationName": "Pont de Londres",
+            "latitude": 51.5078788,
+            "longitude": -0.0877321,
+            "orderIndex": 5,
+            "duration": 45,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/London_Bridge_from_South_bank.jpg/400px-London_Bridge_from_South_bank.jpg",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          }
+        ],
+        "theme": "Saveurs locales",
+        "dayNarrative": "Découvrez Tour de Londres, Tower of London puis Tower Bridge."
+      }
+    ],
+    "accommodation": {
+      "id": "booking-14768217",
+      "name": "Arcore London Premium Apartments Aldgate",
+      "type": "hotel",
+      "address": "York Buildings, London WC2N 6JN, United Kingdom",
+      "latitude": 51.5145813,
+      "longitude": -0.0688285,
+      "rating": 9,
+      "reviewCount": 1,
+      "pricePerNight": 382,
+      "currency": "EUR",
+      "amenities": [],
+      "checkInTime": "15:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Arcore+London+Premium+Apartments+Aldgate+Londres&checkin=2026-03-25&checkout=2026-03-29&group_adults=2&group_children=0&no_rooms=1",
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/731970002.jpg?k=0aaf83eab39459acd8c43149ad8440df87dd3d934258bf25f74966a00a151367&o="
+      ],
+      "breakfastIncluded": false
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-5682883",
+        "name": "2 bed, 2 bath 1 min from Paddington station",
+        "type": "hotel",
+        "address": "40 Eastbourne Terrace, London W2 6LG, United Kingdom",
+        "latitude": 51.516476138084,
+        "longitude": -0.181460496876258,
+        "rating": 8.1,
+        "reviewCount": 11,
+        "pricePerNight": 347,
+        "currency": "EUR",
+        "amenities": [],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=2+bed%2C+2+bath+1+min+from+Paddington+station+Londres&checkin=2026-03-25&checkout=2026-03-29&group_adults=2&group_children=0&no_rooms=1",
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/570512949.jpg?k=5901f2ffc108f7358377446f91383185a705b66a8d25aafdb7b961766f0ffde4&o="
+        ],
+        "breakfastIncluded": false
+      },
+      {
+        "id": "booking-15819615",
+        "name": "Elegant Flats in Prime Notting Hill Near Hyde Park",
+        "type": "hotel",
+        "address": "89-95 Moscow Rd, London W2 4EL, United Kingdom",
+        "latitude": 51.5156706753791,
+        "longitude": -0.189575603449483,
+        "rating": 8,
+        "reviewCount": 0,
+        "pricePerNight": 430,
+        "currency": "EUR",
+        "amenities": [],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Elegant+Flats+in+Prime+Notting+Hill+Near+Hyde+Park+Londres&checkin=2026-03-25&checkout=2026-03-29&group_adults=2&group_children=0&no_rooms=1",
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/824333250.jpg?k=b0be25c574fac73a38bd988c6628f6aa1ea6dfc505ba06c8a5ef7a84848de001&o="
+        ],
+        "breakfastIncluded": false
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Londres",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 135,
+            "price": 150,
+            "co2": 1,
+            "operator": "Eurostar",
+            "frequency": "Plusieurs par jour",
+            "bookingUrl": "https://www.omio.fr/trains/paris/london?departure_date=2026-03-25"
+          }
+        ],
+        "totalDuration": 175,
+        "totalPrice": 150,
+        "totalCO2": 1,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/paris/london?departure_date=2026-03-25",
+        "dataSource": "api",
+        "priceRange": [
+          80,
+          300
+        ],
+        "recommended": true,
+        "recommendationReason": "Option rapide, écologique"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Paris",
+            "to": "Londres",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 258,
+            "price": 14,
+            "co2": 9,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/paris/london?departure_date=2026-03-25"
+          }
+        ],
+        "totalDuration": 313,
+        "totalPrice": 14,
+        "totalCO2": 9,
+        "score": 6.5,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0.2,
+          "co2Score": 9.1
+        },
+        "bookingUrl": "https://www.omio.fr/bus/paris/london?departure_date=2026-03-25"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Paris",
+            "to": "Londres",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 206,
+            "price": 72,
+            "co2": 18,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Paris/Londres"
+          }
+        ],
+        "totalDuration": 236,
+        "totalPrice": 72,
+        "totalCO2": 18,
+        "score": 6.5,
+        "scoreDetails": {
+          "priceScore": 5.7,
+          "timeScore": 5.7,
+          "co2Score": 8
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Paris/Londres",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Londres",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 26,
+            "price": 52,
+            "co2": 88,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/CDG2503LHR2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 316,
+        "totalPrice": 52,
+        "totalCO2": 88,
+        "score": 2.4,
+        "scoreDetails": {
+          "priceScore": 7.2,
+          "timeScore": 0,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/CDG2503LHR2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/londres?departure_date=2026-03-25"
+      }
+    ],
+    "attractionPool": [
+      {
+        "id": "gp-new-ChIJB9OTMDIbdkgRp0JWbQGZsS8",
+        "name": "British Museum",
+        "type": "culture",
+        "description": "Véritable vitrine d'antiquités mondiales, avec momies égyptiennes et sculptures de la Grèce antique.",
+        "duration": 150,
+        "estimatedCost": 15,
+        "latitude": 51.5194133,
+        "longitude": -0.1269566,
+        "rating": 4.7,
+        "reviewCount": 170287,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "20:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "20:30"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "phone": "020 7323 8000",
+        "website": "https://www.britishmuseum.org/",
+        "googleMapsUrl": "https://maps.google.com/?cid=3436696222068785831&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW7i8Uk_1oLDqbt17-njYzkyI02adrKtVwg2QtVnBnFhimE5iHQKkJGAM2xT-0y_D4ypu5jgOLIfwdy2JZnFJN1keuzFYVeYiEQlGqRR5OAuXr4UCPsbJhGFqQGfA0SbZiQGjwcpwlu82i7vW4NP8TwrR3vfu2JkwyMZQVDYjGguGeiXPZCuv3cWOkkwPzodqaQ3QmBEm1JSgBrGs1W53DO4zzpntNY6Y0MAKA4biSCmrKInVquVJ2I32g8horLDR153msOXACxb9QKqLv23shbie4QVIRT2GwYRDuhHcYzjhnk2EJnoBG2zuZCab5d4qZhA4i484ZDdtatUth4Cqy9C_3FMmnsUAW1NOuXv0t3OxGGDhk9hZefDPrKDB5JsgfV0Het8fcYUWJwp1jtd4du_NrywHQ2gby9-RbFIssozoS6&maxwidth=400",
+        "googlePlaceId": "ChIJB9OTMDIbdkgRp0JWbQGZsS8",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 156.21870076813346,
+        "source": "mustsee",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=British%20Museum%20Guided%20Tour"
+      },
+      {
+        "id": "gp-new-ChIJ3TgfM0kDdkgRZ2TV4d1Jv6g",
+        "name": "Tour de Londres",
+        "type": "culture",
+        "description": "Château médiéval aux siècles d'histoire sanglants, abritant joyaux de la Couronne et gardiens emblématiques.",
+        "duration": 45,
+        "estimatedCost": 33,
+        "latitude": 51.508112399999995,
+        "longitude": -0.0759493,
+        "rating": 4.7,
+        "reviewCount": 117062,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "16:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "16:30"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "16:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "16:30"
+          }
+        },
+        "phone": "0333 320 6000",
+        "website": "https://www.hrp.org.uk/tower-of-london/",
+        "googleMapsUrl": "https://maps.google.com/?cid=12159518736249087079&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Tower_of_London_viewed_from_the_River_Thames.jpg/400px-Tower_of_London_viewed_from_the_River_Thames.jpg",
+        "googlePlaceId": "ChIJ3TgfM0kDdkgRZ2TV4d1Jv6g",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 149.77886076861597,
+        "source": "mustsee",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Tower%20of%20London%20Ticket"
+      },
+      {
+        "id": "gp-ChIJSdtli0MDdkgRLW9aCBpCeJ4",
+        "name": "Tower Bridge",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.5054564,
+        "longitude": -0.07535649999999999,
+        "rating": 4.8,
+        "reviewCount": 177970,
+        "duration": 45,
+        "estimatedCost": 13,
+        "openingHours": {
+          "open": "09:30",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/London_-_London_Tower_Bridge_-_140806_171049.jpg/400px-London_-_London_Tower_Bridge_-_140806_171049.jpg",
+        "googlePlaceId": "ChIJSdtli0MDdkgRLW9aCBpCeJ4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 7407 9191",
+        "website": "https://www.towerbridge.org.uk/",
+        "score": 149.38268857889648,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Tower%20Bridge%20Exhibition%20Ticket"
+      },
+      {
+        "id": "gp-new-ChIJtV5bzSAFdkgRpwLZFPWrJgo",
+        "name": "Palais de Buckingham",
+        "type": "culture",
+        "description": "Il est possible de visiter les appartements officiels et privés du palais, et de voir la relève de la garde.",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.501363999999995,
+        "longitude": -0.14189,
+        "rating": 4.5,
+        "reviewCount": 188914,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "phone": "0303 123 7300",
+        "website": "https://www.rct.uk/visit/buckingham-palace",
+        "googleMapsUrl": "https://maps.google.com/?cid=731461058599387815&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVrX6DK0oKI4mwBVTuDpS37mimjdPzeX5ZaX-qVLscwDgrTLGoGiYwRt6lGmRA5GiZCtKXmn-R_6gT6lU32_aRWZtg_foki3X4-Pxw7bxudumwWjOar1mKQo0L3Nvx65sbqBEa8D0PX3iROrpUm3nd_dh-sMBTHlfV6TTlBZAWu9A1w-75BL2BvZfyjepSL9vXVsu4gahbLqoWXdvrGMYfvrcrNHOEwyp3bs8un4yeXTZu-fRGk8OMZTicOduu7LjyuZS2ztH_FRBzKduv7XA6zx6eoZ6niOlDTWtG9QBVXzrlHctehIYHSDXFpCMjYI7aLoQgk5omU140TumGnvnh99qVE5p2pwCvOOtBLRaBAPxBVtZgw3pz743W5qHhsym9p2cae7qnukXJmUE04vyJN_XpKrhM_QhzKFj0Q9RW_qVvA&maxwidth=400",
+        "googlePlaceId": "ChIJtV5bzSAFdkgRpwLZFPWrJgo",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 147.73524523563106,
+        "source": "mustsee"
+      },
+      {
+        "id": "gp-new-ChIJD2bPdVcDdkgRuUSgnOXnKDE",
+        "name": "Borough Market",
+        "type": "culture",
+        "description": "Immense marché sous des lignes ferroviaires proposant viande britannique, pâtisseries et produits laitiers.",
+        "duration": 75,
+        "estimatedCost": 15,
+        "latitude": 51.505582600000004,
+        "longitude": -0.09048080000000001,
+        "rating": 4.6,
+        "reviewCount": 124002,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "16:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "phone": "020 7407 1002",
+        "website": "https://boroughmarket.org.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=3542336080288171193&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV8hYblMfD3ALVcWst2_7nhqFOFGgyfUCbtzIxXi2mcWulZ9N0B349wxS_McZ7_EeyygNjlQxChXfb1RgKn-6R8mkvMMdkqOB0jOBcllLSsLmMK8luZY5cUYEPmXBGn2bvo89x2E6dokA5wkdb1eJ-wukrIQS7isHySTuc5_suWgxCwwJi6QVgkxK0JMqaj49E-ilP6EyUabHau4vs_J4LYbhmS9sjCayaVD1Drb0fgbZbOCqweUeqqrsiv73zlNaLyNh0zwZHz1ULGEO2e56fzTr8Wrz-3eMYdFYh9RC1BOuxzFsXSKk-6I4Tj2Bp0bMY4WD46lSZSdriV14AJCCoPx134nYSQbeAOh7245tUZiHYZWP2qLJ9EWv_dR08_-hGxzx_Cs4cOMo1Yjnt8U4g3eyzHb_NPJlTlK1fAxD5WgWQBYQyIb4naLN1mzW4t&maxwidth=400",
+        "googlePlaceId": "ChIJD2bPdVcDdkgRuUSgnOXnKDE",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 144.10627729679135,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJ2dGMjMMEdkgRqVqkuXQkj7c",
+        "name": "Big Ben",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.50072919999999,
+        "longitude": -0.1246254,
+        "rating": 4.6,
+        "reviewCount": 94475,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg/400px-Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg",
+        "googlePlaceId": "ChIJ2dGMjMMEdkgRqVqkuXQkj7c",
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 7219 4272",
+        "website": "https://www.parliament.uk/bigben",
+        "score": 143.10531045340633,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Houses%20of%20Parliament%20Big%20Ben%20Tour"
+      },
+      {
+        "id": "gp-ChIJoaH8k8YEdkgRnmDd5iuUl9Y",
+        "name": "Pont de Westminster",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.5008638,
+        "longitude": -0.1219645,
+        "rating": 4.6,
+        "reviewCount": 11395,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX0XwJMnmbwWVTJaAiuAh1R8VxfG874UNsns5dTdoadKp70x0eoUGSq_WRLkYkH8OF4kp00785iRs_x1R2WtHqKmEIK71nnAG2tMqTRDqZ9cq-yB37xZZx4I3bfcpowueWF7bIZ2gVKCloPbuPjNq7Pr94ul-zd-SOLlQ-2-QuLV1u-Xv3rAla_xDamAN-jQGHcAu9zSp4y4QoP9An0UNIF5NcxHy1RLFaugqOPS-6DJCu6JJZlkRdJ_ighgryJXH00KID_TAUfYzsERo6-l-mb10-hT3Ooga2PKOMKN7aHpaQSAbc_lRy7yXqqpHGFNj78iPuks1KRVfl3WbMKcryjzBCnxiB7z0gvQxCbmfkHAsiuBR-v9LILDlKXHNvJ93dsha7KKkF6nydhjKVt5NARiNjPhYJBnvZyRKE1QoblsWxt-oqRDd-2c2tf6GXVBFXS3-NtZWRuUcbUq24svmh2-eTIBXsX42ycwlCnN9h_-2dl4btpztEzWagTUQbVNWouR02e_HNrKlST6eoHetyNzwxHdqkuYH-Wg1avYbYP6HsIISeLz-Fx_3N1sz3jndZnHmsOHo_svA&maxwidth=400",
+        "googlePlaceId": "ChIJoaH8k8YEdkgRnmDd5iuUl9Y",
+        "businessStatus": "OPERATIONAL",
+        "score": 135.29723182994945,
+        "source": "google_places"
+      },
+      {
+        "id": "natural-history-museum",
+        "name": "Natural History Museum",
+        "type": "culture",
+        "description": "Spectacular dinosaur exhibits and natural world collections",
+        "duration": 150,
+        "estimatedCost": 0,
+        "latitude": 51.4967,
+        "longitude": -0.1764,
+        "rating": 4.8,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:50"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 111.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "st-pauls-cathedral",
+        "name": "St Paul's Cathedral",
+        "type": "culture",
+        "description": "Christopher Wren's masterpiece with iconic dome",
+        "duration": 75,
+        "estimatedCost": 23,
+        "latitude": 51.5138,
+        "longitude": -0.0984,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "08:30",
+          "close": "16:30"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 111.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=St%20Pauls%20Cathedral%20Admission%20Ticket"
+      },
+      {
+        "id": "tower-of-london",
+        "name": "Tower of London",
+        "type": "culture",
+        "description": "Historic castle and home to the Crown Jewels",
+        "duration": 45,
+        "estimatedCost": 34,
+        "latitude": 51.5081,
+        "longitude": -0.0759,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.hrp.org.uk/tower-of-london/",
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:30"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 106.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-new-ChIJQR9pg8sEdkgRKeWNNYlDdPU",
+        "name": "Covent Garden",
+        "type": "shopping",
+        "description": "Boutiques, cafés et bars aménagés dans les bâtiments d'un marché restauré. Artistes de rue sur la Piazza.",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.512045,
+        "longitude": -0.12282539999999999,
+        "rating": 4.6,
+        "reviewCount": 123671,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "20:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "20:00"
+          }
+        },
+        "phone": "020 7420 5856",
+        "website": "https://www.coventgarden.london/",
+        "googleMapsUrl": "https://maps.google.com/?cid=17686835893178852649&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXIk2ebmNujp0dd1RuLaO5TC7CYY1rpksxf4L-9E3XBqjnoqx1ffHtgyE1RGKYd2o1UAjW6ZyM8dXXV4YQNy64og-iQWWzGCRKCaxPEaOKOjAWBQnHYHzfwB2rmBOFl-AgP4X70c_zsknWlghDtIBV4W-SPhJKQCyTrOckO4f-lRYZHJQ3JbrxuR3qo2wlvDCaYoE2CjVoRAYbgzdpzDQ383gUcucwY1EFgJX1mNjggXL-70DprJZ_nJdjtZi0zkjYLLyEV3paihJf6xWJW5yJ-Hj1zwSnmnQyxBDebIxfsw3SExtW8IqPc2OvWNnJH1NaJJpauik4bib_0K60HilJQYwZOJ32khvSS4IWo_eLwKeYbey0P02n1LAkF_QByHflRwa1Csk73O43IzqlT_CLp40alRxtJBB6HwChBao2nwOQLsdvr0R92XPRWJg&maxwidth=400",
+        "googlePlaceId": "ChIJQR9pg8sEdkgRKeWNNYlDdPU",
+        "dataReliability": "verified",
+        "isOutdoor": true,
+        "score": 65.09644112722833,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJG-CxwNoEdkgRXx26gHZwVf8",
+        "name": "St James's Park",
+        "type": "nature",
+        "description": "Espace vert, café au toit végétalisé, lac avec des pélicans nourris chaque jour et cérémonies officielles.",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.502967,
+        "longitude": -0.1339534,
+        "rating": 4.7,
+        "reviewCount": 61813,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "05:00",
+          "close": "18:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "monday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "tuesday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "wednesday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "thursday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "friday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "05:00",
+            "close": "00:00"
+          }
+        },
+        "phone": "0300 061 2350",
+        "website": "https://www.royalparks.org.uk/visit/parks/st-jamess-park",
+        "googleMapsUrl": "https://maps.google.com/?cid=18398735506960162143&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Londonstjamespark2.jpg/400px-Londonstjamespark2.jpg",
+        "googlePlaceId": "ChIJG-CxwNoEdkgRXx26gHZwVf8",
+        "dataReliability": "verified",
+        "isOutdoor": true,
+        "score": 61.32385201146194,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJeclqF84EdkgRtKAjTmWFr0I",
+        "name": "National Gallery",
+        "type": "culture",
+        "description": "Musée d'art à Trafalgar Square dont les œuvres retracent l'évolution de la peinture en Europe occidentale.",
+        "duration": 120,
+        "estimatedCost": 15,
+        "latitude": 51.508928999999995,
+        "longitude": -0.128299,
+        "rating": 4.8,
+        "reviewCount": 59892,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "21:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "phone": "020 7747 2885",
+        "website": "https://www.nationalgallery.org.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=4805205997576757428&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Galer%C3%ADa_Nacional%2C_Londres%2C_Inglaterra%2C_2014-08-07%2C_DD_036.JPG/400px-Galer%C3%ADa_Nacional%2C_Londres%2C_Inglaterra%2C_2014-08-07%2C_DD_036.JPG",
+        "googlePlaceId": "ChIJeclqF84EdkgRtKAjTmWFr0I",
+        "dataReliability": "verified",
+        "isOutdoor": true,
+        "score": 54.016056769196965,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJw1d-sUMFdkgRH2XN_U0Jt54",
+        "name": "Victoria and Albert Museum",
+        "type": "culture",
+        "description": "Expositions populaires, collection permanente d'arts décoratifs, boutique design et café richement décoré.",
+        "duration": 120,
+        "estimatedCost": 15,
+        "latitude": 51.4966392,
+        "longitude": -0.17218,
+        "rating": 4.7,
+        "reviewCount": 65757,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "22:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:45"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:45"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:45"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:45"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:45"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:45"
+          }
+        },
+        "phone": "020 7942 2000",
+        "website": "https://www.vam.ac.uk/south-kensington",
+        "googleMapsUrl": "https://maps.google.com/?cid=11436620009305892127&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWA70oQvEv4TUS1L3eCoHKGnBV6aoT_iz6P_GWUQa_V2_BhxrVEUkzOGXFlLyINZvqBzsnQ8EiHdf-u4-9NlxDXZJmW8sw4UH_P_ljQu52_jED2qDc3-mFBkegQMkqN1wmJv-ZKYCKA5X-PBbyxJvDgLRCGw9OQCSreGgy1QkxDuf0ek7ehzqLeifB0VDeNh9ZSaaRLWmy6_pkOC4pJKmHmLhI8FkE0t3RrJ5ZWxrSKUh2YTdAp29xjoXURxfs3fI4EJmRBF4JkfP-qTbPHGwftvxTz7QoKLOkFIjX87H6JyVRcyQkSvYENCDD_Ou4TOP6R38NgUgo8NqcqnxmRrTAlVFWYDb_Alomts0DCd2dGvJzTrJfySwOF8L3ty3KZ9n6CnjN164yaJBfhBLdL3RyHqHBaypvuuPFkg8OrTw_XYA&maxwidth=400",
+        "googlePlaceId": "ChIJw1d-sUMFdkgRH2XN_U0Jt54",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 51.06175946597431,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJTXqIiSMbdkgRaJ4F-SvrI9c",
+        "name": "7 Bali Spa",
+        "type": "wellness",
+        "description": "7 Bali Spa à Londres",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.5169108,
+        "longitude": -0.13501459999999998,
+        "rating": 4.8,
+        "reviewCount": 283,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "22:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "22:30"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "22:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "22:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "22:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "22:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "22:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "22:30"
+          }
+        },
+        "phone": "020 4547 5467",
+        "website": "https://7balispa.co.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=15502492916433395304&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUbqvMAyiF0fN98rzuKMPzEjWDiqrmh2eazAfEMJrScgJvWvVSKdt5LmlcJupZeESRK3YeNsSY0abS4uH-7gy3IVEWkCdsY9TMrmWibLcZ9aOOLBWs3awNQ__FuEQnpF0Ra1WMb1poNnppFC7Z6iswXEcskO7lM_q4pGnFMLhRh0zE8Snmf0PGyZrvSai4DdGGEV3F9gjRIkPKAlqIFOXhi126PlWwN4FywCF5NLkeFKt9Gp0Z8OZ9B1aAnw0uPRCwbLrmfvKgB7xLGuCDwTiPf2X3wdlNGtQubdMZcBRVNcw&maxwidth=400",
+        "googlePlaceId": "ChIJTXqIiSMbdkgRaJ4F-SvrI9c",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 48.4923205283839,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJhRoYKUkFdkgRDL20SU9sr9E",
+        "name": "Hyde Park",
+        "type": "park",
+        "description": "",
+        "latitude": 51.5073638,
+        "longitude": -0.1641135,
+        "rating": 4.7,
+        "reviewCount": 140105,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "05:00",
+          "close": "00:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Hyde_Park_July_2015-1.jpg/400px-Hyde_Park_July_2015-1.jpg",
+        "googlePlaceId": "ChIJhRoYKUkFdkgRDL20SU9sr9E",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "monday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "tuesday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "wednesday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "thursday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "friday": {
+            "open": "05:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "05:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "0300 061 2000",
+        "website": "https://www.royalparks.org.uk/visit/parks/hyde-park?utm_source=google&utm_medium=organic&utm_campaign=google-my-business&utm_content=hyde-park",
+        "isOutdoor": true,
+        "score": 44.96925951270836,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJH-tBOc4EdkgRJ8aJ8P1CUxo",
+        "name": "Trafalgar Square",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.508039,
+        "longitude": -0.128069,
+        "rating": 4.6,
+        "reviewCount": 136698,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXfCJwbAr_Mfw43qpW7RE6xc-XMWUSbow4epZ7G6IOuHsOQ2ao07l8jBnPyDLVlfubAYc2i31A9bLKIAsRZTM90SV7NgjwL9RK_H0mCYKDpKhjvtxNbuggruCMjFiry-XImDGs7BS2MklJPi6Z0wpAxJHV_d6TTLGGFqhkN15wNxImhladfi-prcoCVqBJWdOkFW1JsjLAeLGrNQLzKIHflvbOAXVt-tN6upFTLdBb-jT1AtP0hdN-twfo1ILDu-ktm2tD-dyeA5zPymcaDeADSpOc74F2_kI7mcQTW4LaMv5mBlJlo0YKR995ebzhtmuW6thnH6m90CGST6Qn6hixMYfo5xFio6WFdO_qJfkxkucrK_N5AdhwOzN_7nAH1rLgw966rzTSnweG02qs0VNhIErBRmXbwlleJk9EzQ2Ml3mOv2SOEmyIcjXFT_JI85K4tsRWA0SLXDkk0Nzc9ACw8VsdN8SjTsJ8yo9mflDg5rvNHmcEWSlCpa01pSbMqcJxgnnMO3HzwtLrWTU1LyN6IQ_SNbwS5J-aURMdAoXMZPM1HtJA4U0dmpW7Sp1JpM-DtPqq9&maxwidth=400",
+        "googlePlaceId": "ChIJH-tBOc4EdkgRJ8aJ8P1CUxo",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.london.gov.uk/who-we-are/city-halls-buildings-and-squares/trafalgar-square",
+        "isOutdoor": true,
+        "score": 44.46497168725332,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-new-ChIJD5ZQMiwFdkgRLSuZru8rY8o",
+        "name": "Aman Spa",
+        "type": "wellness",
+        "description": "Aman Spa à Londres",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.510202,
+        "longitude": -0.149585,
+        "rating": 4.7,
+        "reviewCount": 135,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "21:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "21:00"
+          }
+        },
+        "phone": "020 3147 7305",
+        "website": "https://www.the-connaught.co.uk/aman-spa/?utm_source=google&utm_medium=organic&utm_campaign=local",
+        "googleMapsUrl": "https://maps.google.com/?cid=14583548326782249773&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXxWKoi7Bpd4Yvsz08N4xZPkuKXGUZL2cGCSPAPsewQwc0D6zG6JQ-4fkqdpYHBhvaX9CqTntnmkFe0PTf6Ljeo7fHTAeqGkv3bZUSniUlATVlxULfA3bEWA9znxWAE8ZNX801u14K3Bh0fYAtU_Cc8yRqp9xLsSS1-THLV2-d1D9WOLfvYI55zJnTJ22_3wYS8lrr4i32tE4h8RScll_68jQbtcp28lHgCSC0uq9cZBt69mbANSTRg2kpiTLp6WxcUsw9BAbZZZO-3ImghnFFPY8B-8EFFaXh7SKpGxzkCvA&maxwidth=400",
+        "googlePlaceId": "ChIJD5ZQMiwFdkgRLSuZru8rY8o",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 44.3647999273591,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJc2nSALkEdkgRkuoJJBfzkUI",
+        "name": "London Eye",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.5031864,
+        "longitude": -0.1195192,
+        "rating": 4.5,
+        "reviewCount": 197675,
+        "duration": 45,
+        "estimatedCost": 34,
+        "openingHours": {
+          "open": "11:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/London-Eye-2009.JPG/400px-London-Eye-2009.JPG",
+        "googlePlaceId": "ChIJc2nSALkEdkgRkuoJJBfzkUI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 7967 8021",
+        "website": "https://www.londoneye.com/",
+        "score": 43.89481638427848,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=London%20Eye%20Standard%20Ticket"
+      },
+      {
+        "id": "gp-new-ChIJGyUuT8cFdkgRC1EqeTwdqbw",
+        "name": "THE LUMI SPA",
+        "type": "wellness",
+        "description": "THE LUMI SPA à Londres",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.514361799999996,
+        "longitude": -0.1394483,
+        "rating": 4.6,
+        "reviewCount": 136,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "phone": "020 4610 0959",
+        "website": "https://thelumispa.co.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=13594429095762612491&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUj33xQXmTDBK0YEksShMnqvyBwVobIf5AedR6ueLL70X-hWic2PIORb2uLC7vIBWnlUowrLkZCLPSwLhMayDuoEQDaB1xXQ7vCogGLeQV93tGPZUQFsh3ZzF2u5GJZo7fC89EDB0EbaXhBjrXygNxeeA7Nvc8sJfmKe0wLXZSXvoQKN_D26Horzi7sV7OZ0wkedCgg2uW9mNnNgXfkxymRBIEFIkPHm99mSBkwjtRhlYtjEh7apZhSW-ygdRP_5PrJL1zov-uY2-iAjJi-Es8Qvl8FH8p6-14lIbkUQ1bnLQ&maxwidth=400",
+        "googlePlaceId": "ChIJGyUuT8cFdkgRC1EqeTwdqbw",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 43.83919017923134,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJq4lX1doEdkgR5JXPstgQjc0",
+        "name": "Churchill War Rooms",
+        "type": "museum",
+        "description": "",
+        "latitude": 51.5021585,
+        "longitude": -0.1293572,
+        "rating": 4.6,
+        "reviewCount": 15154,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWtBW7mipdPMx4cQkYsZasVYy9522HT1m4Mm-sYqeKQgBtXA5puw_eqLJGGq9mM6HlBaOz9BcBUUgRoXYykjrwL29nkQuJohkLO3UfLjqJNfMKGZXzxjwftc-ZsHcDL4dEk2PcN8raQ6Wmuo2V1LNcH0ZD2nWeyzVDSh8FWsBTN00RcPCkBm54SAeiPl4ZlugdisYDcMh89kxK3D14bD9YHITX_61SLnanhsS08ncV9SmDzEFjRtesFTZqSyIUst4Ea5ibSd-_mNZ3vARlvn_GB3SQYztWphqZ6Dzx5Pah7ALh7EzGrP_qhM2gosYmFjSlziZ1RS2VpSma3UJkTyMFW-ry9AN5KNlxLHu8eHnZ6Pz-PQvaPGuPc0prQc3nwkS9_3S-6YeOgVBTjrphHkjCd0Sojng7-yll9hRs_CGzNzqTYuxoxz283R-kVsIUZXP3h7NsnKtnndD9kUIHNEbX3JSueOkRmCPWKLRS7TwHNUHEwFLwpR-FCZ_ycIRs76rfibLeCd3aq12WFd-Vc6lB8gQFDZNvUx6zNXssERtN8rDwS-hxiKUaavM231X9pyOFoDw&maxwidth=400",
+        "googlePlaceId": "ChIJq4lX1doEdkgR5JXPstgQjc0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 7416 5000",
+        "website": "https://www.iwm.org.uk/visits/churchill-war-rooms",
+        "isOutdoor": false,
+        "score": 43.35387594326164,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-new-ChIJczuZfc0adkgRc8X-u3ZiHcE",
+        "name": "Wallace Collection",
+        "type": "culture",
+        "description": "Musée d'antiquités, sculptures, œuvres d'art et armures du monde entier, dans maison de ville somptueuse.",
+        "duration": 120,
+        "estimatedCost": 15,
+        "latitude": 51.517323000000005,
+        "longitude": -0.1530885,
+        "rating": 4.8,
+        "reviewCount": 10138,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "phone": "020 7563 9500",
+        "website": "https://www.wallacecollection.org/",
+        "googleMapsUrl": "https://maps.google.com/?cid=13915386685744399731&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUAO46n3ge0scR7mGQZaLlJKA3SL4tcJKVVjczcW6A8l6m75-g14aDFC2elyfHmpHFKlXZOl8UEJlJKrt4DLQ4nRRuR38RmCn4CeMsf_tbgzC-AWDxyjf9kIOd2WA1S9vFFer6DAoUMw_uzmC-fA8fbJzi22Ner9ETl3CL7M6aHV635uNlkYWKFp6z2v4H_HKC0Xm-6RpzmJIYal9RZmQkEQF6YEv9NmfQ2-AFOqFWeODsInUEMBw6P6ofgrjXbM04uwe2Bu_otSaloxHQTMdhe93_1sDWyMEhLZQC2HhIf803QU7Ws3QCQCqRjlXRQVVQIU-XjtKrgEcHAaqnl4wwJmB-7_WTvOk7sF3SwLWrZwUjHju8ReLiRhqKRg6bNaauggLfDfDjEzKWMCORE1t0bov-mZbMtBuExLLGyAgjE2w&maxwidth=400",
+        "googlePlaceId": "ChIJczuZfc0adkgRc8X-u3ZiHcE",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 41.858879126482464,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJSzwgydoDdkgRndnXVYQGXBI",
+        "name": "Musée Horniman",
+        "type": "culture",
+        "description": "Musée avec aquarium, animaux empaillés et collections d'instruments musicaux dans jardins paysagers.",
+        "duration": 120,
+        "estimatedCost": 15,
+        "latitude": 51.4419283,
+        "longitude": -0.0619967,
+        "rating": 4.6,
+        "reviewCount": 9386,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:30"
+          }
+        },
+        "phone": "020 8699 1872",
+        "website": "https://www.horniman.ac.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=1322939555985742237&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXIIUOb3TvYu6kBFbf9KWcbmPSeTrvC-X8otbBZlHacYZKizcvH_nIk_0EnfJ7N9c0xSXaDiMn4RcF8-vHvHowUtsqFcizBWjzvKJj_HExs1_cXiGGpwD3jYagHAyRii48fuGWAwhNygQdYwqR0eOIbP-z67EX7bGytvxfCgr1Atu7b-ehSSDMoIhix_PeiSCjGsn1dtubdAMLbOEU7IIOLT3eaUZ7D9ko3fxn7yS8XabBDfLNRiXDd0PiTj8j1ImsVnw7AFIgfxvpaYEup7KNjol07uBJuWfaZAxWayyARXZKs08hZuAhsyklcq5b8I8oy3eDez8rZShwMvhs4IhYjr9xSUm1geNSmzSqlhK1MI3WMOhX_xxQ94dZCRwef682KYL9njH2UGAbs_ouWkbdpgztbJYsqL2zpY3Slf9LQ1g&maxwidth=400",
+        "googlePlaceId": "ChIJSzwgydoDdkgRndnXVYQGXBI",
+        "dataReliability": "verified",
+        "isOutdoor": true,
+        "score": 41.57700498961649,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJLzVDusQEdkgRelObBaL_jto",
+        "name": "Abbaye de Westminster",
+        "type": "culture",
+        "description": "Abbaye protestante aux offices quotidiens célébrant les couronnements anglais et britanniques depuis 1066.",
+        "duration": 45,
+        "estimatedCost": 15,
+        "latitude": 51.4993695,
+        "longitude": -0.1272993,
+        "rating": 4.6,
+        "reviewCount": 49958,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "phone": "020 7222 5152",
+        "website": "https://www.westminster-abbey.org/",
+        "googleMapsUrl": "https://maps.google.com/?cid=15748806018305053562&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVUUREbjoi4Op0rooEk72KZO6wqDeRr_JWRaQgpAJY5nfJsFi74oQjGpX75uVOf-Kf__c-LKj6W2xJzVZ2i-U5jUsVkdvbdKhhSSE1-_w4n47245jyr_o5kdnnzPO2BV_5saArEShijwZopjVPPO4FL5McSV4vXjrCS0NT8Je3QrFC4EDO3zbR7wCQLgPrZOzMAQxsmp0OKKiq22cJckVZRRoAyplDVkuVatVmuxtiJbliEHf5lTJdhVWAOkMOZgcPDLPSFKClGahIWQpeJg7tmzFxs-GFH0wZY_vWH_VwV7lVhoaCMRDtNaVuZ49zvl8HI7SPHmLTh9X5FgzKMTC0ldmGTlHGzMx5ggrKR4LUiztg4v53jJTwUgb6o7xO_SP4TtP0fCJSjomAOGVjtoTvSQQr_sZaty1LDEqcpaVMt62nb&maxwidth=400",
+        "googlePlaceId": "ChIJLzVDusQEdkgRelObBaL_jto",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 40.75869446494516,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJJUQ-d8oEdkgR-JVIDfRa6aY",
+        "name": "Courtauld Gallery",
+        "type": "culture",
+        "description": "Galerie élégante avec grande collection d'art, dont des œuvres de Monet, Van Gogh et Cézanne.",
+        "duration": 120,
+        "estimatedCost": 15,
+        "latitude": 51.5115865,
+        "longitude": -0.11755929999999999,
+        "rating": 4.7,
+        "reviewCount": 2780,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "phone": "020 3947 7777",
+        "website": "http://courtauld.ac.uk/gallery",
+        "googleMapsUrl": "https://maps.google.com/?cid=12027244284111001080&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX7LwORdDsJinmq0RL_zIesgpKS5fWg0HMlevtumOM8SjM3wSo5QfwmQZC7YWy8JQPz7basoDPodR17Pu9ybhWpdN3u6ary3CiDhL_YVCvZt25DDQ9XlG7-Mh8k-BHoNBaGjf6AMtYH29EUJnZPuLn4MaACuf_NqqDa9mBBlg3F0G2ItXnM44Uda9oO0wUb3mZ_o6j4AD1cwZbk-GX7n8zO3CKET8gAYKVjZG8garHlMiHqDgIC-RnzY9Alm1i0KZMmyLcNLGWf2WPAGbgQF-SqY6k_vBdeg16R2ixIuzKuRlnIjE9oaa9iS8S1at1VpHPZ-wp37OeINr_MPUowuHLSrzJnQnRdAJlXXjPMtG2tiEld4yBHySG4HAS3aCAHNh0oVsM6khZUXpoQIF5dwRw9QcLRdoQ8hC1nz0MO0WZYYiFD&maxwidth=400",
+        "googlePlaceId": "ChIJJUQ-d8oEdkgR-JVIDfRa6aY",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 40.27300922934213,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJxRO7WVEDdkgRrGM1fCYoHqY",
+        "name": "Pont de Londres",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.5078788,
+        "longitude": -0.0877321,
+        "rating": 4.6,
+        "reviewCount": 63432,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/London_Bridge_from_South_bank.jpg/400px-London_Bridge_from_South_bank.jpg",
+        "googlePlaceId": "ChIJxRO7WVEDdkgRrGM1fCYoHqY",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.cityoflondon.gov.uk/things-to-do/architecture/bridges",
+        "score": 40.13844512739496,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ03GSCloDdkgRe_s-p2vyvQA",
+        "name": "The Shard",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.5045,
+        "longitude": -0.0865,
+        "rating": 4.6,
+        "reviewCount": 45822,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/The_Shard_from_the_Sky_Garden_2015.jpg/400px-The_Shard_from_the_Sky_Garden_2015.jpg",
+        "googlePlaceId": "ChIJ03GSCloDdkgRe_s-p2vyvQA",
+        "businessStatus": "OPERATIONAL",
+        "phone": "0344 499 7222",
+        "website": "https://www.the-shard.com/",
+        "score": 38.94019388483322,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-new-ChIJjaFZHUkFdkgRx1FRopPLqjQ",
+        "name": "AIRE Ancient Baths London",
+        "type": "wellness",
+        "description": "AIRE Ancient Baths London à Londres",
+        "duration": 60,
+        "estimatedCost": 15,
+        "latitude": 51.5088854,
+        "longitude": -0.122702,
+        "rating": 4.6,
+        "reviewCount": 1842,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "23:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "23:00"
+          }
+        },
+        "phone": "020 3830 4610",
+        "website": "https://beaire.com/en/aire-ancient-baths-london",
+        "googleMapsUrl": "https://maps.google.com/?cid=3795069470956933575&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVyksTOB8uYmTkxnt58LNooPId63KAZOcd1FMyM7k31740th4UoUOF9HnxrlmOp1J-bq4D65qkjfridYIM6MgrZ9QjB08ziL_g3mOFclsMDKUeL19yGkuOzWuLIuG2p5PXASA0sTND2llMGUE_q6e0_Lx1umRBrWDrgBmiVKJNB7R5Co1omq3gDgxFHDF2tlgAHFjwTx5Q0ydqL_nz72xeg7se6yFyHLzQhfwj-zIpvApQMDUIjEeAJNIWddB-GEk_i7YuGFQnKGMj3sMSvoVeDiCjsxj4Lo5G_T2ElJMtSyw&maxwidth=400",
+        "googlePlaceId": "ChIJjaFZHUkFdkgRx1FRopPLqjQ",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 36.44918833491958,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJURt2jFIDdkgRsxERfqYhtSo",
+        "name": "Marché de Leadenhall",
+        "type": "shopping",
+        "description": "Marché couvert historique de style victorien avec magasins de vêtements et d'accessoires, restaurants et bars.",
+        "duration": 120,
+        "estimatedCost": 15,
+        "latitude": 51.512766,
+        "longitude": -0.0835289,
+        "rating": 4.4,
+        "reviewCount": 22196,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "phone": "020 7606 3030",
+        "website": "https://leadenhallmarket.co.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=3077402919340937651&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUaFbOCANGNVH1B2AViQ8XhHmT1bV3IkOqvVEY2kLT-Ypd6jhCmhA2xsP24q2LaPFVhVfh3TQiRWKFi5033e9nvYpTQ2izhsiQzMbsLB9qQ4f9yhVNeUGkcfQxkyHUUaNk9gEHbg58Ztqcqprx_pIlelXkUdTiMzbCglHr0jzE3WFDPyAHdFtqxRk_YZec-Oa9JCuE_WG8R2KmQcx6A3qmg-blgncqPtSlWuBRtIUBd1JI5ydCzxSbSMtmaoJuPuyT2-ED64AETeHRh0DPjYxzQkZlNnKH6qiz2arvWOtIrzvPlkkeRxJy9f9Nct6Xn0DWBivMh52t0ae7ZCZp65A_bIUlRY3r7ACUHJrfaXw2NxXc7EMy5wAVP6Yf33Q7MbDJSYQp-xXMPe_7dHRG5D1XTcyx5i0UacOaEfLYVoa9fFMhUNZwV2lWG-quoYUrq&maxwidth=400",
+        "googlePlaceId": "ChIJURt2jFIDdkgRsxERfqYhtSo",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 36.14394998218045,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJscLxT6ccdkgR4JQC5l_JcD8",
+        "name": "Banya No.1 - Hoxton",
+        "type": "wellness",
+        "description": "Banya No.1 - Hoxton à Londres",
+        "duration": 90,
+        "estimatedCost": 15,
+        "latitude": 51.53015,
+        "longitude": -0.094344,
+        "rating": 4.8,
+        "reviewCount": 782,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:30",
+          "close": "22:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "22:30"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "22:30"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "22:30"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "22:30"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "22:30"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "22:30"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "22:30"
+          }
+        },
+        "phone": "020 7253 6723",
+        "website": "https://gobanya.co.uk/?utm_source=google&utm_medium=organic&utm_campaign=gmb",
+        "googleMapsUrl": "https://maps.google.com/?cid=4571375035499058400&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVuf0Z-Mfx838OFtnfkCitxZireB7wR3QfV2dSx97lg7AkU_pMw4vmHpfUfPrHymJ321k2165juEdVK0SNY5OczPbJCbWssN5Yv9IZDPt8Pt9trP1thBxoMcy_Wkc118J-qLPHTi2F49UWUm8dlI75yKM6HHT9TjcNi7m0h4_Dq-7IgLUyz_3UlsPDPLxlVmTds1d7MCMVci3Wcl98tQmO47JrMaOjnXeIuCoMFXk35ELAOvijrtLIV65AHVeUJ7O3HOZZOeg3SEKTsFr44GiHf9R_cpMoruGfeErpcoRM&maxwidth=400",
+        "googlePlaceId": "ChIJscLxT6ccdkgR4JQC5l_JcD8",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 33.63735090385448,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJG1YB2m4RdkgRsetv9D40NGY",
+        "name": "Portobello Road Market",
+        "type": "shopping",
+        "description": "Marché hebdomadaire vivant proposant des articles vintage, une cuisine de rue, des souvenirs et plus.",
+        "duration": 75,
+        "estimatedCost": 15,
+        "latitude": 51.5170002,
+        "longitude": -0.205847,
+        "rating": 4.5,
+        "reviewCount": 27988,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "08:00",
+          "close": "19:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "19:00"
+          }
+        },
+        "website": "https://www.visitportobello.com/",
+        "googleMapsUrl": "https://maps.google.com/?cid=7364568735651195825&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUoBhNRcNn6FqkZj7O5SW-0KBeG10pY5ujKVasd9FNZj46KK985iXmRxQdDLdzjkTqjL2FUAo54Qz3OswzJblvUz6u_aEVId22tBTugAMB1yXy6H1pk0Yila_ypqdTdb_lPorsdDWGLJLmtjSXzBVFKLMGqmdXWPldbNqqJKtPoi190M4ORkF902cjKXyuyVBq3_sZ2_CwyOEiHAPrm6Rbf6cgV-7xTQhJnFCR-7e63vTs5B_-tooDpZo3XdunrlWmcD7yadyjDsaooAy-Ij2N6ElHpR-leoBZbGxogfnRoGhjmKT1op6OYinHHYtrd2HGue3ZhK3B2DWTStcmd1Kfbppp5ngHQhnAjTT3ddqyjbFz3EzY2jNxpQwIAz1hpA6d-x4ruUITzQIEEHNa7Q9EdWpNBO7EkcRIlATuQUesCS23Q&maxwidth=400",
+        "googlePlaceId": "ChIJG1YB2m4RdkgRsetv9D40NGY",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 33.00632469400162,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJZ5rPfcwEdkgRCld_oTBUf_k",
+        "name": "Jubilee Market",
+        "type": "shopping",
+        "description": "Marché couvert avec antiquités, objets de collection, œuvres d'art et d'artisanat, objets du quotidien et alimentation.",
+        "duration": 75,
+        "estimatedCost": 15,
+        "latitude": 51.5116328,
+        "longitude": -0.12182889999999999,
+        "rating": 4.4,
+        "reviewCount": 9698,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "05:00",
+          "close": "19:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "05:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:30",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "10:30",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "10:30",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "10:30",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "18:00"
+          }
+        },
+        "phone": "020 7379 4242",
+        "website": "http://www.jubileemarket.co.uk/",
+        "googleMapsUrl": "https://maps.google.com/?cid=17978180805330949898&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXqwmpWUZgdy3tI5JdCYnd1-wOH8LpWQEf1jPE32DAkXqO-sB-KcKDggymM8jx0sWn9-fQo2bxiibxtMY40Vlwc9vko7rkRJ92WFBvJLf7Z9u_t5rHF7Phn7ffgsZ7wF9nLlIMqsqtcoa0jQZSf9dcT5jJcoWYjXJUpVrhBVzyysqozkMkFwCc-r1e1Mf6TS8XlS_xpuBpKJMbxzNK0BpzGmzhfzHzxWP7fmidF_J1m9dY--cTc2-KlV7EFvzKW2S_0j0oO1V40tbhKwRlXHxEUksm4iESTzbvji58zCQhWFtrT7cjcbrvqJWWTZ23wLOKRkgWJmo0YXBIGyUbBjHnJT7_lgRG6ohqouw7BOIgIqwcOp6TVTgoMd72Q4wP98B3BDYvWIOnALs49XhnYcixqERjznff2V1NKZDsjI1K7Zw&maxwidth=400",
+        "googlePlaceId": "ChIJZ5rPfcwEdkgRCld_oTBUf_k",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 32.84442816669018,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJk9LIC8cEdkgR2TkO-raMEDk",
+        "name": "London Dungeon",
+        "type": "attraction",
+        "description": "",
+        "latitude": 51.50251189999999,
+        "longitude": -0.1187628,
+        "rating": 4.3,
+        "reviewCount": 19653,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVhYRHEMnGnznGIzoqQnxSJJXjkvq1eWavcERfeFFaztzsU-01INM-HhVl-Il-EGwz_iOvnMRFPuJW3uOWg6QD36SrrL4tO-5UPySylo3GTqfifuzD31wUMIwSHDXjn-GpUbJH9e3nJwoM3n5CvP6wMbGSyHk16Xh0ALv5uzmiEyIa-JHHDv2NXty7BRyRgWtFy8U-wBNlVExzg_VestnEG5oNq23yLj8xE5IyWoXrl81Z7reyh8zo-o_MHYstFRKu1cLDfKF3YrWBGYoKUL99opCB3nt_YzS7exgoIdoErh50_v3r0tScuAxVwd8c5h5ASGCGjOVlXgTpyCkmK_Pz-hLGlurywYXdcIwRzvmTNQJSLklNxo0ZnZmW1tftlc9U--2ewXoYzp8wl_7Wp7yevGRUgP0RKRKhVkeXKX5rmQjsJlz5WhTyzHqMH8GYpGkybYN535RVjFttuiASs9LLtML1BRAJmkW619t3UteDCAshPR9U2hU5x2pSEInfsOV16UXo17ivCAaj-2QwN56RMdHPN8v0tMUM-WZnEvBbEKvWDI_s7tdWMCHXzHjgHqxflHA&maxwidth=400",
+        "googlePlaceId": "ChIJk9LIC8cEdkgR2TkO-raMEDk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "16:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "16:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "16:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "16:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "16:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "16:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 7967 8022",
+        "website": "https://www.thedungeons.com/london/",
+        "score": 32.74312015624707,
+        "source": "google_places"
+      }
+    ],
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 140,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "premium",
+      "dailyActivityBudget": 85,
+      "transportTips": "Achetez des cartes Oyster rechargeables (transport illimité 7 jours ~45€). Les musées majeurs sont gratuits (British Museum, National Gallery, V&A, etc.).",
+      "reasoning": "Avec 600€/personne/jour à Londres, c'est un budget CONFORTABLE. L'Airbnb avec cuisine permet de contrôler les petits-déjeuners (3-4€/pers) et certains déjeuners, tout en gardant flexibilité pour restaurants (Londres = très cher: 20-35€ par repas). Cela libère ~170€/jour pour activités premium (musées payants, spas, shopping, restaurants gastronomiques). Le 'mixed' au déjeuner = alternance restaurants modérés/sandwichs pour optimiser sans sacrifier l'expérience. Les dîners au restaurant car c'est une priorité gastronomique. Budget activités de 85€/jour permet wellness (spa ~60€), culture payante, et shopping. Transport optimisé via Oyster. Stratégie: maximiser expérience gastronomique + wellness + shopping haut de gamme (Oxford Street, Harrods), tout en maîtrisant les coûts d'hébergement.",
+      "maxPricePerActivity": 200
+    },
+    "pipelineVersion": "v3",
+    "stageDurationsMs": {
+      "fetch": 100596,
+      "score": 24,
+      "cluster": 6,
+      "hotel": 0,
+      "anchor-transport": 0,
+      "travel-times": 2907,
+      "restaurants": 2,
+      "schedule": 0,
+      "repair": 1,
+      "contracts": 0,
+      "decorate": 0
+    },
+    "qualityMetrics": {
+      "score": 80,
+      "invariantsPassed": false,
+      "violations": [
+        "P0.2: Day 3 \"Dishoom\" is 1171m from nearest activity (max 800m)",
+        "P0.3: Day 3 has no dinner",
+        "P0.3: Day 4 has no dinner",
+        "P0.3: Day 5 has no lunch"
+      ]
+    },
+    "qualityWarnings": [],
+    "contractViolations": [
+      "P0.2: Day 3 \"Dishoom\" is 1171m from nearest activity (max 800m)",
+      "P0.3: Day 3 has no dinner",
+      "P0.3: Day 4 has no dinner",
+      "P0.3: Day 5 has no lunch"
+    ]
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: luxury-couple",
+    "   Paris → Londres (5j)",
+    "   couple (2p) | luxury | culture, gastronomy, shopping, wellness",
+    "======================================================================\n",
+    "[Pipeline V3] Using V3 pipeline (deterministic 12-step)",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[Day Trips AI] Calling Gemini 2.0 Flash for day trip suggestions...",
+    "[Google Places New] Text search \"British Museum Londres\": 1 results",
+    "[Google Places New] Text search \"Tower of London Londres\": 1 results",
+    "[Google Places New] Text search \"Buckingham Palace Londres\": 1 results",
+    "[Google Places New] Found 3/3 must-see attractions",
+    "[Places Wrapper] ✅ Google Places returned 3 must-see attractions",
+    "[Google Places New] Text search \"best museums art galleries historical sites Londres\": 20 results",
+    "[Google Places New] Text search \"top tourist attractions must see landmarks Londres\": 20 results",
+    "[Google Places New] Text search \"famous viewpoints markets food streets Londres\": 20 results",
+    "[Google Places New] Text search \"food markets street food districts local cuisine Londres\": 20 results",
+    "[Google Places New] Text search \"meilleur restaurant Londres\": 20 results",
+    "[Google Places New] Found 20 restaurants for \"Londres\" (any)",
+    "[Places Wrapper] ✅ Google Places returned 20 restaurants for \"Londres\"",
+    "[Google Places New] Text search \"best shopping districts markets boutiques crafts Londres\": 20 results",
+    "[Google Places New] Text search \"spas thermal baths wellness retreats hot springs Londres\": 20 results",
+    "[Google Places New] Found 40 attractions for \"Londres\"",
+    "[Places Wrapper] ✅ Google Places returned 40 attractions for \"Londres\"",
+    "[Google Places] ✅ 20 attractions found for Londres",
+    "[Hotels] Disponibilité live: 8/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (477ms)",
+    "[Pipeline V2] Injected 8 curated must-see attractions for \"Londres\" from local database",
+    "[Pipeline V2]   → Big Ben & Houses of Parliament, Tower Bridge, British Museum, Tower of London, Buckingham Palace, Westminster Abbey, Natural History Museum, Borough Market, St Paul's Cathedral",
+    "[Pipeline V2] Step 1: All data fetched in 100596ms",
+    "[Pipeline V2]   Activities: 20 Google + 40 Places/SerpAPI + 24 Overpass + 0 Viator",
+    "[Pipeline V2]   Restaurants: 1 TA + 20 Places/SerpAPI",
+    "[Pipeline V2]   Hotels: 8 | Transport options: 4",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Nirvana Spa\" (54km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Ragdale Hall Spa\" (154km from destination, max 50km)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [156.2] ⭐ \"British Museum\" (src=mustsee, reviews=170287, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #2 [149.8] ⭐ \"Tour de Londres\" (src=mustsee, reviews=117062, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #3 [149.4] ⭐ \"Tower Bridge\" (src=google_places, reviews=177970, rating=4.8, tags=none)",
+    "[Pipeline V2]   #4 [147.7] ⭐ \"Palais de Buckingham\" (src=mustsee, reviews=188914, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #5 [144.1] ⭐ \"Borough Market\" (src=serpapi, reviews=124002, rating=4.6, tags=none)",
+    "[Pipeline V2]   #6 [143.1] ⭐ \"Big Ben\" (src=google_places, reviews=94475, rating=4.6, tags=none)",
+    "[Pipeline V2]   #7 [135.3] ⭐ \"Pont de Westminster\" (src=google_places, reviews=11395, rating=4.6, tags=none)",
+    "[Pipeline V2]   #8 [111.9] ⭐ \"Natural History Museum\" (src=mustsee, reviews=0, rating=4.8, tags=deep_culture)",
+    "[Pipeline V2]   #9 [111.9] ⭐ \"St Paul's Cathedral\" (src=mustsee, reviews=0, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #10 [106.9] ⭐ \"Tower of London\" (src=mustsee, reviews=0, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #11 [65.1]    \"Covent Garden\" (src=serpapi, reviews=123671, rating=4.6, tags=kid_friendly,relaxing)",
+    "[Pipeline V2]   #12 [61.3]    \"St James's Park\" (src=serpapi, reviews=61813, rating=4.7, tags=romantic,relaxing)",
+    "[Pipeline V2]   #13 [54.0]    \"National Gallery\" (src=serpapi, reviews=59892, rating=4.8, tags=deep_culture)",
+    "[Pipeline V2]   #14 [51.1]    \"Victoria and Albert Museum\" (src=serpapi, reviews=65757, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #15 [48.5]    \"7 Bali Spa\" (src=serpapi, reviews=283, rating=4.8, tags=romantic,relaxing)",
+    "[Pipeline V2]   #16 [45.0]    \"Hyde Park\" (src=google_places, reviews=140105, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #17 [44.5]    \"Trafalgar Square\" (src=google_places, reviews=136698, rating=4.6, tags=none)",
+    "[Pipeline V2]   #18 [44.4]    \"Aman Spa\" (src=serpapi, reviews=135, rating=4.7, tags=romantic,relaxing)",
+    "[Pipeline V2]   #19 [43.9]    \"London Eye\" (src=google_places, reviews=197675, rating=4.5, tags=none)",
+    "[Pipeline V2]   #20 [43.8]    \"THE LUMI SPA\" (src=serpapi, reviews=136, rating=4.6, tags=romantic,relaxing)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 12/44",
+    "[Pipeline V3] Step 2: 33 activities selected",
+    "[Pipeline V2] City density profile: category=dense, p75=3.86km, median=2.72km, maxClusterRadius=0.77km",
+    "[Pipeline V2] Radius-constrained clustering produced 9 clusters (target 5), running soft pass with 1.16km",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"7 Bali Spa\" from cluster with 16 → 15 activities to cluster with 4 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"THE LUMI SPA\" from cluster with 15 → 14 activities to cluster with 4 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Abbaye de Westminster\" from cluster with 14 → 13 activities to cluster with 5 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"St James's Park\" from cluster with 13 → 12 activities to cluster with 5 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Churchill War Rooms\" from cluster with 12 → 11 activities to cluster with 5 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"London Dungeon\" from cluster with 11 → 10 activities to cluster with 6 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"London Eye\" from cluster with 10 → 9 activities to cluster with 6 activities",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (51.5091, -0.1239), Day 2: centroid (51.5064, -0.1425), Day 3: centroid (51.5056, -0.1572), Day 4: centroid (51.5005, -0.1047), Day 5: centroid (51.5075, -0.0822)",
+    "[Cluster] Inter-cluster swap: 12 improvements",
+    "[Pipeline V2] Cluster Day 1: 9 activities, radius=1.38km, intraDistance=3.74km",
+    "[Pipeline V2] Cluster Day 2: 6 activities, radius=1.13km, intraDistance=6.19km",
+    "[Pipeline V2] Cluster Day 3: 6 activities, radius=3.27km, intraDistance=10.80km",
+    "[Pipeline V2] Cluster Day 4: 5 activities, radius=6.93km, intraDistance=15.11km",
+    "[Pipeline V2] Cluster Day 5: 7 activities, radius=0.61km, intraDistance=2.31km",
+    "[Pipeline V3] Step 3: 5 clusters created",
+    "[Pipeline V3] Step 4: Hotel selected: Arcore London Premium Apartments Aldgate",
+    "[Anchor Transport] Generated time windows for 5 days:",
+    "  Day 1: 08:30 → 22:00",
+    "  Day 2: 08:30 → 22:00",
+    "  Day 3: 08:30 → 22:00",
+    "  Day 4: 08:30 → 22:00",
+    "  Day 5: 08:30 → 22:00",
+    "[Pipeline V3] Step 5: Time windows anchored",
+    "[Travel Times] Computed travel times for 5 days (18 API calls)",
+    "[Pipeline V3] Step 6: Travel times computed (selective mode)",
+    "[Place Restaurants] Placed 6 meals across 5 days",
+    "  Day 1 lunch: \"Dishoom\" (1154m from London Eye)",
+    "  Day 1 dinner: \"The Seafood Bar\" (753m from Trafalgar Square)",
+    "  Day 2 lunch: \"Circolo Popolare 🇮🇹\" (85m from 7 Bali Spa)",
+    "  Day 2 dinner: \"Brasserie Zedel\" (969m from Aman Spa)",
+    "  Day 3 lunch: \"Dishoom\" (1171m from St James's Park)",
+    "  Day 4 lunch: \"Dishoom\" (650m from Courtauld Gallery)",
+    "[Pipeline V3] Step 7: Restaurants placed for 5 days",
+    "[assembleV3Days] Day 1: skipping \"London Eye\" (ends 19:35 past close 18:00)",
+    "[assembleV3Days] Day 1: skipping \"Big Ben\" (ends 20:15 past close 18:00)",
+    "[assembleV3Days] Day 1: skipping \"Abbaye de Westminster\" (ends 20:30 past close 18:00)",
+    "[assembleV3Days] Day 2: skipping \"Wallace Collection\" (ends 20:50 past close 17:00)",
+    "[assembleV3Days] Day 3: skipping \"Churchill War Rooms\" (ends 19:15 past close 18:00)",
+    "[assembleV3Days] Day 3: skipping \"Portobello Road Market\" (ends 22:50 past close 19:00)",
+    "[assembleV3Days] Day 4: skipping \"London Dungeon\" (ends 18:35 past close 17:00)",
+    "[assembleV3Days] Day 4: skipping \"Musée Horniman\" (ends 20:35 past close 17:30)",
+    "[assembleV3Days] Day 5: skipping \"Marché de Leadenhall\" (ends 18:40 past close 18:00)",
+    "[Pipeline V3] Step 8: Schedule built with 5 days",
+    "[Repair] 3 repairs performed, 1 unresolved",
+    "  [replacement] Day 1: \"Big Ben\" — Injected must-see \"Big Ben\", evicted \"Jubilee Market\" (lower rated)",
+    "  [extension] Day 2: \"Palais de Buckingham\" — Extended by 30min to fill gap (90→120min)",
+    "  [extension] Day 3: \"Victoria and Albert Museum\" — Extended by 30min to fill gap (120→150min)",
+    "[Pipeline V3] Step 9: 3 repairs performed",
+    "[Contracts] Score: 80/100, Invariants: FAILED",
+    "  Activities: 24, Restaurants: 6",
+    "  Must-sees: 10/10",
+    "  Violations (4):",
+    "    - P0.2: Day 3 \"Dishoom\" is 1171m from nearest activity (max 800m)",
+    "    - P0.3: Day 3 has no dinner",
+    "    - P0.3: Day 4 has no dinner",
+    "    - P0.3: Day 5 has no lunch",
+    "[Pipeline V3] Step 10: Quality score 80/100, Invariants: FAILED",
+    "[Pipeline V3] Step 11: Decoration complete (LLM: false)",
+    "[Pipeline V3] Trip generated in 103538ms",
+    "  Stage times: fetch=100596ms, score=24ms, cluster=6ms, hotel=0ms, anchor-transport=0ms, travel-times=2907ms, restaurants=2ms, schedule=0ms, repair=1ms, contracts=0ms, decorate=0ms",
+    "  Quality: 80/100, Invariants: FAILED"
+  ],
+  "warnings": [
+    "[Viator] Search failed: 400",
+    "[Weather] Fetch failed (non-critical): The operation was aborted due to timeout",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Place Restaurants] No lunch within 800m, relaxed to 1200.0000000000002m: 5 candidates",
+    "[Place Restaurants] No dinner within 800m, relaxed to 1200.0000000000002m: 1 candidates",
+    "[Place Restaurants] No lunch within 800m, relaxed to 1200.0000000000002m: 8 candidates",
+    "  [UNRESOLVED] Day 3: Restaurant \"Dishoom\" is 1171m from nearest activity (max 800m)"
+  ],
+  "errors": [
+    "[Day Trips AI] Gemini API error: 404 — {\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.\",\n    \"status\": \"NOT_FOUND\"\n  }\n}\n",
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 6283 (line 160 column 8)"
+  ],
+  "durationMs": 103539,
+  "generatedAt": "2026-02-23T11:58:59.413Z",
+  "success": true,
+  "_campaign": {
+    "campaignId": "v3-quality-test",
+    "runId": "S05-luxury-couple",
+    "runKind": "scenario",
+    "seed": 424242,
+    "startedAt": "2026-02-23T11:58:59.413Z",
+    "durationMs": 103539
+  }
+}

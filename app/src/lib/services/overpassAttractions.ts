@@ -435,14 +435,14 @@ export async function searchAttractionsOverpass(
     // Post-Wikidata semantic filter: reject abstract concepts, destroyed sites, streets, etc.
     const wdDescription = wd?.description || '';
     if (shouldExcludeByWikidata(wdDescription)) {
-      console.log(`[Overpass] Excluded "${wd?.name || poi.name}" by Wikidata description: "${wdDescription}"`);
+      console.debug(`[Overpass] Excluded "${wd?.name || poi.name}" by Wikidata description: "${wdDescription}"`);
       continue;
     }
 
     // Positive gate: description must mention a visitable place type
     // OR the OSM tags must confirm it's a physical tourist place
     if (!isLikelyVisitableByDescription(wdDescription) && !isVisitablePlace(poi.tags)) {
-      console.log(`[Overpass] Excluded "${wd?.name || poi.name}" — not visitable by description or OSM tags: "${wdDescription}"`);
+      console.debug(`[Overpass] Excluded "${wd?.name || poi.name}" — not visitable by description or OSM tags: "${wdDescription}"`);
       continue;
     }
 

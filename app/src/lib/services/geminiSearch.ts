@@ -506,7 +506,7 @@ priceLevel: 1 (€) à 4 (€€€€). IMPORTANT: Pas de champ description, ti
         dataReliability: 'verified' as const, // Vérifié via Google Search
       }));
 
-    console.log(`[Gemini Restaurants] ✅ ${restaurants.length} restaurants trouvés pour "${destination}"`);
+    console.debug(`[Gemini Restaurants] ${restaurants.length} restaurants trouvés pour "${destination}"`);
     return restaurants;
   } catch (error) {
     console.error('[Gemini Restaurants] Erreur:', error);

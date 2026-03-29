@@ -1,0 +1,254 @@
+{
+  "tripId": "13e1569c-3884-4b57-9d21-2f48a8aa9f03",
+  "scenarioId": "geo-suggest-01-le-festin-portugais-a-porto",
+  "generatedAt": "2026-02-17T14:33:14.591Z",
+  "destination": "Porto",
+  "summary": {
+    "totalIssues": 7,
+    "critical": 1,
+    "warning": 4,
+    "info": 2,
+    "score": 96,
+    "weightedScore": 96
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "geography": {
+      "score": 84,
+      "critical": 1,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 16.3
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 2,
+      "weightedPenalty": 1.4
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "geography:Jour 1: \"✈️ Vol → Porto\" a des coordonnées (0, 0) — non géocodé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"✈️ Vol → Porto\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"culture\" demandée mais aucune activité correspondante trouvé",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"culture\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: dîner \"Dîner — Sabor Da Fazenda\" à 16:10 — trop tôt (attendu a",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: dîner \"Dîner — Sabor Da Fazenda\" à 16:10 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 3: dîner \"Dîner — ENCAIXADOS\" à 16:10 — trop tôt (attendu après 1",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: dîner \"Dîner — ENCAIXADOS\" à 16:10 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: \"Palacio da Bolsa\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: dîner \"Dîner — Sabor Da Fazenda\" à 16:10 — trop tôt (attendu après 18h00)",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Sabor Da Fazenda"
+      },
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 3: dîner \"Dîner — ENCAIXADOS\" à 16:10 — trop tôt (attendu après 18h00)",
+        "dayNumber": 3,
+        "itemTitle": "Dîner — ENCAIXADOS"
+      }
+    ],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: \"✈️ Vol → Porto\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 1,
+        "itemTitle": "✈️ Vol → Porto"
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.57,
+          "totalLegKm": 3.97
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Palacio da Bolsa\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Palacio da Bolsa",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"culture\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "culture"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 16,
+    "activitiesCount": 6,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 5.333333333333333,
+    "totalEstimatedCost": 223,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

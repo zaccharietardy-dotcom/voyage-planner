@@ -1,0 +1,657 @@
+{
+  "tripId": "286e6b9c-fa53-435a-a315-77e3d3e55bf7",
+  "scenarioId": "luxury-couple",
+  "generatedAt": "2026-02-23T14:34:30.170Z",
+  "destination": "Londres",
+  "summary": {
+    "totalIssues": 37,
+    "critical": 0,
+    "warning": 15,
+    "info": 22,
+    "score": 87,
+    "weightedScore": 87
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 42,
+      "critical": 0,
+      "warning": 10,
+      "info": 0,
+      "totalIssues": 10,
+      "weightedPenalty": 58.45
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 92,
+      "critical": 0,
+      "warning": 0,
+      "info": 11,
+      "totalIssues": 11,
+      "weightedPenalty": 7.7
+    },
+    "dataQuality": {
+      "score": 90,
+      "critical": 0,
+      "warning": 1,
+      "info": 10,
+      "totalIssues": 11,
+      "weightedPenalty": 10.5
+    },
+    "rhythm": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 5,
+      "impactScore": 36,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (3 demi-tours détectés)",
+        "Jour 3: itinéraire en zigzag (4 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 18,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: efficacité de route faible (1.83x du minimum MST)",
+        "Jour 4: efficacité de route faible (2.56x du minimum MST)",
+        "Jour 5: efficacité de route faible (2.23x du minimum MST)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 12.8,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 4: 3 segments > 2.5km (max cible: 1)",
+        "Jour 5: 4 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 11,
+      "impactScore": 11,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Abbaye de Westminster\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Hyde Park\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Wallace Collection\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 8,
+      "impactScore": 8,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"National Gallery\" n'a pas de description",
+        "Jour 1: \"Big Ben\" n'a pas de description",
+        "Jour 2: \"Hyde Park\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "realism:Jour 5: restaurant \"Kibele Restaurant\" à 3.4km de l'activité précédent",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 5: restaurant \"Kibele Restaurant\" à 3.4km de l'activité précédente (\"Victoria and Albert Museum\") avec seulement 5min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (2/3): buckingham palace",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (2/3): buckingham palace"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 4: 10 activités/restaurants — journée surchargée",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: 10 activités/restaurants — journée surchargée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.64,
+          "totalLegKm": 8.73
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.58,
+          "totalLegKm": 7.9
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.83,
+          "totalLegKm": 4.12
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: efficacité de route faible (1.83x du minimum MST)",
+        "dayNumber": 3,
+        "details": {
+          "routeInefficiencyRatio": 1.83,
+          "threshold": 1.75,
+          "totalLegKm": 4.12,
+          "mstLowerBoundKm": 2.25
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 4,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 2.56,
+          "totalLegKm": 13.9
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: efficacité de route faible (2.56x du minimum MST)",
+        "dayNumber": 4,
+        "details": {
+          "routeInefficiencyRatio": 2.56,
+          "threshold": 1.75,
+          "totalLegKm": 13.9,
+          "mstLowerBoundKm": 5.44
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: 4 segments > 2.5km (max cible: 1)",
+        "dayNumber": 5,
+        "details": {
+          "longLegCount": 4,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 5,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.23,
+          "totalLegKm": 13.45
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: efficacité de route faible (2.23x du minimum MST)",
+        "dayNumber": 5,
+        "details": {
+          "routeInefficiencyRatio": 2.23,
+          "threshold": 1.75,
+          "totalLegKm": 13.45,
+          "mstLowerBoundKm": 6.02
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Abbaye de Westminster\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Abbaye de Westminster",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Hyde Park\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Hyde Park",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Wallace Collection\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Wallace Collection",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Aman Spa\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Aman Spa",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"7 Bali Spa\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "7 Bali Spa",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"THE LUMI SPA\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "THE LUMI SPA",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"AIRE Ancient Baths London\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "AIRE Ancient Baths London",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"The Shard\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "The Shard",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Borough Market\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Borough Market",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Sky Garden\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Sky Garden",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 5: \"Kensington Gardens\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 5,
+        "itemTitle": "Kensington Gardens",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"National Gallery\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "National Gallery",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Big Ben\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Big Ben",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Hyde Park\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Hyde Park",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Tower Bridge\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Tower Bridge",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"The Shard\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "The Shard",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Monument au Grand incendie de Londres\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Monument au Grand incendie de Londres",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Sky Garden\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Sky Garden",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Kensington Gardens\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Kensington Gardens",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 4: 10 activités/restaurants — journée surchargée",
+        "dayNumber": 4,
+        "details": {
+          "activityCount": 10
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (2/3): buckingham palace",
+        "details": {
+          "found": 2,
+          "total": 3,
+          "missing": [
+            "buckingham palace"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "info",
+        "category": "realism",
+        "message": "Jour 4: \"Borough Market\" prévu à 15:45 — les marchés ferment souvent en début d'après-midi",
+        "dayNumber": 4,
+        "itemTitle": "Borough Market"
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 5: restaurant \"Kibele Restaurant\" à 3.4km de l'activité précédente (\"Victoria and Albert Museum\") avec seulement 5min de battement",
+        "dayNumber": 5,
+        "itemTitle": "Kibele Restaurant",
+        "details": {
+          "distKm": "3.4",
+          "gapMin": 5
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 5,
+    "totalItems": 35,
+    "activitiesCount": 22,
+    "restaurantsCount": 13,
+    "avgItemsPerDay": 7,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

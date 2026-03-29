@@ -1,0 +1,977 @@
+{
+  "tripId": "47582a3b-4224-42c4-9071-040d4fbc606b",
+  "scenarioId": "backpacker",
+  "generatedAt": "2026-02-23T11:58:59.413Z",
+  "destination": "Marrakech",
+  "summary": {
+    "totalIssues": 67,
+    "critical": 7,
+    "warning": 20,
+    "info": 40,
+    "score": 75,
+    "weightedScore": 75
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 69,
+      "critical": 3,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 5,
+      "weightedPenalty": 31.4
+    },
+    "geography": {
+      "score": 0,
+      "critical": 4,
+      "warning": 13,
+      "info": 0,
+      "totalIssues": 17,
+      "weightedPenalty": 160.2
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 87,
+      "critical": 0,
+      "warning": 0,
+      "info": 18,
+      "totalIssues": 18,
+      "weightedPenalty": 12.6
+    },
+    "dataQuality": {
+      "score": 83,
+      "critical": 0,
+      "warning": 1,
+      "info": 19,
+      "totalIssues": 20,
+      "weightedPenalty": 16.8
+    },
+    "rhythm": {
+      "score": 89,
+      "critical": 0,
+      "warning": 3,
+      "info": 1,
+      "totalIssues": 4,
+      "weightedPenalty": 11.2
+    },
+    "relevance": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 66,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 4: segment urbain dur 29.9km entre \"La fontaine des épices\" et \"Anima (André Heller Garden)\" (> 4km)",
+        "Jour 6: segment urbain dur 6.3km entre \"Bab Aghmat\" et \"Oniva Quad Marrakech\" (> 4km)",
+        "Jour 6: segment urbain dur 4.6km entre \"Dromadaire Marrakech - Cheval Quad & Buggy Marrakech Palmeraie\" et \"Le Slimana Restaurant & Rooftop\" (> 4km)"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 6,
+      "impactScore": 43.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (4 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (3 demi-tours détectés)",
+        "Jour 3: itinéraire en zigzag (4 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 4,
+      "impactScore": 24,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: efficacité de route faible (2.31x du minimum MST)",
+        "Jour 2: efficacité de route faible (1.78x du minimum MST)",
+        "Jour 3: efficacité de route faible (2.39x du minimum MST)"
+      ]
+    },
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 20,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 6: 6.3km entre \"Bab Aghmat\" et \"Oniva Quad Marrakech\" avec seulement 5min de battement"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 18,
+      "impactScore": 18,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Le Jardin Secret Médina Marrakech\" n'a aucun lien (booking, viator, maps)",
+        "Jour 1: \"Medersa Ben Youssef\" n'a aucun lien (booking, viator, maps)",
+        "Jour 1: \"Souk Semmarine\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 16,
+      "impactScore": 16,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Musée Dar El Bacha\" n'a pas de description",
+        "Jour 1: \"Palais de la Bahia\" n'a pas de description",
+        "Jour 1: \"Le Jardin Secret Médina Marrakech\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 12.8,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 2 segments > 2.5km (max cible: 1)",
+        "Jour 6: 2 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: \"Le Jardin Secret Médina Marrakech\" (fin 13:10) chevauche \"Med",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Le Jardin Secret Médina Marrakech\" (fin 13:10) chevauche \"Medersa Ben Youssef\" (début 11:40)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: \"Musée Dar El Bacha\" (fin 11:30) chevauche \"Palais de la Bahia",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Musée Dar El Bacha\" (fin 11:30) chevauche \"Palais de la Bahia\" (début 09:30)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 6: \"La fontaine des épices\" (fin 09:15) chevauche \"Bab Aghmat\" (d",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 6: \"La fontaine des épices\" (fin 09:15) chevauche \"Bab Aghmat\" (début 09:00)"
+      ]
+    },
+    {
+      "key": "GEO_VERY_LONG_DAY_LEG",
+      "code": "GEO_VERY_LONG_DAY_LEG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/geography",
+      "count": 1,
+      "impactScore": 4.8,
+      "avgFrequencyWeight": 1.2,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: 29.9km entre \"La fontaine des épices\" et \"Anima (André Heller Garden)\" — trajet long"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 1: \"Musée Dar El Bacha\" (fin 11:30) chevauche \"Palais de la Bahia\" (début 09:30)",
+        "dayNumber": 1,
+        "itemTitle": "Musée Dar El Bacha",
+        "details": {
+          "currentEnd": "11:30",
+          "nextStart": "09:30",
+          "overlapMinutes": 120
+        }
+      },
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 1: \"Le Jardin Secret Médina Marrakech\" (fin 13:10) chevauche \"Medersa Ben Youssef\" (début 11:40)",
+        "dayNumber": 1,
+        "itemTitle": "Le Jardin Secret Médina Marrakech",
+        "details": {
+          "currentEnd": "13:10",
+          "nextStart": "11:40",
+          "overlapMinutes": 90
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 1: 19h de vide entre \"Excursion d'une journée complète au désert d'Agafay en quad avec déjeuner\" (fin 00:00) et \"Le Bistro Arabe - Restaurant et jazz marocain à Marrakech\" (début 19:00)",
+        "dayNumber": 1,
+        "details": {
+          "gapMinutes": 1140
+        }
+      },
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 6: \"La fontaine des épices\" (fin 09:15) chevauche \"Bab Aghmat\" (début 09:00)",
+        "dayNumber": 6,
+        "itemTitle": "La fontaine des épices",
+        "details": {
+          "currentEnd": "09:15",
+          "nextStart": "09:00",
+          "overlapMinutes": 15
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 6: 18h de vide entre \"Excursion privée d'une journée dans les montagnes de l'Atlas et les 5 vallées -Tout compris-\" (fin 01:20) et \"Le Bistro Arabe - Restaurant et jazz marocain à Marrakech\" (début 19:00)",
+        "dayNumber": 6,
+        "details": {
+          "gapMinutes": 1060
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 2.31,
+          "totalLegKm": 4.92
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: efficacité de route faible (2.31x du minimum MST)",
+        "dayNumber": 1,
+        "details": {
+          "routeInefficiencyRatio": 2.31,
+          "threshold": 1.75,
+          "totalLegKm": 4.92,
+          "mstLowerBoundKm": 2.13
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.78,
+          "totalLegKm": 8.83
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (1.78x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 1.78,
+          "threshold": 1.75,
+          "totalLegKm": 8.83,
+          "mstLowerBoundKm": 4.96
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 2.39,
+          "totalLegKm": 6.78
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: efficacité de route faible (2.39x du minimum MST)",
+        "dayNumber": 3,
+        "details": {
+          "routeInefficiencyRatio": 2.39,
+          "threshold": 1.75,
+          "totalLegKm": 6.78,
+          "mstLowerBoundKm": 2.84
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: 29.9km entre \"La fontaine des épices\" et \"Anima (André Heller Garden)\" — trajet long",
+        "dayNumber": 4,
+        "details": {
+          "distanceKm": 30,
+          "gapMinutes": 95
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 4: segment urbain dur 29.9km entre \"La fontaine des épices\" et \"Anima (André Heller Garden)\" (> 4km)",
+        "dayNumber": 4,
+        "details": {
+          "distanceKm": 29.93,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 5,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.54,
+          "totalLegKm": 3.22
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 6: 6.3km entre \"Bab Aghmat\" et \"Oniva Quad Marrakech\" avec seulement 5min de battement",
+        "dayNumber": 6,
+        "details": {
+          "distanceKm": "6.3",
+          "gapMinutes": 5
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 6: segment urbain dur 6.3km entre \"Bab Aghmat\" et \"Oniva Quad Marrakech\" (> 4km)",
+        "dayNumber": 6,
+        "details": {
+          "distanceKm": 6.26,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 6: segment urbain dur 4.6km entre \"Dromadaire Marrakech - Cheval Quad & Buggy Marrakech Palmeraie\" et \"Le Slimana Restaurant & Rooftop\" (> 4km)",
+        "dayNumber": 6,
+        "details": {
+          "distanceKm": 4.61,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 6: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 6,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 6: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 6,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.73,
+          "totalLegKm": 15.87
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 7,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 2.52,
+          "totalLegKm": 5.73
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: efficacité de route faible (2.52x du minimum MST)",
+        "dayNumber": 7,
+        "details": {
+          "routeInefficiencyRatio": 2.52,
+          "threshold": 1.75,
+          "totalLegKm": 5.73,
+          "mstLowerBoundKm": 2.27
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Le Jardin Secret Médina Marrakech\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Le Jardin Secret Médina Marrakech",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Medersa Ben Youssef\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Medersa Ben Youssef",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Souk Semmarine\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Souk Semmarine",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Les Jardins de la Ménara\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Les Jardins de la Ménara",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Bab ER-REB\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Bab ER-REB",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Bab Agnaou\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Bab Agnaou",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Cyber Parc Arsat Moulay Abdeslam\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Cyber Parc Arsat Moulay Abdeslam",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Koutoubia Marrakech\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Koutoubia Marrakech",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Parc Lalla Hasna\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Parc Lalla Hasna",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"Walls of Marrakesh\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "Walls of Marrakesh",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 3,
+        "itemTitle": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: \"Anima (André Heller Garden)\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 4,
+        "itemTitle": "Anima (André Heller Garden)",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 5: \"Les Tombeaux Saadiens\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 5,
+        "itemTitle": "Les Tombeaux Saadiens",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 5: \"Synagogue Salat Al Azama\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 5,
+        "itemTitle": "Synagogue Salat Al Azama",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: \"Bab Aghmat\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 6,
+        "itemTitle": "Bab Aghmat",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: \"Oniva Quad Marrakech\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 6,
+        "itemTitle": "Oniva Quad Marrakech",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: \"Dromadaire Marrakech - Cheval Quad & Buggy Marrakech Palmeraie\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 6,
+        "itemTitle": "Dromadaire Marrakech - Cheval Quad & Buggy Marrakech Palmeraie",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 7: \"Jardin Majorelle\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 7,
+        "itemTitle": "Jardin Majorelle",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Musée Dar El Bacha\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Musée Dar El Bacha",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Palais de la Bahia\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Palais de la Bahia",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Le Jardin Secret Médina Marrakech\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Le Jardin Secret Médina Marrakech",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Souk Semmarine\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Souk Semmarine",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Les Jardins de la Ménara\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Les Jardins de la Ménara",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Bab Agnaou\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Bab Agnaou",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Cyber Parc Arsat Moulay Abdeslam\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Cyber Parc Arsat Moulay Abdeslam",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Koutoubia Marrakech\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Koutoubia Marrakech",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Parc Lalla Hasna\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Parc Lalla Hasna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Walls of Marrakesh\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Walls of Marrakesh",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Palais El Badiî\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Palais El Badiî",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Les Tombeaux Saadiens\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Les Tombeaux Saadiens",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Synagogue Salat Al Azama\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Synagogue Salat Al Azama",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 6: \"Bab Aghmat\" n'a pas de description",
+        "dayNumber": 6,
+        "itemTitle": "Bab Aghmat",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 7: \"musée YVES SAINT LAURENT marrakech\" n'a pas de description",
+        "dayNumber": 7,
+        "itemTitle": "musée YVES SAINT LAURENT marrakech",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: 9 activités/restaurants — journée surchargée",
+        "dayNumber": 1,
+        "details": {
+          "activityCount": 9
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: seulement 30min de temps libre — pas de pause",
+        "dayNumber": 1,
+        "details": {
+          "freeMinutes": 30,
+          "occupiedMinutes": 690
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: 9 activités/restaurants — journée surchargée",
+        "dayNumber": 3,
+        "details": {
+          "activityCount": 9
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 3 (9 activités) vs jour 4 (2 activités) — déséquilibre important",
+        "details": {
+          "day1": 9,
+          "day2": 2
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): place jemaa el-fna",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "place jemaa el-fna"
+          ]
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 7,
+    "totalItems": 45,
+    "activitiesCount": 27,
+    "restaurantsCount": 18,
+    "avgItemsPerDay": 6.428571428571429,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

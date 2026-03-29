@@ -243,7 +243,7 @@ export const DayTimeline = memo(function DayTimeline({
                 </span>
               )}
             </h3>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 mt-1.5">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 flex items-center gap-2 mt-1.5">
               <Calendar className="h-3.5 w-3.5 text-gold" />
               {format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}
             </p>

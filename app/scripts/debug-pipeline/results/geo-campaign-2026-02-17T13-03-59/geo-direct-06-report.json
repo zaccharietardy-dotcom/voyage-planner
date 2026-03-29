@@ -1,0 +1,292 @@
+{
+  "tripId": "72780f2c-921d-4811-9cbb-91c0a98e4b6b",
+  "scenarioId": "geo-direct-06",
+  "generatedAt": "2026-02-17T13:12:48.649Z",
+  "destination": "Séville",
+  "summary": {
+    "totalIssues": 9,
+    "critical": 0,
+    "warning": 7,
+    "info": 2,
+    "score": 96,
+    "weightedScore": 96
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "geography": {
+      "score": 87,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 12.6
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 92,
+      "critical": 0,
+      "warning": 2,
+      "info": 1,
+      "totalIssues": 3,
+      "weightedPenalty": 7.7
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 14.4,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 3: itinéraire en zigzag (4 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "realism:Dernier jour: dernière activité (14:00) à seulement 85min avant le vol",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Dernier jour: dernière activité (14:00) à seulement 85min avant le vol (15:25) — risqué"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"wellness\" demandée mais aucune activité correspondante trouv",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"wellness\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3: 9 activités/restaurants — journée surchargée",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: 9 activités/restaurants — journée surchargée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 30min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: seulement 30min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: dîner \"Dîner — Restaurante La Cochera del Abuelo\" à 13:10 — tr",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: dîner \"Dîner — Restaurante La Cochera del Abuelo\" à 13:10 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3 (9 activités) vs jour 4 (2 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3 (9 activités) vs jour 4 (2 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: dîner \"Dîner — Restaurante La Cochera del Abuelo\" à 13:10 — trop tôt (attendu après 18h00)",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Restaurante La Cochera del Abuelo"
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (4 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 4
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: 9 activités/restaurants — journée surchargée",
+        "dayNumber": 3,
+        "details": {
+          "activityCount": 9
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: seulement 30min de temps libre — pas de pause",
+        "dayNumber": 3,
+        "details": {
+          "freeMinutes": 30,
+          "occupiedMinutes": 765
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 3 (9 activités) vs jour 4 (2 activités) — déséquilibre important",
+        "details": {
+          "day1": 9,
+          "day2": 2
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"wellness\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "wellness"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Dernier jour: dernière activité (14:00) à seulement 85min avant le vol (15:25) — risqué",
+        "dayNumber": 4,
+        "details": {
+          "gapMinutes": 85
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 24,
+    "activitiesCount": 10,
+    "restaurantsCount": 8,
+    "avgItemsPerDay": 6,
+    "totalEstimatedCost": 973,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

@@ -1,0 +1,491 @@
+{
+  "campaignMeta": {
+    "campaignId": "smoke-s01-v5",
+    "startedAt": "2026-02-14T22:36:47.212Z",
+    "finishedAt": "2026-02-14T22:37:47.940Z",
+    "durationMs": 60728,
+    "seed": 1337,
+    "totalRequested": 1,
+    "randomCountRequested": 0,
+    "scenarioCountRequested": 1,
+    "analyze": true,
+    "failFast": true,
+    "outDir": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-s01-v5"
+  },
+  "runStats": {
+    "total": 1,
+    "success": 1,
+    "failed": 0,
+    "scenarioRuns": 1,
+    "randomRuns": 0,
+    "analyzedRuns": 1,
+    "successRate": 1
+  },
+  "scoreStats": {
+    "average": 93,
+    "min": 93,
+    "max": 93,
+    "p50": 93,
+    "p90": 93,
+    "sectionAverages": {
+      "schedule": 99,
+      "geography": 73,
+      "budget": 97,
+      "links": 100,
+      "dataQuality": 98,
+      "rhythm": 99,
+      "relevance": 90,
+      "realism": 93
+    }
+  },
+  "issuesByCode": [
+    {
+      "key": "geography:Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé",
+      "code": "geography:Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé",
+      "code": "geography:Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): colisée",
+      "code": "relevance:Must-see manquants (1/2): colisée",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): colisée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" est à 15.4km du",
+      "code": "geography:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" est à 15.4km du",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" est à 15.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 1: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "code": "geography:Jour 1: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "code": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" à 15.4km de l'a",
+      "code": "realism:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" à 15.4km de l'a",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" à 15.4km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "code": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14.1km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 2,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "Jour 3: \"Chapelle Sixtine\" n'a pas de description"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "code": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "code": "rhythm:Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "issuesByComponent": [
+    {
+      "component": "unknown",
+      "total": 11,
+      "critical": 3,
+      "warning": 5,
+      "info": 3
+    },
+    {
+      "component": "pipeline/content",
+      "total": 2,
+      "critical": 0,
+      "warning": 0,
+      "info": 2
+    }
+  ],
+  "topRegressions": [
+    {
+      "key": "geography:Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé",
+      "code": "geography:Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé",
+      "code": "geography:Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): colisée",
+      "code": "relevance:Must-see manquants (1/2): colisée",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): colisée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" est à 15.4km du",
+      "code": "geography:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" est à 15.4km du",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" est à 15.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 1: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "code": "geography:Jour 1: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "code": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" à 15.4km de l'a",
+      "code": "realism:Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" à 15.4km de l'a",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Déjeuner — ADESSO Osteria Moderna\" à 15.4km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "code": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14.1km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 2,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "Jour 3: \"Chapelle Sixtine\" n'a pas de description"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "code": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "code": "rhythm:Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "stratification": {
+    "groupTypes": {
+      "solo": 0,
+      "couple": 1,
+      "friends": 0,
+      "family_with_kids": 0,
+      "family_without_kids": 0
+    },
+    "budgetLevels": {
+      "economic": 0,
+      "moderate": 1,
+      "comfort": 0,
+      "luxury": 0
+    },
+    "transports": {
+      "optimal": 1,
+      "plane": 0,
+      "train": 0,
+      "car": 0,
+      "bus": 0
+    },
+    "multiCityRuns": 0
+  },
+  "exitCriteria": {
+    "successRate": {
+      "value": 1,
+      "target": 0.9,
+      "pass": true
+    },
+    "noApiKeyLeaks": {
+      "count": 0,
+      "pass": true
+    },
+    "noHotelBoundaryIncoherent": {
+      "count": 0,
+      "pass": true
+    },
+    "urbanLegPolicy": {
+      "count": 0,
+      "pass": true
+    },
+    "averageScore": {
+      "value": 93,
+      "target": 85,
+      "pass": true
+    },
+    "noCriticalRemaining": {
+      "count": 3,
+      "pass": false
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "S01-paris-rome-4d",
+      "runKind": "scenario",
+      "scenarioId": "paris-rome-4d",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-s01-v5/S01-paris-rome-4d.json",
+      "startedAt": "2026-02-14T22:36:47.212Z",
+      "durationMs": 60723,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/smoke-s01-v5/S01-paris-rome-4d-report.json",
+      "score": 93,
+      "critical": 3,
+      "warning": 5,
+      "info": 5
+    }
+  ]
+}

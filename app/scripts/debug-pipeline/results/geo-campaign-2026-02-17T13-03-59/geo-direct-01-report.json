@@ -1,0 +1,170 @@
+{
+  "tripId": "6704d72d-b391-44a0-be4c-b3550051be85",
+  "scenarioId": "geo-direct-01",
+  "generatedAt": "2026-02-17T13:05:41.903Z",
+  "destination": "Berlin",
+  "summary": {
+    "totalIssues": 3,
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "score": 99,
+    "weightedScore": 99
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "geography": {
+      "score": 94,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 6.3
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: dîner \"Dîner — Restaurant Dae Mon\" à 14:15 — trop tôt (attendu",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: dîner \"Dîner — Restaurant Dae Mon\" à 14:15 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: dîner \"Dîner — Restaurant Dae Mon\" à 14:15 — trop tôt (attendu après 18h00)",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Restaurant Dae Mon"
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 12,
+    "activitiesCount": 3,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 4,
+    "totalEstimatedCost": 251,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

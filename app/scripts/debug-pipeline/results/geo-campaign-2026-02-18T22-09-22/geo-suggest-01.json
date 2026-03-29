@@ -1,0 +1,3500 @@
+{
+  "scenarioId": "geo-suggest-01-escapade-gourmande-en-provence-culinaire",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Marseille",
+    "startDate": "2026-04-04T22:10:52.411Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "economic",
+    "activities": [
+      "gastronomy",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Marseille",
+        "days": 2
+      },
+      {
+        "city": "Aix-en-Provence",
+        "days": 1
+      }
+    ]
+  },
+  "trip": {
+    "id": "d5bf6b40-79f1-44c5-8962-0157ed6fe2a4",
+    "createdAt": "2026-02-18T22:12:09.549Z",
+    "updatedAt": "2026-02-18T22:12:09.549Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Marseille",
+      "startDate": "2026-04-04T22:10:52.411Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "economic",
+      "activities": [
+        "gastronomy",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Marseille",
+          "days": 2
+        },
+        {
+          "city": "Aix-en-Provence",
+          "days": 1
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-04T22:10:52.411Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "05:16",
+            "endTime": "05:43",
+            "type": "transport",
+            "title": "🧭 Départ depuis Lyon",
+            "description": "Départ depuis Lyon",
+            "locationName": "Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 27,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Lyon%2C%20Marseille",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "05:43",
+            "endTime": "08:14",
+            "type": "transport",
+            "title": "🚄 Train → Marseille",
+            "description": "Lyon → Marseille",
+            "locationName": "Lyon → Marseille",
+            "latitude": 43.2965,
+            "longitude": 5.3698,
+            "orderIndex": 1,
+            "estimatedCost": 50,
+            "duration": 151,
+            "bookingUrl": "https://www.omio.fr/trains/lyon/marseille?departure_date=2026-04-05",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%84%20Train%20%E2%86%92%20Marseille%2C%20Marseille",
+            "transitLegs": [
+              {
+                "mode": "train",
+                "from": "Lyon Part Dieu",
+                "to": "Marseille-St-Charles",
+                "departure": "2026-04-05T04:28:00.000Z",
+                "arrival": "2026-04-05T06:14:00.000Z",
+                "duration": 106,
+                "line": "TGV INOUI"
+              }
+            ],
+            "transitDataSource": "api",
+            "priceRange": [
+              25,
+              80
+            ],
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg"
+          },
+          {
+            "id": "gp-ChIJFZv_M7_AyRIRfr31NFtB3RA",
+            "dayNumber": 1,
+            "startTime": "08:24",
+            "endTime": "09:24",
+            "type": "activity",
+            "title": "Château d'If",
+            "description": "Château d'If",
+            "locationName": "Château d'If",
+            "latitude": 43.27995139999999,
+            "longitude": 5.325145699999999,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20d'If%2C%20Marseille",
+            "dataReliability": "verified",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ]
+          },
+          {
+            "id": "ai-mustsee-marseille-0",
+            "dayNumber": 1,
+            "startTime": "09:34",
+            "endTime": "11:34",
+            "type": "activity",
+            "title": "Vieux-Port de Marseille",
+            "description": "Port historique emblématique au cœur de la ville, symbole de l'identité maritime marseillaise.",
+            "locationName": "Vieux-Port de Marseille",
+            "latitude": 43.30007,
+            "longitude": 5.36317,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vieux-Port%20de%20Marseille%2C%20Marseille",
+            "dataReliability": "generated",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 3.8,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-1-lunch",
+            "dayNumber": 1,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Maison Charlie",
+            "description": "Salon de thé cosy avec petit-déjeuner et gâteaux",
+            "locationName": "38 Rue Caisserie, 13002 Marseille",
+            "latitude": 43.296977,
+            "longitude": 5.367349,
+            "orderIndex": 4,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Charlie%2C%2038%20Rue%20Caisserie%2C%2013002%20Marseille",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Charlie%2C%20Marseille",
+            "restaurant": {
+              "id": "serp-7882945096792297714",
+              "name": "Maison Charlie",
+              "address": "38 Rue Caisserie, 13002 Marseille",
+              "latitude": 43.296977,
+              "longitude": 5.367349,
+              "rating": 4.7,
+              "reviewCount": 1034,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Salon de thé cosy avec petit-déjeuner et gâteaux"
+              ],
+              "description": "Salon de thé cosy avec petit-déjeuner et gâteaux",
+              "phoneNumber": "04 91 52 44 82",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Charlie%2C%2038%20Rue%20Caisserie%2C%2013002%20Marseille",
+              "googlePlaceId": "7882945096792297714",
+              "openingHours": {},
+              "distance": 0.35578628069295026,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-1777038680774659960",
+                  "name": "Le Bouchon Provençal",
+                  "address": "6 Pl. aux Huiles, 13001 Marseille",
+                  "latitude": 43.293034,
+                  "longitude": 5.371498,
+                  "rating": 4.6,
+                  "reviewCount": 2108,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant français"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Spécialités de brasserie et terrasse verdoyante"
+                  ],
+                  "description": "Spécialités de brasserie et terrasse verdoyante",
+                  "phoneNumber": "04 91 33 44 92",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bouchon%20Proven%C3%A7al%2C%206%20Pl.%20aux%20Huiles%2C%2013001%20Marseille",
+                  "googlePlaceId": "1777038680774659960",
+                  "openingHours": {},
+                  "distance": 0.8433983883570886,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfWEeKdiuU9kVUT5sXavunfoGeTQshcV_OHpt_ROOBT88mOMzq0PcXTYJGF7IhypUMs78dOPsVMUR0ah3OIx2G5Qxsvg-_MGKKweJuqxiHD_3JoZSOmcLMPYYIQ3P-hdfRntlOEyxCA_8NW5e5BH7WuYCalI0Ly53UdlS2PRMTrLbYX0U7onr1KT7yiA3JpJwBW-Tol_kz7jxMMlFIgLgU4Jsz2WoxOWkbSUdhFgZoFSK-DV_X-SFRDgyqqi8A8gSnIVgfRt52oRWQ2lAB18O6W25XWITaOkWA7DkPm--2zEuuN-RXY&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-16648476899401418647",
+                  "name": "Acuda - Restaurant Marseille",
+                  "address": "34 Pl. aux Huiles, 13001 Marseille",
+                  "latitude": 43.292363,
+                  "longitude": 5.371677,
+                  "rating": 4.8,
+                  "reviewCount": 398,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "07 56 10 84 56",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Acuda%20-%20Restaurant%20Marseille%2C%2034%20Pl.%20aux%20Huiles%2C%2013001%20Marseille",
+                  "googlePlaceId": "16648476899401418647",
+                  "openingHours": {},
+                  "distance": 0.9185015638124688,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUOJTeODU3DKCM7-gKIJ_foq3ANlW8_02tPy5d0MNFIMLMIb43Bg6AccYdkOtHpQPwd9TsvnV9wUWL_QdqTMD3alS5U3ofIEvtglvqsLSmcEeGZF6AuaVgWA8BrL2lvKbhH7G0Hpuia-nFnQ9SQzXGtECR0MFpFm58gmaOySkroytCLuQveqWfwy-TwjNWOLns2QI1OZs8725ZzjXgszQoIYA3c3_ZHh7Sp8I9yHBeOXrOHEZhVXG-oi3W-DMFCgUxaOSh6BrP8hIwr0j4EN8frVBDflf9FOSy_Zo_0zZ51nJRIt84&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVI8aNJGSCwEWitqWqPQj_Pbjq4taHL70oI7EG6-sw5-ieU-hDMwyDLuVy0k--iPYj3m7aXMAsYclOMS_LUKszWyUgq5cURoD_jbK44XpOYaig6ZtEKLxxjY9pCr4C_fKtPyZm5QysvmzIEEX6A8KzvV3Fa3j9I2cPuNiWfveZg3kaOpRgLSn4pkl6jcntBTq0YHKoS0VFoXwDxlhD9IqMmmpCGJ44UVf94xms5WhwM9IdriEjDZ-gY_TYpg-TSKNk_6tUJp2xf8cqS3oPiRyz-i0RvEaFYf4qiv_IMDRqeXvAE5jjmT8KELZLQg4JIlennZQh9MSsdEvmFZtnxKHxF5cfMKytqMbefSWdnBksiGSrnCbcTXe86Tgx7oUlFABU7g3zxQ5vQp4EMoPqcEd84xq9oevRpkjkMqNL-At2OBLgIw7OuYQ8lcAuNl-UwYBLCNpu3f3fQaiw9zXmAf1KmYd9arh7VGIpU8aN44WJAYGfV9-nFf9qfzU7utkwnfuLuTxHtdS3GE4epo-mU5Al9VnzqbH8MGS-jfdhfqwvB85vKpk1aSk2DYnk5n-RQpYruOF9uKMp_vTXFF-CP10N9CElWDQ&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-1777038680774659960",
+                "name": "Le Bouchon Provençal",
+                "address": "6 Pl. aux Huiles, 13001 Marseille",
+                "latitude": 43.293034,
+                "longitude": 5.371498,
+                "rating": 4.6,
+                "reviewCount": 2108,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant français"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Spécialités de brasserie et terrasse verdoyante"
+                ],
+                "description": "Spécialités de brasserie et terrasse verdoyante",
+                "phoneNumber": "04 91 33 44 92",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Bouchon%20Proven%C3%A7al%2C%206%20Pl.%20aux%20Huiles%2C%2013001%20Marseille",
+                "googlePlaceId": "1777038680774659960",
+                "openingHours": {},
+                "distance": 0.8433983883570886,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWEeKdiuU9kVUT5sXavunfoGeTQshcV_OHpt_ROOBT88mOMzq0PcXTYJGF7IhypUMs78dOPsVMUR0ah3OIx2G5Qxsvg-_MGKKweJuqxiHD_3JoZSOmcLMPYYIQ3P-hdfRntlOEyxCA_8NW5e5BH7WuYCalI0Ly53UdlS2PRMTrLbYX0U7onr1KT7yiA3JpJwBW-Tol_kz7jxMMlFIgLgU4Jsz2WoxOWkbSUdhFgZoFSK-DV_X-SFRDgyqqi8A8gSnIVgfRt52oRWQ2lAB18O6W25XWITaOkWA7DkPm--2zEuuN-RXY&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-16648476899401418647",
+                "name": "Acuda - Restaurant Marseille",
+                "address": "34 Pl. aux Huiles, 13001 Marseille",
+                "latitude": 43.292363,
+                "longitude": 5.371677,
+                "rating": 4.8,
+                "reviewCount": 398,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "07 56 10 84 56",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Acuda%20-%20Restaurant%20Marseille%2C%2034%20Pl.%20aux%20Huiles%2C%2013001%20Marseille",
+                "googlePlaceId": "16648476899401418647",
+                "openingHours": {},
+                "distance": 0.9185015638124688,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUOJTeODU3DKCM7-gKIJ_foq3ANlW8_02tPy5d0MNFIMLMIb43Bg6AccYdkOtHpQPwd9TsvnV9wUWL_QdqTMD3alS5U3ofIEvtglvqsLSmcEeGZF6AuaVgWA8BrL2lvKbhH7G0Hpuia-nFnQ9SQzXGtECR0MFpFm58gmaOySkroytCLuQveqWfwy-TwjNWOLns2QI1OZs8725ZzjXgszQoIYA3c3_ZHh7Sp8I9yHBeOXrOHEZhVXG-oi3W-DMFCgUxaOSh6BrP8hIwr0j4EN8frVBDflf9FOSy_Zo_0zZ51nJRIt84&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVI8aNJGSCwEWitqWqPQj_Pbjq4taHL70oI7EG6-sw5-ieU-hDMwyDLuVy0k--iPYj3m7aXMAsYclOMS_LUKszWyUgq5cURoD_jbK44XpOYaig6ZtEKLxxjY9pCr4C_fKtPyZm5QysvmzIEEX6A8KzvV3Fa3j9I2cPuNiWfveZg3kaOpRgLSn4pkl6jcntBTq0YHKoS0VFoXwDxlhD9IqMmmpCGJ44UVf94xms5WhwM9IdriEjDZ-gY_TYpg-TSKNk_6tUJp2xf8cqS3oPiRyz-i0RvEaFYf4qiv_IMDRqeXvAE5jjmT8KELZLQg4JIlennZQh9MSsdEvmFZtnxKHxF5cfMKytqMbefSWdnBksiGSrnCbcTXe86Tgx7oUlFABU7g3zxQ5vQp4EMoPqcEd84xq9oevRpkjkMqNL-At2OBLgIw7OuYQ8lcAuNl-UwYBLCNpu3f3fQaiw9zXmAf1KmYd9arh7VGIpU8aN44WJAYGfV9-nFf9qfzU7utkwnfuLuTxHtdS3GE4epo-mU5Al9VnzqbH8MGS-jfdhfqwvB85vKpk1aSk2DYnk5n-RQpYruOF9uKMp_vTXFF-CP10N9CElWDQ&maxwidth=800",
+            "distanceFromPrevious": 0.48,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:30",
+            "type": "checkin",
+            "title": "Check-in Vertigo Hostel",
+            "description": "Disponibilité confirmée",
+            "locationName": "38 Rue Fort Notre Dame, 13007 Marseille, France",
+            "latitude": 43.2913973778401,
+            "longitude": 5.3719362616539,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 8,
+            "bookingUrl": "https://www.booking.com/hotel/fr/vertigo-vieux-port-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vertigo%20Hostel%2C%20Marseille",
+            "accommodation": {
+              "id": "booking-270898",
+              "name": "Vertigo Hostel",
+              "type": "hotel",
+              "address": "38 Rue Fort Notre Dame, 13007 Marseille, France",
+              "latitude": 43.2913973778401,
+              "longitude": 5.3719362616539,
+              "rating": 8,
+              "reviewCount": 3245,
+              "stars": 2,
+              "pricePerNight": 32,
+              "totalPrice": 64,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/796594858.jpg?k=bbe2e3649a2c08e3c4df52a78d9a991adea76eb686dfc68f59dc9c0f325db769&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/fr/vertigo-vieux-port-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/796594858.jpg?k=bbe2e3649a2c08e3c4df52a78d9a991adea76eb686dfc68f59dc9c0f325db769&o=",
+            "distanceFromPrevious": 0.72,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJs0riBr3AyRIRVtgGX43TIUU",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Cathédrale la Major de Marseille",
+            "description": "La cathédrale Notre-Dame-de-la-Major, dite La Major, est le siège de l'archevêque de Marseille. Elle est parfois appelée Sainte-Marie-Majeure, du nom du sanctuaire qu'elle accueille en son sein.",
+            "locationName": "Cathédrale la Major de Marseille",
+            "latitude": 43.2992624,
+            "longitude": 5.3646914,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cath%C3%A9drale%20la%20Major%20de%20Marseille%2C%20Marseille",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWVSGz4IL8EDfk4NLb5trZE8IzDl-wdAQo42BOL2g-lsjAg4kzXrWxllRMqmVJUWouuBRkV3MI2KUUcMkpMXN0HGb5ll7EmlDq7ZmcsousXpNHg5OPZ3svjk2nztt_fbo19AinOpEmx04wM3fYgHZFJG_bMf-CaLGBl-7fHRNfosXjeioM5PUv04HYYFnYUXQ1m_v7-S1cu5u7rbXBoWAiH-lGYaEPtNw025yiTjM4ZJQZpwsD7WWoicSbwZ1oiDzY24FacSroYtA6HwhOeq_fw57_OekU_io5IXATn0YR6eFzgZ2ex7XyvzJYL1SBzSFR0sy9Ju-G5viI0t5HqhAYTOZS87ELWMcVoU6XmNSewkjuEYZZfs6SxiFKms7V8JhU-oOk5XYU9XA8qJ6ATrsg7OKosvUMF7oTKBA1zbf8Aq_rI96C_oZXEXLetmZLXwuJ4YIcWAo78intSjXkOrCCoS6zmrARSJ1gqPXG39A6JJUlySxJx4VUPzsTiAT7aLiHCBwoCO5kYkCNqefAzv_btXFlGi8e4mi6JCjbiMbdeGEDPM5IurWiF9eaYJNIfyCGJgq4p&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 1.05,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=43.2913973778401,5.3719362616539&destination=43.2992624,5.3646914&travelmode=transit"
+          },
+          {
+            "id": "ai-mustsee-marseille-4",
+            "dayNumber": 1,
+            "startTime": "17:00",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Le Panier",
+            "description": "Le Panier désigne un quartier de Marseille situé dans le 2e arrondissement, partagé entre trois quartiers administratifs : Hôtel-de-Ville, Les Grands-Carmes et La Joliette.",
+            "locationName": "Le Panier",
+            "latitude": 43.29806,
+            "longitude": 5.36778,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Panier%2C%20Marseille",
+            "dataReliability": "generated",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Rue_Panier_Marseille.jpg/500px-Rue_Panier_Marseille.jpg",
+            "mustSee": true,
+            "distanceFromPrevious": 0.28,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — La Pagaille Restaurant, Lounge & Cocktail",
+            "description": "Repas sur place",
+            "locationName": "La Pagaille Restaurant, Lounge & Cocktail",
+            "latitude": 43.297004,
+            "longitude": 5.366064,
+            "orderIndex": 8,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pagaille%20Restaurant%2C%20Lounge%20%26%20Cocktail%2C%2037%20Rue%20Caisserie%2C%2013002%20Marseille",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pagaille%20Restaurant%2C%20Lounge%20%26%20Cocktail%2C%2037%20Rue%20Caisserie%2C%2013002%20Marseille",
+            "restaurant": {
+              "id": "serp-12323702349618498896",
+              "name": "La Pagaille Restaurant, Lounge & Cocktail",
+              "address": "37 Rue Caisserie, 13002 Marseille",
+              "latitude": 43.297004,
+              "longitude": 5.366064,
+              "rating": 4.8,
+              "reviewCount": 722,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "09 87 38 19 68",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pagaille%20Restaurant%2C%20Lounge%20%26%20Cocktail%2C%2037%20Rue%20Caisserie%2C%2013002%20Marseille",
+              "googlePlaceId": "12323702349618498896",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVTUKIL36qF6S6nDwWbgQ-rMqUv1_46XF9CIxshlxn4cV11DsDXtvTSTuPhA3CnfCQhOr3OHXxr4C9ah0XKFH_AVNjBa8MS2eOPCpPNvshjROMVSZUo-W0sZMvvp9HiAdF3GKA6W5h8smtR6QYdJkhgJcFTcEQxNuf0NWIhCOhXbSQusXdUhCVbty1phA-j1IuO2pWQB2cjjkOuuss_0DSykjGwholhAIn5FsLFfC_36GxtPtXsdhcJLk3cYMA91CUqL_VlbMRS_twWliS_e815-knTAvdqMlXY8Pclc9IquL1J1b4&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-4472485017472347570",
+                "name": "Wood la cantine gourmande",
+                "address": "8 Rue de la Guirlande, 13002 Marseille",
+                "latitude": 43.296791,
+                "longitude": 5.370497,
+                "rating": 4.7,
+                "reviewCount": 1062,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant français"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant tendance, cuisine fusion, terrasse"
+                ],
+                "description": "Restaurant tendance, cuisine fusion, terrasse",
+                "phoneNumber": "04 91 91 93 42",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Wood%20la%20cantine%20gourmande%2C%208%20Rue%20de%20la%20Guirlande%2C%2013002%20Marseille",
+                "googlePlaceId": "4472485017472347570",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUiHFiN0Ipu8z1kOvj9biNHWRNM1ZuxdsHeFY1YzEOOqIj0f2NWtSE9JJwg3jxpfX0W8Gwgw1inQ1-RcPLn3gYWO3DofbcvlkDPTrGs00GFCqG1NIneYMi88x6ydCDPUY1rbLq8mXb-E7sCj-AClanSJYOQ6fqzyeZARf-ADstn3FRGOBstij4kTnH8KTfXmcxppn__Pf0zTzFD4FHKxLRhzc_qXqlRCzAM58AcYbZIlZuB7iJAT23EaO2jbwaL90bwoKCWwieC4TuQgarxQEG6wxE3IDVrdo31NSJAajAIOG019gM&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-5182099954446983797",
+                "name": "Le Gourmet Monte Carlo",
+                "address": "32 Rue Coutellerie, 13002 Marseille",
+                "latitude": 43.296821,
+                "longitude": 5.371908,
+                "rating": 4.8,
+                "reviewCount": 348,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant français"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "09 56 31 49 23",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Gourmet%20Monte%20Carlo%2C%2032%20Rue%20Coutellerie%2C%2013002%20Marseille",
+                "googlePlaceId": "5182099954446983797",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWNydRl3k5V7wErqnjONhS62TjVy1KbLM4ensqyovEmr5LP5L97W0EJOOUNWC1VUKoj9LFAYjeBgUmfmFZwf7gaROy00BJfC0vfz3_jOn2yDp6HaVpfDUQJKvd_pl1lCStxAAAOjagq0R-KeMn4MvdxaEiM-3HeYWV4LKk4sIhxXVj_gzBpWgCk-jxwHGYtS7RUuG2PwU_j3Y_w2TpNCwlZqvRY7UljUsSpj2hiJ2y075soxZjoZLkTiK9wDAN4CqOeuxKasfbZLhIzPZGzhPmIVaAua9fCJatdyO8qYVhY3sorB1E&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVTUKIL36qF6S6nDwWbgQ-rMqUv1_46XF9CIxshlxn4cV11DsDXtvTSTuPhA3CnfCQhOr3OHXxr4C9ah0XKFH_AVNjBa8MS2eOPCpPNvshjROMVSZUo-W0sZMvvp9HiAdF3GKA6W5h8smtR6QYdJkhgJcFTcEQxNuf0NWIhCOhXbSQusXdUhCVbty1phA-j1IuO2pWQB2cjjkOuuss_0DSykjGwholhAIn5FsLFfC_36GxtPtXsdhcJLk3cYMA91CUqL_VlbMRS_twWliS_e815-knTAvdqMlXY8Pclc9IquL1J1b4&maxwidth=800",
+            "distanceFromPrevious": 0.18,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=43.2933509,5.3588146&destination=43.295788,5.378523&travelmode=transit",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Notre-Dame et Panier historique",
+        "dayNarrative": "Découverte de la Marseille historique avec la majestueuse Basilique Notre-Dame de la Garde et flânerie dans le quartier pittoresque du Panier.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 11,
+          "tempMax": 21,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 30,
+          "transport": 50,
+          "total": 80
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 135,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": true,
+          "geoPrunedActivitiesCount": 1
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 3.8,
+          "p95LegKm": 1.05,
+          "totalTravelMin": 58,
+          "totalLegKm": 5.79,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.3,
+          "mstLowerBoundKm": 4.46
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-05T22:10:52.411Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Fournil de Beauvallon",
+            "description": "Salon de thé cosy avec petit-déjeuner et gâteaux",
+            "locationName": "Fournil de Beauvallon",
+            "latitude": 43.2354014,
+            "longitude": 5.4110442,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Fournil%20de%20Beauvallon%2C%20213%20Chem.%20de%20Morgiou%2C%2013009%20Marseille",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fournil%20de%20Beauvallon%2C%20213%20Chem.%20de%20Morgiou%2C%2013009%20Marseille",
+            "restaurant": {
+              "id": "serp-nearby-ChIJoc6eyma4yRIR0pGUQp0WKn8",
+              "name": "Fournil de Beauvallon",
+              "address": "213 Chem. de Morgiou, 13009 Marseille",
+              "latitude": 43.2354014,
+              "longitude": 5.4110442,
+              "rating": 4,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "boulangerie",
+                "boulangerie"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "04 91 77 51 15",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Fournil%20de%20Beauvallon%2C%20213%20Chem.%20de%20Morgiou%2C%2013009%20Marseille",
+              "googlePlaceId": "ChIJoc6eyma4yRIR0pGUQp0WKn8",
+              "openingHours": {
+                "wednesday": null
+              },
+              "distance": 0.9059077437566813,
+              "walkingTime": 11,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfV9_tOWq6YACHOZIbG_2ZqBVJPPf5yryORowlFfuMLhlMFieU-Flc5M9sZPbowIMgWAJvyVsR2paDrOfbRkXF3OzqfumnV798KeqA8nsk6NbIpeZfEER1RZJvNYpJUH5EU3Ju3k7vX5WkeQjrFI24dyLLOhHnFfBrn3aiFbsKYbf0F1l1crs2AaQuMy-Fv0PkoR4z7HIhBx8J6t99Qz9-V-q8xHqrWqT9xWKynFpMTHDnQpt8nAtMZEwbK3WUpX7_oqFkBtQQetpEBc0XNVlx6gqkyKyig8mB0zGxAEElSeI01nhIR5JwHuvZiP6lOFefHbEidfHN-fE3t1Ets5GpTGof0GEQXAirdDTh7Ll_-oo4dr2f345ELBef4bVshyMadpjm2Cwc0nTIlBTHxeHD0HmoIlRkcJNEg8ncv9oPhsaF8&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJVVXBxGO4yRIR4wQVnTaqTSo",
+                "name": "Aux Pains Des Délices",
+                "address": "176 Chem. de Morgiou, 13009 Marseille",
+                "latitude": 43.2372337,
+                "longitude": 5.408960899999999,
+                "rating": 4.4,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "marchand de bière",
+                  "magasin de gâteaux",
+                  "chocolatier",
+                  "marchand de donuts",
+                  "restaurant français",
+                  "pâtisserie",
+                  "restaurant végétarien"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 17 28 94 52",
+                "website": "http://aux-pains-des-delices.eatbu.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Aux%20Pains%20Des%20D%C3%A9lices%2C%20176%20Chem.%20de%20Morgiou%2C%2013009%20Marseille",
+                "googlePlaceId": "ChIJVVXBxGO4yRIR4wQVnTaqTSo",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "06:30",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 0.2645623106524655,
+                "walkingTime": 3,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUsSv36jDqaFjADGJPbK0eGBnQmxSl4ZyO5g8d69tgqKqyhZ7yV56HWdVJLolUCjWZT6bpEXjAmJZHG5qMX9ZPoxVohCQp8RxGt_8Zz3P6XekyUMBAaWxwfgw3oScVYWoLunchGISChdkKA_jMb_v7dl45LMOIHZNS-AQLPr-XYXEcPjprdBcuKkPQgwahSBm3Qs_HvEC4oct8rBAA7z_xvKWxMA4x_Pj5XRNpV291TMdDnjlDz10UcPr1NP79G3BR65qkhKyfepJhsZLZ6WmQPcyDxio18mb-hv728ZXJ69Y93oeSc8zQxm7IG2pTlitLKECkDwKaGbvA4NcyzNtxic4dK7LvKovI6YZJ6cXvzY8CQzpkS301Tyn6xIUHeNa29in5TtNEfcyC4EAhNFBp5X6iflG4dwAKguiM7f6E&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJ__8j-4W4yRIR3XURbuvTh7Q",
+                "name": "Le Fournil D Emile",
+                "address": "108 Rue Emile Zola, 13009 Marseille",
+                "latitude": 43.2459543,
+                "longitude": 5.4038336,
+                "rating": 4.2,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Fournil%20D%20Emile%2C%20108%20Rue%20Emile%20Zola%2C%2013009%20Marseille",
+                "googlePlaceId": "ChIJ__8j-4W4yRIR3XURbuvTh7Q",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "06:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.3107592609179592,
+                "walkingTime": 16,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWxL8y9-DwVqi9K9gBy9QBwN_PsvmV13swPO8VdenwaFt1FkdUcUGgH_FyxD356AeHSz_qzneow3JK0CKjKC9JJVVqKVKDj486m4S_ujaRMLULdcGZprkuttM2B5d32Zl-aLW6ReXpvB9_xqrTY0YgyVbngdGZgnZ9Q7U-zM094XLy5KXX_3DBjXmIAmH3WauWgCh7m-Xz8H8bSiR-DbqMIYmwwZoSlEFG5npX3PGjOkZLgvQq3jYYgSdFk56WYLq3uBKO-BW4rOv0_byaBO1biOSQIXagRTV0tgMucoR0d_yS_sLqSW_pYxMlCeiNXJ6sIXcZrAx_9N4Yeo02rcngUDePbTZ4YDEcfEGQCMbPHxrE8Dbkj2hQtNdqL7ulQUeGXE0LqvkM-TlkweQ9GHN6YpF3aIfj5RwtY4bSUGBos1mI&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV9_tOWq6YACHOZIbG_2ZqBVJPPf5yryORowlFfuMLhlMFieU-Flc5M9sZPbowIMgWAJvyVsR2paDrOfbRkXF3OzqfumnV798KeqA8nsk6NbIpeZfEER1RZJvNYpJUH5EU3Ju3k7vX5WkeQjrFI24dyLLOhHnFfBrn3aiFbsKYbf0F1l1crs2AaQuMy-Fv0PkoR4z7HIhBx8J6t99Qz9-V-q8xHqrWqT9xWKynFpMTHDnQpt8nAtMZEwbK3WUpX7_oqFkBtQQetpEBc0XNVlx6gqkyKyig8mB0zGxAEElSeI01nhIR5JwHuvZiP6lOFefHbEidfHN-fE3t1Ets5GpTGof0GEQXAirdDTh7Ll_-oo4dr2f345ELBef4bVshyMadpjm2Cwc0nTIlBTHxeHD0HmoIlRkcJNEg8ncv9oPhsaF8&maxwidth=800",
+            "distanceFromPrevious": 0.9059077437566813,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "ai-mustsee-marseille-2",
+            "dayNumber": 2,
+            "startTime": "10:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Calanques de Marseille",
+            "description": "Les Calanques, connues aussi sous l'appellation calanques de Marseille ou calanques de Cassis ou encore massif des Calanques, sont constituées d'une succession d'anses et de criques s'étendant sur plus de vingt kilomètres de côtes sur la mer Médit...",
+            "locationName": "Calanques de Marseille",
+            "latitude": 43.229434,
+            "longitude": 5.4034314,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 180,
+            "rating": 4.9,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Calanques%20de%20Marseille%2C%20Marseille",
+            "dataReliability": "generated",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVdf1g6pQCb5U2S9StnFmSY2EN2g8F_rzsaPNC1AXYMBCOzRWmVE5_QbzRqmhUolArXbHvw2f19xN06cmrj0tIenDzqF-sznW7l-dE-mViZ3RpYw3s_5a4qvBYasVDzHLFe9qQOvnJPtzo259-pdPYyjHzIgA1tm93vBoRRk9cr-mw13YBzUNrytPYQXlcURuDDd_l9-mNr1n_H9i4uU5Pk2wCxPCxkgH9ZuO09ay3eei9tdPmiOXV2WFBjHC6BlHMpJjdCk005X9NjKJGvvxgQkqVynFBlGaRCH11hdGOODWZUawzV4zW6KdE3SDOswe7EyNadcpkTwW8s_OgDRxZk1MeYmP0EaWx5rGfBLvE2KEffwNCwzIAn0PkgLOPyPMNBeND46WCF5KRTuEyLW6HEyRKzh9-ctCRbSWUj6mh582VZAo6ZdWvXfayr6iJAHblRmrSPhJyCMFEod4kXXgTAFj5aSv3XuZgN0KXU6HFheDNZQ9iPqiFqX1ff985ZslYYrqowydFm4dMH6i22kV4nGKUGRozBD4HXNckfyZh_4_l-W9AT_RONl9XsVu_PHRMjabQdLwNiVA&maxwidth=800",
+            "mustSee": true,
+            "distanceFromPrevious": 0.91,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=43.296977,5.367349&destination=43.229434,5.4034314&travelmode=transit"
+          },
+          {
+            "id": "self-lunch-2",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant à proximité",
+            "description": "Déjeuner",
+            "locationName": "Restaurant à proximité",
+            "latitude": 43.229434,
+            "longitude": 5.4034314,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 45,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20Marseille",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20Marseille",
+            "restaurant": {
+              "name": "Restaurant à proximité",
+              "description": "Déjeuner",
+              "latitude": 43.229434,
+              "longitude": 5.4034314,
+              "estimatedCost": 15
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJB8iujKC5yRIR6NpkknMCc7M",
+                "name": "La Pizzeria du Chef",
+                "address": "12 Bd Vaucanson, 13009 Marseille",
+                "latitude": 43.2286764,
+                "longitude": 5.40121,
+                "rating": 4.8,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "pizzas à emporter",
+                  "pizzas à emporter",
+                  "livraison de pizzas",
+                  "pizzeria"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "04 65 95 71 88",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pizzeria%20du%20Chef%2C%2012%20Bd%20Vaucanson%2C%2013009%20Marseille",
+                "googlePlaceId": "ChIJB8iujKC5yRIR6NpkknMCc7M",
+                "openingHours": {
+                  "wednesday": null
+                },
+                "distance": 0.1987154084766564,
+                "walkingTime": 2,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVRChGbqapnR868B5w6clEvx7G_ON5Ir-qPPlt1mb6LZ-5RJlGaSBSVcHey9sdbiCsU82tleo6WnTOpeA8GS0BIxbDzTSUkNGJqntoC5tpuJKjp60U4_dR59_XsTbaSiq-zOGJQvqEnemou9i-WFopIMil1pYHjhQe0M7TgM_2plMCVxBcFcC4AJqQ49WVATmdPW_jU00L6K-74XsxzBoqn6YaqJRI1-MG-Q4ZS-8aSd6taRokfyZCZHlS9vQAeGqqvpeQBFux5Mm8fOOncGFhX54_3FpN6Qy8oVYTTkOopzg&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJ1yjM7HG4yRIRRstDln50tTs",
+                "name": "Brasserie Des Calanques",
+                "address": "Chem. de Sormiou, 13009 Marseille",
+                "latitude": 43.2331796,
+                "longitude": 5.400949799999999,
+                "rating": 4.2,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "brasserie",
+                  "brasserie",
+                  "bar",
+                  "restaurant français"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "09 64 10 91 51",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Brasserie%20Des%20Calanques%2C%20Chem.%20de%20Sormiou%2C%2013009%20Marseille",
+                "googlePlaceId": "ChIJ1yjM7HG4yRIRRstDln50tTs",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 0.4624783056659273,
+                "walkingTime": 6,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXXK6Ypa1PzQjMM6bXq0ZMIicaPhWnW0YgsqR-WDAU-alVoIwy6NWITZ1cZhAvx_cEPINj8XBNWOClwInKjWAbzVNfDiUIM_IRVjAYeazFjUFiNg7-AeA8hWv5aS-vFMo9xJB5irCyV_q5zJmPdNiAIWu2jG98Z3vaS5JkDvLyQQbLdxtdArSW_SmGLMRoiNZh7YK-yLYP951yYBXtDqbblVWEQwtEZFMU8YORGmTTuNQ14d4YPJGYp7HZSsabR_pzlLmd59jKuPrSrdUzrD5R9_mda8V6kDQsOIm7q4KZNig&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJ9Z24dsnAyRIR7S3utZVPJYk",
+            "dayNumber": 2,
+            "startTime": "13:55",
+            "endTime": "14:55",
+            "type": "activity",
+            "title": "Basilique Notre-Dame de la Garde",
+            "description": "Basilique Notre-Dame de la Garde",
+            "locationName": "Basilique Notre-Dame de la Garde",
+            "latitude": 43.284022,
+            "longitude": 5.3712547,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Basilique%20Notre-Dame%20de%20la%20Garde%2C%20Marseille",
+            "dataReliability": "verified",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 6.61,
+            "timeFromPrevious": 37,
+            "transportToPrevious": "car"
+          },
+          {
+            "id": "ai-mustsee-marseille-1",
+            "dayNumber": 2,
+            "startTime": "15:05",
+            "endTime": "16:35",
+            "type": "activity",
+            "title": "Basilique Notre-Dame de la Garde",
+            "description": "Magnifique basilique surplombant la ville, offrant une vue panoramique spectaculaire.",
+            "locationName": "Basilique Notre-Dame de la Garde",
+            "latitude": 43.2839455,
+            "longitude": 5.371242,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 90,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Basilique%20Notre-Dame%20de%20la%20Garde%2C%20Marseille",
+            "dataReliability": "generated",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 0.01,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "ai-mustsee-marseille-5",
+            "dayNumber": 2,
+            "startTime": "16:45",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "Château d'If",
+            "description": "Célèbre forteresse insulaire immortalisée par le roman Le Comte de Monte-Cristo.",
+            "locationName": "Château d'If",
+            "latitude": 43.279861,
+            "longitude": 5.325138,
+            "orderIndex": 5,
+            "estimatedCost": 20,
+            "duration": 120,
+            "rating": 4.4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20d'If%2C%20Marseille",
+            "dataReliability": "generated",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 3.76,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — l'Oasis Sormiou",
+            "description": "restaurant, restaurant ouvert le midi, sandwicherie",
+            "locationName": "l'Oasis Sormiou",
+            "latitude": 43.228812,
+            "longitude": 5.4013383,
+            "orderIndex": 6,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=l'Oasis%20Sormiou%2C%202%20Bd%20Vaucanson%2C%2013009%20Marseille",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=l'Oasis%20Sormiou%2C%202%20Bd%20Vaucanson%2C%2013009%20Marseille",
+            "restaurant": {
+              "id": "serp-nearby-ChIJLccjzpO5yRIRMQObLnQSxYM",
+              "name": "l'Oasis Sormiou",
+              "address": "2 Bd Vaucanson, 13009 Marseille",
+              "latitude": 43.228812,
+              "longitude": 5.4013383,
+              "rating": 4.7,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restauration rapide",
+                "restauration rapide",
+                "restaurant halal",
+                "restaurant de hamburgers",
+                "livraison de repas à domicile",
+                "restaurant de plats à emporter",
+                "sandwicherie",
+                "snack",
+                "restaurant de tacos"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "07 44 90 08 17",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=l'Oasis%20Sormiou%2C%202%20Bd%20Vaucanson%2C%2013009%20Marseille",
+              "googlePlaceId": "ChIJLccjzpO5yRIRMQObLnQSxYM",
+              "openingHours": {
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "15:00"
+                }
+              },
+              "distance": 0.18314246699148704,
+              "walkingTime": 2,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVhwVqyBJNwi7FrgIisFyhhCZLXDht2ANQmRTAabVxNzmbYAOsqYq9NXmwrq850l-uZbv-zyvuowxfCmXk3X48argGEUaLnEkDKHm-QHL1JsC9HuUshshkW4s_n5-vu006nl_PhToY7wU0KMQId61GDzAuLkM587On8X1VecZBVqUbFh_WQjVVNKVl865WPPjYEJYSHr68YfpLbO-RSe9fVIiRYJNwpHNaVOlXzgr5yHU8gUub0q2cuOp7JUC1CSEugYMK8l6b2frBj2YbmPZf44Zr6E0T7PuiXkxpadL8QOPWJ_qhAGbEQzf9lcaZocIN85ehVDjOThqAxlS9B1-AXjkq4_ey7sAc3BBdFZjI5LzNhWjcywZgGig_nUp2ZmtpHZCJZ64644vhpKABYnIa1ZgEDk6SfkriPw1ZMR8rpZKH9&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJg9pP-3O5yRIRf2PSN7mPOQg",
+                "name": "TRAITEUR & SNACKING",
+                "address": "213 Chem. de Morgiou, 13009 Marseille",
+                "latitude": 43.2344571,
+                "longitude": 5.4121622,
+                "rating": 5,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 36 00 36 33",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=TRAITEUR%20%26%20SNACKING%2C%20213%20Chem.%20de%20Morgiou%2C%2013009%20Marseille",
+                "googlePlaceId": "ChIJg9pP-3O5yRIRf2PSN7mPOQg",
+                "openingHours": {},
+                "distance": 0.9012670300516843,
+                "walkingTime": 11,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUbYKcymKHoibxrXMvnaexcOfD0-37_wT8N15Frl9Ty8u2yb5Gjz1HyDJF7bATq1Wsw72cz4pNH5umsLd5Qy_oRQKelZEcwU1zdBjRPVkHbqLo_w3Al2JtZcNwyim74avgYt1Sy-C5d8Xj1LwPWQAUqJHGRFPNFFaF9piSu4Vf5QzaSFpCKfAMQG3uunzTr5FCweGCXQIO96K9OekRRzFYXiL8XiHn1-CPwOxjAhrCcBSo3fhfBgKSQrimZG_MfLuZLmQb9e3GbvF62hZF5Usr4CeST7DOIapvAj4kDY_NI0Q&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJGTOmEe-5yRIR7fjLyZelnME",
+                "name": "Hot Grill Chez Amir",
+                "address": "beauvallon Centre, 213 Chem. de Morgiou, 13009 Marseille",
+                "latitude": 43.2344571,
+                "longitude": 5.4121622,
+                "rating": 5,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "grillades",
+                  "grillades",
+                  "pizzeria",
+                  "snack"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 73 07 02 72",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hot%20Grill%20Chez%20Amir%2C%20beauvallon%20Centre%2C%20213%20Chem.%20de%20Morgiou%2C%2013009%20Marseille",
+                "googlePlaceId": "ChIJGTOmEe-5yRIR7fjLyZelnME",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.9012670300516843,
+                "walkingTime": 11,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVvxUY-7cdvI-MaMk2HGQUOtMtu34QUIRSNNkiRPlOMYpdwEwUvahtM72mihvoZHeZ6W4kLwiuREZeVsH2CEXQk35y0aLDS3Et7am_e4a-LN8fymGVHQHX9fB6wjKzejHQdmNbaYQSA4wkHw09fQ_ye91tJ6CpU-4qUPxAQ_nlXpxXZ9TaUlE1WsnAW8ry1TIoxPZUUiCSM_EKE6RW7RiR6VWzH11H2XQRED3O3Y3Z4annL-mEWlcjg0YqVBVeXigBkkWG2i5KX7hhwiURTcoLv5RjkGqV2to-EBlqPzA0GmOiI_y6DVVH0LHPkMxSKG3zafGhK7ROdWsYwT7UjuHBOdzLxpdXvc0Qr4IbjuFo9kbraEGVCKQckGFT4ITQTsMjWqAMdGkyhIH8XhGXIzDyThW-49-AZPTuXsGtP4Ph1pU-50mELX82rwCXD6g&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVhwVqyBJNwi7FrgIisFyhhCZLXDht2ANQmRTAabVxNzmbYAOsqYq9NXmwrq850l-uZbv-zyvuowxfCmXk3X48argGEUaLnEkDKHm-QHL1JsC9HuUshshkW4s_n5-vu006nl_PhToY7wU0KMQId61GDzAuLkM587On8X1VecZBVqUbFh_WQjVVNKVl865WPPjYEJYSHr68YfpLbO-RSe9fVIiRYJNwpHNaVOlXzgr5yHU8gUub0q2cuOp7JUC1CSEugYMK8l6b2frBj2YbmPZf44Zr6E0T7PuiXkxpadL8QOPWJ_qhAGbEQzf9lcaZocIN85ehVDjOThqAxlS9B1-AXjkq4_ey7sAc3BBdFZjI5LzNhWjcywZgGig_nUp2ZmtpHZCJZ64644vhpKABYnIa1ZgEDk6SfkriPw1ZMR8rpZKH9&maxwidth=800",
+            "distanceFromPrevious": 8.38,
+            "timeFromPrevious": 47,
+            "transportToPrevious": "car",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=43.229434,5.4034314&destination=43.2487536,5.4170492999999995&travelmode=transit",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Château d'If & Calanques de Marseille",
+        "dayNarrative": "Journée consacrée à Château d'If et Calanques de Marseille. 4 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 11,
+          "tempMax": 21,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 15,
+          "food": 60,
+          "transport": 0,
+          "total": 75
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 75,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 8.38,
+          "p95LegKm": 6.61,
+          "totalTravelMin": 130,
+          "totalLegKm": 19.67,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.77,
+          "mstLowerBoundKm": 11.14
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-06T22:10:52.411Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out Vertigo Hostel",
+            "description": "Disponibilité confirmée",
+            "locationName": "38 Rue Fort Notre Dame, 13007 Marseille, France",
+            "latitude": 43.2913973778401,
+            "longitude": 5.3719362616539,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 8,
+            "bookingUrl": "https://www.booking.com/hotel/fr/vertigo-vieux-port-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vertigo%20Hostel%2C%20Marseille",
+            "accommodation": {
+              "id": "booking-270898",
+              "name": "Vertigo Hostel",
+              "type": "hotel",
+              "address": "38 Rue Fort Notre Dame, 13007 Marseille, France",
+              "latitude": 43.2913973778401,
+              "longitude": 5.3719362616539,
+              "rating": 8,
+              "reviewCount": 3245,
+              "stars": 2,
+              "pricePerNight": 32,
+              "totalPrice": 64,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/796594858.jpg?k=bbe2e3649a2c08e3c4df52a78d9a991adea76eb686dfc68f59dc9c0f325db769&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/fr/vertigo-vieux-port-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/796594858.jpg?k=bbe2e3649a2c08e3c4df52a78d9a991adea76eb686dfc68f59dc9c0f325db769&o="
+          },
+          {
+            "id": "gp-ChIJLbJEAADEyRIRYCEp3dY2sOc",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Fort de Ratonneau",
+            "description": "L'île de Ratonneau est une des îles du Frioul, un archipel méditerranéen. Territoire français, elle est située dans la rade de Marseille, à environ 2 milles marins du Vieux-Port de Marseille et fait partie du parc national des Calanques et du parc...",
+            "locationName": "Fort de Ratonneau",
+            "latitude": 43.2827801,
+            "longitude": 5.3116919,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fort%20de%20Ratonneau%2C%20Marseille",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWSml_XhutQNvyimHGJQjNh6Nuv7lSxENoYrULXAapBpc9nXv4of0QPpJNWyeo3LRMR_vl4NOzK9e9-UUkVl0ZU3WHJ9MLursZI660S5pWM8WvyJb33DuZhWEdkKTRWgPNjVqyE8SUMdElbp2P_ntsGPXp8bAqUY88KmSzZhAk7N-YW2dwboo2Gg0pZsGlq1ezNtqf45p0QrK14yggOZiypZdTNR1V-nyjB47txEnixAUIHpAgMbZ4i4aSK54ROBOaB-Nlj6C9dwkFyfy7ugWv6-OUMr2KepRdj7vXa9VYULHZ2aiyIKO012qVdd0oMMKBrW4GKLo4JlFbyf8QzNvX70RAn4cp0Zo_kfjFjav7bImTUKXqxomjcn4TE7kKpT_hhLyU_CMzwsGlgLkTGMondeh3XqN1jtdxj2MOeouJIkOq017en2WE__SP98B8S2JSJOzB4hqTXfQKL1YdBl4QOElMih9nXlhBGvpfk0iq7J2gXYcxgVZDLyC8J68PLabNMjYH2Pct_VzXYTzOYS8YThGPx67fb37PxMYwO20bmGlkC1RfujHxfZdqo_vtuXXyO8SZG&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 4.97,
+            "timeFromPrevious": 47,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "restaurant",
+            "title": "Déjeuner — La dent creuse",
+            "description": "restauration rapide",
+            "locationName": "Quai d'Honneur Île Ratonneau, 13007 Marseille",
+            "latitude": 43.2792305,
+            "longitude": 5.3056242,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20dent%20creuse%2C%20Quai%20d'Honneur%20%C3%8Ele%20Ratonneau%2C%2013007%20Marseille",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20dent%20creuse%2C%20Marseille",
+            "restaurant": {
+              "id": "serp-nearby-ChIJoQM1i1nFyRIRA5R3J_ltH7Y",
+              "name": "La dent creuse",
+              "address": "Quai d'Honneur Île Ratonneau, 13007 Marseille",
+              "latitude": 43.2792305,
+              "longitude": 5.3056242,
+              "rating": 4.7,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restauration rapide",
+                "restauration rapide"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "06 12 59 07 28",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20dent%20creuse%2C%20Quai%20d'Honneur%20%C3%8Ele%20Ratonneau%2C%2013007%20Marseille",
+              "googlePlaceId": "ChIJoQM1i1nFyRIRA5R3J_ltH7Y",
+              "openingHours": {
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.630114055980717,
+              "walkingTime": 8,
+              "_alternatives": [
+                {
+                  "id": "serp-nearby-ChIJie5IZwHEyRIR9UIL-oP--z4",
+                  "name": "La Grillade",
+                  "address": "Quai d'Honneur - Le Frioul, 13007 Marseille",
+                  "latitude": 43.2791546,
+                  "longitude": 5.305537999999999,
+                  "rating": 4.1,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant méditerranéen",
+                    "restaurant méditerranéen",
+                    "restaurant arménien",
+                    "restaurant de grillades"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "04 91 59 07 07",
+                  "website": "https://lagrillade.shop/",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Grillade%2C%20Quai%20d'Honneur%20-%20Le%20Frioul%2C%2013007%20Marseille",
+                  "googlePlaceId": "ChIJie5IZwHEyRIR9UIL-oP--z4",
+                  "openingHours": {
+                    "wednesday": {
+                      "open": "09:15",
+                      "close": "17:30"
+                    }
+                  },
+                  "distance": 0.6408439714034064,
+                  "walkingTime": 8,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfW7k_JfWtL9ApYoSqyiaI23-kW2bsH7ABTEAiObbYakoZTa5QAoq2xbar2QGVkX65Q8HJxV1Ivk9PgQuswBY7PTIQwXRpUKQwBvAs77RbuxHQt3jyHibDaMkAa0ar6By2bsEn63H9P3W6Uhq2NpoBcOlUB6JsjjGIo93a3TKLGXTffh-3dpPjJR5pjjKnZxSHQJ_kfY0gca5G0G6whz-NgCxzxDwR2F6Y0l4fV1xaAfHRLiMzK4t5-JyuSnRPQLaG5pLmYxWzFEb8JFcWK4IIaPcf6wZzEl3npWZdEbmq6rIFHXaxXtSyBbzOBDXP0qdfA28jEJVuHOy_5XSdhoA4DGmPHrtj9eJAhbbgoZ7YT3cSXYwB5BjyVVhA52z088GoZTdme4NmGwU-Q4ctNpQ2h9h4KNTqMAvj8r6kWqi8a8P9mc9BKxfbpCeau20Kj7&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-nearby-ChIJT63VrgbEyRIRfjC--H5Q23E",
+                  "name": "Le Cabanon du Frioul",
+                  "address": "Quai d'Honneur Île Ratonneau, 13007 Marseille",
+                  "latitude": 43.2790973,
+                  "longitude": 5.3044116,
+                  "rating": 4.6,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "bar lounge",
+                    "bar lounge",
+                    "bar",
+                    "magasin d'articles de plage",
+                    "brasserie"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "06 87 55 52 34",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Cabanon%20du%20Frioul%2C%20Quai%20d'Honneur%20%C3%8Ele%20Ratonneau%2C%2013007%20Marseille",
+                  "googlePlaceId": "ChIJT63VrgbEyRIRfjC--H5Q23E",
+                  "openingHours": {
+                    "wednesday": {
+                      "open": "10:00",
+                      "close": "00:00"
+                    }
+                  },
+                  "distance": 0.7176484946500863,
+                  "walkingTime": 9,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVSq1f03T3KB8ZSQ6Fa8n66v-X4ASQ7sgKE-EE9FpT5o1-7j4OhbERyeyMXb7eLTJYI6TiPWnge0sIX4FdiB1Wa2Rkki7ZnC4kPQOSRzJEZzujCNDPRN5QuWb03dHR3CsDv8eQ0v7X4cgEngDqu9pPcT6h4GVcoiavNCg9gVix6XBPSRvhh-6Fy5ExA4cF8i_WJKx5rJi0mZqXL4XTgHhncB3g2pQR-y7dirQzT_3T-Do6FDBgOivMt5Km6IeroAjxzTwpUIGY6UuJUYla57z6DB4SMkAi5F6d2UgzFRx74wg&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWZfpWszpIbnNtYLwMb_7B4RbffXCZJJdmA9BymwKtnnFN1_c0hWagM9-9iCKfLfbAE2G3nTRm-4EfE34VpNjHssevYpvbfOekFEHzo4h37wf62CpQSXgxYompt-Ht1653NFQw-XkqdAAKzAm7nfdTG3FILGoPm0RllfCkHMgkzmbzgAIjE7DQ4pGQDIwADBAmQW5f8JfZmzSnQLGfxuAtuEq1HjjukKwlgqcEI8GIYS09tVoJRCsVvK4tvkYD8amjQ1iUZjF_AdOC4swkuWH5mRvHD5394-bAVziuQ9wiHUQ&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJie5IZwHEyRIR9UIL-oP--z4",
+                "name": "La Grillade",
+                "address": "Quai d'Honneur - Le Frioul, 13007 Marseille",
+                "latitude": 43.2791546,
+                "longitude": 5.305537999999999,
+                "rating": 4.1,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant méditerranéen",
+                  "restaurant méditerranéen",
+                  "restaurant arménien",
+                  "restaurant de grillades"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "04 91 59 07 07",
+                "website": "https://lagrillade.shop/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Grillade%2C%20Quai%20d'Honneur%20-%20Le%20Frioul%2C%2013007%20Marseille",
+                "googlePlaceId": "ChIJie5IZwHEyRIR9UIL-oP--z4",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "09:15",
+                    "close": "17:30"
+                  }
+                },
+                "distance": 0.6408439714034064,
+                "walkingTime": 8,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW7k_JfWtL9ApYoSqyiaI23-kW2bsH7ABTEAiObbYakoZTa5QAoq2xbar2QGVkX65Q8HJxV1Ivk9PgQuswBY7PTIQwXRpUKQwBvAs77RbuxHQt3jyHibDaMkAa0ar6By2bsEn63H9P3W6Uhq2NpoBcOlUB6JsjjGIo93a3TKLGXTffh-3dpPjJR5pjjKnZxSHQJ_kfY0gca5G0G6whz-NgCxzxDwR2F6Y0l4fV1xaAfHRLiMzK4t5-JyuSnRPQLaG5pLmYxWzFEb8JFcWK4IIaPcf6wZzEl3npWZdEbmq6rIFHXaxXtSyBbzOBDXP0qdfA28jEJVuHOy_5XSdhoA4DGmPHrtj9eJAhbbgoZ7YT3cSXYwB5BjyVVhA52z088GoZTdme4NmGwU-Q4ctNpQ2h9h4KNTqMAvj8r6kWqi8a8P9mc9BKxfbpCeau20Kj7&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJT63VrgbEyRIRfjC--H5Q23E",
+                "name": "Le Cabanon du Frioul",
+                "address": "Quai d'Honneur Île Ratonneau, 13007 Marseille",
+                "latitude": 43.2790973,
+                "longitude": 5.3044116,
+                "rating": 4.6,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar lounge",
+                  "bar lounge",
+                  "bar",
+                  "magasin d'articles de plage",
+                  "brasserie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 87 55 52 34",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Cabanon%20du%20Frioul%2C%20Quai%20d'Honneur%20%C3%8Ele%20Ratonneau%2C%2013007%20Marseille",
+                "googlePlaceId": "ChIJT63VrgbEyRIRfjC--H5Q23E",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "10:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.7176484946500863,
+                "walkingTime": 9,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVSq1f03T3KB8ZSQ6Fa8n66v-X4ASQ7sgKE-EE9FpT5o1-7j4OhbERyeyMXb7eLTJYI6TiPWnge0sIX4FdiB1Wa2Rkki7ZnC4kPQOSRzJEZzujCNDPRN5QuWb03dHR3CsDv8eQ0v7X4cgEngDqu9pPcT6h4GVcoiavNCg9gVix6XBPSRvhh-6Fy5ExA4cF8i_WJKx5rJi0mZqXL4XTgHhncB3g2pQR-y7dirQzT_3T-Do6FDBgOivMt5Km6IeroAjxzTwpUIGY6UuJUYla57z6DB4SMkAi5F6d2UgzFRx74wg&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWZfpWszpIbnNtYLwMb_7B4RbffXCZJJdmA9BymwKtnnFN1_c0hWagM9-9iCKfLfbAE2G3nTRm-4EfE34VpNjHssevYpvbfOekFEHzo4h37wf62CpQSXgxYompt-Ht1653NFQw-XkqdAAKzAm7nfdTG3FILGoPm0RllfCkHMgkzmbzgAIjE7DQ4pGQDIwADBAmQW5f8JfZmzSnQLGfxuAtuEq1HjjukKwlgqcEI8GIYS09tVoJRCsVvK4tvkYD8amjQ1iUZjF_AdOC4swkuWH5mRvHD5394-bAVziuQ9wiHUQ&maxwidth=800",
+            "distanceFromPrevious": 0.63,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3",
+            "dayNumber": 3,
+            "startTime": "15:00",
+            "endTime": "17:26",
+            "type": "transport",
+            "title": "🚄 Train → Lyon",
+            "description": "Marseille → Lyon",
+            "locationName": "Marseille → Lyon",
+            "latitude": 43.2965,
+            "longitude": 5.3698,
+            "orderIndex": 3,
+            "estimatedCost": 50,
+            "duration": 146,
+            "bookingUrl": "https://www.omio.fr/trains/marseille/lyon?departure_date=2026-04-07",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%84%20Train%20%E2%86%92%20Lyon%2C%20Marseille",
+            "transitLegs": [
+              {
+                "mode": "train",
+                "from": "Marseille-St-Charles",
+                "to": "Lyon Part Dieu",
+                "departure": "2026-04-07T13:00:00.000Z",
+                "arrival": "2026-04-07T14:46:00.000Z",
+                "duration": 106,
+                "line": "TGV INOUI"
+              }
+            ],
+            "transitDataSource": "api",
+            "priceRange": [
+              25,
+              80
+            ],
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg",
+            "distanceFromPrevious": 7.383,
+            "timeFromPrevious": 32,
+            "transportToPrevious": "car",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=43.2792305,5.3056242&destination=43.2965,5.3698&travelmode=transit"
+          }
+        ],
+        "theme": "Fort de Ratonneau",
+        "dayNarrative": "Journée consacrée à Fort de Ratonneau. 1 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": 10,
+          "tempMax": 22,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 30,
+          "transport": 50,
+          "total": 80
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 120,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.63,
+          "p95LegKm": 0.63,
+          "totalTravelMin": 11,
+          "totalLegKm": 0.63,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0.63
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Marseille",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 43.2965,
+              "lng": 5.3698
+            },
+            "duration": 106,
+            "price": 50,
+            "co2": 1,
+            "operator": "TGV INOUI",
+            "frequency": "Plusieurs par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/marseille?departure_date=2026-04-05"
+          }
+        ],
+        "totalDuration": 146,
+        "totalPrice": 50,
+        "totalCO2": 1,
+        "score": 7.3,
+        "scoreDetails": {
+          "priceScore": 1.7,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/marseille?departure_date=2026-04-05",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lyon Part Dieu",
+            "to": "Marseille-St-Charles",
+            "departure": "2026-04-05T04:28:00.000Z",
+            "arrival": "2026-04-05T06:14:00.000Z",
+            "duration": 106,
+            "line": "TGV INOUI"
+          }
+        ],
+        "priceRange": [
+          25,
+          80
+        ],
+        "recommended": true,
+        "recommendationReason": "Option rapide, écologique"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Marseille",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 43.2965,
+              "lng": 5.3698
+            },
+            "duration": 208,
+            "price": 11,
+            "co2": 7,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/marseille?departure_date=2026-04-05"
+          }
+        ],
+        "totalDuration": 263,
+        "totalPrice": 11,
+        "totalCO2": 7,
+        "score": 5.1,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 5.4
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/marseille?departure_date=2026-04-05"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Marseille",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 43.2965,
+              "lng": 5.3698
+            },
+            "duration": 167,
+            "price": 58,
+            "co2": 14,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Marseille"
+          }
+        ],
+        "totalDuration": 197,
+        "totalPrice": 58,
+        "totalCO2": 14,
+        "score": 1.9,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 5.6,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Marseille",
+        "dataSource": "estimated"
+      }
+    ],
+    "selectedTransport": {
+      "id": "train_api",
+      "mode": "train",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Lyon",
+          "to": "Marseille",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 43.2965,
+            "lng": 5.3698
+          },
+          "duration": 106,
+          "price": 50,
+          "co2": 1,
+          "operator": "TGV INOUI",
+          "frequency": "Plusieurs par jour",
+          "bookingUrl": "https://www.omio.fr/trains/lyon/marseille?departure_date=2026-04-05"
+        }
+      ],
+      "totalDuration": 146,
+      "totalPrice": 50,
+      "totalCO2": 1,
+      "score": 7.3,
+      "scoreDetails": {
+        "priceScore": 1.7,
+        "timeScore": 10,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.omio.fr/trains/lyon/marseille?departure_date=2026-04-05",
+      "dataSource": "api",
+      "transitLegs": [
+        {
+          "mode": "train",
+          "from": "Lyon Part Dieu",
+          "to": "Marseille-St-Charles",
+          "departure": "2026-04-05T04:28:00.000Z",
+          "arrival": "2026-04-05T06:14:00.000Z",
+          "duration": 106,
+          "line": "TGV INOUI"
+        }
+      ],
+      "priceRange": [
+        25,
+        80
+      ],
+      "recommended": true,
+      "recommendationReason": "Option rapide, écologique"
+    },
+    "accommodation": {
+      "id": "booking-270898",
+      "name": "Vertigo Hostel",
+      "type": "hotel",
+      "address": "38 Rue Fort Notre Dame, 13007 Marseille, France",
+      "latitude": 43.2913973778401,
+      "longitude": 5.3719362616539,
+      "rating": 8,
+      "reviewCount": 3245,
+      "stars": 2,
+      "pricePerNight": 32,
+      "totalPrice": 64,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/796594858.jpg?k=bbe2e3649a2c08e3c4df52a78d9a991adea76eb686dfc68f59dc9c0f325db769&o="
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/hotel/fr/vertigo-vieux-port-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-270898",
+        "name": "Vertigo Hostel",
+        "type": "hotel",
+        "address": "38 Rue Fort Notre Dame, 13007 Marseille, France",
+        "latitude": 43.2913973778401,
+        "longitude": 5.3719362616539,
+        "rating": 8,
+        "reviewCount": 3245,
+        "stars": 2,
+        "pricePerNight": 32,
+        "totalPrice": 64,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/796594858.jpg?k=bbe2e3649a2c08e3c4df52a78d9a991adea76eb686dfc68f59dc9c0f325db769&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/fr/vertigo-vieux-port-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-6223699",
+        "name": "The People - Marseille",
+        "type": "hotel",
+        "address": "7 Rue Jean-Marc Cathala, 13002 Marseille, France",
+        "latitude": 43.301105,
+        "longitude": 5.371282,
+        "rating": 8.3,
+        "reviewCount": 5950,
+        "stars": 3,
+        "pricePerNight": 49,
+        "totalPrice": 98,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/508975786.jpg?k=25104dbf892915fe6ec519a7f8ea419a15f635a01736471cbee5f71826a92032&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/fr/the-people-hostel-marseille.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-1202771",
+        "name": "Ibis Budget Marseille Timone",
+        "type": "hotel",
+        "address": "69 Bd Sakakini, 13005 Marseille, France",
+        "latitude": 43.295242,
+        "longitude": 5.400739,
+        "rating": 6.6,
+        "reviewCount": 1722,
+        "stars": 2,
+        "pricePerNight": 57,
+        "totalPrice": 114,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/779423780.jpg?k=fcac4fcd900168b6ca0bbd6c82861caf9b670b74a59f42bfe35ef2dba1ac2531&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:30",
+        "bookingUrl": "https://www.booking.com/hotel/fr/ibis-budget-marseille-timone.html?checkin=2026-04-04&checkout=2026-04-06&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 334,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 64,
+      "food": 135,
+      "activities": 35,
+      "transport": 100,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Français",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Bonjour",
+            "phonetic": "Bo-zhour",
+            "context": "Salutation générale"
+          },
+          {
+            "original": "Je voudrais commander...",
+            "translation": "Je voudrais commander...",
+            "phonetic": "Zhuh voo-dray ko-man-day",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "Pouvez-vous m'aider ?",
+            "translation": "Pouvez-vous m'aider ?",
+            "phonetic": "Poo-vay voo may-day",
+            "context": "Demander de l'aide"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Où sont les toilettes ?",
+            "phonetic": "Oo son lay twa-let",
+            "context": "Demander des toilettes"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "Combien ça coûte ?",
+            "phonetic": "Kom-bee-en sa koot",
+            "context": "Prix d'un article"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Merci beaucoup",
+            "phonetic": "Mer-see bo-koo",
+            "context": "Remerciement"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "Je ne comprends pas",
+            "phonetic": "Zhuh nuh kom-pron pah",
+            "context": "Incompréhension"
+          },
+          {
+            "original": "Parlez-vous anglais ?",
+            "translation": "Parlez-vous anglais ?",
+            "phonetic": "Par-lay voo on-glay",
+            "context": "Communication"
+          },
+          {
+            "original": "Un café, s'il vous plaît",
+            "translation": "Un café, s'il vous plaît",
+            "phonetic": "Uhn ka-fay, seel voo play",
+            "context": "Au café"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Au secours !",
+            "phonetic": "Oh suh-koor",
+            "context": "Urgence"
+          },
+          {
+            "original": "Excusez-moi",
+            "translation": "Excusez-moi",
+            "phonetic": "Ex-kew-zay mwa",
+            "context": "Politesse"
+          },
+          {
+            "original": "Je suis perdu",
+            "translation": "Je suis perdu",
+            "phonetic": "Zhuh swee per-doo",
+            "context": "Besoin de direction"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Pull léger",
+            "reason": "Températures variables en avril"
+          },
+          {
+            "item": "Imperméable compact",
+            "reason": "Risques de pluie printanière"
+          },
+          {
+            "item": "Chaussures confortables",
+            "reason": "Marche dans les villes et randonnées"
+          },
+          {
+            "item": "Crème solaire",
+            "reason": "Protection UV en début de printemps"
+          },
+          {
+            "item": "Lunettes de soleil",
+            "reason": "Soleil méditerranéen"
+          },
+          {
+            "item": "Bouteille d'eau réutilisable",
+            "reason": "Hydratation et écologie"
+          },
+          {
+            "item": "Adaptateur secteur",
+            "reason": "Compatible prises françaises"
+          },
+          {
+            "item": "Petit sac à dos",
+            "reason": "Déplacements et excursions"
+          }
+        ],
+        "plugType": "C/E",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Aucun visa requis, déplacements nationaux"
+          }
+        ],
+        "importantLaws": [
+          "Port de la ceinture de sécurité obligatoire",
+          "Limitation de vitesse sur autoroute à 130 km/h",
+          "Interdiction de téléphoner en conduisant sans kit mains libres"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "17",
+        "ambulance": "15",
+        "fire": "18",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "SOS Médecins",
+            "number": "3624"
+          },
+          {
+            "label": "Centre antipoison",
+            "number": "04 91 75 25 25"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 50,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 30,
+      "transportTips": "Utiliser le pass RTM 3 jours, combiner métro/bus",
+      "reasoning": "Budget serré nécessitant optimisation. Logement avec cuisine permet économies repas. Alternance restaurants locaux et courses pour expérience gastronomique et maîtrise budget. Privilégier activités culturelles gratuites/petit budget comme musées municipaux, vieux port, quartiers historiques.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJ9Z24dsnAyRIR7S3utZVPJYk",
+        "name": "Basilique Notre-Dame de la Garde",
+        "type": "religious",
+        "description": "",
+        "latitude": 43.284022,
+        "longitude": 5.3712547,
+        "rating": 4.7,
+        "reviewCount": 48623,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "07:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXqPrLldufWrmzIT2cZqVdi1Z-ag2phWdM2NANdazr1HxBr2Mtr36wbn8yYEhbvSckGdYO1AvM7R2-qVr_RIygDSkIkfmt_HO4dnPq-4b46-yIiDpbf39qUmZ6IBmW0kz4M_Ee3nkFQaik2g-f5ioyfSgm_gyJb6HycAML-ELfIWP0w1Pbgek8B_f6A49F3bWRnzUUMLiM_slxvodxKfQVKOcWmDG_R5K-6l5wan-yF_1hBSZpmb_AX4HF81ISiD3maaNGv4BWJ15IQfinyPy6plKTu9Yg7cw1CbOmkvt6Ack1CCl-pV5s9W7n8CQQL7ylBJRrD69LfkAi1aAImMikm0sBhYl6xlsse0n4pfi8QVZhCJpkTjf24BYI3NPj_sl7Q-yTxxjWGV2lLaLgHMAqN-0HXeoFXhzhobdHAJtk_OCTOS30fm5zkCQdVJMZgLf4nnWMKjc-mheVTdj-JAWNAyASjqKwWLRQW5Y2BJ3yqLo20A_2JIgXYbXvGJsYUf7CUw9g1pkCtwiMAQAYICLeqXg2FunlwchVuw494EMS8wslJGgx9HlRBERKkIZ2QqYGmOl9TrPJOKA&maxwidth=400",
+        "googlePlaceId": "ChIJ9Z24dsnAyRIR7S3utZVPJYk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 13 40 80",
+        "website": "https://basiliquenotredamedelagarde.com/",
+        "isOutdoor": false,
+        "score": 142.40034149328602,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "gp-ChIJs0riBr3AyRIRVtgGX43TIUU",
+        "name": "Cathédrale la Major de Marseille",
+        "type": "religious",
+        "description": "",
+        "latitude": 43.2992624,
+        "longitude": 5.3646914,
+        "rating": 4.7,
+        "reviewCount": 19080,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:30"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWVSGz4IL8EDfk4NLb5trZE8IzDl-wdAQo42BOL2g-lsjAg4kzXrWxllRMqmVJUWouuBRkV3MI2KUUcMkpMXN0HGb5ll7EmlDq7ZmcsousXpNHg5OPZ3svjk2nztt_fbo19AinOpEmx04wM3fYgHZFJG_bMf-CaLGBl-7fHRNfosXjeioM5PUv04HYYFnYUXQ1m_v7-S1cu5u7rbXBoWAiH-lGYaEPtNw025yiTjM4ZJQZpwsD7WWoicSbwZ1oiDzY24FacSroYtA6HwhOeq_fw57_OekU_io5IXATn0YR6eFzgZ2ex7XyvzJYL1SBzSFR0sy9Ju-G5viI0t5HqhAYTOZS87ELWMcVoU6XmNSewkjuEYZZfs6SxiFKms7V8JhU-oOk5XYU9XA8qJ6ATrsg7OKosvUMF7oTKBA1zbf8Aq_rI96C_oZXEXLetmZLXwuJ4YIcWAo78intSjXkOrCCoS6zmrARSJ1gqPXG39A6JJUlySxJx4VUPzsTiAT7aLiHCBwoCO5kYkCNqefAzv_btXFlGi8e4mi6JCjbiMbdeGEDPM5IurWiF9eaYJNIfyCGJgq4p&maxwidth=400",
+        "googlePlaceId": "ChIJs0riBr3AyRIRVtgGX43TIUU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "07 72 15 60 10",
+        "website": "https://diocese-marseille.fr/paroisse/sanctuaire-sainte-marie-majeure-cathedrale-la-major/",
+        "isOutdoor": false,
+        "score": 138.79395001620802,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJFZv_M7_AyRIRfr31NFtB3RA",
+        "name": "Château d'If",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.27995139999999,
+        "longitude": 5.325145699999999,
+        "rating": 4.6,
+        "reviewCount": 5448,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXktKqGDzf5baTkFQKqSp5Vn8Lil-_2FRHFzAkU9TmdByb3aIVqHIm9DAmcUVDeS0Ie83S34la6kR3_2rkG--rnThC966qiXEdzFPzJq9rPTxIDZHE7oUl2wH2mV2hm8A3vY1POXtoLfKpoiBV3hh6vKeiSDWmA3Jxp9GkfxfIKMWg7mEVel9C9Am_9eH5V1Od5iqjOVMp9XnV50USSIrUFlMdFtelwh5X_zHcFnznSGYXH6NxXCxMwWXLte5LZSunnRJabA6-xsuQDZky-kGf_aUB-sw22CoyBEVsVKsLsxUvN6-faq47aSvO1zsAK1KjlppD0YY9IoZPrbLhVUscCw1gqP6iFUfwEqSDBWlHQ4DL1XQom7Qq4K8UUZT1nkPt_EUmUuu00oJA4LCbTDnJ93-O5Qwg5RAXE7XiHr4GWrFjw8vQj5tArcuAFFtj_JZzQ12rpZliMN2brOrimlkQTfv8myEbBLxjrhdw7WPGu0Z129z0deBHf6FKIrk0zM__OXk2XobUTdyXKO_KLyQqWBJ6e731HV17SQWXCzoGHuoYrf7itjLYbPemBvJxQa4wpwxHqPPSrXA&maxwidth=400",
+        "googlePlaceId": "ChIJFZv_M7_AyRIRfr31NFtB3RA",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 03 06 25 26",
+        "website": "http://chateau-if.fr/",
+        "isOutdoor": false,
+        "score": 137.54920460947918,
+        "source": "google_places"
+      },
+      {
+        "id": "ai-mustsee-marseille-4",
+        "name": "Le Panier",
+        "type": "culture",
+        "description": "Plus ancien quartier de Marseille, rues étroites pittoresques et atmosphère authentique.",
+        "duration": 90,
+        "estimatedCost": 0,
+        "latitude": 43.29806,
+        "longitude": 5.36778,
+        "rating": 4.6,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "generated",
+        "isOutdoor": false,
+        "score": 101.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "ai-mustsee-marseille-2",
+        "name": "Calanques de Marseille",
+        "type": "nature",
+        "description": "Magnifiques fjords calcaires méditerranéens offrant des paysages naturels à couper le souffle.",
+        "duration": 180,
+        "estimatedCost": 15,
+        "latitude": 43.229434,
+        "longitude": 5.4034314,
+        "rating": 4.9,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "generated",
+        "isOutdoor": true,
+        "score": 101.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJgUObVWK_yRIRd6M73U2Mdeg",
+        "name": "Palais Longchamp",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.30426689999999,
+        "longitude": 5.3946029,
+        "rating": 4.6,
+        "reviewCount": 19453,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "18:45"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXBcM7HtC9YbvBiiMiEYS-6UX5jcUWfwItX4pzwtSTYwXe8ekKmg1AcWYDtkwz3LLPu0AjDPYQFtTfUMMGKkyDJRJXoe88DOyQL86WKTJQTiph1u2kwOLkSHxeaivHWYsK4QY_ayoR9mSZtKObQKQVRtmHcTc72KPSJa5fsG2tGxlJTIVLRQwvcfzGEjb0G3-IAKtzCtXjU-kA69WKb0idin_KxudaIvA0QHRbI7IMXJ6-TRKCpUoJrR0Fp0aSAPViAE48_xsBEO8Z8zwQ-KGR4NcSr3OnvcVz1Q8IvhsQGNdcxGBQHVQ0HdDzefgVsWMMZb5-nEQn3ffpiKlzgkCdDv9_On1QuyrZZxPqgFTb2DF1aMjA14X3HtBMVnX2HY50VkffhwCwkw-cJsA8sD-q0Q2nRGbOEvsjMmKZ4rPDmFVaVB1XDKirSV7ZIGFKGR5q418HpQZvpgIMEf4ixvpvp-msB1dkXGH1PdoA-Kj4R4i-4A8aCLGN4DIpxnI0prDI_HZH2oGhEsHo84XPYqe0Ey_dalihDBFmWR8tPEx2UCKuDJkDleD_GlCBjx-AZt2OjBYwA&maxwidth=400",
+        "googlePlaceId": "ChIJgUObVWK_yRIRd6M73U2Mdeg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "18:45"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 55 25 51",
+        "website": "https://www.marseille.fr/culture/patrimoine-culturel/le-palais-longchamp",
+        "isOutdoor": false,
+        "score": 43.777896832883975,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ7fOdj5rAyRIR_jlSzkaC86U",
+        "name": "Mucem - Musée des civilisations de l’Europe et de la Méditerranée",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.2966941,
+        "longitude": 5.3610825,
+        "rating": 4.4,
+        "reviewCount": 23736,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVYR1QbWSmTBtB4pyARuZJpAOM2WVjr3HBdWH_Ffio04kPxGoNFOThWeN4csUTtD_08nQKGxpX1QmgZ9IaXZmtODU2zmgm4KLylJSSuNx8GWQ4fJsAlxXT7IRC35lDGTGfSVuB87FZ13_wZkiyw_nefx70lK4pYG2kIjHkb1qEJA9qrsW1u2RzDzuLE1ZWRQtzkP7RA0EFH_NP8H3fGrVGAYWgE_0ye9hU3tWhH2WKCKf9mFqW157qZTXAPJWaWyDC_wqsIIFVtAUShPlQjmEpgQpv4POyjMs6o88cHpbsPvVrzlukMEykar8CWScU17qeLrNuZ-3QVkyhtKbk1aeGqWzF3nWgtdMpNIA7ZlKeLPF-MP7E2u64CYqaJ8L3wGz1XzP2wcJq8VyO-M6DzJwpfBzX4VYniENiQ9utF8S4PmLK5_4bDZ7ijrLlxKK_ZWmxyW8bD92lQ2Ly-XIGMlRAqovo00nj6PO91xyzmEPLB_N-F7KRnpAaJXaeF65dUmqgTuCNerwDQ8eTuB_6j33S288fX9QTkIAcH5v7ddpA0hjGIgBvbbOU3Mtt1oFgAlEiPAUkYBT88XA&maxwidth=400",
+        "googlePlaceId": "ChIJ7fOdj5rAyRIR_jlSzkaC86U",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": null,
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 84 35 13 13",
+        "website": "https://www.mucem.org/",
+        "isOutdoor": false,
+        "score": 42.870348809529304,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ2Z63aurAyRIRAYXcJw8lHgY",
+        "name": "Centre de la Vieille Charité",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.3001517,
+        "longitude": 5.3678971,
+        "rating": 4.5,
+        "reviewCount": 4913,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUq1Lb0tl6_IAJB_x2F_tqt_j_JuECv2bQW1OvWUwfjhx_HO6RKxsQCinpzNkxXb0g8MNMZ6JuYB5rPwF3SmB1VEzcMUfyjrYWD9iftbV-bEYUZCIC0zFvUyOXx-9Z3tNPfbv5ULSUXS-H8PzX6mHFgCIFDICvv7i2F2MgqqOLL1BFMKUTRPmQ4YxFngs6-g--GW-ATPFx1P1a2B0EChQRTCV4hJJFmfMIG4uvhHJiATat8YSv_paIAZ_4BYb1REB9KHALo0PIo3kgcfxtDvIRXL4RP7Var3_llnlBNEVK_SKxxGXo2Ym73ifG9XGGJOJdL1j27YS-SyoBlWwc_Yb8YJcyacLSboXfGVaLnRabmA5i2XdIhvRVJtSzkHzQ7fyBoG9t56Xkfay_WqaCyfeNJee6Bo422Dt-vwd2SxMWuzo08imlooOeyut9k2dgwM7VzVSpBtGM4YHcYadg7zy71HOiSUb_fERCsw8Av30CJNxiEoYetT01s-eACoIUUuT9tHuWoxgbsR8cLHq66pDySuaoEDjZMwhJZlJNUApRiRQ5iEPTbGJGOHFNVzivT7TZrew&maxwidth=400",
+        "googlePlaceId": "ChIJ2Z63aurAyRIRAYXcJw8lHgY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 14 58 46",
+        "website": "https://musees.marseille.fr/centre-de-la-vieille-charite-cvc",
+        "isOutdoor": false,
+        "score": 38.83372100157467,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJK9u8AWnHyRIR1NMVwyL4ytM",
+        "name": "Parc Borély",
+        "type": "park",
+        "description": "",
+        "latitude": 43.260334,
+        "longitude": 5.3823007,
+        "rating": 4.5,
+        "reviewCount": 13882,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "06:30",
+          "close": "21:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXcBpEeYjEUtW507HJlEy4ENFqnJsU41UNI7BhQJI0X4BGAlHyUuBTlr14tUHfN1UlO8c7FHFKpFak7TCzA9_9bbTCBrP3iftbz2tr5YqtquAKI6oSCpkgkm25hnq-n1vnIfwF04h20sza0ArROpxSruTMrw0nZ5LdJneQHd0JKyCFBTY1K6UX3JIf6-JtHWGfHB_NOw7x42w7e68-KHi2APHsjOfYh5bemunNPsH8kVpH9iumr7JdOgEQmy3yMMpgiLR_6eJotmvokTsKi7OMCVAceNqpiq_eQL3v_RKOlCzxuoQYa9WkmYGT5XkRS2mbkS7A8_oZiy6CMmNjHRFjn_7FnLBa0uaDTJtmO2Q3AOtnoPAcC2SJk7GYf3ZKsentb3cUaH1FDtiq7LZENw5X7xaMRQZDIwTB2uIDAYrO3QPSy23Di2XIBtFFZMvZvcsgLdCjFcsAy-iR8EGIbzopH1sArCcOMK99DZoVM5P0nGL_V3Pq9jqE57Yzbu6E0OVgV-S7QcNUTrplMfwH30gmeXVQ-cdf2HFxLcpEzMczZg1q65SnwMDlmEu8Q8I6kBE2DDAM3Du4rKw&maxwidth=400",
+        "googlePlaceId": "ChIJK9u8AWnHyRIR1NMVwyL4ytM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "monday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "tuesday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "wednesday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "thursday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "friday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "06:30",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 55 25 51",
+        "isOutdoor": true,
+        "score": 35.02736002893727,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ9dgYS9rAyRIRp60_u-dLPp8",
+        "name": "Parc Émile Duclaux",
+        "type": "park",
+        "description": "",
+        "latitude": 43.2933509,
+        "longitude": 5.3588146,
+        "rating": 4.6,
+        "reviewCount": 2950,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "07:00",
+          "close": "21:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVrLqAWOSLCFVGiScTQDoO-JJRVKQKX3_gk2f9-gT8PxpTpa3izWBLmgxeiYGsdLGMHF5EcDNKq5whpadPkHHIpFAs07IE8EJcDvx8sZWA4jFLT7odv_h4k0QPKbzUy2iriphxuIKys4Tf_9J6L9iQFmKAwlqZH8qJW_n5dPUueJExVJ6ThHsCOSj0z5Mi54rYVpm6ZecylbXp6g6UTUR93Ry5xDKIxFPYHty4ggMx26d-kFnpDN2RsdrzIcbyURonzgklyDrvJgjIlPbjziMJJfemF8mxL4Lo3DBjtO3GhissG3lW3opde_ne8svh3yn9gHT3jvXryCUqugnI3z90Nr_eB2gmEyO0HoUDxeMzklq-DiVikmyxFAVRbAxCOxDktEjgWmTSkEahKD3dmzHnDzgG14yrDobtdWwx0OTNgD7_ymaCL9Faso2V0J-ScGGXy6J7-pdK3kcEKlJeHgmSRuNVOFuTILPKV81LmmAQSlYUfvUb9b4WBpc2zEEijylTKXnw3unmJf3Rl0nwuqqT4EtJa1vDHP386tM_Y45hZMldEp6qcsv-m8t32ZW3gMIlhlQ&maxwidth=400",
+        "googlePlaceId": "ChIJ9dgYS9rAyRIRp60_u-dLPp8",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.marseille.fr/environnement/parcs-et-jardins/jardin-du-pharo",
+        "isOutdoor": true,
+        "score": 32.242263321066424,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ31iVW7_AyRIRyBfgXoyS76I",
+        "name": "Les Petits Trains de Marseille",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2958397,
+        "longitude": 5.366706499999999,
+        "rating": 4.3,
+        "reviewCount": 12073,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "14:00",
+          "close": "16:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV3YYmCTLVBKUUbbbE7o4ndUCPoV76WMZT9_aZiItozf7Fm0MOzYS87WZDEzmNeGaj8QFB5kpO4bdnrbOvrLHJRjEcDlmRddRmyN4Gkz2qG8sq7e9CmisWGWAfC3ho42H702pIFSzPRlVDCTgZJkC5j_2QC0LhNBs4GqRU55b-YSxo9B-r-Pjh7DgFtU59epiBpcKVToLmBam5jy3yYRDdov_EWW9XPQu1iGStznL5zYeceK7MSQpjP1koJ_PpKhkGrtXO4wPOQu0UI_Wnz95QZb_nUWqfxkAvSfuRKDRmSqr-zLDSe8R6zVgTRlds9Hj6in7Qh093RJFRnKaGhcBha17Lg31Ppk8C_4tMWLM9LqFWgAozB8yTeLxZKPTl9Pi2dHFBbnMCD8VEvjxXiG0m89cXfloNf74IInWyYBB-T7zG1sitfkv8UZkTSE9EO7bL54yq8nbQNqDbPjkQa-iW-qo0DowlmabJldpMhRQYO7P5imgwG5JuT_IdoVv43VBXXpEqRYi6muBwigUPVJGsgjYjug58TXgDsHyerhI583CSVC33GDevrzvuKdtD9j9Yr4HzE&maxwidth=400",
+        "googlePlaceId": "ChIJ31iVW7_AyRIRyBfgXoyS76I",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "monday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "tuesday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "wednesday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "thursday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "friday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "saturday": {
+            "open": "14:00",
+            "close": "16:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 25 24 69",
+        "website": "https://www.petit-train-marseille.com/",
+        "score": 31.171999886404414,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJySHEzzW4yRIRniAPBwmntxo",
+        "name": "Parc national des Calanques",
+        "type": "park",
+        "description": "",
+        "latitude": 43.2178391,
+        "longitude": 5.4430178,
+        "rating": 4.7,
+        "reviewCount": 21023,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGk3XEu0FLHBnwLn83-ZPRZk2SFsCRjPJigGPGTAv2Dtw9ggQhiXH0L8mea4k5HivNfKNHrSLwjijbK-3X6WA7YDM9o4fHlZH6c8t5Ke8B_Y1U1NNwUEQMju2wdTy45iNP0OgnkeZA0MMoW2SWMpfW4VngQLRDC_WeJWjBybPXBlRDwVOO2FNRqy8lvqx3t4Zy7juxm0UyjfCnTZwzOjSdsH5tFT5FZib-ZFRSRCc98RDpmiqdPda2xQZHEVB3CUkmRNeZ5RMHNUZBXr3FFp3rkV8RbTkbaPj0SsgCx8dP4Dv-aQk&maxwidth=400",
+        "googlePlaceId": "ChIJySHEzzW4yRIRniAPBwmntxo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 20 10 50 00",
+        "website": "http://www.calanques-parcnational.fr/fr",
+        "isOutdoor": true,
+        "score": 31.168522407855868,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJU-Rgnc_AyRIRix0vXLYpsDA",
+        "name": "Abbaye Saint-Victor",
+        "type": "religious",
+        "description": "",
+        "latitude": 43.2903502,
+        "longitude": 5.3655664,
+        "rating": 4.6,
+        "reviewCount": 3717,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXf4-Gy2UqifPGT0iJn-PP0jmSGX0DJHiYmA0vcSxZhn4Ws7MoQZ4DJ_obNY5bXeF89Cl3EaxB5IR91wjC8MdUpPqDR4QrrrShZdCNZ0EKDt-BStpay83Sagq0qPZiLwSdd6frbZmMX4nJD33gZdwomDJqF9dACacC_rKGNyYDDItGAPFjAhpxh1HiKnnfg73CdbYHCQXLJnyVN8mMNOhybg8nXEMQY52p4s5L323U4d5WL6i6-21BhJG7OcpaxWmeRWwS8y-CtdeJjBNfNrCynyDRH8dNTf1p5ewpU4FPY4Tf0JDbBFx-ToW7r-ULLC39zMVwJOPYlD3AVWwJtag0e24ig80um4BEjDK5epp3k90YiuX81g2m91qmkkrOGqonz0nCUdEG5nZYRDmJIkoyDbW_WYUJs9-UxAZ_tWg71gEWkpM8p181zJImQ2jlMqcYb0gflcSfUypGj1G0azACr75uHgZBLmHhquMr9TsQTQvlUJlommpaTYmUobmlLD007tluyi7dtmI0tmptUkawGPBMGiHItdkn6OS6vdTMQ2hJ6_cL2cuYGXMNAgZuzbkNlLU40&maxwidth=400",
+        "googlePlaceId": "ChIJU-Rgnc_AyRIRix0vXLYpsDA",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 96 11 22 60",
+        "score": 31.1145536547249,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJU983K7rAyRIRcfuc4OOxuYg",
+        "name": "Musée Cantini de la Ville de Marseille",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.292169,
+        "longitude": 5.378202,
+        "rating": 4.2,
+        "reviewCount": 1096,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWH6WOTvpSmPl0UEDCyYGwPKOCrbBo3_tMNS6lVykNW9S3U6_9FDW2DIrsFpsutNXKzLodhoB3Dv6rtu4jtttIbOTCAhJ88eo51pfidcnjep9UAu65XIv_5-HQF_8X31DyaD4e4Zesow7XHuii1zBpmQRA379RQsgHLcxlGkuX_b-av2rc-nxxid7W-mGRACoMWNTNpXg_Kbj9RKcKOp3wKzigogzt2mgvyDHEqzLuWzJp9dHztxUiKpBPCEi_T9m53atQRAKA03NcZp5T_655GUz2-NG0gwao-WYZYFrhKCg6DASRXfZT84X08usvkwG17pLmgU2MrfcHOcyy8rdpcP49D73WRV7ewx-j3jBmzxOVKM7LB3ITl2rAxi7MwhFanHgeP5mvPKt_pfQqEXxElUgr9FRi8Ml8mKhyQDGwe68jLhVPGTWnYIXXYUeNTnjShk0LlwNEkJW165Pyc2evGB5-mVLpF7DrlPqfZe0HvxO7D0mT7F2Xjl5LR4qOFpFRebaAVRl5m4YEw6P4tRTPAW9HHyp_OpX1zjNIzTbzCzZ-bmhCSs5eGiVDOqCVf006lNVPikloo1A&maxwidth=400",
+        "googlePlaceId": "ChIJU983K7rAyRIRcfuc4OOxuYg",
+        "isOutdoor": false,
+        "score": 30.362653612271924,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJk-G2C4zAyRIReBwPJdvJHWU",
+        "name": "Port Antique",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.297715,
+        "longitude": 5.3740853,
+        "rating": 4.4,
+        "reviewCount": 1318,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX6Baj2pEml_maPjNCLmdCBfb0tiB_iM-pGHzb7Al7nIbUl8vZcXAS4zmc2vSEgSPfWUWM6DitefaZ_eyeO4lHzqHlQnxiFe52dTH5MdPkxm_8-BxWi5rofhIHHCoKAVrTpprN0VMOI-UhZvDQkDJkiq7Ao_pc0hyNo0Yz1g8aOqBCM0olcDBL4pFe964T7nPv5nUKonY7SQiyg8kh3iaUWILZudujksn9jHpD3CDhzPi3IDzNiosomDXRFODpGEz0-c5YsrZq_lw_V3Qh1zO3rsvue5tsVLCfPRBrvKbx_nIV7pqu9CMV3JlVRxi5-wr92oQ7n_Qb7YXVGkPF1Yz8AQRruGlxTynwn2y4gZ3dc6zMQRvbUO7DzY4gma6G1OKHAtkrCG_HOb2WLFsZfzsYtrgxNILxKsyfO4U3bTQc0qHTDLp12Z-91OBdAA5hrAtha35cErD9m7qtmm8U3eyGeUlq-Q07dJcAEa8pekpHnRy9Q1JybflontjkJjVC4AvWhNo0Yf8smMt_0t0NUTAehfL2xBeQOIvnTcdu6mjMWPYZ-KHpV7qXJ5ICvVEwyOvlOPIk9&maxwidth=400",
+        "googlePlaceId": "ChIJk-G2C4zAyRIReBwPJdvJHWU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 55 36 00",
+        "website": "http://www.marseille.fr/",
+        "score": 25.002868465209083,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJf158t7jAyRIRKomyU0m2bDw",
+        "name": "L'Ombrière de Norman Foster",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2945923,
+        "longitude": 5.3741084,
+        "rating": 4.3,
+        "reviewCount": 1647,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXhMsLW78PuHmwWJvCtKwrvV5r1TA4Ak5oA9E98WE8CiggFuwZaBaBGVgz6mb1mm7J85yx__XuZLJV_wQ3-Zrq_1oyhUZuhGHUqnYM7-Ip6FQ7lyU8c9mo2BXLDZItf4PKgfp-vvHrPGulUJar6M8D_58b3tt0zKmYI2a5TViKeEGWFf6VDb5yW8kXvazIYEo8RQn6e3O2ms8Ejlf7xx8RPNmTpCP0FCObiUBFQdhUJ2t4us4NJ1O0dEtAZCQGBdEcRsT_bHSOQdXPZRi3mqORiUmSw2ixCiaqHGbBcnkSdpclxa-HAo8wtEP1RthlWKWCTBOgG-dSPVTAY88uYA9R5ukhrMolr5gCnOVXRgtqfBOF-XWmTzKUqMx8ocT4wvTcDHm-Q6plEepCzpjgmeH7fQ4lVAXSoDSj4SpecDctUSEOs6-PVV2ZMDjSz1DXu6f0gNg6E8YfhHIVVQFHXcpAgGwSZ2xNDkgZU393M3Sxmnp1xXdJ_AxjKAwUyF4lWpidA8M3hE_uEp07o4FDA87TZqd4sKgfMeT1gYdYqDgv0k2-_nqRvMJb4sr8mA2r1A4exIQ&maxwidth=400",
+        "googlePlaceId": "ChIJf158t7jAyRIRKomyU0m2bDw",
+        "score": 24.69489931158072,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJJ1ltydrAyRIRshw___IPib8",
+        "name": "Citadelle de Marseille (Fort Saint-Nicolas)",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2910482,
+        "longitude": 5.362568,
+        "rating": 4.5,
+        "reviewCount": 709,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWmhHxrU4OblInfE5hPPPuhKFO6seO0AMo9k9VO69201cU6TZvcWNYkDTD7XkvxOgXpQymNkP_ph03g4f7QzjG5IKmsqNFJyfyIG9j_NMogKfSWD6G6coY1wL9sPI9gC_2yoN5EjRT3DMeHWLozvs9vPUK_5rT8q-40mIwegvOrGNyuTjVaCz0dofAkKwH4KkJpGec8zz8O74vdfTIu0p6KtSmg_qTWbiupGZc8LiSP4BGtiZmpXVfymvc57-4cxxZk7STQpwc_IRYZZ2T4EORYIVGvNglaMkhskSpViwzjchPpMV1KjI_9FJcwrhgpxNZs2qZ2imMpzQ2XI8y2AD3I3bQ47cC3govFV7LPhhGa3VatwftSYvYG31pbuHIHJx_bySTL_5sA9f6LOJEL-dK9_bZkDOqBc7NvIF3pYx3trZA4r7WojXvlZiAv51U6s3WD-KiYmFbmIO4ySWxN9nMZ9cSakswS1ritbLUDDiTJkkE3OUZqq3a9dINwIjP8HYL7oJukTz-kRcsjBBRG5t3172JEcNRUh2IqZEJQbYaVb-IUc8jAcUypBZIoYXOzo_M0bWoe&maxwidth=400",
+        "googlePlaceId": "ChIJJ1ltydrAyRIRshw___IPib8",
+        "score": 23.758336100604765,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJn3IeHK7AyRIRjR7zbifsmVc",
+        "name": "Place Castellane",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2860331,
+        "longitude": 5.383197399999999,
+        "rating": 4.1,
+        "reviewCount": 1852,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXO8XYBWU5FtGNzsWLDczFeVB3cpgLtum9mo-cB1LZroE3Fzn17mVtal3H7M4bMbaC06sLcRGVJwOgK2JiQxnTtseP1YfQGeZLhKjOXRNEIupjXOzqf6aBiMXgrG_Yu2T_Kzfl8A1QYzjZwYkVO6-dPDcu8MAKGFnN5PvZ74kqifJvb9Q5wrDFq14Xl4IajCtqh0r7lSG7ocD6wgcJ1-NEhT46kEDLjq_mRjDzAlqLtdHCbLzP4najEiJC1ilwJvWr3LWztrAJ11ynr8ri1m-QKP8l8wCCYwR2WdYDslfjachrBK7lC0EbfMnemj08tRoaCFlQKsxlYKs8Uen-GWvUsaj2LZXb6cGoa3xCpEOaXHLtvETlvR-eszb6oB692QEmME3XvcS3rp7__TTZV6jBi9VK_2k5uIJb_AQLfQXPpkiSt_pqE5NtM10L8tlXdeqcF_ApLDd6KEI_sHMrL7EOls90lE1Jk4QC0OMliMOt2ETutko7pTxfoW5LjQDWiyLnjb-KVmGznUWENSweS-M4GlMAEXspQguSxo4MjX4eL2tzg3XJ09LL4-Fm_EvOB8wlBuXY_&maxwidth=400",
+        "googlePlaceId": "ChIJn3IeHK7AyRIRjR7zbifsmVc",
+        "isOutdoor": true,
+        "score": 22.945026088365633,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJLbJEAADEyRIRYCEp3dY2sOc",
+        "name": "Fort de Ratonneau",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2827801,
+        "longitude": 5.3116919,
+        "rating": 4.5,
+        "reviewCount": 425,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWSml_XhutQNvyimHGJQjNh6Nuv7lSxENoYrULXAapBpc9nXv4of0QPpJNWyeo3LRMR_vl4NOzK9e9-UUkVl0ZU3WHJ9MLursZI660S5pWM8WvyJb33DuZhWEdkKTRWgPNjVqyE8SUMdElbp2P_ntsGPXp8bAqUY88KmSzZhAk7N-YW2dwboo2Gg0pZsGlq1ezNtqf45p0QrK14yggOZiypZdTNR1V-nyjB47txEnixAUIHpAgMbZ4i4aSK54ROBOaB-Nlj6C9dwkFyfy7ugWv6-OUMr2KepRdj7vXa9VYULHZ2aiyIKO012qVdd0oMMKBrW4GKLo4JlFbyf8QzNvX70RAn4cp0Zo_kfjFjav7bImTUKXqxomjcn4TE7kKpT_hhLyU_CMzwsGlgLkTGMondeh3XqN1jtdxj2MOeouJIkOq017en2WE__SP98B8S2JSJOzB4hqTXfQKL1YdBl4QOElMih9nXlhBGvpfk0iq7J2gXYcxgVZDLyC8J68PLabNMjYH2Pct_VzXYTzOYS8YThGPx67fb37PxMYwO20bmGlkC1RfujHxfZdqo_vtuXXyO8SZG&maxwidth=400",
+        "googlePlaceId": "ChIJLbJEAADEyRIRYCEp3dY2sOc",
+        "score": 14.802927301931518,
+        "source": "google_places"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJgUObVWK_yRIRd6M73U2Mdeg",
+        "name": "Palais Longchamp",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.30426689999999,
+        "longitude": 5.3946029,
+        "rating": 4.6,
+        "reviewCount": 19453,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "18:45"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXBcM7HtC9YbvBiiMiEYS-6UX5jcUWfwItX4pzwtSTYwXe8ekKmg1AcWYDtkwz3LLPu0AjDPYQFtTfUMMGKkyDJRJXoe88DOyQL86WKTJQTiph1u2kwOLkSHxeaivHWYsK4QY_ayoR9mSZtKObQKQVRtmHcTc72KPSJa5fsG2tGxlJTIVLRQwvcfzGEjb0G3-IAKtzCtXjU-kA69WKb0idin_KxudaIvA0QHRbI7IMXJ6-TRKCpUoJrR0Fp0aSAPViAE48_xsBEO8Z8zwQ-KGR4NcSr3OnvcVz1Q8IvhsQGNdcxGBQHVQ0HdDzefgVsWMMZb5-nEQn3ffpiKlzgkCdDv9_On1QuyrZZxPqgFTb2DF1aMjA14X3HtBMVnX2HY50VkffhwCwkw-cJsA8sD-q0Q2nRGbOEvsjMmKZ4rPDmFVaVB1XDKirSV7ZIGFKGR5q418HpQZvpgIMEf4ixvpvp-msB1dkXGH1PdoA-Kj4R4i-4A8aCLGN4DIpxnI0prDI_HZH2oGhEsHo84XPYqe0Ey_dalihDBFmWR8tPEx2UCKuDJkDleD_GlCBjx-AZt2OjBYwA&maxwidth=400",
+        "googlePlaceId": "ChIJgUObVWK_yRIRd6M73U2Mdeg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "18:45"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "18:45"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 55 25 51",
+        "website": "https://www.marseille.fr/culture/patrimoine-culturel/le-palais-longchamp",
+        "isOutdoor": false,
+        "score": 43.777896832883975,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ7fOdj5rAyRIR_jlSzkaC86U",
+        "name": "Mucem - Musée des civilisations de l’Europe et de la Méditerranée",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.2966941,
+        "longitude": 5.3610825,
+        "rating": 4.4,
+        "reviewCount": 23736,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVYR1QbWSmTBtB4pyARuZJpAOM2WVjr3HBdWH_Ffio04kPxGoNFOThWeN4csUTtD_08nQKGxpX1QmgZ9IaXZmtODU2zmgm4KLylJSSuNx8GWQ4fJsAlxXT7IRC35lDGTGfSVuB87FZ13_wZkiyw_nefx70lK4pYG2kIjHkb1qEJA9qrsW1u2RzDzuLE1ZWRQtzkP7RA0EFH_NP8H3fGrVGAYWgE_0ye9hU3tWhH2WKCKf9mFqW157qZTXAPJWaWyDC_wqsIIFVtAUShPlQjmEpgQpv4POyjMs6o88cHpbsPvVrzlukMEykar8CWScU17qeLrNuZ-3QVkyhtKbk1aeGqWzF3nWgtdMpNIA7ZlKeLPF-MP7E2u64CYqaJ8L3wGz1XzP2wcJq8VyO-M6DzJwpfBzX4VYniENiQ9utF8S4PmLK5_4bDZ7ijrLlxKK_ZWmxyW8bD92lQ2Ly-XIGMlRAqovo00nj6PO91xyzmEPLB_N-F7KRnpAaJXaeF65dUmqgTuCNerwDQ8eTuB_6j33S288fX9QTkIAcH5v7ddpA0hjGIgBvbbOU3Mtt1oFgAlEiPAUkYBT88XA&maxwidth=400",
+        "googlePlaceId": "ChIJ7fOdj5rAyRIR_jlSzkaC86U",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": null,
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 84 35 13 13",
+        "website": "https://www.mucem.org/",
+        "isOutdoor": false,
+        "score": 42.870348809529304,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ2Z63aurAyRIRAYXcJw8lHgY",
+        "name": "Centre de la Vieille Charité",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.3001517,
+        "longitude": 5.3678971,
+        "rating": 4.5,
+        "reviewCount": 4913,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUq1Lb0tl6_IAJB_x2F_tqt_j_JuECv2bQW1OvWUwfjhx_HO6RKxsQCinpzNkxXb0g8MNMZ6JuYB5rPwF3SmB1VEzcMUfyjrYWD9iftbV-bEYUZCIC0zFvUyOXx-9Z3tNPfbv5ULSUXS-H8PzX6mHFgCIFDICvv7i2F2MgqqOLL1BFMKUTRPmQ4YxFngs6-g--GW-ATPFx1P1a2B0EChQRTCV4hJJFmfMIG4uvhHJiATat8YSv_paIAZ_4BYb1REB9KHALo0PIo3kgcfxtDvIRXL4RP7Var3_llnlBNEVK_SKxxGXo2Ym73ifG9XGGJOJdL1j27YS-SyoBlWwc_Yb8YJcyacLSboXfGVaLnRabmA5i2XdIhvRVJtSzkHzQ7fyBoG9t56Xkfay_WqaCyfeNJee6Bo422Dt-vwd2SxMWuzo08imlooOeyut9k2dgwM7VzVSpBtGM4YHcYadg7zy71HOiSUb_fERCsw8Av30CJNxiEoYetT01s-eACoIUUuT9tHuWoxgbsR8cLHq66pDySuaoEDjZMwhJZlJNUApRiRQ5iEPTbGJGOHFNVzivT7TZrew&maxwidth=400",
+        "googlePlaceId": "ChIJ2Z63aurAyRIRAYXcJw8lHgY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 14 58 46",
+        "website": "https://musees.marseille.fr/centre-de-la-vieille-charite-cvc",
+        "isOutdoor": false,
+        "score": 38.83372100157467,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJK9u8AWnHyRIR1NMVwyL4ytM",
+        "name": "Parc Borély",
+        "type": "park",
+        "description": "",
+        "latitude": 43.260334,
+        "longitude": 5.3823007,
+        "rating": 4.5,
+        "reviewCount": 13882,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "06:30",
+          "close": "21:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXcBpEeYjEUtW507HJlEy4ENFqnJsU41UNI7BhQJI0X4BGAlHyUuBTlr14tUHfN1UlO8c7FHFKpFak7TCzA9_9bbTCBrP3iftbz2tr5YqtquAKI6oSCpkgkm25hnq-n1vnIfwF04h20sza0ArROpxSruTMrw0nZ5LdJneQHd0JKyCFBTY1K6UX3JIf6-JtHWGfHB_NOw7x42w7e68-KHi2APHsjOfYh5bemunNPsH8kVpH9iumr7JdOgEQmy3yMMpgiLR_6eJotmvokTsKi7OMCVAceNqpiq_eQL3v_RKOlCzxuoQYa9WkmYGT5XkRS2mbkS7A8_oZiy6CMmNjHRFjn_7FnLBa0uaDTJtmO2Q3AOtnoPAcC2SJk7GYf3ZKsentb3cUaH1FDtiq7LZENw5X7xaMRQZDIwTB2uIDAYrO3QPSy23Di2XIBtFFZMvZvcsgLdCjFcsAy-iR8EGIbzopH1sArCcOMK99DZoVM5P0nGL_V3Pq9jqE57Yzbu6E0OVgV-S7QcNUTrplMfwH30gmeXVQ-cdf2HFxLcpEzMczZg1q65SnwMDlmEu8Q8I6kBE2DDAM3Du4rKw&maxwidth=400",
+        "googlePlaceId": "ChIJK9u8AWnHyRIR1NMVwyL4ytM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "monday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "tuesday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "wednesday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "thursday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "friday": {
+            "open": "06:30",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "06:30",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 55 25 51",
+        "isOutdoor": true,
+        "score": 35.02736002893727,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ9dgYS9rAyRIRp60_u-dLPp8",
+        "name": "Parc Émile Duclaux",
+        "type": "park",
+        "description": "",
+        "latitude": 43.2933509,
+        "longitude": 5.3588146,
+        "rating": 4.6,
+        "reviewCount": 2950,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "07:00",
+          "close": "21:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVrLqAWOSLCFVGiScTQDoO-JJRVKQKX3_gk2f9-gT8PxpTpa3izWBLmgxeiYGsdLGMHF5EcDNKq5whpadPkHHIpFAs07IE8EJcDvx8sZWA4jFLT7odv_h4k0QPKbzUy2iriphxuIKys4Tf_9J6L9iQFmKAwlqZH8qJW_n5dPUueJExVJ6ThHsCOSj0z5Mi54rYVpm6ZecylbXp6g6UTUR93Ry5xDKIxFPYHty4ggMx26d-kFnpDN2RsdrzIcbyURonzgklyDrvJgjIlPbjziMJJfemF8mxL4Lo3DBjtO3GhissG3lW3opde_ne8svh3yn9gHT3jvXryCUqugnI3z90Nr_eB2gmEyO0HoUDxeMzklq-DiVikmyxFAVRbAxCOxDktEjgWmTSkEahKD3dmzHnDzgG14yrDobtdWwx0OTNgD7_ymaCL9Faso2V0J-ScGGXy6J7-pdK3kcEKlJeHgmSRuNVOFuTILPKV81LmmAQSlYUfvUb9b4WBpc2zEEijylTKXnw3unmJf3Rl0nwuqqT4EtJa1vDHP386tM_Y45hZMldEp6qcsv-m8t32ZW3gMIlhlQ&maxwidth=400",
+        "googlePlaceId": "ChIJ9dgYS9rAyRIRp60_u-dLPp8",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.marseille.fr/environnement/parcs-et-jardins/jardin-du-pharo",
+        "isOutdoor": true,
+        "score": 32.242263321066424,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ31iVW7_AyRIRyBfgXoyS76I",
+        "name": "Les Petits Trains de Marseille",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2958397,
+        "longitude": 5.366706499999999,
+        "rating": 4.3,
+        "reviewCount": 12073,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "14:00",
+          "close": "16:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV3YYmCTLVBKUUbbbE7o4ndUCPoV76WMZT9_aZiItozf7Fm0MOzYS87WZDEzmNeGaj8QFB5kpO4bdnrbOvrLHJRjEcDlmRddRmyN4Gkz2qG8sq7e9CmisWGWAfC3ho42H702pIFSzPRlVDCTgZJkC5j_2QC0LhNBs4GqRU55b-YSxo9B-r-Pjh7DgFtU59epiBpcKVToLmBam5jy3yYRDdov_EWW9XPQu1iGStznL5zYeceK7MSQpjP1koJ_PpKhkGrtXO4wPOQu0UI_Wnz95QZb_nUWqfxkAvSfuRKDRmSqr-zLDSe8R6zVgTRlds9Hj6in7Qh093RJFRnKaGhcBha17Lg31Ppk8C_4tMWLM9LqFWgAozB8yTeLxZKPTl9Pi2dHFBbnMCD8VEvjxXiG0m89cXfloNf74IInWyYBB-T7zG1sitfkv8UZkTSE9EO7bL54yq8nbQNqDbPjkQa-iW-qo0DowlmabJldpMhRQYO7P5imgwG5JuT_IdoVv43VBXXpEqRYi6muBwigUPVJGsgjYjug58TXgDsHyerhI583CSVC33GDevrzvuKdtD9j9Yr4HzE&maxwidth=400",
+        "googlePlaceId": "ChIJ31iVW7_AyRIRyBfgXoyS76I",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "monday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "tuesday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "wednesday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "thursday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "friday": {
+            "open": "14:00",
+            "close": "16:00"
+          },
+          "saturday": {
+            "open": "14:00",
+            "close": "16:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 25 24 69",
+        "website": "https://www.petit-train-marseille.com/",
+        "score": 31.171999886404414,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJySHEzzW4yRIRniAPBwmntxo",
+        "name": "Parc national des Calanques",
+        "type": "park",
+        "description": "",
+        "latitude": 43.2178391,
+        "longitude": 5.4430178,
+        "rating": 4.7,
+        "reviewCount": 21023,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGk3XEu0FLHBnwLn83-ZPRZk2SFsCRjPJigGPGTAv2Dtw9ggQhiXH0L8mea4k5HivNfKNHrSLwjijbK-3X6WA7YDM9o4fHlZH6c8t5Ke8B_Y1U1NNwUEQMju2wdTy45iNP0OgnkeZA0MMoW2SWMpfW4VngQLRDC_WeJWjBybPXBlRDwVOO2FNRqy8lvqx3t4Zy7juxm0UyjfCnTZwzOjSdsH5tFT5FZib-ZFRSRCc98RDpmiqdPda2xQZHEVB3CUkmRNeZ5RMHNUZBXr3FFp3rkV8RbTkbaPj0SsgCx8dP4Dv-aQk&maxwidth=400",
+        "googlePlaceId": "ChIJySHEzzW4yRIRniAPBwmntxo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 20 10 50 00",
+        "website": "http://www.calanques-parcnational.fr/fr",
+        "isOutdoor": true,
+        "score": 31.168522407855868,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJU-Rgnc_AyRIRix0vXLYpsDA",
+        "name": "Abbaye Saint-Victor",
+        "type": "religious",
+        "description": "",
+        "latitude": 43.2903502,
+        "longitude": 5.3655664,
+        "rating": 4.6,
+        "reviewCount": 3717,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXf4-Gy2UqifPGT0iJn-PP0jmSGX0DJHiYmA0vcSxZhn4Ws7MoQZ4DJ_obNY5bXeF89Cl3EaxB5IR91wjC8MdUpPqDR4QrrrShZdCNZ0EKDt-BStpay83Sagq0qPZiLwSdd6frbZmMX4nJD33gZdwomDJqF9dACacC_rKGNyYDDItGAPFjAhpxh1HiKnnfg73CdbYHCQXLJnyVN8mMNOhybg8nXEMQY52p4s5L323U4d5WL6i6-21BhJG7OcpaxWmeRWwS8y-CtdeJjBNfNrCynyDRH8dNTf1p5ewpU4FPY4Tf0JDbBFx-ToW7r-ULLC39zMVwJOPYlD3AVWwJtag0e24ig80um4BEjDK5epp3k90YiuX81g2m91qmkkrOGqonz0nCUdEG5nZYRDmJIkoyDbW_WYUJs9-UxAZ_tWg71gEWkpM8p181zJImQ2jlMqcYb0gflcSfUypGj1G0azACr75uHgZBLmHhquMr9TsQTQvlUJlommpaTYmUobmlLD007tluyi7dtmI0tmptUkawGPBMGiHItdkn6OS6vdTMQ2hJ6_cL2cuYGXMNAgZuzbkNlLU40&maxwidth=400",
+        "googlePlaceId": "ChIJU-Rgnc_AyRIRix0vXLYpsDA",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 96 11 22 60",
+        "score": 31.1145536547249,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJU983K7rAyRIRcfuc4OOxuYg",
+        "name": "Musée Cantini de la Ville de Marseille",
+        "type": "museum",
+        "description": "",
+        "latitude": 43.292169,
+        "longitude": 5.378202,
+        "rating": 4.2,
+        "reviewCount": 1096,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWH6WOTvpSmPl0UEDCyYGwPKOCrbBo3_tMNS6lVykNW9S3U6_9FDW2DIrsFpsutNXKzLodhoB3Dv6rtu4jtttIbOTCAhJ88eo51pfidcnjep9UAu65XIv_5-HQF_8X31DyaD4e4Zesow7XHuii1zBpmQRA379RQsgHLcxlGkuX_b-av2rc-nxxid7W-mGRACoMWNTNpXg_Kbj9RKcKOp3wKzigogzt2mgvyDHEqzLuWzJp9dHztxUiKpBPCEi_T9m53atQRAKA03NcZp5T_655GUz2-NG0gwao-WYZYFrhKCg6DASRXfZT84X08usvkwG17pLmgU2MrfcHOcyy8rdpcP49D73WRV7ewx-j3jBmzxOVKM7LB3ITl2rAxi7MwhFanHgeP5mvPKt_pfQqEXxElUgr9FRi8Ml8mKhyQDGwe68jLhVPGTWnYIXXYUeNTnjShk0LlwNEkJW165Pyc2evGB5-mVLpF7DrlPqfZe0HvxO7D0mT7F2Xjl5LR4qOFpFRebaAVRl5m4YEw6P4tRTPAW9HHyp_OpX1zjNIzTbzCzZ-bmhCSs5eGiVDOqCVf006lNVPikloo1A&maxwidth=400",
+        "googlePlaceId": "ChIJU983K7rAyRIRcfuc4OOxuYg",
+        "isOutdoor": false,
+        "score": 30.362653612271924,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJk-G2C4zAyRIReBwPJdvJHWU",
+        "name": "Port Antique",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.297715,
+        "longitude": 5.3740853,
+        "rating": 4.4,
+        "reviewCount": 1318,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX6Baj2pEml_maPjNCLmdCBfb0tiB_iM-pGHzb7Al7nIbUl8vZcXAS4zmc2vSEgSPfWUWM6DitefaZ_eyeO4lHzqHlQnxiFe52dTH5MdPkxm_8-BxWi5rofhIHHCoKAVrTpprN0VMOI-UhZvDQkDJkiq7Ao_pc0hyNo0Yz1g8aOqBCM0olcDBL4pFe964T7nPv5nUKonY7SQiyg8kh3iaUWILZudujksn9jHpD3CDhzPi3IDzNiosomDXRFODpGEz0-c5YsrZq_lw_V3Qh1zO3rsvue5tsVLCfPRBrvKbx_nIV7pqu9CMV3JlVRxi5-wr92oQ7n_Qb7YXVGkPF1Yz8AQRruGlxTynwn2y4gZ3dc6zMQRvbUO7DzY4gma6G1OKHAtkrCG_HOb2WLFsZfzsYtrgxNILxKsyfO4U3bTQc0qHTDLp12Z-91OBdAA5hrAtha35cErD9m7qtmm8U3eyGeUlq-Q07dJcAEa8pekpHnRy9Q1JybflontjkJjVC4AvWhNo0Yf8smMt_0t0NUTAehfL2xBeQOIvnTcdu6mjMWPYZ-KHpV7qXJ5ICvVEwyOvlOPIk9&maxwidth=400",
+        "googlePlaceId": "ChIJk-G2C4zAyRIReBwPJdvJHWU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 91 55 36 00",
+        "website": "http://www.marseille.fr/",
+        "score": 25.002868465209083,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJf158t7jAyRIRKomyU0m2bDw",
+        "name": "L'Ombrière de Norman Foster",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2945923,
+        "longitude": 5.3741084,
+        "rating": 4.3,
+        "reviewCount": 1647,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXhMsLW78PuHmwWJvCtKwrvV5r1TA4Ak5oA9E98WE8CiggFuwZaBaBGVgz6mb1mm7J85yx__XuZLJV_wQ3-Zrq_1oyhUZuhGHUqnYM7-Ip6FQ7lyU8c9mo2BXLDZItf4PKgfp-vvHrPGulUJar6M8D_58b3tt0zKmYI2a5TViKeEGWFf6VDb5yW8kXvazIYEo8RQn6e3O2ms8Ejlf7xx8RPNmTpCP0FCObiUBFQdhUJ2t4us4NJ1O0dEtAZCQGBdEcRsT_bHSOQdXPZRi3mqORiUmSw2ixCiaqHGbBcnkSdpclxa-HAo8wtEP1RthlWKWCTBOgG-dSPVTAY88uYA9R5ukhrMolr5gCnOVXRgtqfBOF-XWmTzKUqMx8ocT4wvTcDHm-Q6plEepCzpjgmeH7fQ4lVAXSoDSj4SpecDctUSEOs6-PVV2ZMDjSz1DXu6f0gNg6E8YfhHIVVQFHXcpAgGwSZ2xNDkgZU393M3Sxmnp1xXdJ_AxjKAwUyF4lWpidA8M3hE_uEp07o4FDA87TZqd4sKgfMeT1gYdYqDgv0k2-_nqRvMJb4sr8mA2r1A4exIQ&maxwidth=400",
+        "googlePlaceId": "ChIJf158t7jAyRIRKomyU0m2bDw",
+        "score": 24.69489931158072,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJJ1ltydrAyRIRshw___IPib8",
+        "name": "Citadelle de Marseille (Fort Saint-Nicolas)",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2910482,
+        "longitude": 5.362568,
+        "rating": 4.5,
+        "reviewCount": 709,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWmhHxrU4OblInfE5hPPPuhKFO6seO0AMo9k9VO69201cU6TZvcWNYkDTD7XkvxOgXpQymNkP_ph03g4f7QzjG5IKmsqNFJyfyIG9j_NMogKfSWD6G6coY1wL9sPI9gC_2yoN5EjRT3DMeHWLozvs9vPUK_5rT8q-40mIwegvOrGNyuTjVaCz0dofAkKwH4KkJpGec8zz8O74vdfTIu0p6KtSmg_qTWbiupGZc8LiSP4BGtiZmpXVfymvc57-4cxxZk7STQpwc_IRYZZ2T4EORYIVGvNglaMkhskSpViwzjchPpMV1KjI_9FJcwrhgpxNZs2qZ2imMpzQ2XI8y2AD3I3bQ47cC3govFV7LPhhGa3VatwftSYvYG31pbuHIHJx_bySTL_5sA9f6LOJEL-dK9_bZkDOqBc7NvIF3pYx3trZA4r7WojXvlZiAv51U6s3WD-KiYmFbmIO4ySWxN9nMZ9cSakswS1ritbLUDDiTJkkE3OUZqq3a9dINwIjP8HYL7oJukTz-kRcsjBBRG5t3172JEcNRUh2IqZEJQbYaVb-IUc8jAcUypBZIoYXOzo_M0bWoe&maxwidth=400",
+        "googlePlaceId": "ChIJJ1ltydrAyRIRshw___IPib8",
+        "score": 23.758336100604765,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJn3IeHK7AyRIRjR7zbifsmVc",
+        "name": "Place Castellane",
+        "type": "attraction",
+        "description": "",
+        "latitude": 43.2860331,
+        "longitude": 5.383197399999999,
+        "rating": 4.1,
+        "reviewCount": 1852,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXO8XYBWU5FtGNzsWLDczFeVB3cpgLtum9mo-cB1LZroE3Fzn17mVtal3H7M4bMbaC06sLcRGVJwOgK2JiQxnTtseP1YfQGeZLhKjOXRNEIupjXOzqf6aBiMXgrG_Yu2T_Kzfl8A1QYzjZwYkVO6-dPDcu8MAKGFnN5PvZ74kqifJvb9Q5wrDFq14Xl4IajCtqh0r7lSG7ocD6wgcJ1-NEhT46kEDLjq_mRjDzAlqLtdHCbLzP4najEiJC1ilwJvWr3LWztrAJ11ynr8ri1m-QKP8l8wCCYwR2WdYDslfjachrBK7lC0EbfMnemj08tRoaCFlQKsxlYKs8Uen-GWvUsaj2LZXb6cGoa3xCpEOaXHLtvETlvR-eszb6oB692QEmME3XvcS3rp7__TTZV6jBi9VK_2k5uIJb_AQLfQXPpkiSt_pqE5NtM10L8tlXdeqcF_ApLDd6KEI_sHMrL7EOls90lE1Jk4QC0OMliMOt2ETutko7pTxfoW5LjQDWiyLnjb-KVmGznUWENSweS-M4GlMAEXspQguSxo4MjX4eL2tzg3XJ09LL4-Fm_EvOB8wlBuXY_&maxwidth=400",
+        "googlePlaceId": "ChIJn3IeHK7AyRIRjR7zbifsmVc",
+        "isOutdoor": true,
+        "score": 22.945026088365633,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 26,
+        "byEngine": {
+          "google_local": 11,
+          "google_hotels": 1,
+          "google_maps": 14
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-suggest-01-escapade-gourmande-en-provence-culinaire",
+    "   Lyon → Marseille (3j)",
+    "   solo (1p) | economic | gastronomy, culture",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 4ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.2965,5.3698,14z\", gl=\"fr\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Weather] 3 days fetched for 2026-04-04 → 2026-04-06",
+    "[Google Places] ✅ 30 attractions found for Marseille",
+    "[Hotels] Booking pass relax: 21 options retained (strict=2, relaxed=20)",
+    "[Hotels] Disponibilité live: 10/21 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (339ms)",
+    "[Pipeline V2] Resolving GPS for 3 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/3 activities",
+    "[Pipeline V2] No curated must-sees for \"Marseille\" — generating via AI...",
+    "[Pipeline V2] AI generated 5 must-sees: Vieux-Port de Marseille, Basilique Notre-Dame de la Garde, Calanques de Marseille, Le Panier, Château d'If",
+    "[Pipeline V2] Step 1: All data fetched in 47434ms",
+    "[Pipeline V2]   Activities: 30 Google + 18 SerpAPI + 0 Overpass + 12 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 10 | Transport options: 3",
+    "[Pipeline V2] Step 1 done in 47434ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Same-location-type dedup: \"Muséum d'histoire naturelle de la Ville de Marseille\" merged with \"Palais Longchamp\" (type=museum)",
+    "[Pipeline V2] Same-location-type dedup: \"Fort Saint-Jean\" merged with \"Mucem - Musée des civilisations de l’Europe et de la Méditerranée\" (type=museum)",
+    "[Pipeline V2] Same-location-type dedup: \"Tour du fanal\" merged with \"Mucem - Musée des civilisations de l’Europe et de la Méditerranée\" (type=museum)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [142.4] ⭐ \"Basilique Notre-Dame de la Garde\" (src=google_places, reviews=48623, rating=4.7, tags=none)",
+    "[Pipeline V2]   #2 [138.8] ⭐ \"Cathédrale la Major de Marseille\" (src=google_places, reviews=19080, rating=4.7, tags=none)",
+    "[Pipeline V2]   #3 [137.5] ⭐ \"Château d'If\" (src=google_places, reviews=5448, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #4 [101.9] ⭐ \"Calanques de Marseille\" (src=mustsee, reviews=0, rating=4.9, tags=none)",
+    "[Pipeline V2]   #5 [101.9] ⭐ \"Le Panier\" (src=mustsee, reviews=0, rating=4.6, tags=none)",
+    "[Pipeline V2]   #6 [43.8]    \"Palais Longchamp\" (src=google_places, reviews=19453, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #7 [42.9]    \"Mucem - Musée des civilisations de l’Europe et de la Méditerranée\" (src=google_places, reviews=23736, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #8 [38.8]    \"Centre de la Vieille Charité\" (src=google_places, reviews=4913, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #9 [35.0]    \"Parc Borély\" (src=google_places, reviews=13882, rating=4.5, tags=relaxing)",
+    "[Pipeline V2]   #10 [32.2]    \"Parc Émile Duclaux\" (src=google_places, reviews=2950, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #11 [31.2]    \"Les Petits Trains de Marseille\" (src=google_places, reviews=12073, rating=4.3, tags=none)",
+    "[Pipeline V2]   #12 [31.2]    \"Parc national des Calanques\" (src=google_places, reviews=21023, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #13 [31.1]    \"Abbaye Saint-Victor\" (src=google_places, reviews=3717, rating=4.6, tags=none)",
+    "[Pipeline V2]   #14 [30.4]    \"Musée Cantini de la Ville de Marseille\" (src=google_places, reviews=1096, rating=4.2, tags=deep_culture)",
+    "[Pipeline V2]   #15 [25.0]    \"Port Antique\" (src=google_places, reviews=1318, rating=4.4, tags=none)",
+    "[Pipeline V2]   #16 [24.7]    \"L'Ombrière de Norman Foster\" (src=google_places, reviews=1647, rating=4.3, tags=none)",
+    "[Pipeline V2]   #17 [23.9]    \"Porte d'Aix\" (src=google_places, reviews=5841, rating=3.9, tags=none)",
+    "[Pipeline V2]   #18 [23.8]    \"Citadelle de Marseille (Fort Saint-Nicolas)\" (src=google_places, reviews=709, rating=4.5, tags=none)",
+    "[Pipeline V2]   #19 [22.9]    \"Place Castellane\" (src=google_places, reviews=1852, rating=4.1, tags=none)",
+    "[Pipeline V2]   #20 [14.8]    \"Fort de Ratonneau\" (src=google_places, reviews=425, rating=4.5, tags=none)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 6/26",
+    "[Pipeline V2] Step 2: 19 activities selected (5 must-sees) from 60 total",
+    "[Pipeline V2] Must-sees: \"Basilique Notre-Dame de la Garde\" (142.4), \"Cathédrale la Major de Marseille\" (138.8), \"Château d'If\" (137.5), \"Calanques de Marseille\" (101.9), \"Le Panier\" (101.9)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=medium, p75=4.94km, median=2.44km, maxClusterRadius=1.65km",
+    "[Pipeline V2] Radius-constrained clustering produced 6 clusters (target 3), running soft pass with 2.47km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (43.2923, 5.3715), Day 2: centroid (43.2814, 5.3184), Day 3: centroid (43.2236, 5.4232)",
+    "[Pipeline V2] Cluster Day 1: 15 activities, radius=3.66km, intraDistance=15.15km",
+    "[Pipeline V2] Cluster Day 2: 2 activities, radius=0.57km, intraDistance=1.13km",
+    "[Pipeline V2] Cluster Day 3: 2 activities, radius=1.73km, intraDistance=3.46km",
+    "[Pipeline V2] Phase 10: swapped far activity \"Parc national des Calanques\" (10.6km from center) off last day with \"Fort de Ratonneau\" (4.9km from center) from Day 2",
+    "[Pipeline V2] Phase 10: moved far activity \"Calanques de Marseille\" (7.9km from center) off last day → Day 2 (395min gap)",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 15 activities [3 must-sees] (13.0h avail, max 6), Day 2: 3 activities [2 must-sees] (12.0h avail, max 6), Day 3: 1 activities [0 must-sees] (6.0h avail, max 2)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Basilique Notre-Dame de la Garde\" (score=142.4), \"Cathédrale la Major de Marseille\" (score=138.8), \"Le Panier\" (score=101.9), \"Château d'If\" (score=137.5), \"Calanques de Marseille\" (score=101.9)",
+    "[Pipeline V2]   Day 1: Basilique Notre-Dame de la Garde, Cathédrale la Major de Marseille, Le Panier",
+    "[Pipeline V2]   Day 2: Château d'If, Calanques de Marseille",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1: Basilique Notre-Dame de la Garde, Abbaye Saint-Victor, Citadelle de Marseille (Fort Saint-Nicolas), Parc Émile Duclaux, Mucem - Musée des civilisations de l’Europe et de la Méditerranée, Cathédrale la Major de Marseille, Centre de la Vieille Charité, Le Panier, Les Petits Trains de Marseille, Port Antique, L'Ombrière de Norman Foster, Musée Cantini de la Ville de Marseille, Palais Longchamp, Place Castellane, Parc Borély (11.5km intra)",
+    "[Pipeline V2]   Day 2: Château d'If, Parc national des Calanques, Calanques de Marseille (15.2km intra)",
+    "[Pipeline V2]   Day 3: Fort de Ratonneau (0.0km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Vertigo Hostel\" (3.82 score, 1.37km center, 4.14km boundary avg, profile=urban_standard)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Step 4 prefetch: sparse anchors=4/7 (day-1-last, day-2-centroid, day-2-first, day-2-last)",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.260334,5.3823007,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.24240816666666,5.390531633333333,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.27995139999999,5.325145699999999,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.229434,5.4034314,14z\", gl=\"fr\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Step 4: supplemental API restaurants fetched=10, total SerpAPI pool=10",
+    "[Pipeline V2] Restaurants pool: total=37, budgetFiltered=9, geo=7",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=8, targets=6",
+    "[SerpAPI Places] Requête: q=\"café petit déjeuner boulangerie\", location=\"Marseille\", ll=\"@43.2913973778401,5.3719362616539,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.26654667556802,5.38022781233078,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.27995139999999,5.325145699999999,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.24182667556802,5.39713237233078,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.2827801,5.3116919,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Marseille\", ll=\"@43.28450355556802,5.32374077233078,14z\", gl=\"fr\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=47, budgetFiltered=19, geo=17",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=20, missing meals 8 -> 5",
+    "[Pipeline V2] Step 4: 4/9 meals assigned restaurants (pool=17)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 2: \"Mucem et patrimoine marseillais\" → \"Château d'If & Calanques de Marseille\"",
+    "[Pipeline V2] Theme mismatch fixed for day 3: \"Calanques et nature provençale\" → \"Fort de Ratonneau\"",
+    "[Pipeline V2] Step 6 done in 10420ms — \"Jour 1 allégé pour l'arrivée avec les sites emblématiques, jour 2 dense culturellement par temps couvert, jour 3 nature profitant du ciel dégagé avant le départ.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 19/19 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 22 pairs...",
+    "[Pipeline V2] Directions cache: 22/22 pairs fetched",
+    "[Pipeline V2] Day 1 re-optimized with real times: Parc Borély → Musée Cantini de la Ville de Marseille → Place Castellane → L'Ombrière de Norman Foster → Port Antique → Les Petits Trains de Marseille → Le Panier → Centre de la Vieille Charité → Cathédrale la Major de Marseille → Mucem - Musée des civilisations de l’Europe et de la Méditerranée → Abbaye Saint-Victor → Citadelle de Marseille (Fort Saint-Nicolas) → Basilique Notre-Dame de la Garde → Parc Émile Duclaux → Palais Longchamp",
+    "[Pipeline V2] 2-opt re-optimization: 1/3 days changed with real times",
+    "[Pipeline V2] Day 1: 15 activities to schedule (3 must-sees), dayStart=09:14, dayEnd=22:00, window=12.8h, cursor=09:14",
+    "[Pipeline V2]   → \"Parc Borély\" (60min, score=35.0, mustSee=false)",
+    "[Pipeline V2]   → \"Musée Cantini de la Ville de Marseille\" (120min, score=30.4, mustSee=false)",
+    "[Pipeline V2]   → \"Place Castellane\" (30min, score=22.9, mustSee=false)",
+    "[Pipeline V2]   → \"L'Ombrière de Norman Foster\" (60min, score=24.7, mustSee=false)",
+    "[Pipeline V2]   → \"Port Antique\" (60min, score=25.0, mustSee=false)",
+    "[Pipeline V2]   → \"Les Petits Trains de Marseille\" (60min, score=31.2, mustSee=false)",
+    "[Pipeline V2]   → \"Le Panier\" (90min, score=101.9, mustSee=true)",
+    "[Pipeline V2]   → \"Centre de la Vieille Charité\" (120min, score=38.8, mustSee=false)",
+    "[Pipeline V2]   → \"Cathédrale la Major de Marseille\" (30min, score=138.8, mustSee=true)",
+    "[Pipeline V2]   → \"Mucem - Musée des civilisations de l’Europe et de la Méditerranée\" (120min, score=42.9, mustSee=false)",
+    "[Pipeline V2]   → \"Abbaye Saint-Victor\" (30min, score=31.1, mustSee=false)",
+    "[Pipeline V2]   → \"Citadelle de Marseille (Fort Saint-Nicolas)\" (60min, score=23.8, mustSee=false)",
+    "[Pipeline V2]   → \"Basilique Notre-Dame de la Garde\" (60min, score=142.4, mustSee=true)",
+    "[Pipeline V2]   → \"Parc Émile Duclaux\" (60min, score=32.2, mustSee=false)",
+    "[Pipeline V2]   → \"Palais Longchamp\" (120min, score=43.8, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 breakfast: \"La Pépite Le Panier - Restaurant Sans Gluten & Patisserie - Marseille\" (0.7km) → \"Maison Charlie\" (0.7km)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 lunch: \"Le Bouchon Provençal\" (0.6km) → \"Maison Charlie\" (0.1km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 dinner, searching pool + API near \"Palais Longchamp\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 dinner: found \"Petrin Couchette\" (0.68km from Palais Longchamp)",
+    "[Pipeline V2] Day 1: Must-see \"Le Panier\" rejected at 90min, retrying with 45min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 1: Must-see \"Cathédrale la Major de Marseille\" rejected at 60min, retrying with 60min (min=60min, factor=0.5)",
+    "[Pipeline V2] Day 1: Evicted \"Parc Borély\" (score=35.02736002893727, slot=16:00-17:00) to make room for must-see \"Cathédrale la Major de Marseille\"",
+    "[Pipeline V2] Day 1: Must-see \"Basilique Notre-Dame de la Garde\" rejected at 60min, retrying with 60min (min=60min, factor=0.5)",
+    "[Pipeline V2] Day 1: Evicted \"Abbaye Saint-Victor\" (score=31.1145536547249, slot=18:00-18:30) to make room for must-see \"Basilique Notre-Dame de la Garde\"",
+    "[Pipeline V2] Day 1: Must-see \"Basilique Notre-Dame de la Garde\" RETRY 3 — extending day end to 23:00 (was 22:00)",
+    "[Pipeline V2] Day 1: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Day 2: 3 activities to schedule (2 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Château d'If\" (60min, score=137.5, mustSee=true)",
+    "[Pipeline V2]   → \"Calanques de Marseille\" (180min, score=101.9, mustSee=true)",
+    "[Pipeline V2]   → \"Parc national des Calanques\" (60min, score=31.2, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 breakfast: \"Boulangerie-Café Pain Salvator\" (0.9km) → \"Maison Charlie\" (0.7km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 lunch, searching pool + API near \"Château d'If\"...",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Parc national des Calanques\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"Equinoxe\" (0.26km from Parc national des Calanques)",
+    "[Pipeline V2] Day 2: Skipping \"Château d'If\" — closed on monday",
+    "[Pipeline V2] Day 2: Skipping \"Parc national des Calanques\" — closed on monday",
+    "[Pipeline V2] Day 2: Lunch inserted via findBestMealSlot at 13:00-13:45",
+    "[Pipeline V2] Day 3: 1 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=14:00, window=6.0h, cursor=08:15",
+    "[Pipeline V2]   → \"Fort de Ratonneau\" (60min, score=14.8, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 3 breakfast: \"Maison Charlie\" (0.7km) → \"Petrin Couchette\" (0.7km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 lunch, searching pool + API near \"Fort de Ratonneau\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 lunch: found \"La dent creuse\" (0.63km from Fort de Ratonneau)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 dinner, searching pool + API near \"Fort de Ratonneau\"...",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Fetching images for 2 items without photos...",
+    "[Pipeline V2] ✅ Place images: 2/2 enriched (restaurants handled in dedicated Google photo pass)",
+    "[Pipeline V2] 📸 Enriching 16 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 15/16 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule re-opt: Day 1 \"Dîner — Petrin Couchette\" (1.6km from neighbor) → \"La Pagaille Restaurant, Lounge & Cocktail\" (0.7km from ref)",
+    "[Pipeline V2] Post-schedule: 2 restaurant(s) still far — trying SerpAPI nearby search",
+    "[Pipeline V2] Post-schedule SerpAPI re-opt: Day 2 \"Petit-déjeuner — Maison Charlie\" (8.1km) → \"Fournil de Beauvallon\" (0.9km from ref)",
+    "[Pipeline V2] Post-schedule SerpAPI re-opt: Day 2 \"Dîner — Equinoxe\" (2.4km) → \"l'Oasis Sormiou\" (0.2km from ref)",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 4 restaurant(s) (2 API calls)",
+    "[Pipeline V2] 📸 Enriching 12 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 11/12 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 5 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 2 large intra-day gap segment(s)",
+    "[Pipeline V2] Geo strict prune: Day 1 removed 1 optional activity(ies)",
+    "[Pipeline V2] Section 13i: pruned 1 optional activity(ies) to reduce intra-day zigzags",
+    "[Pipeline V2] Must-see recovery: inserted \"Basilique Notre-Dame de la Garde\" into day 2 (gap=315min)",
+    "[Pipeline V2] Must-see recovery: inserted \"Château d'If\" into day 1 (gap=286min)",
+    "[Pipeline V2] Must-see recovery: inserted \"Basilique Notre-Dame de la Garde\" into day 2 (gap=245min)",
+    "[Pipeline V2] Must-see recovery: inserted \"Vieux-Port de Marseille\" into day 1 (gap=216min)",
+    "[Pipeline V2] Must-see recovery: inserted \"Château d'If\" into day 2 (gap=145min)",
+    "[Pipeline V2] Step 7: 13 alternatives, pool trimmed to 19/19",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 52/100",
+    "  ⚠️ Day 1: zigzag route detected (3 turnbacks)",
+    "  ⚠️ Day 2: zigzag route detected (2 turnbacks)",
+    "  ⚠️ Day 2: route inefficiency is high (1.77x vs MST lower bound)",
+    "  ⚠️ Day 2: day load is high (745min planned incl. travel)",
+    "  ⚠️ Day 2: first activity starts late (10:00)",
+    "  ⚠️ Day 2: hard long leg 6.6km between \"Déjeuner — Restaurant à proximité\" and \"Basilique Notre-Dame de la Garde\"",
+    "  ⚠️ Day 2: hard long leg 8.4km between \"Château d'If\" and \"Dîner — l'Oasis Sormiou\"",
+    "  ⚠️ Day 2: 3 legs > 2.5km (target max = 1)",
+    "  ⚠️ Day 2: impossible transition \"Déjeuner — Restaurant à proximité\" → \"Basilique Notre-Dame de la Garde\" (6.6km, 37min, gap=10min)",
+    "  🔧 Day 2: Fixed activity count in narrative (3 → 4)",
+    "[Pipeline V2] Step 8: Quality score 52/100 (9 warnings, 1 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 26 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 77309ms (77.3s)",
+    "[Pipeline V2]   3 days, 20 items total",
+    "[Pipeline V2] ✅ All 5 must-sees are in the schedule"
+  ],
+  "warnings": [
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 12:30 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 11:00 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 12:00 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 19:00 tardif (après 18h)",
+    "[Hotels] Check-in 13:30 invalide (avant 14h), corrigé à 14:00",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"La Randonnée Urbaine de Marseille, Marseille\": 5437.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Calanques de Marseille\": 42.3km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Basilique Notre-Dame de la Garde\": 461.8km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"MuCEM (Musée des Civilisations de l'Europe et de la Méditerranée)\": 5781.8km de la destination (max 30km)",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"MuCEM (Musée des Civilisations de l'Europe et de la Méditerranée)\", skipping",
+    "[Pipeline V2] Day 1: REJECTED activity \"Musée Cantini de la Ville de Marseille\" (duration=120min, travel=35min, cursor=17:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Place Castellane\" (duration=30min, travel=30min, cursor=17:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"L'Ombrière de Norman Foster\" (duration=60min, travel=20min, cursor=17:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Port Antique\" (duration=60min, travel=25min, cursor=17:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Les Petits Trains de Marseille\" (duration=60min, travel=25min, cursor=17:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Centre de la Vieille Charité\" (duration=120min, travel=5min, cursor=17:45, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Mucem - Musée des civilisations de l’Europe et de la Méditerranée\" (duration=120min, travel=10min, cursor=17:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Citadelle de Marseille (Fort Saint-Nicolas)\" (duration=60min, travel=5min, cursor=18:30, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Basilique Notre-Dame de la Garde\" (duration=60min, travel=15min, cursor=18:00, dayEnd=22:00) ⚠️ MUST-SEE LOST",
+    "[Pipeline V2] Day 1: REJECTED activity \"Palais Longchamp\" (duration=120min, travel=45min, cursor=21:15, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Petrin Couchette\" overlaps with \"Check-out Vertigo Hostel\"",
+    "[Pipeline V2] ⚠ 1 full day(s) still have gaps >= 3h after gap-fill. Running emergency fill...",
+    "[Pipeline V2] Must-see recovery: 5 must-see(s) missing from schedule — attempting recovery"
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"La Randonnée Urbaine de Marseille, Marseille\" à Marseille — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite en vélo électrique de la calanque de Sormiou dans le Parc National au départ de Marseille, Marseille\" à Marseille — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"MuCEM (Musée des Civilisations de l'Europe et de la Méditerranée)\" à Marseille — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 77309,
+  "generatedAt": "2026-02-18T22:10:52.411Z",
+  "success": true,
+  "runType": "suggestion",
+  "suggestionQuery": "Je veux un city-break gastronomie pas cher depuis Lyon",
+  "suggestionTitle": "Escapade Gourmande en Provence Culinaire"
+}

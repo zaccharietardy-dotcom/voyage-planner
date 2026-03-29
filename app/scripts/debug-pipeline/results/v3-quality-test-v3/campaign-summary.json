@@ -1,0 +1,1426 @@
+{
+  "campaignMeta": {
+    "campaignId": "v3-quality-test-v3",
+    "startedAt": "2026-02-23T14:08:47.624Z",
+    "finishedAt": "2026-02-23T14:11:44.687Z",
+    "durationMs": 177063,
+    "seed": 424242,
+    "totalRequested": 5,
+    "randomCountRequested": 0,
+    "scenarioCountRequested": 5,
+    "analyze": true,
+    "failFast": true,
+    "outDir": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3"
+  },
+  "runStats": {
+    "total": 5,
+    "success": 5,
+    "failed": 0,
+    "scenarioRuns": 5,
+    "randomRuns": 0,
+    "analyzedRuns": 5,
+    "successRate": 1
+  },
+  "scoreStats": {
+    "average": 84.6,
+    "min": 76,
+    "max": 96,
+    "p50": 82,
+    "p90": 96,
+    "sectionAverages": {
+      "schedule": 98,
+      "geography": 29.2,
+      "budget": 96.2,
+      "links": 91.2,
+      "dataQuality": 88.6,
+      "rhythm": 99,
+      "relevance": 95.2,
+      "realism": 95
+    }
+  },
+  "issuesByCode": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 35,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: segment urbain dur 4.1km entre \"Trattoria Vecchia Roma\" et \"Basilique St Pierre\" (> 4km)",
+        "Jour 1: segment urbain dur 8.3km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Samurai Ninja Museum Asakusa Tokyo\" (> 4km)",
+        "Jour 1: segment urbain dur 9.0km entre \"Samurai Ninja Museum Asakusa Tokyo\" et \"Fūunji Shinjuku\" (> 4km)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 6,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S03-14day-long",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 1: 9.0km entre \"Samurai Ninja Museum Asakusa Tokyo\" et \"Fūunji Shinjuku\" avec seulement 10min de battement",
+        "Jour 2: 13.3km entre \"Tokyo DisneySea\" et \"Gyukatsu Ichinisan\" avec seulement 10min de battement",
+        "Jour 4: 5.4km entre \"Akihabara Electric Town\" et \"GYOPAO Gyoza Roppongi\" avec seulement 0min de battement"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 22,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (4 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (5 demi-tours détectés)",
+        "Jour 1: itinéraire en zigzag (2 demi-tours détectés)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 19,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: 2 segments > 2.5km (max cible: 1)",
+        "Jour 2: 3 segments > 2.5km (max cible: 1)",
+        "Jour 4: 5 segments > 2.5km (max cible: 1)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 17,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: efficacité de route faible (2.00x du minimum MST)",
+        "Jour 2: efficacité de route faible (2.49x du minimum MST)",
+        "Jour 1: efficacité de route faible (2.27x du minimum MST)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_VERY_LONG_DAY_LEG",
+      "code": "GEO_VERY_LONG_DAY_LEG",
+      "severity": "warning",
+      "component": "pipeline/geography",
+      "count": 6,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S03-14day-long",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 7: 62.8km entre \"Splash Tokyo\" et \"Mont Fuji\" — trajet long",
+        "Jour 7: 108.7km entre \"Mont Fuji\" et \"Tokyo Disneyland\" — trajet long",
+        "Jour 4: 29.9km entre \"La fontaine des épices\" et \"Anima (André Heller Garden)\" — trajet long"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "code": "budget:Pas de costBreakdown dans le trip",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 5,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "code": "data-quality:Pas de breakdown des coûts",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 5,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "code": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "code": "budget:Pas d'hébergement défini dans le voyage",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "code": "data-quality:Pas d'hébergement défini",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (0/1): sagrada familia",
+      "code": "relevance:Must-see manquants (0/1): sagrada familia",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (0/1): sagrada familia"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 7: \"Splash Tokyo\" est à 52.5km du centre — trop loin ?",
+      "code": "geography:Jour 7: \"Splash Tokyo\" est à 52.5km du centre — trop loin ?",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: \"Splash Tokyo\" est à 52.5km du centre — trop loin ?"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 7: \"Mont Fuji\" est à 99.2km du centre — trop loin ?",
+      "code": "geography:Jour 7: \"Mont Fuji\" est à 99.2km du centre — trop loin ?",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: \"Mont Fuji\" est à 99.2km du centre — trop loin ?"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (2/3): sanctuaire fushimi inari",
+      "code": "relevance:Must-see manquants (2/3): sanctuaire fushimi inari",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (2/3): sanctuaire fushimi inari"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Activité \"adventure\" demandée mais aucune activité correspondante trou",
+      "code": "relevance:Activité \"adventure\" demandée mais aucune activité correspondante trou",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Activité \"adventure\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 1: restaurant \"Fūunji Shinjuku\" à 9.0km de l'activité précédente ",
+      "code": "realism:Jour 1: restaurant \"Fūunji Shinjuku\" à 9.0km de l'activité précédente ",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Fūunji Shinjuku\" à 9.0km de l'activité précédente (\"Samurai Ninja Museum Asakusa Tokyo\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Gyukatsu Ichinisan\" à 13.3km de l'activité précéde",
+      "code": "realism:Jour 2: restaurant \"Gyukatsu Ichinisan\" à 13.3km de l'activité précéde",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Gyukatsu Ichinisan\" à 13.3km de l'activité précédente (\"Tokyo DisneySea\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 5.4km de l'activité précé",
+      "code": "realism:Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 5.4km de l'activité précé",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 5.4km de l'activité précédente (\"Akihabara Electric Town\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 7: restaurant \"Shinjuku Sushi Hatsume\" à 17.8km de l'activité pré",
+      "code": "realism:Jour 7: restaurant \"Shinjuku Sushi Hatsume\" à 17.8km de l'activité pré",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: restaurant \"Shinjuku Sushi Hatsume\" à 17.8km de l'activité précédente (\"Tokyo Disneyland\") avec seulement 15min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 14: restaurant \"Fūunji Shinjuku\" à 11.2km de l'activité précédent",
+      "code": "realism:Jour 14: restaurant \"Fūunji Shinjuku\" à 11.2km de l'activité précédent",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 14: restaurant \"Fūunji Shinjuku\" à 11.2km de l'activité précédente (\"Parc d'Inokashira\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): place jemaa el-fna",
+      "code": "relevance:Must-see manquants (1/2): place jemaa el-fna",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): place jemaa el-fna"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 5: restaurant \"Restaurant Leopard Marrakech\" à 22.3km de l'activi",
+      "code": "realism:Jour 5: restaurant \"Restaurant Leopard Marrakech\" à 22.3km de l'activi",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 5: restaurant \"Restaurant Leopard Marrakech\" à 22.3km de l'activité précédente (\"Excursion au coucher du soleil dans le désert d'Agafay\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 7: restaurant \"La Terrasse Du Jardin\" à 4.1km de l'activité précé",
+      "code": "realism:Jour 7: restaurant \"La Terrasse Du Jardin\" à 4.1km de l'activité précé",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 7: restaurant \"La Terrasse Du Jardin\" à 4.1km de l'activité précédente (\"Dromadaire Marrakech - Cheval Quad & Buggy Marrakech Palmeraie\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3: 9 activités/restaurants — journée surchargée",
+      "code": "rhythm:Jour 3: 9 activités/restaurants — journée surchargée",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 3: 9 activités/restaurants — journée surchargée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (2/3): buckingham palace",
+      "code": "relevance:Must-see manquants (2/3): buckingham palace",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (2/3): buckingham palace"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 61,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: \"Basilique St Pierre\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Chiostro del Bramante\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Piazza Navona\" n'a aucun lien (booking, viator, maps)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 40,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: \"Le Forum Romain\" n'a pas de description",
+        "Jour 1: \"Basilique St Pierre\" n'a pas de description",
+        "Jour 2: \"Fontaine de Trevi\" n'a pas de description"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 5,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "code": "data-quality:Pas de conseils de voyage",
+      "severity": "info",
+      "component": "unknown",
+      "count": 5,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "code": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Tous les must-see présents (2/2)",
+      "code": "relevance:Tous les must-see présents (2/2)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Tous les must-see présents (2/2)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 1: 5h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 08:10",
+      "code": "schedule:Jour 1: 5h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 08:10",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 1: 5h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 08:10) et \"Samurai Ninja Museum Asakusa Tokyo\" (début 13:20)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 1: 3h de vide entre \"Fūunji Shinjuku\" (fin 15:45) et \"Teppan Baby",
+      "code": "schedule:Jour 1: 3h de vide entre \"Fūunji Shinjuku\" (fin 15:45) et \"Teppan Baby",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 1: 3h de vide entre \"Fūunji Shinjuku\" (fin 15:45) et \"Teppan Baby\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 2: 6h de vide entre \"Gyukatsu Ichinisan\" (fin 13:30) et \"Teppan B",
+      "code": "schedule:Jour 2: 6h de vide entre \"Gyukatsu Ichinisan\" (fin 13:30) et \"Teppan B",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 2: 6h de vide entre \"Gyukatsu Ichinisan\" (fin 13:30) et \"Teppan Baby\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 5: 3h de vide entre \" Tokyo :Atelier de calligraphie et création ",
+      "code": "schedule:Jour 5: 3h de vide entre \" Tokyo :Atelier de calligraphie et création ",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 5: 3h de vide entre \" Tokyo :Atelier de calligraphie et création originale de T-shirts\" (fin 15:50) et \"MO-MO-PARADISE Shibuya Koendori\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 7: 3h de vide entre \"Mont Fuji\" (fin 10:30) et \"Tokyo Disneyland\"",
+      "code": "schedule:Jour 7: 3h de vide entre \"Mont Fuji\" (fin 10:30) et \"Tokyo Disneyland\"",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: 3h de vide entre \"Mont Fuji\" (fin 10:30) et \"Tokyo Disneyland\" (début 13:45)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 8: 4h de vide entre \"Gyukatsu Ichinisan\" (fin 14:55) et \"Teppan B",
+      "code": "schedule:Jour 8: 4h de vide entre \"Gyukatsu Ichinisan\" (fin 14:55) et \"Teppan B",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 8: 4h de vide entre \"Gyukatsu Ichinisan\" (fin 14:55) et \"Teppan Baby\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 10: 5h de vide entre \"Gyukatsu Ichinisan\" (fin 14:05) et \"Tapas M",
+      "code": "schedule:Jour 10: 5h de vide entre \"Gyukatsu Ichinisan\" (fin 14:05) et \"Tapas M",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 10: 5h de vide entre \"Gyukatsu Ichinisan\" (fin 14:05) et \"Tapas Molecular Bar\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 14: 3h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 09:1",
+      "code": "schedule:Jour 14: 3h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 09:1",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 14: 3h de vide entre \"MO-MO-PARADISE Shinjuku-Sanchome\" (fin 09:15) et \"Parc d'Inokashira\" (début 12:40)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 14: 4h de vide entre \"Fūunji Shinjuku\" (fin 15:05) et \"New York G",
+      "code": "schedule:Jour 14: 4h de vide entre \"Fūunji Shinjuku\" (fin 15:05) et \"New York G",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 14: 4h de vide entre \"Fūunji Shinjuku\" (fin 15:05) et \"New York Grill\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 1: 17h de vide entre \"Cyber Parc Arsat Moulay Abdeslam\" (fin 02:0",
+      "code": "schedule:Jour 1: 17h de vide entre \"Cyber Parc Arsat Moulay Abdeslam\" (fin 02:0",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 1: 17h de vide entre \"Cyber Parc Arsat Moulay Abdeslam\" (fin 02:05) et \"Le Slimana Restaurant & Rooftop\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 2: 5h de vide entre \"Dar Essalam\" (fin 14:15) et \"La Table de la ",
+      "code": "schedule:Jour 2: 5h de vide entre \"Dar Essalam\" (fin 14:15) et \"La Table de la ",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 2: 5h de vide entre \"Dar Essalam\" (fin 14:15) et \"La Table de la Kasbah\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 4: 4h de vide entre \"Dar Essalam\" (fin 14:50) et \"Cafe Restaurant",
+      "code": "schedule:Jour 4: 4h de vide entre \"Dar Essalam\" (fin 14:50) et \"Cafe Restaurant",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 4: 4h de vide entre \"Dar Essalam\" (fin 14:50) et \"Cafe Restaurant Dar L'hssira\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 5: 3h de vide entre \"Restaurant Leopard Marrakech\" (fin 15:55) et",
+      "code": "schedule:Jour 5: 3h de vide entre \"Restaurant Leopard Marrakech\" (fin 15:55) et",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 5: 3h de vide entre \"Restaurant Leopard Marrakech\" (fin 15:55) et \"Kiss Ko Marrakech\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 6: 6h de vide entre \"Le Slimana Restaurant & Rooftop\" (fin 13:30)",
+      "code": "schedule:Jour 6: 6h de vide entre \"Le Slimana Restaurant & Rooftop\" (fin 13:30)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 6: 6h de vide entre \"Le Slimana Restaurant & Rooftop\" (fin 13:30) et \"La Terrasse Du Jardin\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 7: 5h de vide entre \"La Terrasse Du Jardin\" (fin 13:35) et \"Le Sl",
+      "code": "schedule:Jour 7: 5h de vide entre \"La Terrasse Du Jardin\" (fin 13:35) et \"Le Sl",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 7: 5h de vide entre \"La Terrasse Du Jardin\" (fin 13:35) et \"Le Slimana Restaurant & Rooftop\" (début 19:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 2: ~9.9km de marche implicite entre activités",
+      "code": "rhythm:Jour 2: ~9.9km de marche implicite entre activités",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 2: ~9.9km de marche implicite entre activités"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 5: ~8.1km de marche implicite entre activités",
+      "code": "rhythm:Jour 5: ~8.1km de marche implicite entre activités",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 5: ~8.1km de marche implicite entre activités"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 3: \"Borough Market\" prévu à 15:45 — les marchés ferment souvent e",
+      "code": "realism:Jour 3: \"Borough Market\" prévu à 15:45 — les marchés ferment souvent e",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 3: \"Borough Market\" prévu à 15:45 — les marchés ferment souvent en début d'après-midi"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "issuesByComponent": [
+    {
+      "component": "pipeline/step8-validate",
+      "total": 99,
+      "critical": 41,
+      "warning": 58,
+      "info": 0
+    },
+    {
+      "component": "pipeline/links",
+      "total": 61,
+      "critical": 0,
+      "warning": 0,
+      "info": 61
+    },
+    {
+      "component": "unknown",
+      "total": 60,
+      "critical": 0,
+      "warning": 29,
+      "info": 31
+    },
+    {
+      "component": "pipeline/content",
+      "total": 40,
+      "critical": 0,
+      "warning": 0,
+      "info": 40
+    },
+    {
+      "component": "pipeline/geography",
+      "total": 6,
+      "critical": 0,
+      "warning": 6,
+      "info": 0
+    }
+  ],
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 35,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: segment urbain dur 4.1km entre \"Trattoria Vecchia Roma\" et \"Basilique St Pierre\" (> 4km)",
+        "Jour 1: segment urbain dur 8.3km entre \"MO-MO-PARADISE Shinjuku-Sanchome\" et \"Samurai Ninja Museum Asakusa Tokyo\" (> 4km)",
+        "Jour 1: segment urbain dur 9.0km entre \"Samurai Ninja Museum Asakusa Tokyo\" et \"Fūunji Shinjuku\" (> 4km)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 6,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S03-14day-long",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 1: 9.0km entre \"Samurai Ninja Museum Asakusa Tokyo\" et \"Fūunji Shinjuku\" avec seulement 10min de battement",
+        "Jour 2: 13.3km entre \"Tokyo DisneySea\" et \"Gyukatsu Ichinisan\" avec seulement 10min de battement",
+        "Jour 4: 5.4km entre \"Akihabara Electric Town\" et \"GYOPAO Gyoza Roppongi\" avec seulement 0min de battement"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 22,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (4 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (5 demi-tours détectés)",
+        "Jour 1: itinéraire en zigzag (2 demi-tours détectés)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 19,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: 2 segments > 2.5km (max cible: 1)",
+        "Jour 2: 3 segments > 2.5km (max cible: 1)",
+        "Jour 4: 5 segments > 2.5km (max cible: 1)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 17,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 1: efficacité de route faible (2.00x du minimum MST)",
+        "Jour 2: efficacité de route faible (2.49x du minimum MST)",
+        "Jour 1: efficacité de route faible (2.27x du minimum MST)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "GEO_VERY_LONG_DAY_LEG",
+      "code": "GEO_VERY_LONG_DAY_LEG",
+      "severity": "warning",
+      "component": "pipeline/geography",
+      "count": 6,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S03-14day-long",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 7: 62.8km entre \"Splash Tokyo\" et \"Mont Fuji\" — trajet long",
+        "Jour 7: 108.7km entre \"Mont Fuji\" et \"Tokyo Disneyland\" — trajet long",
+        "Jour 4: 29.9km entre \"La fontaine des épices\" et \"Anima (André Heller Garden)\" — trajet long"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "code": "budget:Pas de costBreakdown dans le trip",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 5,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "code": "data-quality:Pas de breakdown des coûts",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 5,
+      "affectedRuns": 5,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-1day-express",
+        "S03-14day-long",
+        "S04-backpacker",
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "code": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "code": "budget:Pas d'hébergement défini dans le voyage",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "code": "data-quality:Pas d'hébergement défini",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (0/1): sagrada familia",
+      "code": "relevance:Must-see manquants (0/1): sagrada familia",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-1day-express"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (0/1): sagrada familia"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 7: \"Splash Tokyo\" est à 52.5km du centre — trop loin ?",
+      "code": "geography:Jour 7: \"Splash Tokyo\" est à 52.5km du centre — trop loin ?",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: \"Splash Tokyo\" est à 52.5km du centre — trop loin ?"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "geography:Jour 7: \"Mont Fuji\" est à 99.2km du centre — trop loin ?",
+      "code": "geography:Jour 7: \"Mont Fuji\" est à 99.2km du centre — trop loin ?",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: \"Mont Fuji\" est à 99.2km du centre — trop loin ?"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (2/3): sanctuaire fushimi inari",
+      "code": "relevance:Must-see manquants (2/3): sanctuaire fushimi inari",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (2/3): sanctuaire fushimi inari"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Activité \"adventure\" demandée mais aucune activité correspondante trou",
+      "code": "relevance:Activité \"adventure\" demandée mais aucune activité correspondante trou",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Activité \"adventure\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 1: restaurant \"Fūunji Shinjuku\" à 9.0km de l'activité précédente ",
+      "code": "realism:Jour 1: restaurant \"Fūunji Shinjuku\" à 9.0km de l'activité précédente ",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Fūunji Shinjuku\" à 9.0km de l'activité précédente (\"Samurai Ninja Museum Asakusa Tokyo\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Gyukatsu Ichinisan\" à 13.3km de l'activité précéde",
+      "code": "realism:Jour 2: restaurant \"Gyukatsu Ichinisan\" à 13.3km de l'activité précéde",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Gyukatsu Ichinisan\" à 13.3km de l'activité précédente (\"Tokyo DisneySea\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 5.4km de l'activité précé",
+      "code": "realism:Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 5.4km de l'activité précé",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 4: restaurant \"GYOPAO Gyoza Roppongi\" à 5.4km de l'activité précédente (\"Akihabara Electric Town\") avec seulement 0min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 7: restaurant \"Shinjuku Sushi Hatsume\" à 17.8km de l'activité pré",
+      "code": "realism:Jour 7: restaurant \"Shinjuku Sushi Hatsume\" à 17.8km de l'activité pré",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 7: restaurant \"Shinjuku Sushi Hatsume\" à 17.8km de l'activité précédente (\"Tokyo Disneyland\") avec seulement 15min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 14: restaurant \"Fūunji Shinjuku\" à 11.2km de l'activité précédent",
+      "code": "realism:Jour 14: restaurant \"Fūunji Shinjuku\" à 11.2km de l'activité précédent",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-14day-long"
+      ],
+      "sampleMessages": [
+        "Jour 14: restaurant \"Fūunji Shinjuku\" à 11.2km de l'activité précédente (\"Parc d'Inokashira\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): place jemaa el-fna",
+      "code": "relevance:Must-see manquants (1/2): place jemaa el-fna",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): place jemaa el-fna"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 5: restaurant \"Restaurant Leopard Marrakech\" à 22.3km de l'activi",
+      "code": "realism:Jour 5: restaurant \"Restaurant Leopard Marrakech\" à 22.3km de l'activi",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 5: restaurant \"Restaurant Leopard Marrakech\" à 22.3km de l'activité précédente (\"Excursion au coucher du soleil dans le désert d'Agafay\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 7: restaurant \"La Terrasse Du Jardin\" à 4.1km de l'activité précé",
+      "code": "realism:Jour 7: restaurant \"La Terrasse Du Jardin\" à 4.1km de l'activité précé",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-backpacker"
+      ],
+      "sampleMessages": [
+        "Jour 7: restaurant \"La Terrasse Du Jardin\" à 4.1km de l'activité précédente (\"Dromadaire Marrakech - Cheval Quad & Buggy Marrakech Palmeraie\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3: 9 activités/restaurants — journée surchargée",
+      "code": "rhythm:Jour 3: 9 activités/restaurants — journée surchargée",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S05-luxury-couple"
+      ],
+      "sampleMessages": [
+        "Jour 3: 9 activités/restaurants — journée surchargée"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "stratification": {
+    "groupTypes": {
+      "solo": 2,
+      "couple": 2,
+      "friends": 1,
+      "family_with_kids": 0,
+      "family_without_kids": 0
+    },
+    "budgetLevels": {
+      "economic": 2,
+      "moderate": 1,
+      "comfort": 1,
+      "luxury": 1
+    },
+    "transports": {
+      "optimal": 3,
+      "plane": 1,
+      "train": 1,
+      "car": 0,
+      "bus": 0
+    },
+    "multiCityRuns": 0
+  },
+  "exitCriteria": {
+    "successRate": {
+      "value": 1,
+      "target": 0.9,
+      "pass": true
+    },
+    "noApiKeyLeaks": {
+      "count": 0,
+      "pass": true
+    },
+    "noHotelBoundaryIncoherent": {
+      "count": 0,
+      "pass": true
+    },
+    "urbanLegPolicy": {
+      "count": 54,
+      "pass": false
+    },
+    "averageScore": {
+      "value": 84.6,
+      "target": 85,
+      "pass": false
+    },
+    "noCriticalRemaining": {
+      "count": 41,
+      "pass": false
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "S01-paris-rome-4d",
+      "runKind": "scenario",
+      "scenarioId": "paris-rome-4d",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S01-paris-rome-4d.json",
+      "startedAt": "2026-02-23T14:08:47.624Z",
+      "durationMs": 51417,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S01-paris-rome-4d-report.json",
+      "score": 89,
+      "critical": 1,
+      "warning": 8,
+      "info": 23
+    },
+    {
+      "runId": "S02-1day-express",
+      "runKind": "scenario",
+      "scenarioId": "1day-express",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S02-1day-express.json",
+      "startedAt": "2026-02-23T14:09:39.055Z",
+      "durationMs": 44961,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S02-1day-express-report.json",
+      "score": 96,
+      "critical": 0,
+      "warning": 7,
+      "info": 4
+    },
+    {
+      "runId": "S03-14day-long",
+      "runKind": "scenario",
+      "scenarioId": "14day-long",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S03-14day-long.json",
+      "startedAt": "2026-02-23T14:10:24.022Z",
+      "durationMs": 43795,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S03-14day-long-report.json",
+      "score": 76,
+      "critical": 30,
+      "warning": 39,
+      "info": 55
+    },
+    {
+      "runId": "S04-backpacker",
+      "runKind": "scenario",
+      "scenarioId": "backpacker",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S04-backpacker.json",
+      "startedAt": "2026-02-23T14:11:07.825Z",
+      "durationMs": 25087,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S04-backpacker-report.json",
+      "score": 80,
+      "critical": 9,
+      "warning": 23,
+      "info": 25
+    },
+    {
+      "runId": "S05-luxury-couple",
+      "runKind": "scenario",
+      "scenarioId": "luxury-couple",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S05-luxury-couple.json",
+      "startedAt": "2026-02-23T14:11:32.918Z",
+      "durationMs": 11762,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/v3-quality-test-v3/S05-luxury-couple-report.json",
+      "score": 82,
+      "critical": 1,
+      "warning": 16,
+      "info": 25
+    }
+  ]
+}

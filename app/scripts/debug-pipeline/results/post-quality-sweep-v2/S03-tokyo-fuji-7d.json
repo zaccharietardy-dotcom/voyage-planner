@@ -1,0 +1,4098 @@
+{
+  "scenarioId": "tokyo-fuji-7d",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Tokyo",
+    "startDate": "2026-05-20T08:00:00.000Z",
+    "durationDays": 7,
+    "transport": "plane",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "nature"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Mont Fuji, Sanctuaire Meiji",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Tokyo",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "b1085ee6-d9df-4024-93ca-dcbd0b7eb5e3",
+    "createdAt": "2026-03-19T16:20:23.883Z",
+    "updatedAt": "2026-03-19T16:20:23.883Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Tokyo",
+      "startDate": "2026-05-20T08:00:00.000Z",
+      "durationDays": 7,
+      "transport": "plane",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "nature"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Mont Fuji, Sanctuaire Meiji",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Tokyo",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-05-20T08:00:00.000Z",
+        "items": [
+          {
+            "id": "656dda54-7820-45d2-a783-3c0808e5311d",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "23:55",
+            "type": "flight",
+            "title": "Vol Paris → Tokyo",
+            "description": "Réservez votre vol",
+            "locationName": "Paris",
+            "latitude": 35.6762,
+            "longitude": 139.6503,
+            "orderIndex": 0,
+            "duration": 1018,
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 777,
+            "bookingUrl": "https://www.aviasales.com/search/CDG2005HND26052?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/CDG2005HND26052?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/paris/tokyo?departure_date=2026-05-20&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "theme": "Journée de détente",
+        "dayNarrative": ""
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-05-21T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — THE BELCOMO",
+            "description": "Petit-déjeuner à THE BELCOMO",
+            "locationName": "THE BELCOMO",
+            "latitude": 35.6695288,
+            "longitude": 139.7159503,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJdTS4WlWNGGARGCumxitFYq0",
+              "name": "THE BELCOMO",
+              "address": "Minato City, Kitaaoyama, 2-chōme−14−4 The Argyle Aoyama, 4F GRAND HOTEL",
+              "latitude": 35.6695288,
+              "longitude": 139.7159503,
+              "rating": 4.1,
+              "reviewCount": 806,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "breakfast",
+                "french",
+                "italian",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Chic restaurant in the Aoyama Grand Hotel plating global fare, plus a large wine & spirits list."
+              ],
+              "description": "Chic restaurant in the Aoyama Grand Hotel plating global fare, plus a large wine & spirits list.",
+              "phoneNumber": "03-6271-5429",
+              "website": "https://aoyamagrand.com/restaurants/the-belcomo/",
+              "googleMapsUrl": "https://maps.google.com/?cid=12493624370597866264&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfU5mV3GafHEaEJ6Tjhjv9GXmjHC-FKCKJ13cfM4FzcXL4emvT1iEqfK9cMXqlgBNpk7oTAKn8PM_Ft2zZqbKp18YT30SWq2B_xzsjm346fsB8gSY0OiwXWX2Ef0E1_0z5EykUrHD4x8JramPKiZB-n8TaCHBJ9POODQVvCVK3N5txM0i6oT-0TtVcrwA7ZxM8N6KOhcms_3dt_ukRwroVsXPlT6Pcj-YWIgJwRjTM1Kw9eXiv6FhxEydOzesYkw2OieThY2aVudrHUk88sMWlMAopwidkkjLBZz7rNR4Elpaw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJdTS4WlWNGGARGCumxitFYq0",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.5706872774878314,
+              "walkingTime": 7,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.1,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=12493624370597866264&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJdTS4WlWNGGARGCumxitFYq0",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "monday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "tuesday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "wednesday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "thursday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "friday": {
+                "open": "08:00",
+                "close": "23:00"
+              },
+              "saturday": {
+                "open": "08:00",
+                "close": "23:00"
+              }
+            }
+          },
+          {
+            "id": "travel-2-1",
+            "dayNumber": 2,
+            "startTime": "09:30",
+            "endTime": "09:45",
+            "type": "transport",
+            "title": "Transport en commun — 4.0km",
+            "description": "THE BELCOMO → Shinjuku Gyoen Park",
+            "locationName": "",
+            "latitude": 35.685176299999995,
+            "longitude": 139.71005169999998,
+            "orderIndex": 1,
+            "duration": 15,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "qawxE}vtsY{@GEGAc@mAGBm@?Ep@C~BKp@IbBB`ADpB^lCl@fEjAxDjAfBb@jB\\bAHfA@fADR?NDJCHGBIAGFqB}@ImAGu@Bm@@}AUy@Mq@Ke@OqAg@y@WIGo@sCQo@O_@Uc@{BcDkAqBu@aCGYq@^KFSDuAVkF`AsCf@k@Pk@XcAr@eEtCy@j@m@Tu@JuABk@CMGM?U?qA?iCAaB?QDc@@sAJKGO?g@Fo@TaAl@iBp@cAViB`@q@CWEm@O_@Qq@[aC_BeBiA{@o@{@s@aCuBsAaAi@]RYj@aAXo@`@iAp@mCbBgIXoC",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 3.994,
+            "timeFromPrevious": 15
+          },
+          {
+            "id": "serp-attr-ChIJPyOTG8KMGGARh_IXobWxHmo",
+            "dayNumber": 2,
+            "startTime": "09:45",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Shinjuku Gyoen Park",
+            "description": "Vaste parc avec jardins et serre. Ancien domaine de 58 hectares, ce parc est composé de plusieurs jardins, d'espaces verdoyants et d'une serre.",
+            "locationName": "Shinjuku Gyoen Park",
+            "latitude": 35.685176299999995,
+            "longitude": 139.71005169999998,
+            "orderIndex": 2,
+            "duration": 90,
+            "rating": 4.6,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepG4Ee1MDcZ-rRwis-eu7IGy2ZyBdueYHIXt0LILV6WWZYbC3nzoA_b4zBR_YkHCErxUqH7t_tV6n5mSimxHeNXlEcwTzp0jy3rcNGHAia5kkNDK4OhAgWgoXwCOx0eT1lvsn-SRA=w163-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Shinjuku%20Gyoen%20Park&query=35.685176299999995,139.71005169999998",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "travel-2-3",
+            "dayNumber": 2,
+            "startTime": "11:25",
+            "endTime": "11:45",
+            "type": "transport",
+            "title": "Transport en commun — 4.4km",
+            "description": "Shinjuku Gyoen Park → Sanctuaire Meiji",
+            "locationName": "",
+            "latitude": 35.6764,
+            "longitude": 139.6993,
+            "orderIndex": 3,
+            "duration": 20,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "g}sxEg|ysYu@ROAGMLSFWA[GOEE[S@C@E@IAIYs@KKQCsAf@`@lABTIJ_A`@h@rAbBfEbAhDhArEbAlEGLF\\n@zCb@jCN|AP~BDnBDtADlCHxCHl@DRBz@@|@ODWFIl@Qp@cBjGeB|GwFsCs@a@_@[_@e@_@e@U`BUpAyAjCwDbHsBpDUb@e@z@CTKX]z@Yt@mAhDwA~DyDlKoBpF_@dAy@vBu@tBgA|CsB`GId@?ZJd@l@lBHXUKSA{@ECAEDIFKBOES?gAEgAAcAIkB]gBc@yDkAyAc@mBg@mCm@qB_@aAEcBCq@HKx@C~@AB",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 4.42,
+            "timeFromPrevious": 20
+          },
+          {
+            "id": "meiji-shrine",
+            "dayNumber": 2,
+            "startTime": "11:45",
+            "endTime": "12:45",
+            "type": "activity",
+            "title": "Sanctuaire Meiji",
+            "description": "Sanctuaire shinto majestueux dédié à l'empereur Meiji, entouré de forêt",
+            "locationName": "Sanctuaire Meiji",
+            "latitude": 35.6764,
+            "longitude": 139.6993,
+            "orderIndex": 4,
+            "duration": 60,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sanctuaire%20Meiji&query=35.6764,139.6993",
+            "mustSee": true,
+            "openingHours": {
+              "open": "05:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "12:55",
+            "endTime": "14:10",
+            "type": "restaurant",
+            "title": "Déjeuner — AFURI Harajuku",
+            "description": "Déjeuner à AFURI Harajuku",
+            "locationName": "AFURI Harajuku",
+            "latitude": 35.6730053,
+            "longitude": 139.7038019,
+            "orderIndex": 5,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJba17TbqMGGARFtDV6hkZbcs",
+              "name": "AFURI Harajuku",
+              "address": "Shibuya, Sendagaya, 3-chōme−63−1 グランデフォレスタ原宿 1F",
+              "latitude": 35.6730053,
+              "longitude": 139.7038019,
+              "rating": 4.4,
+              "reviewCount": 4392,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "japanese"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "https://afuri.com/",
+              "googleMapsUrl": "https://maps.google.com/?cid=14658399961265590294&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfW1Hz9Dp0bqjXtIgZQE-Y97cmSLJiTHlKdHW9Y3kcvzXHRh7YTvZLupB0Q4Bxb715aIiZ9Ndwuq_rhpbL-iAvPxkxz9rsKxyxtM_ZZz7l8j8e4sUkCP9Z46uJx0HaWZO1_iX-KOF0QDNNA4OECaMYSUag7F7J87K9dBAI6MYHhh_M4C1ac6BHXmLOyhfGAflmjy2jQZmilNqN_ovXLimWOmA49KWjHyNFAkmYSwPufNsXOchO5zPAranhtqAJkoHFdcdB4FM-QAbYfe4w3BCjW2CUSCbI4H_zoyXoCxZMikgg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJba17TbqMGGARFtDV6hkZbcs",
+              "openingHours": {
+                "sunday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "10:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.8273455667642448,
+              "walkingTime": 10,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.4,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=14658399961265590294&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJba17TbqMGGARFtDV6hkZbcs",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "23:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "23:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "23:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "23:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "23:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "23:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "23:00"
+              }
+            }
+          },
+          {
+            "id": "travel-2-6",
+            "dayNumber": 2,
+            "startTime": "14:25",
+            "endTime": "14:50",
+            "type": "transport",
+            "title": "Transport en commun — 13.4km",
+            "description": "AFURI Harajuku → Musée d'art Mori",
+            "locationName": "",
+            "latitude": 35.6604621,
+            "longitude": 139.7292785,
+            "orderIndex": 6,
+            "duration": 25,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "c_wxEkmjsYHg@D[HDp@ZDBR^\\\\^ZNJGPlAd@JDDAz@qAFIJLTWb@_@p@e@`@[fAgAtAyAFCx@An@AP@NSLQp@i@~CcCbAu@Q_DKsCCm@S}AOcACa@Sm@Uy@Oi@c@wAa@_BASSoAU}Ay@eF_@_Ci@yCkByKSeAISEK]eBeAkFwAeHiAkGOy@K{@Ky@Oq@Mm@a@yBkAcGyAsH}@kEo@yBMk@U_AESD[EYIa@c@}Bu@mDmB{J}@iESy@MOOc@I[GS_@aAqBuFu@yBw@mCi@{Bc@wAi@mAoAcCyB_E{DiH]q@_FkIUq@Ig@?_ALo@Tk@LSb@_@p@c@f@]`CwA|CmBbCyAzBwAb@e@Xm@Je@Bm@Cu@c@cEU_Ak@oAuAaCYm@W_AKu@Ei@@aATeB`@oAb@iAf@kAb@aAPk@Hy@Ay@OkB]gEW_Dc@gFMk@cAwBUg@Yw@Ku@GoBKqFIuFRyBh@eFh@gId@oGt@{Iv@mJ`@eFLeCJaBH_BVmD@W?mDM}ASoAm@yBiA_D_AuCgBsFq@mBYeAKo@Co@EmA@c@NoDBk@NuAN_AToAv@yB~@iBP_@~@kAv@s@TMb@M~A_@t@Wb@_@T_@JUJg@Fa@VsD@kBEkAMeB_@uECoABc@PyANeB?u@Ei@YsCO}As@aHy@}Hc@oEE_AAq@HgARiAXwA?]H]Ty@d@iAd@q@t@y@~AwAlDyC^Y^Sh@OXDL?f@B^FnAf@nBbApAt@`@PRCfAl@z@d@r@f@\\XpArAdBpBXb@Zv@^pAbAzHRv@Rf@d@r@pA~ArApArC~CzA`BjCzBxBhBtB|AJZd@h@l@t@tArB^l@D?@?X`@z@lAv@nBlCvG|@tBpE|KjB~E`CxGpAnD~@a@HKCUa@mArAg@PBJJXr@@HAHLJXXFLFTFDHBp@SHA@HBNAHGDa@N",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 13.412,
+            "timeFromPrevious": 25
+          },
+          {
+            "id": "serp-attr-ChIJg5RCD3eLGGAR6dbIHRM98w8",
+            "dayNumber": 2,
+            "startTime": "14:50",
+            "endTime": "16:50",
+            "type": "activity",
+            "title": "Musée d'art Mori",
+            "description": "Musée d'Art moderne dans gratte-ciel. Musée d'Art dans la tour Mori avec expositions temporaires d'œuvres contemporaines internationales.",
+            "locationName": "Musée d'art Mori",
+            "latitude": 35.6604621,
+            "longitude": 139.7292785,
+            "orderIndex": 7,
+            "duration": 120,
+            "rating": 4.3,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo0VGAoEX-ucCINgzS67GZQb3iLkNwoaimFwdaLEGEfO83B7-Vu6yLc7YS0xc7xN7j1ODuK5OVpGEKIwgHSnPD7IiAKXVFakyW15pyzAtTiBNKtW23I73QB4ExS0LCN1i9xqpOxWg=w80-h106-k-no",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Mus%C3%A9e%20d'art%20Mori%20Tokyo",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20d'art%20Mori&query=35.6604621,139.7292785",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "22:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Mus%C3%A9e%20d'art%20Mori%20Tokyo"
+          },
+          {
+            "id": "free-time-2-7",
+            "dayNumber": 2,
+            "startTime": "17:00",
+            "endTime": "18:50",
+            "type": "free_time",
+            "title": "Temps libre — Exploration du quartier",
+            "description": "Profitez de ce temps libre pour flâner dans le quartier, faire du shopping ou prendre un café",
+            "locationName": "",
+            "latitude": 35.6604621,
+            "longitude": 139.7292785,
+            "orderIndex": 8,
+            "duration": 110,
+            "imageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Blue Note Tokyo",
+            "description": "Dîner à Blue Note Tokyo",
+            "locationName": "Blue Note Tokyo",
+            "latitude": 35.6611386,
+            "longitude": 139.7160849,
+            "orderIndex": 9,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJmYBOrGaLGGARUHAVps9SV9k",
+              "name": "Blue Note Tokyo",
+              "address": "6-chōme-3-16 Minamiaoyama, Minato City",
+              "latitude": 35.6611386,
+              "longitude": 139.7160849,
+              "rating": 4.6,
+              "reviewCount": 3796,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Sophisticated, dark jazz club offering a refined, seasonal menu of French-inspired dishes."
+              ],
+              "description": "Sophisticated, dark jazz club offering a refined, seasonal menu of French-inspired dishes.",
+              "phoneNumber": "03-5485-0088",
+              "website": "http://www.bluenote.co.jp/?utm_source=google&utm_medium=google_map&utm_campaign=tech_01",
+              "googleMapsUrl": "https://maps.google.com/?cid=15661077281002319952&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfX1gflUyNVqUqW1vNHCXTFxd6D8Ezke2eqEc_rnHLiYs-65-zcmHfemZc_zQCi5QDcgKq9IUOkV9Kvv_4Jc7e_CMTZ3GrlaxEfWJZpK3FyZRlGKe6Vv4JPXXIYqEQztRhTrUGxo_LWgyL94NTReDh5FaRNlKF-MUtijpEXhlBiB_VcZ-2uHIQkxDkFWv849WmOpxts8dvyvl4dxt698armK-XMtsuabMDks4RS3XhPKuGo1SKnAycrM_QPBunzHn8gLrxLd8VTuRL0ibBY9SNWGw9A_9g2JlUcAAaBiVC3jZA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJmYBOrGaLGGARUHAVps9SV9k",
+              "openingHours": {
+                "sunday": {
+                  "open": "15:00",
+                  "close": "21:30"
+                },
+                "monday": {
+                  "open": "16:30",
+                  "close": "22:30"
+                },
+                "tuesday": {
+                  "open": "16:30",
+                  "close": "22:30"
+                },
+                "wednesday": {
+                  "open": "16:30",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "16:30",
+                  "close": "22:30"
+                },
+                "friday": {
+                  "open": "16:30",
+                  "close": "22:30"
+                },
+                "saturday": {
+                  "open": "15:00",
+                  "close": "21:30"
+                }
+              },
+              "distance": 0.5812082000333932,
+              "walkingTime": 7,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJVVUlOmSLGGARGqkXwDpR7PI",
+                "name": "Yoroniku",
+                "address": "Minato City, Minamiaoyama, 6-chōme−6−22 LunaRossa南青山 B1",
+                "latitude": 35.660246199999996,
+                "longitude": 139.7175653,
+                "rating": 4.4,
+                "reviewCount": 1523,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "japanese"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Yakiniku BBQ joint for strips of beef cooked on table grills, also known for its shaved-ice dessert."
+                ],
+                "description": "Yakiniku BBQ joint for strips of beef cooked on table grills, also known for its shaved-ice dessert.",
+                "phoneNumber": "03-3498-4629",
+                "website": "https://s.tabelog.com/tokyo/A1306/A130602/13042979/top_amp/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17504455164455004442&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUiLKAlAyuiaCCjTxrjci7vK0Eg4RBm9BRguMnNFgAsKmYe6YtPhkHYTagDapRJQ5Qrym5G68G8OP1kpFGTDbMb6kCnGJz0eWEMtagUXVbW9IH8aCvibKClC266i81nJXIdV_WzsKypQaTKKA4iMP5nD8sQU6pYMZJXpX34vMWxeGPugSdjUksMXRGnNspp-OEigbjtmIoEVVgQG_8bYIFTsgeRDpPuCoBI1RxOn7D9LjWbuBx9M4ThGBXE70-7OBrWbYi2Mhb7Lhhb_9-gkK5saLOeBOH4Y6hpWYeR7kqSq1Gqi8rVdnpBiQkhxuNuTgJIGSnCVpKY2Fwq_R3WipJVILBRDyQZpixjwO297jePi_-cfSSnHQtJo5yJYVN97uBMD5cd9JekNQKLc6QEh8kfEwgl83DrP9MUZmlZsyJY3Q&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJVVUlOmSLGGARGqkXwDpR7PI",
+                "openingHours": {
+                  "sunday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "17:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.6353609158947918,
+                "walkingTime": 8,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.6,
+            "estimatedCost": 45,
+            "bookingUrl": "https://maps.google.com/?cid=15661077281002319952&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJmYBOrGaLGGARUHAVps9SV9k",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "15:00",
+                "close": "21:30"
+              },
+              "monday": {
+                "open": "16:30",
+                "close": "22:30"
+              },
+              "tuesday": {
+                "open": "16:30",
+                "close": "22:30"
+              },
+              "wednesday": {
+                "open": "16:30",
+                "close": "22:30"
+              },
+              "thursday": {
+                "open": "16:30",
+                "close": "22:30"
+              },
+              "friday": {
+                "open": "16:30",
+                "close": "22:30"
+              },
+              "saturday": {
+                "open": "15:00",
+                "close": "21:30"
+              }
+            }
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Shinjuku Gyoen Park, Sanctuaire Meiji puis Musée d'art Mori."
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-05-22T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-3-breakfast",
+            "dayNumber": 3,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Blue Bottle Coffee - Shibuya Cafe",
+            "description": "Petit-déjeuner à Blue Bottle Coffee - Shibuya Cafe",
+            "locationName": "Blue Bottle Coffee - Shibuya Cafe",
+            "latitude": 35.664094399999996,
+            "longitude": 139.69951749999998,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJiXocb7WNGGAReVVBhRwWLoQ",
+              "name": "Blue Bottle Coffee - Shibuya Cafe",
+              "address": "1-chōme-7-3 Jinnan, Shibuya",
+              "latitude": 35.664094399999996,
+              "longitude": 139.69951749999998,
+              "rating": 4.6,
+              "reviewCount": 1509,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "brunch",
+                "café",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Chaîne de cafés tendance proposant boissons au café et viennoiseries raffinées, ainsi que café en grain et matériel de préparation."
+              ],
+              "description": "Chaîne de cafés tendance proposant boissons au café et viennoiseries raffinées, ainsi que café en grain et matériel de préparation.",
+              "website": "https://store.bluebottlecoffee.jp/pages/shibuya?utm_source=google&utm_campaign=my_business&utm_id=C023Shibuya&utm_term=top",
+              "googleMapsUrl": "https://maps.google.com/?cid=9524574573685724537&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWf6--tuNs1yLAQeeAjb9MoeNiLozpvZBOGgIkM_eJA95lIm01la9IphTBTaZe7tL7nR02n0c5wf6_6AhOid4L6JDh9lHhE3Y0ZK6MHzYvj4hMpwpSlDw0nXq5fApgCDPC1lIqoAJeJQrPLuOW9lnJYDIDzd_aXHnw6U64kRivZ4wOwWhHV0qfclQ_9lFkNSlk8b6pVH44CgSn0pu75GXQx3WmGXT8CYq8JwjqusxAwvTXFQu-UULFa6uh99kje9HC8P7NMXg-JYUz_sd3qoC1MzAcjqmTBWN9-_ZxbaJEchIwbs2_hyEcP1enRIo_awEb7h4eP6_g7OGclBqHWBZS5491yv26BYezUGHY0QK1DoHDVaA7yXBrgASt6X9VtQv4IDvXWlP28yG9qyTIslVp5i3Oy_-lU7bYMMNgpHlwq6AGR&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJiXocb7WNGGAReVVBhRwWLoQ",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "20:00"
+                }
+              },
+              "distance": 0.5789295948590699,
+              "walkingTime": 7,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJv-GUvJ6MGGAR5g8ZGkUxgNg",
+                "name": "The Aoyama Grand Hotel",
+                "address": "2-chōme-14-4 Kitaaoyama, Minato City",
+                "latitude": 35.66952,
+                "longitude": 139.71579599999998,
+                "rating": 4.6,
+                "reviewCount": 730,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Hôtel sophistiqué avec 4 restaurants, bar sur le toit et centre de remise en forme."
+                ],
+                "description": "Hôtel sophistiqué avec 4 restaurants, bar sur le toit et centre de remise en forme.",
+                "phoneNumber": "03-6271-5430",
+                "website": "https://aoyamagrand.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=15600523282071752678&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXiYqSkS_l0nFT2nQwkrHAa6sFtbi0gZeyxoUZEZWCT4dYl885pQqkAusDUAuselIkz0lyi5ZuadPQSb6cbjiSu0hKhWO3v7_IEz_8Uhy5PCbjAIonDqLu2QFbkT7nMhbXwWP0F51aa1iwZyVcqkrmmeyfnEQnNGmKqFqTR0cnEssAA9IGMIr0b_cmHYwx-PNQFFbgdICc_3A8i0aqPAQipUkZjsjjp8gbwQU1_eLRlr3keBJqOZEUhfd0aab_DFWhcDUM9fqINhXnr3bZe77GZuUCWaX5DMa9x3D-vODnxew&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJv-GUvJ6MGGAR5g8ZGkUxgNg",
+                "openingHours": {},
+                "distance": 0.5649030006326258,
+                "walkingTime": 7,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJdTS4WlWNGGARGCumxitFYq0",
+                "name": "THE BELCOMO",
+                "address": "Minato City, Kitaaoyama, 2-chōme−14−4 The Argyle Aoyama, 4F GRAND HOTEL",
+                "latitude": 35.6695288,
+                "longitude": 139.7159503,
+                "rating": 4.1,
+                "reviewCount": 806,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "breakfast",
+                  "french",
+                  "italian",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Chic restaurant in the Aoyama Grand Hotel plating global fare, plus a large wine & spirits list."
+                ],
+                "description": "Chic restaurant in the Aoyama Grand Hotel plating global fare, plus a large wine & spirits list.",
+                "phoneNumber": "03-6271-5429",
+                "website": "https://aoyamagrand.com/restaurants/the-belcomo/",
+                "googleMapsUrl": "https://maps.google.com/?cid=12493624370597866264&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU5mV3GafHEaEJ6Tjhjv9GXmjHC-FKCKJ13cfM4FzcXL4emvT1iEqfK9cMXqlgBNpk7oTAKn8PM_Ft2zZqbKp18YT30SWq2B_xzsjm346fsB8gSY0OiwXWX2Ef0E1_0z5EykUrHD4x8JramPKiZB-n8TaCHBJ9POODQVvCVK3N5txM0i6oT-0TtVcrwA7ZxM8N6KOhcms_3dt_ukRwroVsXPlT6Pcj-YWIgJwRjTM1Kw9eXiv6FhxEydOzesYkw2OieThY2aVudrHUk88sMWlMAopwidkkjLBZz7rNR4Elpaw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJdTS4WlWNGGARGCumxitFYq0",
+                "openingHours": {
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.5706872774878314,
+                "walkingTime": 7,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.6,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=9524574573685724537&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJiXocb7WNGGAReVVBhRwWLoQ",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "monday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "tuesday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "wednesday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "thursday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "friday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "saturday": {
+                "open": "08:00",
+                "close": "20:00"
+              }
+            }
+          },
+          {
+            "id": "travel-3-1",
+            "dayNumber": 3,
+            "startTime": "09:30",
+            "endTime": "09:55",
+            "type": "transport",
+            "title": "Transport en commun — 7.7km",
+            "description": "Blue Bottle Coffee - Shibuya Cafe → Japan Olympic Museum",
+            "locationName": "",
+            "latitude": 35.6749203,
+            "longitude": 139.7151887,
+            "orderIndex": 1,
+            "duration": 25,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "c_wxEkmjsYHg@D[HDp@ZDBR^\\\\^ZNJGPlAd@JDDAz@qAFIJLTWb@_@p@e@`@[fAgAtAyAFCx@An@AP@NSLQp@i@~CcCbAu@Q_DKsCCm@S}AOcACa@Sm@Uy@Oi@c@wAa@_BASSoAU}Ay@eF_@_Ci@yCkByKSeAISEK]eBeAkFwAeHiAkGOy@K{@Ky@Oq@Mm@a@yBkAcGyAsH}@kEo@yBMk@U_Aw@yD{@gE_CuLw@}Dy@uCkBcFqBoGe@uAeAoDm@{A_AmBi@aAQ_@We@e@w@uCqFy@}Ag@y@a@u@wBiD}CsFOWJMX_@t@u@\\]RMv@]fAg@tD{B|CiBz@i@nDyB~@g@BOVODC?IGO]Ya@k@U{@UsBQw@e@gAsEeJCYx@sBzAwD`@mAFe@@_@MoB@[F]V}@PiBDa@Lc@Vk@FWCOMc@Im@KmASqBMkAt@@x@EbAYnAy@bBkA|CwBr@[v@QbIwAfCg@l@]NKGk@I_AUuBOwAe@yE_AkJk@_GGkA?u@XmFFaBRKz@]VK",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 7.722,
+            "timeFromPrevious": 25
+          },
+          {
+            "id": "serp-attr-ChIJQXjm8NWNGGARlEEJZUe8AJQ",
+            "dayNumber": 3,
+            "startTime": "10:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Japan Olympic Museum",
+            "description": "Histoire des JO et jardin commémoratif. Musée présentant des expositions interactives sur l'histoire des Jeux olympiques, avec un jardin de monuments commémoratifs.",
+            "locationName": "Japan Olympic Museum",
+            "latitude": 35.6749203,
+            "longitude": 139.7151887,
+            "orderIndex": 2,
+            "duration": 120,
+            "rating": 4.2,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer38zonxA7AwBmdcG2_Xuy__CXZ9Seq4K3ckfCONEzlwvdcu9mB2kyxSBAK9gg8rA0Q8etTsYKjAciXBInL5JUBohv_u1ApMUfjkHXY04rltVwAqINmn41o7v1uDxCTquKETgelsA=w122-h92-k-no",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Japan%20Olympic%20Museum%20Tokyo",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Japan%20Olympic%20Museum&query=35.6749203,139.7151887",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "17:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Japan%20Olympic%20Museum%20Tokyo"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "12:10",
+            "endTime": "13:25",
+            "type": "restaurant",
+            "title": "Déjeuner — SHAKE SHACK Gaien",
+            "description": "Déjeuner à SHAKE SHACK Gaien",
+            "locationName": "SHAKE SHACK Gaien",
+            "latitude": 35.6733487,
+            "longitude": 139.719852,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJGdnScYOMGGAR1OlU0Oc0Aq4",
+              "name": "SHAKE SHACK Gaien",
+              "address": "2-chōme-1-15 Kitaaoyama, Minato City",
+              "latitude": 35.6733487,
+              "longitude": 139.719852,
+              "rating": 4.1,
+              "reviewCount": 3322,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Chaîne branchée avec service au comptoir et plats classiques revisités comme les burgers et la crème glacée."
+              ],
+              "description": "Chaîne branchée avec service au comptoir et plats classiques revisités comme les burgers et la crème glacée.",
+              "phoneNumber": "03-6455-5409",
+              "website": "https://shakeshack.jp/locations/gaien/?utm_source=mybusiness&utm_medium=website",
+              "googleMapsUrl": "https://maps.google.com/?cid=12538642482790197716&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXsavCsy9SJdf55s9J_sbz9K3tyFaVsNVPKhVThTD5gkQAoEslnYY6lAokxFVJ-WsUjkjCIJVt_K1RSPP8uCPhsU-uQi0lQ5FbYJBEVhY_jOta0LDUELLpm2E3HovX4yoXAqCzLLs6hY2Ra2d_L3Ro2KlYdaXwL_dqZ_eC7FSAgnBV41GzN6RTVoTxsFisTGBvWPKMolcOjmILpt4dnZ8kaKILWV10KRlH_rhCqm1rPsBNOEa3V6VxvCj-nx3GAEXQL-K5NB-_9KOrfWXzkoeJQhkjFMAyNfTXPnnNYTaLb9e3qLBqwY6jkBCDzeT0iOktXKrAijlROfg3JYMAiIJoWUiil9qYdUPglpG3Y-QFFc9h_HoTTfV83je2MprTymTFZD8AIlJSN6fbfPggODoCSwEnSE6b-hp4F9H67efjM8g&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJGdnScYOMGGAR1OlU0Oc0Aq4",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                },
+                "monday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "20:00"
+                }
+              },
+              "distance": 0.6343839507176539,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJSy-vN6OMGGARu0U2mh7bkEE",
+                "name": "Red Rock Harajuku",
+                "address": "Hulic Aoyama Building, 地下１階, 3-chōme-25-12 Jingūmae, Shibuya",
+                "latitude": 35.6714073,
+                "longitude": 139.707823,
+                "rating": 4.2,
+                "reviewCount": 2782,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "steak",
+                  "japanese"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-6721-1729",
+                "website": "http://www.redrock-kobebeef.com/shopinfo.html",
+                "googleMapsUrl": "https://maps.google.com/?cid=4724516933594400187&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXfuws-IAO1z-qZXRDgULHwenSIAGyOe1KBp7jdILxmMD0aq-k8lZZav0-2Wwy1XPGjrDEkyTH7JsaOltmatYLukVZ58hOV9y3dWwyR9piLSaA3IwzpFbDqvVSrf8FIMHYXVdHLB_IxCL4TgerOLcXzp_eTY1ZCrFoMWvkBDuoC1teuIxxb2sQVtaL35D0rvt0DPIC9T5RNywibpNfvdDpmnO7r-CDLpqNEW26iXYRdX3wuzYNHq4749-BEMi3_Rq5AizNVyBdp-Zm2HEabofcxrDpwnqXZJ9p8qPcbvO09FxAB9XlduohBbl_Oc9yhwOjDyIvlMNzampzW1IhaDHX79n7gYQMLIZhAqpuheHjN_figcUflSbSN2_sxxDiJLRKcKV9RhD9K6IdLIye1QT6jAdhQ5EiJFTsIGbSdKdFy3Q&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJSy-vN6OMGGARu0U2mh7bkEE",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  }
+                },
+                "distance": 0.5406796985452043,
+                "walkingTime": 7,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJT-PDTZ-MGGARFRAPEagv3gA",
+                "name": "BREIZH Café Crêperie Omotesando",
+                "address": "3-chōme-5-4 Jingūmae, Shibuya",
+                "latitude": 35.668746,
+                "longitude": 139.7123,
+                "rating": 4.2,
+                "reviewCount": 1146,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "french",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3478-7855",
+                "website": "https://le-bretagne.com/creperie/omotesando/",
+                "googleMapsUrl": "https://maps.google.com/?cid=62539843716976661&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVs3WgWTdOkt_Ty6MxL4EaxnZUBEbI0-xKfAgfCmgxLTLSbFHn8YysUK0777TGuRW2xQbe54mLaxsb5gi2cpZjUYRs2UgFu9HDIOD3C6QKRSgM5I8_HwylrcFF5DhOA-TYAkcuWf8f2tEuASEnPnx2nzErFCG-n3fVs_tORUoBs5U86ZU15Np5gxGFdc8NGp5z_ubofUo6qghFqmxXlAE7GbvbjbRrPJDCC1x55j_XuHMplsuX3j33NZc-lNv4UEHUjobuFsMP2mONihkNj9HRkK6IzDyUfyf88YvYbGeWzJg&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJT-PDTZ-MGGARFRAPEagv3gA",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.6707338119406422,
+                "walkingTime": 8,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.1,
+            "estimatedCost": 45,
+            "bookingUrl": "https://maps.google.com/?cid=12538642482790197716&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJGdnScYOMGGAR1OlU0Oc0Aq4",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:00",
+                "close": "20:00"
+              },
+              "monday": {
+                "open": "11:00",
+                "close": "20:00"
+              },
+              "tuesday": {
+                "open": "11:00",
+                "close": "20:00"
+              },
+              "wednesday": {
+                "open": "11:00",
+                "close": "20:00"
+              },
+              "thursday": {
+                "open": "11:00",
+                "close": "20:00"
+              },
+              "friday": {
+                "open": "11:00",
+                "close": "20:00"
+              },
+              "saturday": {
+                "open": "11:00",
+                "close": "20:00"
+              }
+            }
+          },
+          {
+            "id": "travel-3-4",
+            "dayNumber": 3,
+            "startTime": "13:40",
+            "endTime": "13:50",
+            "type": "transport",
+            "title": "Transport en commun — 2.5km",
+            "description": "SHAKE SHACK Gaien → Yoyogi-kōen",
+            "locationName": "",
+            "latitude": 35.6700649,
+            "longitude": 139.6949656,
+            "orderIndex": 4,
+            "duration": 10,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "ywvxEsdwsYqAh@KDIDATGxACh@SpDAt@F~@`@hEjBbRb@hEXvC^vAb@rA^r@hBnCrAtB`@nAn@rCHFx@VhAd@l@P~AVpARj@Bj@C`A@tBNLAPABFL^Nd@Tv@`@fAj@bBXz@\\jAJz@D`APnMZtT?PWA?KEyC",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 2.483,
+            "timeFromPrevious": 10
+          },
+          {
+            "id": "serp-attr-ChIJMwpiebSMGGARPr_454zHvDQ",
+            "dayNumber": 3,
+            "startTime": "13:50",
+            "endTime": "16:50",
+            "type": "activity",
+            "title": "Yoyogi-kōen",
+            "description": "Parc dans le village olympique de 1964. Vaste parc public urbain avec des lacs, des fontaines, des espaces boisés et des arbres centenaires.",
+            "locationName": "Yoyogi-kōen",
+            "latitude": 35.6700649,
+            "longitude": 139.6949656,
+            "orderIndex": 5,
+            "duration": 180,
+            "rating": 4.4,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo92DKjdZrR8r3InnX_Ovp6cz28QfJidXSX5lKf3WaNtYEh40PehZTIvgL4UYbtUfw0f5FnhgdQV2tRe6uGyLd5EanWZA65NxMFtl_ljjBq55Ivx9GvQNZIr67Dhk6OqM41lGs=w122-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Yoyogi-k%C5%8Den&query=35.6700649,139.6949656",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "travel-3-6",
+            "dayNumber": 3,
+            "startTime": "17:00",
+            "endTime": "17:10",
+            "type": "transport",
+            "title": "Transport en commun — 1.8km",
+            "description": "Yoyogi-kōen → Carrefour de Shibuya",
+            "locationName": "",
+            "latitude": 35.6595,
+            "longitude": 139.7004,
+            "orderIndex": 6,
+            "duration": 10,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "anuxEcessYYqUI_GEu@Kw@Mq@]mAmAsDEMTJ|@HtALdHXz@@tALdBN`Cb@nHd@b@DFHX^h@^f@FdD@rEAp@?b@@b@BhAThAND@AHC\\",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 1.778,
+            "timeFromPrevious": 10
+          },
+          {
+            "id": "shibuya-crossing",
+            "dayNumber": 3,
+            "startTime": "17:10",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Carrefour de Shibuya",
+            "description": "Le passage piéton le plus fréquenté au monde",
+            "locationName": "Carrefour de Shibuya",
+            "latitude": 35.6595,
+            "longitude": 139.7004,
+            "orderIndex": 7,
+            "duration": 110,
+            "rating": 4.5,
+            "estimatedCost": 0,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoDwoYtyRuWpXCXIM9rgDPRkyeLGieE_80w7a3aBHJymRD7b7SqdEsUrhYqm1C2gBhfv_lTJHHJ9lbDgo47qfEQFVakrYgO8cmLGnBKlf3LMuX7mR6VCm9Z1czkKVs5D_eV3bWK=w138-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Carrefour%20de%20Shibuya&query=35.6595,139.7004",
+            "mustSee": true,
+            "openingHours": {
+              "open": "00:00",
+              "close": "23:59"
+            }
+          },
+          {
+            "id": "meal-3-dinner",
+            "dayNumber": 3,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — THE RIGOLETTO",
+            "description": "Dîner à THE RIGOLETTO",
+            "locationName": "THE RIGOLETTO",
+            "latitude": 35.6624483,
+            "longitude": 139.7026884,
+            "orderIndex": 8,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJ-UdqNaaMGGARuNSrjc-NbKE",
+              "name": "THE RIGOLETTO",
+              "address": "Shibuya, 1-chōme−23−21 渋谷キャスト GF 1F",
+              "latitude": 35.6624483,
+              "longitude": 139.7026884,
+              "rating": 4.2,
+              "reviewCount": 1811,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian",
+                "spanish",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant serving pasta, meat dishes & wine in a sleek dining room with a lounge feel."
+              ],
+              "description": "Restaurant serving pasta, meat dishes & wine in a sleek dining room with a lounge feel.",
+              "phoneNumber": "03-6631-1129",
+              "website": "https://www.huge.co.jp/restaurant/rigoletto/shibuya",
+              "googleMapsUrl": "https://maps.google.com/?cid=11631827860165743800&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXxev9XJ5c61uu9Y54xwdNtV1E3OLasehwgV1nVOGAEXknAzxjDXOL1aroStmphZM6ES0fY-8viZQRQVvQ2EEMTeE4e7vyKoONky-QAHLPOkFr7h7MRN074u6yoKRe_pWHlQGA115i_7QVtkYczZPQSV-dUCwh4NB_uxG1tiq6KwW9KBL6mml9z97kOcPTs_DK9f--3Cr-QemGnr80ms1ZkdsUqTLmnhfvOtDAqKnhuyOIMfNBGvQJEFh1WNN6lE-p9FXBv8ml38r77fX4Md9EUIFm4FJXqIP0e9uFYdiw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ-UdqNaaMGGARuNSrjc-NbKE",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "11:30",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.6397111162342075,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.2,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=11631827860165743800&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJ-UdqNaaMGGARuNSrjc-NbKE",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "monday": {
+                "open": "11:30",
+                "close": "23:00"
+              },
+              "tuesday": {
+                "open": "11:30",
+                "close": "23:00"
+              },
+              "wednesday": {
+                "open": "11:30",
+                "close": "23:00"
+              },
+              "thursday": {
+                "open": "11:30",
+                "close": "23:00"
+              },
+              "friday": {
+                "open": "11:30",
+                "close": "00:00"
+              },
+              "saturday": {
+                "open": "11:00",
+                "close": "00:00"
+              }
+            }
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Japan Olympic Museum, Yoyogi-kōen puis Carrefour de Shibuya."
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-05-23T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-4-breakfast",
+            "dayNumber": 4,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Blue Bottle Coffee Aoyama",
+            "description": "Petit-déjeuner à Blue Bottle Coffee Aoyama",
+            "locationName": "Blue Bottle Coffee Aoyama",
+            "latitude": 35.665273,
+            "longitude": 139.71385809999998,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJ6VIU1J-MGGARbBb5g_Wg8Ec",
+              "name": "Blue Bottle Coffee Aoyama",
+              "address": "3-chōme-13-14 Minamiaoyama, Minato City",
+              "latitude": 35.665273,
+              "longitude": 139.71385809999998,
+              "rating": 4.2,
+              "reviewCount": 3082,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "brunch",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Chaîne de cafés tendance proposant boissons au café et viennoiseries raffinées, ainsi que café en grain et matériel de préparation."
+              ],
+              "description": "Chaîne de cafés tendance proposant boissons au café et viennoiseries raffinées, ainsi que café en grain et matériel de préparation.",
+              "website": "https://store.bluebottlecoffee.jp/pages/aoyama?utm_source=google&utm_medium=my_business&utm_campaign=top&utm_id=C002Aoyama",
+              "googleMapsUrl": "https://maps.google.com/?cid=5183820147445012076&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUNK1M1vjgzhgX3KysdY2OwScBsHZayL7FJYuspPjIVRBCo3DcM7Ohrj8y-9IJYhbVMYfVN63PTDWOXkgORkc6H27BvbHGYmytUP9N5S4nFr3tCMaUmfKsLBEKuJh2sjfpd2SQVTPNh0M2f-sEN49lRS-_zmrowFJfe1QM-j0rHhXo6DBpo7dz5iJTqtUwlbqeGcJCVpTZxPkV1KIJLSp5F9XL5UFoLyDXxXX60oApe10UITHI7U1zhi_4WwJbjniP6hO2-u1hdjZUZXtULpu6E5JlmQ7fW4H9KuW4X75pm4A&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ6VIU1J-MGGARbBb5g_Wg8Ec",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                }
+              },
+              "distance": 0.45355399431492693,
+              "walkingTime": 6,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJv-GUvJ6MGGAR5g8ZGkUxgNg",
+                "name": "The Aoyama Grand Hotel",
+                "address": "2-chōme-14-4 Kitaaoyama, Minato City",
+                "latitude": 35.66952,
+                "longitude": 139.71579599999998,
+                "rating": 4.6,
+                "reviewCount": 730,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Hôtel sophistiqué avec 4 restaurants, bar sur le toit et centre de remise en forme."
+                ],
+                "description": "Hôtel sophistiqué avec 4 restaurants, bar sur le toit et centre de remise en forme.",
+                "phoneNumber": "03-6271-5430",
+                "website": "https://aoyamagrand.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=15600523282071752678&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXiYqSkS_l0nFT2nQwkrHAa6sFtbi0gZeyxoUZEZWCT4dYl885pQqkAusDUAuselIkz0lyi5ZuadPQSb6cbjiSu0hKhWO3v7_IEz_8Uhy5PCbjAIonDqLu2QFbkT7nMhbXwWP0F51aa1iwZyVcqkrmmeyfnEQnNGmKqFqTR0cnEssAA9IGMIr0b_cmHYwx-PNQFFbgdICc_3A8i0aqPAQipUkZjsjjp8gbwQU1_eLRlr3keBJqOZEUhfd0aab_DFWhcDUM9fqINhXnr3bZe77GZuUCWaX5DMa9x3D-vODnxew&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJv-GUvJ6MGGAR5g8ZGkUxgNg",
+                "openingHours": {},
+                "distance": 0.5649030006326258,
+                "walkingTime": 7,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJdTS4WlWNGGARGCumxitFYq0",
+                "name": "THE BELCOMO",
+                "address": "Minato City, Kitaaoyama, 2-chōme−14−4 The Argyle Aoyama, 4F GRAND HOTEL",
+                "latitude": 35.6695288,
+                "longitude": 139.7159503,
+                "rating": 4.1,
+                "reviewCount": 806,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "breakfast",
+                  "french",
+                  "italian",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Chic restaurant in the Aoyama Grand Hotel plating global fare, plus a large wine & spirits list."
+                ],
+                "description": "Chic restaurant in the Aoyama Grand Hotel plating global fare, plus a large wine & spirits list.",
+                "phoneNumber": "03-6271-5429",
+                "website": "https://aoyamagrand.com/restaurants/the-belcomo/",
+                "googleMapsUrl": "https://maps.google.com/?cid=12493624370597866264&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU5mV3GafHEaEJ6Tjhjv9GXmjHC-FKCKJ13cfM4FzcXL4emvT1iEqfK9cMXqlgBNpk7oTAKn8PM_Ft2zZqbKp18YT30SWq2B_xzsjm346fsB8gSY0OiwXWX2Ef0E1_0z5EykUrHD4x8JramPKiZB-n8TaCHBJ9POODQVvCVK3N5txM0i6oT-0TtVcrwA7ZxM8N6KOhcms_3dt_ukRwroVsXPlT6Pcj-YWIgJwRjTM1Kw9eXiv6FhxEydOzesYkw2OieThY2aVudrHUk88sMWlMAopwidkkjLBZz7rNR4Elpaw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJdTS4WlWNGGARGCumxitFYq0",
+                "openingHours": {
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.5706872774878314,
+                "walkingTime": 7,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.2,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=5183820147445012076&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJ6VIU1J-MGGARbBb5g_Wg8Ec",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "monday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "tuesday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "wednesday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "thursday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "friday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "saturday": {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            }
+          },
+          {
+            "id": "travel-4-1",
+            "dayNumber": 4,
+            "startTime": "09:30",
+            "endTime": "09:50",
+            "type": "transport",
+            "title": "Transport en commun — 4.6km",
+            "description": "Blue Bottle Coffee Aoyama → Meiji-jingū",
+            "locationName": "",
+            "latitude": 35.6763976,
+            "longitude": 139.6993259,
+            "orderIndex": 1,
+            "duration": 20,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "s~txE{hysY?hDFFP@~B@HBb@?HBBBP\\LMJQJMjD{Cz@w@nAiA\\f@|@hAVX\\p@FZFd@BlAI`AEr@@\\Fd@Rh@JR@PERI`@RFd@Tp@d@t@r@PXUHWXo@dAgBdDOXUZ]Z_@Pe@PmDz@{Ah@[Hm@@gBUiACqB?y@Na@Lo@\\wAdASXQXO\\Qt@QbB_@jDI\\Ob@g@p@iAnA_@n@U\\_AbBXT`An@PLxAfAzBjBbDrCrAhAjAdAtAhAf@b@LJKX]z@Yt@mAhDwA~DiH~R_@dAy@vBu@tBgA|CsB`GId@?ZJd@l@lBHXUKSA{@ECAEDIFKBOES?gAEgAAcAIkB]gBc@yDkAyAc@mBg@mCm@qB_@aAEcBCq@HKx@C~@AB",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 4.625,
+            "timeFromPrevious": 20
+          },
+          {
+            "id": "serp-attr-ChIJ5SZMmreMGGARcz8QSTiJyo8",
+            "dayNumber": 4,
+            "startTime": "09:50",
+            "endTime": "12:50",
+            "type": "activity",
+            "title": "Meiji-jingū",
+            "description": "Célèbre sanctuaire shintoïste, jardin. Érigé au cœur de la forêt, ce sanctuaire shintoïste ancien possède un jardin d'iris saisonnier.",
+            "locationName": "Meiji-jingū",
+            "latitude": 35.6763976,
+            "longitude": 139.6993259,
+            "orderIndex": 2,
+            "duration": 180,
+            "rating": 4.6,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepFoXFgq6KVoQQHwlgV9Q_5zIgAMBxmjc5ASdRBh83OZXp5YdSVBEtAeehyrlwQs7Pm6bUiqeqpIjYr-Y4xbdfEvHP5WNHCdOgCaAvhZzmMc4izII3GL6uYR4KS9e1s0cPHMOz8hA=w122-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Meiji-jing%C5%AB&query=35.6763976,139.6993259",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-4-lunch",
+            "dayNumber": 4,
+            "startTime": "13:00",
+            "endTime": "14:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Gyukatsu Motomura Harajuku Branch",
+            "description": "Déjeuner à Gyukatsu Motomura Harajuku Branch",
+            "locationName": "Gyukatsu Motomura Harajuku Branch",
+            "latitude": 35.6706585,
+            "longitude": 139.7072227,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJK7NEQ6OMGGAROeZ_ndIeQrE",
+              "name": "Gyukatsu Motomura Harajuku Branch",
+              "address": "Shibuya, Jingūmae, 3-chōme−23−2 青山ＮＳビル B1F",
+              "latitude": 35.6706585,
+              "longitude": 139.7072227,
+              "rating": 4.8,
+              "reviewCount": 5520,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "japanese"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "050-1721-2861",
+              "website": "https://www.gyukatsu-motomura.com/store/Harajuku?utm_source=google&utm_medium=GBP_harajuku",
+              "googleMapsUrl": "https://maps.google.com/?cid=12772805383110518329&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUN4Xb8Dw0MSRyAJGYQ4lyHm7vFtcCSff2TDOIO76am5_-7CTp3nFX9SYcalr3dSkxH7LP4ZrtMtd1PSXoP8qvwaJ8iacobIiboN-D_RmEi-ZkNEipSA0CGZ0QMWrQlAbJzxf8I19xZCz_TiUHsMv40-NrInw6Yvhz8-5IFNOg1lciK6E72wsAPb8q7pS6vjxmJESJQI9awxDSxTVrmA3TsDuQ10UWtfaHtA9VKKJkkb55skgGgtqldQf_JtLU8IQgtOelN1-KKzjWromgKYCzkJ_q2LMmRUdUUGP0c0fgNTbQVG3juxQvMFiNATP1c2LA-52bOxASsRd_6tw_B457y5KGOZonzfgasFnzARwW2XLzh0oHSYQvNotjK7_VaYIhmu3cVd4zeqZU0dOojANOla5in8evNQaQ4QznID8-bBwSZ&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJK7NEQ6OMGGAROeZ_ndIeQrE",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.6324270671903175,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJoQC4faSMGGAR1wiDmBUhsAs",
+                "name": "bills Omotesando",
+                "address": "Shibuya, Jingūmae, 4-chōme−30−3 東急プラザ 表参道原宿 7F",
+                "latitude": 35.6685817,
+                "longitude": 139.7057812,
+                "rating": 4,
+                "reviewCount": 3373,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-5772-1133",
+                "website": "https://www.billsjapan.com/jp/locations/omotesando",
+                "googleMapsUrl": "https://maps.google.com/?cid=842209506955036887&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX8ainx_J_ZkUDIh2CU2w_uEUoxPvXS07UVBVrkeXPh8xWalIimjM_pcs_QWq0MgmQyVx2cTaQOB0sP49WPgS7u54-SMLh24t9M-0TjwnaUMwodvYu_nL0uHG-SRD0SOBtMfJ_RalkLDyvxMf-ueYAkMVF5UnF-ITHS6YojzCHosFKNCcB51DQ9vf0p0DqTj6AunrXEHXjFxTUJGAwygIrY1TH8kIKsDWuS2YoF_UigRpasEAn0A-7rrXwsJFeJ9-SkL-6OscFILkDYHGZakYh_I5sCNInIZNzywm-IBlHIAw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJoQC4faSMGGAR1wiDmBUhsAs",
+                "openingHours": {
+                  "sunday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "friday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8806420655053276,
+                "walkingTime": 11,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJ_9GsagCNGGAR6auqGPod5nY",
+                "name": "Tokyu Plaza Harajuku\"HARAKADO\"",
+                "address": "Shibuya, Jingūmae, 6-chōme−31−21 原宿スクエア内 東急プラザ 原宿「ハラカド」",
+                "latitude": 35.6683935,
+                "longitude": 139.7047092,
+                "rating": 4.3,
+                "reviewCount": 979,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "centre commercial"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "https://www.tokyu-plaza.com/harakado/",
+                "googleMapsUrl": "https://maps.google.com/?cid=8567568301111815145&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU8Wl93MES0eSGHkuD0s90Y_bBF2Pdop1V7KLZM9p11zk6K_QydlEY4EO5JvH5_wwuHBAgSlJR6Us7iCxBKEaeTaPGtra27c-g2D9uA726bAbcGtVeswg7yc8pZ9y_6lCUaSKtP6LTwp7VExj87dlyvpDwaFqzXa81EyPJjrt52bKrVseZOO4BXYzAtSgq_6UelXYygSljgCOvu-mbrBobkF737B55P0FqzDL9mDDAVNee004zsBUfh-8bvK3sWErDJASivUaa96f5T24G1jcgGcucoqt9ToaKuO5Fjkv21qA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJ_9GsagCNGGAR6auqGPod5nY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.11064183322916714,
+                "walkingTime": 1,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=12772805383110518329&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJK7NEQ6OMGGAROeZ_ndIeQrE",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "monday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "11:00",
+                "close": "22:00"
+              }
+            }
+          },
+          {
+            "id": "travel-4-4",
+            "dayNumber": 4,
+            "startTime": "14:30",
+            "endTime": "15:00",
+            "type": "transport",
+            "title": "Transport en commun — 10.4km",
+            "description": "Gyukatsu Motomura Harajuku Branch → Centre d'Art national de Tokyo",
+            "locationName": "",
+            "latitude": 35.665289,
+            "longitude": 139.726374,
+            "orderIndex": 4,
+            "duration": 30,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "c_wxEkmjsYHg@D[HDp@ZDBR^\\\\^ZNJGPlAd@JDDAz@qAFIJLTWb@_@p@e@`@[fAgAtAyAFCx@An@AP@NSLQp@i@~CcCbAu@Q_DKsCCm@S}AOcACa@Sm@Uy@Oi@c@wAa@_BASSoAU}Ay@eF_@_Ci@yCkByKSeAISEK]eBeAkFwAeHiAkGOy@K{@Ky@Oq@Mm@a@yBkAcGyAsH}@kEo@yBMk@U_Aw@yD{@gE_CuLw@}Dy@uCkBcFqBoGe@uAeAoDm@{A_AmBi@aAQ_@We@e@w@uCqFy@}Ag@y@a@u@wBiD}CsFgCmEw@iA_CqDoDoFw@wAs@uBeBkFy@oCg@iBa@{A]sAuAyEY}Ag@kEe@_DW}AOgAYoDQ}CE{ADcAVaBXy@Vk@|@cBjAoCn@{Av@qCf@gB^qB|@}Fr@{FJ}ABwA?mCC{AKeBMgAAe@Ik@Ow@CMVC~@@jC?`B@LIfD?rA@xFBhA@XDb@PZXj@z@V\\PEHAF?hBl@`@HV?VKPQLYd@cHz@cMB[AOEUPCh@SZMlD{AxB_AjCgAnAk@rD_B`CcAnB{@f@Wj@i@f@w@LYV{@Vg@^Y|Ao@pCgAzAe@fDgAj@MN?^BNFl@\\XVX`@Z`@b@X^NXBT@r@GrJwAbDk@zEq@dAQPCDEHEVGb@QTM|@q@Q]CCAA]?OAc@CoBAIEES@yC",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 10.367,
+            "timeFromPrevious": 30
+          },
+          {
+            "id": "serp-attr-ChIJP-vO9nuLGGARGJ2q8uryJUA",
+            "dayNumber": 4,
+            "startTime": "15:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Centre d'Art national de Tokyo",
+            "description": "Espace moderne, expositions temporaires. Grand centre moderne présentant expositions temporaires d'art japonais et international.",
+            "locationName": "Centre d'Art national de Tokyo",
+            "latitude": 35.665289,
+            "longitude": 139.726374,
+            "orderIndex": 5,
+            "duration": 120,
+            "rating": 4.4,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweq9BiPl3q38RL8tzpHJ8c0_V58LOucMlBQOboLJzv-99Cnh4paG__RHYgi_awB8Mwba-4eU2C406FVaRi3Mx_0hFA5vOzvGsf8G-rNHGdFgHFCetDXYMaZEiWyObC9KZvnOJIvUVA=w138-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Centre%20d'Art%20national%20de%20Tokyo&query=35.665289,139.726374",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "travel-4-6",
+            "dayNumber": 4,
+            "startTime": "17:10",
+            "endTime": "17:25",
+            "type": "transport",
+            "title": "Marche — 832m",
+            "description": "Centre d'Art national de Tokyo → Roppongi Hills - Tokyo City View",
+            "locationName": "",
+            "latitude": 35.6600712,
+            "longitude": 139.7292907,
+            "orderIndex": 6,
+            "duration": 15,
+            "estimatedCost": 0,
+            "transportToPrevious": "walk",
+            "distanceFromPrevious": 0.8316736509292934,
+            "timeFromPrevious": 15
+          },
+          {
+            "id": "serp-attr-ChIJK0TdDneLGGARVxJ3MHC0emY",
+            "dayNumber": 4,
+            "startTime": "17:25",
+            "endTime": "20:25",
+            "type": "activity",
+            "title": "Roppongi Hills - Tokyo City View",
+            "description": "Roppongi Hills - Tokyo City View à Tokyo",
+            "locationName": "Roppongi Hills - Tokyo City View",
+            "latitude": 35.6600712,
+            "longitude": 139.7292907,
+            "orderIndex": 7,
+            "duration": 180,
+            "rating": 4.4,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepP6MDI7kBFUlrCVhr8UbH3MP-fVauKhggXd_fAIPk-kFU_M_L6z5pPRKf4jP5Dm5wofzhvvJnDKjHrdiMHVah6hoS5wySRfoAf5E2BKyc8ELTiUJ2bmRNBVBA97wclJhmcHSa2=w137-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Roppongi%20Hills%20-%20Tokyo%20City%20View&query=35.6600712,139.7292907",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "22:00"
+            }
+          },
+          {
+            "id": "meal-4-dinner",
+            "dayNumber": 4,
+            "startTime": "20:35",
+            "endTime": "22:05",
+            "type": "restaurant",
+            "title": "Dîner — Yoroniku",
+            "description": "Dîner à Yoroniku",
+            "locationName": "Yoroniku",
+            "latitude": 35.660246199999996,
+            "longitude": 139.7175653,
+            "orderIndex": 8,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJVVUlOmSLGGARGqkXwDpR7PI",
+              "name": "Yoroniku",
+              "address": "Minato City, Minamiaoyama, 6-chōme−6−22 LunaRossa南青山 B1",
+              "latitude": 35.660246199999996,
+              "longitude": 139.7175653,
+              "rating": 4.4,
+              "reviewCount": 1523,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "japanese"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Yakiniku BBQ joint for strips of beef cooked on table grills, also known for its shaved-ice dessert."
+              ],
+              "description": "Yakiniku BBQ joint for strips of beef cooked on table grills, also known for its shaved-ice dessert.",
+              "phoneNumber": "03-3498-4629",
+              "website": "https://s.tabelog.com/tokyo/A1306/A130602/13042979/top_amp/",
+              "googleMapsUrl": "https://maps.google.com/?cid=17504455164455004442&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUiLKAlAyuiaCCjTxrjci7vK0Eg4RBm9BRguMnNFgAsKmYe6YtPhkHYTagDapRJQ5Qrym5G68G8OP1kpFGTDbMb6kCnGJz0eWEMtagUXVbW9IH8aCvibKClC266i81nJXIdV_WzsKypQaTKKA4iMP5nD8sQU6pYMZJXpX34vMWxeGPugSdjUksMXRGnNspp-OEigbjtmIoEVVgQG_8bYIFTsgeRDpPuCoBI1RxOn7D9LjWbuBx9M4ThGBXE70-7OBrWbYi2Mhb7Lhhb_9-gkK5saLOeBOH4Y6hpWYeR7kqSq1Gqi8rVdnpBiQkhxuNuTgJIGSnCVpKY2Fwq_R3WipJVILBRDyQZpixjwO297jePi_-cfSSnHQtJo5yJYVN97uBMD5cd9JekNQKLc6QEh8kfEwgl83DrP9MUZmlZsyJY3Q&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJVVUlOmSLGGARGqkXwDpR7PI",
+              "openingHours": {
+                "sunday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "monday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "tuesday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "wednesday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "thursday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "friday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.6353609158947918,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.4,
+            "estimatedCost": 45,
+            "bookingUrl": "https://maps.google.com/?cid=17504455164455004442&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJVVUlOmSLGGARGqkXwDpR7PI",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "17:00",
+                "close": "00:00"
+              },
+              "monday": {
+                "open": "17:00",
+                "close": "00:00"
+              },
+              "tuesday": {
+                "open": "17:00",
+                "close": "00:00"
+              },
+              "wednesday": {
+                "open": "17:00",
+                "close": "00:00"
+              },
+              "thursday": {
+                "open": "17:00",
+                "close": "00:00"
+              },
+              "friday": {
+                "open": "17:00",
+                "close": "00:00"
+              },
+              "saturday": {
+                "open": "17:00",
+                "close": "00:00"
+              }
+            }
+          }
+        ],
+        "theme": "Exploration du quartier",
+        "dayNarrative": "Découvrez Meiji-jingū, Centre d'Art national de Tokyo puis Roppongi Hills - Tokyo City View."
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-05-24T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-5-breakfast",
+            "dayNumber": 5,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — The Royal Park Tokyo Shiodome",
+            "description": "Petit-déjeuner à The Royal Park Tokyo Shiodome",
+            "locationName": "The Royal Park Tokyo Shiodome",
+            "latitude": 35.6642408,
+            "longitude": 139.7605355,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJeTst88KLGGARuv7SFiEThqo",
+              "name": "The Royal Park Tokyo Shiodome",
+              "address": "1-chōme-6-3 Higashishinbashi, Minato City",
+              "latitude": 35.6642408,
+              "longitude": 139.7605355,
+              "rating": 4.4,
+              "reviewCount": 3253,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "hôtel"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Logements sobres dans hôtel haut de gamme avec restaurant moderne, spa et bar branché."
+              ],
+              "description": "Logements sobres dans hôtel haut de gamme avec restaurant moderne, spa et bar branché.",
+              "phoneNumber": "03-6253-1111",
+              "website": "https://www.royalparkhotels.co.jp/ic/tokyoshiodome/",
+              "googleMapsUrl": "https://maps.google.com/?cid=12287529666164752058&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXCLl8RcNV_N0EGJa22Q8kzz5lXb_ifeBb_VlOr7l8dMoE6Ki6Aspi6Y3x2X9fRf8UicG5GaNcZAQ0es1wEU_2EF3cJyue0CbO26MyBFTeaMYdTIW_Mfmx5qqtpS19Sh-7xgJh57H1VwTTCQqq6UU7UKfpCA-uvWpGkS2c9g7JAdYieJmb_bMwfQwbVOYSj6sI3RkJscAcfDTMHSnXTdJz1rAwmng0Ztoq_VwTSxKk2yevy8H71bYM3YV7N0qd800gtm8bWc9fWtTS_6djOMyGZO3Vsif4OJ6yfjwCZoBbLNQ&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJeTst88KLGGARuv7SFiEThqo",
+              "openingHours": {},
+              "distance": 0.6106295843368454,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJp_uTpMOLGGARuV0qHAQguMU",
+                "name": "Hotel Villa Fontaine Grand Shiodome",
+                "address": "Minato City, Higashishinbashi, 1-chōme−9−2 内",
+                "latitude": 35.661968099999996,
+                "longitude": 139.7598879,
+                "rating": 4.2,
+                "reviewCount": 2983,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "hôtel"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Hôtel gratte-ciel du centre-ville avec hébergements modernes, Wi-Fi gratuit et salle de sport."
+                ],
+                "description": "Hôtel gratte-ciel du centre-ville avec hébergements modernes, Wi-Fi gratuit et salle de sport.",
+                "phoneNumber": "03-3569-2220",
+                "website": "http://www.hvf.jp/shiodome/?utm_source=google&utm_medium=google_map&utm_campaign=tech_07&gbp_shio&argument=tTLvHkHu&dmai=gbp_shio",
+                "googleMapsUrl": "https://maps.google.com/?cid=14247172623211060665&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWIGZz5_zmZSdE5Q8pwQh0g6cH9y_DyGDl_3IwuN1pgLbdf_t858y0pO_XL8wqoKL1uli-EP4mcqgtsEyXuesBkFrRvfbsi8x_9vhgydgB-xhp_5J6kERHEkmfmxEhEqiQaBZ7nNDn2cGt3oWy86JGUnbcrAdHtyovTbfyNpRTKPjwSfZX1rNKjVtk7rO7GJyd5Jps0NGbvcTvLzkgY6Z63v1XQV-68jWVZFDzPN1Ida77-RmrYhv7Va586QXil78PRTzSEoFbpegK4dKjLRxFb4OhOBhOcWf6dIuCCyWuY0Q&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJp_uTpMOLGGARuV0qHAQguMU",
+                "openingHours": {
+                  "sunday": {
+                    "open": "00:00",
+                    "close": "23:59"
+                  },
+                  "monday": null,
+                  "tuesday": null,
+                  "wednesday": null,
+                  "thursday": null,
+                  "friday": null,
+                  "saturday": null
+                },
+                "distance": 0.6706821181899053,
+                "walkingTime": 8,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJkc9owueLGGAREpyt6KeHSFE",
+                "name": "Hotel Musse Ginza Meitetsu",
+                "address": "7-chōme-12-9 Ginza, Chuo City",
+                "latitude": 35.667867,
+                "longitude": 139.763575,
+                "rating": 4.3,
+                "reviewCount": 1316,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "breakfast"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Unpretentious hotel featuring a restaurant & a lobby lounge, as well as city views."
+                ],
+                "description": "Unpretentious hotel featuring a restaurant & a lobby lounge, as well as city views.",
+                "phoneNumber": "03-3541-3535",
+                "website": "https://m-inn.com/musse/ginza/",
+                "googleMapsUrl": "https://maps.google.com/?cid=5857080470628310034&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWu3HtvoO6sRs-fSd03LGOJjVCeGSDuwaoNPyrLXxsQPHqMxpNl_UIwCGpm-LOOriiGHOeC-f4ZsXL-WUVGoAt0eXUZTDFr1rowHR0EK5qwvJVeOU7cLj7S0dHeabQYMvBlxHLOHQBDofVmS41C3BPZtWjA0gWesGJpLlW2F7WM7HmjhKl25jBY55XdWXhM4cBWGsK2dGtU8kZL2oB8psdhjZPiOfnpVp05UpQpEKUjXlv_y6GBUmhWfC4SVD6S4POQTYXumpENHStgqrnmZtQdWeHzzAqB9SaMaYEQj0Ub-Q&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJkc9owueLGGAREpyt6KeHSFE",
+                "openingHours": {},
+                "distance": 0.6151349755667137,
+                "walkingTime": 8,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.4,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=12287529666164752058&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJeTst88KLGGARuv7SFiEThqo",
+            "openingHoursByDay": {}
+          },
+          {
+            "id": "travel-5-1",
+            "dayNumber": 5,
+            "startTime": "09:30",
+            "endTime": "09:40",
+            "type": "transport",
+            "title": "Transport en commun — 2.4km",
+            "description": "The Royal Park Tokyo Shiodome → Classe Tokyo confortable : Ramen, Sushi, Sake Pairing & Cultural Exchange",
+            "locationName": "",
+            "latitude": 35.666146399999995,
+            "longitude": 139.7858073,
+            "orderIndex": 1,
+            "duration": 10,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "{wtxEe{atYmBtBi@l@MRq@_AwAqBq@aAyCeEkA}AmBeC{EqG}@{@oAeA[YGECCH[PaAHe@ASHc@`@aCh@_D`AaGz@kERm@Vk@r@_A~FwGJKFSd@m@bDuD`GeH~@gAe@q@kAgBwB}C{AwBW_@}@fAY\\JNlAbB`@j@",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 2.442,
+            "timeFromPrevious": 10
+          },
+          {
+            "id": "viator-473140P1",
+            "dayNumber": 5,
+            "startTime": "09:40",
+            "endTime": "12:40",
+            "type": "activity",
+            "title": "Classe Tokyo confortable : Ramen, Sushi, Sake Pairing &",
+            "description": "Chez Ramen Cooking Tokyo, nous proposons un cours de cuisine immersive qui va au-delà de la cuisine et met l’accent sur un véritable échange culturel. Nos hôtes Japonais Anglais accueillent chaleureusement les clients dans un cadre intime en petits groupes où des liens durables se forment. Au cours de notre expérience décontractée de 2,5 à 3 heures, vous apprendrez à créer deux plats Japonais emblématiques : des ramen authentiques et votre choix de sushis faits à la main ou de délicieux gyoza. Profitez d'accords de saké illimités soigneusement préparés pour accompagner chaque plat, ainsi que d'explications perspicaces sur leur importance culturelle. Les familles voyageant avec des enfants sont chaleureusement accueillies – les enfants reçoivent même des collations traditionnelles japonaises \"dagashi\" comme de délicieux souvenirs. Nos cours sont particulièrement populaires pour les occasions spéciales comme les anniversaires, les lunes de miel ou les remises de diplômes, garantissant que chaque événement est mémorable. Rejoignez-nous pour une expérience Japonaise authentique à Tokyo, où cuisine, culture et communauté se marient parfaitement.",
+            "locationName": "Classe Tokyo confortable : Ramen, Sushi, Sake Pairing & Cultural Exchange",
+            "latitude": 35.666146399999995,
+            "longitude": 139.7858073,
+            "orderIndex": 2,
+            "duration": 180,
+            "rating": 5,
+            "estimatedCost": 112,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/d8/0e/8c.jpg",
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Ramen-and-Gyoza-Cooking-Class-Tokyo/d334-473140P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Classe%20Tokyo%20confortable%20%3A%20Ramen%2C%20Sushi%2C%20Sake%20Pairing%20%26%20Cultural%20Exchange&query=35.666146399999995,139.7858073",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-5-lunch",
+            "dayNumber": 5,
+            "startTime": "12:50",
+            "endTime": "14:05",
+            "type": "restaurant",
+            "title": "Déjeuner — Sushizanmai",
+            "description": "Déjeuner à Sushizanmai",
+            "locationName": "Sushizanmai",
+            "latitude": 35.6659044,
+            "longitude": 139.77064919999998,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJoylsI9-LGGAREFepCWo2oeM",
+              "name": "Sushizanmai",
+              "address": "4-chōme-11-9 Tsukiji, Chuo City",
+              "latitude": 35.6659044,
+              "longitude": 139.77064919999998,
+              "rating": 4.2,
+              "reviewCount": 8826,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "sushi",
+                "seafood",
+                "japanese"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-3541-1117",
+              "website": "https://www.kiyomura.co.jp/store/detail/1",
+              "googleMapsUrl": "https://maps.google.com/?cid=16402451146916583184&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUhl56md7aQ1J_nr7OUuZ_ee_ykcWE7qNGOYYcYlkf5fkqzKvsaBXPYqfHAJbAuHfdv9H0uIGfTj-jAeiE27EwoepYQE4KwR0b5bt3Jjxoqe5aWRWc27QagC4k9pk8dONFlqGgpyIp2ZUr9r_iLlE28QAJiR1WwGWFTHZDqOmlW7Z3onedFxQo2dwi07ANkXsiLFKTmFu-x0Ot3vvkq3NVqhg_vuS8CJjHJzeU8LhkA4HIDgQPZAwPcuoJm5nYUe3hc6txq-bL7k75Xv_uPTblR5N1SoE-fp7JPKRlPS5ePZQ&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJoylsI9-LGGAREFepCWo2oeM",
+              "openingHours": {
+                "sunday": {
+                  "open": "00:00",
+                  "close": "23:59"
+                },
+                "monday": null,
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": null,
+                "friday": null,
+                "saturday": null
+              },
+              "distance": 0.4380336064731009,
+              "walkingTime": 5,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.2,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=16402451146916583184&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJoylsI9-LGGAREFepCWo2oeM",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "00:00",
+                "close": "23:59"
+              },
+              "monday": null,
+              "tuesday": null,
+              "wednesday": null,
+              "thursday": null,
+              "friday": null,
+              "saturday": null
+            }
+          },
+          {
+            "id": "travel-5-4",
+            "dayNumber": 5,
+            "startTime": "14:20",
+            "endTime": "14:35",
+            "type": "transport",
+            "title": "Transport en commun — 3.8km",
+            "description": "Sushizanmai → Marché au détail de Tsukiji",
+            "locationName": "",
+            "latitude": 35.6647703,
+            "longitude": 139.7702515,
+            "orderIndex": 4,
+            "duration": 15,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "oosxE_~|sYkAfAIBSGeBi@FMDOL]Zs@nAaDTw@VgAYO[CYEmCcAWOOSGSCm@A_BMSEUOa@CQYGwAW{Cc@[E[GBQ\\yAf@}B`@cBf@aCl@oCXwAh@sGN{AJwA[EKEw@k@gCoBaG_F_DcCm@c@A{@E}@EkADaBJqALyAD}AAe@UwBk@oDIoA?w@LaAn@kBfAiCl@cCHkA@m@Iw@UeAUi@o@aAeGuGgBqBgBaCiCsDMMJOfDgDfDeDt@u@NTlBpCt@nA{@`AcBhBu@x@",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 3.769,
+            "timeFromPrevious": 15
+          },
+          {
+            "id": "serp-attr-ChIJW2cLzSGLGGARXAKXv6EkbqI",
+            "dayNumber": 5,
+            "startTime": "14:35",
+            "endTime": "16:35",
+            "type": "activity",
+            "title": "Marché au détail de Tsukiji",
+            "description": "Marché aux poissons avec un large choix. Vaste marché aux poissons avec vente de fruits de mer et des espaces pour assister aux célèbres enchères de thons.",
+            "locationName": "Marché au détail de Tsukiji",
+            "latitude": 35.6647703,
+            "longitude": 139.7702515,
+            "orderIndex": 5,
+            "duration": 120,
+            "rating": 4.2,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo4LOT9hxZvOBpnezFRpSZTJQc5-S14tNAT6m4Y_cGhyrwV264W5sichw09STuixDHJPcFz7OROu0kIJJjNzKlrsKhMUcFMO5RFvd-7nYqdKnFrdwGJHHE6E4IHf5pcj6zDnAnIQg=w163-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=March%C3%A9%20au%20d%C3%A9tail%20de%20Tsukiji&query=35.6647703,139.7702515",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "travel-5-6",
+            "dayNumber": 5,
+            "startTime": "16:45",
+            "endTime": "17:10",
+            "type": "transport",
+            "title": "Transport en commun — 13.1km",
+            "description": "Marché au détail de Tsukiji → La Tour de Tokyo",
+            "locationName": "",
+            "latitude": 35.6585805,
+            "longitude": 139.7454329,
+            "orderIndex": 6,
+            "duration": 25,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "c_wxEkmjsYHg@D[HDp@ZDBR^\\\\^ZNJGPlAd@JDDAz@qAFIJLTWb@_@p@e@`@[fAgAtAyAFCx@An@AP@NSLQp@i@~CcCbAu@Q_DKsCCm@S}AOcACa@Sm@Uy@Oi@c@wAa@_BASSoAU}Ay@eF_@_Ci@yCkByKSeAISEK]eBeAkFwAeHiAkGOy@K{@Ky@Oq@Mm@a@yBkAcGyAsH}@kEo@yBMk@U_AESD[EYIa@c@}Bu@mDmB{J}@iESy@MOOc@I[GS_@aAqBuFu@yBw@mCi@{Bc@wAi@mAoAcCyB_E{DiH]q@_FkIUq@Ig@?_ALo@Tk@LSb@_@p@c@f@]`CwA|CmBbCyAzBwAb@e@Xm@Je@Bm@Cu@c@cEU_Ak@oAuAaCYm@W_AKu@Ei@@aATeB`@oAb@iAf@kAb@aAPk@Hy@Ay@OkB]gEW_Dc@gFMk@cAwBUg@Yw@Ku@GoBKqFIuFRyBh@eFh@gId@oGt@{Iv@mJ`@eFLeCJaBH_BVmD@W?mDM}ASoAm@yBiA_D_AuCgBsFq@mBYeAKo@Co@EmA@c@NoDBk@NuAN_AToAv@yB~@iBP_@~@kAv@s@TMb@M~A_@t@Wb@_@T_@JUJg@Fa@VsD@kBEkAMeB_@uECoABc@PyANeB?u@Ei@YsCO}As@aHy@}Hc@oEE_AAq@HgARiAXwA?]H]Ty@d@iAd@q@t@y@~AwAlDyC^Y^Sh@OXDL?f@B^FnAf@nBbApAt@`@PRCfAl@z@d@r@f@\\XpArA`@d@Ta@Va@l@gA~AoG\\uA`@eB|An@lChAb@b@PHd@RxAl@bBz@J?dA`@tAd@xAf@pBt@lCz@jC|@jE~AXJZRfB~AxCrCdCxBdCpBlAx@|AdAh@Vf@RbAT\\IHKHs@DIBOB_@B]DYNs@x@{BHUdBh@RFHCjAgA",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 13.113,
+            "timeFromPrevious": 25
+          },
+          {
+            "id": "serp-attr-ChIJCewJkL2LGGAR3Qmk0vCTGkg",
+            "dayNumber": 5,
+            "startTime": "17:10",
+            "endTime": "17:55",
+            "type": "activity",
+            "title": "La Tour de Tokyo",
+            "description": "Célèbre tour avec points d'observation. Inspiré de la tour Eiffel, ce célèbre édifice est doté de points d'observation & propose d'autres attractions.",
+            "locationName": "La Tour de Tokyo",
+            "latitude": 35.6585805,
+            "longitude": 139.7454329,
+            "orderIndex": 7,
+            "duration": 45,
+            "rating": 4.5,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepFSfakhJd3m4tvMCLXpSU-3DeatkCskA94nrjHSbPJPLunTKlrFFF6--jegWSbDfpocFlnlct9w4AaD9Vpvk4PpR3ZzVQbe9o4J09ShVaJ5tUOujY6YDi3g-3Xa9rAza3F3jen=w80-h113-k-no",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=La%20Tour%20de%20Tokyo%20Tokyo",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Tour%20de%20Tokyo&query=35.6585805,139.7454329",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "23:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=La%20Tour%20de%20Tokyo%20Tokyo"
+          },
+          {
+            "id": "meal-5-dinner",
+            "dayNumber": 5,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Park Hotel Tokyo",
+            "description": "Dîner à Park Hotel Tokyo",
+            "locationName": "Park Hotel Tokyo",
+            "latitude": 35.6630543,
+            "longitude": 139.75945149999998,
+            "orderIndex": 8,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJqbHzUMKLGGAR15DTArzlkgI",
+              "name": "Park Hotel Tokyo",
+              "address": "Minato City, Higashishinbashi, 1-chōme−7−1 汐留メディアタワー フロント 25F",
+              "latitude": 35.6630543,
+              "longitude": 139.75945149999998,
+              "rating": 4.4,
+              "reviewCount": 2571,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Hôtel élégant avec 3 restaurants modernes, bar à cocktails, spa et vue sur la tour de Tokyo."
+              ],
+              "description": "Hôtel élégant avec 3 restaurants modernes, bar à cocktails, spa et vue sur la tour de Tokyo.",
+              "phoneNumber": "03-6252-1111",
+              "website": "https://parkhoteltokyo.com/?utm_campaign=monita2024&utm_medium=googlebusinessprofile&utm_source=Google",
+              "googleMapsUrl": "https://maps.google.com/?cid=185463130339643607&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUrEwZa0veZqFE4mFUkgtmm_GHJj9vymYwWfJ2Y2FG7TVBMhJDi3au_HlwxSTm4y3aA873y2N3kg31kzOQA83YKO_7k_0xLtVSOBcGbp4HhHzqjsG626Kpszbhex4iszrPhepDwpxwIL8Gei0ABPHsyolwnDwLgPN93c54QsK3RmITCVeOnQQFIsmFQ71iEqW4iWY6ShlYOhprnRTtZ46a8GoJVNC0rx7hl_gE88yI8DIj96O6KSsQbDf5KgucJcVdM7sxukilPN13X2Al_JdBVh7SHbTKMuL_ZI0sG5nkrIA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJqbHzUMKLGGAR15DTArzlkgI",
+              "openingHours": {},
+              "distance": 0.6968586190667113,
+              "walkingTime": 9,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJp_uTpMOLGGARuV0qHAQguMU",
+                "name": "Hotel Villa Fontaine Grand Shiodome",
+                "address": "Minato City, Higashishinbashi, 1-chōme−9−2 内",
+                "latitude": 35.661968099999996,
+                "longitude": 139.7598879,
+                "rating": 4.2,
+                "reviewCount": 2983,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "hôtel"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Hôtel gratte-ciel du centre-ville avec hébergements modernes, Wi-Fi gratuit et salle de sport."
+                ],
+                "description": "Hôtel gratte-ciel du centre-ville avec hébergements modernes, Wi-Fi gratuit et salle de sport.",
+                "phoneNumber": "03-3569-2220",
+                "website": "http://www.hvf.jp/shiodome/?utm_source=google&utm_medium=google_map&utm_campaign=tech_07&gbp_shio&argument=tTLvHkHu&dmai=gbp_shio",
+                "googleMapsUrl": "https://maps.google.com/?cid=14247172623211060665&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWIGZz5_zmZSdE5Q8pwQh0g6cH9y_DyGDl_3IwuN1pgLbdf_t858y0pO_XL8wqoKL1uli-EP4mcqgtsEyXuesBkFrRvfbsi8x_9vhgydgB-xhp_5J6kERHEkmfmxEhEqiQaBZ7nNDn2cGt3oWy86JGUnbcrAdHtyovTbfyNpRTKPjwSfZX1rNKjVtk7rO7GJyd5Jps0NGbvcTvLzkgY6Z63v1XQV-68jWVZFDzPN1Ida77-RmrYhv7Va586QXil78PRTzSEoFbpegK4dKjLRxFb4OhOBhOcWf6dIuCCyWuY0Q&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJp_uTpMOLGGARuV0qHAQguMU",
+                "openingHours": {
+                  "sunday": {
+                    "open": "00:00",
+                    "close": "23:59"
+                  },
+                  "monday": null,
+                  "tuesday": null,
+                  "wednesday": null,
+                  "thursday": null,
+                  "friday": null,
+                  "saturday": null
+                },
+                "distance": 0.6706821181899053,
+                "walkingTime": 8,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.4,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=185463130339643607&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJqbHzUMKLGGAR15DTArzlkgI",
+            "openingHoursByDay": {}
+          }
+        ],
+        "theme": "Palais et monuments",
+        "dayNarrative": "Découvrez Classe Tokyo confortable : Ramen, Sushi, Sake Pairing &, Marché au détail de Tsukiji puis La Tour de Tokyo."
+      },
+      {
+        "dayNumber": 6,
+        "date": "2026-05-25T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-6-breakfast",
+            "dayNumber": 6,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Akha Ama Coffee Kagurazaka",
+            "description": "Petit-déjeuner à Akha Ama Coffee Kagurazaka",
+            "locationName": "Akha Ama Coffee Kagurazaka",
+            "latitude": 35.7046978,
+            "longitude": 139.7372354,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJD0Cmuk6NGGAR7MxbA7YPNH4",
+              "name": "Akha Ama Coffee Kagurazaka",
+              "address": "1-25 Akagi Motomachi, Shinjuku City",
+              "latitude": 35.7046978,
+              "longitude": 139.7372354,
+              "rating": 4.5,
+              "reviewCount": 704,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Quaint coffee shop brewing single-origin coffee with organic beans, plus light bites & sweet treats."
+              ],
+              "description": "Quaint coffee shop brewing single-origin coffee with organic beans, plus light bites & sweet treats.",
+              "phoneNumber": "03-6280-8755",
+              "website": "https://akhaama.jp/",
+              "googleMapsUrl": "https://maps.google.com/?cid=9093910821982686444&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVMszlmSTlK8Yl-GfTBciW3bpwsQpBraWpRcPO-B6DFJxHEHFi5FfJnbkABUOapYr38t_llUX6TzjOkZDUTM3m757Vtid_Z_7Lq_kuAlJpoJC_e_TJDXARquOKkpaGm-9_of5mZt9kt0QR02xvcGITWH-EtnauGtGE2VzElog0kHL8tlVa6nPJY0n6t8N95Bk5EVTP_sivnklJP93OHmkhpSn3N1o6ybYVJeYtL3rTGOaEXcFwW6n9t995SICOIjFi9TM1JwjuATc-kDNqcF-vr-8rr2d6pet2eiC5xah2XUA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJD0Cmuk6NGGAR7MxbA7YPNH4",
+              "openingHours": {
+                "sunday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "friday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                }
+              },
+              "distance": 0.5551208008355006,
+              "walkingTime": 7,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.5,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=9093910821982686444&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJD0Cmuk6NGGAR7MxbA7YPNH4",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "monday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "tuesday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "wednesday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "thursday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "friday": {
+                "open": "08:00",
+                "close": "19:00"
+              },
+              "saturday": {
+                "open": "08:00",
+                "close": "19:00"
+              }
+            }
+          },
+          {
+            "id": "travel-6-1",
+            "dayNumber": 6,
+            "startTime": "09:30",
+            "endTime": "10:20",
+            "type": "transport",
+            "title": "Transport en commun — 3.4km",
+            "description": "Akha Ama Coffee Kagurazaka → YAYOI KUSAMA Museum",
+            "locationName": "",
+            "latitude": 35.7031852,
+            "longitude": 139.7264985,
+            "orderIndex": 1,
+            "duration": 50,
+            "estimatedCost": 0,
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 3.3923469287227643,
+            "timeFromPrevious": 50
+          },
+          {
+            "id": "serp-attr-ChIJ95WgVBGNGGAR5oqlQiT2qS4",
+            "dayNumber": 6,
+            "startTime": "10:20",
+            "endTime": "12:20",
+            "type": "activity",
+            "title": "Yayoi Kusama Museum",
+            "description": "Œuvres d'une artiste japonaise avant-gardiste. Expositions, conférences et événements annuels sur la vie et l'œuvre d'une célèbre artiste d'avant-garde.",
+            "locationName": "YAYOI KUSAMA Museum",
+            "latitude": 35.7031852,
+            "longitude": 139.7264985,
+            "orderIndex": 2,
+            "duration": 120,
+            "rating": 4,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepOYuMX1B7xSC-g3u8Z9GbGkJ4FDjJvYVL986WDTRrhAJjFTC2EUzYZZg7M8TdgPCQwW3VqddMsW8etkzTEHExL4Avwc1Y-uH34FIPIeXivq_XCKU2gSzutk5yINy8sov7lkjqd8A=w80-h106-k-no",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Yayoi%20Kusama%20Museum%20Tokyo",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=YAYOI%20KUSAMA%20Museum&query=35.7031852,139.7264985",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Yayoi%20Kusama%20Museum%20Tokyo"
+          },
+          {
+            "id": "meal-6-lunch",
+            "dayNumber": 6,
+            "startTime": "12:30",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Ryūhō",
+            "description": "Déjeuner à Ryūhō",
+            "locationName": "Ryūhō",
+            "latitude": 35.7042143,
+            "longitude": 139.7335579,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJb7HNbVaMGGARTSncJrZQ_jE",
+              "name": "Ryūhō",
+              "address": "Shinjuku City, Yaraichō, 123 B1",
+              "latitude": 35.7042143,
+              "longitude": 139.7335579,
+              "rating": 4.2,
+              "reviewCount": 2340,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "chinese"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-3267-6917",
+              "website": "https://www.facebook.com/%E9%BE%8D%E6%9C%8B-100038813178108/",
+              "googleMapsUrl": "https://maps.google.com/?cid=3602405495209208141&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXcx2ULZRFuS4Byy2pn_DMl1TH0i1lJGtCkRukxHgpDRF-_nlWcAw3TBgEFR05qkXA0HL8yvc9-OslNyEiIgvBaUOIdQeEM7gL7yasXxP4sW_GPDj5HN8MBoZ4kY9sj6GokvjM5xNTK2FmGFgEV675EbhuzDwx_d4OeCcDhdX5ZUazAsk8TGUM8DSpUN34JWbJKo6Pf1YCQZSL1X4cpYRaYb5xwu_TDkk9oTIpTjDX3H7wLqMJ15yIeoTAhJPM_ltoxOyAjebdwBoxEXdwdAqc_DSounB1An2b4oHL1B4z9eHycVgLcforWf32ANKAQY6NNQrxXncMZw4aimhJVFLo4YPj3PGkcX_-NpjtH7cGl9mzu54A2V_dLhlUxr1G-N3yMVohpH8ITOx-GD8xGKRaq0UlPpvLIp7B2avNXQD8IC_cM5VTEE5ULDYOlkA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJb7HNbVaMGGARTSncJrZQ_jE",
+              "openingHours": {
+                "sunday": null,
+                "monday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.27875450722874173,
+              "walkingTime": 3,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.2,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=3602405495209208141&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJb7HNbVaMGGARTSncJrZQ_jE",
+            "openingHoursByDay": {
+              "sunday": null,
+              "monday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "11:00",
+                "close": "22:00"
+              }
+            }
+          },
+          {
+            "id": "free-time-6-4",
+            "dayNumber": 6,
+            "startTime": "15:05",
+            "endTime": "17:20",
+            "type": "free_time",
+            "title": "Temps libre — Exploration du quartier",
+            "description": "Profitez de ce temps libre pour flâner dans le quartier, faire du shopping ou prendre un café",
+            "locationName": "",
+            "latitude": 35.6896633,
+            "longitude": 139.6928239,
+            "orderIndex": 4,
+            "duration": 135,
+            "imageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "serp-attr-ChIJX53MMgCNGGART78Pfc57ZuQ",
+            "dayNumber": 6,
+            "startTime": "17:30",
+            "endTime": "20:30",
+            "type": "activity",
+            "title": "Tokyo Night & Light",
+            "description": "Tokyo Night & Light à Tokyo",
+            "locationName": "Tokyo Night & Light",
+            "latitude": 35.6896633,
+            "longitude": 139.6928239,
+            "orderIndex": 5,
+            "duration": 180,
+            "rating": 4.6,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqNNztT1OHlBs5K8VTg-614a0kB6gTZNMkU0YjqlRhiWmQ0GKHGjBWXOX4eLv8P1R5f1D9OdyRNc9X-c28oy4oPGAYschUhR8t1qK4cWMb0Sn4fW_RGzm8Rk1u6fnfbk3duQqb2h_vnMXU=w80-h106-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20Night%20%26%20Light&query=35.6896633,139.6928239",
+            "mustSee": false,
+            "openingHours": {
+              "open": "17:30",
+              "close": "21:45"
+            }
+          },
+          {
+            "id": "meal-6-dinner",
+            "dayNumber": 6,
+            "startTime": "20:40",
+            "endTime": "22:10",
+            "type": "restaurant",
+            "title": "Dîner — Gyukatsu Motomura Harajuku Branch",
+            "description": "Dîner à Gyukatsu Motomura Harajuku Branch",
+            "locationName": "Gyukatsu Motomura Harajuku Branch",
+            "latitude": 35.6706585,
+            "longitude": 139.7072227,
+            "orderIndex": 6,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJK7NEQ6OMGGAROeZ_ndIeQrE",
+              "name": "Gyukatsu Motomura Harajuku Branch",
+              "address": "Shibuya, Jingūmae, 3-chōme−23−2 青山ＮＳビル B1F",
+              "latitude": 35.6706585,
+              "longitude": 139.7072227,
+              "rating": 4.8,
+              "reviewCount": 5520,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "japanese"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "050-1721-2861",
+              "website": "https://www.gyukatsu-motomura.com/store/Harajuku?utm_source=google&utm_medium=GBP_harajuku",
+              "googleMapsUrl": "https://maps.google.com/?cid=12772805383110518329&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUN4Xb8Dw0MSRyAJGYQ4lyHm7vFtcCSff2TDOIO76am5_-7CTp3nFX9SYcalr3dSkxH7LP4ZrtMtd1PSXoP8qvwaJ8iacobIiboN-D_RmEi-ZkNEipSA0CGZ0QMWrQlAbJzxf8I19xZCz_TiUHsMv40-NrInw6Yvhz8-5IFNOg1lciK6E72wsAPb8q7pS6vjxmJESJQI9awxDSxTVrmA3TsDuQ10UWtfaHtA9VKKJkkb55skgGgtqldQf_JtLU8IQgtOelN1-KKzjWromgKYCzkJ_q2LMmRUdUUGP0c0fgNTbQVG3juxQvMFiNATP1c2LA-52bOxASsRd_6tw_B457y5KGOZonzfgasFnzARwW2XLzh0oHSYQvNotjK7_VaYIhmu3cVd4zeqZU0dOojANOla5in8evNQaQ4QznID8-bBwSZ&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJK7NEQ6OMGGAROeZ_ndIeQrE",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.6324270671903175,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJoQC4faSMGGAR1wiDmBUhsAs",
+                "name": "bills Omotesando",
+                "address": "Shibuya, Jingūmae, 4-chōme−30−3 東急プラザ 表参道原宿 7F",
+                "latitude": 35.6685817,
+                "longitude": 139.7057812,
+                "rating": 4,
+                "reviewCount": 3373,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-5772-1133",
+                "website": "https://www.billsjapan.com/jp/locations/omotesando",
+                "googleMapsUrl": "https://maps.google.com/?cid=842209506955036887&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX8ainx_J_ZkUDIh2CU2w_uEUoxPvXS07UVBVrkeXPh8xWalIimjM_pcs_QWq0MgmQyVx2cTaQOB0sP49WPgS7u54-SMLh24t9M-0TjwnaUMwodvYu_nL0uHG-SRD0SOBtMfJ_RalkLDyvxMf-ueYAkMVF5UnF-ITHS6YojzCHosFKNCcB51DQ9vf0p0DqTj6AunrXEHXjFxTUJGAwygIrY1TH8kIKsDWuS2YoF_UigRpasEAn0A-7rrXwsJFeJ9-SkL-6OscFILkDYHGZakYh_I5sCNInIZNzywm-IBlHIAw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJoQC4faSMGGAR1wiDmBUhsAs",
+                "openingHours": {
+                  "sunday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "friday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:30",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8806420655053276,
+                "walkingTime": 11,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJ_9GsagCNGGAR6auqGPod5nY",
+                "name": "Tokyu Plaza Harajuku\"HARAKADO\"",
+                "address": "Shibuya, Jingūmae, 6-chōme−31−21 原宿スクエア内 東急プラザ 原宿「ハラカド」",
+                "latitude": 35.6683935,
+                "longitude": 139.7047092,
+                "rating": 4.3,
+                "reviewCount": 979,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "centre commercial"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "https://www.tokyu-plaza.com/harakado/",
+                "googleMapsUrl": "https://maps.google.com/?cid=8567568301111815145&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU8Wl93MES0eSGHkuD0s90Y_bBF2Pdop1V7KLZM9p11zk6K_QydlEY4EO5JvH5_wwuHBAgSlJR6Us7iCxBKEaeTaPGtra27c-g2D9uA726bAbcGtVeswg7yc8pZ9y_6lCUaSKtP6LTwp7VExj87dlyvpDwaFqzXa81EyPJjrt52bKrVseZOO4BXYzAtSgq_6UelXYygSljgCOvu-mbrBobkF737B55P0FqzDL9mDDAVNee004zsBUfh-8bvK3sWErDJASivUaa96f5T24G1jcgGcucoqt9ToaKuO5Fjkv21qA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJ_9GsagCNGGAR6auqGPod5nY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.11064183322916714,
+                "walkingTime": 1,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=12772805383110518329&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJK7NEQ6OMGGAROeZ_ndIeQrE",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "monday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "11:00",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "11:00",
+                "close": "22:00"
+              }
+            },
+            "qualityFlags": [
+              "restaurant_distant"
+            ]
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Yayoi Kusama Museum puis Tokyo Night & Light."
+      },
+      {
+        "dayNumber": 7,
+        "date": "2026-05-26T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-7-breakfast",
+            "dayNumber": 7,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — TOHO CINEMAS Ueno",
+            "description": "Petit-déjeuner à TOHO CINEMAS Ueno",
+            "locationName": "TOHO CINEMAS Ueno",
+            "latitude": 35.7068072,
+            "longitude": 139.7731154,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJNT72-J-OGGARSD1VjuHFx7U",
+              "name": "TOHO CINEMAS Ueno",
+              "address": "Taito City, Ueno, 3-chōme−24−6 フロンティアタワ 7階",
+              "latitude": 35.7068072,
+              "longitude": 139.7731154,
+              "rating": 4,
+              "reviewCount": 3713,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "050-6868-5066",
+              "website": "https://hlo.tohotheater.jp/net/schedule/080/TNPI2000J01.do",
+              "googleMapsUrl": "https://maps.google.com/?cid=13098655613776641352&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVFRb2AApxtsbPA7yIfe5EuBVi13NKWVhlloyUhB8krz02u-v-6SsjaWBS5HfY2qKj3dWIxDLrDX4HMtg5ko-27VLkjDfVUY5H4wRumt5g3LjzLIj6YoBV1pD1-2sxzVWJM6BjOyBo5qv2_GSuN9sv3jYTv7CSAtZw7DbLrBqESeYlKGy-RlOFjle8kvuhl83Rj5_DXclWdPVZHgSU3NCEMgrYjzwRqfTtCPuaFGpBhxFwa1npmALTjlqagsm3tes0iKXl_MzQzWabeOfEjS22eZESdDC4Aypqwi8YlWzb07g&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJNT72-J-OGGARSD1VjuHFx7U",
+              "openingHours": {},
+              "distance": 0.6547025555537668,
+              "walkingTime": 8,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=13098655613776641352&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJNT72-J-OGGARSD1VjuHFx7U",
+            "openingHoursByDay": {}
+          },
+          {
+            "id": "travel-7-1",
+            "dayNumber": 7,
+            "startTime": "09:30",
+            "endTime": "10:40",
+            "type": "transport",
+            "title": "Transport en commun — 5.1km",
+            "description": "TOHO CINEMAS Ueno → Godzilla Head",
+            "locationName": "",
+            "latitude": 35.6950521,
+            "longitude": 139.70191169999998,
+            "orderIndex": 1,
+            "duration": 70,
+            "estimatedCost": 0,
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 5.111019403621587,
+            "timeFromPrevious": 70
+          },
+          {
+            "id": "serp-attr-ChIJzRzI3HSNGGARRwZW6AtJfi0",
+            "dayNumber": 7,
+            "startTime": "10:40",
+            "endTime": "13:40",
+            "type": "activity",
+            "title": "Godzilla Head",
+            "description": "Godzilla Head à Tokyo",
+            "locationName": "Godzilla Head",
+            "latitude": 35.6950521,
+            "longitude": 139.70191169999998,
+            "orderIndex": 2,
+            "duration": 180,
+            "rating": 4.4,
+            "estimatedCost": 17,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerngdWHgXJvtdjbsupLyyj_0JZ9Kh4xzE0X2MgQsnx1tdBtLvXSoeaPptAZ8YrTKcd_nBgYdQYSQhuO1or2MkYD_7RMflX6WdPba0vxlQGU5_twyrB2mPw7-arqDPmWWfn8p6GbAQ=w122-h92-k-no",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Godzilla%20Head&query=35.6950521,139.70191169999998",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "senso-ji",
+            "dayNumber": 7,
+            "startTime": "15:20",
+            "endTime": "16:20",
+            "type": "activity",
+            "title": "Temple Senso-ji",
+            "description": "Plus ancien temple bouddhiste de Tokyo à Asakusa",
+            "locationName": "Temple Senso-ji",
+            "latitude": 35.7148,
+            "longitude": 139.7967,
+            "orderIndex": 3,
+            "duration": 60,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Temple%20Senso-ji&query=35.7148,139.7967",
+            "mustSee": true,
+            "openingHours": {
+              "open": "06:00",
+              "close": "17:00"
+            }
+          },
+          {
+            "id": "d67d551c-9147-4705-8f74-8a89d21ccf85",
+            "dayNumber": 7,
+            "startTime": "17:00",
+            "endTime": "23:55",
+            "type": "flight",
+            "title": "Vol Tokyo → Paris",
+            "description": "Réservez votre vol retour",
+            "locationName": "Tokyo",
+            "latitude": 35.6762,
+            "longitude": 139.6503,
+            "orderIndex": 4,
+            "duration": 1018,
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 777,
+            "bookingUrl": "https://www.aviasales.com/search/HND2605CDG2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/HND2605CDG2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/tokyo/paris?departure_date=2026-05-26&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "theme": "Patrimoine historique",
+        "dayNarrative": "Découvrez Godzilla Head puis Temple Senso-ji."
+      }
+    ],
+    "accommodationOptions": [],
+    "transportOptions": [
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Tokyo",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 35.6762,
+              "lng": 139.6503
+            },
+            "duration": 728,
+            "price": 777,
+            "co2": 1476,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/CDG2005HND2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 1018,
+        "totalPrice": 777,
+        "totalCO2": 1476,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.aviasales.com/search/CDG2005HND2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/tokyo?departure_date=2026-05-20&passengers%5B%5D=adult&passengers%5B%5D=adult",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Tokyo",
+            "duration": 713,
+            "price": 951,
+            "co2": 1855
+          }
+        ],
+        "totalDuration": 1001,
+        "totalPrice": 975,
+        "totalCO2": 1856,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 0
+        }
+      }
+    ],
+    "attractionPool": [
+      {
+        "id": "senso-ji",
+        "name": "Temple Senso-ji",
+        "type": "culture",
+        "description": "Plus ancien temple bouddhiste de Tokyo à Asakusa",
+        "duration": 60,
+        "estimatedCost": 0,
+        "latitude": 35.7148,
+        "longitude": 139.7967,
+        "rating": 4.6,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "06:00",
+          "close": "17:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 102.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "shibuya-crossing",
+        "name": "Carrefour de Shibuya",
+        "type": "culture",
+        "description": "Le passage piéton le plus fréquenté au monde",
+        "duration": 30,
+        "estimatedCost": 0,
+        "latitude": 35.6595,
+        "longitude": 139.7004,
+        "rating": 4.5,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 102.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoDwoYtyRuWpXCXIM9rgDPRkyeLGieE_80w7a3aBHJymRD7b7SqdEsUrhYqm1C2gBhfv_lTJHHJ9lbDgo47qfEQFVakrYgO8cmLGnBKlf3LMuX7mR6VCm9Z1czkKVs5D_eV3bWK=w138-h92-k-no",
+        "coordinateConfidenceScore": 0.49,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "meiji-shrine",
+        "name": "Sanctuaire Meiji",
+        "type": "culture",
+        "description": "Sanctuaire shinto majestueux dédié à l'empereur Meiji, entouré de forêt",
+        "duration": 60,
+        "estimatedCost": 0,
+        "latitude": 35.6764,
+        "longitude": 139.6993,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "05:00",
+          "close": "18:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 102.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "protectedReason": "must_see",
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJQXjm8NWNGGARlEEJZUe8AJQ",
+        "name": "Japan Olympic Museum",
+        "type": "culture",
+        "description": "Histoire des JO et jardin commémoratif. Musée présentant des expositions interactives sur l'histoire des Jeux olympiques, avec un jardin de monuments commémoratifs.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 35.6749203,
+        "longitude": 139.7151887,
+        "rating": 4.2,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "tips": "Histoire des JO et jardin commémoratif. Musée présentant des expositions interactives sur l'histoire des Jeux olympiques, avec un jardin de monuments commémoratifs.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://japan-olympicmuseum.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer38zonxA7AwBmdcG2_Xuy__CXZ9Seq4K3ckfCONEzlwvdcu9mB2kyxSBAK9gg8rA0Q8etTsYKjAciXBInL5JUBohv_u1ApMUfjkHXY04rltVwAqINmn41o7v1uDxCTquKETgelsA=w122-h92-k-no",
+        "isOutdoor": true,
+        "score": 29.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJMwpiebSMGGARPr_454zHvDQ",
+        "name": "Yoyogi-kōen",
+        "type": "adventure",
+        "description": "Parc dans le village olympique de 1964. Vaste parc public urbain avec des lacs, des fontaines, des espaces boisés et des arbres centenaires.",
+        "duration": 180,
+        "estimatedCost": 17,
+        "latitude": 35.6700649,
+        "longitude": 139.6949656,
+        "rating": 4.4,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "tips": "Parc dans le village olympique de 1964. Vaste parc public urbain avec des lacs, des fontaines, des espaces boisés et des arbres centenaires.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.tokyo-park.or.jp/park/yoyogi/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo92DKjdZrR8r3InnX_Ovp6cz28QfJidXSX5lKf3WaNtYEh40PehZTIvgL4UYbtUfw0f5FnhgdQV2tRe6uGyLd5EanWZA65NxMFtl_ljjBq55Ivx9GvQNZIr67Dhk6OqM41lGs=w122-h92-k-no",
+        "isOutdoor": true,
+        "score": 25.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJP-vO9nuLGGARGJ2q8uryJUA",
+        "name": "Centre d'Art national de Tokyo",
+        "type": "culture",
+        "description": "Espace moderne, expositions temporaires. Grand centre moderne présentant expositions temporaires d'art japonais et international.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 35.665289,
+        "longitude": 139.726374,
+        "rating": 4.4,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "tips": "Espace moderne, expositions temporaires. Grand centre moderne présentant expositions temporaires d'art japonais et international.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.nact.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweq9BiPl3q38RL8tzpHJ8c0_V58LOucMlBQOboLJzv-99Cnh4paG__RHYgi_awB8Mwba-4eU2C406FVaRi3Mx_0hFA5vOzvGsf8G-rNHGdFgHFCetDXYMaZEiWyObC9KZvnOJIvUVA=w138-h92-k-no",
+        "isOutdoor": false,
+        "score": 24.42659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJ5SZMmreMGGARcz8QSTiJyo8",
+        "name": "Meiji-jingū",
+        "type": "adventure",
+        "description": "Célèbre sanctuaire shintoïste, jardin. Érigé au cœur de la forêt, ce sanctuaire shintoïste ancien possède un jardin d'iris saisonnier.",
+        "duration": 180,
+        "estimatedCost": 17,
+        "latitude": 35.6763976,
+        "longitude": 139.6993259,
+        "rating": 4.6,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "tips": "Célèbre sanctuaire shintoïste, jardin. Érigé au cœur de la forêt, ce sanctuaire shintoïste ancien possède un jardin d'iris saisonnier.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.meijijingu.or.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepFoXFgq6KVoQQHwlgV9Q_5zIgAMBxmjc5ASdRBh83OZXp5YdSVBEtAeehyrlwQs7Pm6bUiqeqpIjYr-Y4xbdfEvHP5WNHCdOgCaAvhZzmMc4izII3GL6uYR4KS9e1s0cPHMOz8hA=w122-h92-k-no",
+        "isOutdoor": true,
+        "score": 22.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJW2cLzSGLGGARXAKXv6EkbqI",
+        "name": "Marché au détail de Tsukiji",
+        "type": "culture",
+        "description": "Marché aux poissons avec un large choix. Vaste marché aux poissons avec vente de fruits de mer et des espaces pour assister aux célèbres enchères de thons.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 35.6647703,
+        "longitude": 139.7702515,
+        "rating": 4.2,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "tips": "Marché aux poissons avec un large choix. Vaste marché aux poissons avec vente de fruits de mer et des espaces pour assister aux célèbres enchères de thons.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.tsukiji.or.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo4LOT9hxZvOBpnezFRpSZTJQc5-S14tNAT6m4Y_cGhyrwV264W5sichw09STuixDHJPcFz7OROu0kIJJjNzKlrsKhMUcFMO5RFvd-7nYqdKnFrdwGJHHE6E4IHf5pcj6zDnAnIQg=w163-h92-k-no",
+        "isOutdoor": false,
+        "score": 20.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJLYwD5TTuGGARBZKEP5BV4U0",
+        "name": "Musée Ghibli",
+        "type": "adventure",
+        "description": "Musée sur le célèbre studio d'animation. Musée original dédié au célèbre studio d'animation avec une aire de jeux, un cinéma et un jardin sur le toit.",
+        "duration": 150,
+        "estimatedCost": 17,
+        "latitude": 35.696238,
+        "longitude": 139.5704317,
+        "rating": 4.5,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "tips": "Musée sur le célèbre studio d'animation. Musée original dédié au célèbre studio d'animation avec une aire de jeux, un cinéma et un jardin sur le toit.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.ghibli-museum.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqR6W2hyFlCTXfC4bOEY0ee4WhZK0mQjdfRPGzpZSouLiQhCC0NT3NbPfALuEtwanrHdruoU86KqKAeYzEEAIVp1zn1eX6SJfJ6XvtT8VADn_4PiES5aeYbpBsqe75o8xLxgkQq=w122-h92-k-no",
+        "isOutdoor": true,
+        "score": 18.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-434880P1",
+        "name": "Expérience Matcha avec dégustation de thé japonais à Tokyo",
+        "type": "culture",
+        "description": "Découvrez les méthodes de culture et l'histoire du thé, une boisson traditionnelle japonaise. L'instructeur principal est titulaire d'un baccalauréat en sciences agricoles et possède une connaissance particulièrement approfondie des sciences du sol. C'est un ancien producteur de thé qui a été impliqué dans tout, de la culture du thé à sa transformation à Kyoto. L'assistant est titulaire d'un baccalauréat en pharmacie et est pharmacien en exercice. Vous pouvez déguster plusieurs types de thé japonais en petites portions à la fois. Avec une grande variété de saveurs et d’arômes de thé, vous êtes sûr de trouver votre préféré.",
+        "duration": 90,
+        "estimatedCost": 49,
+        "latitude": 35.6627569,
+        "longitude": 139.66838199999998,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Matcha-tea-ceremony-and-5-kinds-of-Japanese-tea-tasting-in-Tokyo/d334-434880P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/11/ee/97/35.jpg",
+        "providerName": "Viator",
+        "reviewCount": 35,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": 16.116541960990993,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJPyOTG8KMGGARh_IXobWxHmo",
+        "name": "Shinjuku Gyoen Park",
+        "type": "adventure",
+        "description": "Vaste parc avec jardins et serre. Ancien domaine de 58 hectares, ce parc est composé de plusieurs jardins, d'espaces verdoyants et d'une serre.",
+        "duration": 90,
+        "estimatedCost": 17,
+        "latitude": 35.685176299999995,
+        "longitude": 139.71005169999998,
+        "rating": 4.6,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "tips": "Vaste parc avec jardins et serre. Ancien domaine de 58 hectares, ce parc est composé de plusieurs jardins, d'espaces verdoyants et d'une serre.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.env.go.jp/garden/shinjukugyoen/index.html",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepG4Ee1MDcZ-rRwis-eu7IGy2ZyBdueYHIXt0LILV6WWZYbC3nzoA_b4zBR_YkHCErxUqH7t_tV6n5mSimxHeNXlEcwTzp0jy3rcNGHAia5kkNDK4OhAgWgoXwCOx0eT1lvsn-SRA=w163-h92-k-no",
+        "isOutdoor": true,
+        "score": 12.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-480607P1",
+        "name": "Atelier Couteau Japonais Tokyo Keen et Sashimi (Don de thon / Sushi)",
+        "type": "culture",
+        "description": "Tuna Don Workshop : 10 : 45~ Inscription 11 : 00~ Salutation ~ Présentation 11 : 10~ Regarder \"Le Monde du Couteau Japonais\" Vidéo spéciale 11 : 20~ Démonstration d'utilisation des couteaux Japonais par notre chef Japonais 11 : 40~ Temps de pratique 1) Pratique du couteau sashimi en utilisant des boulettes de farine 2) Pratiquer la coupe du thon pour chaque personne à l'aide d'un couteau à sashimis 3) Faire tare (sauce) et mariner le thon 12 : 10~ Aiguiser les couteaux Japonais 12 : 25~ Faire un don de thon 12 : 30~ Dégustation (La dégustation de saké est également disponible) Atelier Sushi : 13 : 30~ Salutation ~Présentation 13 : 35~ Tamagoyaki (oeuf roulé) faisant spectacle 13 : 45~ Regarder \"Le Monde du Couteau Japonais\" Vidéo spéciale 13 : 55~ Démonstration d'utilisation des couteaux Japonais par M. Naoya Kumagai 14 : 10~ Pratique avec tous les participants 1) Pratique du couteau sashimi en utilisant des boulettes de farine 2) Pratiquer la coupe pour chaque personne à l'aide d'un couteau à sashimis 14 : 30~ sushi making 15 : 00~ Temps de photo et dégustation (la dégustation de saké est également disponible) + expérience d'aiguisage de couteau en option",
+        "duration": 120,
+        "estimatedCost": 111,
+        "latitude": 35.6617131,
+        "longitude": 139.7203096,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Tokyo-Learn-Keen-Japanese-Knife-and-Sashimi-Cooking-Class/d334-480607P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/r/32/88/d1/82/caption.jpg",
+        "providerName": "Viator",
+        "reviewCount": 53,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": 12.12336094703446,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJxU48-2OLGGARHMtB5RAhytA",
+        "name": "Musée Nezu",
+        "type": "culture",
+        "description": "Musée sur l'art au Japon et en Asie de l'Est. Musée sur l'art au Japon et en Asie de l'Est avec objets pré-modernes sur divers supports, café et boutique de cadeaux.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 35.6622568,
+        "longitude": 139.7170937,
+        "rating": 4.5,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "tips": "Musée sur l'art au Japon et en Asie de l'Est. Musée sur l'art au Japon et en Asie de l'Est avec objets pré-modernes sur divers supports, café et boutique de cadeaux.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.nezu-muse.or.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqA9ci6U15vhiFribmy1X8V0cdYBnnLSaw1GemOA_PjK3l1Tj8jTJtoodkPIqxAGxYGtUpgRKAwFPiioYFopTiELhyJbL-ED8Tr-KicwzJzaBm-ebQwcQfUqglid5VWMSM66HTF=w122-h92-k-no",
+        "isOutdoor": false,
+        "score": 6.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJ95WgVBGNGGAR5oqlQiT2qS4",
+        "name": "YAYOI KUSAMA Museum",
+        "type": "culture",
+        "description": "Œuvres d'une artiste japonaise avant-gardiste. Expositions, conférences et événements annuels sur la vie et l'œuvre d'une célèbre artiste d'avant-garde.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 35.7031852,
+        "longitude": 139.7264985,
+        "rating": 4,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "tips": "Œuvres d'une artiste japonaise avant-gardiste. Expositions, conférences et événements annuels sur la vie et l'œuvre d'une célèbre artiste d'avant-garde.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://yayoikusamamuseum.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepOYuMX1B7xSC-g3u8Z9GbGkJ4FDjJvYVL986WDTRrhAJjFTC2EUzYZZg7M8TdgPCQwW3VqddMsW8etkzTEHExL4Avwc1Y-uH34FIPIeXivq_XCKU2gSzutk5yINy8sov7lkjqd8A=w80-h106-k-no",
+        "isOutdoor": false,
+        "score": 6.926591972249479,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-5596969P1",
+        "name": "Tokyo Sushi Making Class : Sake Ceremony & Matcha Experience",
+        "type": "culture",
+        "description": "☆120 + avis cinq étoiles sur TripAdvisor & Google — Certifié Excellence Badge Entrez dans Asakusa pour une expérience de sushis vivante et pratique mêlant culture, compétence et célébration – parfaite pour les familles, les couples et les amis de tous âges. Commencez par Kagami-biraki : chantez \"Yoisho!\", ouvrez un baril de saké, et portez un toast à un nouveau départ (option sans alcool disponible). Apprenez ensuite les ingrédients essentiels du nigiri : façonnez le riz, manipulez les garnitures et placez le poisson comme un Expert. Pas besoin d'expérience — les enfants adorent, et les nouveaux arrivants se sentent toujours comme chez eux. Créez 6 à 10 pièces, terminez par une cérémonie de matcha et repartez avec des compétences et des photos que toute la famille gardera précieusement. Vous avez une allergie alimentaire ou ne préférez pas de poisson cru? Faites-le nous savoir à l'avance — nous ferons de notre mieux pour accueillir chaque client afin que tout le monde puisse profiter de l'expérience complète ensemble. À quelques pas de la gare d'Asakusa — Senso-ji, Kaminarimon, Tokyo Skytree et Ryogoku Sumo Hall tous à proximité.",
+        "duration": 90,
+        "estimatedCost": 43,
+        "latitude": 35.7125622,
+        "longitude": 139.7991204,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Interactive-Sushi-Making-with-Sake-Ceremony/d334-5596969P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "17:00",
+          "close": "23:30"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/15/7d/fc.jpg",
+        "providerName": "Viator",
+        "reviewCount": 36,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 6.747070251772529,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJg5RCD3eLGGAR6dbIHRM98w8",
+        "name": "Musée d'art Mori",
+        "type": "culture",
+        "description": "Musée d'Art moderne dans gratte-ciel. Musée d'Art dans la tour Mori avec expositions temporaires d'œuvres contemporaines internationales.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 35.6604621,
+        "longitude": 139.7292785,
+        "rating": 4.3,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "22:00"
+        },
+        "tips": "Musée d'Art moderne dans gratte-ciel. Musée d'Art dans la tour Mori avec expositions temporaires d'œuvres contemporaines internationales.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.mori.art.museum/jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo0VGAoEX-ucCINgzS67GZQb3iLkNwoaimFwdaLEGEfO83B7-Vu6yLc7YS0xc7xN7j1ODuK5OVpGEKIwgHSnPD7IiAKXVFakyW15pyzAtTiBNKtW23I73QB4ExS0LCN1i9xqpOxWg=w80-h106-k-no",
+        "isOutdoor": false,
+        "score": 5.42659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-470703P3",
+        "name": "Tokyo Ueno Food Tour Sushi Ramen et favoris locaux",
+        "type": "culture",
+        "description": "Bienvenue à Ueno, le berceau de Tokyo ! Avant même que Shibuya, Shinjuku et Harajuku n'existent, c'était le cœur d'Edo il y a plus de 400 ans. Cette histoire a façonné les saveurs du Japon, et aujourd'hui Ueno reste l'un des meilleurs endroits pour déguster de la vraie nourriture locale faite avec cœur! Notre PDG est né et a grandi ici, donc cette visite vous emmène aux endroits que les habitants aiment vraiment <3 Les restaurants et les izakayas que nous visitons ne sont pas branchés ou touristiques, mais chaleureux, authentiques et pleins de caractère, des endroits qui servent une délicieuse cuisine Japonaise depuis des générations :) Nous nous asseyons à chaque arrêt et dégustons une variété de plats classiques comme des sushis fraîchement préparés, du Gyoza, des brochettes de yakitori grillées, du Ramen et bien plus encore! Nos guides sont la première raison pour laquelle les clients aiment cette visite Sympathique, énergique et pleine d'histoires, ils donnent vie à la nourriture et au quartier! Que vous soyez en couple, en famille ou en solo, nous voulons que vous partiez avec une vraie connexion à Ueno et son histoire culinaire!",
+        "duration": 45,
+        "estimatedCost": 76,
+        "latitude": 35.713249999999995,
+        "longitude": 139.77678799999998,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Tokyo-Guided-Food-Tour-with-Food-and-Japanese-Alcohol/d334-470703P3?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/0b/c4/3c.jpg",
+        "providerName": "Viator",
+        "reviewCount": 59,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": 4.168513092340785,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJX53MMgCNGGART78Pfc57ZuQ",
+        "name": "Tokyo Night & Light",
+        "type": "adventure",
+        "description": "Tokyo Night & Light à Tokyo",
+        "duration": 180,
+        "estimatedCost": 17,
+        "latitude": 35.6896633,
+        "longitude": 139.6928239,
+        "rating": 4.6,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "17:30",
+          "close": "21:45"
+        },
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://tokyoprojectionmappingproject.jp/en/event/20240225/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqNNztT1OHlBs5K8VTg-614a0kB6gTZNMkU0YjqlRhiWmQ0GKHGjBWXOX4eLv8P1R5f1D9OdyRNc9X-c28oy4oPGAYschUhR8t1qK4cWMb0Sn4fW_RGzm8Rk1u6fnfbk3duQqb2h_vnMXU=w80-h106-k-no",
+        "isOutdoor": true,
+        "score": 2.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJzRzI3HSNGGARRwZW6AtJfi0",
+        "name": "Godzilla Head",
+        "type": "adventure",
+        "description": "Godzilla Head à Tokyo",
+        "duration": 180,
+        "estimatedCost": 17,
+        "latitude": 35.6950521,
+        "longitude": 139.70191169999998,
+        "rating": 4.4,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.toho.co.jp/shinjukutoho/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerngdWHgXJvtdjbsupLyyj_0JZ9Kh4xzE0X2MgQsnx1tdBtLvXSoeaPptAZ8YrTKcd_nBgYdQYSQhuO1or2MkYD_7RMflX6WdPba0vxlQGU5_twyrB2mPw7-arqDPmWWfn8p6GbAQ=w122-h92-k-no",
+        "isOutdoor": true,
+        "score": 2.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJK0TdDneLGGARVxJ3MHC0emY",
+        "name": "Roppongi Hills - Tokyo City View",
+        "type": "adventure",
+        "description": "Roppongi Hills - Tokyo City View à Tokyo",
+        "duration": 180,
+        "estimatedCost": 17,
+        "latitude": 35.6600712,
+        "longitude": 139.7292907,
+        "rating": 4.4,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "22:00"
+        },
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://tcv.roppongihills.com/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepP6MDI7kBFUlrCVhr8UbH3MP-fVauKhggXd_fAIPk-kFU_M_L6z5pPRKf4jP5Dm5wofzhvvJnDKjHrdiMHVah6hoS5wySRfoAf5E2BKyc8ELTiUJ2bmRNBVBA97wclJhmcHSa2=w137-h92-k-no",
+        "isOutdoor": true,
+        "score": 1.4265919722494802,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJCewJkL2LGGAR3Qmk0vCTGkg",
+        "name": "La Tour de Tokyo",
+        "type": "adventure",
+        "description": "Célèbre tour avec points d'observation. Inspiré de la tour Eiffel, ce célèbre édifice est doté de points d'observation & propose d'autres attractions.",
+        "duration": 45,
+        "estimatedCost": 17,
+        "latitude": 35.6585805,
+        "longitude": 139.7454329,
+        "rating": 4.5,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "23:00"
+        },
+        "tips": "Célèbre tour avec points d'observation. Inspiré de la tour Eiffel, ce célèbre édifice est doté de points d'observation & propose d'autres attractions.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.tokyotower.co.jp/",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepFSfakhJd3m4tvMCLXpSU-3DeatkCskA94nrjHSbPJPLunTKlrFFF6--jegWSbDfpocFlnlct9w4AaD9Vpvk4PpR3ZzVQbe9o4J09ShVaJ5tUOujY6YDi3g-3Xa9rAza3F3jen=w80-h113-k-no",
+        "isOutdoor": true,
+        "score": -0.0734080277505198,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-473140P1",
+        "name": "Classe Tokyo confortable : Ramen, Sushi, Sake Pairing & Cultural Exchange",
+        "type": "culture",
+        "description": "Chez Ramen Cooking Tokyo, nous proposons un cours de cuisine immersive qui va au-delà de la cuisine et met l’accent sur un véritable échange culturel. Nos hôtes Japonais Anglais accueillent chaleureusement les clients dans un cadre intime en petits groupes où des liens durables se forment. Au cours de notre expérience décontractée de 2,5 à 3 heures, vous apprendrez à créer deux plats Japonais emblématiques : des ramen authentiques et votre choix de sushis faits à la main ou de délicieux gyoza. Profitez d'accords de saké illimités soigneusement préparés pour accompagner chaque plat, ainsi que d'explications perspicaces sur leur importance culturelle. Les familles voyageant avec des enfants sont chaleureusement accueillies – les enfants reçoivent même des collations traditionnelles japonaises \"dagashi\" comme de délicieux souvenirs. Nos cours sont particulièrement populaires pour les occasions spéciales comme les anniversaires, les lunes de miel ou les remises de diplômes, garantissant que chaque événement est mémorable. Rejoignez-nous pour une expérience Japonaise authentique à Tokyo, où cuisine, culture et communauté se marient parfaitement.",
+        "duration": 180,
+        "estimatedCost": 112,
+        "latitude": 35.666146399999995,
+        "longitude": 139.7858073,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Ramen-and-Gyoza-Cooking-Class-Tokyo/d334-473140P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/d8/0e/8c.jpg",
+        "providerName": "Viator",
+        "reviewCount": 82,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": -5.106773228348551,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      }
+    ],
+    "budgetStrategy": {
+      "accommodationType": "hotel",
+      "accommodationBudgetPerNight": 100,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 25,
+      "maxPricePerActivity": 50,
+      "transportTips": "Mix transports en commun et quelques taxis",
+      "reasoning": "Budget modéré, hôtel correct avec restaurants"
+    },
+    "pipelineVersion": "v3",
+    "stageDurationsMs": {
+      "fetch": 0,
+      "score": 18,
+      "anchor-transport": 0,
+      "cluster": 2,
+      "hotel": 0,
+      "travel-times": 3350,
+      "restaurants": 217,
+      "schedule": 10,
+      "contracts": 1,
+      "decorate": 0
+    },
+    "qualityMetrics": {
+      "score": 75,
+      "invariantsPassed": false,
+      "violations": [
+        "P0.3: Day 1 has no dinner",
+        "P0.2: Day 6 \"Dîner — Gyukatsu Motomura Harajuku Branch\" is 2481m from nearest activity (max 1500m)",
+        "P0.3: Day 7 has no lunch"
+      ]
+    },
+    "qualityWarnings": [],
+    "contractViolations": [
+      "P0.3: Day 1 has no dinner",
+      "P0.2: Day 6 \"Dîner — Gyukatsu Motomura Harajuku Branch\" is 2481m from nearest activity (max 1500m)",
+      "P0.3: Day 7 has no lunch"
+    ],
+    "plannerDiagnostics": {
+      "plannerVersion": "v3.0",
+      "beamUsed": false,
+      "beamFallbackUsed": false,
+      "dayTripPackCount": 0,
+      "repairRejectedCount": 0,
+      "zigzagTurnsTotal": 0,
+      "routeInefficiencyTotal": 0,
+      "criticalGeoCount": 0,
+      "contractsPassed": false,
+      "rescueStage": 0,
+      "protectedBreakCount": 0,
+      "lateMealReplacementCount": 0,
+      "dayNumberMismatchCount": 0,
+      "dayTripEvictionCount": 0,
+      "finalIntegrityFailures": 0,
+      "orphanTransportCount": 0,
+      "teleportLegCount": 0,
+      "staleNarrativeCount": 0,
+      "freeTimeOverBudgetCount": 0,
+      "mealFallbackCount": 0,
+      "routeRebuildCount": 0,
+      "restaurantRefetchMissCount": 0,
+      "missingProtectedMustSeeCount": 0,
+      "dayTripAtomicityBreakCount": 0,
+      "arrivalFatigueViolationCount": 0,
+      "temporalImpossibleItemCount": 0,
+      "sparseFullCityDayCount": 1,
+      "dayTripDestinationMismatchCount": 0,
+      "sameFamilyOverloadCount": 1
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: tokyo-fuji-7d",
+    "   Paris → Tokyo (7j)",
+    "   couple (2p) | moderate | culture, nature",
+    "======================================================================\n",
+    "[Pipeline V3] Step 1: Using fixture data (no API calls)",
+    "[Pipeline V2] Excluded 9 Viator activities with unreliable GPS (city-center fallback)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [102.9] ⭐ \"Temple Senso-ji\" (src=mustsee, reviews=0, rating=4.6, tags=none)",
+    "[Pipeline V2]   #2 [102.9] ⭐ \"Carrefour de Shibuya\" (src=mustsee, reviews=0, rating=4.5, tags=none)",
+    "[Pipeline V2]   #3 [102.9] ⭐ \"Sanctuaire Meiji\" (src=mustsee, reviews=0, rating=4.7, tags=none)",
+    "[Pipeline V2]   #4 [29.9]    \"Japan Olympic Museum\" (src=serpapi, reviews=0, rating=4.2, tags=kid_friendly,deep_culture,relaxing)",
+    "[Pipeline V2]   #5 [25.9]    \"Yoyogi-kōen\" (src=serpapi, reviews=0, rating=4.4, tags=romantic,relaxing)",
+    "[Pipeline V2]   #6 [24.4]    \"Centre d'Art national de Tokyo\" (src=serpapi, reviews=0, rating=4.4, tags=romantic,relaxing)",
+    "[Pipeline V2]   #7 [22.9]    \"Meiji-jingū\" (src=serpapi, reviews=0, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #8 [20.9]    \"Marché au détail de Tsukiji\" (src=serpapi, reviews=0, rating=4.2, tags=romantic,relaxing)",
+    "[Pipeline V2]   #9 [18.9]    \"Musée Ghibli\" (src=serpapi, reviews=0, rating=4.5, tags=deep_culture,relaxing)",
+    "[Pipeline V2]   #10 [16.1]    \"Expérience Matcha avec dégustation de thé japonais à Tokyo\" (src=viator, reviews=35, rating=5, tags=foodie)",
+    "[Pipeline V2]   #11 [12.9]    \"Shinjuku Gyoen Park\" (src=serpapi, reviews=0, rating=4.6, tags=romantic,relaxing)",
+    "[Pipeline V2]   #12 [12.1]    \"Atelier Couteau Japonais Tokyo Keen et Sashimi (Don de thon / Sushi)\" (src=viator, reviews=53, rating=5, tags=foodie)",
+    "[Pipeline V2]   #13 [6.9]    \"Musée Nezu\" (src=serpapi, reviews=0, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #14 [6.9]    \"YAYOI KUSAMA Museum\" (src=serpapi, reviews=0, rating=4, tags=kid_friendly,deep_culture)",
+    "[Pipeline V2]   #15 [6.7]    \"Tokyo Sushi Making Class : Sake Ceremony & Matcha Experience\" (src=viator, reviews=36, rating=5, tags=none)",
+    "[Pipeline V2]   #16 [5.4]    \"Musée d'art Mori\" (src=serpapi, reviews=0, rating=4.3, tags=deep_culture)",
+    "[Pipeline V2]   #17 [4.2]    \"Tokyo Ueno Food Tour Sushi Ramen et favoris locaux\" (src=viator, reviews=59, rating=5, tags=foodie)",
+    "[Pipeline V2]   #18 [2.9]    \"Tokyo Night & Light\" (src=serpapi, reviews=0, rating=4.6, tags=none)",
+    "[Pipeline V2]   #19 [2.9]    \"Godzilla Head\" (src=serpapi, reviews=0, rating=4.4, tags=none)",
+    "[Pipeline V2]   #20 [1.4]    \"Roppongi Hills - Tokyo City View\" (src=serpapi, reviews=0, rating=4.4, tags=none)",
+    "[Pipeline V3] Step 2: 22 activities selected",
+    "[Trust Layer] 22 activities enriched in 0ms — coords: 4H/18M/0L, protected: 3, dayTripAffinity: 0",
+    "[Anchor Transport] Generated time windows for 7 days:",
+    "  Day 1: 08:30 → 22:00",
+    "  Day 2: 08:30 → 22:00",
+    "  Day 3: 08:30 → 22:00",
+    "  Day 4: 08:30 → 22:00",
+    "  Day 5: 08:30 → 22:00",
+    "  Day 6: 08:30 → 22:00",
+    "  Day 7: 08:30 → 22:00",
+    "[Pipeline V3] Step 2c: Time windows anchored",
+    "[Pipeline V2] City density profile: category=medium, p75=8.11km, median=4.66km, maxClusterRadius=1.16km, hardRadiusCap=5.00km",
+    "[Pipeline V2] enforceMinimumClusterSize: moved \"Atelier Couteau Japonais Tokyo Keen et Sashimi (Don de thon / Sushi)\" from Day 2 (4 left) → Day 5 (3 now), dist=5.23km",
+    "[Pipeline V2] enforceMinimumClusterSize: moved \"Shinjuku Gyoen Park\" from Day 2 (3 left) → Day 6 (2 now), dist=12.67km",
+    "[Pipeline V2] enforceMinimumClusterSize: moved \"Expérience Matcha avec dégustation de thé japonais à Tokyo\" from Day 3 (3 left) → Day 6 (3 now), dist=4.01km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (35.6814, 139.6496), Day 2: centroid (35.6743, 139.6979), Day 3: centroid (35.6656, 139.7109), Day 4: centroid (35.6611, 139.7326), Day 5: centroid (35.6642, 139.7588), Day 6: centroid (35.6960, 139.7071), Day 7: centroid (35.7135, 139.7909)",
+    "[Cluster] Inter-cluster swap: 4 improvements",
+    "[Pipeline V3] Type diversity: swapped \"Musée Nezu\" (culture) from Day 3 ↔ \"Yoyogi-kōen\" (adventure) from Day 1",
+    "[Pipeline V3] Type diversity: swapped \"Musée d'art Mori\" (culture) from Day 4 ↔ \"Meiji-jingū\" (adventure) from Day 2",
+    "[Pipeline V3] Type diversity: swapped \"Tokyo Ueno Food Tour Sushi Ramen et favoris locaux\" (culture) from Day 7 ↔ \"Godzilla Head\" (adventure) from Day 6",
+    "[Pipeline V2] Cluster Day 1: 3 activities, radius=7.78km, intraDistance=14.00km",
+    "[Pipeline V2] Cluster Day 2: 3 activities, radius=2.11km, intraDistance=6.49km",
+    "[Pipeline V2] Cluster Day 3: 3 activities, radius=1.29km, intraDistance=3.18km",
+    "[Pipeline V2] Cluster Day 4: 4 activities, radius=2.12km, intraDistance=6.83km",
+    "[Pipeline V2] Cluster Day 5: 3 activities, radius=2.03km, intraDistance=7.35km",
+    "[Pipeline V2] Cluster Day 6: 3 activities, radius=4.23km, intraDistance=12.70km",
+    "[Pipeline V2] Cluster Day 7: 3 activities, radius=5.94km, intraDistance=9.32km",
+    "[Pipeline V3] Step 3: 7 clusters created (0 day trip packs, planner=v3.0)",
+    "[Pipeline V3] Step 4: Hotel selected: none",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6762,139.6503 → 35.696238,139.5704317",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.696238,139.5704317 → 35.6627569,139.66838199999998",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6627569,139.66838199999998 → 35.6622568,139.7170937",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6622568,139.7170937 → 35.6762,139.6503",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6762,139.6503 → 35.6604621,139.7292785",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6604621,139.7292785 → 35.6764,139.6993",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6764,139.6993 → 35.685176299999995,139.71005169999998",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.685176299999995,139.71005169999998 → 35.6762,139.6503",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6762,139.6503 → 35.6749203,139.7151887",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6749203,139.7151887 → 35.6700649,139.6949656",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6700649,139.6949656 → 35.6595,139.7004",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6595,139.7004 → 35.6762,139.6503",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6762,139.6503 → 35.665289,139.726374",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.665289,139.726374 → 35.6763976,139.6993259",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6763976,139.6993259 → 35.6617131,139.7203096",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6600712,139.7292907 → 35.6762,139.6503",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6762,139.6503 → 35.6585805,139.7454329",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6585805,139.7454329 → 35.6647703,139.7702515",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.6647703,139.7702515 → 35.666146399999995,139.7858073",
+    "[Cache L2] MISS directions",
+    "[Cache L2] HIT directions",
+    "[Directions] Transit failed, driving fallback succeeded for 35.666146399999995,139.7858073 → 35.6762,139.6503",
+    "[Travel Times] Computed travel times for 7 days (20 API calls)",
+    "[Pipeline V3] Step 6: Travel times computed (selective mode)",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 17 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 19 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 13 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 14 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 16 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 12 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search",
+    "[Google Places New] Found 15 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[enrichRestaurantPool] Enriched pool: 30 → 96 restaurants (66 added from cluster searches)",
+    "[Pipeline V3] Step 7: Restaurant pool enriched (96 restaurants)",
+    "[Unified] Day 1: skipping \"Expérience Matcha avec dégustation de thé japonais à Tokyo\" (ends past close 18:00)",
+    "[Unified] Day 4: skipping \"Atelier Couteau Japonais Tokyo Keen et Sashimi (Don de thon / Sushi)\" (ends past close 18:00)",
+    "[Unified] Day 6: stopping at activity 2/3 (22:20 >= 22:00)",
+    "[Unified P0.2] Day 6: closest restaurant \"Gyukatsu Motomura Harajuku Branch\" still 2481m away — keeping \"Gyukatsu Motomura Harajuku Branch\" with distant flag",
+    "[Unified P0.2] Day 7: closest restaurant \"Gyukatsu Motomura Harajuku Branch\" still 2755m away — keeping \"Gyukatsu Motomura Harajuku Branch\" with distant flag",
+    "[Unified P0.2] Day 7: closest restaurant \"Gyukatsu Motomura Ueno Branch\" still 2066m away — keeping \"Gyukatsu Motomura Ueno Branch\" with distant flag",
+    "[Unified] Post-repair orphan transport: removing \"Ryūhō → Tokyo Night & Light\" on Day 6",
+    "[Unified] 1 repairs performed, 0 unresolved",
+    "  [extension] Day 3: \"Carrefour de Shibuya\" — Extended by 80min to fill gap (30→110min)",
+    "[Pipeline V3] Step 8: Unified schedule built with 7 days, 1 repairs",
+    "[Pipeline V3] Step 11b: Transport items injected (mode: plane)",
+    "[Pipeline V3] Post-injection sweep: removed 4 items past departure on Day 7",
+    "[Pipeline V3] Post-injection sweep: removed 8 pre-arrival items on Day 1",
+    "[Contracts] Score: 75/100, Invariants: FAILED",
+    "  Activities: 16, Restaurants: 16",
+    "  Must-sees: 3/3",
+    "  Distribution: imbalance=0.5, empty=0, overloaded=0",
+    "  Routing: travel=105min, longLegs=3, zigzag=9",
+    "  Meals: fallbacks=0",
+    "  Violations (3):",
+    "    - P0.3: Day 1 has no dinner",
+    "    - P0.2: Day 6 \"Dîner — Gyukatsu Motomura Harajuku Branch\" is 2481m from nearest activity (max 1500m)",
+    "    - P0.3: Day 7 has no lunch",
+    "[Pipeline V3] Step 10: Quality score 75/100, Invariants: FAILED",
+    "[Pipeline V3] Step 11: Decoration complete (LLM: false)",
+    "[Pipeline V3] Trip generated in 3601ms",
+    "  Stage times: fetch=0ms, score=18ms, anchor-transport=0ms, cluster=2ms, hotel=0ms, travel-times=3350ms, restaurants=217ms, schedule=10ms, contracts=1ms, decorate=0ms",
+    "  Quality: 75/100, Invariants: FAILED",
+    "  API cost: €0.39 / €5.00 — {\"directions\":39,\"places-nearby-search\":6}"
+  ],
+  "warnings": [
+    "[Place Restaurants] Pass 4 (5km, reuse): found 1 candidates for breakfast",
+    "[Place Restaurants] Pass 3 (1.5km): found 2 candidates for dinner",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 4 candidates for breakfast",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 9 candidates for breakfast",
+    "[Place Restaurants] Pass 3 (1.5km): found 9 candidates for lunch",
+    "[Place Restaurants] Pass 3 (1.5km): found 1 candidates for dinner",
+    "[Place Restaurants] Pass 3 (1.5km): found 1 candidates for lunch",
+    "[Place Restaurants] Pass 3 (1.5km): found 2 candidates for dinner",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 26 candidates for dinner",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 26 candidates for lunch",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 7 candidates for dinner",
+    "[Schedule Safety] Day 2: keeping \"Dîner — Blue Note Tokyo\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 4: keeping \"Déjeuner — Gyukatsu Motomura Harajuku Branch\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 4: keeping \"Dîner — Yoroniku\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 5: keeping \"Dîner — Park Hotel Tokyo\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 6: keeping \"Dîner — Gyukatsu Motomura Harajuku Branch\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 7: keeping \"Déjeuner — Gyukatsu Motomura Harajuku Branch\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 7: keeping \"Dîner — Gyukatsu Motomura Ueno Branch\" despite validation issue (no better alternative found)",
+    "[Unified P0.2] Day 6: \"Dîner — Gyukatsu Motomura Harajuku Branch\" is 2481m from nearest activity — searching closer restaurant",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 26 candidates for dinner",
+    "[Unified P0.2] Day 7: \"Déjeuner — Gyukatsu Motomura Harajuku Branch\" is 2755m from nearest activity — searching closer restaurant",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 26 candidates for lunch",
+    "[Unified P0.2] Day 7: \"Dîner — Gyukatsu Motomura Ueno Branch\" is 2066m from nearest activity — searching closer restaurant",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 7 candidates for dinner",
+    "[Pipeline V3] Post-injection sweep: keeping must-see \"Temple Senso-ji\" on Day 7 despite departure cutoff"
+  ],
+  "errors": [],
+  "durationMs": 3602,
+  "generatedAt": "2026-03-19T16:20:20.282Z",
+  "success": true,
+  "_campaign": {
+    "campaignId": "post-quality-sweep-v2",
+    "runId": "S03-tokyo-fuji-7d",
+    "runKind": "scenario",
+    "seed": 424242,
+    "startedAt": "2026-03-19T16:20:20.280Z",
+    "durationMs": 3602
+  }
+}

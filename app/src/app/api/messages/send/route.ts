@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { notifyMessage } from '@/lib/services/notifications';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 function getServiceClient() {
   return createClient(
@@ -17,7 +18,16 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
+    const rateLimitKey = `messages:${user.id}`;
+    const { allowed } = checkRateLimit(rateLimitKey, { windowMs: 3_600_000, maxRequests: 50 });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    }
+
     const { conversation_id, content } = await request.json();
+    if (!content || typeof content !== 'string' || content.length > 5000) {
+      return NextResponse.json({ error: 'Invalid content' }, { status: 400 });
+    }
     if (!conversation_id || !content?.trim()) {
       return NextResponse.json({ error: 'conversation_id et content requis' }, { status: 400 });
     }
@@ -79,6 +89,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(message);
   } catch (error) {
+    console.error('[messages/send]', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

@@ -68,11 +68,11 @@ export async function findBestFlights(
     scopedOriginAirports = sortedOriginAirports.slice(0, Math.min(maxPerSide, sortedOriginAirports.length));
     scopedDestAirports = sortedDestAirports.slice(0, Math.min(maxPerSide, sortedDestAirports.length));
     const scopedPairCount = scopedOriginAirports.length * scopedDestAirports.length;
-    console.log(
+    console.debug(
       `[Flights] Airport pair cap active: ${scopedPairCount}/${fullPairCount} pairs (FLIGHT_AIRPORT_PAIR_CAP=${pairCap})`
     );
   } else {
-    console.log(`[Flights] Airport search scope: full (${fullPairCount} airport pairs)`);
+    console.debug(`[Flights] Airport search scope: full (${fullPairCount} airport pairs)`);
   }
 
   for (const originAirport of scopedOriginAirports) {

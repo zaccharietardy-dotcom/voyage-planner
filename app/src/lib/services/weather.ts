@@ -125,7 +125,7 @@ export async function fetchWeatherForecast(
   const cacheKey = `weather-${coords.lat.toFixed(2)}-${coords.lng.toFixed(2)}-${start}-${end}`;
   const cached = readCache(cacheKey);
   if (cached) {
-    console.log(`[Weather] Cache hit for ${start} → ${end}`);
+    console.debug(`[Weather] Cache hit for ${start} → ${end}`);
     return cached;
   }
 
@@ -148,7 +148,7 @@ export async function fetchWeatherForecast(
 
     if (forecasts.length > 0) {
       writeCache(cacheKey, forecasts);
-      console.log(`[Weather] ${forecasts.length} days fetched for ${start} → ${end}`);
+      console.debug(`[Weather] ${forecasts.length} days fetched for ${start} → ${end}`);
     }
 
     return forecasts;

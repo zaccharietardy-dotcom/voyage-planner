@@ -1,0 +1,129 @@
+{
+  "campaignId": "geo-campaign-2026-02-17T14-19-06",
+  "startedAt": "2026-02-17T14:19:06.012Z",
+  "finishedAt": "2026-02-17T14:24:47.605Z",
+  "durationMs": 341593,
+  "seed": 20260217,
+  "maxRuns": 3,
+  "expectedDirectRuns": 2,
+  "expectedSuggestionRuns": 1,
+  "envHealth": {
+    "ANTHROPIC": "✅",
+    "SERPAPI": "✅",
+    "RAPIDAPI": "✅",
+    "VIATOR": "✅"
+  },
+  "runStats": {
+    "total": 3,
+    "success": 3,
+    "failed": 0,
+    "direct": 2,
+    "suggestion": 1
+  },
+  "geoCodeTotals": {
+    "GEO_IMPOSSIBLE_TRANSITION": 0,
+    "GEO_URBAN_HARD_LONG_LEG": 1,
+    "GEO_INTRA_DAY_ZIGZAG": 2,
+    "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+  },
+  "inefficiency": {
+    "failDays": 0,
+    "exemptDays": 0
+  },
+  "mustSeeCoverageFailures": 2,
+  "acceptance": {
+    "noImpossibleTransition": {
+      "pass": true,
+      "count": 0
+    },
+    "noUrbanHardLongLeg": {
+      "pass": false,
+      "count": 1
+    },
+    "noIntraDayZigzag": {
+      "pass": false,
+      "count": 2
+    },
+    "routeInefficiencyWithinTarget": {
+      "pass": true,
+      "count": 0,
+      "exempt": 0
+    },
+    "mustSeeCoverage": {
+      "pass": false,
+      "count": 2
+    },
+    "campaignExecuted8Plus2": {
+      "pass": true,
+      "expected": 3,
+      "actual": 3
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "geo-direct-01",
+      "runType": "direct",
+      "scenarioId": "geo-direct-01",
+      "success": true,
+      "durationMs": 76782,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T14-19-06/geo-direct-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T14-19-06/geo-direct-01-report.json",
+      "score": 99,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 0,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": [
+        "Porte de Brandebourg",
+        "Île aux Musées"
+      ]
+    },
+    {
+      "runId": "geo-direct-02",
+      "runType": "direct",
+      "scenarioId": "geo-direct-02",
+      "success": true,
+      "durationMs": 129520,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T14-19-06/geo-direct-02.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T14-19-06/geo-direct-02-report.json",
+      "score": 93,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 1,
+        "GEO_INTRA_DAY_ZIGZAG": 2,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-suggest-01",
+      "runType": "suggestion",
+      "scenarioId": "geo-suggest-01-escapade-gastronomique-et-culturelle-a-s",
+      "success": true,
+      "durationMs": 125459,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T14-19-06/geo-suggest-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T14-19-06/geo-suggest-01-report.json",
+      "score": 98,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 0,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": [
+        "Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique"
+      ],
+      "suggestionQuery": "Je veux faire un break de 3 jours en Europe",
+      "suggestionTitle": "Escapade Gastronomique et Culturelle à San Sebastian"
+    }
+  ]
+}

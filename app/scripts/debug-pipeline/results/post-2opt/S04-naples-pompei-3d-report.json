@@ -1,0 +1,364 @@
+{
+  "tripId": "b8d795e9-4ecb-4a5b-ab2b-97499d5e7ad8",
+  "scenarioId": "naples-pompei-3d",
+  "generatedAt": "2026-03-19T23:10:39.473Z",
+  "destination": "Naples",
+  "summary": {
+    "totalIssues": 11,
+    "critical": 2,
+    "warning": 6,
+    "info": 3,
+    "score": 92,
+    "weightedScore": 92
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 63,
+      "critical": 1,
+      "warning": 3,
+      "info": 0,
+      "totalIssues": 4,
+      "weightedPenalty": 37.15
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 95,
+      "critical": 0,
+      "warning": 1,
+      "info": 2,
+      "totalIssues": 3,
+      "weightedPenalty": 4.9
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 90,
+      "critical": 1,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 10
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 20,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 5.6km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Déjeuner — Zi Teresa\" avec seulement 10min de battement (besoin ~12min)"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (0/2): pompei, spaccanapoli",
+      "category": "relevance",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (0/2): pompei, spaccanapoli"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 2 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: efficacité de route faible (1.97x du minimum MST)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Déjeuner — Zi Teresa\" à 5.6km de l'activité précéd",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Déjeuner — Zi Teresa\" à 5.6km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 10min de battement"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 5.6km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Déjeuner — Zi Teresa\" avec seulement 10min de battement (besoin ~12min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "5.6",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 12
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.97,
+          "totalLegKm": 17.81
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (1.97x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 1.97,
+          "threshold": 1.75,
+          "totalLegKm": 17.81,
+          "mstLowerBoundKm": 9.04
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important",
+        "details": {
+          "day1": 1,
+          "day2": 6
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "critical",
+        "category": "relevance",
+        "message": "Must-see manquants (0/2): pompei, spaccanapoli",
+        "details": {
+          "found": 0,
+          "total": 2,
+          "missing": [
+            "pompei",
+            "spaccanapoli"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Déjeuner — Zi Teresa\" à 5.6km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 10min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Déjeuner — Zi Teresa",
+        "details": {
+          "distKm": "5.6",
+          "gapMin": 10
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 14,
+    "activitiesCount": 3,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 4.666666666666667,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

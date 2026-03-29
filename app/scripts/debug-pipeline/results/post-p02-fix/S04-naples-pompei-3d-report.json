@@ -1,0 +1,464 @@
+{
+  "tripId": "601e1010-6bd4-4378-bce0-f793ac2225ee",
+  "scenarioId": "naples-pompei-3d",
+  "generatedAt": "2026-03-19T10:02:30.036Z",
+  "destination": "Naples",
+  "summary": {
+    "totalIssues": 18,
+    "critical": 2,
+    "warning": 12,
+    "info": 4,
+    "score": 87,
+    "weightedScore": 87
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 33,
+      "critical": 2,
+      "warning": 6,
+      "info": 0,
+      "totalIssues": 8,
+      "weightedPenalty": 67.3
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "dataQuality": {
+      "score": 95,
+      "critical": 0,
+      "warning": 1,
+      "info": 2,
+      "totalIssues": 3,
+      "weightedPenalty": 4.9
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "realism": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 40,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: 6.8km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Dîner — Gino e Toto Sorbillo\" avec seulement 5min de battement (besoin ~14min)",
+        "Jour 2: 23.7km entre \"Pompei\" et \"Galleria Umberto I\" avec seulement 0min de battement (besoin ~29min)"
+      ]
+    },
+    {
+      "key": "GEO_VERY_LONG_DAY_LEG",
+      "code": "GEO_VERY_LONG_DAY_LEG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/geography",
+      "count": 2,
+      "impactScore": 9.6,
+      "avgFrequencyWeight": 1.2,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" — trajet long",
+        "Jour 2: 23.7km entre \"Pompei\" et \"Galleria Umberto I\" — trajet long"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 2 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: efficacité de route faible (1.99x du minimum MST)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "realism:Jour 1: restaurant \"Dîner — Gino e Toto Sorbillo\" à 6.8km de l'activit",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: restaurant \"Dîner — Gino e Toto Sorbillo\" à 6.8km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 5min de battement"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Déjeuner — Repas libre\" à 6.6km de l'activité préc",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Déjeuner — Repas libre\" à 6.6km de l'activité précédente (\"Musée archéologique national de Naples\") avec seulement 10min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): spaccanapoli",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): spaccanapoli"
+      ]
+    },
+    {
+      "key": "GEO_LONG_LEG_OK",
+      "code": "GEO_LONG_LEG_OK",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 2,
+      "avgFrequencyWeight": 0.5,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: segment long 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" (135min de battement)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: 6.8km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Dîner — Gino e Toto Sorbillo\" avec seulement 5min de battement (besoin ~14min)",
+        "dayNumber": 1,
+        "details": {
+          "distanceKm": "6.8",
+          "gapMinutes": 5,
+          "estimatedTravelMin": 14
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" — trajet long",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 24,
+          "gapMinutes": 135
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: segment long 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" (135min de battement)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 24.36,
+          "gapMinutes": 135
+        },
+        "code": "GEO_LONG_LEG_OK",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 0.5
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 23.7km entre \"Pompei\" et \"Galleria Umberto I\" — trajet long",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 24,
+          "gapMinutes": 0
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 23.7km entre \"Pompei\" et \"Galleria Umberto I\" avec seulement 0min de battement (besoin ~29min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "23.7",
+          "gapMinutes": 0,
+          "estimatedTravelMin": 29
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.99,
+          "totalLegKm": 52.16
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (1.99x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 1.99,
+          "threshold": 1.75,
+          "totalLegKm": 52.16,
+          "mstLowerBoundKm": 26.26
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 2,
+        "itemTitle": "Déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (2 activités) vs jour 2 (7 activités) — déséquilibre important",
+        "details": {
+          "day1": 2,
+          "day2": 7
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): spaccanapoli",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "spaccanapoli"
+          ]
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 1: restaurant \"Dîner — Gino e Toto Sorbillo\" à 6.8km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 5min de battement",
+        "dayNumber": 1,
+        "itemTitle": "Dîner — Gino e Toto Sorbillo",
+        "details": {
+          "distKm": "6.8",
+          "gapMin": 5
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Déjeuner — Repas libre\" à 6.6km de l'activité précédente (\"Musée archéologique national de Naples\") avec seulement 10min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Déjeuner — Repas libre",
+        "details": {
+          "distKm": "6.6",
+          "gapMin": 10
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 17,
+    "activitiesCount": 5,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 5.666666666666667,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

@@ -1,0 +1,440 @@
+{
+  "tripId": "99870c84-0530-475c-8749-97dc16fd2f90",
+  "scenarioId": "geo-direct-01",
+  "generatedAt": "2026-02-18T23:17:01.622Z",
+  "destination": "Berlin",
+  "summary": {
+    "totalIssues": 15,
+    "critical": 6,
+    "warning": 5,
+    "info": 4,
+    "score": 78,
+    "weightedScore": 78
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 0,
+      "critical": 4,
+      "warning": 3,
+      "info": 0,
+      "totalIssues": 7,
+      "weightedPenalty": 105.15
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 59,
+      "critical": 2,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 3,
+      "weightedPenalty": 40.7
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 95,
+      "critical": 0,
+      "warning": 1,
+      "info": 2,
+      "totalIssues": 3,
+      "weightedPenalty": 4.9
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 4,
+      "impactScore": 88,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: segment urbain dur 4.7km entre \"Mur de Berlin\" et \"East Side Gallery\" (> 4km)",
+        "Jour 2: segment urbain dur 4.4km entre \"East Side Gallery\" et \"Porte de Brandebourg\" (> 4km)",
+        "Jour 2: segment urbain dur 4.8km entre \"Alexanderplatz\" et \"Dîner — Café am Neuen See\" (> 4km)"
+      ]
+    },
+    {
+      "key": "LINK_TRANSPORT_DATE_MISMATCH",
+      "code": "LINK_TRANSPORT_DATE_MISMATCH",
+      "category": "links",
+      "severity": "critical",
+      "component": "pipeline/step7-assemble",
+      "count": 2,
+      "impactScore": 40,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: departure_date=2026-03-21 incohérente pour \"🚌 Bus → Berlin\" (attendu 2026-03-20)",
+        "Jour 3: departure_date=2026-03-23 incohérente pour \"🚌 Bus → Lyon\" (attendu 2026-03-22)"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (5 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 6 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: efficacité de route faible (3.11x du minimum MST)"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1: seulement 20min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: seulement 20min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Mur de Berlin\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1 (1 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1 (1 activités) vs jour 2 (8 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2 (8 activités) vs jour 3 (2 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2 (8 activités) vs jour 3 (2 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment urbain dur 4.7km entre \"Mur de Berlin\" et \"East Side Gallery\" (> 4km)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 4.69,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment urbain dur 4.4km entre \"East Side Gallery\" et \"Porte de Brandebourg\" (> 4km)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 4.38,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment urbain dur 4.8km entre \"Alexanderplatz\" et \"Dîner — Café am Neuen See\" (> 4km)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 4.83,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 6 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 6,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (5 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 5,
+          "routeInefficiencyRatio": 3.11,
+          "totalLegKm": 26.03
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (3.11x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 3.11,
+          "threshold": 1.75,
+          "totalLegKm": 26.03,
+          "mstLowerBoundKm": 8.36
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 3: segment urbain dur 4.6km entre \"Mémorial aux Juifs assassinés d'Europe\" et \"Déjeuner — RIVO Spreeterrassen\" (> 4km)",
+        "dayNumber": 3,
+        "details": {
+          "distanceKm": 4.56,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [],
+    "links": [
+      {
+        "severity": "critical",
+        "category": "links",
+        "message": "Jour 1: departure_date=2026-03-21 incohérente pour \"🚌 Bus → Berlin\" (attendu 2026-03-20)",
+        "dayNumber": 1,
+        "itemTitle": "🚌 Bus → Berlin",
+        "details": {
+          "departureDate": "2026-03-21",
+          "expectedDate": "2026-03-20",
+          "bookingUrl": "https://www.omio.fr/bus/lyon/berlin?departure_date=2026-03-21"
+        },
+        "code": "LINK_TRANSPORT_DATE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Mur de Berlin\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Mur de Berlin",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "critical",
+        "category": "links",
+        "message": "Jour 3: departure_date=2026-03-23 incohérente pour \"🚌 Bus → Lyon\" (attendu 2026-03-22)",
+        "dayNumber": 3,
+        "itemTitle": "🚌 Bus → Lyon",
+        "details": {
+          "departureDate": "2026-03-23",
+          "expectedDate": "2026-03-22",
+          "bookingUrl": "https://www.omio.fr/bus/berlin/lyon?departure_date=2026-03-23"
+        },
+        "code": "LINK_TRANSPORT_DATE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: seulement 20min de temps libre — pas de pause",
+        "dayNumber": 1,
+        "details": {
+          "freeMinutes": 20,
+          "occupiedMinutes": 901
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (1 activités) vs jour 2 (8 activités) — déséquilibre important",
+        "details": {
+          "day1": 1,
+          "day2": 8
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2 (8 activités) vs jour 3 (2 activités) — déséquilibre important",
+        "details": {
+          "day1": 8,
+          "day2": 2
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 16,
+    "activitiesCount": 8,
+    "restaurantsCount": 3,
+    "avgItemsPerDay": 5.333333333333333,
+    "totalEstimatedCost": 249,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

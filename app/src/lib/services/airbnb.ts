@@ -272,7 +272,7 @@ export async function searchAirbnbListings(
       });
     }
 
-    console.log(
+    console.debug(
       `[Airbnb] Audit destination=${destination} raw=${listings.length} sampled=${sampledListings.length} kept=${accommodations.length} rejectedMissingId=${rejectedMissingId} rejectedInvalidUrl=${rejectedInvalidUrl} rejectedPrice=${rejectedPrice}`
     );
 

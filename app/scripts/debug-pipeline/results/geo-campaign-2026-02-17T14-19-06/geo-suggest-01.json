@@ -1,0 +1,1512 @@
+{
+  "scenarioId": "geo-suggest-01-escapade-gastronomique-et-culturelle-a-s",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "San Sebastian",
+    "startDate": "2026-04-03T14:22:42.143Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "San Sebastian",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "ba4a6ba6-01e3-4919-bce8-c3c2c4485461",
+    "createdAt": "2026-02-17T14:24:47.531Z",
+    "updatedAt": "2026-02-17T14:24:47.531Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "San Sebastian",
+      "startDate": "2026-04-03T14:22:42.143Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "San Sebastian",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-03T14:22:42.143Z",
+        "items": [
+          {
+            "id": "home-airport-out-1",
+            "dayNumber": 1,
+            "startTime": "06:17",
+            "endTime": "06:55",
+            "type": "transport",
+            "title": "🚗 Trajet vers LYS",
+            "description": "Lyon → Lyon Saint-Exupéry",
+            "locationName": "Lyon Saint-Exupéry",
+            "latitude": 45.7256,
+            "longitude": 5.0811,
+            "orderIndex": 0,
+            "estimatedCost": 4,
+            "duration": 38,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%97%20Trajet%20vers%20LYS%2C%20San%20Sebastian",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "airport_parking_included"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "parking-out-1",
+            "dayNumber": 1,
+            "startTime": "06:55",
+            "endTime": "07:25",
+            "type": "parking",
+            "title": "Parking aéroport — P5 Économique",
+            "description": "",
+            "locationName": "Lyon Saint-Exupéry",
+            "latitude": 45.72,
+            "longitude": 5.09,
+            "orderIndex": 1,
+            "estimatedCost": 36,
+            "duration": 30,
+            "rating": 3.8,
+            "bookingUrl": "https://www.lyonaeroports.com/parkings",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=P5%20%C3%89conomique%2C%20San%20Sebastian",
+            "parking": {
+              "id": "lys-p5",
+              "name": "P5 Économique",
+              "type": "airport",
+              "address": "Lyon Saint-Exupéry",
+              "latitude": 45.72,
+              "longitude": 5.09,
+              "distanceToTerminal": 1500,
+              "pricePerDay": 12,
+              "currency": "EUR",
+              "amenities": [
+                "outdoor",
+                "24h",
+                "shuttle"
+              ],
+              "rating": 3.8,
+              "reviewCount": 320,
+              "bookingUrl": "https://www.lyonaeroports.com/parkings",
+              "totalPrice": 36,
+              "locationName": "Lyon Saint-Exupéry",
+              "estimatedCost": 36,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "airport_parking_selected"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "airport_parking_selected"
+            ],
+            "distanceFromPrevious": 0.93,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "flight-out-1",
+            "dayNumber": 1,
+            "startTime": "08:55",
+            "endTime": "09:55",
+            "type": "flight",
+            "title": "Vol XK 131",
+            "description": "",
+            "locationName": "",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 2,
+            "estimatedCost": 98,
+            "duration": 60,
+            "bookingUrl": "https://www.aviasales.com/search/LYS0304AJA1?currency=eur&locale=fr",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20XK%20131%2C%20San%20Sebastian",
+            "flight": {
+              "id": "serp-XK 131-2026-04-03",
+              "airline": "XK",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/XK.png",
+              "flightNumber": "XK 131",
+              "departureAirport": "Aéroport de Lyon-Saint-Exupéry",
+              "departureAirportCode": "LYS",
+              "departureCity": "LYS",
+              "departureTime": "2026-04-03T06:55:00.000Z",
+              "departureTimeDisplay": "08:55",
+              "arrivalAirport": "Aéroport Ajaccio Napoléon Bonaparte",
+              "arrivalAirportCode": "AJA",
+              "arrivalCity": "AJA",
+              "arrivalTime": "2026-04-03T07:55:00.000Z",
+              "arrivalTimeDisplay": "09:55",
+              "duration": 60,
+              "stops": 0,
+              "price": 98,
+              "pricePerPerson": 98,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/LYS0304AJA1?currency=eur&locale=fr"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "meal-1-lunch",
+            "dayNumber": 1,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Aduana Elkartea",
+            "description": "restaurant",
+            "locationName": "Aduana Elkartea",
+            "latitude": 43.340428599999996,
+            "longitude": -1.7969323,
+            "orderIndex": 3,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJOU2yRlkIUQ0RGNctLSYVWLk",
+              "name": "Aduana Elkartea",
+              "address": "Aduana Kalea, 3, 20302 Irun, Gipuzkoa, Espagne",
+              "latitude": 43.340428599999996,
+              "longitude": -1.7969323,
+              "rating": 4.8,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+              "googlePlaceId": "ChIJOU2yRlkIUQ0RGNctLSYVWLk",
+              "openingHours": {
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.011535511799985455,
+              "walkingTime": 0,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVnIawD8BXaPtXgd0ck9-O1kzqFSkDtdz_vY6caU8N2_MJKNCo8zidv29Ua8SAzI5ljtUuY40n3JKiX2jGL6bP6IgL8fqtznezDqH3sUCofwOffFbWfeFa1zbbONLukS5yshoOyawaW3IswdylmZ0Ctd7xlrfYF-nJW5JiMzS4_fBE__S1bwi2nR7kTOWzjKzm3ZEaypwItViYvggpiRpHrQB06_U9y3nuXX7TqShAMwqyjxxhCIMugudS8vgHX5eRXE25J9K2997wgN53YvHzKpeNDw3PpRpeJpC1CN2WcXnWvojzahXBtC0eByPsIp251cpO0w-_-8Gubw85R02y9vk-oBHmRdQWakV0tIxdQmjzCbL93AUADf9A_LMCdq7ye1jjcIjvhQpZ9FZ5_Mrcw_RjonPgU5OUvPMxn1Yk9fh2P&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVnIawD8BXaPtXgd0ck9-O1kzqFSkDtdz_vY6caU8N2_MJKNCo8zidv29Ua8SAzI5ljtUuY40n3JKiX2jGL6bP6IgL8fqtznezDqH3sUCofwOffFbWfeFa1zbbONLukS5yshoOyawaW3IswdylmZ0Ctd7xlrfYF-nJW5JiMzS4_fBE__S1bwi2nR7kTOWzjKzm3ZEaypwItViYvggpiRpHrQB06_U9y3nuXX7TqShAMwqyjxxhCIMugudS8vgHX5eRXE25J9K2997wgN53YvHzKpeNDw3PpRpeJpC1CN2WcXnWvojzahXBtC0eByPsIp251cpO0w-_-8Gubw85R02y9vk-oBHmRdQWakV0tIxdQmjzCbL93AUADf9A_LMCdq7ye1jjcIjvhQpZ9FZ5_Mrcw_RjonPgU5OUvPMxn1Yk9fh2P&maxwidth=800",
+            "distanceFromPrevious": 0.011535511799985455,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "17:00",
+            "endTime": "17:30",
+            "type": "checkin",
+            "title": "Check-in Pensión Lizaso",
+            "description": "Disponibilité confirmée",
+            "locationName": "Aduana Kalea, 5, 20303 Irun, Gipuzkoa, Spain",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 7.4,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Lizaso+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pensi%C3%B3n%20Lizaso%2C%20San%20Sebastian",
+            "accommodation": {
+              "id": "booking-578220",
+              "name": "Pensión Lizaso",
+              "type": "hotel",
+              "address": "Aduana Kalea, 5, 20303 Irun, Gipuzkoa, Spain",
+              "latitude": 43.3404938807205,
+              "longitude": -1.79704315960407,
+              "rating": 7.4,
+              "reviewCount": 1174,
+              "stars": 3,
+              "pricePerNight": 82,
+              "totalPrice": 164,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/672277659.jpg?k=817262d814e19a835d6c0ea34f6f071696b2201d1d7c7856f2234f35f698e9a1&o="
+              ],
+              "checkInTime": "17:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Lizaso+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "hotel_distance_no_candidate_under_relaxed_cap"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "hotel_distance_no_candidate_under_relaxed_cap"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/672277659.jpg?k=817262d814e19a835d6c0ea34f6f071696b2201d1d7c7856f2234f35f698e9a1&o=",
+            "distanceFromPrevious": 0.01,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=42.6976276,9.4510422&destination=43.3404938807205,-1.79704315960407&travelmode=transit"
+          },
+          {
+            "id": "self-dinner-1",
+            "dayNumber": 1,
+            "startTime": "20:00",
+            "endTime": "21:00",
+            "type": "restaurant",
+            "title": "Dîner — Restaurant à proximité",
+            "description": "Dîner",
+            "locationName": "Restaurant à proximité",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 5,
+            "estimatedCost": 20,
+            "duration": 60,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20San%20Sebastian",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20San%20Sebastian",
+            "restaurant": {
+              "name": "Restaurant à proximité",
+              "description": "Dîner",
+              "latitude": 43.3404938807205,
+              "longitude": -1.79704315960407,
+              "estimatedCost": 20
+            },
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Découverte gastronomique",
+        "dayNarrative": "Première journée dédiée à la découverte culinaire avec une visite des meilleurs pintxos de Saint-Sébastien pour s'immerger dans la culture locale.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 11,
+          "tempMax": 19,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 50,
+          "transport": 40,
+          "total": 90
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 185,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.01,
+          "p95LegKm": 0.01,
+          "totalTravelMin": 5,
+          "totalLegKm": 0.01,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0.01
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-04T14:22:42.143Z",
+        "items": [
+          {
+            "id": "self-breakfast-2",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:30",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Pensión Lizaso",
+            "description": "Petit-déjeuner à l'hôtel",
+            "locationName": "Pensión Lizaso",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 0,
+            "estimatedCost": 8,
+            "duration": 30,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Pensi%C3%B3n%20Lizaso%2C%20San%20Sebastian",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pensi%C3%B3n%20Lizaso%2C%20San%20Sebastian",
+            "restaurant": {
+              "name": "Pensión Lizaso",
+              "description": "Petit-déjeuner à l'hôtel",
+              "latitude": 43.3404938807205,
+              "longitude": -1.79704315960407,
+              "estimatedCost": 8,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXUboFMHNxZ7dN5K802VC9xUblIpL2UevXaYrGxwzXoDvxYVhdEhNJfVCldp6R6tlNInQ1E3vTDxStjActO-Rf-q8eadWQ8c1THjQnnjqRVXPOWpbbBSRILJLlLCrt8bGBYXZYjTepwsQopNAj8Jv6YyHvu2cMtEnjaf6IBV391GtDCQc3Z-FLs25hScNZtN_3sTzy_OurwhZamJpYQBFltOpjkXWo8BN3R7jJu2NmA5-YC0SVv3uc1thAkTwaD42JHIcrDA6qWN8ViyS_DYbGpGZZ4X767-hFoCLGps_S0-yAqr_RoaFGOpgsvYi0Uf5063NjUofSK4y96uWkU9Q4Qv9VKYFDvlB7cHc3tO18yPDGvMIVOCNOR8u9wz6YN4RMTBtwtNg462KkMd5GCS74x4YE3Di-Bc3Ve0TrIEu6CRPGyHDEKzINJdHs2u_ax4hVAnHGRVFaIxtjYqTgf_bukn6N3c6aUyJ-EVSXMR_pfbEy7Bg1XzdAXFZdDiiRtVDWlQHCf94qeesKjn9N4T-S43tj_iceYaUKVywq1K5jjl8RZwpYVqH8Zq-UixYegLvdVpTEw&maxwidth=800"
+              ]
+            },
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXUboFMHNxZ7dN5K802VC9xUblIpL2UevXaYrGxwzXoDvxYVhdEhNJfVCldp6R6tlNInQ1E3vTDxStjActO-Rf-q8eadWQ8c1THjQnnjqRVXPOWpbbBSRILJLlLCrt8bGBYXZYjTepwsQopNAj8Jv6YyHvu2cMtEnjaf6IBV391GtDCQc3Z-FLs25hScNZtN_3sTzy_OurwhZamJpYQBFltOpjkXWo8BN3R7jJu2NmA5-YC0SVv3uc1thAkTwaD42JHIcrDA6qWN8ViyS_DYbGpGZZ4X767-hFoCLGps_S0-yAqr_RoaFGOpgsvYi0Uf5063NjUofSK4y96uWkU9Q4Qv9VKYFDvlB7cHc3tO18yPDGvMIVOCNOR8u9wz6YN4RMTBtwtNg462KkMd5GCS74x4YE3Di-Bc3Ve0TrIEu6CRPGyHDEKzINJdHs2u_ax4hVAnHGRVFaIxtjYqTgf_bukn6N3c6aUyJ-EVSXMR_pfbEy7Bg1XzdAXFZdDiiRtVDWlQHCf94qeesKjn9N4T-S43tj_iceYaUKVywq1K5jjl8RZwpYVqH8Zq-UixYegLvdVpTEw&maxwidth=800",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "self-lunch-2",
+            "dayNumber": 2,
+            "startTime": "08:40",
+            "endTime": "09:25",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant à proximité",
+            "description": "Déjeuner",
+            "locationName": "Restaurant à proximité",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 45,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20San%20Sebastian",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20San%20Sebastian",
+            "restaurant": {
+              "name": "Restaurant à proximité",
+              "description": "Déjeuner",
+              "latitude": 43.3404938807205,
+              "longitude": -1.79704315960407,
+              "estimatedCost": 15
+            },
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "self-dinner-2",
+            "dayNumber": 2,
+            "startTime": "09:35",
+            "endTime": "10:35",
+            "type": "restaurant",
+            "title": "Dîner — Aduana Elkartea",
+            "description": "Dîner",
+            "locationName": "Aduana Kalea, 3, 20302 Irun, Gipuzkoa, Espagne",
+            "latitude": 43.340428599999996,
+            "longitude": -1.7969323,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJOU2yRlkIUQ0RGNctLSYVWLk",
+              "name": "Aduana Elkartea",
+              "address": "Aduana Kalea, 3, 20302 Irun, Gipuzkoa, Espagne",
+              "latitude": 43.340428599999996,
+              "longitude": -1.7969323,
+              "rating": 4.8,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+              "googlePlaceId": "ChIJOU2yRlkIUQ0RGNctLSYVWLk",
+              "openingHours": {
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.011535511799985455,
+              "walkingTime": 0,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVnIawD8BXaPtXgd0ck9-O1kzqFSkDtdz_vY6caU8N2_MJKNCo8zidv29Ua8SAzI5ljtUuY40n3JKiX2jGL6bP6IgL8fqtznezDqH3sUCofwOffFbWfeFa1zbbONLukS5yshoOyawaW3IswdylmZ0Ctd7xlrfYF-nJW5JiMzS4_fBE__S1bwi2nR7kTOWzjKzm3ZEaypwItViYvggpiRpHrQB06_U9y3nuXX7TqShAMwqyjxxhCIMugudS8vgHX5eRXE25J9K2997wgN53YvHzKpeNDw3PpRpeJpC1CN2WcXnWvojzahXBtC0eByPsIp251cpO0w-_-8Gubw85R02y9vk-oBHmRdQWakV0tIxdQmjzCbL93AUADf9A_LMCdq7ye1jjcIjvhQpZ9FZ5_Mrcw_RjonPgU5OUvPMxn1Yk9fh2P&maxwidth=800"
+              ]
+            },
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVnIawD8BXaPtXgd0ck9-O1kzqFSkDtdz_vY6caU8N2_MJKNCo8zidv29Ua8SAzI5ljtUuY40n3JKiX2jGL6bP6IgL8fqtznezDqH3sUCofwOffFbWfeFa1zbbONLukS5yshoOyawaW3IswdylmZ0Ctd7xlrfYF-nJW5JiMzS4_fBE__S1bwi2nR7kTOWzjKzm3ZEaypwItViYvggpiRpHrQB06_U9y3nuXX7TqShAMwqyjxxhCIMugudS8vgHX5eRXE25J9K2997wgN53YvHzKpeNDw3PpRpeJpC1CN2WcXnWvojzahXBtC0eByPsIp251cpO0w-_-8Gubw85R02y9vk-oBHmRdQWakV0tIxdQmjzCbL93AUADf9A_LMCdq7ye1jjcIjvhQpZ9FZ5_Mrcw_RjonPgU5OUvPMxn1Yk9fh2P&maxwidth=800",
+            "distanceFromPrevious": 0.01,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Découverte gastronomique",
+        "dayNarrative": "Journée d'exploration avec une visite privée de Pampelune incluant un déjeuner à Tolosa pour découvrir la région basque au-delà de Saint-Sébastien.",
+        "isDayTrip": true,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 11,
+          "tempMax": 18,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 43,
+          "transport": 0,
+          "total": 43
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 10,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.01,
+          "p95LegKm": 0,
+          "totalTravelMin": 15,
+          "totalLegKm": 0.01,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0.01
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-05T14:22:42.143Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "09:15",
+            "type": "checkout",
+            "title": "Check-out Pensión Lizaso",
+            "description": "Disponibilité confirmée",
+            "locationName": "Aduana Kalea, 5, 20303 Irun, Gipuzkoa, Spain",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 7.4,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Lizaso+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pensi%C3%B3n%20Lizaso%2C%20San%20Sebastian",
+            "accommodation": {
+              "id": "booking-578220",
+              "name": "Pensión Lizaso",
+              "type": "hotel",
+              "address": "Aduana Kalea, 5, 20303 Irun, Gipuzkoa, Spain",
+              "latitude": 43.3404938807205,
+              "longitude": -1.79704315960407,
+              "rating": 7.4,
+              "reviewCount": 1174,
+              "stars": 3,
+              "pricePerNight": 82,
+              "totalPrice": 164,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/672277659.jpg?k=817262d814e19a835d6c0ea34f6f071696b2201d1d7c7856f2234f35f698e9a1&o="
+              ],
+              "checkInTime": "17:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Lizaso+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "hotel_distance_no_candidate_under_relaxed_cap"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "hotel_distance_no_candidate_under_relaxed_cap"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/672277659.jpg?k=817262d814e19a835d6c0ea34f6f071696b2201d1d7c7856f2234f35f698e9a1&o="
+          },
+          {
+            "id": "self-lunch-3",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant à proximité",
+            "description": "Déjeuner",
+            "locationName": "Restaurant à proximité",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 45,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20San%20Sebastian",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20San%20Sebastian",
+            "restaurant": {
+              "name": "Restaurant à proximité",
+              "description": "Déjeuner",
+              "latitude": 43.3404938807205,
+              "longitude": -1.79704315960407,
+              "estimatedCost": 15
+            },
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "self-dinner-3",
+            "dayNumber": 3,
+            "startTime": "13:55",
+            "endTime": "14:55",
+            "type": "restaurant",
+            "title": "Dîner — Aduana Elkartea",
+            "description": "Dîner",
+            "locationName": "Aduana Kalea, 3, 20302 Irun, Gipuzkoa, Espagne",
+            "latitude": 43.340428599999996,
+            "longitude": -1.7969323,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJOU2yRlkIUQ0RGNctLSYVWLk",
+              "name": "Aduana Elkartea",
+              "address": "Aduana Kalea, 3, 20302 Irun, Gipuzkoa, Espagne",
+              "latitude": 43.340428599999996,
+              "longitude": -1.7969323,
+              "rating": 4.8,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Aduana%20Elkartea%2C%20Aduana%20Kalea%2C%203%2C%2020302%20Irun%2C%20Gipuzkoa%2C%20Espagne",
+              "googlePlaceId": "ChIJOU2yRlkIUQ0RGNctLSYVWLk",
+              "openingHours": {
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.011535511799985455,
+              "walkingTime": 0,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVnIawD8BXaPtXgd0ck9-O1kzqFSkDtdz_vY6caU8N2_MJKNCo8zidv29Ua8SAzI5ljtUuY40n3JKiX2jGL6bP6IgL8fqtznezDqH3sUCofwOffFbWfeFa1zbbONLukS5yshoOyawaW3IswdylmZ0Ctd7xlrfYF-nJW5JiMzS4_fBE__S1bwi2nR7kTOWzjKzm3ZEaypwItViYvggpiRpHrQB06_U9y3nuXX7TqShAMwqyjxxhCIMugudS8vgHX5eRXE25J9K2997wgN53YvHzKpeNDw3PpRpeJpC1CN2WcXnWvojzahXBtC0eByPsIp251cpO0w-_-8Gubw85R02y9vk-oBHmRdQWakV0tIxdQmjzCbL93AUADf9A_LMCdq7ye1jjcIjvhQpZ9FZ5_Mrcw_RjonPgU5OUvPMxn1Yk9fh2P&maxwidth=800"
+              ]
+            },
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVnIawD8BXaPtXgd0ck9-O1kzqFSkDtdz_vY6caU8N2_MJKNCo8zidv29Ua8SAzI5ljtUuY40n3JKiX2jGL6bP6IgL8fqtznezDqH3sUCofwOffFbWfeFa1zbbONLukS5yshoOyawaW3IswdylmZ0Ctd7xlrfYF-nJW5JiMzS4_fBE__S1bwi2nR7kTOWzjKzm3ZEaypwItViYvggpiRpHrQB06_U9y3nuXX7TqShAMwqyjxxhCIMugudS8vgHX5eRXE25J9K2997wgN53YvHzKpeNDw3PpRpeJpC1CN2WcXnWvojzahXBtC0eByPsIp251cpO0w-_-8Gubw85R02y9vk-oBHmRdQWakV0tIxdQmjzCbL93AUADf9A_LMCdq7ye1jjcIjvhQpZ9FZ5_Mrcw_RjonPgU5OUvPMxn1Yk9fh2P&maxwidth=800",
+            "distanceFromPrevious": 0.01,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3-fallback",
+            "dayNumber": 3,
+            "startTime": "15:25",
+            "endTime": "17:55",
+            "type": "transport",
+            "title": "✈️ Vol retour",
+            "description": "San Sebastian → Lyon (estimation, lien vols recommandé)",
+            "locationName": "San Sebastian → Lyon",
+            "latitude": 43.3404938807205,
+            "longitude": -1.79704315960407,
+            "orderIndex": 3,
+            "duration": 150,
+            "estimatedCost": 50,
+            "bookingUrl": "https://www.aviasales.com/search/SAN%20SEBASTIAN0504LYON1?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/SAN SEBASTIAN0504LYON1?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/lyon/san-sebastian?departure_date=2026-04-05",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ]
+          }
+        ],
+        "theme": "Retour",
+        "dayNarrative": "Journée de départ sans activités programmées pour profiter d'un rythme plus tranquille avant le vol retour.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Bruine légère",
+          "tempMin": 11,
+          "tempMax": 19,
+          "icon": "🌦️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 35,
+          "transport": 0,
+          "total": 35
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 225,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.01,
+          "p95LegKm": 0.01,
+          "totalTravelMin": 10,
+          "totalLegKm": 0.01,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0.01
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "San Sebastian",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 42.6975,
+              "lng": 9.451
+            },
+            "duration": 38,
+            "price": 50,
+            "co2": 128,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON0304SAN SEBASTIAN1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 328,
+        "totalPrice": 50,
+        "totalCO2": 128,
+        "score": 6.6,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 10,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON0304SAN SEBASTIAN1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/san-sebastian?departure_date=2026-04-03",
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "San Sebastian",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 42.6975,
+              "lng": 9.451
+            },
+            "duration": 301,
+            "price": 100,
+            "co2": 26,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/San%20Sebastian"
+          }
+        ],
+        "totalDuration": 346,
+        "totalPrice": 100,
+        "totalCO2": 26,
+        "score": 3.4,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/San%20Sebastian",
+        "dataSource": "estimated",
+        "recommendationReason": "Option la plus écologique"
+      }
+    ],
+    "selectedTransport": {
+      "id": "plane",
+      "mode": "plane",
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Lyon",
+          "to": "San Sebastian",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 42.6975,
+            "lng": 9.451
+          },
+          "duration": 38,
+          "price": 50,
+          "co2": 128,
+          "frequency": "Plusieurs vols par jour",
+          "bookingUrl": "https://www.aviasales.com/search/LYON0304SAN SEBASTIAN1?currency=eur&locale=fr"
+        }
+      ],
+      "totalDuration": 328,
+      "totalPrice": 50,
+      "totalCO2": 128,
+      "score": 6.6,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 10,
+        "co2Score": 0
+      },
+      "bookingUrl": "https://www.aviasales.com/search/LYON0304SAN SEBASTIAN1?currency=eur&locale=fr",
+      "omioFlightUrl": "https://www.omio.fr/vols/lyon/san-sebastian?departure_date=2026-04-03",
+      "recommended": true,
+      "recommendationReason": "Option économique, rapide"
+    },
+    "outboundFlight": {
+      "id": "serp-XK 131-2026-04-03",
+      "airline": "XK",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/XK.png",
+      "flightNumber": "XK 131",
+      "departureAirport": "Aéroport de Lyon-Saint-Exupéry",
+      "departureAirportCode": "LYS",
+      "departureCity": "LYS",
+      "departureTime": "2026-04-03T06:55:00.000Z",
+      "departureTimeDisplay": "08:55",
+      "arrivalAirport": "Aéroport Ajaccio Napoléon Bonaparte",
+      "arrivalAirportCode": "AJA",
+      "arrivalCity": "AJA",
+      "arrivalTime": "2026-04-03T07:55:00.000Z",
+      "arrivalTimeDisplay": "09:55",
+      "duration": 60,
+      "stops": 0,
+      "price": 98,
+      "pricePerPerson": 98,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/LYS0304AJA1?currency=eur&locale=fr"
+    },
+    "accommodation": {
+      "id": "booking-578220",
+      "name": "Pensión Lizaso",
+      "type": "hotel",
+      "address": "Aduana Kalea, 5, 20303 Irun, Gipuzkoa, Spain",
+      "latitude": 43.3404938807205,
+      "longitude": -1.79704315960407,
+      "rating": 7.4,
+      "reviewCount": 1174,
+      "stars": 3,
+      "pricePerNight": 82,
+      "totalPrice": 164,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/672277659.jpg?k=817262d814e19a835d6c0ea34f6f071696b2201d1d7c7856f2234f35f698e9a1&o="
+      ],
+      "checkInTime": "17:00",
+      "checkOutTime": "12:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Lizaso+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified",
+      "qualityFlags": [
+        "hotel_distance_no_candidate_under_relaxed_cap"
+      ]
+    },
+    "parking": {
+      "id": "lys-p5",
+      "name": "P5 Économique",
+      "type": "airport",
+      "address": "Lyon Saint-Exupéry",
+      "latitude": 45.72,
+      "longitude": 5.09,
+      "distanceToTerminal": 1500,
+      "pricePerDay": 12,
+      "currency": "EUR",
+      "amenities": [
+        "outdoor",
+        "24h",
+        "shuttle"
+      ],
+      "rating": 3.8,
+      "reviewCount": 320,
+      "bookingUrl": "https://www.lyonaeroports.com/parkings",
+      "totalPrice": 36
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-584461",
+        "name": "Bar Pensión Restaurante Bidasoa",
+        "type": "hotel",
+        "address": "Estación Kalea, 14, BAJO, 20301 Irun, Gipuzkoa, Spain",
+        "latitude": 43.3409903415343,
+        "longitude": -1.79894551634789,
+        "rating": 5.3,
+        "reviewCount": 723,
+        "stars": 2,
+        "pricePerNight": 68,
+        "totalPrice": 136,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/18699882.jpg?k=92c96076916c41a043463124e4cf3f3b128760eea483eb33ccf15e87691792c6&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Bar+Pensi%C3%B3n+Restaurante+Bidasoa+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-356933",
+        "name": "Hostal Xaloa Orio",
+        "type": "hotel",
+        "address": "Estropalari Kalea, 26, 20810 Orio, Gipuzkoa, Spain",
+        "latitude": 43.281073637179,
+        "longitude": -2.12541192770004,
+        "rating": 8.2,
+        "reviewCount": 716,
+        "stars": 2,
+        "pricePerNight": 75,
+        "totalPrice": 150,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/6447791.jpg?k=c68f694aee626101512a62b129311388d78edc4596ea60664885daa2d0db3f27&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Hostal+Xaloa+Orio+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-19090",
+        "name": "Pensión Txiki Polit",
+        "type": "hotel",
+        "address": "Orape, Musika Plaza, 10, 20800 Zarautz, Gipuzkoa, Spain",
+        "latitude": 43.2859784866554,
+        "longitude": -2.17680049209775,
+        "rating": 8.4,
+        "reviewCount": 2252,
+        "stars": 2,
+        "pricePerNight": 80,
+        "totalPrice": 160,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/412936079.jpg?k=0a9209b39d4df0a7c98bb8335015dec61ce4ee734faf75e33822f3eaf1c4c10d&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Txiki+Polit+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-1249608",
+        "name": "HOSTAL EUROPA pensión",
+        "type": "hotel",
+        "address": "Av. Iparralde, 59, 20302 Irun, Gipuzkoa, Spain",
+        "latitude": 43.3491223953328,
+        "longitude": -1.78621249707692,
+        "rating": 6.6,
+        "reviewCount": 379,
+        "stars": 3,
+        "pricePerNight": 81,
+        "totalPrice": 162,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/110988495.jpg?k=766d12a7e5cb2b331a2395b2fea891271393b5d4676715e4f6c9978a5d1045b6&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=HOSTAL+EUROPA+pensi%C3%B3n+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-578220",
+        "name": "Pensión Lizaso",
+        "type": "hotel",
+        "address": "Aduana Kalea, 5, 20303 Irun, Gipuzkoa, Spain",
+        "latitude": 43.3404938807205,
+        "longitude": -1.79704315960407,
+        "rating": 7.4,
+        "reviewCount": 1174,
+        "stars": 3,
+        "pricePerNight": 82,
+        "totalPrice": 164,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/672277659.jpg?k=817262d814e19a835d6c0ea34f6f071696b2201d1d7c7856f2234f35f698e9a1&o="
+        ],
+        "checkInTime": "17:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Pensi%C3%B3n+Lizaso+San+Sebastian&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 446,
+    "costBreakdown": {
+      "flights": 98,
+      "accommodation": 164,
+      "food": 148,
+      "activities": 0,
+      "transport": 0,
+      "parking": 36,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Espagnol",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Buenos días",
+            "phonetic": "bweh-nos dee-as",
+            "context": "Salutation formelle le matin"
+          },
+          {
+            "original": "Je voudrais...",
+            "translation": "Me gustaría...",
+            "phonetic": "meh goos-ta-ree-a",
+            "context": "Pour faire une demande polie"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "¿Dónde están los servicios?",
+            "phonetic": "don-deh es-tan los ser-vee-see-os",
+            "context": "Demander les toilettes"
+          },
+          {
+            "original": "L'addition, s'il vous plaît",
+            "translation": "La cuenta, por favor",
+            "phonetic": "la kwen-ta por fa-vor",
+            "context": "Demander l'addition au restaurant"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "No entiendo",
+            "phonetic": "no en-tee-en-do",
+            "context": "Quand on ne comprend pas"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "¿Habla francés?",
+            "phonetic": "a-bla fran-ses",
+            "context": "Demander si l'interlocuteur parle français"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "¿Cuánto cuesta?",
+            "phonetic": "kwan-to kwes-ta",
+            "context": "Demander le prix"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "¡Ayuda!",
+            "phonetic": "a-you-da",
+            "context": "En cas d'urgence"
+          },
+          {
+            "original": "Un café, s'il vous plaît",
+            "translation": "Un café, por favor",
+            "phonetic": "un ka-feh por fa-vor",
+            "context": "Commander un café"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Muchas gracias",
+            "phonetic": "moo-chas gra-see-as",
+            "context": "Remercier chaleureusement"
+          },
+          {
+            "original": "Je suis désolé",
+            "translation": "Lo siento",
+            "phonetic": "lo see-en-to",
+            "context": "S'excuser poliment"
+          },
+          {
+            "original": "Pouvez-vous m'aider ?",
+            "translation": "¿Puede ayudarme?",
+            "phonetic": "pweh-deh a-you-dar-meh",
+            "context": "Demander de l'aide"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Pull léger",
+            "reason": "Températures fraîches en avril (15-20°C)"
+          },
+          {
+            "item": "Imperméable compact",
+            "reason": "Risque de pluie à San Sebastian"
+          },
+          {
+            "item": "Adaptateur prise européen",
+            "reason": "Compatibilité électrique"
+          },
+          {
+            "item": "Chaussures de marche confortables",
+            "reason": "Ville avec nombreux déplacements à pied"
+          },
+          {
+            "item": "Petit sac à dos",
+            "reason": "Pour visites et excursions"
+          },
+          {
+            "item": "Crème solaire",
+            "reason": "Protection UV en bord de mer"
+          },
+          {
+            "item": "Bonnet léger",
+            "reason": "Protéger du vent océanique"
+          }
+        ],
+        "plugType": "C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Pas de visa pour un séjour touristique < 90 jours. Passeport ou carte d'identité valide."
+          }
+        ],
+        "importantLaws": [
+          "Interdiction de boire sur la voie publique",
+          "Port du masque dans les transports en commun recommandé",
+          "Respect strict des horaires de repos dans les logements"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "112",
+        "fire": "112",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Police locale de San Sebastian",
+            "number": "943 00 00 00"
+          },
+          {
+            "label": "Hôpital universitaire de Donostia",
+            "number": "943 00 70 00"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 120,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 80,
+      "transportTips": "Utilisez le bus ou marchez - San Sebastian est compact",
+      "reasoning": "San Sebastian est une destination gastronomique coûteuse. Stratégie d'économie avec Airbnb avec cuisine permet de réinvestir budget dans expériences culinaires. Petit-déjeuner et courses économiseront de l'argent, tout en profitant de quelques restaurants pour pintxos et dîners. Budget activités mixte permettra de découvrir culture et gastronomie sans se ruiner.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [
+      {
+        "id": "viator-124868P1",
+        "name": "Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique",
+        "type": "culture",
+        "description": "#10 Meilleure expérience culinaire au monde 2022 Notre expérience inégalée dans le monde de la gastronomie et notre expertise culinaire mondiale font de nous le guide idéal pour montrer aux visiteurs la ville basque unique de Saint-Sébastien, une ville aimée de ses habitants et un lieu sans comparaison pour les gourmands du monde entier.",
+        "duration": 180,
+        "estimatedCost": 175,
+        "latitude": 42.6975,
+        "longitude": 9.451,
+        "rating": 5,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/San-Sebastian/Evening-Pintxo-Tapas-Tour-with-a-Local-Expert/d5505-124868P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "city_fallback",
+        "geoConfidence": "low",
+        "qualityFlags": [
+          "viator_city_center_fallback"
+        ],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/6e/cf/35.jpg",
+        "providerName": "Viator",
+        "reviewCount": 602,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 113.55919298251565,
+        "source": "viator"
+      },
+      {
+        "id": "viator-169199P22",
+        "name": "Visite privée de Pampelune avec déjeuner à Tolosa",
+        "type": "culture",
+        "description": "Découvrez le cœur de Pampelune, une ville vivante avec une histoire, une architecture à couper le souffle et une scène culinaire exquise. Plongez dans le frisson de la course de taureaux mondialement connue, en expérimentant la course légendaire de première main, ainsi que d'autres activités amusantes et surprenantes. Promenez-vous dans l'impressionnante Citadelle médiévale, où ses jardins sereins offrent la toile de fond idéale pour explorer son passé captivant. Pour rendre vos souvenirs vraiment inoubliables, saisissez l'occasion d'une séance photo unique sur une réplique de la rue Estafeta, avec des taureaux San Fermín authentiques! La journée se termine par un retour panoramique à Saint-Sébastien par la route de montagne Malloak, mettant en valeur ses superbes villages. Nous terminerons le voyage par un dîner dans ce qui est réputé être le meilleur restaurant du jour de tout Guipúzcoa, situé à Tolosa.",
+        "duration": 120,
+        "estimatedCost": 180,
+        "latitude": 42.6975,
+        "longitude": 9.451,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Pamplona/Tour-of-Pamplona-from-Sansebastian/d22689-169199P22?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "17:00",
+          "close": "23:30"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "city_fallback",
+        "geoConfidence": "low",
+        "qualityFlags": [
+          "viator_city_center_fallback",
+          "viator_low_plus_value"
+        ],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/16/9c/6f/25.jpg",
+        "providerName": "Viator",
+        "reviewCount": 18,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": -2.989454989793387,
+        "source": "viator"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "viator-124868P1",
+        "name": "Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique",
+        "type": "culture",
+        "description": "#10 Meilleure expérience culinaire au monde 2022 Notre expérience inégalée dans le monde de la gastronomie et notre expertise culinaire mondiale font de nous le guide idéal pour montrer aux visiteurs la ville basque unique de Saint-Sébastien, une ville aimée de ses habitants et un lieu sans comparaison pour les gourmands du monde entier.",
+        "duration": 180,
+        "estimatedCost": 175,
+        "latitude": 42.6975,
+        "longitude": 9.451,
+        "rating": 5,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/San-Sebastian/Evening-Pintxo-Tapas-Tour-with-a-Local-Expert/d5505-124868P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "city_fallback",
+        "geoConfidence": "low",
+        "qualityFlags": [
+          "viator_city_center_fallback"
+        ],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/6e/cf/35.jpg",
+        "providerName": "Viator",
+        "reviewCount": 602,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 113.55919298251565,
+        "source": "viator"
+      },
+      {
+        "id": "viator-169199P22",
+        "name": "Visite privée de Pampelune avec déjeuner à Tolosa",
+        "type": "culture",
+        "description": "Découvrez le cœur de Pampelune, une ville vivante avec une histoire, une architecture à couper le souffle et une scène culinaire exquise. Plongez dans le frisson de la course de taureaux mondialement connue, en expérimentant la course légendaire de première main, ainsi que d'autres activités amusantes et surprenantes. Promenez-vous dans l'impressionnante Citadelle médiévale, où ses jardins sereins offrent la toile de fond idéale pour explorer son passé captivant. Pour rendre vos souvenirs vraiment inoubliables, saisissez l'occasion d'une séance photo unique sur une réplique de la rue Estafeta, avec des taureaux San Fermín authentiques! La journée se termine par un retour panoramique à Saint-Sébastien par la route de montagne Malloak, mettant en valeur ses superbes villages. Nous terminerons le voyage par un dîner dans ce qui est réputé être le meilleur restaurant du jour de tout Guipúzcoa, situé à Tolosa.",
+        "duration": 120,
+        "estimatedCost": 180,
+        "latitude": 42.6975,
+        "longitude": 9.451,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Pamplona/Tour-of-Pamplona-from-Sansebastian/d22689-169199P22?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "17:00",
+          "close": "23:30"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "city_fallback",
+        "geoConfidence": "low",
+        "qualityFlags": [
+          "viator_city_center_fallback",
+          "viator_low_plus_value"
+        ],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/16/9c/6f/25.jpg",
+        "providerName": "Viator",
+        "reviewCount": 18,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": -2.989454989793387,
+        "source": "viator"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 26,
+        "byEngine": {
+          "google_local": 5,
+          "google_hotels": 1,
+          "google_flights": 6,
+          "google_maps": 14
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-suggest-01-escapade-gastronomique-et-culturelle-a-s",
+    "   Lyon → San Sebastian (3j)",
+    "   solo (1p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 3ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"San Sebastian\", ll=\"@42.6975,9.451,14z\", gl=\"us\"",
+    "[Weather] 3 days fetched for 2026-04-03 → 2026-04-05",
+    "[Google Places] ✅ 22 attractions found for San Sebastian",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Hotels] Booking pass relax: 16 options retained (strict=1, relaxed=16)",
+    "[Hotels] Disponibilité live: 8/16 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (245ms)",
+    "[Pipeline V2] Resolving GPS for 2 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/2 activities",
+    "[Pipeline V2] No curated must-sees for \"San Sebastian\" — generating via AI...",
+    "[Flights] Airport search scope: full (3 airport pairs)",
+    "[Pipeline V2] Flights found in 13925ms",
+    "[Pipeline V2] Step 1: All data fetched in 105233ms",
+    "[Pipeline V2]   Activities: 22 Google + 11 SerpAPI + 0 Overpass + 10 Viator",
+    "[Pipeline V2]   Restaurants: 23 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 8 | Transport options: 2",
+    "[Pipeline V2] Step 1 done in 105233ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Palais de Miramar\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Peine del Viento XV\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Kontxa Pasealekua\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Musée San Telmo\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Château de la Mota\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Aquarium San Sebastián\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Observatoire du mont Igeldo\" (934km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Cathédrale du Bon Pasteur de Saint-Sébastien\" (931km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Jardins d'Alderdi Eder\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Funiculaire du Mont Igueldo\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Basilique Sainte-Marie du Chœur\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Mont Urgull\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Parc Aiete\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Baluarte del Mirador\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Loretopea\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Parc Cristina Enea\" (931km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Santiago bateria\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"San Sebastian Beach\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Pont María Cristina\" (931km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Phare de Santa Clara\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Donostiako Hondartza\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Kontxako Erlojuak\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Free Walking Tour San Sebastian\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Kontxa Pasealekua\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Santiago bateria\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Peine del Viento XV\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Loretopea\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Château de la Mota\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Observatoire du mont Igeldo\" (934km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Chillida-Leku\" (933km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Musée Maritime Basque\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"San Martin Merkatua\" (932km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Marché de la Bretxa\" (932km from destination, max 50km)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [113.6] ⭐ \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\" (src=viator, reviews=602, rating=5, tags=foodie)",
+    "[Pipeline V2]   #2 [-3.0]    \"Visite privée de Pampelune avec déjeuner à Tolosa\" (src=viator, reviews=18, rating=5, tags=relaxing)",
+    "[Pipeline V2] Step 2: interest filter kept 1/1 non-must-sees (below floor=6), fallback to full pool",
+    "[Pipeline V2] Step 2: 2 activities selected (1 must-sees) from 43 total",
+    "[Pipeline V2] Must-sees: \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\" (113.6)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=2.00km, median=1.00km, maxClusterRadius=0.67km",
+    "[Pipeline V2] Step 3: 1 clusters created",
+    "[Pipeline V2]   Day 1: Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique, Visite privée de Pampelune avec déjeuner à Tolosa (0.0km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Pensión Lizaso\" (11615546.51 score, 916.53km center, 916.53km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Step 4 prefetch: sparse anchors=2/2 (hotel, day-1-centroid)",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"San Sebastian\", ll=\"@43.3404938807205,-1.79704315960407,14z\", gl=\"us\"",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Step 4: supplemental API restaurants fetched=20, total SerpAPI pool=20",
+    "[Pipeline V2] Restaurants pool: total=43, budgetFiltered=43, geo=20",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=3, targets=3",
+    "[SerpAPI Places] Requête: q=\"breakfast brunch café bakery\", location=\"San Sebastian\", ll=\"@43.3404938807205,-1.79704315960407,14z\", gl=\"us\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"San Sebastian\", ll=\"@42.6975,9.451,14z\", gl=\"us\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"San Sebastian\", ll=\"@42.8260987761441,7.201391368079187,14z\", gl=\"us\"",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=62, budgetFiltered=62, geo=39",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=39, missing meals 3 -> 3",
+    "[Pipeline V2] Step 4: 0/3 meals assigned restaurants (pool=39)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Step 6 done in 7487ms — \"L'excursion à Pampelune est programmée le jour 2 selon ses horaires spécifiques (17h-23h30), permettant une découverte culinaire locale le premier jour et un départ tranquille le dernier jour.\"",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Prefetching directions for 3 pairs...",
+    "[Pipeline V2] Directions cache: 3/3 pairs fetched",
+    "[Pipeline V2] Day 1: 2 activities to schedule (1 must-sees), dayStart=10:55, dayEnd=22:00, window=11.1h, cursor=10:55",
+    "[Pipeline V2]   → \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\" (180min, score=113.6, mustSee=true)",
+    "[Pipeline V2]   → \"Visite privée de Pampelune avec déjeuner à Tolosa\" (120min, score=-3.0, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 lunch, searching pool + API near \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 lunch: found \"Restaurant Timà Bastia\" (0.01km from Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 dinner, searching pool + API near \"Visite privée de Pampelune avec déjeuner à Tolosa\"...",
+    "[Pipeline V2] Day 1: Must-see \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\" rejected at 180min, retrying with 125min (min=30min, factor=0.7)",
+    "[Pipeline V2] Day 1: Must-see \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\" RETRY 3 — extending day end to 23:00 (was 22:00)",
+    "[Pipeline V2] Day 1: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Day 2: 0 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2] Day 2: Lunch inserted via findBestMealSlot at 13:00-13:45",
+    "[Pipeline V2] Day 3: 0 activities to schedule (0 must-sees), dayStart=09:00, dayEnd=22:00, window=13.0h, cursor=09:15",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 13:00-13:45",
+    "[Pipeline V2] 📸 Enriching 9 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 4/9 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule: 1 restaurant(s) still far — trying SerpAPI nearby search",
+    "[Pipeline V2] Post-schedule SerpAPI re-opt: Day 1 \"Déjeuner — Restaurant Timà Bastia\" (916.5km) → \"Aduana Elkartea\" (0.0km from ref)",
+    "[Pipeline V2] 📸 Enriching 6 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 1/6 enriched with Google Places photos",
+    "[Pipeline V2] Section 13f: compressed 3 large intra-day gap segment(s)",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=2, fallback-flagged=0",
+    "[Pipeline V2] Step 7: 2 alternatives, pool trimmed to 2/2",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 76/100",
+    "  ⚠️ Day 2: No activities scheduled",
+    "  ⚠️ Day 3: No activities scheduled",
+    "  ⚠️ Day 3: missing explicit inter-city return transport",
+    "  🔧 Day 3: inserted fallback return longhaul transport",
+    "[Pipeline V2] Step 8: Quality score 76/100 (3 warnings, 1 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 26 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 125459ms (125.5s)",
+    "[Pipeline V2]   3 days, 13 items total"
+  ],
+  "warnings": [
+    "Aéroports non trouvés pour \"San Sebastian\", utilisation de Paris par défaut",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[RapidAPI Booking] ❌ Google Places résultat rejeté pour \"Isla\": \"CA-2, Usulután, El Salvador\" n'est pas dans San Sebastian",
+    "[Hotels] Check-in 12:00 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique, San Sebastian\": 931.6km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Visite gastronomique de Saint-Sébastien: Pintxos, boissons et tapas avec un local, San Sebastian\": 931.8km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Musée San Telmo\": 931.7km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Parte Vieja (Vieille Ville)\": 865.1km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"La Concha Beach\": 932.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Palais Miramar\": 932.8km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Aquarium de San Sebastian\": 9133.9km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Monte Urgull\": 932.0km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Nominatim rejeté pour \"Musée San Telmo\": 931.7km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Nominatim rejeté pour \"La Concha Beach\": 931.8km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Nominatim rejeté pour \"Aquarium de San Sebastian\": 932.3km de la destination (max 30km)",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"Musée San Telmo\", skipping",
+    "[CoordsResolver] ❌ Nominatim rejeté pour \"Monte Urgull\": 932.1km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Gemini rejeté pour \"Palais Miramar\": 932.8km de la destination (max 30km)",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"La Concha Beach\", skipping",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"Parte Vieja (Vieille Ville)\", skipping",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"Palais Miramar\", skipping",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"Aquarium de San Sebastian\", skipping",
+    "[CoordsResolver] ❌ Gemini rejeté pour \"Monte Urgull\": 932.1km de la destination (max 30km)",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"Monte Urgull\", skipping",
+    "[SerpAPI] Vols filtrés LYS→BIA 2026-04-03: escale_nuit=1 (Aéroport Marseille Provence×1)",
+    "[SerpAPI] Vols filtrés BIA→LYS 2026-04-05: escale_nuit=4 (Aéroport de Paris-Charles de Gaulle×3, Aéroport de Francfort×1), escale_longue=1 (Aéroport de Paris-Charles de Gaulle×1)",
+    "[SerpAPI] Vols filtrés LYS→CLY 2026-04-03: escale_nuit=3 (Aéroport de Paris-Orly×1, Aéroport Marseille Provence×1, Aéroport Ajaccio Napoléon Bonaparte×1), escale_longue=2 (Aéroport Ajaccio Napoléon Bonaparte×1, Aéroport de Paris-Orly×1)",
+    "[SerpAPI] Vols filtrés CLY→LYS 2026-04-05: escale_nuit=2 (Aéroport Ajaccio Napoléon Bonaparte×2), escale_longue=1 (Aéroport de Paris-Charles de Gaulle×1)",
+    "[SerpAPI] Vols filtrés LYS→AJA 2026-04-03: escale_nuit=3 (Aéroport de Paris-Orly×1, Aéroport de Bastia Poretta×1, Aéroport Marseille Provence×1)",
+    "[SerpAPI] Vols filtrés AJA→LYS 2026-04-05: escale_nuit=6 (Aéroport de Paris-Charles de Gaulle×3, Aéroport de Bastia Poretta×2, Aéroport de Paris-Orly×1), escale_longue=1 (Aéroport de Paris-Charles de Gaulle×1)",
+    "Google Directions API error, falling back: Error: Google API: ZERO_RESULTS",
+    "[Pipeline V2] Day 1: REJECTED activity \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\" (duration=180min, travel=1785min, cursor=17:30, dayEnd=22:00) ⚠️ MUST-SEE LOST",
+    "[Pipeline V2] Day 1: REJECTED activity \"Visite privée de Pampelune avec déjeuner à Tolosa\" (duration=120min, travel=1785min, cursor=17:30, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner à l'hôtel\" overlaps with \"Check-out Pensión Lizaso\"",
+    "[Scheduler] Conflict: \"✈️ Vol → Lyon\" overlaps with \"Dîner — Restaurant à proximité\""
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique, San Sebastian\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite gastronomique de Saint-Sébastien: Pintxos, boissons et tapas avec un local, San Sebastian\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Musée San Telmo\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"La Concha Beach\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Parte Vieja (Vieille Ville)\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Palais Miramar\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Aquarium de San Sebastian\" à San Sebastian — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Monte Urgull\" à San Sebastian — aucune API n'a pu résoudre",
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Découvrez les meilleurs pintxos de Saint-Sébastien lors d’une visite culinaire unique\"",
+    "[Pipeline V2]   Day 1: (no activities)",
+    "[Pipeline V2]   Day 2: (no activities)",
+    "[Pipeline V2]   Day 3: (no activities)"
+  ],
+  "durationMs": 125459,
+  "generatedAt": "2026-02-17T14:22:42.143Z",
+  "success": true,
+  "runType": "suggestion",
+  "suggestionQuery": "Je veux faire un break de 3 jours en Europe",
+  "suggestionTitle": "Escapade Gastronomique et Culturelle à San Sebastian"
+}

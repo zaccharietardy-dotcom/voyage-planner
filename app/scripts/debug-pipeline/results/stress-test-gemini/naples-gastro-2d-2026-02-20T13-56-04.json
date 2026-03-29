@@ -1,0 +1,1359 @@
+{
+  "scenarioId": "naples-gastro-2d",
+  "preferences": {
+    "origin": "Rome",
+    "destination": "Naples",
+    "startDate": "2026-02-23T13:47:18.701Z",
+    "durationDays": 2,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "moderate",
+    "activities": [
+      "gastronomy",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Pompei, Spaccanapoli",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Naples",
+        "days": 2
+      }
+    ]
+  },
+  "trip": {
+    "id": "9cf8a8a0-8449-4b15-a9a3-826aed0d4063",
+    "createdAt": "2026-02-20T13:55:57.555Z",
+    "updatedAt": "2026-02-20T13:55:57.555Z",
+    "preferences": {
+      "origin": "Rome",
+      "destination": "Naples",
+      "startDate": "2026-02-23T13:47:18.701Z",
+      "durationDays": 2,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "moderate",
+      "activities": [
+        "gastronomy",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Pompei, Spaccanapoli",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Naples",
+          "days": 2
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-23T13:47:18.701Z",
+        "items": [
+          {
+            "id": "96dde74c-11d6-4466-97eb-8aa86b934595",
+            "dayNumber": 1,
+            "startTime": "10:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Parc Archéologique de Pompei",
+            "description": "Cité romaine préservée par les cendres. Site archéologique sur les vestiges de la cité romaine emblématique préservée par les cendres du Vésuve.",
+            "locationName": "Parc Archéologique de Pompei",
+            "latitude": 40.7512189,
+            "longitude": 14.4886761,
+            "orderIndex": 0,
+            "estimatedCost": 11,
+            "duration": 180,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.7512189,14.4886761",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20Arch%C3%A9ologique%20de%20Pompei&query_place_id=&center=40.7512189,14.4886761",
+            "mustSee": true,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerX1Z8PhiS3MgqIXkofezl0yaIZwcfJVHGMvBWgTtc0920GcmherjsA266Tuie218Vj0wMeaYQ96kCvEsdZfT9FMYCF2Dw6ijznfvW6eZAGjiZFgHZ6W6c26bgtUTribL-18PNY=w163-h92-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "100e58b2-17c0-4e89-aee2-5911b3793097",
+            "dayNumber": 1,
+            "startTime": "13:30",
+            "endTime": "14:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Vitami",
+            "description": "Repas sur place",
+            "locationName": "Via Duomo, 227, 80138 Napoli NA",
+            "latitude": 40.850512,
+            "longitude": 14.260144,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.848116,14.274016",
+            "restaurant": {
+              "id": "serp-8138621121677223578",
+              "name": "Vitami",
+              "address": "Via Duomo, 227, 80138 Napoli NA",
+              "latitude": 40.850512,
+              "longitude": 14.260144,
+              "rating": 4.8,
+              "reviewCount": 1462,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "347 734 9199",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Vitami%2C%20Via%20Duomo%2C%20227%2C%2080138%20Napoli%20NA",
+              "googlePlaceId": "8138621121677223578",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-770832786853721052",
+                "name": "Enoteca e Trattoria La Cantinetta",
+                "address": "Via Michelangelo Ciccone, 30, 80142 Napoli NA",
+                "latitude": 40.848116,
+                "longitude": 14.274016,
+                "rating": 4.9,
+                "reviewCount": 934,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "081 554 3288",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Enoteca%20e%20Trattoria%20La%20Cantinetta%2C%20Via%20Michelangelo%20Ciccone%2C%2030%2C%2080142%20Napoli%20NA",
+                "photos": [
+                  "https://serpapi.com/searches/699860fd4707f18efe53ccee/images/xcbqeRuGW95MlOhVldjlT0P1K02irFbZMHIybHMWozc.jpeg"
+                ],
+                "googlePlaceId": "770832786853721052",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-13858639878181621693",
+                "name": "Caffe' Del Professore Add'a Signora",
+                "address": "V. Vittorio Emanuele III, 53, 80145 Napoli NA",
+                "latitude": 40.839477,
+                "longitude": 14.251583,
+                "rating": 4.8,
+                "reviewCount": 3532,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "081 252 8256",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caffe'%20Del%20Professore%20Add'a%20Signora%2C%20V.%20Vittorio%20Emanuele%20III%2C%2053%2C%2080145%20Napoli%20NA",
+                "photos": [
+                  "https://serpapi.com/searches/699860fd4707f18efe53ccee/images/83yxGLpCSqeHsNBGieMlebxJs6MK83fgVL5iZK6bzrE.jpeg"
+                ],
+                "googlePlaceId": "13858639878181621693",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 21.04,
+            "timeFromPrevious": 263,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Vitami%2C%20Via%20Duomo%2C%20227%2C%2080138%20Napoli%20NA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vitami%2C%20Via%20Duomo%2C%20227%2C%2080138%20Napoli%20NA",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "d935a4b2-6ebb-499f-885b-cc25813044af",
+            "dayNumber": 1,
+            "startTime": "14:05",
+            "endTime": "15:21",
+            "type": "transport",
+            "title": "Gare de Rome-Termini → Napoli Centrale",
+            "description": "Train Train",
+            "locationName": "Gare de Rome-Termini",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 2,
+            "duration": 116,
+            "transitLegs": [
+              {
+                "mode": "train",
+                "from": "Gare de Rome-Termini",
+                "to": "Napoli Centrale",
+                "departure": "2026-02-23T14:05:00.000Z",
+                "arrival": "2026-02-23T15:21:00.000Z",
+                "duration": 76,
+                "line": "FR"
+              }
+            ],
+            "transitDataSource": "api",
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg",
+            "estimatedCost": 30,
+            "bookingUrl": "https://www.omio.fr/trains/rome/naples?departure_date=2026-02-23"
+          },
+          {
+            "id": "f3cd1868-6b5b-475b-b69c-2d8a7547a81c",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Spaccanapoli",
+            "description": "Spaccanapoli è un'arteria viaria del centro antico di Napoli ed è una delle vie più importanti della città.  Prende nell'area centrale i nomi ufficiali di via Pasquale Scura, via Benedetto Croce e via",
+            "locationName": "Spaccanapoli",
+            "latitude": 40.8500845,
+            "longitude": 14.2602324,
+            "orderIndex": 3,
+            "estimatedCost": 11,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.8500845,14.2602324",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Spaccanapoli&query_place_id=&center=40.8500845,14.2602324",
+            "mustSee": true,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoG6bGuDA2e4ScajuxqeZnqpKs7xvWghWSEowUi6ujVcUwuovCfwe5oznK0T6u-A8xFFrJZVyo2qK0r1N1pb-aR20aos311wr4zLhlM80ExfuNdxyQ5h29XfEBGL6JRX_R6O68GFuqKdW6M=w80-h106-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "0660b7f7-62d9-40a8-9c6f-ee4d1efbae40",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "16:15",
+            "type": "checkin",
+            "title": "Check-in Duomo Luxury House",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Duomo Luxury House",
+            "latitude": 40.8477602,
+            "longitude": 14.2634206,
+            "orderIndex": 4,
+            "accommodation": {
+              "id": "booking-15749354",
+              "name": "Duomo Luxury House",
+              "type": "hotel",
+              "address": "Via Duomo, 133, 80138 Napoli NA, Italy",
+              "latitude": 40.8477602,
+              "longitude": 14.2634206,
+              "rating": 10,
+              "reviewCount": 5,
+              "stars": 3,
+              "pricePerNight": 81,
+              "totalPrice": 81,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/817791968.jpg?k=5edfda9799a15bd5de0835cc00c9dd31690b92ab904598f9ecc4b3c299ac539e&o="
+              ],
+              "checkInTime": "16:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/it/duomo-luxury-house-napoli.html?checkin=2026-02-23&checkout=2026-02-24&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.booking.com/hotel/it/duomo-luxury-house-napoli.html?checkin=2026-02-23&checkout=2026-02-25&group_adults=2&group_children=0&no_rooms=1",
+            "distanceFromPrevious": 0.37,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "1bebf606-dc85-4cba-a731-85c1d01a9ebd",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Cala La Pasta",
+            "description": "Repas sur place",
+            "locationName": "Via dei Tribunali, 179/180, 80139 Napoli NA",
+            "latitude": 40.852536,
+            "longitude": 14.261748,
+            "orderIndex": 5,
+            "estimatedCost": 15,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.848116,14.274016",
+            "restaurant": {
+              "id": "serp-1505328436023452535",
+              "name": "Cala La Pasta",
+              "address": "Via dei Tribunali, 179/180, 80139 Napoli NA",
+              "latitude": 40.852536,
+              "longitude": 14.261748,
+              "rating": 4.6,
+              "reviewCount": 4836,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "081 1874 5627",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cala%20La%20Pasta%2C%20Via%20dei%20Tribunali%2C%20179%2F180%2C%2080139%20Napoli%20NA",
+              "googlePlaceId": "1505328436023452535",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-770832786853721052",
+                "name": "Enoteca e Trattoria La Cantinetta",
+                "address": "Via Michelangelo Ciccone, 30, 80142 Napoli NA",
+                "latitude": 40.848116,
+                "longitude": 14.274016,
+                "rating": 4.9,
+                "reviewCount": 934,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "081 554 3288",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Enoteca%20e%20Trattoria%20La%20Cantinetta%2C%20Via%20Michelangelo%20Ciccone%2C%2030%2C%2080142%20Napoli%20NA",
+                "photos": [
+                  "https://serpapi.com/searches/699860fd4707f18efe53ccee/images/xcbqeRuGW95MlOhVldjlT0P1K02irFbZMHIybHMWozc.jpeg"
+                ],
+                "googlePlaceId": "770832786853721052",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-nearby-ChIJ8_d0MRUIOxMRiPztd-s_5j8",
+                "name": "I Buongustai",
+                "address": "Via dei Tribunali, 201, 80139 Napoli NA",
+                "latitude": 40.8529319,
+                "longitude": 14.2630386,
+                "rating": 4.7,
+                "reviewCount": 1488,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 446768",
+                "website": "https://trattoriaibuongustai.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=I%20Buongustai%2C%20Via%20dei%20Tribunali%2C%20201%2C%2080139%20Napoli%20NA",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepLsIUIyAlineV0_c_oldLTRXNfAP95TJzu9vFuH_Op8kfaQ-IsPGN8iRd_1fWS53fXPE-vjs4BX29KDSOrlh9NkfvP6e73sXbOOR_VtIZX8raQmpSWFDM2A9Qw_ZwkT0ZhXQ=w104-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ8_d0MRUIOxMRiPztd-s_5j8",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "16:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.11713559198107767,
+                "walkingTime": 1
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.89,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Cala%20La%20Pasta%2C%20Via%20dei%20Tribunali%2C%20179%2F180%2C%2080139%20Napoli%20NA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cala%20La%20Pasta%2C%20Via%20dei%20Tribunali%2C%20179%2F180%2C%2080139%20Napoli%20NA",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Parc Archéologique de Pompei & Spaccanapoli",
+        "dayNarrative": "Journée 1: Parc Archéologique de Pompei & Spaccanapoli",
+        "geoDiagnostics": {
+          "maxLegKm": 22.18,
+          "p95LegKm": 0.89,
+          "totalTravelMin": 283,
+          "totalLegKm": 23.12,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.03,
+          "mstLowerBoundKm": 22.46
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 165,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-24T13:47:18.701Z",
+        "items": [
+          {
+            "id": "4d71a60f-0cfd-4582-8e11-d126ad204477",
+            "dayNumber": 2,
+            "startTime": "08:30",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Chapelle Sansevero",
+            "description": "A chapel is a Christian place of prayer and worship that is usually relatively small.  The term has several meanings.",
+            "locationName": "Chapelle Sansevero",
+            "latitude": 40.8492951,
+            "longitude": 14.2548837,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.8492951,14.2548837",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Chapelle%20Sansevero&query_place_id=&center=40.8492951,14.2548837",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVUDj5_3Zh1gk5g8xU5L-czdLTbN5jcUVwpqaGfZMm53GDHKTLziEq8FBnKmXtqlgRc2KmCMZfvrhoOSA_2l9toao3osoaMH-N5P0B-CHiKjfUj8lYoGtxjLr_6DPX2X4wIClxT8Qp5r2ds6rTFJEZ43AoDppHhCff6RqCy0m7gvxqK_rPoE74t4EZxeC2zvg0YrW9awhdDv_2L4or6k5NI92cBAg-4hCiGycEPJhpjUDQUuI8DevffAd5XxR2i6nHEQlZW1lGqVrkU0Q5093o613BYccqkyCMuLtVJuyL4lKH_q-EoLkPRmJ2h4SnRhfY_VKCDHgXGYHqpBu7EbBEvPHNJnFdTawHw_padNdUkFLpKUT_agwzBRnbCPh8b3qqRbstdUSHJY8vlyIUxVBKWDzdC-hc8O-I6Rp2KMVa8TrKlfGOU2_X7CQcNy3z-5vfMGiR1k9tHGSygzqFxqaCpxk4VqBuXIghfnVJ686-3dTyHY8RXGj128UVJiK24ROKubTmQc-7bGspCql1nVJeKAO8O6NIMJ2Ve41rnTOraYJfmCUBPCWHfMK0YNv5Us--A-nNMbk9CQg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "3ce017c4-01ac-48df-80d1-681b193d86ca",
+            "dayNumber": 2,
+            "startTime": "10:00",
+            "endTime": "10:15",
+            "type": "checkout",
+            "title": "Check-out Duomo Luxury House",
+            "description": "Départ de l'hôtel",
+            "locationName": "Duomo Luxury House",
+            "latitude": 40.8477602,
+            "longitude": 14.2634206,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "booking-15749354",
+              "name": "Duomo Luxury House",
+              "type": "hotel",
+              "address": "Via Duomo, 133, 80138 Napoli NA, Italy",
+              "latitude": 40.8477602,
+              "longitude": 14.2634206,
+              "rating": 10,
+              "reviewCount": 5,
+              "stars": 3,
+              "pricePerNight": 81,
+              "totalPrice": 81,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/817791968.jpg?k=5edfda9799a15bd5de0835cc00c9dd31690b92ab904598f9ecc4b3c299ac539e&o="
+              ],
+              "checkInTime": "16:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/it/duomo-luxury-house-napoli.html?checkin=2026-02-23&checkout=2026-02-24&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 0.74,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "f81bc381-2a02-42c8-9322-eec923041578",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Castel dell'Ovo",
+            "description": "Il Castel dell'Ovo è il castello più antico della città di Napoli ed è uno degli elementi che spiccano maggiormente nel celebre panorama del golfo.  Si trova tra i quartieri di San Ferdinando e Chiaia",
+            "locationName": "Castel dell'Ovo",
+            "latitude": 40.8283157,
+            "longitude": 14.2476044,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.8283157,14.2476044",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Castel%20dell'Ovo&query_place_id=&center=40.8283157,14.2476044",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVIl1zKuq_0iWJg2wJaSwijTcIff_xGbQHQg7KwAYzEFWwd0GNaFfYUnh567sLoqC45OSEl1XyFmKErSvHPmAPQghDd1uGt8mB5aHtIfb55zRz0KqFbWbXswcZimHvPrGRyHuNMN4aLmfApb6bVKv1JXlT_e-sAyyrzkAFjDYn-8gQ85D-23ngNp2ExDAc1-uZfYSjI4qjpDcNPttHfDewnaV3SmE7eyQHK5ZjG72aRj1Av7ATpHFXrRNraFgBLA0tTyiMWb88r7reqDKJPnriQmgqHJWLDl6BXW1hheU1A_Enaclbx4zQSEEJA_-xXmCM9uDJs7f9WEDmgAx_TDXlPbKYHvaOo8565y4dtpIVEqbzwqx5cCrtq0ZJAhJ7z6USjztIAUdPwu-1Es2Ew7USV5-szhdFJO3_I-ggKS_1eUUDmM9vNnKS278PzdEOm8SvqZKMtFAPPuOlBUmrG76Lvg2oVpsmEG6mJ0BOlUjvr9jTOEGpii6FCdhNIz54T0ahmz9GFwsEolw2fBAB3oFGxTDynx7pL8_MvAsF3Gbr7IWKFSHbVLo6jCya0A1toXtsdXH2G&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.54,
+            "timeFromPrevious": 32,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "c4974152-daaa-4e78-aa5e-2dffec3bb2da",
+            "dayNumber": 2,
+            "startTime": "12:15",
+            "endTime": "13:30",
+            "type": "restaurant",
+            "title": "Déjeuner — Officina del Mare",
+            "description": "Repas sur place",
+            "locationName": "Piazzetta Marinari, 20-21, 80132 Napoli NA",
+            "latitude": 40.8282883,
+            "longitude": 14.248321599999999,
+            "orderIndex": 3,
+            "estimatedCost": 45,
+            "duration": 75,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.848517,14.256286",
+            "restaurant": {
+              "id": "serp-nearby-ChIJQ9bDf64JOxMRRcaflNkFu4s",
+              "name": "Officina del Mare",
+              "address": "Piazzetta Marinari, 20-21, 80132 Napoli NA",
+              "latitude": 40.8282883,
+              "longitude": 14.248321599999999,
+              "rating": 4.2,
+              "reviewCount": 2105,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "restaurant de fruits de mer",
+                "restaurant de fruits de mer",
+                "restaurant italien",
+                "restaurant de spécialités d'italie du sud"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "333 453 4425",
+              "website": "https://www.officinadelmarenapoli.it/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Officina%20del%20Mare%2C%20Piazzetta%20Marinari%2C%2020-21%2C%2080132%20Napoli%20NA",
+              "googlePlaceId": "ChIJQ9bDf64JOxMRRcaflNkFu4s",
+              "openingHours": {
+                "friday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "sunday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.06042071765525724,
+              "walkingTime": 1
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJt1K4VxkJOxMRl1ILF6vKSG8",
+                "name": "Ristorente di Mare - Molo17",
+                "address": "Via Partenope, 12 H, 80121 Napoli NA",
+                "latitude": 40.8306646,
+                "longitude": 14.2445553,
+                "rating": 4.3,
+                "reviewCount": 1626,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "restaurant de fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 1886 5240",
+                "website": "https://molo17napoli.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ristorente%20di%20Mare%20-%20Molo17%2C%20Via%20Partenope%2C%2012%20H%2C%2080121%20Napoli%20NA",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqPrxWPJD0F2dyHJ62BSH_-JaXJy-QYzkwxb9bhdLZS8F2Uk1tLPzkbHpKrKTSFdxeZT6G8EwuYXMUEFT0ce1gDvsNaaf2hE9_N70H9yp36fQ6P_0jzeK3GN7hG1k8ufQE7m5Yl=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJt1K4VxkJOxMRl1ILF6vKSG8",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.3661027763881892,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-13858639878181621693",
+                "name": "Caffe' Del Professore Add'a Signora",
+                "address": "V. Vittorio Emanuele III, 53, 80145 Napoli NA",
+                "latitude": 40.839477,
+                "longitude": 14.251583,
+                "rating": 4.8,
+                "reviewCount": 3532,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "081 252 8256",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caffe'%20Del%20Professore%20Add'a%20Signora%2C%20V.%20Vittorio%20Emanuele%20III%2C%2053%2C%2080145%20Napoli%20NA",
+                "photos": [
+                  "https://serpapi.com/searches/699860fd4707f18efe53ccee/images/83yxGLpCSqeHsNBGieMlebxJs6MK83fgVL5iZK6bzrE.jpeg"
+                ],
+                "googlePlaceId": "13858639878181621693",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 2.36,
+            "timeFromPrevious": 30,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Officina%20del%20Mare%2C%20Piazzetta%20Marinari%2C%2020-21%2C%2080132%20Napoli%20NA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Officina%20del%20Mare%2C%20Piazzetta%20Marinari%2C%2020-21%2C%2080132%20Napoli%20NA",
+            "selectionSource": "api"
+          },
+          {
+            "id": "ea8e220f-7310-49ea-b4a6-e8217dc39ac2",
+            "dayNumber": 2,
+            "startTime": "13:45",
+            "endTime": "15:45",
+            "type": "activity",
+            "title": "Musée archéologique national de Naples",
+            "description": "Jean Baptiste Alexandre Barone di Strolz è stato un generale e politico francese.",
+            "locationName": "Musée archéologique national de Naples",
+            "latitude": 40.8535985,
+            "longitude": 14.2505254,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.8535985,14.2505254",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20arch%C3%A9ologique%20national%20de%20Naples&query_place_id=&center=40.8535985,14.2505254",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWdfcFzEQdReGXzz2Fdry68IDpExEYU_-nmvtNQvhi6LhFacWJzd_FLIxnNpfqVveraAvIVtXbMyLZRJb62vuZUAn3SU52drhz9uH_b1Y7zbalNCpkP3U8KqYrWFC87UjbBnxxri_nnkG5FotqANQ9epG969biSXHWVkEPSrba5qwst7AS_EF7PbnszZsXdl3C2gDusDb8mpmxf0FsYOwlD7vVrYqLEtlyOLNH27M9gdFvsAPBGf0HtzHqUtBd5h4eY76dVwyJAOU2Izo7nmG64B4M3pJ4OPqJ0j-udkS1bSg52xnLqBr5I347lkluA5tQYPosYcPyb9V8kWAKZrgtc3E2QW4Vs_qu-qMzrucgDU745M8n0ggXaSc2cYK_UQWwfpWUZQqbBx3pR9Ayj7GKLi8wIc0N-trI3GAnxjokdj5e7JdVuMF7SAos0xr4KgwMn55FLagkUab-EBdMg6Z6nvnIkxKVNSLJNzx4LcHtRoXuNrTTW1uvkiW0sZ5IlI7SEYcVoV_ZO9VkwycDiqpR6s0Mx7aAB1dlCojLy9_ME4B6eiG4fZcKZDo0bHn3rperBHTf7&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.74,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "5201b401-8db6-484d-af9f-bea38aba7c45",
+            "dayNumber": 2,
+            "startTime": "14:05",
+            "endTime": "15:21",
+            "type": "transport",
+            "title": "Gare de Rome-Termini → Napoli Centrale",
+            "description": "Train Train",
+            "locationName": "Gare de Rome-Termini",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 5,
+            "duration": 116,
+            "transitLegs": [
+              {
+                "mode": "train",
+                "from": "Gare de Rome-Termini",
+                "to": "Napoli Centrale",
+                "departure": "2026-02-23T14:05:00.000Z",
+                "arrival": "2026-02-23T15:21:00.000Z",
+                "duration": 76,
+                "line": "FR"
+              }
+            ],
+            "transitDataSource": "api",
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg",
+            "estimatedCost": 30,
+            "bookingUrl": "https://www.omio.fr/trains/rome/naples?departure_date=2026-02-23"
+          },
+          {
+            "id": "c5430e4a-f24b-45d8-b5ac-05c2cf8fe005",
+            "dayNumber": 2,
+            "startTime": "16:15",
+            "endTime": "18:15",
+            "type": "activity",
+            "title": "Underground Naples",
+            "description": "Marco Ruggiero è un musicista italiano, è il chitarrista fondatore dei St. Anger.  Nell'ambito della musica emergente partenopea è conosciuto per essere l'ex-chitarrista dei Nameless Crime.",
+            "locationName": "Underground Naples",
+            "latitude": 40.8510429,
+            "longitude": 14.2567975,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.8510429,14.2567975",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Underground%20Naples&query_place_id=&center=40.8510429,14.2567975",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXZ7a_Txb4f9H1Klwxky5BxeHiX239_vq4GH1M_Z13WVsiFHvaS6rODtzl1EVm2HCBYWM-wH2ERd9w85U_tuKfvaGlrBaN4nFWhsTxiBaoovcZxb0pf3tjJx_xNOaAzASZ_Xc5vgv0ji_gnHvX51o4niRoZIrCcMlbbwP3GxqSdLBPSS2jW4iuDP8qPIPzzrMg9dONTnmPbnc2qMWXRbf2sWLfVNiskrgehuW6jGxCZ7xyysdYVZPoILB2IJdewUfvF3YG7VJTrsbg5SaIwzNYQp-IEjsJKi2s1DfNZcdm245YFY2lg_4ududjzfU30UMD6O-z6S9t2IvYTaB5rBApiys6VhqXE1uG3fPaQlDJxUIRnSv_CJab4-f3dtNv5XfvZPNiltIMI2uVnikT5GzuP5twqoE-zbFMcLJRsMJi11wTYWC5LYeIvqpsvy_BFEYh_qJ39RYHRoYiwi_42okEeXUWWVapC0Iv_na4H0TBuUpsQmPTWV7zL0z4CGr_JXlEFAWj4lQ98_tRHQUM3ZMjoModdfUif5Jv5ifW0uIQApT9aD4RMAdk-XHEaKwQac6wgfyBQWY2qAw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "3b377daa-30f2-428f-9730-cd19c595f0a8",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — La Locanda Gesù Vecchio Civico 4",
+            "description": "Repas sur place",
+            "locationName": "Via Giovanni Paladino, 4-4/A, 80138 Napoli NA",
+            "latitude": 40.848517,
+            "longitude": 14.256286,
+            "orderIndex": 7,
+            "estimatedCost": 12,
+            "duration": 90,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=40.848517,14.256286",
+            "restaurant": {
+              "id": "serp-7490600017369702587",
+              "name": "La Locanda Gesù Vecchio Civico 4",
+              "address": "Via Giovanni Paladino, 4-4/A, 80138 Napoli NA",
+              "latitude": 40.848517,
+              "longitude": 14.256286,
+              "rating": 4.8,
+              "reviewCount": 842,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "081 424 4552",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Locanda%20Ges%C3%B9%20Vecchio%20Civico%204%2C%20Via%20Giovanni%20Paladino%2C%204-4%2FA%2C%2080138%20Napoli%20NA",
+              "photos": [
+                "https://serpapi.com/searches/699860fd4707f18efe53ccee/images/MmoSpyT34pXC8YGd1Zi1lH7_8XtkWvGFV9mQFjEIpoE.jpeg"
+              ],
+              "googlePlaceId": "7490600017369702587",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJsWPum20JOxMR_sxsZAcHfno",
+                "name": "Trattoria Pizzeria Bella Napoli Centro - Chef dal 1990",
+                "address": "Via Carminiello Ai Mannesi, 19, 80187 Napoli NA",
+                "latitude": 40.85095,
+                "longitude": 14.2603203,
+                "rating": 4.7,
+                "reviewCount": 6726,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 843 8275",
+                "website": "http://bellanapolicentro.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Trattoria%20Pizzeria%20Bella%20Napoli%20Centro%20-%20Chef%20dal%201990%2C%20Via%20Carminiello%20Ai%20Mannesi%2C%2019%2C%2080187%20Napoli%20NA",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqWHieMzwtHlqtIrlrUtbAK2uy9XaZ4BvbZFrfA2sao7NDYVqxvboqGfXj5YKcNFNWwpV8tHWvXQ8FKaJAsCzwF6il36bix2pv6ME-W4yh2ykLvfpj1v43NAmXkYejTzYObWElX=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJsWPum20JOxMR_sxsZAcHfno",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": null,
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.21335582517663543,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJuc28TqoJOxMRQUskSfOcT28",
+                "name": "Januarius",
+                "address": "Via Duomo, 146/148, 80138 Napoli NA",
+                "latitude": 40.8522296,
+                "longitude": 14.258923999999999,
+                "rating": 4.6,
+                "reviewCount": 1989,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "restaurant de spécialités de la région de naples"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 014 5980",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Januarius%2C%20Via%20Duomo%2C%20146%2F148%2C%2080138%20Napoli%20NA",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqLS0PTvp-J5AxETi-VfSM42cuFl5xV1ELkAPozPFXyxaIJ7tKRHkRY2O6Xa5ht3p4R7Pq9-zIE5GMrrrsp49iff5wEs-yyHWeD4lE43cC-7RMwS_8MkGqiCsJQ57qo3Aph5vWP=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJuc28TqoJOxMRQUskSfOcT28",
+                "openingHours": {
+                  "friday": {
+                    "open": "13:00",
+                    "close": "15:00"
+                  },
+                  "saturday": {
+                    "open": "13:00",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "13:00",
+                    "close": "15:30"
+                  },
+                  "monday": {
+                    "open": "13:00",
+                    "close": "15:00"
+                  },
+                  "tuesday": null,
+                  "wednesday": {
+                    "open": "13:00",
+                    "close": "15:00"
+                  },
+                  "thursday": {
+                    "open": "13:00",
+                    "close": "15:00"
+                  }
+                },
+                "distance": 0.23995080376805256,
+                "walkingTime": 3
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.28,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Chapelle Sansevero & Castel dell'Ovo",
+        "dayNarrative": "Journée 2: Chapelle Sansevero & Castel dell'Ovo",
+        "geoDiagnostics": {
+          "maxLegKm": 2.82,
+          "p95LegKm": 2.54,
+          "totalTravelMin": 82,
+          "totalLegKm": 6.3,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.85,
+          "mstLowerBoundKm": 3.41
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 54,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Rome",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 76,
+            "price": 30,
+            "co2": 3,
+            "operator": "FR",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/rome/naples?departure_date=2026-02-23"
+          }
+        ],
+        "totalDuration": 116,
+        "totalPrice": 30,
+        "totalCO2": 3,
+        "score": 7.9,
+        "scoreDetails": {
+          "priceScore": 3.5,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/rome/naples?departure_date=2026-02-23",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Gare de Rome-Termini",
+            "to": "Napoli Centrale",
+            "departure": "2026-02-23T14:05:00.000Z",
+            "arrival": "2026-02-23T15:21:00.000Z",
+            "duration": 76,
+            "line": "FR"
+          }
+        ],
+        "priceRange": [
+          15,
+          55
+        ],
+        "recommended": true,
+        "recommendationReason": "Option rapide, écologique"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Rome",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 141,
+            "price": 8,
+            "co2": 5,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/rome/naples?departure_date=2026-02-23"
+          }
+        ],
+        "totalDuration": 196,
+        "totalPrice": 8,
+        "totalCO2": 5,
+        "score": 5.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 7.1
+        },
+        "bookingUrl": "https://www.omio.fr/bus/rome/naples?departure_date=2026-02-23"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Rome",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 113,
+            "price": 42,
+            "co2": 10,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Rome/Naples"
+          }
+        ],
+        "totalDuration": 128,
+        "totalPrice": 42,
+        "totalCO2": 10,
+        "score": 2.8,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 8.5,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Rome/Naples",
+        "dataSource": "estimated"
+      }
+    ],
+    "selectedTransport": {
+      "id": "train_api",
+      "mode": "train",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Rome",
+          "to": "Naples",
+          "fromCoords": {
+            "lat": 41.9028,
+            "lng": 12.4964
+          },
+          "toCoords": {
+            "lat": 40.8518,
+            "lng": 14.2681
+          },
+          "duration": 76,
+          "price": 30,
+          "co2": 3,
+          "operator": "FR",
+          "frequency": "1-3 par jour",
+          "bookingUrl": "https://www.omio.fr/trains/rome/naples?departure_date=2026-02-23"
+        }
+      ],
+      "totalDuration": 116,
+      "totalPrice": 30,
+      "totalCO2": 3,
+      "score": 7.9,
+      "scoreDetails": {
+        "priceScore": 3.5,
+        "timeScore": 10,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.omio.fr/trains/rome/naples?departure_date=2026-02-23",
+      "dataSource": "api",
+      "transitLegs": [
+        {
+          "mode": "train",
+          "from": "Gare de Rome-Termini",
+          "to": "Napoli Centrale",
+          "departure": "2026-02-23T14:05:00.000Z",
+          "arrival": "2026-02-23T15:21:00.000Z",
+          "duration": 76,
+          "line": "FR"
+        }
+      ],
+      "priceRange": [
+        15,
+        55
+      ],
+      "recommended": true,
+      "recommendationReason": "Option rapide, écologique"
+    },
+    "accommodation": {
+      "id": "booking-15749354",
+      "name": "Duomo Luxury House",
+      "type": "hotel",
+      "address": "Via Duomo, 133, 80138 Napoli NA, Italy",
+      "latitude": 40.8477602,
+      "longitude": 14.2634206,
+      "rating": 10,
+      "reviewCount": 5,
+      "stars": 3,
+      "pricePerNight": 81,
+      "totalPrice": 81,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/817791968.jpg?k=5edfda9799a15bd5de0835cc00c9dd31690b92ab904598f9ecc4b3c299ac539e&o="
+      ],
+      "checkInTime": "16:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/hotel/it/duomo-luxury-house-napoli.html?checkin=2026-02-23&checkout=2026-02-24&group_adults=2&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-15749354",
+        "name": "Duomo Luxury House",
+        "type": "hotel",
+        "address": "Via Duomo, 133, 80138 Napoli NA, Italy",
+        "latitude": 40.8477602,
+        "longitude": 14.2634206,
+        "rating": 10,
+        "reviewCount": 5,
+        "stars": 3,
+        "pricePerNight": 81,
+        "totalPrice": 81,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/817791968.jpg?k=5edfda9799a15bd5de0835cc00c9dd31690b92ab904598f9ecc4b3c299ac539e&o="
+        ],
+        "checkInTime": "16:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/it/duomo-luxury-house-napoli.html?checkin=2026-02-23&checkout=2026-02-24&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-13736598",
+        "name": "Casa D Hotel Napoli",
+        "type": "hotel",
+        "address": "Via Regina Sancia, 8/10-12, 80139 Napoli NA, Italy",
+        "latitude": 40.8502331,
+        "longitude": 14.2648936,
+        "rating": 9.4,
+        "reviewCount": 241,
+        "stars": 3,
+        "pricePerNight": 129,
+        "totalPrice": 129,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/685103310.jpg?k=eeacef10fa6a3c481a64e3149e0b08b9c5b9fdf22555b90e45d0ce9ebcf40aed&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "10:30",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Casa+D+Hotel+Napoli+Naples&checkin=2026-02-23&checkout=2026-02-24&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-573724",
+        "name": "Hotel Cristina",
+        "type": "hotel",
+        "address": "Via Diocleziano, 109, 80124 Napoli NA, Italy",
+        "latitude": 40.8197674318108,
+        "longitude": 14.1846950062294,
+        "rating": 8.7,
+        "reviewCount": 1805,
+        "stars": 3,
+        "pricePerNight": 83,
+        "totalPrice": 83,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/210807243.jpg?k=8b62173d89921d978c93b3fbd94bf69e00e9dc444d99f3243c03999e104944a9&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Hotel+Cristina+Naples&checkin=2026-02-23&checkout=2026-02-24&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 362,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 162,
+      "food": 96,
+      "activities": 44,
+      "transport": 60,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 110,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 45,
+      "transportTips": "Achetez une Artecard 3 jours (30€) pour musées illimités et transports en commun illimités - très avantageux pour votre durée",
+      "reasoning": "Budget serré (250€/pers/jour). Airbnb avec cuisine permet petit-déj économique (3-4€/pers) et cuisiner 1-2 soirs. Déjeuners mixtes (street food napolitaine pas chère 6-8€). Dîners au restaurant pour l'expérience gastronomique locale (12-18€/pers). Artecard optimise culture (musées inclus) et transport. Reste ~45€/jour/pers pour activités, visites guidées courtes, pizzerias traditionnelles. Naples offre excellente gastronomie accessible.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: naples-gastro-2d",
+    "   Rome → Naples (2j)",
+    "   couple (2p) | moderate | gastronomy, culture",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Naples\", ll=\"@40.8518,14.2681,14z\", gl=\"it\"",
+    "[Weather] 2 days fetched for 2026-02-23 → 2026-02-24",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Google Places] ✅ 26 attractions found for Naples",
+    "[Hotels] Disponibilité live: 7/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (511ms)",
+    "[Pipeline V2] Resolving GPS for 8 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/8 activities",
+    "[Pipeline V2] Step 1: All data fetched in 22677ms",
+    "[Pipeline V2]   Activities: 26 Google + 20 SerpAPI + 2 Overpass + 15 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 7 | Transport options: 3",
+    "[Pipeline V2 LLM] Step 1 done in 22677ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Duomo Luxury House\" (10★, €81/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 65 activities → 34 after dedup (dropped 31)",
+    "[Pipeline V2 LLM] Step 2: Selected 14 activities (2 must-sees, 12 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 10 restaurants from 40 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 167 pairs",
+    "[Pipeline V2 LLM] Step 2: 14 activities, 10 restaurants, 167 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 11ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 10961 in + 1079 out, ~$0.0023, 12693ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Découverte du cœur historique de Naples\",\n      \"narrative\": \"Après votre arrivée et l'installation à l'hôtel, plongez dans l'ambiance vibrant...",
+    "[Pipeline V2 LLM] Enrichment: removed pre-arrival item \"serp-attr-ChIJl8kMVgAJOxMR4f2WCe2j9lw\" at 16:50 (arrival: 16:21)",
+    "[Pipeline V2 LLM] Retrying Gemini with corrections...",
+    "[Pipeline V2 LLM] Gemini retry completed",
+    "[Pipeline V2 LLM] Enrichment: removed pre-arrival item \"serp-attr-ChIJl8kMVgAJOxMR4f2WCe2j9lw\" at 16:50 (arrival: 16:21)",
+    "[Pipeline V2 LLM] Building deterministic fallback plan...",
+    "[Pipeline V2 LLM] Plan: 2 days, 6 activities, 4 meals",
+    "[Pipeline V2 LLM] Step 3 done in 26356ms — 2 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 14 activities, 10 restaurants",
+    "[Pipeline V2 LLM] Built 2 days with 10 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 3592ms",
+    "[Pipeline V2 LLM] Step 4 done in 3592ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 3 restaurants swapped, 0 kept as fallback (2041ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 8 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 1638ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 86/100",
+    "  📦 Complétude: 21/25",
+    "  ⏱️  Rythme:     16/25",
+    "  🗺️  Géo:        24/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: chevauchement Déjeuner — Vitami / Gare de Rome-Termini → Napoli Centrale",
+    "  ⚠️ Jour 1: chevauchement Gare de Rome-Termini → Napoli Centrale / Spaccanapoli",
+    "  ⚠️ Jour 1: chevauchement Spaccanapoli / Check-in Duomo Luxury House",
+    "  ⚠️ Jour 2: chevauchement Chapelle Sansevero / Check-out Duomo Luxury House",
+    "  ⚠️ Jour 2: chevauchement Musée archéologique national de Naples / Gare de Rome-Termini → Napoli Centrale",
+    "[Pipeline V2 LLM] Step 5 done in 2ms — score: 86/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 56317ms ==="
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite de Marco Island en camion Safari, Naples\": 8516.5km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Visite de Marco Island en camion Safari, Naples\": 8625.0km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Visite en tricycle électrique à Naples en Floride - Du plaisir pour toute la famille !, Naples\": 8617.1km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"de Hobie Kayak EcoTour: Premium Eco Experience Bonita Springs, Naples\": 8606.6km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Activité guidée au coucher du soleil en kayak à LED Glow à Bonita Springs, Naples\": 8606.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Excursion en kayak dans les tunnels des mangroves (photographe inclus)- Marco Island, Naples\": 8621.5km de la destination (max 30km)",
+    "[Pipeline V2 LLM] Gemini plan has errors: Missing must-see activities: serp-attr-ChIJl8kMVgAJOxMR4f2WCe2j9lw,Plan too sparse: only 5 items for 2 days (expected ≥8)",
+    "[Pipeline V2 LLM] Gemini retry still has errors — falling back"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 5931 (line 174 column 4)",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite de la faune et de la flore de l'île Marco, Naples\" à Naples — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite de Marco Island en camion Safari, Naples\" à Naples — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite en tricycle électrique à Naples en Floride - Du plaisir pour toute la famille !, Naples\" à Naples — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Clear Kayak Sunset & Light Tour - Bonita Springs / Ft Myers Beach, Naples\" à Naples — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"de Hobie Kayak EcoTour: Premium Eco Experience Bonita Springs, Naples\" à Naples — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Activité guidée au coucher du soleil en kayak à LED Glow à Bonita Springs, Naples\" à Naples — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Excursion en kayak dans les tunnels des mangroves (photographe inclus)- Marco Island, Naples\" à Naples — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 56317,
+  "generatedAt": "2026-02-20T13:55:08.510Z",
+  "success": true
+}

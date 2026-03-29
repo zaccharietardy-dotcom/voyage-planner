@@ -1,0 +1,2722 @@
+{
+  "scenarioId": "lyon-milan-5d-test",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Milan",
+    "startDate": "2026-02-23T11:19:03.342Z",
+    "durationDays": 5,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Duomo, La Scala",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Milan",
+        "days": 5
+      }
+    ]
+  },
+  "trip": {
+    "id": "26329b8c-4771-4da9-89d1-d514097e1498",
+    "createdAt": "2026-02-20T11:21:31.615Z",
+    "updatedAt": "2026-02-20T11:21:31.615Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Milan",
+      "startDate": "2026-02-23T11:19:03.342Z",
+      "durationDays": 5,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Duomo, La Scala",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Milan",
+          "days": 5
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-23T11:19:03.342Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "12:30",
+            "endTime": "15:00",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Lyon → Milan (estimation)",
+            "locationName": "Lyon → Milan",
+            "latitude": 45.487873,
+            "longitude": 9.203969299999999,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 14,
+            "bookingUrl": "https://www.omio.fr/bus/lyon/milan?departure_date=2026-02-23",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "8e695378-581c-4f4c-b8ed-f3b66ee9a893",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in iQ Hotel Milano",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "iQ Hotel Milano",
+            "latitude": 45.487873,
+            "longitude": 9.203969299999999,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "ta-hotel-563622",
+              "name": "iQ Hotel Milano",
+              "type": "hotel",
+              "address": "Milan",
+              "latitude": 45.487873,
+              "longitude": 9.203969299999999,
+              "rating": 4.7,
+              "reviewCount": 352,
+              "pricePerNight": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/19/a3/b2/c6/rooftop.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.hotelmidwaymilan.com/",
+              "description": "Stazione Centrale • Prix via Booking.com • Disponibilité confirmée",
+              "totalPrice": 0
+            },
+            "bookingUrl": "https://www.hotelmidwaymilan.com/"
+          },
+          {
+            "id": "38ff8e85-cba8-4870-8213-f0d0b1af76a8",
+            "dayNumber": 1,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Piazza del Duomo",
+            "description": "Piazza del Duomo è la piazza principale di Milano.  Dominata dal Duomo di Milano, da cui il nome, è il centro vitale della città, punto d'incontro dei milanesi per celebrare importanti eventi e, insie",
+            "locationName": "Piazza del Duomo",
+            "latitude": 45.4641941,
+            "longitude": 9.189698,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4641941,9.189698",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Piazza%20del%20Duomo&query_place_id=&center=45.4641941,9.189698",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUYdHejzMixNLuhZAJO50rPxMAJY9Le9VMtMXCdwwHswPIpK_4BErcIB3ZdT0mFw7M5e51-pNb3qAmwDV_F6NLaqkzntcrdv2On7PvJk3fuWZnQpqOoHA9yUm-J1M7JaiEqBjNiTC0LkQIi7EARzeSIbViTLv1qKU5rSdxSb8Z5Kk-DfYD6H70DGCqGOrq0HN0AzORuOCfEbw3RPXC8pGNBkRmnRW5DD_TSO4ukIfxTrOPfsFD03I86eb28iBuS0us08kt81wXDXDsYVXsw1eyFURZOqGVzVvUJqt6uPNh_EWCL6FXRS6ap2oCi6kYZ6G2uAe0j8Rbao4yYlKlwUOnzK7vo3PiwiUSYRJWd_B5rLSUhuwt-_5fKLKUIPd7APLt5is0WASkkTEQG2n3sjmmwcUhdw51Ja5HA4NHTQNcS9z0bot0QzoRpnaoPthAS0WuHx2-t3lYEtWeDj0esm1SrBegVzyHQ1mSr2OL6CE5tsq674S5ekNc2yZMmGt5emhCXADNVxyYGJUp4krJdn5CXBQigzIRez9pIwcI6KgJb-UNXLRcog5I8i9jvPtgG8RnpqQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.86,
+            "timeFromPrevious": 36,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "b52fed3e-eecc-45d7-82dc-afc798711b06",
+            "dayNumber": 1,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Galleria Vittorio Emanuele II",
+            "description": "La galleria Vittorio Emanuele II è una galleria commerciale di Milano che, in forma di strada pedonale coperta, collega piazza Duomo a piazza della Scala.",
+            "locationName": "Galleria Vittorio Emanuele II",
+            "latitude": 45.4658434,
+            "longitude": 9.1899401,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4658434,9.1899401",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Galleria%20Vittorio%20Emanuele%20II&query_place_id=&center=45.4658434,9.1899401",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWxI7ifArKuHifeOttQeb9efCNkNA2IcVxHXJCYF9d5xa0GfQ2JvlqI0LWjerPa4AGAFqehY8kUekTz2LlX4xYA4ZLY_5iHmGEUJ7q_prINgViot5whhzWuwaMZFFuvv2qblPfmfoAlkJL10x0sTiC3hz7G0MXjJSIq7n7WR9rbQNPouVWY9VbB1Z2PXaxuPKudsFncwCMy3UWipUpxcO5fw0l7dSUFqBx90UDmt9N1jrozaFTWryNsN-tcoo5qOO2ep-0L9ulgI_wYI_iDg9iH4yovfwZgyBPPiDxOyrUob04yNOOcoQ9PZAT-yK-RLjyEb2y5un0sM0ngXYkflV7aFWpk4kvcpTtaV5JmfF4EqAxSZBBs_mBp8GYpEOULH7ivx4BsDteciiWJpb7Nzp-N_ZGYIEMnRF5VT26TrCuuD9ECaIWIi15ffNzY3YPVRvp5J7x_i1f6iNFzyBStlDBKOdXQ9cA07A5Sl3CrnQ7V6DYKKw8jfQQLI_C-dtN-OAbvuTqWfjQ4fqci2GuSTVQO-9GyaUUxhJFIeLZy0k20h-6mSdTKTBCzW9yKGHWarjhlWeIVXWGQWw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.18,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "22908d61-2c85-4462-bce7-f905a03bd3f4",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "La Scala",
+            "description": "Il Nuovo Regio Ducal Teatro alla Scala, semplicemente noto come Teatro alla Scala e colloquialmente chiamato la Scala, è il principale teatro d'opera di Milano.  Considerato tra i più prestigiosi teat",
+            "locationName": "La Scala",
+            "latitude": 45.4674021,
+            "longitude": 9.1895512,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4674021,9.1895512",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Scala&query_place_id=&center=45.4674021,9.1895512",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV2gCh19ZTRdfqQznAuT1d-tTeQ80mHXn2GCwToYR0ehghpwSIoS6nnd6eYbheJB2gnWkm-qDyOiaNK4YqKuT2UT5B2iRTd58OwV6_LyXEf7lmNqjakENWAwJdfGu0h93weZUP-iXsbB2DdrAzIBTuK52a6lHG_FeBjF99CwetrebhyIhAEJDwSJUsgEzVzfPHLcDEsitKIoRbp08-FKF7-VN9ieJW3wLrvyNKdxB3qqRaBCfAlGh-eLDBkFoB2aUwV6sp0laAeBPmc9V8P0_bTS3Hb1vwnbnrrRiiz5ELT51xteyaidkcIskpPZxyGTa2Ka-LJqmX8kRu2yELVa8eaNzggHdbRmG_0tURenOM_elxXR0L9sKI-UTkdd3vsO06DZgclRx8Fg9oD8pv5tlulqIUyBPmO6QEPBzJAmg4krkRsKIvXnLCP5pUgJwGJ5AZrqsQzMNtWux8uEjzw_n7VUuw1aLs_KjBDN4sblUsbGUD6tjGC_cd9ZURJwh67YPnXcexGf4-XZzXCdi2K26GmqmYYQzqcefn-lonY0nm2HZT78zBI0Bcw1o2jvuYRaYJ0PRqq&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.18,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a99a5762-8a84-462b-8dde-5c3c186838ed",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "21:00",
+            "type": "restaurant",
+            "title": "Dîner — Ristorante Galleria",
+            "description": "\"Restaurant incroyable autant par la décoration que par le service.\"",
+            "locationName": "Milan, Metropolitan City of Milan",
+            "latitude": 45.46606,
+            "longitude": 9.189919,
+            "orderIndex": 5,
+            "estimatedCost": 36,
+            "duration": 90,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.46606,9.189919",
+            "restaurant": {
+              "id": "serp-16521467397370762782",
+              "name": "Ristorante Galleria",
+              "address": "Milan, Metropolitan City of Milan",
+              "latitude": 45.46606,
+              "longitude": 9.189919,
+              "rating": 4.5,
+              "reviewCount": 6100,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "italienne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Restaurant incroyable autant par la décoration que par le service.\""
+              ],
+              "description": "\"Restaurant incroyable autant par la décoration que par le service.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+              "photos": [
+                "https://serpapi.com/searches/6998383602706ace35488445/images/rQXHUFVnYRFCMf3Tq0OWGioYKYWspC_QDnTo9sOfI10.jpeg"
+              ],
+              "googlePlaceId": "16521467397370762782",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "name": "Il Cairoli Bar & Restaurant",
+                "address": "Via Cusani, 13, 20121 Milano MI",
+                "latitude": 45.4683062,
+                "longitude": 9.1830894,
+                "rating": 4.5,
+                "reviewCount": 315,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "338 665 1230",
+                "website": "https://www.unaitalianhospitality.com/it/ristoranti/il-cairoli-bar-and-restaurant?cmp=gmb_il_cairoli_bar_restaurant_link",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Il%20Cairoli%20Bar%20%26%20Restaurant%2C%20Via%20Cusani%2C%2013%2C%2020121%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoi8LemHNAOm-jVhnKq3fNb5jEAQvUeDUtpZzT3fo42MiyeQD0CFjFhZvA00janB87YIIBTFZVgy0I9LNnNvbfM0L_DU5zoaFhJfcqp9MGVxY8UCS1Cs2axgPQaQxEDl1fIwFPh=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  }
+                },
+                "distance": 0.37953849621580865,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-11646682267042167518",
+                "name": "Marea Seafood & Beverage",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.45926,
+                "longitude": 9.182789,
+                "rating": 4.8,
+                "reviewCount": 453,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\""
+                ],
+                "description": "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Marea%20Seafood%20%26%20Beverage%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/lXSNyw-5U7WN32X62w--jJIQcIUeuGl5JIH1RFOXoGQ.jpeg"
+                ],
+                "googlePlaceId": "11646682267042167518",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.15,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Piazza del Duomo et Galleria Vittorio Emanuele II",
+        "dayNarrative": "Après le check-in à 15h, découverte légère du centre historique avec la Piazza del Duomo, la Galleria Vittorio Emanuele II et La Scala — les incontournables à pied. Dîner dans le quartier du Duomo pour bien commencer le séjour.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.18,
+          "p95LegKm": 0.18,
+          "totalTravelMin": 8,
+          "totalLegKm": 0.51,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.41,
+          "mstLowerBoundKm": 0.36
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-24T11:19:03.342Z",
+        "items": [
+          {
+            "id": "8b5a010b-c240-4544-b1ca-f0e64e5d988d",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Deep Gold Milano",
+            "description": "\"Petits prix, grosses portions, qualité excellente.\"",
+            "locationName": "Via Gustavo Fara, 33, 20124 Milano MI",
+            "latitude": 45.485109099999995,
+            "longitude": 9.198741499999999,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.462673,9.184408",
+            "restaurant": {
+              "id": "serp-nearby-ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "name": "Deep Gold Milano",
+              "address": "Via Gustavo Fara, 33, 20124 Milano MI",
+              "latitude": 45.485109099999995,
+              "longitude": 9.198741499999999,
+              "rating": 4.7,
+              "reviewCount": 189,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "sandwicherie",
+                "sandwicherie",
+                "café spécialisé dans les boissons expresso",
+                "restaurant spécialisé dans les petites portions à partager"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "02 643 3332",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+              "googlePlaceId": "ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "openingHours": {
+                "friday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "sunday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "monday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "tuesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "wednesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "thursday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.5104325101499946,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "name": "Crazy Cat Café",
+                "address": "Via Napo Torriani, 5, 20124 Milano MI",
+                "latitude": 45.4809439,
+                "longitude": 9.2034378,
+                "rating": 4.4,
+                "reviewCount": 7518,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "bistro",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples."
+                ],
+                "description": "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples.",
+                "phoneNumber": "02 8454 2739",
+                "website": "http://www.crazycatcafe.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Crazy%20Cat%20Caf%C3%A9%2C%20Via%20Napo%20Torriani%2C%205%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweojFccdHy6yHMa-ym6gLu_cbBqhrFWesI5-DQhR79mnullDSX7xYZJzWUlmlYTpf72UBKLVyb51WXH-1otaKxZJ9UTREu2LQDQHyfnor4m7S177z0d6FH-XKImnJuBVDg5hU4j4=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "19:30"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.7715941248327166,
+                "walkingTime": 10
+              },
+              {
+                "id": "serp-nearby-ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "name": "UNGARO 1956",
+                "address": "Via Fabio Filzi, 8, 20124 Milano MI",
+                "latitude": 45.4822607,
+                "longitude": 9.1992088,
+                "rating": 4.8,
+                "reviewCount": 225,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "boutique de desserts"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "346 684 4581",
+                "website": "https://ungaro1956.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=UNGARO%201956%2C%20Via%20Fabio%20Filzi%2C%208%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer2yxR7uh9vIL52ieOcLAE45d6UeZERV0G2dNOePhoC35KYcwJ-mspF3VxxKzvo-ZiCp-RWkexmx5uisB1-ow8azDv34ZD80a_tc4Lffdmz4u98d7Lg33Yp1ZkaIhv7ERzK5g7V9BDf4ZEq=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.7260717143870637,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "selectionSource": "api"
+          },
+          {
+            "id": "63426107-fcdc-474d-a871-ed54b2758673",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Pinacothèque de Brera",
+            "description": "Fra Carnevale, pseudonimo di Bartolomeo di Giovanni Corradini, è stato un pittore e religioso italiano.",
+            "locationName": "Pinacothèque de Brera",
+            "latitude": 45.4719545,
+            "longitude": 9.1878145,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4719545,9.1878145",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pinacoth%C3%A8que%20de%20Brera&query_place_id=&center=45.4719545,9.1878145",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVKi781exklY9svfAM006qonDQIspp1_2uJ--026yS9GgiG0_cxPMCxY0C23zjzDxLHMnigDQ4gAKvGfyKS1snSvN__VKle5uZHtDKG47uxqw4ainefFGYUuHdGl5YQpCs_UfRDHJuR7sUrX9_KLazCwaSxXyEh3DyvlFMGPWY9lGF8L2xf-Th2eILXuGymTSeN0s0mrf-ZDDQCwYokNBzKgo9_2WKQtgV8SixGpRBJ-R2XB3zg-_AxmRyzPb0XwoFVslC1w95D_xE3i3bXHtVEGgd_lPyXCfC_yfX67Vm5JSwa_rGWd9aaw5I2I3oBIBqOErZQ5GAIM-mBRjUZYSaN8B5DZgmOLWmGjseiQUa4O-F0kGv5pnJ1uBr27G4nlRBBoyZIRiVuTQpgU10VuSDbIMNWetW55hktJoQEGNjzYvNcskU-XRx31d4Z7s3WScsRpFIEqV134R44pw060DEtXSQof_JTaLPz8EsfKbCm6cR01GCvPv5rJk9rxHqCcNhuYMhBb3tzQWoGe6Pq1WhVx92penxI2bG-2oNPTbeLMfSkxvEpfHnvwga1O5I9jHqqyjCo&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.07,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "81708e0e-f3aa-4eb5-aea9-8e09be5bee24",
+            "dayNumber": 2,
+            "startTime": "11:15",
+            "endTime": "12:15",
+            "type": "activity",
+            "title": "Château des Sforza",
+            "description": "Il palazzo di Versailles, detto anche castello di Versailles o reggia di Versailles, o semplicemente per antonomasia Versailles, è un'antica e grandiosa residenza dei Borboni di Francia situata ad una",
+            "locationName": "Château des Sforza",
+            "latitude": 45.4704762,
+            "longitude": 9.1793325,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4704762,9.1793325",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20des%20Sforza&query_place_id=&center=45.4704762,9.1793325",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVw_LoBkzwckiNK0yz7tinq80thpeTReTTbuAGF73J1Pwq24dJeSJgHd64YBUguz_T4G0rQLIY31HjO0z1j7DpALjhjJPLFDdqOmR0TuyVxsZ9226mHRMt8VF4Sdk34Ncgys1UkmYc5mi2UBprZhHNV1umg8YJ9UKYT_vmAFldii4C_bd0uN3dNK5Nor2Z0Zk5WVLdFAjlBnNZC6vwfASUruqpr1MDCkC1FsfPmSmUHIGqt7lntpmlYw6CcmesxXytAtw7VzzNt3MXkZsH88mtK5J3WVc0qhQCoiz_jXHCF6XcSRGKMMwSWW5VOjps5CHSz4CWxgtrj5aUUNXzESBpHCIp0AjGmPeDPI_cLh3qDoWtbDYSm30oxkoLQUR_Kx7YJlqWRx3wZamfQi94qXdnMSOrZvtO1LdBWz3pp7gyLy9kc9BrUnOzhMBCqlpdPk7A6AxNCs7ypjY_FRo5aCyuxopotcDrbv3EBqyjM7_1iwMDIcPWL2PB7R1BtzCcYtfixoX7xM3EUYdnK_BydCPqn4PZjRPVzLtWiq4CVUGkT8icIn1LzFz3Wo2Ox6M2dO17xgjiZ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.68,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "12a554c0-a7d8-4a9e-8614-20600c3f6611",
+            "dayNumber": 2,
+            "startTime": "12:30",
+            "endTime": "13:30",
+            "type": "restaurant",
+            "title": "Déjeuner — Maccheroni - La Carbonara N°1 di Milano",
+            "description": "\"Nourriture délicieuse Personnel sympathique Ambiance agréable !\"",
+            "locationName": "Via S. Carpoforo, 7, 20121 Milano MI",
+            "latitude": 45.4715998,
+            "longitude": 9.1848516,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.47651,9.172266",
+            "restaurant": {
+              "id": "serp-nearby-ChIJF5d3iMPBhkcRCIKDoVyr7tU",
+              "name": "Maccheroni - La Carbonara N°1 di Milano",
+              "address": "Via S. Carpoforo, 7, 20121 Milano MI",
+              "latitude": 45.4715998,
+              "longitude": 9.1848516,
+              "rating": 4.6,
+              "reviewCount": 2428,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant italien",
+                "restaurant italien"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "02 3831 3245",
+              "website": "https://maccheronirestaurants.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Maccheroni%20-%20La%20Carbonara%20N%C2%B01%20di%20Milano%2C%20Via%20S.%20Carpoforo%2C%207%2C%2020121%20Milano%20MI",
+              "googlePlaceId": "ChIJF5d3iMPBhkcRCIKDoVyr7tU",
+              "openingHours": {
+                "friday": {
+                  "open": "12:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "12:30",
+                  "close": "23:30"
+                },
+                "sunday": {
+                  "open": "12:30",
+                  "close": "22:30"
+                },
+                "monday": {
+                  "open": "12:30",
+                  "close": "22:30"
+                },
+                "tuesday": {
+                  "open": "12:30",
+                  "close": "22:30"
+                },
+                "wednesday": {
+                  "open": "12:30",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "12:30",
+                  "close": "22:30"
+                }
+              },
+              "distance": 0.4481348704756003,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "name": "Il Cairoli Bar & Restaurant",
+                "address": "Via Cusani, 13, 20121 Milano MI",
+                "latitude": 45.4683062,
+                "longitude": 9.1830894,
+                "rating": 4.5,
+                "reviewCount": 315,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "338 665 1230",
+                "website": "https://www.unaitalianhospitality.com/it/ristoranti/il-cairoli-bar-and-restaurant?cmp=gmb_il_cairoli_bar_restaurant_link",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Il%20Cairoli%20Bar%20%26%20Restaurant%2C%20Via%20Cusani%2C%2013%2C%2020121%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoi8LemHNAOm-jVhnKq3fNb5jEAQvUeDUtpZzT3fo42MiyeQD0CFjFhZvA00janB87YIIBTFZVgy0I9LNnNvbfM0L_DU5zoaFhJfcqp9MGVxY8UCS1Cs2axgPQaQxEDl1fIwFPh=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  }
+                },
+                "distance": 0.37953849621580865,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-11646682267042167518",
+                "name": "Marea Seafood & Beverage",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.45926,
+                "longitude": 9.182789,
+                "rating": 4.8,
+                "reviewCount": 453,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\""
+                ],
+                "description": "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Marea%20Seafood%20%26%20Beverage%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/lXSNyw-5U7WN32X62w--jJIQcIUeuGl5JIH1RFOXoGQ.jpeg"
+                ],
+                "googlePlaceId": "11646682267042167518",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.87,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Maccheroni%20-%20La%20Carbonara%20N%C2%B01%20di%20Milano%2C%20Via%20S.%20Carpoforo%2C%207%2C%2020121%20Milano%20MI",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Maccheroni%20-%20La%20Carbonara%20N%C2%B01%20di%20Milano%2C%20Via%20S.%20Carpoforo%2C%207%2C%2020121%20Milano%20MI",
+            "selectionSource": "api"
+          },
+          {
+            "id": "c90de663-5fa6-403b-a4b3-040471bfee05",
+            "dayNumber": 2,
+            "startTime": "13:45",
+            "endTime": "14:45",
+            "type": "activity",
+            "title": "Parco Sempione",
+            "description": "Il Parco Sempione è una zona verde della città di Milano.  Realizzato a fine Ottocento sull'area già occupata dalla Piazza d'armi, occupa un'area di 386000 m², completamente cintata e videosorvegliata",
+            "locationName": "Parco Sempione",
+            "latitude": 45.4720981,
+            "longitude": 9.177224299999999,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4720981,9.177224299999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parco%20Sempione&query_place_id=&center=45.4720981,9.177224299999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW5XaD8HEtXd_ga1ZFzol9L9_vcQKAJH5J43Kz5MG0ycRA42ClfIll_BPU3_KXacbcZlbM6FTf6TI_TXgeVSaYUP44UIBNIFYNel_k37VtzB-6J42kqkJBO2NMq_OXVLwhSU1-7YTc3cJtv_ZB-1vkItHx5QHwwww2K9qQLaPrI9j7IcS4NPKCcWlGPjU2M4aeU1gXDLsv8v5L-Z7Rg5w9sKqB-9fUL5FdegW3tnTKJ1-wRDNBmx9URso_MgJmf5PMWWvzb3H8100zachhoemFHLRoqHdratcWR_b2OXVLK20VcUXgYhuO2mfVtz0KznzRWIZcsGoM45AUMoP9zi9HKSeP0eKzMJmgVUgh7VN_wa2-EBLslCOOwnMKzCKB3aUYMYVmj7nU4To_4CiZywFTdag-nApwg5xVBBa7Q3p1GDSeM2WE5cKhTNIzkC_22zp_EnVxAThSUPPim32W_YCc3poPmWJvXW85K0N1G0_WDnZaIfjiFbZ8NS757keUnnyVhEzYPhgUGIBmbJVmkhFoamL9GQwTnU8HOoQxtl-HYtIqIKeUVYybSGgdy3FiIOjodcwGz&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.62,
+            "timeFromPrevious": 8,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "0dcf97c5-5c96-4dd3-8eac-dac39b168597",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "15:30",
+            "type": "activity",
+            "title": "Église San Maurizio al Monastero Maggiore",
+            "description": "Il Cenacolo, noto anche come l'Ultima Cena, è un dipinto parietale, definito spesso impropriamente come un affresco, ottenuto con una tecnica mista \"a secco\" su intonaco (460×880 cm) di Leonardo da Vi",
+            "locationName": "Église San Maurizio al Monastero Maggiore",
+            "latitude": 45.4656402,
+            "longitude": 9.178937399999999,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4656402,9.178937399999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%C3%89glise%20San%20Maurizio%20al%20Monastero%20Maggiore&query_place_id=&center=45.4656402,9.178937399999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXTFQRyXJG137S6NR2c-YTlPNRzZqZglxIIi_NG27n_t36uQCO_vjN53GtxSZHm6TwWWWYDhu3jkL3XsMfdB0kAyEpR4vf6MSVCgcxWrF5BPENC5Z75uC5ymDByGkCXjE47ECGt6i7s2kBiWQ4vdZJKdlcLM35rJk6XXFGRPPAq_TSj5L4XezNoDwxGsff9RbZoqocvebxUCxpasC-2hu6dbPpNQlsOZtDD8ZTsShK0C3yplnr9PreoGEDej82Fk7y_ebliOzHva3cOMPWlmJ10QlMQYNPBN4Zz0CfcYRSoQdbHrRLZza2gyZT8MebTpvpdjT_d7TJ59SDYPcCz6e5ehJvz8EaN-rPsJgPkaCed_hnEcSvXnmhgmFIwzS2hTRDkmXp_s5mMYUg9i4lDLr3SIFnpu5SwSA6zYesUnO-4aCKwQPudn12tVEWQrZvCnFuYKrl6pm_GX13bcJRStvaNJDPT-1OpKxcS55exRKMa2l1cEqJxtKPw8PF5ItWn_aQRowrhxDjVYZjIdx5KqHKfej_Xy45ysgmY0Cs5vByPReRgo_LwnITEAZe-f92DdJOSxFSO5qcKcQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.73,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "c515cad7-1c0b-402e-8837-a438818ea67c",
+            "dayNumber": 2,
+            "startTime": "18:00",
+            "endTime": "21:00",
+            "type": "activity",
+            "title": "Cours de gnocchis, pâtes, tiramisù et vins",
+            "description": "Avec l'aide d'un chef natif et expérimenté, vous apprendrez tous les secrets de la cuisine italienne. Vous apprendrez, avec une expérience pratique, comment faire 3 plats du début à la fin, et vous pourrez profiter de ce que vous avez créé ! Pendant le cours, nous parlerons des erreurs les plus courantes que l'on peut commettre lors de la préparation d'un plat italien typique et vous pourrez poser n'importe quelle question sur la cuisine et les traditions italiennes. Vous obtiendrez des recommandations sur les meilleurs restaurants et marchés de la région et les meilleurs produits à acheter pour emporter chez vous. Tout cela dans un environnement amusant et professionnel, avec un chef qui vous aidera tout au long de l'expérience !",
+            "locationName": "Cours de gnocchis, pâtes, tiramisù et vins",
+            "latitude": 45.4626734,
+            "longitude": 9.184408,
+            "orderIndex": 6,
+            "estimatedCost": 69,
+            "duration": 180,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Milan/Cooking-class-truffle-gnocchi-fresh-pasta-tiramisu-and-wine/d512-420378P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4626734,9.184408",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cours%20de%20gnocchis%2C%20p%C3%A2tes%2C%20tiramis%C3%B9%20et%20vins&query_place_id=&center=45.4626734,9.184408",
+            "mustSee": true,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/7e/9f/09.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Cours de gnocchis, pâtes, tiramisù et vins",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/7e/9f/09.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 697,
+            "viatorPrice": 69,
+            "viatorDuration": 180,
+            "freeCancellation": true,
+            "instantConfirmation": false,
+            "distanceFromPrevious": 0.54,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          }
+        ],
+        "theme": "Brera, Castello & Gastronomie milanaise",
+        "dayNarrative": "Journée culturelle intense dans les quartiers nord du centre : Pinacothèque de Brera, Château des Sforza et Parco Sempione. Le soir, cours de cuisine pour s'immerger dans la gastronomie italienne — l'activité must-see du voyage.",
+        "geoDiagnostics": {
+          "maxLegKm": 1.07,
+          "p95LegKm": 0.87,
+          "totalTravelMin": 59,
+          "totalLegKm": 4.51,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.22,
+          "mstLowerBoundKm": 3.7
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 150,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-02-25T11:19:03.342Z",
+        "items": [
+          {
+            "id": "135e5647-eff2-40cb-9792-d55195938f24",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Deep Gold Milano",
+            "description": "\"Service impeccable, plats délicieux et copieux.\"",
+            "locationName": "Via Gustavo Fara, 33, 20124 Milano MI",
+            "latitude": 45.485109099999995,
+            "longitude": 9.198741499999999,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.46063,9.176588",
+            "restaurant": {
+              "id": "serp-nearby-ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "name": "Deep Gold Milano",
+              "address": "Via Gustavo Fara, 33, 20124 Milano MI",
+              "latitude": 45.485109099999995,
+              "longitude": 9.198741499999999,
+              "rating": 4.7,
+              "reviewCount": 189,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "sandwicherie",
+                "sandwicherie",
+                "café spécialisé dans les boissons expresso",
+                "restaurant spécialisé dans les petites portions à partager"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "02 643 3332",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+              "googlePlaceId": "ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "openingHours": {
+                "friday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "sunday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "monday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "tuesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "wednesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "thursday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.5104325101499946,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "name": "Crazy Cat Café",
+                "address": "Via Napo Torriani, 5, 20124 Milano MI",
+                "latitude": 45.4809439,
+                "longitude": 9.2034378,
+                "rating": 4.4,
+                "reviewCount": 7518,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "bistro",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples."
+                ],
+                "description": "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples.",
+                "phoneNumber": "02 8454 2739",
+                "website": "http://www.crazycatcafe.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Crazy%20Cat%20Caf%C3%A9%2C%20Via%20Napo%20Torriani%2C%205%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweojFccdHy6yHMa-ym6gLu_cbBqhrFWesI5-DQhR79mnullDSX7xYZJzWUlmlYTpf72UBKLVyb51WXH-1otaKxZJ9UTREu2LQDQHyfnor4m7S177z0d6FH-XKImnJuBVDg5hU4j4=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "19:30"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.7715941248327166,
+                "walkingTime": 10
+              },
+              {
+                "id": "serp-nearby-ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "name": "UNGARO 1956",
+                "address": "Via Fabio Filzi, 8, 20124 Milano MI",
+                "latitude": 45.4822607,
+                "longitude": 9.1992088,
+                "rating": 4.8,
+                "reviewCount": 225,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "boutique de desserts"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "346 684 4581",
+                "website": "https://ungaro1956.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=UNGARO%201956%2C%20Via%20Fabio%20Filzi%2C%208%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer2yxR7uh9vIL52ieOcLAE45d6UeZERV0G2dNOePhoC35KYcwJ-mspF3VxxKzvo-ZiCp-RWkexmx5uisB1-ow8azDv34ZD80a_tc4Lffdmz4u98d7Lg33Yp1ZkaIhv7ERzK5g7V9BDf4ZEq=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.7260717143870637,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "93464e32-d9cd-4523-b0c3-4a21e1e40fc3",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Musée des sciences et des techniques Léonard de Vinci",
+            "description": "The Conservatoire national des arts et métiers is an AMBA-accredited French grande école and grand établissement.  It is a member of the Conférence des Grandes écoles, which is an equivalent to the Iv",
+            "locationName": "Musée des sciences et des techniques Léonard de Vinci",
+            "latitude": 45.4628869,
+            "longitude": 9.1706523,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4628869,9.1706523",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20des%20sciences%20et%20des%20techniques%20L%C3%A9onard%20de%20Vinci&query_place_id=&center=45.4628869,9.1706523",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUcAdre4FdmYYeVc3loqu__J_UVo62L3WJIteUkwU92DBpzm0lqF4aq_uWzKnhwXhyebBvZ4x-uu7Teptg16J3ZfM2whbSE__Q4ajFPK-bejMcPiEFU2ebmmm7QweqFLJCQBhr1DEfEiQrMcctK9MMz2-hfptouOBo6oX547Q6bnxrN-7gLj9rUoSM9HqXzZDp2vr_bGRsiyFv7m3gj8Gu0wJ4OXxH1mEwh6XUcmCJKn-ICx2E98yr1h2jz_owKZ0ApVyInm_FVbF2FTpV1c4Ryz4-vExt6okYSX1b5s9oxKwuqV-3kuwlFowTLcn0Pb97zwQaeYpSIRRuryopidDUFbCyzPzdkZBVgLUn0uXLGkMzDjDdJ0ZZNi2c1w-3ub5MDDqVPwuS27d7jB8OAuUimg754PErg4ea_eLra6XEknEVIkx3VFFaYj8UhN8IFMuCyeABJo91zs78KCu9D3XY_sciy9ObpxeSL7fs1kgsHv8_1HOxzr7_QqEZQrWFZ8VbFyak2M7G907Bsv5fjOwdbnG8yq1A1SA5ZM27ZCNVuaWwmvPOXq07mJXrVzvv1r71t3-xujQrJBA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.53,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "9dab4890-b925-4449-992a-8055a6de8d7b",
+            "dayNumber": 3,
+            "startTime": "12:00",
+            "endTime": "13:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Ristorante Galleria",
+            "description": "\"Très bonne cuisine, carte des vins très fournie et personnel top !\"",
+            "locationName": "Milan, Metropolitan City of Milan",
+            "latitude": 45.46606,
+            "longitude": 9.189919,
+            "orderIndex": 2,
+            "estimatedCost": 45,
+            "duration": 75,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.461052,9.183305",
+            "restaurant": {
+              "id": "serp-16521467397370762782",
+              "name": "Ristorante Galleria",
+              "address": "Milan, Metropolitan City of Milan",
+              "latitude": 45.46606,
+              "longitude": 9.189919,
+              "rating": 4.5,
+              "reviewCount": 6100,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "italienne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Restaurant incroyable autant par la décoration que par le service.\""
+              ],
+              "description": "\"Restaurant incroyable autant par la décoration que par le service.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+              "googlePlaceId": "16521467397370762782",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "name": "Il Cairoli Bar & Restaurant",
+                "address": "Via Cusani, 13, 20121 Milano MI",
+                "latitude": 45.4683062,
+                "longitude": 9.1830894,
+                "rating": 4.5,
+                "reviewCount": 315,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "338 665 1230",
+                "website": "https://www.unaitalianhospitality.com/it/ristoranti/il-cairoli-bar-and-restaurant?cmp=gmb_il_cairoli_bar_restaurant_link",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Il%20Cairoli%20Bar%20%26%20Restaurant%2C%20Via%20Cusani%2C%2013%2C%2020121%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoi8LemHNAOm-jVhnKq3fNb5jEAQvUeDUtpZzT3fo42MiyeQD0CFjFhZvA00janB87YIIBTFZVgy0I9LNnNvbfM0L_DU5zoaFhJfcqp9MGVxY8UCS1Cs2axgPQaQxEDl1fIwFPh=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  }
+                },
+                "distance": 0.37953849621580865,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-11646682267042167518",
+                "name": "Marea Seafood & Beverage",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.45926,
+                "longitude": 9.182789,
+                "rating": 4.8,
+                "reviewCount": 453,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\""
+                ],
+                "description": "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Marea%20Seafood%20%26%20Beverage%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/lXSNyw-5U7WN32X62w--jJIQcIUeuGl5JIH1RFOXoGQ.jpeg"
+                ],
+                "googlePlaceId": "11646682267042167518",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 1.01,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "83013c27-e4b0-4e89-823f-16713991505f",
+            "dayNumber": 3,
+            "startTime": "13:30",
+            "endTime": "15:30",
+            "type": "activity",
+            "title": "Musée Poldi Pezzoli",
+            "description": "Gian Giacomo Poldi Pezzoli d'Albertone è stato un collezionista d'arte italiano, fondatore del museo che porta il suo nome, il Museo Poldi Pezzoli di Milano.",
+            "locationName": "Musée Poldi Pezzoli",
+            "latitude": 45.4685282,
+            "longitude": 9.1916916,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4685282,9.1916916",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Poldi%20Pezzoli&query_place_id=&center=45.4685282,9.1916916",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV4GFNTrTseS3YHuBdHojIDc-ElRDGyr60dk6BH8U5C58e5_9JanSWEnVtYC73fydzz8OP9GOyV5bE1vnuXg8IFMiLLCPy74h3ZP2PGzu6gWblIb_XTHi2KAUmdFVgjg9FvsyAD-wbSFJ0FDrWn5g_0IseOKA3w_9vnx6rQzp3QFpoeRsQIolZjN2Qdfu2b-Em15Sx5hdxINgiNRjIz-cmExKQMlYhjicQlz0JxDYWAh3qODeA8IhLPY3hojG0-f9nrvidwCunogGGGHc4fR4F82cSjyI4ipYWS8P8v4gSy0CuK_juNp7q6No5lkWxvjDSpd8etuwOIzeUq7yc085PAIhqptCoVzSeSs1_ZwkWz5uBLcTq--vQJBdL8UAzttz1QN7ayZRQ90GcjjAocUb84v6kkcb1Jgicy9Gng6DTPLeJpnhju-72y3VCCqz6d0y6ugON-yysRTjEafgLclXBxIjcGSfu8UWlqfygMJHoGyTP-_WmUqTcDYMXtpEixH0WXUnf-pVuy6aIQ-eGRqF0uGdSX98ixO-aHan1v4MavRPpqYENdSv1w8y_ThYAZFAyAjR8ulyoC8g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.06,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "3aee9dfa-a693-466b-ae21-f3717aee9bb1",
+            "dayNumber": 3,
+            "startTime": "15:45",
+            "endTime": "16:15",
+            "type": "activity",
+            "title": "Église Santa Maria delle Grazie",
+            "description": "La chiesa di Santa Maria Maddalena, o chiesa della Maddalena, è un luogo di culto cattolico di Parigi situato nell'area degli Champs-Élysées, nell'VIII arrondissement, nella piazza omonima.",
+            "locationName": "Église Santa Maria delle Grazie",
+            "latitude": 45.465963,
+            "longitude": 9.170962099999999,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.465963,9.170962099999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%C3%89glise%20Santa%20Maria%20delle%20Grazie&query_place_id=&center=45.465963,9.170962099999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWF5BPbwDeB9JfcMdsHedCVHdsbeXVBa_2hJiwqjVfBeJv3lg0mMXxZRh15C98ZJHAk9e29XZzj7slKlGPjQ3TrlC6cDGjB3SoevSLZqm60zSFR_e62LFoFedKedVQSoR0V0p-xKd9JRJL-cKCoCQ_v4vP1h3Lh8nBEz6b5w3-u46HKAqB-vA-JuRYENmFbwIJPsioVTgkJRySzFc2Iiekz2VzSZjP3DGhxryKkRJujIiF7YA13EbN7UfTFiw1-s1pRcjqKw1rpm8o4zG7Dy_4lsQUPRFA065_EWHkkSK3Wuc-AxtX_LgMphtq-yeV6gSryHGLTJd0oBV-iRE7iDi38AKuxzBbN3Axx67iiZK9JxGqtf0EwRkBu7BNMuPpbSOSGnYks8wO8Y3ZAB3Dm7Fy-___HBFumlp2F88VCjMadThkcYjuysLpQSxP6APZqkzkbkezlZwbF2X2WQLiAqSkK8YuTp5rYmRCLxR-HLuFHhIn4FRri-d6NAY16vhVEY91rr-UKTEYLCa8IOh-0WdWYner71EgK9lv9rchdPSfEw5-XeSGQavg8kHwiW7RR-OyJvg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.64,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e9745522-85f4-48bc-8568-9e6e3869307c",
+            "dayNumber": 3,
+            "startTime": "16:30",
+            "endTime": "17:30",
+            "type": "activity",
+            "title": "Piazza Mercanti",
+            "description": "Piazza Mercanti è una piazza di Milano creata come centro della vita cittadina in epoca medioevale, successivamente trasformata in via Mercanti.  Per piazza Mercanti si intende, nel linguaggio quotidi",
+            "locationName": "Piazza Mercanti",
+            "latitude": 45.4646339,
+            "longitude": 9.187676999999999,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4646339,9.187676999999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Piazza%20Mercanti&query_place_id=&center=45.4646339,9.187676999999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXkR81zQ1CPchWHInaAIyRTrinO18j3NXAsd2TWPYkSNPoODGRAAvEp4q82wzzdVlxMjwOFlwW86wSZ2BGlQ0xsstj2YdOpGj4fxD38qCAs_f7cRRtzJexTb2HEDpkBEwF3J66TFpQHdhZdV7bXb2ANtamb5sIb7RwVpM6JthLV9ySyEe4cuJ9jo2wwPe_nt2Z5CjjV-Ez_TGsoe9YxkbJiZRZq2HxVGQXI8ZRyCnYkQ64duv41slNekwnpovjQ92F0dTdSoo9irkR13LLxQ2pQIwSCZTYU1mu7Yg2J4OTE0BjCCrbvZOCf6pGJFOf5NDjmmaFSKbnCvDDUSYHzSYGSzO6OF-7-AqZaJUj45IbZfP_-J9WEHy18h3hTQZZpOuc07OH2L5HM1XFqTs06dS_ew_cmDQzT_Uc2RsRGoPOYNvS_AfijIK-vtq3b140RqDMy4Wjylf6O49UeowtK1VXQTcouGHVzH4h4mB4VRPDzuiC5Gnc3nAjso6NSWQD-fW3LGUidKx0w9l1CmUpxY-vC85edm1avSEsw3Cu_SQ4lDtq2sJ5dA0MpFhK5_faLOuw_Uzm4&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.31,
+            "timeFromPrevious": 17,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "d443bee0-98db-46aa-a888-0d3f5e8cd13c",
+            "dayNumber": 3,
+            "startTime": "19:30",
+            "endTime": "21:00",
+            "type": "restaurant",
+            "title": "Dîner — La piada di una volta",
+            "description": "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\"",
+            "locationName": "Milan, Metropolitan City of Milan",
+            "latitude": 45.462513,
+            "longitude": 9.187598,
+            "orderIndex": 6,
+            "estimatedCost": 15,
+            "duration": 90,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.45926,9.182789",
+            "restaurant": {
+              "id": "serp-5214240056502930238",
+              "name": "La piada di una volta",
+              "address": "Milan, Metropolitan City of Milan",
+              "latitude": 45.462513,
+              "longitude": 9.187598,
+              "rating": 4.8,
+              "reviewCount": 121,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "italienne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"piadine très bon fait a ma demande Grande variété de garniture.\""
+              ],
+              "description": "\"piadine très bon fait a ma demande Grande variété de garniture.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20piada%20di%20una%20volta%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+              "googlePlaceId": "5214240056502930238",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11646682267042167518",
+                "name": "Marea Seafood & Beverage",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.45926,
+                "longitude": 9.182789,
+                "rating": 4.8,
+                "reviewCount": 453,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\""
+                ],
+                "description": "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Marea%20Seafood%20%26%20Beverage%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/lXSNyw-5U7WN32X62w--jJIQcIUeuGl5JIH1RFOXoGQ.jpeg"
+                ],
+                "googlePlaceId": "11646682267042167518",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-7938420910150740681",
+                "name": "SENSORIUM | Experiential Dining",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.457153,
+                "longitude": 9.187014,
+                "rating": 4.8,
+                "reviewCount": 406,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bon et le personnel est très à l’écoute.\""
+                ],
+                "description": "\"Très bon et le personnel est très à l’écoute.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=SENSORIUM%20%7C%20Experiential%20Dining%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/Dz9TShaoUBdPtZhM_Y2FMyV3oHpTjKB66pMPFLU5zRU.jpeg"
+                ],
+                "googlePlaceId": "7938420910150740681",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.71,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20piada%20di%20una%20volta%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20piada%20di%20una%20volta%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Musées, Léonard de Vinci & Santa Maria",
+        "dayNarrative": "Journée dédiée à l'art et à la Renaissance milanaise : le Musée des sciences Léonard de Vinci, l'Église Santa Maria delle Grazie et le Musée Poldi Pezzoli. Journée intérieure idéale par temps de brouillard.",
+        "geoDiagnostics": {
+          "maxLegKm": 3.3,
+          "p95LegKm": 1.64,
+          "totalTravelMin": 105,
+          "totalLegKm": 8.28,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.9,
+          "mstLowerBoundKm": 4.36
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 120,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-02-26T11:19:03.342Z",
+        "items": [
+          {
+            "id": "04d0b2fb-9b49-4199-a020-98058669cc6b",
+            "dayNumber": 4,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Deep Gold Milano",
+            "description": "\"Super cuisine, super service, très bon produits et cuisine maison.\"",
+            "locationName": "Via Gustavo Fara, 33, 20124 Milano MI",
+            "latitude": 45.485109099999995,
+            "longitude": 9.198741499999999,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.46208,9.185868",
+            "restaurant": {
+              "id": "serp-nearby-ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "name": "Deep Gold Milano",
+              "address": "Via Gustavo Fara, 33, 20124 Milano MI",
+              "latitude": 45.485109099999995,
+              "longitude": 9.198741499999999,
+              "rating": 4.7,
+              "reviewCount": 189,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "sandwicherie",
+                "sandwicherie",
+                "café spécialisé dans les boissons expresso",
+                "restaurant spécialisé dans les petites portions à partager"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "02 643 3332",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+              "googlePlaceId": "ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "openingHours": {
+                "friday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "sunday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "monday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "tuesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "wednesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "thursday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.5104325101499946,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "name": "Crazy Cat Café",
+                "address": "Via Napo Torriani, 5, 20124 Milano MI",
+                "latitude": 45.4809439,
+                "longitude": 9.2034378,
+                "rating": 4.4,
+                "reviewCount": 7518,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "bistro",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples."
+                ],
+                "description": "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples.",
+                "phoneNumber": "02 8454 2739",
+                "website": "http://www.crazycatcafe.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Crazy%20Cat%20Caf%C3%A9%2C%20Via%20Napo%20Torriani%2C%205%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweojFccdHy6yHMa-ym6gLu_cbBqhrFWesI5-DQhR79mnullDSX7xYZJzWUlmlYTpf72UBKLVyb51WXH-1otaKxZJ9UTREu2LQDQHyfnor4m7S177z0d6FH-XKImnJuBVDg5hU4j4=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "19:30"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.7715941248327166,
+                "walkingTime": 10
+              },
+              {
+                "id": "serp-nearby-ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "name": "UNGARO 1956",
+                "address": "Via Fabio Filzi, 8, 20124 Milano MI",
+                "latitude": 45.4822607,
+                "longitude": 9.1992088,
+                "rating": 4.8,
+                "reviewCount": 225,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "boutique de desserts"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "346 684 4581",
+                "website": "https://ungaro1956.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=UNGARO%201956%2C%20Via%20Fabio%20Filzi%2C%208%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer2yxR7uh9vIL52ieOcLAE45d6UeZERV0G2dNOePhoC35KYcwJ-mspF3VxxKzvo-ZiCp-RWkexmx5uisB1-ow8azDv34ZD80a_tc4Lffdmz4u98d7Lg33Yp1ZkaIhv7ERzK5g7V9BDf4ZEq=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.7260717143870637,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "6d6ceef1-2703-49f4-80d0-4790b961e68c",
+            "dayNumber": 4,
+            "startTime": "09:30",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Jardin botanique de Brera",
+            "description": "Il pisello è una pianta erbacea annuale appartenente alla famiglia Fabaceae, originaria dell'area mediterranea e orientale.",
+            "locationName": "Jardin botanique de Brera",
+            "latitude": 45.47091469999999,
+            "longitude": 9.1891832,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.47091469999999,9.1891832",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20botanique%20de%20Brera&query_place_id=&center=45.47091469999999,9.1891832",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW5QDOJcrOk4eXDaHuMaQ4NLsQJm3VXI8yF6e6dBfKStLmSXHcuZjpaQOunJ9hguWY0n-YF-A6u8_QdWhSd-fcAERCf7DlfzM_qOD94SdSHeDWab-hY9db0VP8Ez53o2pPwxO_EqB0Jo94sDHx3hMNWfU7tP083eDQ1llXoTOrKgeYleA9YPYJgOhuhEW0qrE0ntQe4nYejTsbDuz9ryodojgmKFrzNpyUAje2l33KkAVwgilGN23_SGFWMKX8bGSg_nSF7cNA4e8K2TECJwTfKtibQQENaatRFI2EsQ9ofLpSQ7qshx4r8-G8mLvbG0p8mDMTMuwX81fLXRaneheH_9AsZudU2TajZc-Xdjq2uDXWEMXJJNM8ZPW5T6TjEM_lnKnYAzl8K5ybdEoIkBrpEhhCDn767oU9NbxW5fcH7LvmUvNQyPkQoLXvfK1R8I96RwKDV4Nw_FznPEyhM3Qv92_zj8Gvwx8s0molu8MWoQ1Owrk8oy_E6GdgcQNptS3Zd_L7O2WoHbU6PUZ4gETdDaOHwQqIxFf-r2z0QQ99SlKc87s8ml8jaJnloQq3CqJplphU--KSKOA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.02,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "96db4378-b6e0-4a78-a2a7-da478085cf79",
+            "dayNumber": 4,
+            "startTime": "10:45",
+            "endTime": "11:45",
+            "type": "activity",
+            "title": "Cimetière monumental de Milan",
+            "description": "Il cimitero monumentale di Milano è noto per ospitare un gran numero di sepolture illustri, che lo popolano fin dalla data della sua benedizione inaugurale, il 2 novembre, giorno della commemorazione ",
+            "locationName": "Cimetière monumental de Milan",
+            "latitude": 45.484569,
+            "longitude": 9.180162,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.484569,9.180162",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cimeti%C3%A8re%20monumental%20de%20Milan&query_place_id=&center=45.484569,9.180162",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWyDnZ8sU1cBObq1tPrGtRls9oL_pw71BzuwOEjRYGrunYqEet7Fw3qzbIbPdK7fPheOGQ9KKgLYxq-C3LC0DEoFd5N44u1XM_pAG11f9F7xvVyctsu1qI6o-tjZqmSU-KpRQIWsGiT6K_6SV0vDiG9n1pq1_AL5qfXjhhcYtsag1U0zK1nygUc8MIMD4nubpvk_pUrwZpL4iLw2MfHTyYzDlfxG_QpyIgiyJSIeGgtz5vzz_H-6iK2nKNBWIfCWGqPhpGdKx8h1S-JCIOhaduQ7noGdtRTHU2AgJ5EfttmOBhxof11KNkf9-7bd047rMMx8rYMGG8ToYJvAwtWPl_-2lKjxCIHwRoS56ODQ6hVU9LCUky5axw89_9TTxeiGAoDIcQA4XielstOjM3nnCemQWzVepuL0ljR0tEc7Swlu8oZ_IXUibhmx-CiIVuFUJA48C68BIlnHTvt3q1mSO1qJx8HdrrjvuJdmLjZqAFdoD8i1139zftPgexMwLs_zcOEW9TxOqIUEAjUlQwAUB99vsMtt3WWceFpTC8T5JsucDI5TSCw_3dNtYzTR8SFTnWzI_lw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.67,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "af36350b-e57c-4721-805e-e27c1b4a669c",
+            "dayNumber": 4,
+            "startTime": "12:30",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — ANYMA BISTROT",
+            "description": "\"Très bon et le personnel est très à l’écoute.\"",
+            "locationName": "Via Pietro Maroncelli, 15, 20154 Milano MI",
+            "latitude": 45.4833502,
+            "longitude": 9.1826741,
+            "orderIndex": 3,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.457153,9.187014",
+            "restaurant": {
+              "id": "serp-nearby-ChIJKzkWGMDBhkcRfQRLiGIzjNM",
+              "name": "ANYMA BISTROT",
+              "address": "Via Pietro Maroncelli, 15, 20154 Milano MI",
+              "latitude": 45.4833502,
+              "longitude": 9.1826741,
+              "rating": 4.7,
+              "reviewCount": 258,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant italien",
+                "restaurant italien",
+                "restaurant de fruits de mer",
+                "restaurant espagnol",
+                "bar à tapas"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "345 177 5270",
+              "website": "https://anymagastronomia.it/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ANYMA%20BISTROT%2C%20Via%20Pietro%20Maroncelli%2C%2015%2C%2020154%20Milano%20MI",
+              "googlePlaceId": "ChIJKzkWGMDBhkcRfQRLiGIzjNM",
+              "openingHours": {
+                "friday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                },
+                "sunday": null,
+                "monday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                }
+              },
+              "distance": 0.23816217076045804,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3815436881561536200",
+                "name": "Via Pasteria - Arco Delle Pace",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.47651,
+                "longitude": 9.172266,
+                "rating": 4.8,
+                "reviewCount": 4700,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Nourriture délicieuse Personnel sympathique Ambiance agréable !\""
+                ],
+                "description": "\"Nourriture délicieuse Personnel sympathique Ambiance agréable !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Via%20Pasteria%20-%20Arco%20Delle%20Pace%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/ZVgjWmwrd9iHQnVXEESCE0jjSgopD1VgtcFrPlXP0XY.jpeg"
+                ],
+                "googlePlaceId": "3815436881561536200",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-nearby-ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "name": "UNGARO 1956",
+                "address": "Via Fabio Filzi, 8, 20124 Milano MI",
+                "latitude": 45.4822607,
+                "longitude": 9.1992088,
+                "rating": 4.8,
+                "reviewCount": 225,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "boutique de desserts"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "346 684 4581",
+                "website": "https://ungaro1956.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=UNGARO%201956%2C%20Via%20Fabio%20Filzi%2C%208%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer2yxR7uh9vIL52ieOcLAE45d6UeZERV0G2dNOePhoC35KYcwJ-mspF3VxxKzvo-ZiCp-RWkexmx5uisB1-ow8azDv34ZD80a_tc4Lffdmz4u98d7Lg33Yp1ZkaIhv7ERzK5g7V9BDf4ZEq=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.7260717143870637,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 3.09,
+            "timeFromPrevious": 39,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=ANYMA%20BISTROT%2C%20Via%20Pietro%20Maroncelli%2C%2015%2C%2020154%20Milano%20MI",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=ANYMA%20BISTROT%2C%20Via%20Pietro%20Maroncelli%2C%2015%2C%2020154%20Milano%20MI",
+            "selectionSource": "api"
+          },
+          {
+            "id": "bba4bde2-3992-44f5-95ef-61a76b2c332f",
+            "dayNumber": 4,
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Quadrilatero del Silenzio",
+            "description": "Elisabetta I Tudor è stata regina d'Inghilterra e d'Irlanda dal 17 novembre 1558 fino al 24 marzo 1603, giorno della sua morte.",
+            "locationName": "Quadrilatero del Silenzio",
+            "latitude": 45.4712916,
+            "longitude": 9.204684,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4712916,9.204684",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Quadrilatero%20del%20Silenzio&query_place_id=&center=45.4712916,9.204684",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUMMGDSQ-THpNzBps-dZEEmT7Bngf423IjB_7ol8MckUpW2m50bjUJElA9cCLEeC16TfvkUE-Nn5wPDvJVuQg55N4JkF7nFHVzMlZCMtTSLCMLnh49Rb9Oc86l4r1G5FOhNrnKK1CzesUDa98IpJL5kVj-DYtjoUAQ6spmO8jt_Jv1T6EBbirpS0daaXCGjTjooj-2T5EYZOk3Y00cEsPqtK7xFK4EiFBpPbjXkFpXnaaQWpY0V2fLCcZX2mKhCs_X1b251WrcZuPy6cSLcypdJgaWliU2Hvj2nvlO1gOE_5cWLz8xvVv2CNOG7ThujN2UDVscbMODQ5ZJyUPVTVIHq5umwXO7TZbRn2ovav3fQXC9u6vkgB8AaZ0vUxruLs5TekIZEV3r4YrW1eC5tVGgnQbzsp5Vb-ivzPvJbgpHNCjrgijCm0BqIe460O0DywnkFYswHQmRxTh90mZtqxNoppTLAH9_TBCeGnS3agy62i6t5bOrUj9Nzqef717bR6MWmkJgTH0THeo0vMPuF1G0XomKv48s8CWWNhiWfmrD0TV_NxJ3srIhJRI2ECziHSiupgQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.09,
+            "timeFromPrevious": 27,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "f7d9135a-c6d5-4496-b525-8902387d03c4",
+            "dayNumber": 4,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Expérience Chocolat La Fabrique de Chocolat",
+            "description": "Réservez votre visite et partez à la découverte du cacao dans la chocolaterie d'Enrico Rizzi, le seul laboratoire de transformation de la fève à la barre au cœur de Milan. Vous visiterez une plantation de cacao dans une vidéo immersive à 360°, assisterez à toutes les étapes de la transformation du cacao et participerez à une dégustation guidée de chocolats d'origine unique.",
+            "locationName": "Expérience Chocolat La Fabrique de Chocolat",
+            "latitude": 45.4586,
+            "longitude": 9.1827,
+            "orderIndex": 5,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Milan/Chocolate-Experience-The-Chocolate-Factory/d512-5555352P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4586,9.1827",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Exp%C3%A9rience%20Chocolat%20La%20Fabrique%20de%20Chocolat&query_place_id=&center=45.4586,9.1827",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/4f/6a/87.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Expérience Chocolat La Fabrique de Chocolat",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/4f/6a/87.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 20,
+            "viatorPrice": 30,
+            "viatorDuration": 60,
+            "freeCancellation": true,
+            "instantConfirmation": false,
+            "distanceFromPrevious": 2.22,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "b11bb3d6-80e7-4201-8300-47604444e78b",
+            "dayNumber": 4,
+            "startTime": "17:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Madonnina",
+            "description": "La Madonnina è una statua in rame dorato, opera di Giuseppe Perego, raffigurante la Madonna Assunta e posta sulla guglia maggiore del Duomo di Milano.",
+            "locationName": "Madonnina",
+            "latitude": 45.4643554,
+            "longitude": 9.1919048,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4643554,9.1919048",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Madonnina&query_place_id=&center=45.4643554,9.1919048",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV_IZ7OYnHnqt3puUKLhmwl5d6Th0O7GmS39rBd1SSO5jTsLS2S7tknNEC9H3ptLNMOhZ-d_LNCcxLNTbxnOM3VtSFRhHAv9_SijYL90-ZBuHExd0jFpVFq-P6DAIxXccZbjpEWHz_oST91ituhVwXqOjjPprqotZhpTiLFsqTiymk8vQVtf2eV825S_TPslTXW4QzJOlpQQWgjJBeQiGtfePZ_gLsta9xQKBxH7KCH7zMFkRCW_s4ljK9aCHDSU-c_phYGgQVYRN6gXOrAcwyPYMXaQImpQAV_6ZYyM94v3E-xkFjzHlzXp3VfG0sNC8JuJqYkJ9pR0BmXBUyEEHSlEBeoFm-as8bb6OI9s74uEr8fTmnxQlmUonVMvXcCz_dZgFossXny9Cb8_921sswiYdfe9bSkFlDk_isIAWko0OKDPkqxdndbZj51aMuC3_Q7ax7Wwyu6mb_gM0a8BJy_TT6NW7P7sqEnlxCMZdsf69R0oPgML3vWkXjbK7fGZNZpWOsZU_LgEUCTKlTpEGWs2rmmZKTVbKv88gOH9Z0S8O1I8XsJ1gk9G-ktREIJfTK5RWqy&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.96,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "ee66f84a-4126-44b7-a0e6-2c805c383f65",
+            "dayNumber": 4,
+            "startTime": "19:30",
+            "endTime": "21:00",
+            "type": "restaurant",
+            "title": "Dîner — Ristorante Galleria",
+            "description": "\"Une très bonne cuisine authentique italienne 👌🏽 l’ambiance est chic.\"",
+            "locationName": "Milan, Metropolitan City of Milan",
+            "latitude": 45.46606,
+            "longitude": 9.189919,
+            "orderIndex": 7,
+            "estimatedCost": 45,
+            "duration": 90,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4578,9.18749",
+            "restaurant": {
+              "id": "serp-16521467397370762782",
+              "name": "Ristorante Galleria",
+              "address": "Milan, Metropolitan City of Milan",
+              "latitude": 45.46606,
+              "longitude": 9.189919,
+              "rating": 4.5,
+              "reviewCount": 6100,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "italienne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Restaurant incroyable autant par la décoration que par le service.\""
+              ],
+              "description": "\"Restaurant incroyable autant par la décoration que par le service.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+              "googlePlaceId": "16521467397370762782",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "name": "Il Cairoli Bar & Restaurant",
+                "address": "Via Cusani, 13, 20121 Milano MI",
+                "latitude": 45.4683062,
+                "longitude": 9.1830894,
+                "rating": 4.5,
+                "reviewCount": 315,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "338 665 1230",
+                "website": "https://www.unaitalianhospitality.com/it/ristoranti/il-cairoli-bar-and-restaurant?cmp=gmb_il_cairoli_bar_restaurant_link",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Il%20Cairoli%20Bar%20%26%20Restaurant%2C%20Via%20Cusani%2C%2013%2C%2020121%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoi8LemHNAOm-jVhnKq3fNb5jEAQvUeDUtpZzT3fo42MiyeQD0CFjFhZvA00janB87YIIBTFZVgy0I9LNnNvbfM0L_DU5zoaFhJfcqp9MGVxY8UCS1Cs2axgPQaQxEDl1fIwFPh=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJ3551NJfBhkcRI2pPrEqdg7g",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  }
+                },
+                "distance": 0.37953849621580865,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-11646682267042167518",
+                "name": "Marea Seafood & Beverage",
+                "address": "Milan, Metropolitan City of Milan",
+                "latitude": 45.45926,
+                "longitude": 9.182789,
+                "rating": 4.8,
+                "reviewCount": 453,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\""
+                ],
+                "description": "\"Cuisine très qualitative avec des goûts et textures bien équilibrés.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Marea%20Seafood%20%26%20Beverage%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+                "photos": [
+                  "https://serpapi.com/searches/6998383602706ace35488445/images/lXSNyw-5U7WN32X62w--jJIQcIUeuGl5JIH1RFOXoGQ.jpeg"
+                ],
+                "googlePlaceId": "11646682267042167518",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.81,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ristorante%20Galleria%2C%20Milan%2C%20Metropolitan%20City%20of%20Milan",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Quartiers, Jardins & Saveurs locales",
+        "dayNarrative": "Exploration du Jardin botanique de Brera, du Cimetière monumental et du Quadrilatero del Silenzio. Une journée pour découvrir les facettes moins touristiques de Milan, ponctuée d'une expérience chocolat en après-midi.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.22,
+          "p95LegKm": 2.09,
+          "totalTravelMin": 118,
+          "totalLegKm": 9.01,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.52,
+          "mstLowerBoundKm": 5.94
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 90,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-02-27T11:19:03.342Z",
+        "items": [
+          {
+            "id": "0165aad7-cb0f-4de0-a490-0201d55f5c59",
+            "dayNumber": 5,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Deep Gold Milano",
+            "description": "\"Très bien reçu, les plats sont excellents et le personnel très agréable !\"",
+            "locationName": "Via Gustavo Fara, 33, 20124 Milano MI",
+            "latitude": 45.485109099999995,
+            "longitude": 9.198741499999999,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4569,9.173474",
+            "restaurant": {
+              "id": "serp-nearby-ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "name": "Deep Gold Milano",
+              "address": "Via Gustavo Fara, 33, 20124 Milano MI",
+              "latitude": 45.485109099999995,
+              "longitude": 9.198741499999999,
+              "rating": 4.7,
+              "reviewCount": 189,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "sandwicherie",
+                "sandwicherie",
+                "café spécialisé dans les boissons expresso",
+                "restaurant spécialisé dans les petites portions à partager"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "02 643 3332",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+              "googlePlaceId": "ChIJc-joMc7GhkcRKPw4EuBBACs",
+              "openingHours": {
+                "friday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "sunday": {
+                  "open": "04:00",
+                  "close": "15:00"
+                },
+                "monday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "tuesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "wednesday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                },
+                "thursday": {
+                  "open": "04:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.5104325101499946,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "name": "Crazy Cat Café",
+                "address": "Via Napo Torriani, 5, 20124 Milano MI",
+                "latitude": 45.4809439,
+                "longitude": 9.2034378,
+                "rating": 4.4,
+                "reviewCount": 7518,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "bistro",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples."
+                ],
+                "description": "Lieu original avec pâtisseries et encas simples. Ce café insolite accueillant 9 chats résidents propose des pâtisseries, des crèmes glacées et d'autres mets simples.",
+                "phoneNumber": "02 8454 2739",
+                "website": "http://www.crazycatcafe.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Crazy%20Cat%20Caf%C3%A9%2C%20Via%20Napo%20Torriani%2C%205%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweojFccdHy6yHMa-ym6gLu_cbBqhrFWesI5-DQhR79mnullDSX7xYZJzWUlmlYTpf72UBKLVyb51WXH-1otaKxZJ9UTREu2LQDQHyfnor4m7S177z0d6FH-XKImnJuBVDg5hU4j4=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJcXd708XGhkcRRbycGXT-q3Q",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "19:30"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.7715941248327166,
+                "walkingTime": 10
+              },
+              {
+                "id": "serp-nearby-ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "name": "UNGARO 1956",
+                "address": "Via Fabio Filzi, 8, 20124 Milano MI",
+                "latitude": 45.4822607,
+                "longitude": 9.1992088,
+                "rating": 4.8,
+                "reviewCount": 225,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "boutique de desserts"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "346 684 4581",
+                "website": "https://ungaro1956.it/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=UNGARO%201956%2C%20Via%20Fabio%20Filzi%2C%208%2C%2020124%20Milano%20MI",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwer2yxR7uh9vIL52ieOcLAE45d6UeZERV0G2dNOePhoC35KYcwJ-mspF3VxxKzvo-ZiCp-RWkexmx5uisB1-ow8azDv34ZD80a_tc4Lffdmz4u98d7Lg33Yp1ZkaIhv7ERzK5g7V9BDf4ZEq=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJg0Bxz9HHhkcRjsmZng5s-r0",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.7260717143870637,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Deep%20Gold%20Milano%2C%20Via%20Gustavo%20Fara%2C%2033%2C%2020124%20Milano%20MI",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "ab42517c-790c-4238-a8a6-1154ffe76d96",
+            "dayNumber": 5,
+            "startTime": "09:00",
+            "endTime": "09:45",
+            "type": "activity",
+            "title": "Piazza Castello Fountain",
+            "description": "Lubiana è la capitale e la più grande città della Slovenia, con una popolazione di circa 300. 354 abitanti.",
+            "locationName": "Piazza Castello Fountain",
+            "latitude": 45.4692345,
+            "longitude": 9.180943,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=45.4692345,9.180943",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Piazza%20Castello%20Fountain&query_place_id=&center=45.4692345,9.180943",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUGAG-8Xbg7_XbF0e7B9lBzNgB7dUGD70b5O70t7DomeSPwYUSRpkJs7X5kENuUyCT1HMpx7kXk558SuAkm0Ibjwx7AjitzVuAfcIhK1vtUeYTDDvKzgD5Bh7KgIv-4MBoo2JHAYlGF-kmkutX01AeYQmD_GFkQLY0brlfh2KZHcb3P_inKzYTxkO2igfamEhjbuTJiKogBJ2zTR2TfggQZJWB0nBR1LJy-fNWeRlZp2k3OhHHGlmnFcBK6IJeTF-3ig-uYa4rGuDxPcE5F3qZZdONbRPJEKVtvHOLKqnRdXgsD660Er7jPuP5f0n4MNX3j4VVQTQixjxG2sHA_C4DAtyOoN7GjJI1vGlYkAbxC-Hm82fE0Bdo6wxmTadAaKxOcPuJW3WnJDarURNUJRajMpKFA6XE2KJOH3l3j6upfYTmOZ1GKLLwFBFT3A3-yK5EqY_ARIW1DRUzOKolKRcrJa5oORDwgNrLl-H3acI4u_kntojTib-C_K_wceobnqy4qwtitH1p498XDmt0iPTGlEICOBCzgqkKUMZSkQV8IVSgzhbsDvpBE77GO7Tozm0xu1uFpaByegw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.49,
+            "timeFromPrevious": 19,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "0b8a845d-b486-40a6-a940-91bd51c3ebc2",
+            "dayNumber": 5,
+            "startTime": "11:00",
+            "endTime": "11:15",
+            "type": "checkout",
+            "title": "Check-out iQ Hotel Milano",
+            "description": "Départ de l'hôtel",
+            "locationName": "iQ Hotel Milano",
+            "latitude": 45.487873,
+            "longitude": 9.203969299999999,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "ta-hotel-563622",
+              "name": "iQ Hotel Milano",
+              "type": "hotel",
+              "address": "Milan",
+              "latitude": 45.487873,
+              "longitude": 9.203969299999999,
+              "rating": 4.7,
+              "reviewCount": 352,
+              "pricePerNight": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/19/a3/b2/c6/rooftop.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.hotelmidwaymilan.com/",
+              "description": "Stazione Centrale • Prix via Booking.com • Disponibilité confirmée",
+              "totalPrice": 0
+            },
+            "distanceFromPrevious": 2.74,
+            "timeFromPrevious": 35,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "transport-ret-5-fallback",
+            "dayNumber": 5,
+            "startTime": "11:45",
+            "endTime": "14:15",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "Milan → Lyon (estimation)",
+            "locationName": "Milan → Lyon",
+            "latitude": 45.485109099999995,
+            "longitude": 9.198741499999999,
+            "orderIndex": 3,
+            "duration": 150,
+            "estimatedCost": 14,
+            "bookingUrl": "https://www.omio.fr/bus/lyon/milan?departure_date=2026-02-27",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "Dernier matin & Piazza Castello",
+        "dayNarrative": "Dernier matin à Milan avant le checkout à 11h : petit-déjeuner rapide près de l'hôtel et courte promenade à la Piazza Castello Fountain, à deux pas du Château des Sforza, avant de reprendre la route vers Lyon.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.25,
+          "p95LegKm": 2.25,
+          "totalTravelMin": 27,
+          "totalLegKm": 2.25,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 2.25
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 75,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Milan",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.4642,
+              "lng": 9.19
+            },
+            "duration": 255,
+            "price": 14,
+            "co2": 9,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/milan?departure_date=2026-02-23"
+          }
+        ],
+        "totalDuration": 310,
+        "totalPrice": 14,
+        "totalCO2": 9,
+        "score": 8.5,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 5.9,
+          "co2Score": 9.5
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/milan?departure_date=2026-02-23",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Milan",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.4642,
+              "lng": 9.19
+            },
+            "duration": 204,
+            "price": 73,
+            "co2": 18,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Milan"
+          }
+        ],
+        "totalDuration": 234,
+        "totalPrice": 73,
+        "totalCO2": 18,
+        "score": 6.2,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 8.4
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Milan",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Milan",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.4642,
+              "lng": 9.19
+            },
+            "duration": 379,
+            "price": 70,
+            "co2": 5,
+            "operator": "TER",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/milan?departure_date=2026-02-23"
+          }
+        ],
+        "totalDuration": 419,
+        "totalPrice": 70,
+        "totalCO2": 5,
+        "score": 3.6,
+        "scoreDetails": {
+          "priceScore": 0.5,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/milan?departure_date=2026-02-23",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lyon-Perrache",
+            "to": "Lyon Part Dieu",
+            "departure": "2026-02-23T12:38:00.000Z",
+            "arrival": "2026-02-23T12:46:00.000Z",
+            "duration": 8,
+            "line": "TER"
+          },
+          {
+            "mode": "train",
+            "from": "Lyon Part Dieu",
+            "to": "Chambéry - Challes-les-Eaux",
+            "departure": "2026-02-23T12:50:00.000Z",
+            "arrival": "2026-02-23T14:16:00.000Z",
+            "duration": 86,
+            "line": "TER"
+          },
+          {
+            "mode": "train",
+            "from": "Chambéry - Challes-les-Eaux",
+            "to": "Milano Porta Garibaldi",
+            "departure": "2026-02-23T14:44:00.000Z",
+            "arrival": "2026-02-23T18:50:00.000Z",
+            "duration": 246,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "train",
+            "from": "Milano Porta Garibaldi",
+            "to": "Repubblica",
+            "departure": "2026-02-23T18:55:00.000Z",
+            "arrival": "2026-02-23T18:57:00.000Z",
+            "duration": 2,
+            "line": "S5"
+          }
+        ],
+        "priceRange": [
+          35,
+          130
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Milan",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.4642,
+              "lng": 9.19
+            },
+            "duration": 26,
+            "price": 51,
+            "co2": 87,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON2302MILAN1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 316,
+        "totalPrice": 51,
+        "totalCO2": 87,
+        "score": 3.1,
+        "scoreDetails": {
+          "priceScore": 3.7,
+          "timeScore": 5.6,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON2302MILAN1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/milan?departure_date=2026-02-23"
+      }
+    ],
+    "selectedTransport": {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Lyon",
+          "to": "Milan",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 45.4642,
+            "lng": 9.19
+          },
+          "duration": 255,
+          "price": 14,
+          "co2": 9,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/lyon/milan?departure_date=2026-02-23"
+        }
+      ],
+      "totalDuration": 310,
+      "totalPrice": 14,
+      "totalCO2": 9,
+      "score": 8.5,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 5.9,
+        "co2Score": 9.5
+      },
+      "bookingUrl": "https://www.omio.fr/bus/lyon/milan?departure_date=2026-02-23",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "ta-hotel-563622",
+      "name": "iQ Hotel Milano",
+      "type": "hotel",
+      "address": "Milan",
+      "latitude": 45.487873,
+      "longitude": 9.203969299999999,
+      "rating": 4.7,
+      "reviewCount": 352,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/19/a3/b2/c6/rooftop.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.hotelmidwaymilan.com/",
+      "description": "Stazione Centrale • Prix via Booking.com • Disponibilité confirmée",
+      "totalPrice": 0
+    },
+    "accommodationOptions": [],
+    "totalEstimatedCost": 267,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 0,
+      "food": 168,
+      "activities": 99,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 50,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 40,
+      "transportTips": "Achetez le Radiobus Milan (10€ pour 10 trajets) ou abonnement 1 jour (4,50€). À pied pour centre-ville. Le métro/tram est efficace pour musées éloignés.",
+      "reasoning": "Budget serré (200€/jour) mais nécessite équilibre qualité-vie. Airbnb avec cuisine = ~50€/nuit (reste 150€). Petit-déj maison (5€), déj mixte avec paninis/cafés (12€), dîner restaurant typique milanais (20-25€). Total repas ~40€, transport ~10€, reste 40€ pour culture (Pinacothèque 15€, Duomo gratuit, églises gratuites, balades). Milan est cher mais l'Airbnb et autopréparation breakfast/déj permettent de profiter de restaurants de qualité le soir (point clé pour gastronomie). Stratégie : privilégier expériences culinaires et musées majeurs, minimiser surcoûts touristiques.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: lyon-milan-5d-test",
+    "   Lyon → Milan (5j)",
+    "   solo (1p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Milan\", ll=\"@45.4642,9.19,14z\", gl=\"it\"",
+    "[Weather] Cache hit for 2026-02-23 → 2026-02-27",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Google Places] ✅ 26 attractions found for Milan",
+    "[Hotels] Disponibilité live: 7/11 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (434ms)",
+    "[Pipeline V2] Resolving GPS for 15 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/15 activities",
+    "[Pipeline V2] Injected 5 curated must-see attractions for \"Milan\" from local database",
+    "[Pipeline V2]   → Cathédrale de Milan (Duomo), La Cène de Léonard de Vinci, Galleria Vittorio Emanuele II, Château des Sforza, Teatro alla Scala, Pinacoteca di Brera",
+    "[Pipeline V2] Step 1: All data fetched in 48852ms",
+    "[Pipeline V2]   Activities: 26 Google + 23 SerpAPI + 2 Overpass + 15 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 7 | Transport options: 4",
+    "[Pipeline V2 LLM] Step 1 done in 48853ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for Claude... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"iQ Hotel Milano\" (4.7★, €0/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 73 activities → 39 after dedup (dropped 34)",
+    "[Pipeline V2 LLM] Step 2: Selected 31 activities (1 must-sees, 30 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 50 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 947 pairs",
+    "[Pipeline V2 LLM] Step 2: 31 activities, 18 restaurants, 947 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 18ms",
+    "[Pipeline V2 LLM] === Step 3: Claude planning... ===",
+    "[Pipeline V2 LLM] Calling Claude Sonnet for trip planning...",
+    "[Pipeline V2 LLM] Claude planning: 30720 in + 3283 out, ~$0.1414, 56346ms",
+    "[Pipeline V2 LLM] Retrying with corrections...",
+    "[Pipeline V2 LLM] Retry completed",
+    "[Pipeline V2 LLM] Plan: 5 days, 18 activities, 10 meals",
+    "[Pipeline V2 LLM] Step 3 done in 99395ms — 5 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 31 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 5 days with 28 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 10ms",
+    "[Pipeline V2 LLM] Step 4 done in 11ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 9 restaurants swapped, 0 kept as fallback (1378ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 20 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 5ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 97/100",
+    "  📦 Complétude: 25/25",
+    "  ⏱️  Rythme:     25/25",
+    "  🗺️  Géo:        22/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 5: transport retour manquant",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 5: transport retour inséré (fallback)",
+    "  🔧 Jour 1: thème régénéré \"Arrivée & Cœur historique de Milan\" → \"Piazza del Duomo et Galleria Vittorio Emanuele II\"",
+    "[Pipeline V2 LLM] Step 5 done in 6ms — score: 97/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 149667ms ==="
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Expérience Chocolat La Fabrique de Chocolat, Milan\": 5909.4km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Petit groupe Lac de Côme Expérience avec bateau et van, de Milan, Milan\": 61.6km de la destination (max 30km)",
+    "[Pipeline V2 LLM] Initial plan has errors: Day 5 item 1: activity \"gp-ChIJLxywR6zGhkcRzWA5FDqJTeE\" scheduled twice"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5909 (line 160 column 8)",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Milan : Segway Tour Guide Touristique Local Live - 2 heures et demie, Milan\" à Milan — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Milan: Visite en Segway avec Guide touristique local en direct - 3 heures et demie, Milan\" à Milan — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Petit groupe Lac de Côme Expérience avec bateau et van, de Milan, Milan\" à Milan — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 149667,
+  "generatedAt": "2026-02-20T11:19:03.343Z",
+  "success": true
+}

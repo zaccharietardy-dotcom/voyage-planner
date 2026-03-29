@@ -1,0 +1,629 @@
+{
+  "tripId": "7cc55f76-e06d-4a65-aaf8-344815670f93",
+  "scenarioId": "tokyo-fuji-7d",
+  "generatedAt": "2026-03-19T10:02:30.034Z",
+  "destination": "Tokyo",
+  "summary": {
+    "totalIssues": 30,
+    "critical": 6,
+    "warning": 19,
+    "info": 5,
+    "score": 81,
+    "weightedScore": 81
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 0,
+      "critical": 6,
+      "warning": 11,
+      "info": 0,
+      "totalIssues": 17,
+      "weightedPenalty": 178.45
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "dataQuality": {
+      "score": 94,
+      "critical": 0,
+      "warning": 1,
+      "info": 4,
+      "totalIssues": 5,
+      "weightedPenalty": 6.3
+    },
+    "rhythm": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 90,
+      "critical": 0,
+      "warning": 3,
+      "info": 0,
+      "totalIssues": 3,
+      "weightedPenalty": 10.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 6,
+      "impactScore": 120,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: 6.1km entre \"Temple Senso-ji\" et \"Temps libre — Exploration du quartier\" avec seulement 10min de battement (besoin ~13min)",
+        "Jour 3: 6.1km entre \"Temps libre — Exploration du quartier\" et \"Déjeuner — Rainforest Cafe\" avec seulement 10min de battement (besoin ~13min)",
+        "Jour 3: 17.6km entre \"Déjeuner — Rainforest Cafe\" et \"Meiji-jingū\" avec seulement 15min de battement (besoin ~22min)"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 21.6,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: itinéraire en zigzag (3 demi-tours détectés)",
+        "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 5: itinéraire en zigzag (3 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 19.2,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: 4 segments > 2.5km (max cible: 1)",
+        "Jour 4: 4 segments > 2.5km (max cible: 1)",
+        "Jour 5: 3 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 18,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: efficacité de route faible (1.75x du minimum MST)",
+        "Jour 4: efficacité de route faible (2.63x du minimum MST)",
+        "Jour 5: efficacité de route faible (2.28x du minimum MST)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "geography:Jour 3: restaurant \"Déjeuner — Rainforest Cafe\" est à 18.9km du centre",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — Rainforest Cafe\" est à 18.9km du centre"
+      ]
+    },
+    {
+      "key": "geography:Jour 6: restaurant \"Dîner — 鉄焼（Tetsuyaki）\" est à 86.1km du centre",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 6: restaurant \"Dîner — 鉄焼（Tetsuyaki）\" est à 86.1km du centre"
+      ]
+    },
+    {
+      "key": "realism:Jour 3: restaurant \"Déjeuner — Rainforest Cafe\" à 6.1km de l'activité ",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — Rainforest Cafe\" à 6.1km de l'activité précédente (\"Temps libre — Exploration du quartier\") avec seulement 10min de battement"
+      ]
+    },
+    {
+      "key": "realism:Jour 4: 12h d'activités continues sans pause ≥30min",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: 12h d'activités continues sans pause ≥30min"
+      ]
+    },
+    {
+      "key": "realism:Jour 4: restaurant \"Dîner — Kaitenzushi Nemuro Hanamaru KITTE Marunouc",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: restaurant \"Dîner — Kaitenzushi Nemuro Hanamaru KITTE Marunouchi\" à 6.1km de l'activité précédente (\"Temps libre — Exploration du quartier\") avec seulement 10min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): sanctuaire meiji",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): sanctuaire meiji"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: restaurant \"Déjeuner — Rainforest Cafe\" est à 18.9km du centre",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — Rainforest Cafe",
+        "details": {
+          "distanceKm": 19
+        }
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 3: 6.1km entre \"Temple Senso-ji\" et \"Temps libre — Exploration du quartier\" avec seulement 10min de battement (besoin ~13min)",
+        "dayNumber": 3,
+        "details": {
+          "distanceKm": "6.1",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 13
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 3: 6.1km entre \"Temps libre — Exploration du quartier\" et \"Déjeuner — Rainforest Cafe\" avec seulement 10min de battement (besoin ~13min)",
+        "dayNumber": 3,
+        "details": {
+          "distanceKm": "6.1",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 13
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 3: 17.6km entre \"Déjeuner — Rainforest Cafe\" et \"Meiji-jingū\" avec seulement 15min de battement (besoin ~22min)",
+        "dayNumber": 3,
+        "details": {
+          "distanceKm": "17.6",
+          "gapMinutes": 15,
+          "estimatedTravelMin": 22
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: 4 segments > 2.5km (max cible: 1)",
+        "dayNumber": 3,
+        "details": {
+          "longLegCount": 4,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.75,
+          "totalLegKm": 41.92
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: efficacité de route faible (1.75x du minimum MST)",
+        "dayNumber": 3,
+        "details": {
+          "routeInefficiencyRatio": 1.75,
+          "threshold": 1.75,
+          "totalLegKm": 41.92,
+          "mstLowerBoundKm": 23.91
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 4: 6.3km entre \"Déjeuner — Tokyo Ramen Street\" et \"Temps libre — Exploration du quartier\" avec seulement 10min de battement (besoin ~13min)",
+        "dayNumber": 4,
+        "details": {
+          "distanceKm": "6.3",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 13
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 4: 6.1km entre \"Temps libre — Exploration du quartier\" et \"Dîner — Kaitenzushi Nemuro Hanamaru KITTE Marunouchi\" avec seulement 10min de battement (besoin ~13min)",
+        "dayNumber": 4,
+        "details": {
+          "distanceKm": "6.1",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 13
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: 4 segments > 2.5km (max cible: 1)",
+        "dayNumber": 4,
+        "details": {
+          "longLegCount": 4,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 2.63,
+          "totalLegKm": 19.81
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: efficacité de route faible (2.63x du minimum MST)",
+        "dayNumber": 4,
+        "details": {
+          "routeInefficiencyRatio": 2.63,
+          "threshold": 1.75,
+          "totalLegKm": 19.81,
+          "mstLowerBoundKm": 7.54
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 5: 5.7km entre \"Omoide Yokocho Memory Lane\" et \"Maple Waterfall\" avec seulement 10min de battement (besoin ~12min)",
+        "dayNumber": 5,
+        "details": {
+          "distanceKm": "5.7",
+          "gapMinutes": 10,
+          "estimatedTravelMin": 12
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 5,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 5,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.28,
+          "totalLegKm": 17.32
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: efficacité de route faible (2.28x du minimum MST)",
+        "dayNumber": 5,
+        "details": {
+          "routeInefficiencyRatio": 2.28,
+          "threshold": 1.75,
+          "totalLegKm": 17.32,
+          "mstLowerBoundKm": 7.61
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 6: restaurant \"Dîner — 鉄焼（Tetsuyaki）\" est à 86.1km du centre",
+        "dayNumber": 6,
+        "itemTitle": "Dîner — 鉄焼（Tetsuyaki）",
+        "details": {
+          "distanceKm": 86
+        }
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 6: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 6,
+        "itemTitle": "Déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 6: transport \"Bus → Kawaguchiko — 94.3km\" sans transportMode explicite",
+        "dayNumber": 6,
+        "itemTitle": "Bus → Kawaguchiko — 94.3km",
+        "code": "DATA_TRANSPORT_MODE_MISSING",
+        "component": "pipeline/step7-assemble"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 6: transport \"Bus retour → Tokyo — 100km\" sans transportMode explicite",
+        "dayNumber": 6,
+        "itemTitle": "Bus retour → Tokyo — 100km",
+        "code": "DATA_TRANSPORT_MODE_MISSING",
+        "component": "pipeline/step7-assemble"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 4: seulement 45min de temps libre — pas de pause",
+        "dayNumber": 4,
+        "details": {
+          "freeMinutes": 45,
+          "occupiedMinutes": 675
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 5: seulement 35min de temps libre — pas de pause",
+        "dayNumber": 5,
+        "details": {
+          "freeMinutes": 35,
+          "occupiedMinutes": 685
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): sanctuaire meiji",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "sanctuaire meiji"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 3: restaurant \"Déjeuner — Rainforest Cafe\" à 6.1km de l'activité précédente (\"Temps libre — Exploration du quartier\") avec seulement 10min de battement",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — Rainforest Cafe",
+        "details": {
+          "distKm": "6.1",
+          "gapMin": 10
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 4: 12h d'activités continues sans pause ≥30min",
+        "dayNumber": 4,
+        "details": {
+          "totalHours": "12.0"
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 4: restaurant \"Dîner — Kaitenzushi Nemuro Hanamaru KITTE Marunouchi\" à 6.1km de l'activité précédente (\"Temps libre — Exploration du quartier\") avec seulement 10min de battement",
+        "dayNumber": 4,
+        "itemTitle": "Dîner — Kaitenzushi Nemuro Hanamaru KITTE Marunouchi",
+        "details": {
+          "distKm": "6.1",
+          "gapMin": 10
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 7,
+    "totalItems": 40,
+    "activitiesCount": 10,
+    "restaurantsCount": 13,
+    "avgItemsPerDay": 5.714285714285714,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

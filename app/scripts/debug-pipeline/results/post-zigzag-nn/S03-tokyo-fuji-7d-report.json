@@ -1,0 +1,404 @@
+{
+  "tripId": "46fc9f54-cb68-4a89-a580-288f711fd344",
+  "scenarioId": "tokyo-fuji-7d",
+  "generatedAt": "2026-03-19T23:04:51.093Z",
+  "destination": "Tokyo",
+  "summary": {
+    "totalIssues": 15,
+    "critical": 0,
+    "warning": 12,
+    "info": 3,
+    "score": 92,
+    "weightedScore": 92
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 70,
+      "critical": 0,
+      "warning": 5,
+      "info": 0,
+      "totalIssues": 5,
+      "weightedPenalty": 29.75
+    },
+    "budget": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 91,
+      "critical": 0,
+      "warning": 2,
+      "info": 3,
+      "totalIssues": 5,
+      "weightedPenalty": 9.1
+    },
+    "rhythm": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 21.6,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 5: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 6: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 7: 2 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 5: efficacité de route faible (1.92x du minimum MST)"
+      ]
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "realism:Dernier jour: dernière activité (16:20) à seulement 40min avant le vol",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Dernier jour: dernière activité (16:20) à seulement 40min avant le vol (17:00) — risqué"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): mont fuji",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): mont fuji"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 55min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: seulement 55min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.55,
+          "totalLegKm": 6.29
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 5,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.92,
+          "totalLegKm": 7.5
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 5: efficacité de route faible (1.92x du minimum MST)",
+        "dayNumber": 5,
+        "details": {
+          "routeInefficiencyRatio": 1.92,
+          "threshold": 1.75,
+          "totalLegKm": 7.5,
+          "mstLowerBoundKm": 3.91
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 6: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 6,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.19,
+          "totalLegKm": 8.13
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 7: 2 segments > 2.5km (max cible: 1)",
+        "dayNumber": 7,
+        "details": {
+          "longLegCount": 2,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      },
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas d'hébergement défini dans le voyage"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas d'hébergement défini"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: seulement 55min de temps libre — pas de pause",
+        "dayNumber": 3,
+        "details": {
+          "freeMinutes": 55,
+          "occupiedMinutes": 665
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): mont fuji",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "mont fuji"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Dernier jour: dernière activité (16:20) à seulement 40min avant le vol (17:00) — risqué",
+        "dayNumber": 7,
+        "details": {
+          "gapMinutes": 40
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 7,
+    "totalItems": 50,
+    "activitiesCount": 16,
+    "restaurantsCount": 16,
+    "avgItemsPerDay": 7.142857142857143,
+    "totalEstimatedCost": null,
+    "hasAccommodation": false,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

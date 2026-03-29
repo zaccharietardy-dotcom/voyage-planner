@@ -192,7 +192,7 @@ export function SharePanel({
                 {canChangeRoles && member.role !== 'owner' && member.userId !== currentUserId && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Options">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -231,7 +231,7 @@ export function SharePanel({
               className="text-sm bg-muted"
               onClick={(event) => event.currentTarget.select()}
             />
-            <Button onClick={handleCopy} variant="outline" size="icon">
+            <Button onClick={handleCopy} variant="outline" size="icon" aria-label="Copier le lien">
               {copied ? (
                 <Check className="h-4 w-4 text-green-500" />
               ) : (

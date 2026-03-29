@@ -1,0 +1,364 @@
+{
+  "tripId": "37bef2f7-fed2-4427-a242-836b50f32158",
+  "scenarioId": "geo-direct-05",
+  "generatedAt": "2026-02-17T13:11:47.752Z",
+  "destination": "Marrakech",
+  "summary": {
+    "totalIssues": 15,
+    "critical": 2,
+    "warning": 5,
+    "info": 8,
+    "score": 94,
+    "weightedScore": 94
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "geography": {
+      "score": 74,
+      "critical": 2,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 3,
+      "weightedPenalty": 26.3
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 95,
+      "critical": 0,
+      "warning": 0,
+      "info": 7,
+      "totalIssues": 7,
+      "weightedPenalty": 4.9
+    },
+    "rhythm": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "relevance": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "geography:Jour 1: \"🔄 Transport → Marrakech\" a des coordonnées (0, 0) — non géoc",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"🔄 Transport → Marrakech\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "geography:Jour 5: \"🔄 Transport → Nantes\" a des coordonnées (0, 0) — non géocodé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 5: \"🔄 Transport → Nantes\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 4: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 6,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "Jour 3: \"Place Jemaa el fna\" n'a pas de description",
+        "Jour 3: \"Jungle Rooftop La Pergola - Jazz Bar & Restaurant\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"adventure\" demandée mais aucune activité correspondante trou",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"adventure\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "relevance:Voyage family_with_kids mais 1 activités adultes: jungle rooftop la pe",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Voyage family_with_kids mais 1 activités adultes: jungle rooftop la pergola - jazz bar & restaurant"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3: 9 activités/restaurants — journée surchargée",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: 9 activités/restaurants — journée surchargée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 4: dîner \"Dîner — Restaurant Granada Marrakech\" à 13:10 — trop tô",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: dîner \"Dîner — Restaurant Granada Marrakech\" à 13:10 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1 (3 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1 (3 activités) vs jour 2 (8 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 4: dîner \"Dîner — Restaurant Granada Marrakech\" à 13:10 — trop tôt (attendu après 18h00)",
+        "dayNumber": 4,
+        "itemTitle": "Dîner — Restaurant Granada Marrakech"
+      }
+    ],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: \"🔄 Transport → Marrakech\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 1,
+        "itemTitle": "🔄 Transport → Marrakech"
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 2
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 5: \"🔄 Transport → Nantes\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 5,
+        "itemTitle": "🔄 Transport → Nantes"
+      }
+    ],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Place Jemaa el fna\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Place Jemaa el fna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Jungle Rooftop La Pergola - Jazz Bar & Restaurant\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Jungle Rooftop La Pergola - Jazz Bar & Restaurant",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Palais El Badiî\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Palais El Badiî",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Jardin Majorelle\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Jardin Majorelle",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 5: \"Les Jardins de la Ménara\" n'a pas de description",
+        "dayNumber": 5,
+        "itemTitle": "Les Jardins de la Ménara",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: 9 activités/restaurants — journée surchargée",
+        "dayNumber": 3,
+        "details": {
+          "activityCount": 9
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (3 activités) vs jour 2 (8 activités) — déséquilibre important",
+        "details": {
+          "day1": 3,
+          "day2": 8
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"adventure\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "adventure"
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Voyage family_with_kids mais 1 activités adultes: jungle rooftop la pergola - jazz bar & restaurant",
+        "details": {
+          "adultActivities": [
+            "jungle rooftop la pergola - jazz bar & restaurant"
+          ]
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 5,
+    "totalItems": 32,
+    "activitiesCount": 16,
+    "restaurantsCount": 11,
+    "avgItemsPerDay": 6.4,
+    "totalEstimatedCost": 969,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

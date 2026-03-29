@@ -1,0 +1,2555 @@
+{
+  "scenarioId": "geo-suggest-01-bologna-la-dolce-vita-gourmande",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Bologne",
+    "startDate": "2026-04-03T15:23:25.769Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "economic",
+    "activities": [
+      "gastronomy",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Bologne",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "51ae69b2-1dcd-4daf-b134-e8e8809ba702",
+    "createdAt": "2026-02-17T15:24:23.006Z",
+    "updatedAt": "2026-02-17T15:24:23.006Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Bologne",
+      "startDate": "2026-04-03T15:23:25.769Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "economic",
+      "activities": [
+        "gastronomy",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Bologne",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-03T15:23:25.769Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "07:33",
+            "endTime": "08:00",
+            "type": "transport",
+            "title": "🧭 Départ depuis Lyon",
+            "description": "Départ depuis Lyon",
+            "locationName": "Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 27,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Lyon%2C%20Bologne",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "13:05",
+            "type": "transport",
+            "title": "🚄 Train → Bologne",
+            "description": "Lyon → Bologne",
+            "locationName": "Lyon → Bologne",
+            "latitude": 44.4938203,
+            "longitude": 11.3426327,
+            "orderIndex": 1,
+            "estimatedCost": 36,
+            "duration": 305,
+            "bookingUrl": "https://www.omio.fr/trains/lyon/bologne?departure_date=2026-04-03",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%84%20Train%20%E2%86%92%20Bologne%2C%20Bologne",
+            "transitDataSource": "estimated",
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg"
+          },
+          {
+            "id": "gp-ChIJpcQFB77Uf0cRGz8HHZZb4vg",
+            "dayNumber": 1,
+            "startTime": "13:10",
+            "endTime": "14:10",
+            "type": "activity",
+            "title": "Cathédrale de Bologne",
+            "description": "Cathédrale de Bologne",
+            "locationName": "Cathédrale de Bologne",
+            "latitude": 44.4959254,
+            "longitude": 11.3429655,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cath%C3%A9drale%20de%20Bologne%2C%20Bologne",
+            "dataReliability": "verified",
+            "mustSee": false,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ]
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:30",
+            "type": "checkin",
+            "title": "Check-in 3. Suite Hotel Elite",
+            "description": "",
+            "locationName": "Bologne",
+            "latitude": 44.4993322,
+            "longitude": 11.358780200000002,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.1,
+            "bookingUrl": "http://www.absuiteinnovativedesign.it/",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=3.%20Suite%20Hotel%20Elite%2C%20Bologne",
+            "accommodation": {
+              "id": "ta-hotel-1605643",
+              "name": "3. Suite Hotel Elite",
+              "type": "apartment",
+              "address": "Bologne",
+              "latitude": 44.4993322,
+              "longitude": 11.358780200000002,
+              "rating": 4.1,
+              "reviewCount": 2834,
+              "pricePerNight": 0,
+              "totalPrice": 0,
+              "currency": "EUR",
+              "amenities": [
+                "breakfast"
+              ],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/a8/59/dd/suite-hotel-elite.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "http://www.absuiteinnovativedesign.it/",
+              "description": "Free breakfast available • Porto • Prix via Booking.com • Disponibilité confirmée",
+              "qualityFlags": [
+                "hotel_distance_relaxed_pass_1"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "hotel_distance_relaxed_pass_1"
+            ],
+            "imageUrl": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/a8/59/dd/suite-hotel-elite.jpg?w=600&h=400&s=1",
+            "distanceFromPrevious": 1.31,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "gp-ChIJOVXWhpXUf0cRHrXmOpr8xD4",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Piazza Maggiore",
+            "description": "",
+            "locationName": "Piazza Maggiore",
+            "latitude": 44.4937544,
+            "longitude": 11.3430945,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Piazza%20Maggiore%2C%20Bologne",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXlEpoQPpE1iiBfqmzTpx3u8o5we7EvxvZTHHXyTrFsdJGoEyzBIquSdYmSkrOFMT2pQi9xHjI0ReDom2vikLa1Qzl5oFiSCqOnWuEr2OnHKukXcWoQIR4MvokVWhGEIpUpE6GWE8t0KhrzFeLt_E6WUCFGYo4N_LbFLYX-NGMPFy-a0nfu1i8vwjj-yFnAp0XG0ua7zK5aWRsmDqnRv5k9XSvws5kUmSXZaDMviTyMe7V7lDxE39cNosbHMT-JyMyLhVAiT_DLJnM6UlYafGyNS9sUTCH0wiExWc_2w9QrTl8aQx-mvrJJW0YtNw8o9HRJnKdnUmATlkQ8k1SMkQT_VPMgUlTod505o0Mf98pvGin6aUAd6nyEK0lK_JzheIIKwNesN3-3Z4DAL45jkJR1g1mpkNDCniVtkg-QkWhcVSxzaFDvg0kmZNgWtRtVS8UaecdqpAXe-V0o80NGVbkpL9mjev0XXbarSjOCkgj7cD9HCV8GaNxZn3F1wB6jvLYqEglQKgMLLS3tI7xN7PkEV-hAaw2M1ZFFZ7eAZS2kXvtQSghax2oR0V9lwLUGGlUS-dgC&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 1.39,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=44.4993322,11.358780200000002&destination=44.4937544,11.3430945&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJt0YDhpXUf0cRpbAGeVhxfaE",
+            "dayNumber": 1,
+            "startTime": "17:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Basilica San Petronio",
+            "description": "",
+            "locationName": "Basilica San Petronio",
+            "latitude": 44.4933901,
+            "longitude": 11.3432131,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Basilica%20San%20Petronio%2C%20Bologne",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV1bN18RIqxi6X_d6xZh14dypK07RselBtnSkduPGxCMXHlDm1cRfWaq-w8ti0xcGYUBF1Ms7-w1OtyDTAwiQHjoaY0ff2vL7y_tgdQNmHtwp2kKQ53E-P1JeBOcACCf0CeaGtJwPnsCT74vckqt5XktOXQRnOy__b3xQBW9pR0Dyjar3U1PofcPUDJUX5gkAnzlvapJrP5XXSAVqlUTB4qddSsglrX2QUvpssEyuWTAU70tkmxbjVVcg2oRSVWIt10j3cIso-63wO_MEjZwlrFaahrb6ibj4cw7wRt-lwsgj8GIcyY89UwUhpJqLUTQ4m_4RGBHKgOzjhC4Ucs-1QtBMZ54GGNWTT03Q7Nc2TNnHI4iwWn5Bu6ajfIDjNGGQHBUrobRk_97zS_5XqKZ3jXPGq4Km-UZbDac5enDtexmAyx2znZD6SiRpSMDHLrOWif0smR0_I-0wfb2J_8LZo9BC7AUUm8lk3cY_Le2o78cupQZk9sVo1Lg4KYuN8PEO-6JJwYV1mXcD5j4OqUp116tbBL2Ex8h_2mo1mxSNcCgkDTK5doXdyx3LF_xq6a6WSJyQ5lqDSy6g&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 0.04,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJxQ-LJ77Uf0cRrtpHA1c97w4",
+            "dayNumber": 1,
+            "startTime": "18:05",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Palais du Podestat",
+            "description": "",
+            "locationName": "Palais du Podestat",
+            "latitude": 44.4941273,
+            "longitude": 11.3432617,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 55,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20du%20Podestat%2C%20Bologne",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXerr5GrJTbqqQ1qlyLVuvONGK57jIy2_R2O14cGiYCNnUsMDNY9ruCD8x2W_adk9278cYa8Y9BrOr0N2YX8rVYCwGUJScPTyh0DL1QfxrVvuLFxa_epmj3ykbtP4LAFmxb8DshOlzisQUl8oRtl3AZestCRqV95TFUbrD7U5A9fKU3qzj0jlSzVxFFX5UBS5M0Brd5lwXJke6-uyE3MDiPFLW8FwAeTx4H7hSby_-6PaVKMCUzm5GC1oHetHMtDzydRu51L-qvmfMVKE5QlkhsPbRt4pZ2JPg5dPwXzytc5FJU19njvLK2lCYUT0WKB8bE5ZIZewdGjBQV5X5A5JSok6XKBSlR_Orp1FbJa8UionkkfowwDOzD68wHb3MSAzUum2bbQ1MTlGXHzZXPGyJ6iEQVNb13NCUlJGVDqwKGAgvi9g70uXe6fyCGW3_i1eGyisWMBCWKfzKmO9R0-kYueOPkRKKfqKc95NzPGglr5yelEq8pQHCBREzEtWCxXD1AhO9mgSq4mr0N7w7BRIV71vhJJd9qm27tgAtcKk39b6r0UfwnMar3CX7W-a72Cqj_vHRE&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.08,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — Osteria dell'Orsa",
+            "description": "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\"",
+            "locationName": "Via Mentana, 1f",
+            "latitude": 44.49714,
+            "longitude": 11.347496,
+            "orderIndex": 7,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.2,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Via%20Mentana%2C%201f",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Bologne",
+            "restaurant": {
+              "id": "serp-7523582977286473425",
+              "name": "Osteria dell'Orsa",
+              "address": "Via Mentana, 1f",
+              "latitude": 44.49714,
+              "longitude": 11.347496,
+              "rating": 4.2,
+              "reviewCount": 18000,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\""
+              ],
+              "description": "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Via%20Mentana%2C%201f",
+              "googlePlaceId": "7523582977286473425",
+              "openingHours": {},
+              "distance": 0.3444224948309837,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-10177423837649622684",
+                  "name": "Caffetteria Lilù",
+                  "address": "Via Benedetto XIV, 1/c",
+                  "latitude": 44.494644,
+                  "longitude": 11.349304,
+                  "rating": 4.8,
+                  "reviewCount": 315,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "bistro"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caffetteria%20Lil%C3%B9%2C%20Via%20Benedetto%20XIV%2C%201%2Fc",
+                  "googlePlaceId": "10177423837649622684",
+                  "openingHours": {},
+                  "distance": 0.21396327359188128,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfWLBmdCqZ3YI9wOTOGTG0MnnDqLtVyLv86Epllin9782lEUYx6_cg5bYvBbFRIFvZDN-pIY2QDpvxLIY8QYJ7pS87xuvbARV6xTQp8rfeRDF__v346n7D_gF8Lu8L69WqIfVMVwAjb05yDjv3yBc2B1nuXqUvbunM7IgdhP46BxkwbzpkgpHWkC6vd3TQRNWhsce_dW9hoSUCeudFbRVqentmQTktnwvD-YMFsEZuM9mA7a7Dtn4yHs0b_G9pE2vMakRpzqVXWBLAuXy_LDkfrAyqJ_zPI38wPzZy_6B8ldgSU5CGE&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-5379481790882448936",
+                  "name": "MÒ! MORTADELLA LAB",
+                  "address": "Via Volturno",
+                  "latitude": 44.49772,
+                  "longitude": 11.343022,
+                  "rating": 4.8,
+                  "reviewCount": 5500,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "sandwich"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Excellente cuisine et service.\""
+                  ],
+                  "description": "\"Excellente cuisine et service.\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C3%92!%20MORTADELLA%20LAB%2C%20Via%20Volturno",
+                  "googlePlaceId": "5379481790882448936",
+                  "openingHours": {},
+                  "distance": 0.4987157348912278,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUDIk5aET-lI23paIwrLKPr8orv01FPWmeOLhgYqZ7XXR4d36KtTXsZ4nm7GXyjRF3E0tVRehOX8-gF8kQt9p8C1q9KFDJWIXdJYIjZwWn1YLny_UzYWXw5axXcePbV1-Hia62gDAp9797hzW5UFuukQSUeUfxkkP7VX6efrsmougCk5hC1R25rPo01HdH3AsTm-0tzSEdfYqvGQbIDdYVAu9mU3gU7aYOFDnBQonQARqqtijPqYUH40ojOkHD2RyTc0uKZvuKgK17394XATjHS2Zylriee8M-KiDr670xKlrDTBo6ovuLGPo6Xev8_OjNfMLqtjGoQB11-0BP_MD_jQX-_gAl4XcZ-YGzCsC3Lj7KNKI0NTVJGu3hYocCbkvTGuxd6kLSlsNzTDMA_KhMb5oWxsa5frvlzsN6d2deypuZB2obUDA21jh4R-u_icRTFIYUL5dc2_N4tVrAuv3W-nD4hiWHrrvGQhSsAhFd_TXct4bYlr_Q9cpug_Np-Uv9UFwbMo7l0EsrL1epGpgX6GVPFJAP3_31hToin7xvAq4uWNySRKCLitmga9BUJyy8CnA&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfX3WmDqSYG-dJBSkBwcmey-onX1YBrJYI51emoQf6_UIK3rXhrJmhMCzQ-LMHvJ6v4s1br8fyG-uIDIrFXltpWBRStd3F9e_JLJcZOWoggsy85uode77SubFE1eWJ-ZexSr8C7TlK41w3iOl6M1Qkdb1vYws3blTNGYDFCGL9h6fgVr-ZVX0VXnHnIemm63tr0_4hflbJn_4_WMY7pNVaf5b1wqo_QNv_px0qJmAQ_tMqo05zQ_rfdgwljfU7fbbw9Vs7e88mNAx3Z40gDvnra8e8JkviLKvzgKj0O9AF7VWNhsL1M&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-10177423837649622684",
+                "name": "Caffetteria Lilù",
+                "address": "Via Benedetto XIV, 1/c",
+                "latitude": 44.494644,
+                "longitude": 11.349304,
+                "rating": 4.8,
+                "reviewCount": 315,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "bistro"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caffetteria%20Lil%C3%B9%2C%20Via%20Benedetto%20XIV%2C%201%2Fc",
+                "googlePlaceId": "10177423837649622684",
+                "openingHours": {},
+                "distance": 0.21396327359188128,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWLBmdCqZ3YI9wOTOGTG0MnnDqLtVyLv86Epllin9782lEUYx6_cg5bYvBbFRIFvZDN-pIY2QDpvxLIY8QYJ7pS87xuvbARV6xTQp8rfeRDF__v346n7D_gF8Lu8L69WqIfVMVwAjb05yDjv3yBc2B1nuXqUvbunM7IgdhP46BxkwbzpkgpHWkC6vd3TQRNWhsce_dW9hoSUCeudFbRVqentmQTktnwvD-YMFsEZuM9mA7a7Dtn4yHs0b_G9pE2vMakRpzqVXWBLAuXy_LDkfrAyqJ_zPI38wPzZy_6B8ldgSU5CGE&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-5379481790882448936",
+                "name": "MÒ! MORTADELLA LAB",
+                "address": "Via Volturno",
+                "latitude": 44.49772,
+                "longitude": 11.343022,
+                "rating": 4.8,
+                "reviewCount": 5500,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "sandwich"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Excellente cuisine et service.\""
+                ],
+                "description": "\"Excellente cuisine et service.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C3%92!%20MORTADELLA%20LAB%2C%20Via%20Volturno",
+                "googlePlaceId": "5379481790882448936",
+                "openingHours": {},
+                "distance": 0.4987157348912278,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUDIk5aET-lI23paIwrLKPr8orv01FPWmeOLhgYqZ7XXR4d36KtTXsZ4nm7GXyjRF3E0tVRehOX8-gF8kQt9p8C1q9KFDJWIXdJYIjZwWn1YLny_UzYWXw5axXcePbV1-Hia62gDAp9797hzW5UFuukQSUeUfxkkP7VX6efrsmougCk5hC1R25rPo01HdH3AsTm-0tzSEdfYqvGQbIDdYVAu9mU3gU7aYOFDnBQonQARqqtijPqYUH40ojOkHD2RyTc0uKZvuKgK17394XATjHS2Zylriee8M-KiDr670xKlrDTBo6ovuLGPo6Xev8_OjNfMLqtjGoQB11-0BP_MD_jQX-_gAl4XcZ-YGzCsC3Lj7KNKI0NTVJGu3hYocCbkvTGuxd6kLSlsNzTDMA_KhMb5oWxsa5frvlzsN6d2deypuZB2obUDA21jh4R-u_icRTFIYUL5dc2_N4tVrAuv3W-nD4hiWHrrvGQhSsAhFd_TXct4bYlr_Q9cpug_Np-Uv9UFwbMo7l0EsrL1epGpgX6GVPFJAP3_31hToin7xvAq4uWNySRKCLitmga9BUJyy8CnA&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX3WmDqSYG-dJBSkBwcmey-onX1YBrJYI51emoQf6_UIK3rXhrJmhMCzQ-LMHvJ6v4s1br8fyG-uIDIrFXltpWBRStd3F9e_JLJcZOWoggsy85uode77SubFE1eWJ-ZexSr8C7TlK41w3iOl6M1Qkdb1vYws3blTNGYDFCGL9h6fgVr-ZVX0VXnHnIemm63tr0_4hflbJn_4_WMY7pNVaf5b1wqo_QNv_px0qJmAQ_tMqo05zQ_rfdgwljfU7fbbw9Vs7e88mNAx3Z40gDvnra8e8JkviLKvzgKj0O9AF7VWNhsL1M&maxwidth=800",
+            "distanceFromPrevious": 0.47,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Centre historique et Piazza Maggiore",
+        "dayNarrative": "Découverte du cœur de Bologne avec la majestueuse Piazza Maggiore et ses monuments emblématiques. Une immersion parfaite dans l'histoire médiévale de la ville.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Principalement dégagé",
+          "tempMin": 5,
+          "tempMax": 19,
+          "icon": "🌤️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 15,
+          "transport": 36,
+          "total": 51
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.47,
+          "p95LegKm": 0.24,
+          "totalTravelMin": 25,
+          "totalLegKm": 0.83,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.24,
+          "mstLowerBoundKm": 0.67
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-04T15:23:25.769Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Sartoria Bakery Cafè",
+            "description": "Café clair avec œuvres d'art et bibliothèque",
+            "locationName": "P.za Aldrovandi, 23/b",
+            "latitude": 44.49404,
+            "longitude": 11.352089,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Sartoria%20Bakery%20Caf%C3%A8%2C%20P.za%20Aldrovandi%2C%2023%2Fb",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sartoria%20Bakery%20Caf%C3%A8%2C%20P.za%20Aldrovandi%2C%2023%2Fb",
+            "restaurant": {
+              "id": "serp-1787827094169356914",
+              "name": "Sartoria Bakery Cafè",
+              "address": "P.za Aldrovandi, 23/b",
+              "latitude": 44.49404,
+              "longitude": 11.352089,
+              "rating": 4,
+              "reviewCount": 574,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sartoria%20Bakery%20Caf%C3%A8%2C%20P.za%20Aldrovandi%2C%2023%2Fb",
+              "googlePlaceId": "1787827094169356914",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3241853100716937626",
+                "name": "Forno Brisa Galliera - Bakery & Specialty Coffee",
+                "address": "Via Galliera, 34d",
+                "latitude": 44.500305,
+                "longitude": 11.342944,
+                "rating": 4.5,
+                "reviewCount": 2400,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Forno%20Brisa%20Galliera%20-%20Bakery%20%26%20Specialty%20Coffee%2C%20Via%20Galliera%2C%2034d",
+                "googlePlaceId": "3241853100716937626",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVK2jz7WRsFS6GQmVQJAah2CnSzzfL04C2E2otk_MoeY8XFJ6cWMYC7i2UejRY22r2kPwXNDalztnqVLYvwvVkFJapc8AMKr5c6AWlWs84gU6BeVXAUVXVpHhoxC1BgzsxcF33Mvgp7MiQiZcEpaduD0Oy3shyMfyLYEKHGnfgFXaiqhryGmXppDS2fcERndVzqPS8raBH4VJjlgRQG5w87NyavD54nix_Y9lvZTYKHKQAJvFV_Bc4OoM4RZ83DsijMwD4I4sUtnw_Xu_pQx97G4A8T6fOPGQDdZWX907hzS7WPaTg&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-3152700649155260310",
+                "name": "Pappare' Bologna",
+                "address": "Via De' Giudei, 2d",
+                "latitude": 44.49476,
+                "longitude": 11.346525,
+                "rating": 4.1,
+                "reviewCount": 3700,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "petit-déjeuner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pappare'%20Bologna%2C%20Via%20De'%20Giudei%2C%202d",
+                "googlePlaceId": "3152700649155260310",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVHsJgc57vuQS1AJvqtUo-pv7Rtgv6a2hBPYcjDyWS7jhS6945HlZ6if6HFQzbnHJ620kFM3t2kjhEn_abvIlqXbsc4VlTTFyJRMIMtoXt0WtUb2yxdsLYxsOknRttivpL8twauNJ_cvdt7V9QarCT8rM5ROeWIyats_ub8aP3Rb_36d9aH-ZZnBC4pa8PbJVIwwbw9XOQLbuU1nsbpkyDTYHQYWjIqglws6le-dJ0JHKCx4nXGdc3wYlAUoX-VRVm0Sx6IFHRt3YnxOkCX-rjkMLuYwDu4QLmkxzoadIj_u1uSdaM&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.96,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "ai-mustsee-bologne-2",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Torre degli Asinelli",
+            "description": "Tour médiévale emblématique permettant une vue panoramique spectaculaire sur Bologne.",
+            "locationName": "Torre degli Asinelli",
+            "latitude": 44.4942,
+            "longitude": 11.3467,
+            "orderIndex": 1,
+            "estimatedCost": 5,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Torre%20degli%20Asinelli%2C%20Bologne",
+            "dataReliability": "generated",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Medieval_Bologna.jpg/500px-Medieval_Bologna.jpg",
+            "mustSee": true,
+            "distanceFromPrevious": 0.43,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Cafè Terzi",
+            "description": "Café de qualité supérieure, gâteaux, cadre simple",
+            "locationName": "Via Guglielmo Oberdan, 10d",
+            "latitude": 44.49534,
+            "longitude": 11.34555,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A8%20Terzi%2C%20Via%20Guglielmo%20Oberdan%2C%2010d",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A8%20Terzi%2C%20Bologne",
+            "restaurant": {
+              "id": "serp-5615151256565668595",
+              "name": "Cafè Terzi",
+              "address": "Via Guglielmo Oberdan, 10d",
+              "latitude": 44.49534,
+              "longitude": 11.34555,
+              "rating": 4.4,
+              "reviewCount": 2300,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Café de qualité supérieure, gâteaux, cadre simple"
+              ],
+              "description": "Café de qualité supérieure, gâteaux, cadre simple",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A8%20Terzi%2C%20Via%20Guglielmo%20Oberdan%2C%2010d",
+              "googlePlaceId": "5615151256565668595",
+              "openingHours": {},
+              "distance": 0.15616895383574306,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-5379481790882448936",
+                  "name": "MÒ! MORTADELLA LAB",
+                  "address": "Via Volturno",
+                  "latitude": 44.49772,
+                  "longitude": 11.343022,
+                  "rating": 4.8,
+                  "reviewCount": 5500,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "sandwich"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Excellente cuisine et service.\""
+                  ],
+                  "description": "\"Excellente cuisine et service.\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C3%92!%20MORTADELLA%20LAB%2C%20Via%20Volturno",
+                  "googlePlaceId": "5379481790882448936",
+                  "openingHours": {},
+                  "distance": 0.4881601782613191,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUDIk5aET-lI23paIwrLKPr8orv01FPWmeOLhgYqZ7XXR4d36KtTXsZ4nm7GXyjRF3E0tVRehOX8-gF8kQt9p8C1q9KFDJWIXdJYIjZwWn1YLny_UzYWXw5axXcePbV1-Hia62gDAp9797hzW5UFuukQSUeUfxkkP7VX6efrsmougCk5hC1R25rPo01HdH3AsTm-0tzSEdfYqvGQbIDdYVAu9mU3gU7aYOFDnBQonQARqqtijPqYUH40ojOkHD2RyTc0uKZvuKgK17394XATjHS2Zylriee8M-KiDr670xKlrDTBo6ovuLGPo6Xev8_OjNfMLqtjGoQB11-0BP_MD_jQX-_gAl4XcZ-YGzCsC3Lj7KNKI0NTVJGu3hYocCbkvTGuxd6kLSlsNzTDMA_KhMb5oWxsa5frvlzsN6d2deypuZB2obUDA21jh4R-u_icRTFIYUL5dc2_N4tVrAuv3W-nD4hiWHrrvGQhSsAhFd_TXct4bYlr_Q9cpug_Np-Uv9UFwbMo7l0EsrL1epGpgX6GVPFJAP3_31hToin7xvAq4uWNySRKCLitmga9BUJyy8CnA&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-7523582977286473425",
+                  "name": "Osteria dell'Orsa",
+                  "address": "Via Mentana, 1f",
+                  "latitude": 44.49714,
+                  "longitude": 11.347496,
+                  "rating": 4.2,
+                  "reviewCount": 18000,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\""
+                  ],
+                  "description": "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Via%20Mentana%2C%201f",
+                  "googlePlaceId": "7523582977286473425",
+                  "openingHours": {},
+                  "distance": 0.3329537994672827,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfX3WmDqSYG-dJBSkBwcmey-onX1YBrJYI51emoQf6_UIK3rXhrJmhMCzQ-LMHvJ6v4s1br8fyG-uIDIrFXltpWBRStd3F9e_JLJcZOWoggsy85uode77SubFE1eWJ-ZexSr8C7TlK41w3iOl6M1Qkdb1vYws3blTNGYDFCGL9h6fgVr-ZVX0VXnHnIemm63tr0_4hflbJn_4_WMY7pNVaf5b1wqo_QNv_px0qJmAQ_tMqo05zQ_rfdgwljfU7fbbw9Vs7e88mNAx3Z40gDvnra8e8JkviLKvzgKj0O9AF7VWNhsL1M&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXmxWgn3OJOEXU1YP-TQ3l22Goh1UZoqGaoq6M8WeEAU99n3OMsFKZOytiHPmIJWHMzQG0rdPn5wUQA2nDGY3HD5YdGn2SzRXdBZIXJvOQ8Cm-qFvrF3GyB_KAc7uvVw9hfQh6s0Gyc96TugmmIAuaKEDxKyrUwDBGAyf13MNFpTPhHl_QUIBwMX6jC93qolIUvJHTQcKuWPQHEaYjg0vd5dcU77JTxAEa_2LqD_cIk6uYWC3oQYf4J4tBLfcg19Hv4A9ZYruQ6fALhfENypYbrVeBcwO3KXAiKCbGyQWMUF0W5WVA&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5379481790882448936",
+                "name": "MÒ! MORTADELLA LAB",
+                "address": "Via Volturno",
+                "latitude": 44.49772,
+                "longitude": 11.343022,
+                "rating": 4.8,
+                "reviewCount": 5500,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "sandwich"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Excellente cuisine et service.\""
+                ],
+                "description": "\"Excellente cuisine et service.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C3%92!%20MORTADELLA%20LAB%2C%20Via%20Volturno",
+                "googlePlaceId": "5379481790882448936",
+                "openingHours": {},
+                "distance": 0.4881601782613191,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUDIk5aET-lI23paIwrLKPr8orv01FPWmeOLhgYqZ7XXR4d36KtTXsZ4nm7GXyjRF3E0tVRehOX8-gF8kQt9p8C1q9KFDJWIXdJYIjZwWn1YLny_UzYWXw5axXcePbV1-Hia62gDAp9797hzW5UFuukQSUeUfxkkP7VX6efrsmougCk5hC1R25rPo01HdH3AsTm-0tzSEdfYqvGQbIDdYVAu9mU3gU7aYOFDnBQonQARqqtijPqYUH40ojOkHD2RyTc0uKZvuKgK17394XATjHS2Zylriee8M-KiDr670xKlrDTBo6ovuLGPo6Xev8_OjNfMLqtjGoQB11-0BP_MD_jQX-_gAl4XcZ-YGzCsC3Lj7KNKI0NTVJGu3hYocCbkvTGuxd6kLSlsNzTDMA_KhMb5oWxsa5frvlzsN6d2deypuZB2obUDA21jh4R-u_icRTFIYUL5dc2_N4tVrAuv3W-nD4hiWHrrvGQhSsAhFd_TXct4bYlr_Q9cpug_Np-Uv9UFwbMo7l0EsrL1epGpgX6GVPFJAP3_31hToin7xvAq4uWNySRKCLitmga9BUJyy8CnA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-7523582977286473425",
+                "name": "Osteria dell'Orsa",
+                "address": "Via Mentana, 1f",
+                "latitude": 44.49714,
+                "longitude": 11.347496,
+                "rating": 4.2,
+                "reviewCount": 18000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\""
+                ],
+                "description": "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Via%20Mentana%2C%201f",
+                "googlePlaceId": "7523582977286473425",
+                "openingHours": {},
+                "distance": 0.3329537994672827,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX3WmDqSYG-dJBSkBwcmey-onX1YBrJYI51emoQf6_UIK3rXhrJmhMCzQ-LMHvJ6v4s1br8fyG-uIDIrFXltpWBRStd3F9e_JLJcZOWoggsy85uode77SubFE1eWJ-ZexSr8C7TlK41w3iOl6M1Qkdb1vYws3blTNGYDFCGL9h6fgVr-ZVX0VXnHnIemm63tr0_4hflbJn_4_WMY7pNVaf5b1wqo_QNv_px0qJmAQ_tMqo05zQ_rfdgwljfU7fbbw9Vs7e88mNAx3Z40gDvnra8e8JkviLKvzgKj0O9AF7VWNhsL1M&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXmxWgn3OJOEXU1YP-TQ3l22Goh1UZoqGaoq6M8WeEAU99n3OMsFKZOytiHPmIJWHMzQG0rdPn5wUQA2nDGY3HD5YdGn2SzRXdBZIXJvOQ8Cm-qFvrF3GyB_KAc7uvVw9hfQh6s0Gyc96TugmmIAuaKEDxKyrUwDBGAyf13MNFpTPhHl_QUIBwMX6jC93qolIUvJHTQcKuWPQHEaYjg0vd5dcU77JTxAEa_2LqD_cIk6uYWC3oQYf4J4tBLfcg19Hv4A9ZYruQ6fALhfENypYbrVeBcwO3KXAiKCbGyQWMUF0W5WVA&maxwidth=800",
+            "distanceFromPrevious": 0.16,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "ai-mustsee-bologne-5",
+            "dayNumber": 2,
+            "startTime": "14:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Porticaux de Bologne",
+            "description": "Réseau unique de galeries couvertes classé au patrimoine mondial de l'UNESCO.",
+            "locationName": "Porticaux de Bologne",
+            "latitude": 44.4911203,
+            "longitude": 11.3436002,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 180,
+            "rating": 4.9,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Porticaux%20de%20Bologne%2C%20Bologne",
+            "dataReliability": "generated",
+            "mustSee": true,
+            "distanceFromPrevious": 0.49,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "ai-mustsee-bologne-4",
+            "dayNumber": 2,
+            "startTime": "17:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Mercato delle Erbe",
+            "description": "Marché alimentaire traditionnel offrant les meilleurs produits locaux et spécialités italiennes.",
+            "locationName": "Mercato delle Erbe",
+            "latitude": 44.4960716,
+            "longitude": 11.3382767,
+            "orderIndex": 4,
+            "estimatedCost": 20,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mercato%20delle%20Erbe%2C%20Bologne",
+            "dataReliability": "generated",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWahQ7yceGm2b3Fwg9a4Y5OHkfLg8HRuftsNXQYrbRa4BEGLTofkn6sObGx7jlwCJ-VLE5y1JqXm80FlMzlHBVh7fMBUmy039G9QGg6TDuvrluoZ7FRZUVfxwkE_kdyMzeI6XYbfn6kEzflV9cZ2c7EJIs8Fg1LXUMEKt1gj27v_WxfJCVlPq1x36Knfx4ILN4RD6KwhMd9YL5pM1JDnH3_58VDRZ2IJ2tyPUyYtiC3UWoQgkjrBkhmzPc9lpMSnrr3UZqJEiJQpg1E-0Son8iSnkCaoiNo4AIcYtDhn9A-ZiYAjjmEGx6gprXlxtWyoejijk-_QbolIIpni7h05mhdiynAnWCpXnitboc6Ty4Q6XiaRhOsDlv58ILdZ6YOeMOOhfHuE4Q6VJiI7WRQJEosKcgL09tcn1Q7twMixpujqvNl_vUHikYBWBOHvgz7-HNFNus7ScxcL_XNIJytYSjbbnzDBEkA-oYDwup7pd64J1AtDviLYhSuBpABlR_8t82Fb8dHokgT4yeAVQiZ6B7YgcAu_1RFn3iKVET146PJGYdcfsiul0Bl2Xru3aeM8VLpcCstOM77-eLHJ7Xeexc791XsLg&maxwidth=800",
+            "mustSee": true,
+            "distanceFromPrevious": 0.69,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJtUgGAJbUf0cR9dD53jhF5OI",
+            "dayNumber": 2,
+            "startTime": "18:05",
+            "endTime": "19:05",
+            "type": "activity",
+            "title": "Campanile de la Cathédrale Saint Pierre",
+            "description": "Campanile de la Cathédrale Saint Pierre",
+            "locationName": "Campanile de la Cathédrale Saint Pierre",
+            "latitude": 44.4956401,
+            "longitude": 11.3437616,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Campanile%20de%20la%20Cath%C3%A9drale%20Saint%20Pierre%2C%20Bologne",
+            "dataReliability": "verified",
+            "mustSee": false,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 0.44,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — Osteria dell'Orsa",
+            "description": "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\"",
+            "locationName": "Via Mentana, 1f",
+            "latitude": 44.49714,
+            "longitude": 11.347496,
+            "orderIndex": 6,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.2,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Via%20Mentana%2C%201f",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Bologne",
+            "restaurant": {
+              "id": "serp-7523582977286473425",
+              "name": "Osteria dell'Orsa",
+              "address": "Via Mentana, 1f",
+              "latitude": 44.49714,
+              "longitude": 11.347496,
+              "rating": 4.2,
+              "reviewCount": 18000,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\""
+              ],
+              "description": "\"Très bonnes Tagliatelle con ragù et très bon Tiramisu .\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20dell'Orsa%2C%20Via%20Mentana%2C%201f",
+              "googlePlaceId": "7523582977286473425",
+              "openingHours": {},
+              "distance": 0.4914900590915255,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-5615151256565668595",
+                  "name": "Cafè Terzi",
+                  "address": "Via Guglielmo Oberdan, 10d",
+                  "latitude": 44.49534,
+                  "longitude": 11.34555,
+                  "rating": 4.4,
+                  "reviewCount": 2300,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "café"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Café de qualité supérieure, gâteaux, cadre simple"
+                  ],
+                  "description": "Café de qualité supérieure, gâteaux, cadre simple",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A8%20Terzi%2C%20Via%20Guglielmo%20Oberdan%2C%2010d",
+                  "googlePlaceId": "5615151256565668595",
+                  "openingHours": {},
+                  "distance": 0.29925510138202643,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXmxWgn3OJOEXU1YP-TQ3l22Goh1UZoqGaoq6M8WeEAU99n3OMsFKZOytiHPmIJWHMzQG0rdPn5wUQA2nDGY3HD5YdGn2SzRXdBZIXJvOQ8Cm-qFvrF3GyB_KAc7uvVw9hfQh6s0Gyc96TugmmIAuaKEDxKyrUwDBGAyf13MNFpTPhHl_QUIBwMX6jC93qolIUvJHTQcKuWPQHEaYjg0vd5dcU77JTxAEa_2LqD_cIk6uYWC3oQYf4J4tBLfcg19Hv4A9ZYruQ6fALhfENypYbrVeBcwO3KXAiKCbGyQWMUF0W5WVA&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-5282818347352892547",
+                  "name": "ZanziBar Bologna",
+                  "address": "Via d'Azeglio, 23a",
+                  "latitude": 44.49124,
+                  "longitude": 11.341617,
+                  "rating": 4.9,
+                  "reviewCount": 299,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "café"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ZanziBar%20Bologna%2C%20Via%20d'Azeglio%2C%2023a",
+                  "googlePlaceId": "5282818347352892547",
+                  "openingHours": {},
+                  "distance": 0.4326338506692819,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXegS7bJAKLx6xa9xvX5RbXxStaqoVY9p3GglVkID7E4V9zhAnZnAcjS-mpehmz3VMGGD6xrxozY6RG4e_yP312F2nrMW4ttJ7y65FF4Sp-IPrH642GKzrmmDsVuEMxtTisrV0dYsgfljl4CKVF-Cxa2k8Fp_PrleJvCuJV_gmtq0Krmkr8OX1wm9FPFCWXsHa2KcKR5sh4BlCmY_X82X7_Zp9nucz6wYHWu2vy1tPEn2bK0KCfL_TXO6-LzybHElm4pjV5cVt35ArlXj100ZYbCBZW_F6LJbL9AjmhWn-VZ5RTobiKgB0hLeQC0Kr0tA5GSabdlE1IFU4-dcUh4sEFIX5A1b9twoA4uZQ_HLIlatANLfmfuta5NDIoKpJkbyhsSJVfHHBySeoh2oVXrAdmvy04SPTzzYkAs_-PF_3BKmKORvt4NoiUx2amF38EDHPp7cR7_5xTqTh-dx0tzLbBp3RCK_g-Q6-7jIwSUaXJVYFoV9AASy9S9pvXft63zYx0wrXBZRPvoHVz2dGmiUWjxiuaNVfRil4hi1XZJRTuEPqeibQweiaNO6id7dhylHrOe7juxn1_hA&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfX3WmDqSYG-dJBSkBwcmey-onX1YBrJYI51emoQf6_UIK3rXhrJmhMCzQ-LMHvJ6v4s1br8fyG-uIDIrFXltpWBRStd3F9e_JLJcZOWoggsy85uode77SubFE1eWJ-ZexSr8C7TlK41w3iOl6M1Qkdb1vYws3blTNGYDFCGL9h6fgVr-ZVX0VXnHnIemm63tr0_4hflbJn_4_WMY7pNVaf5b1wqo_QNv_px0qJmAQ_tMqo05zQ_rfdgwljfU7fbbw9Vs7e88mNAx3Z40gDvnra8e8JkviLKvzgKj0O9AF7VWNhsL1M&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5615151256565668595",
+                "name": "Cafè Terzi",
+                "address": "Via Guglielmo Oberdan, 10d",
+                "latitude": 44.49534,
+                "longitude": 11.34555,
+                "rating": 4.4,
+                "reviewCount": 2300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café de qualité supérieure, gâteaux, cadre simple"
+                ],
+                "description": "Café de qualité supérieure, gâteaux, cadre simple",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A8%20Terzi%2C%20Via%20Guglielmo%20Oberdan%2C%2010d",
+                "googlePlaceId": "5615151256565668595",
+                "openingHours": {},
+                "distance": 0.29925510138202643,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXmxWgn3OJOEXU1YP-TQ3l22Goh1UZoqGaoq6M8WeEAU99n3OMsFKZOytiHPmIJWHMzQG0rdPn5wUQA2nDGY3HD5YdGn2SzRXdBZIXJvOQ8Cm-qFvrF3GyB_KAc7uvVw9hfQh6s0Gyc96TugmmIAuaKEDxKyrUwDBGAyf13MNFpTPhHl_QUIBwMX6jC93qolIUvJHTQcKuWPQHEaYjg0vd5dcU77JTxAEa_2LqD_cIk6uYWC3oQYf4J4tBLfcg19Hv4A9ZYruQ6fALhfENypYbrVeBcwO3KXAiKCbGyQWMUF0W5WVA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-5282818347352892547",
+                "name": "ZanziBar Bologna",
+                "address": "Via d'Azeglio, 23a",
+                "latitude": 44.49124,
+                "longitude": 11.341617,
+                "rating": 4.9,
+                "reviewCount": 299,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ZanziBar%20Bologna%2C%20Via%20d'Azeglio%2C%2023a",
+                "googlePlaceId": "5282818347352892547",
+                "openingHours": {},
+                "distance": 0.4326338506692819,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXegS7bJAKLx6xa9xvX5RbXxStaqoVY9p3GglVkID7E4V9zhAnZnAcjS-mpehmz3VMGGD6xrxozY6RG4e_yP312F2nrMW4ttJ7y65FF4Sp-IPrH642GKzrmmDsVuEMxtTisrV0dYsgfljl4CKVF-Cxa2k8Fp_PrleJvCuJV_gmtq0Krmkr8OX1wm9FPFCWXsHa2KcKR5sh4BlCmY_X82X7_Zp9nucz6wYHWu2vy1tPEn2bK0KCfL_TXO6-LzybHElm4pjV5cVt35ArlXj100ZYbCBZW_F6LJbL9AjmhWn-VZ5RTobiKgB0hLeQC0Kr0tA5GSabdlE1IFU4-dcUh4sEFIX5A1b9twoA4uZQ_HLIlatANLfmfuta5NDIoKpJkbyhsSJVfHHBySeoh2oVXrAdmvy04SPTzzYkAs_-PF_3BKmKORvt4NoiUx2amF38EDHPp7cR7_5xTqTh-dx0tzLbBp3RCK_g-Q6-7jIwSUaXJVYFoV9AASy9S9pvXft63zYx0wrXBZRPvoHVz2dGmiUWjxiuaNVfRil4hi1XZJRTuEPqeibQweiaNO6id7dhylHrOe7juxn1_hA&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX3WmDqSYG-dJBSkBwcmey-onX1YBrJYI51emoQf6_UIK3rXhrJmhMCzQ-LMHvJ6v4s1br8fyG-uIDIrFXltpWBRStd3F9e_JLJcZOWoggsy85uode77SubFE1eWJ-ZexSr8C7TlK41w3iOl6M1Qkdb1vYws3blTNGYDFCGL9h6fgVr-ZVX0VXnHnIemm63tr0_4hflbJn_4_WMY7pNVaf5b1wqo_QNv_px0qJmAQ_tMqo05zQ_rfdgwljfU7fbbw9Vs7e88mNAx3Z40gDvnra8e8JkviLKvzgKj0O9AF7VWNhsL1M&maxwidth=800",
+            "distanceFromPrevious": 0.34,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Pinacothèque nationale et Torre degli Asinelli",
+        "dayNarrative": "Journée consacrée à Pinacothèque nationale, Torre degli Asinelli, Mercato delle Erbe. 4 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": 7,
+          "tempMax": 20,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 25,
+          "food": 45,
+          "transport": 0,
+          "total": 70
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 135,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": true,
+          "geoPrunedActivitiesCount": 1
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.69,
+          "p95LegKm": 0.49,
+          "totalTravelMin": 54,
+          "totalLegKm": 2.55,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.38,
+          "mstLowerBoundKm": 1.84
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-05T15:23:25.769Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out 3. Suite Hotel Elite",
+            "description": "",
+            "locationName": "Bologne",
+            "latitude": 44.4993322,
+            "longitude": 11.358780200000002,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 4.1,
+            "bookingUrl": "http://www.absuiteinnovativedesign.it/",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=3.%20Suite%20Hotel%20Elite%2C%20Bologne",
+            "accommodation": {
+              "id": "ta-hotel-1605643",
+              "name": "3. Suite Hotel Elite",
+              "type": "apartment",
+              "address": "Bologne",
+              "latitude": 44.4993322,
+              "longitude": 11.358780200000002,
+              "rating": 4.1,
+              "reviewCount": 2834,
+              "pricePerNight": 0,
+              "totalPrice": 0,
+              "currency": "EUR",
+              "amenities": [
+                "breakfast"
+              ],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/a8/59/dd/suite-hotel-elite.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "http://www.absuiteinnovativedesign.it/",
+              "description": "Free breakfast available • Porto • Prix via Booking.com • Disponibilité confirmée",
+              "qualityFlags": [
+                "hotel_distance_relaxed_pass_1"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "hotel_distance_relaxed_pass_1"
+            ],
+            "imageUrl": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/a8/59/dd/suite-hotel-elite.jpg?w=600&h=400&s=1"
+          },
+          {
+            "id": "gp-ChIJLwKOhMXUf0cRiLrCD6oTfS0",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Giardini Margherita",
+            "description": "The Giardini Margherita is a park in Bologna, Italy, located just south of the city centre.",
+            "locationName": "Giardini Margherita",
+            "latitude": 44.4827156,
+            "longitude": 11.3524117,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Giardini%20Margherita%2C%20Bologne",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfViVZFrD4KWEP9zvWtzNNbUe43SpmiUWIDHKYjGB_xXPp9Ab0m-9UFbzR9bsElz27wX3_X3Mn2MvLdObwSB934MffAKZA5kxNFGyvS605cPgiMC16WArmsPZJHEavSRB1znOf9bWlndaCMucmsl_oeo9vZ43rIBY7olOAyh1Z5TgEHDCR2djZa_R3xxIC5HatSnFnoaiDuD7aKxp8-faeh4YzsFxksLvOXnpN10inzNFmq2yIWdSVE2TDrN_p91MAs3APzL72yh1tfpi56mWj1d_SPtm1h8ojS85RTee8DDVBAg91n1aJ31MN47IMe8OVFfy0jHqpTL6Vz_for6nnz9Bhm5Ndy5lnq3bUtlLCkoFU_O3zLHgokePd5CJwzvxTF_exmjs_3pwQbQ6GoMewQEhQhvyF3zBZ79Jvs_j25zNmIOBD5EfHjN2XqOSrMPB4iDuyyd0GJ2yBbDHvtaDouJrdSDwNwy6nw8c_DdW93Ij4xsuRXl-7k7aiuJrA58qPtjnFHkhwghMPOwUxTmrijKetfU2A5KX1hZr2K8TD7KCQ8LgBWpC65-j3ud6FsPSZ-JNTpH&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.92,
+            "timeFromPrevious": 18,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "ai-mustsee-bologne-1",
+            "dayNumber": 3,
+            "startTime": "10:15",
+            "endTime": "11:50",
+            "type": "activity",
+            "title": "Basilique San Petronio",
+            "description": "Immense basilique gothique considérée comme l'une des plus grandes églises d'Italie.",
+            "locationName": "Basilique San Petronio",
+            "latitude": 44.492931,
+            "longitude": 11.343116,
+            "orderIndex": 2,
+            "estimatedCost": 5,
+            "duration": 95,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Basilique%20San%20Petronio%2C%20Bologne",
+            "dataReliability": "generated",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 1.35,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Al Sangiovese Restaurant",
+            "description": "\"La cuisine est traditionnelle avec un respect stricte des règles de l’art.\"",
+            "locationName": "Vicolo del Falcone, 2b",
+            "latitude": 44.4869,
+            "longitude": 11.3407,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Al%20Sangiovese%20Restaurant%2C%20Vicolo%20del%20Falcone%2C%202b",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Al%20Sangiovese%20Restaurant%2C%20Bologne",
+            "restaurant": {
+              "id": "serp-16664835251150335117",
+              "name": "Al Sangiovese Restaurant",
+              "address": "Vicolo del Falcone, 2b",
+              "latitude": 44.4869,
+              "longitude": 11.3407,
+              "rating": 4.7,
+              "reviewCount": 1400,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"La cuisine est traditionnelle avec un respect stricte des règles de l’art.\""
+              ],
+              "description": "\"La cuisine est traditionnelle avec un respect stricte des règles de l’art.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Al%20Sangiovese%20Restaurant%2C%20Vicolo%20del%20Falcone%2C%202b",
+              "googlePlaceId": "16664835251150335117",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-11857403676423610053",
+                  "name": "Osteria del Sole",
+                  "address": "Vicolo Ranocchi, 1/d",
+                  "latitude": 44.493877,
+                  "longitude": 11.34434,
+                  "rating": 4.6,
+                  "reviewCount": 2400,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "bar à vin"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"J’ai adoré l’endroit, très authentique et vrai.\""
+                  ],
+                  "description": "\"J’ai adoré l’endroit, très authentique et vrai.\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20del%20Sole%2C%20Vicolo%20Ranocchi%2C%201%2Fd",
+                  "googlePlaceId": "11857403676423610053",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUC6ubn3QFzWQ2tX31ZWj1ho_0DukR74hvNvOVIatKDnw5QEJG77lmLyzCaKVSRmC_PQFnvGhKmcIc1YEDHWWTawIPCGAqPcX4hxAHH4PVdhTWd14HI4WRdHsml99R_nda00R5O0coOIypvAwhdB9vBbxlJGiueGZ1_UwihtClnZgsRvp4gBWIacFMHhPOvR3d2KeeQk8fDx6dKQBh8P0Lhy_jAlYw9U-jXz0GsglwmTmo96S2ulZj1QR7APQzb-idpI0C1TJf891mGXV16SCgGPClYQB2SS9LwQ8sNQLrzFIXeVBbGoWuivq-EcbD_X0g421X0Gu-GAAOOhFZL_9h9EGQvmHTvyrsta95qVAlTjdLA_KPrqusxZN8YjkFN9VVPhkS5bUeQSu6BOT-5v9LSjWutqf-HIqYVuebKWM9WzP8CyvZz5JRvWnDWnqAtO71y21Th_nxlSKHpmzz2_JCcEgvYINxss-_1hPLisXtE9k-1uzaiOVN5CpttRil7bEN44NP3_FG7cngFeXNsIvWMLwoGXvLXnWeTxJN5d7Ur_1U7knELa7CN4GmaTQsQH8ysu4D-&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-340603653119943359",
+                  "name": "Sfoglia Rina",
+                  "address": "Via Castiglione, 5/b",
+                  "latitude": 44.49319,
+                  "longitude": 11.346341,
+                  "rating": 4.5,
+                  "reviewCount": 10000,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Très beau restaurant, belle ambiance et service agréable\""
+                  ],
+                  "description": "\"Très beau restaurant, belle ambiance et service agréable\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sfoglia%20Rina%2C%20Via%20Castiglione%2C%205%2Fb",
+                  "googlePlaceId": "340603653119943359",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXSAiPVk8dr3Sz0yoZTbTiIVNSt8aWWITvLtl8CfDBdqdnWIk6ZsvhpHQe1dpI3oZH-t4VnipBr88SuSZNfCICM7isv9uCGksEImL9GOuhgZaRhgvJ2qLIl5JxtOb6avJodeFU-g_bGmZHLpyAacX7sq_GLfSl3EOPeCVqLhOnkOqFdP_T7jsJ4ENk7w_akbJ_jRExTcvkh9I_AC9l4Ids3mSf15_U1c41ad8Ul8AQ3WrSLKjADW064MdEi4WES-xLLVjw804A94bKP-zq19phCbYLqAGaOZhWzg9h_954X0Cq3q3k&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXcK975ViUOoHbszZifv4uxUMAZzLRzIzMbEHTMbjC5a8QUHAnGxNFE1-bgZGJ8AptEXWkArvWvvD1MFQkbUPhbNfqosul4Bx3JNHhvrYhNHr-KoekJLkCrWYoS1qqwqbdFuI3P4Ryl3arhD81JcGLL-nmOhqc0UcT11IlVXcnyjl7whLnbNZPNJMKBANN2FZ_Dfp-e4AK0R-am6duKcC3FKZO0bbdakRkpe_7-7dBxtM4u0m588gqH8Th4g_4mzMsG7a5b-_EKFJMK6eIs9WrP5x8KXPNRhqbpVYyURkJYm9FNnEY&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11857403676423610053",
+                "name": "Osteria del Sole",
+                "address": "Vicolo Ranocchi, 1/d",
+                "latitude": 44.493877,
+                "longitude": 11.34434,
+                "rating": 4.6,
+                "reviewCount": 2400,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "bar à vin"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"J’ai adoré l’endroit, très authentique et vrai.\""
+                ],
+                "description": "\"J’ai adoré l’endroit, très authentique et vrai.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Osteria%20del%20Sole%2C%20Vicolo%20Ranocchi%2C%201%2Fd",
+                "googlePlaceId": "11857403676423610053",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUC6ubn3QFzWQ2tX31ZWj1ho_0DukR74hvNvOVIatKDnw5QEJG77lmLyzCaKVSRmC_PQFnvGhKmcIc1YEDHWWTawIPCGAqPcX4hxAHH4PVdhTWd14HI4WRdHsml99R_nda00R5O0coOIypvAwhdB9vBbxlJGiueGZ1_UwihtClnZgsRvp4gBWIacFMHhPOvR3d2KeeQk8fDx6dKQBh8P0Lhy_jAlYw9U-jXz0GsglwmTmo96S2ulZj1QR7APQzb-idpI0C1TJf891mGXV16SCgGPClYQB2SS9LwQ8sNQLrzFIXeVBbGoWuivq-EcbD_X0g421X0Gu-GAAOOhFZL_9h9EGQvmHTvyrsta95qVAlTjdLA_KPrqusxZN8YjkFN9VVPhkS5bUeQSu6BOT-5v9LSjWutqf-HIqYVuebKWM9WzP8CyvZz5JRvWnDWnqAtO71y21Th_nxlSKHpmzz2_JCcEgvYINxss-_1hPLisXtE9k-1uzaiOVN5CpttRil7bEN44NP3_FG7cngFeXNsIvWMLwoGXvLXnWeTxJN5d7Ur_1U7knELa7CN4GmaTQsQH8ysu4D-&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-340603653119943359",
+                "name": "Sfoglia Rina",
+                "address": "Via Castiglione, 5/b",
+                "latitude": 44.49319,
+                "longitude": 11.346341,
+                "rating": 4.5,
+                "reviewCount": 10000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très beau restaurant, belle ambiance et service agréable\""
+                ],
+                "description": "\"Très beau restaurant, belle ambiance et service agréable\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sfoglia%20Rina%2C%20Via%20Castiglione%2C%205%2Fb",
+                "googlePlaceId": "340603653119943359",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXSAiPVk8dr3Sz0yoZTbTiIVNSt8aWWITvLtl8CfDBdqdnWIk6ZsvhpHQe1dpI3oZH-t4VnipBr88SuSZNfCICM7isv9uCGksEImL9GOuhgZaRhgvJ2qLIl5JxtOb6avJodeFU-g_bGmZHLpyAacX7sq_GLfSl3EOPeCVqLhOnkOqFdP_T7jsJ4ENk7w_akbJ_jRExTcvkh9I_AC9l4Ids3mSf15_U1c41ad8Ul8AQ3WrSLKjADW064MdEi4WES-xLLVjw804A94bKP-zq19phCbYLqAGaOZhWzg9h_954X0Cq3q3k&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXcK975ViUOoHbszZifv4uxUMAZzLRzIzMbEHTMbjC5a8QUHAnGxNFE1-bgZGJ8AptEXWkArvWvvD1MFQkbUPhbNfqosul4Bx3JNHhvrYhNHr-KoekJLkCrWYoS1qqwqbdFuI3P4Ryl3arhD81JcGLL-nmOhqc0UcT11IlVXcnyjl7whLnbNZPNJMKBANN2FZ_Dfp-e4AK0R-am6duKcC3FKZO0bbdakRkpe_7-7dBxtM4u0m588gqH8Th4g_4mzMsG7a5b-_EKFJMK6eIs9WrP5x8KXPNRhqbpVYyURkJYm9FNnEY&maxwidth=800",
+            "distanceFromPrevious": 0.7,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=44.4827156,11.3524117&destination=44.4869,11.3407&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3",
+            "dayNumber": 3,
+            "startTime": "14:00",
+            "endTime": "19:05",
+            "type": "transport",
+            "title": "🚄 Train → Lyon",
+            "description": "Bologne → Lyon",
+            "locationName": "Bologne → Lyon",
+            "latitude": 44.4938203,
+            "longitude": 11.3426327,
+            "orderIndex": 4,
+            "estimatedCost": 36,
+            "duration": 305,
+            "bookingUrl": "https://www.omio.fr/trains/bologne/lyon?departure_date=2026-04-05",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%84%20Train%20%E2%86%92%20Lyon%2C%20Bologne",
+            "transitDataSource": "estimated",
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg",
+            "distanceFromPrevious": 0.78,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk"
+          }
+        ],
+        "theme": "Détente aux Giardini Margherita",
+        "dayNarrative": "Matinée relaxante dans le poumon vert de Bologne avant le départ. Une promenade paisible dans les Giardini Margherita pour clôturer le séjour en douceur.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 7,
+          "tempMax": 21,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 15,
+          "transport": 36,
+          "total": 51
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.35,
+          "p95LegKm": 0.7,
+          "totalTravelMin": 27,
+          "totalLegKm": 2.05,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.18,
+          "mstLowerBoundKm": 1.74
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Bologne",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 44.4938203,
+              "lng": 11.3426327
+            },
+            "duration": 265,
+            "price": 36,
+            "co2": 7,
+            "operator": "Train régional",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/bologne?departure_date=2026-04-03"
+          }
+        ],
+        "totalDuration": 305,
+        "totalPrice": 36,
+        "totalCO2": 7,
+        "score": 9.5,
+        "scoreDetails": {
+          "priceScore": 8.4,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/bologne?departure_date=2026-04-03",
+        "dataSource": "estimated",
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide, écologique"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Bologne",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 44.4938203,
+              "lng": 11.3426327
+            },
+            "duration": 397,
+            "price": 21,
+            "co2": 14,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/bologne?departure_date=2026-04-03"
+          }
+        ],
+        "totalDuration": 452,
+        "totalPrice": 21,
+        "totalCO2": 14,
+        "score": 6.5,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 9.5
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/bologne?departure_date=2026-04-03"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Bologne",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 44.4938203,
+              "lng": 11.3426327
+            },
+            "duration": 40,
+            "price": 53,
+            "co2": 135,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON0304BOLOGNE1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 330,
+        "totalPrice": 53,
+        "totalCO2": 135,
+        "score": 4.9,
+        "scoreDetails": {
+          "priceScore": 6.5,
+          "timeScore": 8.3,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON0304BOLOGNE1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/bologne?departure_date=2026-04-03"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Bologne",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 44.4938203,
+              "lng": 11.3426327
+            },
+            "duration": 318,
+            "price": 112,
+            "co2": 28,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Bologne"
+          }
+        ],
+        "totalDuration": 363,
+        "totalPrice": 112,
+        "totalCO2": 28,
+        "score": 4.8,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 6.1,
+          "co2Score": 8.4
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Bologne",
+        "dataSource": "estimated"
+      }
+    ],
+    "selectedTransport": {
+      "id": "train",
+      "mode": "train",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Lyon",
+          "to": "Bologne",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 44.4938203,
+            "lng": 11.3426327
+          },
+          "duration": 265,
+          "price": 36,
+          "co2": 7,
+          "operator": "Train régional",
+          "frequency": "1-3 par jour",
+          "bookingUrl": "https://www.omio.fr/trains/lyon/bologne?departure_date=2026-04-03"
+        }
+      ],
+      "totalDuration": 305,
+      "totalPrice": 36,
+      "totalCO2": 7,
+      "score": 9.5,
+      "scoreDetails": {
+        "priceScore": 8.4,
+        "timeScore": 10,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.omio.fr/trains/lyon/bologne?departure_date=2026-04-03",
+      "dataSource": "estimated",
+      "recommended": true,
+      "recommendationReason": "Option économique, rapide, écologique"
+    },
+    "accommodation": {
+      "id": "ta-hotel-1605643",
+      "name": "3. Suite Hotel Elite",
+      "type": "apartment",
+      "address": "Bologne",
+      "latitude": 44.4993322,
+      "longitude": 11.358780200000002,
+      "rating": 4.1,
+      "reviewCount": 2834,
+      "pricePerNight": 0,
+      "totalPrice": 0,
+      "currency": "EUR",
+      "amenities": [
+        "breakfast"
+      ],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/a8/59/dd/suite-hotel-elite.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "http://www.absuiteinnovativedesign.it/",
+      "description": "Free breakfast available • Porto • Prix via Booking.com • Disponibilité confirmée",
+      "qualityFlags": [
+        "hotel_distance_relaxed_pass_1"
+      ]
+    },
+    "accommodationOptions": [
+      {
+        "id": "ta-hotel-1605643",
+        "name": "3. Suite Hotel Elite",
+        "type": "apartment",
+        "address": "Bologne",
+        "latitude": 44.4993322,
+        "longitude": 11.358780200000002,
+        "rating": 4.1,
+        "reviewCount": 2834,
+        "pricePerNight": 0,
+        "totalPrice": 0,
+        "currency": "EUR",
+        "amenities": [
+          "breakfast"
+        ],
+        "photos": [
+          "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/a8/59/dd/suite-hotel-elite.jpg?w=600&h=400&s=1"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "http://www.absuiteinnovativedesign.it/",
+        "description": "Free breakfast available • Porto • Prix via Booking.com • Disponibilité confirmée"
+      }
+    ],
+    "totalEstimatedCost": 177,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 0,
+      "food": 75,
+      "activities": 30,
+      "transport": 72,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Italien",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Buongiorno",
+            "phonetic": "bwon-jor-no",
+            "context": "Salutation formelle"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Grazie mille",
+            "phonetic": "grah-tsee-eh meel-leh",
+            "context": "Remerciement appuyé"
+          },
+          {
+            "original": "Je voudrais une table pour deux",
+            "translation": "Vorrei un tavolo per due",
+            "phonetic": "vor-ray oon tah-vo-lo per doo-eh",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "L'addition, s'il vous plaît",
+            "translation": "Il conto, per favore",
+            "phonetic": "eel kon-to per fah-vo-reh",
+            "context": "Demander l'addition"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Dov'è il bagno?",
+            "phonetic": "do-veh eel ban-yo",
+            "context": "Demander les toilettes"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "Parla francese?",
+            "phonetic": "par-lah fran-cheh-zeh",
+            "context": "Demander une langue"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "Non capisco",
+            "phonetic": "non ka-pee-sho",
+            "context": "Incompréhension"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "Quanto costa?",
+            "phonetic": "kwan-to kos-tah",
+            "context": "Demander le prix"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Aiuto!",
+            "phonetic": "ah-yoo-to",
+            "context": "Demande urgente d'aide"
+          },
+          {
+            "original": "Je suis perdu",
+            "translation": "Sono perso",
+            "phonetic": "so-no per-so",
+            "context": "Être égaré"
+          },
+          {
+            "original": "Un café, s'il vous plaît",
+            "translation": "Un caffè, per favore",
+            "phonetic": "oon kaf-feh per fah-vo-reh",
+            "context": "Au café"
+          },
+          {
+            "original": "Je suis désolé",
+            "translation": "Mi dispiace",
+            "phonetic": "mee dee-spyah-cheh",
+            "context": "S'excuser poliment"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Adaptateur prise européen",
+            "reason": "Compatibilité électrique"
+          },
+          {
+            "item": "Pull léger",
+            "reason": "Températures fraîches d'avril"
+          },
+          {
+            "item": "Chaussures de marche confortables",
+            "reason": "Bologne est une ville de marcheurs"
+          },
+          {
+            "item": "Imperméable léger",
+            "reason": "Possibles averses printanières"
+          },
+          {
+            "item": "Protection solaire",
+            "reason": "Soleil plus présent en avril"
+          },
+          {
+            "item": "Petit parapluie pliable",
+            "reason": "Météo changeante"
+          }
+        ],
+        "plugType": "C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Passeport ou carte d'identité valide, pas de visa pour séjour < 90 jours"
+          }
+        ],
+        "importantLaws": [
+          "Interdiction de manger ou boire dans certains lieux publics historiques",
+          "Port du masque dans les transports en commun selon contexte sanitaire",
+          "Respect des zones limitées au trafic (ZTL) dans les centres historiques"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "118",
+        "fire": "115",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Assistance routière",
+            "number": "116"
+          },
+          {
+            "label": "Protection civile",
+            "number": "113"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 50,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 30,
+      "transportTips": "Acheter un pass transports urbains 3 jours, privilégier la marche dans le centre historique",
+      "reasoning": "Budget serré mais suffisant pour Bologne. Logement Airbnb avec cuisine permet d'économiser sur les repas. Stratégie repas mixte pour profiter de la gastronomie locale sans trop dépenser. Activités culturelles gratuites/à petit budget complétées par quelques visites payantes.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJt0YDhpXUf0cRpbAGeVhxfaE",
+        "name": "Basilica San Petronio",
+        "type": "religious",
+        "description": "",
+        "latitude": 44.4933901,
+        "longitude": 11.3432131,
+        "rating": 4.5,
+        "reviewCount": 5815,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV1bN18RIqxi6X_d6xZh14dypK07RselBtnSkduPGxCMXHlDm1cRfWaq-w8ti0xcGYUBF1Ms7-w1OtyDTAwiQHjoaY0ff2vL7y_tgdQNmHtwp2kKQ53E-P1JeBOcACCf0CeaGtJwPnsCT74vckqt5XktOXQRnOy__b3xQBW9pR0Dyjar3U1PofcPUDJUX5gkAnzlvapJrP5XXSAVqlUTB4qddSsglrX2QUvpssEyuWTAU70tkmxbjVVcg2oRSVWIt10j3cIso-63wO_MEjZwlrFaahrb6ibj4cw7wRt-lwsgj8GIcyY89UwUhpJqLUTQ4m_4RGBHKgOzjhC4Ucs-1QtBMZ54GGNWTT03Q7Nc2TNnHI4iwWn5Bu6ajfIDjNGGQHBUrobRk_97zS_5XqKZ3jXPGq4Km-UZbDac5enDtexmAyx2znZD6SiRpSMDHLrOWif0smR0_I-0wfb2J_8LZo9BC7AUUm8lk3cY_Le2o78cupQZk9sVo1Lg4KYuN8PEO-6JJwYV1mXcD5j4OqUp116tbBL2Ex8h_2mo1mxSNcCgkDTK5doXdyx3LF_xq6a6WSJyQ5lqDSy6g&maxwidth=400",
+        "googlePlaceId": "ChIJt0YDhpXUf0cRpbAGeVhxfaE",
+        "isOutdoor": false,
+        "score": 122.52909943812894,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJOVXWhpXUf0cRHrXmOpr8xD4",
+        "name": "Piazza Maggiore",
+        "type": "attraction",
+        "description": "",
+        "latitude": 44.4937544,
+        "longitude": 11.3430945,
+        "rating": 4.7,
+        "reviewCount": 87814,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXlEpoQPpE1iiBfqmzTpx3u8o5we7EvxvZTHHXyTrFsdJGoEyzBIquSdYmSkrOFMT2pQi9xHjI0ReDom2vikLa1Qzl5oFiSCqOnWuEr2OnHKukXcWoQIR4MvokVWhGEIpUpE6GWE8t0KhrzFeLt_E6WUCFGYo4N_LbFLYX-NGMPFy-a0nfu1i8vwjj-yFnAp0XG0ua7zK5aWRsmDqnRv5k9XSvws5kUmSXZaDMviTyMe7V7lDxE39cNosbHMT-JyMyLhVAiT_DLJnM6UlYafGyNS9sUTCH0wiExWc_2w9QrTl8aQx-mvrJJW0YtNw8o9HRJnKdnUmATlkQ8k1SMkQT_VPMgUlTod505o0Mf98pvGin6aUAd6nyEK0lK_JzheIIKwNesN3-3Z4DAL45jkJR1g1mpkNDCniVtkg-QkWhcVSxzaFDvg0kmZNgWtRtVS8UaecdqpAXe-V0o80NGVbkpL9mjev0XXbarSjOCkgj7cD9HCV8GaNxZn3F1wB6jvLYqEglQKgMLLS3tI7xN7PkEV-hAaw2M1ZFFZ7eAZS2kXvtQSghax2oR0V9lwLUGGlUS-dgC&maxwidth=400",
+        "googlePlaceId": "ChIJOVXWhpXUf0cRHrXmOpr8xD4",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.bolognawelcome.com/en/places/squares-streets-monuments/piazza-maggiore-2",
+        "isOutdoor": true,
+        "score": 120.28712752015049,
+        "source": "google_places"
+      },
+      {
+        "id": "ai-mustsee-bologne-5",
+        "name": "Porticaux de Bologne",
+        "type": "culture",
+        "description": "Réseau unique de galeries couvertes classé au patrimoine mondial de l'UNESCO.",
+        "duration": 180,
+        "estimatedCost": 0,
+        "latitude": 44.4911203,
+        "longitude": 11.3436002,
+        "rating": 4.9,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "generated",
+        "isOutdoor": false,
+        "score": 114.8,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "ai-mustsee-bologne-4",
+        "name": "Mercato delle Erbe",
+        "type": "gastronomy",
+        "description": "Marché alimentaire traditionnel offrant les meilleurs produits locaux et spécialités italiennes.",
+        "duration": 75,
+        "estimatedCost": 20,
+        "latitude": 44.4960716,
+        "longitude": 11.3382767,
+        "rating": 4.6,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "generated",
+        "score": 113.2,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "ai-mustsee-bologne-2",
+        "name": "Torre degli Asinelli",
+        "type": "culture",
+        "description": "Tour médiévale emblématique permettant une vue panoramique spectaculaire sur Bologne.",
+        "duration": 60,
+        "estimatedCost": 5,
+        "latitude": 44.4942,
+        "longitude": 11.3467,
+        "rating": 4.5,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "generated",
+        "isOutdoor": false,
+        "score": 109,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJBQTnHbvUf0cRzy3PxAgueuY",
+        "name": "Pinacothèque nationale",
+        "type": "museum",
+        "description": "",
+        "latitude": 44.4977566,
+        "longitude": 11.3534957,
+        "rating": 4.6,
+        "reviewCount": 3901,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1brRBh7lkLF_PgeqTJbJZemMZFaLTOWmoUSDhHPM3pXDi4J0KITU3GmUJc4dHXBiYxGdDBKWWZpSaliuS2I8OehGPv16MmaNdwRK-6BYWxouBngwp2jd6FHtxg0f5Vd6_4aHOF1MvjQszj_nsfLeUNzGzU4rk_yLJTx2zBnmc5CP_rQAGRqRHNhhJBR7kTHYcNeopaIt2Zmms8wllhDDx8LOvkKBsgAnUARCm8oJHiF0E6G_ro8GB07yUTnwXFF-nFx4AI41vR2sXaoAoAD1shfUQuTzZ1mEeDQd7AG24FTuYzgmMMVq09pKwFRULhGFnNNewAZIVpBpWGryhw70pWCNz_ccZrDYsv9JaP9fziney1Hlst5EdAY8U99J4w1D20D_TJKKQs1h6Xj4-VjoY2F7Kti2h6GWKQjO5xhQOJi2082KeipDK4xSYPfrOGvHr77DtsF1Nj0TgsbAlgSOh5b2tENwEVOo8ccwq8U8ONcVQh_cs_Oh2bUpikIExwGSh3k_5bOv396EGkmuLxyxMbfVgvyRprsB304TGtwWMFcG0b3Sx3PyLYVHBaR6cKXqfzQ&maxwidth=400",
+        "googlePlaceId": "ChIJBQTnHbvUf0cRzy3PxAgueuY",
+        "isOutdoor": false,
+        "score": 25.382351900623583,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJaz5Qzb_Uf0cRuygUpptTIzQ",
+        "name": "Museo Civico Archeologico Bologna",
+        "type": "museum",
+        "description": "",
+        "latitude": 44.4927825,
+        "longitude": 11.3437045,
+        "rating": 4.5,
+        "reviewCount": 3647,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW06oEgTPxarJOtIY9yKPRIeODr8Zuvts1Ux5utYUrq_Pt_CSbZn3LY4cqpJDxIeMvNhrT2eVbeVdtfFU6MDnzst3Penfolt65kUFxPV-Wt9YnRN9mCMGv8I_u9xwTOeSnWkW0poB9CQB9EbU7cOyh1iYn28dhJhP3DuW1nNe7E8_lpCukY0DZxYzYtWSM4ghZD7QcdtiFImSYbTYuruBKb7Y-e9y2j1_7qesOkHEkTMb6mbZ7Rr5LO68xGQ7Z9eFSMPsj4WZ6RWF4SVz3y8jLyv9N9aHuBfk9UyjHKUEUVaqWZhqAaZMJ9O1k242lNjHln7h3Kw2HrT4WgRdtAMJAtPTxh3nIzpII5Y8TQ0o8cUHM6-bBZMqoJd2rHq970Gip9NmFeBrGud7pQvXySJWWumRY31u9TW_39V0RCiJ-yYqxitI-zM6KkCCcLPv_jdtSiMfrD1iUCYD8luC2VYTpxPL_rAWj67u9RxMG5a8HRvWjDHf88m3UwIp1iYuIX8u3WCIezMfbIljM3gFWkNAbKO72IFnmIf67dIoso8XlNo9FMmGi8kWQsvsD5LM-WXvKm7A&maxwidth=400",
+        "googlePlaceId": "ChIJaz5Qzb_Uf0cRuygUpptTIzQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "tuesday": null,
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 275 7211",
+        "website": "https://www.museibologna.it/archeologico",
+        "isOutdoor": false,
+        "score": 25.12387152662756,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ01A1b5bUf0cRfJykz824Xb8",
+        "name": "Musée Médiéval Municipal",
+        "type": "museum",
+        "description": "",
+        "latitude": 44.4964798,
+        "longitude": 11.3420796,
+        "rating": 4.4,
+        "reviewCount": 1240,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXVziRfXPEavkSxoPj_bC1m-hs3vCo_knN9f39r85wV9elhNix3WGLss6ojheNv4EC_qA6WKlYlrpzqpfnPjIgbMmefIMMgJ3sXWhuUZ07uufgGKXjxxwdk2rbUxxyjcuYlZmoA5VzNd1Ncu6G6-A4lvQLyQtY6f1z8NSWHFxBJwuA9eARsBNOX4sj8PCE_lQry9hZ94X95RYaD9ZjaTst0rzugIbuyC-xC1Tv2Tfwsuv5MrU-F2fdxwfHG9FuzGbb8v5LrUdi1GFQ-JNDn9myOLQYMJJNImU4cyHZQ4FLoVrg50RS22lkEV8iRjVPUF57C5_PHYLwid2uJh8IBfzVaC3f7KmEMQMNtmd0hlR0ugobTzmkXNpslsU05LyCS_wjuEHplpZOQvDCEFA85hEAe4WaLMtoxbKKiqZeXzSipxn-JsgfuToH-BniqEdCu49HvrXub3DsuX5HchizA8-NYXY7VAmbZfRRyByNZ6zZexGRjZDaJC35tYLuVmrA5Id-RA0sPY5UY4kTsdN8iFOKhaS4TL7DKvqwhig-hE1PCZ27uLO8Cnz1K34qxdkcWHn1C9A&maxwidth=400",
+        "googlePlaceId": "ChIJ01A1b5bUf0cRfJykz824Xb8",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "14:00"
+          },
+          "wednesday": {
+            "open": "14:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "14:00"
+          },
+          "friday": {
+            "open": "14:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 219 3930",
+        "website": "http://www.museibologna.it/arteantica/luoghi/62013/id/36155",
+        "isOutdoor": false,
+        "score": 23.986843370324472,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJLwKOhMXUf0cRiLrCD6oTfS0",
+        "name": "Giardini Margherita",
+        "type": "park",
+        "description": "",
+        "latitude": 44.4827156,
+        "longitude": 11.3524117,
+        "rating": 4.6,
+        "reviewCount": 17398,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfViVZFrD4KWEP9zvWtzNNbUe43SpmiUWIDHKYjGB_xXPp9Ab0m-9UFbzR9bsElz27wX3_X3Mn2MvLdObwSB934MffAKZA5kxNFGyvS605cPgiMC16WArmsPZJHEavSRB1znOf9bWlndaCMucmsl_oeo9vZ43rIBY7olOAyh1Z5TgEHDCR2djZa_R3xxIC5HatSnFnoaiDuD7aKxp8-faeh4YzsFxksLvOXnpN10inzNFmq2yIWdSVE2TDrN_p91MAs3APzL72yh1tfpi56mWj1d_SPtm1h8ojS85RTee8DDVBAg91n1aJ31MN47IMe8OVFfy0jHqpTL6Vz_for6nnz9Bhm5Ndy5lnq3bUtlLCkoFU_O3zLHgokePd5CJwzvxTF_exmjs_3pwQbQ6GoMewQEhQhvyF3zBZ79Jvs_j25zNmIOBD5EfHjN2XqOSrMPB4iDuyyd0GJ2yBbDHvtaDouJrdSDwNwy6nw8c_DdW93Ij4xsuRXl-7k7aiuJrA58qPtjnFHkhwghMPOwUxTmrijKetfU2A5KX1hZr2K8TD7KCQ8LgBWpC65-j3ud6FsPSZ-JNTpH&maxwidth=400",
+        "googlePlaceId": "ChIJLwKOhMXUf0cRiLrCD6oTfS0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 203040",
+        "website": "http://www.comune.bologna.it/",
+        "isOutdoor": true,
+        "score": 20.680998653015024,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxQ-LJ77Uf0cRrtpHA1c97w4",
+        "name": "Palais du Podestat",
+        "type": "attraction",
+        "description": "",
+        "latitude": 44.4941273,
+        "longitude": 11.3432617,
+        "rating": 4.6,
+        "reviewCount": 295,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXerr5GrJTbqqQ1qlyLVuvONGK57jIy2_R2O14cGiYCNnUsMDNY9ruCD8x2W_adk9278cYa8Y9BrOr0N2YX8rVYCwGUJScPTyh0DL1QfxrVvuLFxa_epmj3ykbtP4LAFmxb8DshOlzisQUl8oRtl3AZestCRqV95TFUbrD7U5A9fKU3qzj0jlSzVxFFX5UBS5M0Brd5lwXJke6-uyE3MDiPFLW8FwAeTx4H7hSby_-6PaVKMCUzm5GC1oHetHMtDzydRu51L-qvmfMVKE5QlkhsPbRt4pZ2JPg5dPwXzytc5FJU19njvLK2lCYUT0WKB8bE5ZIZewdGjBQV5X5A5JSok6XKBSlR_Orp1FbJa8UionkkfowwDOzD68wHb3MSAzUum2bbQ1MTlGXHzZXPGyJ6iEQVNb13NCUlJGVDqwKGAgvi9g70uXe6fyCGW3_i1eGyisWMBCWKfzKmO9R0-kYueOPkRKKfqKc95NzPGglr5yelEq8pQHCBREzEtWCxXD1AhO9mgSq4mr0N7w7BRIV71vhJJd9qm27tgAtcKk39b6r0UfwnMar3CX7W-a72Cqj_vHRE&maxwidth=400",
+        "googlePlaceId": "ChIJxQ-LJ77Uf0cRrtpHA1c97w4",
+        "openingHoursByDay": {
+          "sunday": null,
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "21:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 658 3111",
+        "isOutdoor": false,
+        "score": 20.139644031956326,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJcZ-ijr7Uf0cR6iMWIosaYyg",
+        "name": "Tours de Bologne",
+        "type": "attraction",
+        "description": "",
+        "latitude": 44.4942094,
+        "longitude": 11.3467312,
+        "rating": 4.7,
+        "reviewCount": 33326,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVnJhLWj-m7igETUiAv0WhAIelqPP74MAyNaPqne6YOzCcLZYK6Ha8QjQaX58D4JZgKtKk9Pi1wUk7XtCi4owogsnVJWJ6FNPCfyAIifkZvGaNpCiN3SNlLGahvbaqLG3aH5NtnvP2IUVGQjboazfAquwQ3lDP1lhCofEq1EGEwgL51SkM-lnd7pFjVzQLAHFKswkmmnbLKVqCHD8JEtu2PytL3b1kQCGd7IwxbuOMGHwUKaZWilE7TXzUKphp5W3XtrTa6zAufZ6OQIlw2Rm57rwcX2FqHDCtEQqGn6YTmZuat23dEGW4RoDayDeYskQjeISgbff1qzVDQWGi-cYU1sPRLgY5VzhDwb3Z8QxoCcdWjQEZjD7cLQ5ffnHxDa6aryXbIpAKJDLaQpyNZ_tkaESapIJEgkG7-v_1N3BON5jKAapQrOVKaeeaZ8zSranrTMYUhRmjF5M4yz1kujMUMHI9xPFM_aMrmZHDY6bOJC2lgB8BJVDtb3O5NBC71yD8MfGha1KMJXtT4NSxDKKqdoHq5PHJs6s_YYuPQnFZFbKlYZ46l8FO67yyxLGaDUwovI_Sq&maxwidth=400",
+        "googlePlaceId": "ChIJcZ-ijr7Uf0cR6iMWIosaYyg",
+        "businessStatus": "CLOSED_TEMPORARILY",
+        "website": "https://www.bolognawelcome.com/it/esperienze/112542/Le-due-Torri---Prenotazione-salita-alla-Torre-degli-Asinelli",
+        "score": 19.4455663799657,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJYf5xlcfUf0cRhXOcjl6NDQM",
+        "name": "Piazza Santo Stefano",
+        "type": "religious",
+        "description": "",
+        "latitude": 44.4922731,
+        "longitude": 11.3482658,
+        "rating": 4.8,
+        "reviewCount": 12248,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwCgyIdYbPIgiaw5s1ZlZbADO8ypY0erc-zeIjsMEVh6Qya1qk8EyVfehmSIXS5UAtdKlNA1_IC6vhm4qeWJ17WJNGFskQzQMH5-6SFUtzU-ZVxBsGFjn1vTzLbpsWIz57HlEm6oEfZgROO4ja2pb5q80M1akuZnI1Uql7XyMpg7Zw2PEnYi4SkEIOf1ZuiOZmjamHIX06JHmXTjaxDEv6NjGkfWGsK3fRiYeaLNEtRhcnAGgy1HjqnjLnMV7f1SMIvOFSYIBv_lqGsxaG2aw7e3A0HJ7sRM3fiiEtRNBBVbRYt-JiGYV-HHYb-xi_qwLPsGQ6oe5lQoZ27Osb9InrF_ukXJiFXPQwPUgmfTx2zls0ysehBgvmFmnnbF1gQX2I91rTZc9ergORnKe1vpK2SMnho2PbmdXafD78FYKjQRMrwl7Dw3vZNvYWcNQiCGmUz1poYxfg0Em04AyD9ltrPvM817kT9mcPU0f8Nh1yTJCj4Gqg6EZW_Zbtp5KqXgi_gIyj93Wn4hIwlz-xyh7suS2wn3UAQMRnEwP2ZThzjaGc45GQfGYHBu8_-MGEeHSBtgR0&maxwidth=400",
+        "googlePlaceId": "ChIJYf5xlcfUf0cRhXOcjl6NDQM",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.bolognawelcome.com/",
+        "isOutdoor": true,
+        "score": 18.77613035538041,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJt0YDhpXUf0cRcYKsmqRa1Y4",
+        "name": "Fontaine de Neptune",
+        "type": "attraction",
+        "description": "",
+        "latitude": 44.49429689999999,
+        "longitude": 11.3426801,
+        "rating": 4.7,
+        "reviewCount": 5969,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV2qo_6vCe_l_CAnS7iqjMUR4VyubK_fuo_nvJISaE5x4acg5pSQNlIlpELoZjgtDJxLpH6MtihRa0plgFyjhmwmbf-p2lEiHAJ6UfPRLYwwSx3GAmWhpj0ddigt80KrWPUhpv9p7RjRbr522FKCQaP8lHkNy129dR35dc6Dt1d8DEi3gU34mvQsJaIcOZpQ1dq9FnYPmvQZX_DZTPO9QKx1zWL9531AVdRKk4czLbcQKHE-PttARw24MGIJJRUs59EWhq3ZY390dCVdFCRSGujQw2eF_YSWO3680ve27h8ybezTNOA5Pd01WCWyJtLsZ2xEFQar2VeBlF8l0wYVX0xv_AcXn0QHtXAntImmTiyfygGwGNtMEOwZr9MrVh7WfDEJ4-JoCVmX1VauPrj7SkIO_SoneUDZDn7SUyKkmVG-RyKJWBJKUF83KNYAKBsY1YpWCdiFO-qFqKvNagRwdjuSG6jvWPMzOs3YfFQ35iznElGUCPgXNvhYhgGhfy0KSyDihFqB6xeKeshdiyG-9y4oKoY4JrOn5a1fAabM7tDncKAS9simIdV-Qwu8cL_VjXGGcYxpDgtoQ&maxwidth=400",
+        "googlePlaceId": "ChIJt0YDhpXUf0cRcYKsmqRa1Y4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 658 3111",
+        "website": "http://nettuno.comune.bologna.it/",
+        "score": 17.95180315778335,
+        "source": "google_places"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJBQTnHbvUf0cRzy3PxAgueuY",
+        "name": "Pinacothèque nationale",
+        "type": "museum",
+        "description": "",
+        "latitude": 44.4977566,
+        "longitude": 11.3534957,
+        "rating": 4.6,
+        "reviewCount": 3901,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1brRBh7lkLF_PgeqTJbJZemMZFaLTOWmoUSDhHPM3pXDi4J0KITU3GmUJc4dHXBiYxGdDBKWWZpSaliuS2I8OehGPv16MmaNdwRK-6BYWxouBngwp2jd6FHtxg0f5Vd6_4aHOF1MvjQszj_nsfLeUNzGzU4rk_yLJTx2zBnmc5CP_rQAGRqRHNhhJBR7kTHYcNeopaIt2Zmms8wllhDDx8LOvkKBsgAnUARCm8oJHiF0E6G_ro8GB07yUTnwXFF-nFx4AI41vR2sXaoAoAD1shfUQuTzZ1mEeDQd7AG24FTuYzgmMMVq09pKwFRULhGFnNNewAZIVpBpWGryhw70pWCNz_ccZrDYsv9JaP9fziney1Hlst5EdAY8U99J4w1D20D_TJKKQs1h6Xj4-VjoY2F7Kti2h6GWKQjO5xhQOJi2082KeipDK4xSYPfrOGvHr77DtsF1Nj0TgsbAlgSOh5b2tENwEVOo8ccwq8U8ONcVQh_cs_Oh2bUpikIExwGSh3k_5bOv396EGkmuLxyxMbfVgvyRprsB304TGtwWMFcG0b3Sx3PyLYVHBaR6cKXqfzQ&maxwidth=400",
+        "googlePlaceId": "ChIJBQTnHbvUf0cRzy3PxAgueuY",
+        "isOutdoor": false,
+        "score": 25.382351900623583,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJaz5Qzb_Uf0cRuygUpptTIzQ",
+        "name": "Museo Civico Archeologico Bologna",
+        "type": "museum",
+        "description": "",
+        "latitude": 44.4927825,
+        "longitude": 11.3437045,
+        "rating": 4.5,
+        "reviewCount": 3647,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW06oEgTPxarJOtIY9yKPRIeODr8Zuvts1Ux5utYUrq_Pt_CSbZn3LY4cqpJDxIeMvNhrT2eVbeVdtfFU6MDnzst3Penfolt65kUFxPV-Wt9YnRN9mCMGv8I_u9xwTOeSnWkW0poB9CQB9EbU7cOyh1iYn28dhJhP3DuW1nNe7E8_lpCukY0DZxYzYtWSM4ghZD7QcdtiFImSYbTYuruBKb7Y-e9y2j1_7qesOkHEkTMb6mbZ7Rr5LO68xGQ7Z9eFSMPsj4WZ6RWF4SVz3y8jLyv9N9aHuBfk9UyjHKUEUVaqWZhqAaZMJ9O1k242lNjHln7h3Kw2HrT4WgRdtAMJAtPTxh3nIzpII5Y8TQ0o8cUHM6-bBZMqoJd2rHq970Gip9NmFeBrGud7pQvXySJWWumRY31u9TW_39V0RCiJ-yYqxitI-zM6KkCCcLPv_jdtSiMfrD1iUCYD8luC2VYTpxPL_rAWj67u9RxMG5a8HRvWjDHf88m3UwIp1iYuIX8u3WCIezMfbIljM3gFWkNAbKO72IFnmIf67dIoso8XlNo9FMmGi8kWQsvsD5LM-WXvKm7A&maxwidth=400",
+        "googlePlaceId": "ChIJaz5Qzb_Uf0cRuygUpptTIzQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "tuesday": null,
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 275 7211",
+        "website": "https://www.museibologna.it/archeologico",
+        "isOutdoor": false,
+        "score": 25.12387152662756,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ01A1b5bUf0cRfJykz824Xb8",
+        "name": "Musée Médiéval Municipal",
+        "type": "museum",
+        "description": "",
+        "latitude": 44.4964798,
+        "longitude": 11.3420796,
+        "rating": 4.4,
+        "reviewCount": 1240,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXVziRfXPEavkSxoPj_bC1m-hs3vCo_knN9f39r85wV9elhNix3WGLss6ojheNv4EC_qA6WKlYlrpzqpfnPjIgbMmefIMMgJ3sXWhuUZ07uufgGKXjxxwdk2rbUxxyjcuYlZmoA5VzNd1Ncu6G6-A4lvQLyQtY6f1z8NSWHFxBJwuA9eARsBNOX4sj8PCE_lQry9hZ94X95RYaD9ZjaTst0rzugIbuyC-xC1Tv2Tfwsuv5MrU-F2fdxwfHG9FuzGbb8v5LrUdi1GFQ-JNDn9myOLQYMJJNImU4cyHZQ4FLoVrg50RS22lkEV8iRjVPUF57C5_PHYLwid2uJh8IBfzVaC3f7KmEMQMNtmd0hlR0ugobTzmkXNpslsU05LyCS_wjuEHplpZOQvDCEFA85hEAe4WaLMtoxbKKiqZeXzSipxn-JsgfuToH-BniqEdCu49HvrXub3DsuX5HchizA8-NYXY7VAmbZfRRyByNZ6zZexGRjZDaJC35tYLuVmrA5Id-RA0sPY5UY4kTsdN8iFOKhaS4TL7DKvqwhig-hE1PCZ27uLO8Cnz1K34qxdkcWHn1C9A&maxwidth=400",
+        "googlePlaceId": "ChIJ01A1b5bUf0cRfJykz824Xb8",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "14:00"
+          },
+          "wednesday": {
+            "open": "14:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "14:00"
+          },
+          "friday": {
+            "open": "14:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 219 3930",
+        "website": "http://www.museibologna.it/arteantica/luoghi/62013/id/36155",
+        "isOutdoor": false,
+        "score": 23.986843370324472,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJcZ-ijr7Uf0cR6iMWIosaYyg",
+        "name": "Tours de Bologne",
+        "type": "attraction",
+        "description": "",
+        "latitude": 44.4942094,
+        "longitude": 11.3467312,
+        "rating": 4.7,
+        "reviewCount": 33326,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVnJhLWj-m7igETUiAv0WhAIelqPP74MAyNaPqne6YOzCcLZYK6Ha8QjQaX58D4JZgKtKk9Pi1wUk7XtCi4owogsnVJWJ6FNPCfyAIifkZvGaNpCiN3SNlLGahvbaqLG3aH5NtnvP2IUVGQjboazfAquwQ3lDP1lhCofEq1EGEwgL51SkM-lnd7pFjVzQLAHFKswkmmnbLKVqCHD8JEtu2PytL3b1kQCGd7IwxbuOMGHwUKaZWilE7TXzUKphp5W3XtrTa6zAufZ6OQIlw2Rm57rwcX2FqHDCtEQqGn6YTmZuat23dEGW4RoDayDeYskQjeISgbff1qzVDQWGi-cYU1sPRLgY5VzhDwb3Z8QxoCcdWjQEZjD7cLQ5ffnHxDa6aryXbIpAKJDLaQpyNZ_tkaESapIJEgkG7-v_1N3BON5jKAapQrOVKaeeaZ8zSranrTMYUhRmjF5M4yz1kujMUMHI9xPFM_aMrmZHDY6bOJC2lgB8BJVDtb3O5NBC71yD8MfGha1KMJXtT4NSxDKKqdoHq5PHJs6s_YYuPQnFZFbKlYZ46l8FO67yyxLGaDUwovI_Sq&maxwidth=400",
+        "googlePlaceId": "ChIJcZ-ijr7Uf0cR6iMWIosaYyg",
+        "businessStatus": "CLOSED_TEMPORARILY",
+        "website": "https://www.bolognawelcome.com/it/esperienze/112542/Le-due-Torri---Prenotazione-salita-alla-Torre-degli-Asinelli",
+        "score": 19.4455663799657,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJYf5xlcfUf0cRhXOcjl6NDQM",
+        "name": "Piazza Santo Stefano",
+        "type": "religious",
+        "description": "",
+        "latitude": 44.4922731,
+        "longitude": 11.3482658,
+        "rating": 4.8,
+        "reviewCount": 12248,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwCgyIdYbPIgiaw5s1ZlZbADO8ypY0erc-zeIjsMEVh6Qya1qk8EyVfehmSIXS5UAtdKlNA1_IC6vhm4qeWJ17WJNGFskQzQMH5-6SFUtzU-ZVxBsGFjn1vTzLbpsWIz57HlEm6oEfZgROO4ja2pb5q80M1akuZnI1Uql7XyMpg7Zw2PEnYi4SkEIOf1ZuiOZmjamHIX06JHmXTjaxDEv6NjGkfWGsK3fRiYeaLNEtRhcnAGgy1HjqnjLnMV7f1SMIvOFSYIBv_lqGsxaG2aw7e3A0HJ7sRM3fiiEtRNBBVbRYt-JiGYV-HHYb-xi_qwLPsGQ6oe5lQoZ27Osb9InrF_ukXJiFXPQwPUgmfTx2zls0ysehBgvmFmnnbF1gQX2I91rTZc9ergORnKe1vpK2SMnho2PbmdXafD78FYKjQRMrwl7Dw3vZNvYWcNQiCGmUz1poYxfg0Em04AyD9ltrPvM817kT9mcPU0f8Nh1yTJCj4Gqg6EZW_Zbtp5KqXgi_gIyj93Wn4hIwlz-xyh7suS2wn3UAQMRnEwP2ZThzjaGc45GQfGYHBu8_-MGEeHSBtgR0&maxwidth=400",
+        "googlePlaceId": "ChIJYf5xlcfUf0cRhXOcjl6NDQM",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.bolognawelcome.com/",
+        "isOutdoor": true,
+        "score": 18.77613035538041,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJt0YDhpXUf0cRcYKsmqRa1Y4",
+        "name": "Fontaine de Neptune",
+        "type": "attraction",
+        "description": "",
+        "latitude": 44.49429689999999,
+        "longitude": 11.3426801,
+        "rating": 4.7,
+        "reviewCount": 5969,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV2qo_6vCe_l_CAnS7iqjMUR4VyubK_fuo_nvJISaE5x4acg5pSQNlIlpELoZjgtDJxLpH6MtihRa0plgFyjhmwmbf-p2lEiHAJ6UfPRLYwwSx3GAmWhpj0ddigt80KrWPUhpv9p7RjRbr522FKCQaP8lHkNy129dR35dc6Dt1d8DEi3gU34mvQsJaIcOZpQ1dq9FnYPmvQZX_DZTPO9QKx1zWL9531AVdRKk4czLbcQKHE-PttARw24MGIJJRUs59EWhq3ZY390dCVdFCRSGujQw2eF_YSWO3680ve27h8ybezTNOA5Pd01WCWyJtLsZ2xEFQar2VeBlF8l0wYVX0xv_AcXn0QHtXAntImmTiyfygGwGNtMEOwZr9MrVh7WfDEJ4-JoCVmX1VauPrj7SkIO_SoneUDZDn7SUyKkmVG-RyKJWBJKUF83KNYAKBsY1YpWCdiFO-qFqKvNagRwdjuSG6jvWPMzOs3YfFQ35iznElGUCPgXNvhYhgGhfy0KSyDihFqB6xeKeshdiyG-9y4oKoY4JrOn5a1fAabM7tDncKAS9simIdV-Qwu8cL_VjXGGcYxpDgtoQ&maxwidth=400",
+        "googlePlaceId": "ChIJt0YDhpXUf0cRcYKsmqRa1Y4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "051 658 3111",
+        "website": "http://nettuno.comune.bologna.it/",
+        "score": 17.95180315778335,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 8,
+        "byEngine": {
+          "google_local": 4,
+          "google_hotels": 2,
+          "google_maps": 2
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-suggest-01-bologna-la-dolce-vita-gourmande",
+    "   Lyon → Bologne (3j)",
+    "   solo (1p) | economic | gastronomy, culture",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 135ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Bologne\", ll=\"@44.4938203,11.3426327,14z\", gl=\"us\"",
+    "[Weather] Cache hit for 2026-04-03 → 2026-04-05",
+    "[SerpAPI Places] Location \"Bologne\" non supportée, fallback → query avec nom de ville",
+    "[Google Places] ✅ 25 attractions found for Bologne",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (395ms)",
+    "[Pipeline V2] No curated must-sees for \"Bologne\" — generating via AI...",
+    "[Pipeline V2] AI generated 5 must-sees: Piazza Maggiore, Basilique San Petronio, Torre degli Asinelli, Mercato delle Erbe, Porticaux de Bologne",
+    "[Pipeline V2] Step 1: All data fetched in 34160ms",
+    "[Pipeline V2]   Activities: 25 Google + 21 SerpAPI + 0 Overpass + 0 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 1 | Transport options: 4",
+    "[Pipeline V2] Step 1 done in 34160ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Same-location-type dedup: \"Museo Civico Archeologico Bologna\" merged with \"Archiginnasio Palace and Anatomical Theater\" (type=museum)",
+    "[Pipeline V2] Same-location-type dedup: \"Palazzo d'Accursio\" merged with \"Museo Civico Archeologico Bologna\" (type=museum)",
+    "[Pipeline V2] Same-location-type dedup: \"Santuario di Santa Maria della Vita\" merged with \"Museo Civico Archeologico Bologna\" (type=museum)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [122.5] ⭐ \"Basilica San Petronio\" (src=google_places, reviews=5815, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #2 [120.3] ⭐ \"Piazza Maggiore\" (src=google_places, reviews=87814, rating=4.7, tags=none)",
+    "[Pipeline V2]   #3 [114.8] ⭐ \"Porticaux de Bologne\" (src=mustsee, reviews=0, rating=4.9, tags=deep_culture)",
+    "[Pipeline V2]   #4 [113.2] ⭐ \"Mercato delle Erbe\" (src=mustsee, reviews=0, rating=4.6, tags=foodie)",
+    "[Pipeline V2]   #5 [109.0] ⭐ \"Torre degli Asinelli\" (src=mustsee, reviews=0, rating=4.5, tags=none)",
+    "[Pipeline V2]   #6 [25.4]    \"Pinacothèque nationale\" (src=google_places, reviews=3901, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #7 [25.1]    \"Museo Civico Archeologico Bologna\" (src=google_places, reviews=3647, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #8 [24.0]    \"Musée Médiéval Municipal\" (src=google_places, reviews=1240, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #9 [20.7]    \"Giardini Margherita\" (src=google_places, reviews=17398, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #10 [20.1]    \"Palais du Podestat\" (src=google_places, reviews=295, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #11 [19.4]    \"Tours de Bologne\" (src=google_places, reviews=33326, rating=4.7, tags=none)",
+    "[Pipeline V2]   #12 [18.8]    \"Piazza Santo Stefano\" (src=google_places, reviews=12248, rating=4.8, tags=none)",
+    "[Pipeline V2]   #13 [18.0]    \"Fontaine de Neptune\" (src=google_places, reviews=5969, rating=4.7, tags=none)",
+    "[Pipeline V2]   #14 [17.8]    \"Cathédrale de Bologne\" (src=google_places, reviews=5071, rating=4.7, tags=none)",
+    "[Pipeline V2]   #15 [17.7]    \"Basilique de Saint Dominique\" (src=google_places, reviews=4262, rating=4.7, tags=none)",
+    "[Pipeline V2]   #16 [16.3]    \"Porta Maggiore\" (src=google_places, reviews=1680, rating=4.4, tags=none)",
+    "[Pipeline V2]   #17 [16.2]    \"Torre dell'Orologio\" (src=google_places, reviews=789, rating=4.7, tags=none)",
+    "[Pipeline V2]   #18 [16.1]    \"La Piccola Venezia\" (src=google_places, reviews=2963, rating=4.1, tags=none)",
+    "[Pipeline V2]   #19 [15.8]    \"Porta Mascarella\" (src=google_places, reviews=1619, rating=4.2, tags=none)",
+    "[Pipeline V2]   #20 [15.8]    \"ArteBo - Contemporary Art gallery\" (src=serpapi, reviews=0, rating=4.9, tags=deep_culture)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 1/25",
+    "[Pipeline V2] Step 2: 13 activities selected (5 must-sees) from 46 total",
+    "[Pipeline V2] Must-sees: \"Basilica San Petronio\" (122.5), \"Piazza Maggiore\" (120.3), \"Porticaux de Bologne\" (114.8), \"Mercato delle Erbe\" (113.2), \"Torre degli Asinelli\" (109.0)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=0.91km, median=0.43km, maxClusterRadius=0.50km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (44.4939, 11.3438), Day 2: centroid (44.4978, 11.3535), Day 3: centroid (44.4827, 11.3524)",
+    "[Pipeline V2] Cluster Day 1: 11 activities, radius=0.50km, intraDistance=2.38km",
+    "[Pipeline V2] Cluster Day 2: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Cluster Day 3: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Must-see audit: moved \"Torre degli Asinelli\" (60min) from Day 1 → Day 2",
+    "[Pipeline V2] Must-see audit: moved \"Mercato delle Erbe\" (75min) from Day 1 → Day 2",
+    "[Pipeline V2] Must-see audit: moved \"Porticaux de Bologne\" (180min) from Day 1 → Day 2",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 8 activities [2 must-sees] (7.0h avail, max 3), Day 2: 4 activities [3 must-sees] (12.0h avail, max 3), Day 3: 1 activities [0 must-sees] (6.0h avail, max 3)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Basilica San Petronio\" (score=122.5), \"Piazza Maggiore\" (score=120.3), \"Torre degli Asinelli\" (score=109.0), \"Mercato delle Erbe\" (score=113.2), \"Porticaux de Bologne\" (score=114.8)",
+    "[Pipeline V2]   Day 1: Basilica San Petronio, Piazza Maggiore",
+    "[Pipeline V2]   Day 2: Torre degli Asinelli, Mercato delle Erbe, Porticaux de Bologne",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1: Basilica San Petronio, Piazza Maggiore, Palais du Podestat, Fontaine de Neptune, Musée Médiéval Municipal, Tours de Bologne, Piazza Santo Stefano, Museo Civico Archeologico Bologna (1.4km intra)",
+    "[Pipeline V2]   Day 2: Pinacothèque nationale, Torre degli Asinelli, Mercato delle Erbe, Porticaux de Bologne (2.1km intra)",
+    "[Pipeline V2]   Day 3: Giardini Margherita (0.0km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"3. Suite Hotel Elite\" (3.90 score, 1.29km center, 1.34km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Restaurants pool: total=47, budgetFiltered=20, geo=17",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=3, targets=1",
+    "[SerpAPI Places] Requête: q=\"breakfast brunch café bakery\", location=\"Bologne\", ll=\"@44.4993322,11.358780200000002,14z\", gl=\"us\"",
+    "[SerpAPI Places] Location \"Bologne\" non supportée, fallback → query avec nom de ville",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=67, budgetFiltered=40, geo=37",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=20, missing meals 3 -> 3",
+    "[Pipeline V2] Step 4: 6/9 meals assigned restaurants (pool=37)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 2: \"Musées et culture bolonaise\" → \"Pinacothèque nationale et Torre degli Asinelli\"",
+    "[Pipeline V2] Step 6 done in 10010ms — \"Progression logique du centre historique vers les musées puis détente finale, avec répartition équilibrée des activités lourdes et adaptation à la météo couverte du dernier jour.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 12/13 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 16 pairs...",
+    "[Pipeline V2] Directions cache: 16/16 pairs fetched",
+    "[Pipeline V2] Day 1: 8 activities to schedule (2 must-sees), dayStart=15:00, dayEnd=22:00, window=7.0h, cursor=15:00",
+    "[Pipeline V2]   → \"Tours de Bologne\" (60min, score=19.4, mustSee=false)",
+    "[Pipeline V2]   → \"Piazza Santo Stefano\" (30min, score=18.8, mustSee=false)",
+    "[Pipeline V2]   → \"Museo Civico Archeologico Bologna\" (120min, score=25.1, mustSee=false)",
+    "[Pipeline V2]   → \"Basilica San Petronio\" (30min, score=122.5, mustSee=true)",
+    "[Pipeline V2]   → \"Piazza Maggiore\" (30min, score=120.3, mustSee=true)",
+    "[Pipeline V2]   → \"Palais du Podestat\" (60min, score=20.1, mustSee=false)",
+    "[Pipeline V2]   → \"Fontaine de Neptune\" (45min, score=18.0, mustSee=false)",
+    "[Pipeline V2]   → \"Musée Médiéval Municipal\" (120min, score=24.0, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 1 lunch: \"Trattoria del Tempo Buono\" (0.4km) → \"Salumeria Simoni Laboratorio\" (0.1km)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 dinner: \"Caffetteria Lilù\" (0.3km) → \"Osteria dell'Orsa\" (0.1km)",
+    "[Pipeline V2] Day 1: Must-see \"Basilica San Petronio\" rejected at 60min, retrying with 60min (min=60min, factor=0.5)",
+    "[Pipeline V2] Day 1: Evicted \"Piazza Santo Stefano\" (score=18.77613035538041, slot=17:00-17:30) to make room for must-see \"Basilica San Petronio\"",
+    "[Pipeline V2] Day 1: Must-see \"Piazza Maggiore\" rejected at 30min, retrying with 30min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 1: Evicted \"Tours de Bologne\" (score=19.4455663799657, slot=16:00-17:00) to make room for must-see \"Piazza Maggiore\"",
+    "[Pipeline V2] Day 1: Skipping \"Fontaine de Neptune\" — closed on friday",
+    "[Pipeline V2] Day 2: 4 activities to schedule (3 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Pinacothèque nationale\" (120min, score=25.4, mustSee=false)",
+    "[Pipeline V2]   → \"Torre degli Asinelli\" (60min, score=109.0, mustSee=true)",
+    "[Pipeline V2]   → \"Porticaux de Bologne\" (180min, score=114.8, mustSee=true)",
+    "[Pipeline V2]   → \"Mercato delle Erbe\" (75min, score=113.2, mustSee=true)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 breakfast, searching pool + API near \"3. Suite Hotel Elite\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 breakfast: found \"Zoo\" (0.96km from 3. Suite Hotel Elite)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 lunch: \"MÒ! MORTADELLA LAB\" (0.5km) → \"Cafè Terzi\" (0.2km)",
+    "[Pipeline V2] Day 3: 1 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=13:00, window=5.0h, cursor=08:15",
+    "[Pipeline V2]   → \"Giardini Margherita\" (60min, score=20.7, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 breakfast, searching pool + API near \"3. Suite Hotel Elite\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 breakfast: found \"Pappare' Bologna\" (1.10km from 3. Suite Hotel Elite)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 lunch, searching pool + API near \"Giardini Margherita\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 lunch: found \"Al Sangiovese Restaurant\" (1.04km from Giardini Margherita)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 3 dinner: \"ZanziBar Bologna\" (1.1km) → \"QCorner-Bologna\" (0.9km)",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Fetching images for 3 items without photos...",
+    "[Pipeline V2] ✅ Place images: 2/3 enriched (restaurants handled in dedicated Google photo pass)",
+    "[Pipeline V2] 📸 Enriching 15 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 15/15 enriched with Google Places photos",
+    "[Pipeline V2] All restaurants already have good photos — skipping",
+    "[Pipeline V2] Section 13d: Opening hours validated 8 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 1 large intra-day gap segment(s)",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=1, fallback-flagged=0",
+    "[Pipeline V2] Gap fill: Day 1 inserted \"Cathédrale de Bologne\" (60min, detour=0.13km)",
+    "[Pipeline V2] Gap fill: Day 2 inserted \"Campanile de la Cathédrale Saint Pierre\" (60min, detour=0.04km)",
+    "[Pipeline V2] Gap fill: Day 3 inserted \"Basilique San Petronio\" (95min, detour=1.01km)",
+    "[Pipeline V2] Section 13ha: inserted 3 gap-fill activity(ies)",
+    "[Pipeline V2] Geo strict prune: Day 2 removed 1 optional activity(ies)",
+    "[Pipeline V2] Section 13i: pruned 1 optional activity(ies) to reduce intra-day zigzags",
+    "[Pipeline V2] Step 7: 6 alternatives, pool trimmed to 13/13",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 98/100",
+    "  ⚠️ Day 2: first activity starts late (11:00)",
+    "[Pipeline V2] Step 8: Quality score 98/100 (1 warnings, 0 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 8 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 57344ms (57.3s)",
+    "[Pipeline V2]   3 days, 20 items total",
+    "[Pipeline V2] ✅ All 5 must-sees are in the schedule"
+  ],
+  "warnings": [
+    "Aéroports non trouvés pour \"Bologne\", utilisation de Paris par défaut",
+    "[Viator] Search failed: 400",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[Hotels] Aucun match de disponibilité trouvé pour \"Bologne\" (2026-04-03 → 2026-04-05) — conservation de la liste initiale",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Mercato delle Erbe\": 133.4km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Porticaux de Bologne\": 845.6km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Université de Bologne\": 577.4km de la destination (max 30km)",
+    "[Pipeline V2] AI must-see: GPS resolution failed for \"Université de Bologne\", skipping",
+    "[Pipeline V2] Day 1: REJECTED activity \"Museo Civico Archeologico Bologna\" (duration=120min, travel=5min, cursor=17:30, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Musée Médiéval Municipal\" (duration=120min, travel=5min, cursor=21:15, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Pappare' Bologna\" overlaps with \"Check-out 3. Suite Hotel Elite\""
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Université de Bologne\" à Bologne — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 57344,
+  "generatedAt": "2026-02-17T15:23:25.769Z",
+  "success": true,
+  "runType": "suggestion",
+  "suggestionQuery": "Je veux un city-break gastronomie pas cher depuis Lyon",
+  "suggestionTitle": "Bologna : La Dolce Vita Gourmande"
+}

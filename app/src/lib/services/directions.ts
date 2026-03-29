@@ -107,7 +107,7 @@ export async function getDirections(request: DirectionsRequest): Promise<Directi
       if (mode === 'transit') {
         try {
           const drivingResult = await searchWithGoogle(from, to, 'driving');
-          console.log(`[Directions] Transit failed, driving fallback succeeded for ${from.lat},${from.lng} → ${to.lat},${to.lng}`);
+          console.debug(`[Directions] Transit failed, driving fallback succeeded for ${from.lat},${from.lng} → ${to.lat},${to.lng}`);
           return { ...drivingResult, googleMapsUrl, transitLines: [] };
         } catch {
           // Both failed

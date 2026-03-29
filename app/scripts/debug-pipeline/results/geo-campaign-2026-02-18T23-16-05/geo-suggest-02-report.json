@@ -1,0 +1,262 @@
+{
+  "tripId": "604f80e6-8af4-4c7f-b9d9-c57e2f283da1",
+  "scenarioId": "geo-suggest-02-escapade-gastronomique-a-lyon-et-ses-env",
+  "generatedAt": "2026-02-18T23:19:38.324Z",
+  "destination": "Lyon",
+  "summary": {
+    "totalIssues": 9,
+    "critical": 0,
+    "warning": 2,
+    "info": 7,
+    "score": 99,
+    "weightedScore": 99
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 2,
+      "weightedPenalty": 1.4
+    },
+    "dataQuality": {
+      "score": 97,
+      "critical": 0,
+      "warning": 0,
+      "info": 4,
+      "totalIssues": 4,
+      "weightedPenalty": 2.8
+    },
+    "rhythm": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "relevance": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "rhythm:Jour 1: 9 activités/restaurants — journée surchargée",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: 9 activités/restaurants — journée surchargée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: petit-déjeuner \"Déjeuner — Mercredi Biscuiterie, Salon de thé ",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: petit-déjeuner \"Déjeuner — Mercredi Biscuiterie, Salon de thé et Brunch le dimanche\" à 13:00 — trop tard (attendu avant 11h00)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 3,
+      "impactScore": 3,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Place Bellecour\" n'a pas de description",
+        "Jour 1: \"Jardin des Curiosités\" n'a pas de description",
+        "Jour 2: \"Parc de la Tête d'Or\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 2,
+      "impactScore": 2,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Basilique Notre-Dame de Fourvière\" n'a aucun lien (booking, viator, maps)",
+        "Jour 1: \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: 5h de vide entre \"Parc de la Tête d'Or\" (fin 14:00) et \"Dîner ",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: 5h de vide entre \"Parc de la Tête d'Or\" (fin 14:00) et \"Dîner — Chez Rosa\" (début 19:00)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 1: petit-déjeuner \"Déjeuner — Mercredi Biscuiterie, Salon de thé et Brunch le dimanche\" à 13:00 — trop tard (attendu avant 11h00)",
+        "dayNumber": 1,
+        "itemTitle": "Déjeuner — Mercredi Biscuiterie, Salon de thé et Brunch le dimanche"
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 2: 5h de vide entre \"Parc de la Tête d'Or\" (fin 14:00) et \"Dîner — Chez Rosa\" (début 19:00)",
+        "dayNumber": 2,
+        "details": {
+          "gapMinutes": 300
+        }
+      }
+    ],
+    "geography": [],
+    "budget": [],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Basilique Notre-Dame de Fourvière\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Basilique Notre-Dame de Fourvière",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 1,
+        "itemTitle": "Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Place Bellecour\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Place Bellecour",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Jardin des Curiosités\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Jardin des Curiosités",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Parc de la Tête d'Or\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Parc de la Tête d'Or",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: 9 activités/restaurants — journée surchargée",
+        "dayNumber": 1,
+        "details": {
+          "activityCount": 9
+        }
+      }
+    ],
+    "relevance": [],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 21,
+    "activitiesCount": 11,
+    "restaurantsCount": 5,
+    "avgItemsPerDay": 7,
+    "totalEstimatedCost": 345,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

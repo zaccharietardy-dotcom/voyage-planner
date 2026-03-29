@@ -60,7 +60,7 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
           <h3 className="text-base font-bold text-white">
             Personnalisez votre voyage
           </h3>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-xs text-white/60 mt-0.5">
             {currentIndex + 1}/{cards.length} — {card.slotLabel}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
         <button
           onClick={() => { hapticImpactLight(); setCurrentIndex(i => Math.max(0, i - 1)); }}
           disabled={currentIndex === 0}
-          className="h-9 px-3 rounded-xl bg-white/5 text-white/40 text-sm font-medium flex items-center gap-1 disabled:opacity-30 hover:bg-white/10 transition-colors"
+          className="h-9 px-3 rounded-xl bg-white/5 text-white/60 text-sm font-medium flex items-center gap-1 disabled:opacity-30 hover:bg-white/10 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           Précédent
@@ -125,7 +125,7 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
         ) : (
           <button
             onClick={() => { hapticImpactLight(); setCurrentIndex(i => Math.min(cards.length - 1, i + 1)); }}
-            className="h-9 px-3 rounded-xl bg-white/5 text-white/40 text-sm font-medium flex items-center gap-1 hover:bg-white/10 transition-colors"
+            className="h-9 px-3 rounded-xl bg-white/5 text-white/60 text-sm font-medium flex items-center gap-1 hover:bg-white/10 transition-colors"
           >
             Suivant
             <ChevronRight className="h-4 w-4" />
@@ -179,7 +179,7 @@ function OptionButton({
       {/* Badge */}
       <span className={`
         text-[9px] font-black uppercase tracking-widest mb-1
-        ${highlight ? 'text-gold/60' : 'text-white/30'}
+        ${highlight ? 'text-gold/60' : 'text-white/50'}
       `}>
         {label}
       </span>
@@ -198,7 +198,7 @@ function OptionButton({
           </span>
         )}
         {option.cuisineOrType && (
-          <span className="text-[10px] text-white/30 truncate">
+          <span className="text-[10px] text-white/50 truncate">
             {option.cuisineOrType}
           </span>
         )}

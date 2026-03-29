@@ -445,7 +445,9 @@ export async function GET(
       const supabase = await createRouteHandlerClient();
       const { data: { user } } = await supabase.auth.getUser();
       userId = user?.id || null;
-    } catch { /* not authenticated */ }
+    } catch (e) {
+      console.info('[calendar.ics] Auth check skipped (unauthenticated access):', e);
+    }
 
     // Fetch trip with service client (bypasses RLS)
     const { data: trip, error } = await sc

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, X, Undo2, Loader2, Headphones } from 'lucide-react';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -37,6 +38,7 @@ export function ChatPanel({
   const [inputValue, setInputValue] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const keyboardHeight = useKeyboardHeight();
 
   const {
     messages,
@@ -273,7 +275,7 @@ export function ChatPanel({
         )}
 
         {/* Input */}
-        <div className="border-t p-4 flex-shrink-0">
+        <div className="border-t p-4 flex-shrink-0" style={{ paddingBottom: keyboardHeight > 0 ? keyboardHeight + 16 : undefined }}>
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
               ref={inputRef}

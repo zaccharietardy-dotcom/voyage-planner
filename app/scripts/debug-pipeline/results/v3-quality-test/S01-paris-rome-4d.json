@@ -1,0 +1,4222 @@
+{
+  "scenarioId": "paris-rome-4d",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Rome",
+    "startDate": "2026-03-25T11:55:16.864Z",
+    "durationDays": 4,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Colisée, Vatican",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Rome",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "6dd80830-4acc-4712-a9b9-b5117109b59d",
+    "createdAt": "2026-02-23T11:56:10.223Z",
+    "updatedAt": "2026-02-23T11:56:10.223Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Rome",
+      "startDate": "2026-03-25T11:55:16.864Z",
+      "durationDays": 4,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Colisée, Vatican",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Rome",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-25T11:55:16.864Z",
+        "items": [
+          {
+            "id": "meal-1-breakfast",
+            "dayNumber": 1,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "CiPASSO",
+            "description": "Breakfast at CiPASSO",
+            "locationName": "CiPASSO",
+            "latitude": 41.9020219,
+            "longitude": 12.4758908,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "restaurant": {
+              "id": "gp-new-ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "name": "CiPASSO",
+              "address": "Via Metastasio, 21, Roma",
+              "latitude": 41.9020219,
+              "longitude": 12.4758908,
+              "rating": 4.8,
+              "reviewCount": 4760,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste."
+              ],
+              "description": "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste.",
+              "phoneNumber": "06 6889 2620",
+              "website": "https://www.cipassoitalia.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=3580024099131238394&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUWSaWde4Ol-J_dD_yoRcKY4OjLiowTh79HIpFAelHmfJnxyP1im4lp_koknKWz4MjqJDjuLaAoRVQcGfWFlSRcXSq44818mq7y2V5jKxLWxzU2mQnarqZcrTUVAV5RWkIN9oAg6Uq2VcboW1D7i9dNslM_pYmafwgge4fj6IeMF6OaJcXgrX7oeudQhs_Y3PYV4ujY9wzEiiF59c6ofeikA0WJdbXHPFJjh5kRNxGjEfhkdA06nPYkmJkVzC8g2zFLLEvxqQlR5jphRqbvTemjxP6ojNNZMQQd-MYSBz79Zg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "openingHours": {
+                "sunday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "name": "ADESSO Osteria Moderna",
+                "address": "Via dei Maroniti, 29, Roma",
+                "latitude": 41.9021228,
+                "longitude": 12.4847452,
+                "rating": 4.8,
+                "reviewCount": 1065,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "344 154 4315",
+                "website": "https://www.adessoitalia.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=9354681056510857312&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVkWPfAI_tHvu4lTw5Ij_TbvuZdZGmydO4nxcgTnuVqwmOcGn4pGvqCcHp2SjqQX4qBDqob_a86ic8_MmqfXjE4aMfTR1z8FCxFozGX2cfOfISSuTVP8vLxhj--RPqfbE3PP-tuDDOia9CX374ApzQcK8hBIaRFAjbvv5ceCsn2XFve7wPKqNRh4c-vw8WyG-X52g4dn8QR6jzFCP9gHyMa95P1X1T6S_3m6G8bQ7CYMCgZYpXoU2SgGyfEW_E8_hMR5Aqm18kpqKrKxIDhLGiak75-z_N09Qr2snl6qZ1i5A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJYRcthKthLxMR-FPfbPYbePI",
+                "name": "Colline Emiliane",
+                "address": "Via degli Avignonesi, 22, Roma",
+                "latitude": 41.9029515,
+                "longitude": 12.4873707,
+                "rating": 4.6,
+                "reviewCount": 1639,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole."
+                ],
+                "description": "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole.",
+                "phoneNumber": "06 481 7538",
+                "website": "http://www.collineemiliane.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17471745499586319352&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVUFtXZllpzPeGU7qNFtWMUkjQ7yGNS0u4jGXh9K8YCfsd2KHkWRCAoxfO5V4ZjposNk1zwDBdYOjb7JVGs0i4QQL7qcJHH0l_aCMg9Okb4G_yLzHmM37VVlKCAG2LCOd3MxSjc2eRVKUTLx4Ok-H0n_t35L9JHR6FoKoRM5ydOtiJ6BC8VcESKKpEDf3ragV2HpMh-HBtYE9vVPg1ICUYaghhrpWItKTJ4bVu2qYyaj7-cpABt72q4GWwQGSyA5jQxLULHkRK7Z9R0pJd9KezlO34tIGNIWDnwLy5PAB9VQw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJYRcthKthLxMR-FPfbPYbePI",
+                "openingHours": {
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "wednesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "thursday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "friday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "saturday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-new-ChIJrRMgU7ZhLxMRxAOFkC7I8Sg",
+            "dayNumber": 1,
+            "startTime": "10:00",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Colisée",
+            "description": "Immense amphithéâtre romain à 3 niveaux autrefois utilisé pour les combats de gladiateurs, visites guidées.",
+            "locationName": "Colisée",
+            "latitude": 41.8902102,
+            "longitude": 12.4922309,
+            "orderIndex": 1,
+            "duration": 90,
+            "rating": 4.8,
+            "estimatedCost": 14,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW0OkcrIYF28gFR6_G1SpG7V3Bm9l3sLVpvH4S_HOVv2IiBGILEeMioVFCTFcykk5MdAqi094A1oTKZHHPlaNf5THlmE_2cq7r8Ll9WKsVJ-m-s7KBoibLIwpti3b5AeONEVoAQm_XbpjTPrWWHd1tiNpuqbM3bwv4MNahKswYyC1B0C7p5TJDAXu2PkuG8N6XglB8JYKoO_67CW3xEW8GMEF4szKTql8oH8HrE8TgtleAWe9wlbmQh6UrVqQJVDRKCBp83-HMNx-prIn1SaHGp3qJl1qTd3YaxQYZzLoRPpu886Hwtr8NATUOLBK2mx15AO4Ou_6-Yyak4fhiKp8uKdPnRs9tw3XB-_FU66WSy-attQ_SamNnUR1MeGqsOWGms6fHAT-EwBPPRf9JtwC5edC4_OVZ2c84zvSDPr1_ApA&maxwidth=400",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Colosseum%20Roman%20Forum%20Palatine%20Hill%20Skip%20the%20Line",
+            "mustSee": true,
+            "openingHours": {
+              "open": "08:30",
+              "close": "16:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "08:30",
+                "close": "16:30"
+              },
+              "monday": {
+                "open": "08:30",
+                "close": "16:30"
+              },
+              "tuesday": {
+                "open": "08:30",
+                "close": "16:30"
+              },
+              "wednesday": {
+                "open": "08:30",
+                "close": "16:30"
+              },
+              "thursday": {
+                "open": "08:30",
+                "close": "16:30"
+              },
+              "friday": {
+                "open": "08:30",
+                "close": "16:30"
+              },
+              "saturday": {
+                "open": "08:30",
+                "close": "16:30"
+              }
+            },
+            "officialBookingUrl": "https://www.coopculture.it/en/colosseo-e-shop.cfm",
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Colis%C3%A9e%20Rome",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Colis%C3%A9e%20Rome"
+          },
+          {
+            "id": "gp-ChIJWZsUt2FgLxMRg1KHzXfwS3I",
+            "dayNumber": 1,
+            "startTime": "11:50",
+            "endTime": "13:50",
+            "type": "activity",
+            "title": "Basilique St Pierre",
+            "description": "",
+            "locationName": "Basilique St Pierre",
+            "latitude": 41.9021667,
+            "longitude": 12.4539367,
+            "orderIndex": 2,
+            "duration": 60,
+            "rating": 4.8,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/400px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-1-lunch",
+            "dayNumber": 1,
+            "startTime": "14:30",
+            "endTime": "15:45",
+            "type": "restaurant",
+            "title": "Nerone",
+            "description": "Lunch at Nerone",
+            "locationName": "Nerone",
+            "latitude": 41.901085099999996,
+            "longitude": 12.4968924,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJGxJt3aVhLxMR-HI_g4zIzuE",
+              "name": "Nerone",
+              "address": "Via del Viminale, 7A, Roma",
+              "latitude": 41.901085099999996,
+              "longitude": 12.4968924,
+              "rating": 4.7,
+              "reviewCount": 4418,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "http://neronealviminale.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=16271163009559130872&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWmXbRaCbOm5_LhCrCrHDsMGYL89rKSd2WLX9GRLauUVPfGeUb_wO0QtNZVSLP_xkIz8cseuxUxaVy2YGlh-_askI0-B43i8KCgEmh5dIR38sXDGC5DnYq2BmHlIJaLyQ7JJD1VTFPRFUJlMNAaiOUWqGep30CT84wEer8yqC2mHZFtNGbgxHe_Nwst7gnY-z3zsrXJy2ARwozd5e_eVa2hQnoE20nSQQXXH_WyrPPXrEUjBRJeIaiW-m1fO_otsSO7uW5SPmAne9E06qKammWkoW1AYMYqMCJv_Nxm4pitDA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJGxJt3aVhLxMR-HI_g4zIzuE",
+              "openingHours": {
+                "sunday": null,
+                "monday": {
+                  "open": "16:30",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "16:30",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "16:30",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "16:30",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "16:30",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "16:30",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJJxZsdiFhLxMR3eGlg2XNCuc",
+                "name": "Quel che c’è laboratorio Di Cucina",
+                "address": "Via Torino, 129, Roma",
+                "latitude": 41.9013225,
+                "longitude": 12.4957909,
+                "rating": 4.9,
+                "reviewCount": 1869,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "391 778 6748",
+                "googleMapsUrl": "https://maps.google.com/?cid=16648344808412537309&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUk6eJ3GRU9L5Iep3sRSsC-ILiXZsZFQYe5Cznk4MANn0zzGRPHtrLR3hBNBFmwhGF9J-rQyXnqANa3MzfSZTMSCn0hn9vjGRWJ8hviohDFd08cxZfK-lrfxL6x3HvjF8Lzig8_5u0rRv12br00mFqSF0ipQQx8PPWKSILoYVn7csx7PCnW5ZqnGHmuNnmJjHfI4KKqK-C0Z46jADnkwluzxx2LqZ3WJU00MDhgTQMpxAJHEY-Sp9b4vGYY2R1dkX-7ksfKVrgPRcrbgQHexSs1j_OwSkY23cnElx7ky3XRMRINseTH5axyxE_6CxI5ktCB1iDa-G7kWcO8Im1xRGAsl5tmkGWI3rWZNNSOgCpjo4VuRq2TwDltu4tUX8QLQjVkr_mjhbaOwvNzWGtu2SBwOSBJONjjjpCcxEr2jX1J-Q&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJJxZsdiFhLxMR3eGlg2XNCuc",
+                "openingHours": {
+                  "sunday": null,
+                  "monday": {
+                    "open": "18:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "18:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "18:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "18:00",
+                    "close": "20:00"
+                  },
+                  "friday": {
+                    "open": "18:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "15:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJm4cuFqNhLxMRykjKTgH4uu4",
+                "name": "Tonnarello Santa Maria",
+                "address": "Via di Santa Prassede, 9c, Roma",
+                "latitude": 41.8966639,
+                "longitude": 12.4986003,
+                "rating": 4.8,
+                "reviewCount": 2363,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 9761 4636",
+                "website": "https://tonnarellosantamaria.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17202334411195566282&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUAdptPbXStvhHu2BP7UXo6oMygVGaq8Kv7NvLi6z3OFwXqvzBfFg1VQ4Y5eWKhvAZzR_4Q_Lu8Ckvq4_xo3Rq10gSXGwznoZE6qdAC2Knjp56VjupULfEBedAh4-7iUY8d0qc5_iD0iJAtql8q2bNS_nC5x--LyVzd_vH_R-p9_I5hvItODtBsSRQzMUu_6hvzBlQ11riYD1eBrzA_e26HBdMtBi9uNYCRJ00QfK9v-2QwOSpP55AP4e7PjVauLU-zg_hW45k09WnMcRkLlJfIymGVBkv51TRqlCMcy9wkZA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJm4cuFqNhLxMRykjKTgH4uu4",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-new-ChIJ1zB926RhLxMRejWMj_tUs_c",
+            "dayNumber": 1,
+            "startTime": "17:10",
+            "endTime": "18:10",
+            "type": "activity",
+            "title": "Basilique Sainte - Marie - Majeure",
+            "description": "Basilique papale emblématique construite au Ve siècle, célèbre pour ses mosaïques romanes et son plafond doré.",
+            "locationName": "Basilique Sainte - Marie - Majeure",
+            "latitude": 41.897598599999995,
+            "longitude": 12.498408399999999,
+            "orderIndex": 4,
+            "duration": 60,
+            "rating": 4.8,
+            "estimatedCost": 14,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWxBg2Tlm4kcaP6_C6av8iDjY82x4NrPGNTolpRfqkKW6uYoes63t1WntE0oNaK2JnVtf7yo2f31M_1fVaPBHTH0eZeCK5EMsjon_pDi8hHtXODHC-Hp7j69oC3U1jkVJv2EB4rdZon56f9rH7p5mBGTy9pvPaWeoxqvGEPcE2d0Fc5F45HyylsPrzCKdFxAnY-a7efV923F4FgmyiRrjliBvbnivqWLv1pWtr5egBPNrZ3YXVBWKQC_-bkJyDwkN_wsJigV66ZD1e-oYzrR8EPiKIcwimKBPEcs-9o_eLmFu-0H8asqzFUZ_uswQweRZKNC1uNwSK07aOVMRuOnSne0yyjU62ZSuemUyQPhNoI_ZHHPgAVr-rMy8oXPDRlerHWz5SR6Ao5nwIY98t_EYUZtSt6DXGW5CUlTOe7VogylJdV&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "07:00",
+              "close": "18:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "07:00",
+                "close": "18:30"
+              },
+              "monday": {
+                "open": "07:00",
+                "close": "18:30"
+              },
+              "tuesday": {
+                "open": "07:00",
+                "close": "18:30"
+              },
+              "wednesday": {
+                "open": "07:00",
+                "close": "18:30"
+              },
+              "thursday": {
+                "open": "07:00",
+                "close": "18:30"
+              },
+              "friday": {
+                "open": "07:00",
+                "close": "18:30"
+              },
+              "saturday": {
+                "open": "07:00",
+                "close": "18:30"
+              }
+            }
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Trattoria Vecchia Roma",
+            "description": "Dinner at Trattoria Vecchia Roma",
+            "locationName": "Trattoria Vecchia Roma",
+            "latitude": 41.8936997,
+            "longitude": 12.502435,
+            "orderIndex": 5,
+            "duration": 90,
+            "mealType": "dinner",
+            "restaurant": {
+              "id": "gp-new-ChIJ_Zz0irxhLxMRCndXjNM_F9s",
+              "name": "Trattoria Vecchia Roma",
+              "address": "Via Ferruccio, 12/b/c, Roma",
+              "latitude": 41.8936997,
+              "longitude": 12.502435,
+              "rating": 4.5,
+              "reviewCount": 13775,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Trattoria et pizzeria classiques à l'ambiance intimiste, aux murs bordeaux décorés de fresques et d'arches en briques apparentes."
+              ],
+              "description": "Trattoria et pizzeria classiques à l'ambiance intimiste, aux murs bordeaux décorés de fresques et d'arches en briques apparentes.",
+              "phoneNumber": "06 446 7143",
+              "googleMapsUrl": "https://maps.google.com/?cid=15787157196595754762&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVvqXl8qJK_z_YlnS1Rji5PJO6O27hKGz3RfcBdfkZP-5yVppjLSsqlglIsYnykn8kKeyBIf2O31qjH3Y_U_qEI3DkKSB3aSDNzHeFf7MnfBVQfCjPvES9XbP9EiSxJdGAgbiC6rW6S0O5abYCRGb2ZLu2FwWSZreSQIoVlqDMMGVAXR-2fTF6gwhGwdfoH_HbWm5zjMWapUrMLlqROlBfvFXVcT-TjkxnXR0-konxOLPdpJTrWZ7eU1yfxSF9runI0hC1Ebc4A8pT49243j5dPXIZr06bO1rv5r29543tztg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ_Zz0irxhLxMRCndXjNM_F9s",
+              "openingHours": {
+                "sunday": null,
+                "monday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJ2UCyaJdhLxMRCVrQ0J0YxfQ",
+                "name": "Taverna dei migliori",
+                "address": "Viale Manzoni, 107, Roma",
+                "latitude": 41.8940992,
+                "longitude": 12.510938099999999,
+                "rating": 4.6,
+                "reviewCount": 4391,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Pâtes romaines classiques et plats de viande dans un cadre chaleureux ou sur une terrasse côté rue."
+                ],
+                "description": "Pâtes romaines classiques et plats de viande dans un cadre chaleureux ou sur une terrasse côté rue.",
+                "phoneNumber": "06 7720 0413",
+                "website": "https://www.tavernadeimigliori.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17637530581758663177&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWdpqC1wbIrw033ZKwJ2K1uu1SI9_HMrervqBOs_O7gB1rLkQ8zE4Xf_eDr1Mge_UUed8pwClBn3tHpGWPNkl0_TVR86sWKUP90tq2fGvHGD-pve5KJ9AL_nyewOY9kcrHkTSIuGUP-HryERWAq8EWghXowI1DAxAlQtvXHIOdfyzGaYTYlnfTo47Y8YIXmTPEbubvLYLkBHWjlNq1hUfqu3k_Nv3O5QBV3ZE6RP4sLT9Pv0h0esLioCK-KDH8WgQFCAngLLaRsuEqfgdbjhgNJsccVceR9MlHNaOQuzLNvBA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJ2UCyaJdhLxMRCVrQ0J0YxfQ",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.5,
+            "estimatedCost": 30
+          }
+        ],
+        "theme": "Première découverte",
+        "dayNarrative": "Découvrez Colisée, Basilique St Pierre puis Basilique Sainte - Marie - Majeure."
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-26T11:55:16.864Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "CiPASSO",
+            "description": "Breakfast at CiPASSO",
+            "locationName": "CiPASSO",
+            "latitude": 41.9020219,
+            "longitude": 12.4758908,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "restaurant": {
+              "id": "gp-new-ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "name": "CiPASSO",
+              "address": "Via Metastasio, 21, Roma",
+              "latitude": 41.9020219,
+              "longitude": 12.4758908,
+              "rating": 4.8,
+              "reviewCount": 4760,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste."
+              ],
+              "description": "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste.",
+              "phoneNumber": "06 6889 2620",
+              "website": "https://www.cipassoitalia.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=3580024099131238394&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUWSaWde4Ol-J_dD_yoRcKY4OjLiowTh79HIpFAelHmfJnxyP1im4lp_koknKWz4MjqJDjuLaAoRVQcGfWFlSRcXSq44818mq7y2V5jKxLWxzU2mQnarqZcrTUVAV5RWkIN9oAg6Uq2VcboW1D7i9dNslM_pYmafwgge4fj6IeMF6OaJcXgrX7oeudQhs_Y3PYV4ujY9wzEiiF59c6ofeikA0WJdbXHPFJjh5kRNxGjEfhkdA06nPYkmJkVzC8g2zFLLEvxqQlR5jphRqbvTemjxP6ojNNZMQQd-MYSBz79Zg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "openingHours": {
+                "sunday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "name": "ADESSO Osteria Moderna",
+                "address": "Via dei Maroniti, 29, Roma",
+                "latitude": 41.9021228,
+                "longitude": 12.4847452,
+                "rating": 4.8,
+                "reviewCount": 1065,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "344 154 4315",
+                "website": "https://www.adessoitalia.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=9354681056510857312&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVkWPfAI_tHvu4lTw5Ij_TbvuZdZGmydO4nxcgTnuVqwmOcGn4pGvqCcHp2SjqQX4qBDqob_a86ic8_MmqfXjE4aMfTR1z8FCxFozGX2cfOfISSuTVP8vLxhj--RPqfbE3PP-tuDDOia9CX374ApzQcK8hBIaRFAjbvv5ceCsn2XFve7wPKqNRh4c-vw8WyG-X52g4dn8QR6jzFCP9gHyMa95P1X1T6S_3m6G8bQ7CYMCgZYpXoU2SgGyfEW_E8_hMR5Aqm18kpqKrKxIDhLGiak75-z_N09Qr2snl6qZ1i5A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJYRcthKthLxMR-FPfbPYbePI",
+                "name": "Colline Emiliane",
+                "address": "Via degli Avignonesi, 22, Roma",
+                "latitude": 41.9029515,
+                "longitude": 12.4873707,
+                "rating": 4.6,
+                "reviewCount": 1639,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole."
+                ],
+                "description": "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole.",
+                "phoneNumber": "06 481 7538",
+                "website": "http://www.collineemiliane.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17471745499586319352&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVUFtXZllpzPeGU7qNFtWMUkjQ7yGNS0u4jGXh9K8YCfsd2KHkWRCAoxfO5V4ZjposNk1zwDBdYOjb7JVGs0i4QQL7qcJHH0l_aCMg9Okb4G_yLzHmM37VVlKCAG2LCOd3MxSjc2eRVKUTLx4Ok-H0n_t35L9JHR6FoKoRM5ydOtiJ6BC8VcESKKpEDf3ragV2HpMh-HBtYE9vVPg1ICUYaghhrpWItKTJ4bVu2qYyaj7-cpABt72q4GWwQGSyA5jQxLULHkRK7Z9R0pJd9KezlO34tIGNIWDnwLy5PAB9VQw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJYRcthKthLxMR-FPfbPYbePI",
+                "openingHours": {
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "wednesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "thursday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "friday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "saturday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-ChIJ1UCDJ1NgLxMRtrsCzOHxdvY",
+            "dayNumber": 2,
+            "startTime": "09:30",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Fontaine de Trevi",
+            "description": "",
+            "locationName": "Fontaine de Trevi",
+            "latitude": 41.9009325,
+            "longitude": 12.483313,
+            "orderIndex": 1,
+            "duration": 30,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXR1NQPrgzJ34Dm9U5lo0NWkGJ1Jr-o9UUyLoMxJNbW7wF0Pzq7Th0JH17JrIj8M0MS6ZpT-GicklgYBqyg0uYkoRcDr-nT-t3etxTGrCfrMfnyxKTSrOgV3pVcmoy51HO4CNmcoyg1YIwpaFzgkJ05z64YHUUIiHjUjf0ediYm-TlXHANlYDlIHriJj_XrzIJzVFsVYAJBVxTGnrYz6dd7Gkoh9_gXmoI--ESInBzh5P5IT9C2rR9Sxv9JyK6Ue1uk3ThrRI0QbnRzrctDABDuMi95VZ7_vUEfg8DtV5rxtuGDAFMW1x9sxrlUy0xkIgO0GL7CzXK-BV73aAjkoIztFGCebTn7EyFewLFBga9eedbFqG4rrvZOyYhoCEfnm2pc1kfv9TJ9EMAS8I6BPl9CnEZDG4glZWNGfWoD4NxsJ0j_MPCR9bv1DGUxO1ZiVbMf6P4_27h9NZnAe95kJWVAZap-yH7IhArSAykjREj7FNP1eA4Wo-Sbz66JE_pbfqLUJTS9qZTNnGR3rzO3XEn4LL-sGGk8MCE76SqhpcXJzmimizdLIA7oELmV0asMMbt6S0efXaMcM4SQ2W3L8ybpdbE&maxwidth=400",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Trevi%20Fountain%20Underground%20Rome%20Tour",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "22:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:00",
+                "close": "22:00"
+              },
+              "monday": {
+                "open": "11:30",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "09:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "09:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "09:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "11:30",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "22:00"
+              }
+            }
+          },
+          {
+            "id": "gp-ChIJ782pg7NhLxMR5n3swAdAkfo",
+            "dayNumber": 2,
+            "startTime": "10:30",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Le Forum Romain",
+            "description": "",
+            "locationName": "Le Forum Romain",
+            "latitude": 41.8920906,
+            "longitude": 12.4864378,
+            "orderIndex": 2,
+            "duration": 90,
+            "rating": 4.8,
+            "estimatedCost": 18,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfURigjTPMN2Z7K46rCWg_rWrxTEdnVZNN0ffSOzL_blByG-bhanWI13ktdJsPfhwt-ctcvnv_2klLnP12_T3luQSbNqjZRCWy6wbCOcEIwsT7TZBU25nwRyg5vAP2eBzFlJZalx6cQMEyEcO6Msi3ISlkHlTfjVqnHLJdgyvDnMSqdJ1Uf2Tx8INhXCFv1b-CJrUwTbXQrPBicIF-2tkvs_nG6_BjhM4k9O31pgqdX5DTg-Hpvo_B0vRE2WnFfycTy3vh7juJ67CIF4sUqQVXialxpNP8zSIVmukkxIjfmdcp_0tIRuz3W7vopRHEV55QvW8fE-MeSl-RW3uh14vkSUFR6a8B9tFBXT8wUsMuNGztiWbMrv-KESfs9YEaHbE6V-IRohZtP3ZJNo_YD6UMyfTvHBCOPmGgK2tOY0opYp6Qt4SPTfmgNDwj30BwOYN0m7R1mz1muNtSXuI-lQxT0jFJFuVrLvKiUeW9IJQzmkWQwnbExbefcoOhOGPHYwk5nwfvMsqlNnZvhD96uFwCNNV4NChl_qhkoczd_lg7f71xIIbf9k5V0NCSi7eIAq-0vrZ6D2&maxwidth=400",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Colosseum%20Roman%20Forum%20Palatine%20Hill%20Skip%20the%20Line",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "16:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "monday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "tuesday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "wednesday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "thursday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "friday": {
+                "open": "09:00",
+                "close": "16:30"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "16:30"
+              }
+            }
+          },
+          {
+            "id": "gp-ChIJ8-wGeU9gLxMR--zJtnpGod4",
+            "dayNumber": 2,
+            "startTime": "12:10",
+            "endTime": "14:10",
+            "type": "activity",
+            "title": "Musées Capitolins",
+            "description": "",
+            "locationName": "Musées Capitolins",
+            "latitude": 41.8929428,
+            "longitude": 12.4825577,
+            "orderIndex": 3,
+            "duration": 120,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVvMtA-5FvjdR-fKqOglyBNfyPoYhfvHfPazqAQTgK26-QkMoFijVcEt9JqJQTTXxPSRCcObF0TrCWwAK3adHYQuKU0htMBEUKyDTJKRewk0KkduwbeEgiIk3xO2aw8df5bcCDpihy4tysmXUUWp_eEHY-wYZzdqCWyyJZD1S7Sw6IUX104AS-FP3UsK26teU35a83dPjlyf8Kut-YMtv4GOzyRl3j30v-OjAn7sv6mQHEQm_luKLJ7XnHda4g3m2wdWy69-L-lgGZJp8z909mLAgApoC-z5L5NyeQUtpHaRS1DXo9dUVLfjgEDFaRhROXu7OG-sEsaTUaiqyMze9BdVsr82lMX7BbhR8rn2Tg2Vrt62cVJJLZhekDUWsWU7Ly5vwDcErAkYsT4cQT0b6eF15Q_ptQB3WY89Jq2zTtKYV9kGzshYgVlVzlA8anWF4997DKyjj7tJQmn58aYhukU9Ix07CHY0H0-JqzxM7aVLuNe4aKZUqnEUUbTU_OKuHPsSF0MyQLdq1ndaLQpw-t6ogzaAeMlpaICDNWs2WVuXO3iZkCGYKjFBQ4KFkszpkb1EtNTcdvxIxMV_Ld-dI3CTlpWNg&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:30",
+              "close": "19:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "monday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "tuesday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "wednesday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "thursday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "friday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "saturday": {
+                "open": "09:30",
+                "close": "19:30"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Mus%C3%A9es%20Capitolins%20Rome",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Mus%C3%A9es%20Capitolins%20Rome"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "14:20",
+            "endTime": "15:35",
+            "type": "restaurant",
+            "title": "Pane e Salame",
+            "description": "Lunch at Pane e Salame",
+            "locationName": "Pane e Salame",
+            "latitude": 41.900628999999995,
+            "longitude": 12.481772,
+            "orderIndex": 4,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJV_Yr41JgLxMRQZaiulxyYN4",
+              "name": "Pane e Salame",
+              "address": "Via Santa Maria in Via, 19, Roma",
+              "latitude": 41.900628999999995,
+              "longitude": 12.481772,
+              "rating": 4.8,
+              "reviewCount": 8080,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "italian",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Brasserie moderne branchée et retirée, connue pour ses assiettes de fromages et de charcuterie avec vins italiens."
+              ],
+              "description": "Brasserie moderne branchée et retirée, connue pour ses assiettes de fromages et de charcuterie avec vins italiens.",
+              "phoneNumber": "06 679 1352",
+              "website": "https://www.facebook.com/panesalameroma/",
+              "googleMapsUrl": "https://maps.google.com/?cid=16023933216777999937&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWuZ4dYVhJLWwISOOw5LUQzBbwNJQC4H01GOcXhulczXDI4rSCEjXOmSLOVHeTeBJCz-bYnftes5ROJ-VUxI2NCmO8kX1ZyBymsEGeqk0KtFPf2h3gdASvO2Z0qFX6oi59Z3wPOL-g_U7MKo3R7PCpfzIkk6-XH7Mh6gM9Y3u8FXfvf1XiS4tb3AVKPFCJW_Z6pBbEQGBP4rsCIYY901DB-uAJtwsF0NKSOs2uHjWIxqEgPJz3FFZiUEBGhBrRN7WKYMwwEY7W4PmRCjffYcbEhD8IUXbu-oDSogwvwGR896g&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJV_Yr41JgLxMRQZaiulxyYN4",
+              "openingHours": {
+                "sunday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJQdzerLZhLxMRUD0OryD6mtY",
+                "name": "Iari The Vino",
+                "address": "Via Frangipane, 27, Roma",
+                "latitude": 41.892966699999995,
+                "longitude": 12.489398,
+                "rating": 4.7,
+                "reviewCount": 9563,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant intimiste avec terrasse proposant plats italiens traditionnels et pizzas."
+                ],
+                "description": "Restaurant intimiste avec terrasse proposant plats italiens traditionnels et pizzas.",
+                "phoneNumber": "06 6919 1069",
+                "website": "https://iarithevino.eatbu.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=15463947288812862800&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWibZS2vsEDJSSOuF6Q1PrpPCBpm7MgubLsf_c0tU4oGXEndSqVvo77g6y0mqKQCxvhqKqs4KW4hhIoNUxDbxNj3mk-RFtTJOeWbS2Qpym9RQTrAtO0t_LvVPWCVslDlaj1681K_lKXtv69W_PlIJpy6Joiezpyf8occP8xA_dVnuyefDJok-Zm1i1kdTMpDhucfvMxNqTIqJvAxIdAXcD-OnBn8RhlRmYke6fBE3xIGYaiOSFkmyfYQuhdS361szATlyFamFvVh72EpC87L0bPOuIv_gRlRXkbs5EGNGKbN8ULlPqobeIq9ibaHvgRrCsqgZW3xV4nVagJeyTJhxHvxxr_kfUIq3UoSYvDNTwXHru_bA-Sew2HOJgqOu7FBOKFbfOv0rd7sMOgGbxaFTRRFI7-98f9Sxpr_FxncJg&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJQdzerLZhLxMRUD0OryD6mtY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJsQkID65hLxMR2Y5FKM6tPsU",
+                "name": "La Taverna Dei Monti",
+                "address": "Via del Boschetto, 41, Roma",
+                "latitude": 41.8982185,
+                "longitude": 12.4903152,
+                "rating": 4.5,
+                "reviewCount": 3444,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Plats traditionnels de poissons/fruits de mer et pâtes de style romain, servis dans un restaurant classique à l'ambiance détendue."
+                ],
+                "description": "Plats traditionnels de poissons/fruits de mer et pâtes de style romain, servis dans un restaurant classique à l'ambiance détendue.",
+                "phoneNumber": "06 481 7724",
+                "googleMapsUrl": "https://maps.google.com/?cid=14212988574978379481&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWJKEU9TZwRAkMV5NDEEx6gpn19YKJd00wq_j3LIkGmrPo3WLueIDmBIysuyyRzs9kQ6wM-Gc6YIL_wB_aFfrLgDiUs0I0L0hW1svMWrhFLK1dssgAlxQ8mEUoq-P7-Twao4j1tLMt9EUsA9AJqoeQnCuiXZP232TfrOcpjE42Sua_K5AYqOhPhqHF7U8A7NfQ78ymTH7siclsAWpjmp1C6LOwlFLR4XrxRHLKO-GZ6QYAE9o1nQHwv9IReauPuYptCMtjo5bUBetaJLe63PfBD5MsbwVgnedOHNskP9L4&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJsQkID65hLxMR2Y5FKM6tPsU",
+                "openingHours": {
+                  "sunday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "18:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 15
+          },
+          {
+            "id": "gp-ChIJ412AG01gLxMR4T-4pwdIFSE",
+            "dayNumber": 2,
+            "startTime": "15:50",
+            "endTime": "16:20",
+            "type": "activity",
+            "title": "Monument à Victor - Emmanuel II",
+            "description": "",
+            "locationName": "Monument à Victor - Emmanuel II",
+            "latitude": 41.8945976,
+            "longitude": 12.4831269,
+            "orderIndex": 5,
+            "duration": 30,
+            "rating": 4.8,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUhAZwPQr0VmET26FOjvqAhgYQ3mXDYarnylcOOhhTEkbkeKxcWTq3zUYpRg09R-BFU0Y2PbSSBoUpbfDsZOFy8k_jjCNJKYc2tpmS3YTbqd-TSmMUgSPwULeKt0mGhIVjKdzD1SfF261JgfmLB6Rs4gyaeP3OFSy1T1miTnAwb6vlxEvnwY9OaLun4VEKD5014AV2evjt-jOSv9ff8L599C6hDPpiisrKtczP8Gf-S57bajmadAk7pbyn2lkadrUTIlUjaCNj4WWUTnONcWXg5LWHtAkk1Zef0E2odULus0EEfFLXyBUVC5nVsNT-1FYaXyC0He68VZFdlCwT8mZpNUjXKXbEDDvo_Uag2wB5vnx3aNgSe97Equ4p6ziMDWfedTK6iYVq4yLEBIwexx2D3u0bo-FSwL8oTHUBNDccW7mFshFFx4wJxw0Y4F3cAeao1QmVIEq7mi5pq1EcDqT9jHBnC4eusNWecN9cXDE34kDy4kHfufXa8LGerT8tJsR_3rGsmwXYYTLeZaKt5zkUZno3L_CVwd4k4F0FI1AMCzdEu7N7zXAuNhsubfURrc45ewzYGPpf4zQ&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:30",
+              "close": "19:30"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "monday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "tuesday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "wednesday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "thursday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "friday": {
+                "open": "09:30",
+                "close": "19:30"
+              },
+              "saturday": {
+                "open": "09:30",
+                "close": "19:30"
+              }
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Monument%20%C3%A0%20Victor%20-%20Emmanuel%20II%20Rome",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Monument%20%C3%A0%20Victor%20-%20Emmanuel%20II%20Rome"
+          },
+          {
+            "id": "gp-ChIJr3gt3ExgLxMRYaivihEa9K0",
+            "dayNumber": 2,
+            "startTime": "16:30",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Piazza Venezia",
+            "description": "",
+            "locationName": "Piazza Venezia",
+            "latitude": 41.8959886,
+            "longitude": 12.4824632,
+            "orderIndex": 6,
+            "duration": 30,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVA9DBBnA_-IdnsDlLpgk1kcV4co78fXvR9DgdBeSyp7jyslh0hchTIGhr_i9mM631DLMBXBa4qOOZAwFDv_fnvgQlqW36uGA2OF2B8hxvgUvUtpuJBedsb5LokzLV_TIB4Z-0DQQ5U0Yruv_frWuHpE_cxG8ga02ysgcHnhIanFK_Obrm-svoFdJ_yg4QBoCTefgroROSsiqXLxY2W2HQagJQSTEY1JKzBRAyY-QhCer8g8B66ZTArQ3VkZbb5Ec10Is2jVbPsMJ4QV-3HHncTaIwJxsz1QeuySB2NYWitbrXRg5TYs2rjrrQUBrHkuyRZRaiW2-pdQRH7aRNbMhhGEBHKAIQGL8hXuoOM3Jl8IChBBuObhgf2XDvlyjGRMj8PTNtmwpnil2SP_AeCZzdG4BeUmfgorN-lLYPB2I-zGpXu8kZDD9Rv2vSz28jdT_J6q4VtSJeYjxeuM7f2ND3FjbZwivMp_fpLiqoE7znd6vHNn55YcDb_7tQhWaZpZSinHa_CwLLj2n4O14fXCMZ5Me1ypXSeSHTi4LaEd_sl2fTEe2hRaPcPAFIgTpCYKozwBckne3YSjw&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "gp-ChIJqUCGZ09gLxMRLM42IPpl0co",
+            "dayNumber": 2,
+            "startTime": "17:20",
+            "endTime": "18:20",
+            "type": "activity",
+            "title": "Panthéon",
+            "description": "",
+            "locationName": "Panthéon",
+            "latitude": 41.8986108,
+            "longitude": 12.4768729,
+            "orderIndex": 7,
+            "duration": 60,
+            "rating": 4.8,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWOCkiht_vb84WyYUpZWsdmCn4_EOCAGgc84hta3xcy-mq8BrnkUQvvOQe4gb9WgZaZNSxROrF0Fvrls1v4i-JIBcA5nhbaTiGiCv7xRan3HPfluPr4GHE-zehZj3i2GPws1mjNEslAuL16fZmvWt_zY0WZXbECMDcGcLM9YIV6dyYgL5MPpkfZqoAQ5FoRl8gHcgEbIPN-6_ozV_tWxLQwv_AhrxLGXXZZHXew0SBKdC7GVZAutS8vtFppSoe9mNhV8iITue9YEjPHHFnfc9lA6qCb43XzIc5xqj64RsgAkh8njuRtgC-5dQUlIvATaF_b2vqm0tZvdwYade-DC4tsxhXxwIydO1zFwI4t0vbeB5CZlIAcYLZTrDP7fxxQVA5LidFpUOkbv4VVNaBvL1VaX_OW5ttXK2ZavEIFH2KQT_6Jhc7UrcAYtkWR6q9z1iO-vtf1ewV5kB1mFwvwS4Bhz4SmnwXo3W4Q_ARl_EX77yiySzE6MzEMvH70Zk9zxjG2mluAYsh99wxAI8h4wuGj1VyTpfXnTg6HEj3Sr88DZx6szBtLqvbGOOpNhXpqaPnLzwZf&maxwidth=400",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "19:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "09:00",
+                "close": "19:00"
+              },
+              "monday": {
+                "open": "09:00",
+                "close": "19:00"
+              },
+              "tuesday": {
+                "open": "09:00",
+                "close": "19:00"
+              },
+              "wednesday": {
+                "open": "09:00",
+                "close": "19:00"
+              },
+              "thursday": {
+                "open": "09:00",
+                "close": "19:00"
+              },
+              "friday": {
+                "open": "09:00",
+                "close": "19:00"
+              },
+              "saturday": {
+                "open": "09:00",
+                "close": "19:00"
+              }
+            }
+          },
+          {
+            "id": "gp-ChIJPRydwYNgLxMRSjOCLlYkV6M",
+            "dayNumber": 2,
+            "startTime": "18:30",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Piazza Navona",
+            "description": "",
+            "locationName": "Piazza Navona",
+            "latitude": 41.8991633,
+            "longitude": 12.4730742,
+            "orderIndex": 8,
+            "duration": 30,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Paolo_Monti_-_Servizio_fotografico_(Roma%2C_1966)_-_BEIC_6329173.jpg/400px-Paolo_Monti_-_Servizio_fotografico_(Roma%2C_1966)_-_BEIC_6329173.jpg",
+            "mustSee": false,
+            "openingHours": {
+              "open": "00:00",
+              "close": "23:59"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "00:00",
+                "close": "23:59"
+              },
+              "monday": null,
+              "tuesday": null,
+              "wednesday": null,
+              "thursday": null,
+              "friday": null,
+              "saturday": null
+            }
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "19:10",
+            "endTime": "20:40",
+            "type": "restaurant",
+            "title": "Cantina e Cucina",
+            "description": "Dinner at Cantina e Cucina",
+            "locationName": "Cantina e Cucina",
+            "latitude": 41.8979478,
+            "longitude": 12.4716378,
+            "orderIndex": 9,
+            "duration": 90,
+            "mealType": "dinner",
+            "restaurant": {
+              "id": "gp-new-ChIJn6LUaEVgLxMRkWfUcTX4bFM",
+              "name": "Cantina e Cucina",
+              "address": "V. del Governo Vecchio, 87, Roma",
+              "latitude": 41.8979478,
+              "longitude": 12.4716378,
+              "rating": 4.6,
+              "reviewCount": 16812,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "pizza",
+                "italian",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant de style décontracté proposant cuisine régionale et pizzas dans un cadre rustique et rétro."
+              ],
+              "description": "Restaurant de style décontracté proposant cuisine régionale et pizzas dans un cadre rustique et rétro.",
+              "phoneNumber": "06 689 2574",
+              "website": "http://www.cantinaecucina.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=6011452511059470225&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXTnUBcZYZbIB-gpnUgnSJIZz5XKSLWxP1iQJfncFhWDmeEuL9y8FQZ1yIfGPvrmrX_2tdneFwg9NsEF2g6G53zVOQCtKmcyO6zNyYGI3uyu8sPK09K5a52XUNPKwJYZ0UeBO1mX6dXYGBaTuEHl-TNAsItG4aCL012NeslVyI8tBcqIVWQwkMN9nFBdqB-vuQkTlW7UOiO9l9FgmBN4VqS_iCbVcw3C9_dX6K7mLzwIE3100h9eRAlIdTelJtvIvqfV4vhVffH13Lcd9J-voRcsAU5V_HbaLS8783iw8R43hILZpO7PKyQsk3oee79rl564nChpOU0I4QS--cvpYsfdu1KhMNoqMqNTd1uvM8-PB2KduNbyli8M7Kj7duRRY5YjJdsx2mefD4QRKQjnNm0kkRXC1vLbGhQo2gINR0TZPNNu7u1O7Sb8A8axHJ2&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJn6LUaEVgLxMRkWfUcTX4bFM",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "monday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJJ_LhjUVgLxMRiRPTJRtTk-M",
+                "name": "Osteria da Fortunata",
+                "address": "Via del Pellegrino, 11/12, Roma",
+                "latitude": 41.8961166,
+                "longitude": 12.471670699999999,
+                "rating": 4.4,
+                "reviewCount": 29154,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "mediterranean",
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Recettes bio et pâtes maison proposées dans un restaurant simple de style rustique."
+                ],
+                "description": "Recettes bio et pâtes maison proposées dans un restaurant simple de style rustique.",
+                "phoneNumber": "06 6066 7391",
+                "website": "https://www.osteriadafortunata.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=16398542044249920393&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVhm97CLM2MuTn-6lLSGdHInv2L9EXkSGZmtp728iQ6LAZL0Am1BRMK_F0B2UcRVmyqCQ3se6GxLw3YdIPXTb1FlnCo1b9lijkUHYY_0iTDIm3QOvHu0LBMfjhqL5473IDG_AixueYjrfzD8mVLvpJjQWvW011EVs8XVzSLGF-6krIEP0EbeFHJ77PACfn3lfwXrmFzqVnbdVtdoK7-hSFbWDcskPpO2gIsg8uN7Br90QS2nTYE_pXxWcTqLTGKRRcfOIw--nhgHWkghvRYialCbJJ50TynfPCEozz6Sqkx2g&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJJ_LhjUVgLxMRiRPTJRtTk-M",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.6,
+            "estimatedCost": 30
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Fontaine de Trevi, Le Forum Romain puis Musées Capitolins."
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-27T11:55:16.864Z",
+        "items": [
+          {
+            "id": "meal-3-breakfast",
+            "dayNumber": 3,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "CiPASSO",
+            "description": "Breakfast at CiPASSO",
+            "locationName": "CiPASSO",
+            "latitude": 41.9020219,
+            "longitude": 12.4758908,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "restaurant": {
+              "id": "gp-new-ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "name": "CiPASSO",
+              "address": "Via Metastasio, 21, Roma",
+              "latitude": 41.9020219,
+              "longitude": 12.4758908,
+              "rating": 4.8,
+              "reviewCount": 4760,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste."
+              ],
+              "description": "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste.",
+              "phoneNumber": "06 6889 2620",
+              "website": "https://www.cipassoitalia.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=3580024099131238394&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUWSaWde4Ol-J_dD_yoRcKY4OjLiowTh79HIpFAelHmfJnxyP1im4lp_koknKWz4MjqJDjuLaAoRVQcGfWFlSRcXSq44818mq7y2V5jKxLWxzU2mQnarqZcrTUVAV5RWkIN9oAg6Uq2VcboW1D7i9dNslM_pYmafwgge4fj6IeMF6OaJcXgrX7oeudQhs_Y3PYV4ujY9wzEiiF59c6ofeikA0WJdbXHPFJjh5kRNxGjEfhkdA06nPYkmJkVzC8g2zFLLEvxqQlR5jphRqbvTemjxP6ojNNZMQQd-MYSBz79Zg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "openingHours": {
+                "sunday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "name": "ADESSO Osteria Moderna",
+                "address": "Via dei Maroniti, 29, Roma",
+                "latitude": 41.9021228,
+                "longitude": 12.4847452,
+                "rating": 4.8,
+                "reviewCount": 1065,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "344 154 4315",
+                "website": "https://www.adessoitalia.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=9354681056510857312&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVkWPfAI_tHvu4lTw5Ij_TbvuZdZGmydO4nxcgTnuVqwmOcGn4pGvqCcHp2SjqQX4qBDqob_a86ic8_MmqfXjE4aMfTR1z8FCxFozGX2cfOfISSuTVP8vLxhj--RPqfbE3PP-tuDDOia9CX374ApzQcK8hBIaRFAjbvv5ceCsn2XFve7wPKqNRh4c-vw8WyG-X52g4dn8QR6jzFCP9gHyMa95P1X1T6S_3m6G8bQ7CYMCgZYpXoU2SgGyfEW_E8_hMR5Aqm18kpqKrKxIDhLGiak75-z_N09Qr2snl6qZ1i5A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJYRcthKthLxMR-FPfbPYbePI",
+                "name": "Colline Emiliane",
+                "address": "Via degli Avignonesi, 22, Roma",
+                "latitude": 41.9029515,
+                "longitude": 12.4873707,
+                "rating": 4.6,
+                "reviewCount": 1639,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole."
+                ],
+                "description": "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole.",
+                "phoneNumber": "06 481 7538",
+                "website": "http://www.collineemiliane.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17471745499586319352&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVUFtXZllpzPeGU7qNFtWMUkjQ7yGNS0u4jGXh9K8YCfsd2KHkWRCAoxfO5V4ZjposNk1zwDBdYOjb7JVGs0i4QQL7qcJHH0l_aCMg9Okb4G_yLzHmM37VVlKCAG2LCOd3MxSjc2eRVKUTLx4Ok-H0n_t35L9JHR6FoKoRM5ydOtiJ6BC8VcESKKpEDf3ragV2HpMh-HBtYE9vVPg1ICUYaghhrpWItKTJ4bVu2qYyaj7-cpABt72q4GWwQGSyA5jQxLULHkRK7Z9R0pJd9KezlO34tIGNIWDnwLy5PAB9VQw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJYRcthKthLxMR-FPfbPYbePI",
+                "openingHours": {
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "wednesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "thursday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "friday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "saturday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-ChIJ4_TEG1VgLxMROFkd29jWdug",
+            "dayNumber": 3,
+            "startTime": "09:40",
+            "endTime": "10:10",
+            "type": "activity",
+            "title": "Piazza di Spagna",
+            "description": "",
+            "locationName": "Piazza di Spagna",
+            "latitude": 41.9056978,
+            "longitude": 12.482327,
+            "orderIndex": 1,
+            "duration": 30,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVzfi3-70yf7MmJtIyKkctQnZ_d1U8KU7XWY27tdMDERihwO7HF65fMNjJv7LAOtMIVxK4X1_jBJL7nGjMd3_LHlI7_B0d354wm6GrrlHS53ThtELhSsrGeWuxsmGwzhor4-hqvwBUBDtZ3_yLuanzvflnEg0DC9OnPEKDwRNIqjwyFrJgDyGQNWb7nBoX8noQ0bFE5qh3VRl6PktmZIkdkmrRvwnzhdPVIu3jNwoFQ1rxZLVuaLvFSVT48xTaYiOUeUxQY-ppV6HbixY_jhJnSUk4AMrsHhUPAtq3VeFiVz9uE0gYbXDGbG9khJF0TqkGIy408O2dYGHQYKjKHy80fEq_xtrX6bE2yjMBEA-CRnz1rnKya9qicCM6rwcFi2P5u6aDa-2B6JcgHq8Tmr1B2_-2JuigFDHdJCreGCQw9M0JZ-ohjh6TqUaGwsxhW9NlbswzDuiw_eVe04Vcx34NJZC7boHJCBItpafBI87AMw5GV4P3btYKBWAwayTQ3TYg0SZED7-0sx58j12HWTsPTc6tj2oSOl-VzlciLON9_97Gzh933ci9DXWiQkzN7zBJLweKE&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "00:00",
+              "close": "23:59"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "00:00",
+                "close": "23:59"
+              },
+              "monday": null,
+              "tuesday": null,
+              "wednesday": null,
+              "thursday": null,
+              "friday": null,
+              "saturday": null
+            }
+          },
+          {
+            "id": "gp-ChIJq-bXVgRhLxMRv3vgOXaktBs",
+            "dayNumber": 3,
+            "startTime": "10:50",
+            "endTime": "12:50",
+            "type": "activity",
+            "title": "Galerie Borghèse",
+            "description": "",
+            "locationName": "Galerie Borghèse",
+            "latitude": 41.9142103,
+            "longitude": 12.4921442,
+            "orderIndex": 2,
+            "duration": 120,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Roma_Museo_Borghese.jpg/400px-Roma_Museo_Borghese.jpg",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            },
+            "officialBookingUrl": "https://galleriaborghese.beniculturali.it/en/visits/",
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Galerie%20Borgh%C3%A8se%20Rome",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Galerie%20Borgh%C3%A8se%20Rome"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "13:10",
+            "endTime": "14:25",
+            "type": "restaurant",
+            "title": "CARPACCIO beef restaurant",
+            "description": "Lunch at CARPACCIO beef restaurant",
+            "locationName": "CARPACCIO beef restaurant",
+            "latitude": 41.908292900000006,
+            "longitude": 12.4905858,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJ4-lhSABhLxMRxqHpGfFps-k",
+              "name": "CARPACCIO beef restaurant",
+              "address": "Via Marche, 9, Roma",
+              "latitude": 41.908292900000006,
+              "longitude": 12.4905858,
+              "rating": 4.9,
+              "reviewCount": 715,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "06 8621 8298",
+              "googleMapsUrl": "https://maps.google.com/?cid=16839919915911193030&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfV2Uekn48tf9K9MD1R1DsY1J0B_bECfLbK_cCHpFAkxFYU6GJbK2c32K88DJaqjVQ6b1mua-a3GFlUYfZ9UEgv1azm02NqJ-iw0kvWIdGZz_kgshEV175ytAHg5Zyht1yPNh0Ip0j2VwhifUFBrv8TTta8u6DwAub0NS1sB8YVJZhAZABjamldHqKaw8_EjJbGyAu8kijiCw6oHg-EKUGwtO7nlyUxvhh-9sq3yN2eGG-cz3YmfgMZv0WVXe72GL-3Jk4gunFQglauJ7DpyrOsrUShfX6TEfiE016hVRR1aPw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ4-lhSABhLxMRxqHpGfFps-k",
+              "openingHours": {
+                "sunday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                },
+                "monday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                },
+                "tuesday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                },
+                "wednesday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                },
+                "friday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.9,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-ChIJj1M8HQJhLxMRRI6D_z18Pes",
+            "dayNumber": 3,
+            "startTime": "14:40",
+            "endTime": "15:40",
+            "type": "activity",
+            "title": "Villa Borghese",
+            "description": "",
+            "locationName": "Villa Borghese",
+            "latitude": 41.9138782,
+            "longitude": 12.4853818,
+            "orderIndex": 4,
+            "duration": 60,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUcE58goQplD7IfL45yE_N4yIcUEMQ0-QbSEXRlyK8QFmuD--Npoudge3DF8MyoKCJ7gDyrJNvyLjBon5usttD6vdS-r8i101fbJCZkSZJGIM_WGkIGtVPIijwrDHLJ_w3LL9MsABxbMCs7CG0GXZKQczh_nNVaOjDLMwRwXGKAfzXV0nNIqtN_yn2tqBAiHoFuLyNAkchipdxsjU-mtKchbf6QpTsXz8KDWlZswRQbDbOhkXt9RnG8UlI3ipOs5OWqJOxrExW6_SxvVWkp-yYi50jxGcRs1bRu9BjZiafKUbgpbrUMMfXlo3thZC1o8xWdhoFw9QJDRW9a-xHsJLyxfEfU8rr9iMjYPO6wxIrUYFZq3ytry5o0YDo9Vjr_zVcIaja0XETZ9uQnLSwI7rQUdG7Br4sT1zpYRI3g2qGlPK1KZYeMADn86rwh8wO0d4hPS1crenSJoUF3yNZS5aopXVVVUXi1_SAOu_JXuhJy83J8jXSmrM8dxsCMUT4_ALxhOIVuc9lyyJ2bZsg_6n0TLagNfDNeKtPa5ZICLn_VzyzU_NaV8bGUbYa1YLD09nIhQXmw&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "gp-ChIJhxbo5fhgLxMRUEPO_f-f7kM",
+            "dayNumber": 3,
+            "startTime": "16:05",
+            "endTime": "16:35",
+            "type": "activity",
+            "title": "Piazza del Popolo",
+            "description": "",
+            "locationName": "Piazza del Popolo",
+            "latitude": 41.9107038,
+            "longitude": 12.4763579,
+            "orderIndex": 5,
+            "duration": 30,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUr7OJN8V165agY-JgVgQcKOukiBvkA7xOmjFRGDJ6CIFn-8rt5DlP4Y62stn91T57mW4uZXu5SpHgeEryfRzS2MLHFwLxh-Cuai5tFyJ6bGt4B833x5kv1QIG9Yuom-Crc2xBieQlaZSqIZFlfavy_yGck7sf2h78XKG8HZAz_8uCTp8ZZ6qm79S5JNyurK2tccWY8kCcK44PWdsIWbl8Ntpg96jbHK5do98v6rGlmWF3gHvJSDoW41jfl0R4FpE51_pWbdiOxRBjIE6kckTvhP7nUeY-VqxiQQg5Ifh77obq0fD60GLeI0gWP3Wr_8KZtwnJdR5lscFf0GtXwjbM42g1SlY9p08UpPTH6sUp7Paau91n22HfgwlEO0Ehdo8RDGgHY9ZYw-c3kztmtg8U6mgaYO3QlhQrT5Ng2_0EdcwNZ1ajKse7gVsgQoN7wmZFnCkWIwcp6wqXxhdnz6BzEO6ejE4in6FBM7Sg8Rh1lceR_ybAgbYhUNYyVmY72Q8rWDHs9pGFoHSR8oaiG4tzzfoWbhAuAX8BCSsoqOXsbIYOhAhTeZFsfWq0bSIDMSUbmDaNg&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "gp-new-ChIJZQ3ms1pgLxMRGnTxolu6mJE",
+            "dayNumber": 3,
+            "startTime": "17:10",
+            "endTime": "19:10",
+            "type": "activity",
+            "title": "Chiostro del Bramante",
+            "description": "Espace culturel accueillant des expositions temporaires d'art classique dans un cloître conçu par Donato Bramante.",
+            "locationName": "Chiostro del Bramante",
+            "latitude": 41.9000087,
+            "longitude": 12.471590899999999,
+            "orderIndex": 6,
+            "duration": 120,
+            "rating": 4.6,
+            "estimatedCost": 14,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVrw_hUAIoCW9wwvPFRFLP2-tqKh23pyKSZ2rvCcwsSece3mmAw2MEd-fhFscxjtg7uClsSp_rdZABsrxTU-kibL7klCnOJvLjZY3QjMc0AWAS9F-kqItyijkMODWk4ZZAPzP85RtKUMwh3pM65KC8g8D5wrePACQY8cClSPgInxqb8YJ7FSrA5Ha8FfgTtmsBWU87gqCP1CM01IVx9bfU7ikqZy-pxijaJ6HLec_yy770DFobK6bvqu9OwVZ_rM74rZCP9qMxFU_uXM49Cz7VlerKDI690o4weBq3xDofCrg&maxwidth=400",
+            "mustSee": false,
+            "openingHours": {
+              "open": "10:00",
+              "close": "20:00"
+            },
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "19:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "20:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "20:00"
+              }
+            }
+          },
+          {
+            "id": "meal-3-dinner",
+            "dayNumber": 3,
+            "startTime": "19:20",
+            "endTime": "20:50",
+            "type": "restaurant",
+            "title": "Cantina e Cucina",
+            "description": "Dinner at Cantina e Cucina",
+            "locationName": "Cantina e Cucina",
+            "latitude": 41.8979478,
+            "longitude": 12.4716378,
+            "orderIndex": 7,
+            "duration": 90,
+            "mealType": "dinner",
+            "restaurant": {
+              "id": "gp-new-ChIJn6LUaEVgLxMRkWfUcTX4bFM",
+              "name": "Cantina e Cucina",
+              "address": "V. del Governo Vecchio, 87, Roma",
+              "latitude": 41.8979478,
+              "longitude": 12.4716378,
+              "rating": 4.6,
+              "reviewCount": 16812,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "pizza",
+                "italian",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant de style décontracté proposant cuisine régionale et pizzas dans un cadre rustique et rétro."
+              ],
+              "description": "Restaurant de style décontracté proposant cuisine régionale et pizzas dans un cadre rustique et rétro.",
+              "phoneNumber": "06 689 2574",
+              "website": "http://www.cantinaecucina.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=6011452511059470225&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXTnUBcZYZbIB-gpnUgnSJIZz5XKSLWxP1iQJfncFhWDmeEuL9y8FQZ1yIfGPvrmrX_2tdneFwg9NsEF2g6G53zVOQCtKmcyO6zNyYGI3uyu8sPK09K5a52XUNPKwJYZ0UeBO1mX6dXYGBaTuEHl-TNAsItG4aCL012NeslVyI8tBcqIVWQwkMN9nFBdqB-vuQkTlW7UOiO9l9FgmBN4VqS_iCbVcw3C9_dX6K7mLzwIE3100h9eRAlIdTelJtvIvqfV4vhVffH13Lcd9J-voRcsAU5V_HbaLS8783iw8R43hILZpO7PKyQsk3oee79rl564nChpOU0I4QS--cvpYsfdu1KhMNoqMqNTd1uvM8-PB2KduNbyli8M7Kj7duRRY5YjJdsx2mefD4QRKQjnNm0kkRXC1vLbGhQo2gINR0TZPNNu7u1O7Sb8A8axHJ2&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJn6LUaEVgLxMRkWfUcTX4bFM",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "monday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "23:30"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJJ_LhjUVgLxMRiRPTJRtTk-M",
+                "name": "Osteria da Fortunata",
+                "address": "Via del Pellegrino, 11/12, Roma",
+                "latitude": 41.8961166,
+                "longitude": 12.471670699999999,
+                "rating": 4.4,
+                "reviewCount": 29154,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "mediterranean",
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Recettes bio et pâtes maison proposées dans un restaurant simple de style rustique."
+                ],
+                "description": "Recettes bio et pâtes maison proposées dans un restaurant simple de style rustique.",
+                "phoneNumber": "06 6066 7391",
+                "website": "https://www.osteriadafortunata.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=16398542044249920393&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVhm97CLM2MuTn-6lLSGdHInv2L9EXkSGZmtp728iQ6LAZL0Am1BRMK_F0B2UcRVmyqCQ3se6GxLw3YdIPXTb1FlnCo1b9lijkUHYY_0iTDIm3QOvHu0LBMfjhqL5473IDG_AixueYjrfzD8mVLvpJjQWvW011EVs8XVzSLGF-6krIEP0EbeFHJ77PACfn3lfwXrmFzqVnbdVtdoK7-hSFbWDcskPpO2gIsg8uN7Br90QS2nTYE_pXxWcTqLTGKRRcfOIw--nhgHWkghvRYialCbJJ50TynfPCEozz6Sqkx2g&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJJ_LhjUVgLxMRiRPTJRtTk-M",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.6,
+            "estimatedCost": 30
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Piazza di Spagna, Galerie Borghèse puis Villa Borghese."
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-28T11:55:16.864Z",
+        "items": [
+          {
+            "id": "meal-4-breakfast",
+            "dayNumber": 4,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "CiPASSO",
+            "description": "Breakfast at CiPASSO",
+            "locationName": "CiPASSO",
+            "latitude": 41.9020219,
+            "longitude": 12.4758908,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "restaurant": {
+              "id": "gp-new-ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "name": "CiPASSO",
+              "address": "Via Metastasio, 21, Roma",
+              "latitude": 41.9020219,
+              "longitude": 12.4758908,
+              "rating": 4.8,
+              "reviewCount": 4760,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste."
+              ],
+              "description": "Restaurant sophistiqué proposant une cuisine de brasserie créative et des vins raffinés dans une salle à manger intimiste.",
+              "phoneNumber": "06 6889 2620",
+              "website": "https://www.cipassoitalia.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=3580024099131238394&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUWSaWde4Ol-J_dD_yoRcKY4OjLiowTh79HIpFAelHmfJnxyP1im4lp_koknKWz4MjqJDjuLaAoRVQcGfWFlSRcXSq44818mq7y2V5jKxLWxzU2mQnarqZcrTUVAV5RWkIN9oAg6Uq2VcboW1D7i9dNslM_pYmafwgge4fj6IeMF6OaJcXgrX7oeudQhs_Y3PYV4ujY9wzEiiF59c6ofeikA0WJdbXHPFJjh5kRNxGjEfhkdA06nPYkmJkVzC8g2zFLLEvxqQlR5jphRqbvTemjxP6ojNNZMQQd-MYSBz79Zg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJkWBBl0JhLxMR-icOTPPMrjE",
+              "openingHours": {
+                "sunday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "17:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "name": "ADESSO Osteria Moderna",
+                "address": "Via dei Maroniti, 29, Roma",
+                "latitude": 41.9021228,
+                "longitude": 12.4847452,
+                "rating": 4.8,
+                "reviewCount": 1065,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "344 154 4315",
+                "website": "https://www.adessoitalia.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=9354681056510857312&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVkWPfAI_tHvu4lTw5Ij_TbvuZdZGmydO4nxcgTnuVqwmOcGn4pGvqCcHp2SjqQX4qBDqob_a86ic8_MmqfXjE4aMfTR1z8FCxFozGX2cfOfISSuTVP8vLxhj--RPqfbE3PP-tuDDOia9CX374ApzQcK8hBIaRFAjbvv5ceCsn2XFve7wPKqNRh4c-vw8WyG-X52g4dn8QR6jzFCP9gHyMa95P1X1T6S_3m6G8bQ7CYMCgZYpXoU2SgGyfEW_E8_hMR5Aqm18kpqKrKxIDhLGiak75-z_N09Qr2snl6qZ1i5A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJXyYKcsZhLxMRYNBnkNuA0oE",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "17:30",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJYRcthKthLxMR-FPfbPYbePI",
+                "name": "Colline Emiliane",
+                "address": "Via degli Avignonesi, 22, Roma",
+                "latitude": 41.9029515,
+                "longitude": 12.4873707,
+                "rating": 4.6,
+                "reviewCount": 1639,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole."
+                ],
+                "description": "Restaurant classique populaire pour ses plats copieux traditionnels de cuisine romagnole.",
+                "phoneNumber": "06 481 7538",
+                "website": "http://www.collineemiliane.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=17471745499586319352&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVUFtXZllpzPeGU7qNFtWMUkjQ7yGNS0u4jGXh9K8YCfsd2KHkWRCAoxfO5V4ZjposNk1zwDBdYOjb7JVGs0i4QQL7qcJHH0l_aCMg9Okb4G_yLzHmM37VVlKCAG2LCOd3MxSjc2eRVKUTLx4Ok-H0n_t35L9JHR6FoKoRM5ydOtiJ6BC8VcESKKpEDf3ragV2HpMh-HBtYE9vVPg1ICUYaghhrpWItKTJ4bVu2qYyaj7-cpABt72q4GWwQGSyA5jQxLULHkRK7Z9R0pJd9KezlO34tIGNIWDnwLy5PAB9VQw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJYRcthKthLxMR-FPfbPYbePI",
+                "openingHours": {
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "wednesday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "thursday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "friday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  },
+                  "saturday": {
+                    "open": "19:30",
+                    "close": "22:45"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30
+          },
+          {
+            "id": "gp-ChIJKcGbg2NgLxMRthZkUqDs4M8",
+            "dayNumber": 4,
+            "startTime": "10:20",
+            "endTime": "12:50",
+            "type": "activity",
+            "title": "Musées du Vatican",
+            "description": "",
+            "locationName": "Musées du Vatican",
+            "latitude": 41.9064878,
+            "longitude": 12.4536413,
+            "orderIndex": 1,
+            "duration": 150,
+            "rating": 4.6,
+            "estimatedCost": 17,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Mura_vaticane_-_ingresso_ai_Musei_00410.JPG/400px-Mura_vaticane_-_ingresso_ai_Musei_00410.JPG",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Vatican%20Museums%20Sistine%20Chapel%20Skip%20the%20Line",
+            "mustSee": true,
+            "openingHours": {
+              "open": "08:00",
+              "close": "20:00"
+            },
+            "openingHoursByDay": {
+              "sunday": null,
+              "monday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "tuesday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "wednesday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "thursday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "friday": {
+                "open": "08:00",
+                "close": "20:00"
+              },
+              "saturday": {
+                "open": "08:00",
+                "close": "20:00"
+              }
+            },
+            "officialBookingUrl": "https://tickets.museivaticani.va/home",
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Mus%C3%A9es%20du%20Vatican%20Rome",
+            "tiqetsUrl": "https://www.tiqets.com/en/search?query=Mus%C3%A9es%20du%20Vatican%20Rome"
+          },
+          {
+            "id": "gp-new-ChIJPS3UVwqJJRMRsH46sppPCQA",
+            "dayNumber": 4,
+            "startTime": "13:10",
+            "endTime": "16:10",
+            "type": "activity",
+            "title": "Vatican",
+            "description": "Catholic city-state & home of the Pope, known for Sistine Chapel frescoes & St. Peter’s Basilica.",
+            "locationName": "Vatican",
+            "latitude": 41.902916,
+            "longitude": 12.453389000000001,
+            "orderIndex": 2,
+            "duration": 180,
+            "rating": 4,
+            "estimatedCost": 14,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWma3SnRZsasrRx4V54ntnau60CqboyzjZBfdiMinNHiieXeVJQlds-3Ydx7rho-eUhaBASDngc8xarRwQ6HuVYI9anNfWcHu7miqaC0v1A4X7lkU-ACoAzwpdUYcACeD3AWntZEnqpME6GG09ROwGdVtSq80kOFcnNDnOtm5qPCXpoqLUZZbWaiVEaNJUz7H2Hjd7AMhoHUquM6XL2dJu7ASk928SWguSwq0Oax2Xz8yYPojLzADqZnlrDyEio5bRBCp1he9mUvDvZfdRSrTpDviiE5BGUDSVvbcpRbVViOFCu3Q6b3t4qxSX9DtP5IkAm0OPW6WOeumfKgnHZSX6FbOODJiiKcZGljCq97FW7GEFPha6PSKp4AAsXTciQ8Er7cK6M06VH1MUdg285rD2ofFmztW5GrbYq4fWH7oQ&maxwidth=400",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Vatican%20Museums%20Sistine%20Chapel%20Skip%20the%20Line",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-4-lunch",
+            "dayNumber": 4,
+            "startTime": "16:20",
+            "endTime": "17:35",
+            "type": "restaurant",
+            "title": "Tonnarello San Pietro",
+            "description": "Lunch at Tonnarello San Pietro",
+            "locationName": "Tonnarello San Pietro",
+            "latitude": 41.9048543,
+            "longitude": 12.4589588,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "restaurant": {
+              "id": "gp-new-ChIJk9b_C0lhLxMRVZU0LFFikiQ",
+              "name": "Tonnarello San Pietro",
+              "address": "Via del Mascherino, 80, Roma",
+              "latitude": 41.9048543,
+              "longitude": 12.4589588,
+              "rating": 4.8,
+              "reviewCount": 7278,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "06 4544 8433",
+              "website": "https://www.tonnarellosanpietro.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=2635276832738678101&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVALbcrbRkgjXlad0vkbqsQDiAFxj0IwkvjKYR3WCwmHQ76_cqVKsER3oAUC0zIHw42yBWtWwTxxPq-sRgp3rBhjLBtW1z9i18Ar86qWzY1di6jESvQHu3QR-3xh6OmvhQNCJZYqhPSZruSOXflA8PLSxZ39_4uJJZPVWDizjCCV8Ag8EkdP7FWWPTvM2jsVg61UsxF2MYcmR8RVA2mYOa5-3MAcmhSnLLReA1ypQcwdJGgwPISESA7btFzXQ8GJIONvtCi1_bgXz9eMxVvI8kj6tbZt5Z4kq9cFaYiWKj3MuhbDLF5T7-6dKbOYPBnyKvGHDg9NZ4fLQ83RZA1u0ptzCf8nDYtaVfKT3mIUt_Tek24KgIIl5iSpVApzduRodAuVeaCbeI5aVLwvSIzM-l7D33cnL2dLZiokzhQTadRJbLp&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJk9b_C0lhLxMRVZU0LFFikiQ",
+              "openingHours": {
+                "sunday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4.8,
+            "estimatedCost": 30
+          },
+          {
+            "id": "meal-4-dinner",
+            "dayNumber": 4,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Tonnarello | Paglia",
+            "description": "Dinner at Tonnarello | Paglia",
+            "locationName": "Tonnarello | Paglia",
+            "latitude": 41.889804,
+            "longitude": 12.4693004,
+            "orderIndex": 4,
+            "duration": 90,
+            "mealType": "dinner",
+            "restaurant": {
+              "id": "gp-new-ChIJVTkQgThgLxMRWM0saoiZzkA",
+              "name": "Tonnarello | Paglia",
+              "address": "V. della Paglia, 1/2/3, Roma",
+              "latitude": 41.889804,
+              "longitude": 12.4693004,
+              "rating": 4.7,
+              "reviewCount": 100879,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant à l'ambiance détendue avec pâtes, boulettes de viande, plats romains simples, terrasse et concerts de guitare acoustique."
+              ],
+              "description": "Restaurant à l'ambiance détendue avec pâtes, boulettes de viande, plats romains simples, terrasse et concerts de guitare acoustique.",
+              "website": "https://tonnarello.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=4669838674805706072&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWaCEYAsrUXNqSk4Wa3CunZ5l287FMIrath7XLXGEpI-6CMXS61H57wDNA7QudSwRNwrtQwejmEUOIMS38EP5bjzKYVJLUGt-LoaByinc3KX9gFwV3PUB-RUyepDovtwYpcGz9exmudkyRgCsKdv1VX9T4MaS9jXTe9-tHsQyaZxNXLfMlSJt7DfQ5ooRGOS8fWBlQv48CcNyhEwcckYV4SAQAN-_tDXdzifG8AQZrNZlInWJJzrETU-3CNMv0GEdSj2dv0LS6J7izP6QwmFRe9LzhX1GJjabupId1THbMsySm02a-ipGyygzIrzfXJaaPO9PGDHhOWgCa_2M_W0TAgwaUJDB-ni1K9NLyBjw0NmRuPQJvpcUEcHEn4VpSZRYn7d1NWkoFoJIlXbD9nqx4p-XLgOMXt_D9c-WnGA7QAwzO7&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJVTkQgThgLxMRWM0saoiZzkA",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0,
+              "walkingTime": 0,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJn6LUaEVgLxMRkWfUcTX4bFM",
+                "name": "Cantina e Cucina",
+                "address": "V. del Governo Vecchio, 87, Roma",
+                "latitude": 41.8979478,
+                "longitude": 12.4716378,
+                "rating": 4.6,
+                "reviewCount": 16812,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "pizza",
+                  "italian",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant de style décontracté proposant cuisine régionale et pizzas dans un cadre rustique et rétro."
+                ],
+                "description": "Restaurant de style décontracté proposant cuisine régionale et pizzas dans un cadre rustique et rétro.",
+                "phoneNumber": "06 689 2574",
+                "website": "http://www.cantinaecucina.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=6011452511059470225&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXTnUBcZYZbIB-gpnUgnSJIZz5XKSLWxP1iQJfncFhWDmeEuL9y8FQZ1yIfGPvrmrX_2tdneFwg9NsEF2g6G53zVOQCtKmcyO6zNyYGI3uyu8sPK09K5a52XUNPKwJYZ0UeBO1mX6dXYGBaTuEHl-TNAsItG4aCL012NeslVyI8tBcqIVWQwkMN9nFBdqB-vuQkTlW7UOiO9l9FgmBN4VqS_iCbVcw3C9_dX6K7mLzwIE3100h9eRAlIdTelJtvIvqfV4vhVffH13Lcd9J-voRcsAU5V_HbaLS8783iw8R43hILZpO7PKyQsk3oee79rl564nChpOU0I4QS--cvpYsfdu1KhMNoqMqNTd1uvM8-PB2KduNbyli8M7Kj7duRRY5YjJdsx2mefD4QRKQjnNm0kkRXC1vLbGhQo2gINR0TZPNNu7u1O7Sb8A8axHJ2&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJn6LUaEVgLxMRkWfUcTX4bFM",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "23:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJJ_LhjUVgLxMRiRPTJRtTk-M",
+                "name": "Osteria da Fortunata",
+                "address": "Via del Pellegrino, 11/12, Roma",
+                "latitude": 41.8961166,
+                "longitude": 12.471670699999999,
+                "rating": 4.4,
+                "reviewCount": 29154,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "mediterranean",
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Recettes bio et pâtes maison proposées dans un restaurant simple de style rustique."
+                ],
+                "description": "Recettes bio et pâtes maison proposées dans un restaurant simple de style rustique.",
+                "phoneNumber": "06 6066 7391",
+                "website": "https://www.osteriadafortunata.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=16398542044249920393&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVhm97CLM2MuTn-6lLSGdHInv2L9EXkSGZmtp728iQ6LAZL0Am1BRMK_F0B2UcRVmyqCQ3se6GxLw3YdIPXTb1FlnCo1b9lijkUHYY_0iTDIm3QOvHu0LBMfjhqL5473IDG_AixueYjrfzD8mVLvpJjQWvW011EVs8XVzSLGF-6krIEP0EbeFHJ77PACfn3lfwXrmFzqVnbdVtdoK7-hSFbWDcskPpO2gIsg8uN7Br90QS2nTYE_pXxWcTqLTGKRRcfOIw--nhgHWkghvRYialCbJJ50TynfPCEozz6Sqkx2g&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJJ_LhjUVgLxMRiRPTJRtTk-M",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "00:30"
+                  }
+                },
+                "distance": 0,
+                "walkingTime": 0,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 30
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Musées du Vatican puis Vatican."
+      }
+    ],
+    "accommodation": {
+      "id": "booking-15704218",
+      "name": "Appartamento Baby Fontana",
+      "type": "hotel",
+      "address": "Piazza di Trevi, 96, 00187 Roma RM, Italy",
+      "latitude": 41.9011391,
+      "longitude": 12.4844123,
+      "rating": 7.6,
+      "reviewCount": 9,
+      "pricePerNight": 311,
+      "currency": "EUR",
+      "amenities": [],
+      "checkInTime": "14:00",
+      "checkOutTime": "08:00",
+      "bookingUrl": "https://www.booking.com/hotel/it/appartamento-baby-fontana.html?checkin=2026-03-25&checkout=2026-03-28&group_adults=2&group_children=0&no_rooms=1",
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/817182121.jpg?k=89f33133e8b242fbde7ca081c5a830201d7d3861a1f6d682ad7301b8ace6eee2&o="
+      ],
+      "breakfastIncluded": false
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-1490448",
+        "name": "Morin 10 Rome Exclusive Suites",
+        "type": "hotel",
+        "address": "Via Costantino Morin, 10, 00195 Roma RM, Italy",
+        "latitude": 41.9123045683725,
+        "longitude": 12.455125353373,
+        "rating": 8.5,
+        "reviewCount": 444,
+        "pricePerNight": 177,
+        "currency": "EUR",
+        "amenities": [],
+        "checkInTime": "14:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/it/holiday-home-morin-10.html?checkin=2026-03-25&checkout=2026-03-28&group_adults=2&group_children=0&no_rooms=1",
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/540018858.jpg?k=0fbe8da4c12640d7cc6ed09c42ac2cd92929a101bd2911bc586d5a3020574578&o="
+        ],
+        "breakfastIncluded": false
+      },
+      {
+        "id": "booking-15812282",
+        "name": "Elegantis Aventino Charming Flat with Private Terrace",
+        "type": "hotel",
+        "address": "00185 Rome, Metropolitan City of Rome Capital, Italy",
+        "latitude": 41.8836064858616,
+        "longitude": 12.4876944434944,
+        "rating": 10,
+        "reviewCount": 1,
+        "pricePerNight": 373,
+        "currency": "EUR",
+        "amenities": [],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Elegantis+Aventino+Charming+Flat+with+Private+Terrace+Rome&checkin=2026-03-25&checkout=2026-03-28&group_adults=2&group_children=0&no_rooms=1",
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/823123698.jpg?k=d0ea8b36fbc8185df87fd0e16d2a7b1f9fd248898d1279bc80b1aa6673cd8f93&o="
+        ],
+        "breakfastIncluded": false
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 913,
+            "price": 0,
+            "co2": 15,
+            "operator": "A",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/paris/rome?departure_date=2026-03-25"
+          }
+        ],
+        "totalDuration": 953,
+        "totalPrice": 0,
+        "totalCO2": 15,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/paris/rome?departure_date=2026-03-25",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Châtelet - Les Halles",
+            "to": "Gare de Lyon",
+            "departure": "2026-03-25T13:40:00.000Z",
+            "arrival": "2026-03-25T13:42:30.000Z",
+            "duration": 3,
+            "line": "A"
+          },
+          {
+            "mode": "train",
+            "from": "Gare de Lyon",
+            "to": "Milano Porta Garibaldi",
+            "departure": "2026-03-25T13:48:00.000Z",
+            "arrival": "2026-03-25T20:53:00.000Z",
+            "duration": 425,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "train",
+            "from": "Milano Porta Garibaldi",
+            "to": "Roma Tiburtina",
+            "departure": "2026-03-25T21:18:00.000Z",
+            "arrival": "2026-03-26T04:53:00.000Z",
+            "duration": 455,
+            "line": "ICN"
+          }
+        ],
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 829,
+            "price": 44,
+            "co2": 30,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/paris/rome?departure_date=2026-03-25"
+          }
+        ],
+        "totalDuration": 884,
+        "totalPrice": 44,
+        "totalCO2": 30,
+        "score": 6.3,
+        "scoreDetails": {
+          "priceScore": 8.2,
+          "timeScore": 1.2,
+          "co2Score": 9.4
+        },
+        "bookingUrl": "https://www.omio.fr/bus/paris/rome?departure_date=2026-03-25"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Rome",
+            "duration": 68,
+            "price": 91,
+            "co2": 177
+          }
+        ],
+        "totalDuration": 356,
+        "totalPrice": 115,
+        "totalCO2": 178,
+        "score": 6,
+        "scoreDetails": {
+          "priceScore": 5.2,
+          "timeScore": 10,
+          "co2Score": 3
+        }
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 83,
+            "price": 111,
+            "co2": 216,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/CDG2503FCO2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 373,
+        "totalPrice": 111,
+        "totalCO2": 216,
+        "score": 5.5,
+        "scoreDetails": {
+          "priceScore": 5.3,
+          "timeScore": 9.7,
+          "co2Score": 1.4
+        },
+        "bookingUrl": "https://www.aviasales.com/search/CDG2503FCO2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/rome?departure_date=2026-03-25"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 663,
+            "price": 238,
+            "co2": 57,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Paris/Rome"
+          }
+        ],
+        "totalDuration": 753,
+        "totalPrice": 238,
+        "totalCO2": 57,
+        "score": 3.9,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 3.4,
+          "co2Score": 8.2
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Paris/Rome",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "train+plane-via-lyon",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Lyon",
+            "duration": 146,
+            "price": 0,
+            "co2": 2.4,
+            "operator": "A",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Paris&arrival=Lyon&outwardDate=2026-03-25&passengers=2"
+          },
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Rome",
+            "duration": 95,
+            "price": 230,
+            "co2": 247,
+            "operator": "U2",
+            "bookingUrl": "https://www.aviasales.com/search/LYS2503FCO2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 361,
+        "totalPrice": 230,
+        "totalCO2": 249.4,
+        "score": 3.4,
+        "scoreDetails": {
+          "priceScore": 0.3,
+          "timeScore": 9.9,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Paris&arrival=Lyon&outwardDate=2026-03-25&passengers=2"
+      }
+    ],
+    "attractionPool": [
+      {
+        "id": "gp-new-ChIJrRMgU7ZhLxMRxAOFkC7I8Sg",
+        "name": "Colisée",
+        "type": "culture",
+        "description": "Immense amphithéâtre romain à 3 niveaux autrefois utilisé pour les combats de gladiateurs, visites guidées.",
+        "duration": 90,
+        "estimatedCost": 14,
+        "latitude": 41.8902102,
+        "longitude": 12.4922309,
+        "rating": 4.8,
+        "reviewCount": 481886,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "08:30",
+          "close": "16:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:30",
+            "close": "16:30"
+          },
+          "monday": {
+            "open": "08:30",
+            "close": "16:30"
+          },
+          "tuesday": {
+            "open": "08:30",
+            "close": "16:30"
+          },
+          "wednesday": {
+            "open": "08:30",
+            "close": "16:30"
+          },
+          "thursday": {
+            "open": "08:30",
+            "close": "16:30"
+          },
+          "friday": {
+            "open": "08:30",
+            "close": "16:30"
+          },
+          "saturday": {
+            "open": "08:30",
+            "close": "16:30"
+          }
+        },
+        "phone": "06 2111 5843",
+        "website": "https://colosseo.it/",
+        "googleMapsUrl": "https://maps.google.com/?cid=2950359333223072708&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW0OkcrIYF28gFR6_G1SpG7V3Bm9l3sLVpvH4S_HOVv2IiBGILEeMioVFCTFcykk5MdAqi094A1oTKZHHPlaNf5THlmE_2cq7r8Ll9WKsVJ-m-s7KBoibLIwpti3b5AeONEVoAQm_XbpjTPrWWHd1tiNpuqbM3bwv4MNahKswYyC1B0C7p5TJDAXu2PkuG8N6XglB8JYKoO_67CW3xEW8GMEF4szKTql8oH8HrE8TgtleAWe9wlbmQh6UrVqQJVDRKCBp83-HMNx-prIn1SaHGp3qJl1qTd3YaxQYZzLoRPpu886Hwtr8NATUOLBK2mx15AO4Ou_6-Yyak4fhiKp8uKdPnRs9tw3XB-_FU66WSy-attQ_SamNnUR1MeGqsOWGms6fHAT-EwBPPRf9JtwC5edC4_OVZ2c84zvSDPr1_ApA&maxwidth=400",
+        "googlePlaceId": "ChIJrRMgU7ZhLxMRxAOFkC7I8Sg",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 153.37221183733925,
+        "source": "mustsee",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Colosseum%20Roman%20Forum%20Palatine%20Hill%20Skip%20the%20Line"
+      },
+      {
+        "id": "gp-ChIJKcGbg2NgLxMRthZkUqDs4M8",
+        "name": "Musées du Vatican",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.9064878,
+        "longitude": 12.4536413,
+        "rating": 4.6,
+        "reviewCount": 199058,
+        "duration": 150,
+        "estimatedCost": 17,
+        "openingHours": {
+          "open": "08:00",
+          "close": "20:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Mura_vaticane_-_ingresso_ai_Musei_00410.JPG/400px-Mura_vaticane_-_ingresso_ai_Musei_00410.JPG",
+        "googlePlaceId": "ChIJKcGbg2NgLxMRthZkUqDs4M8",
+        "openingHoursByDay": {
+          "sunday": null,
+          "monday": {
+            "open": "08:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 6988 3145",
+        "website": "https://www.museivaticani.va/content/museivaticani/it.html",
+        "isOutdoor": false,
+        "score": 152.84764401360556,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Vatican%20Museums%20Sistine%20Chapel%20Skip%20the%20Line"
+      },
+      {
+        "id": "gp-ChIJ1UCDJ1NgLxMRtrsCzOHxdvY",
+        "name": "Fontaine de Trevi",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.9009325,
+        "longitude": 12.483313,
+        "rating": 4.7,
+        "reviewCount": 494911,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "22:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXR1NQPrgzJ34Dm9U5lo0NWkGJ1Jr-o9UUyLoMxJNbW7wF0Pzq7Th0JH17JrIj8M0MS6ZpT-GicklgYBqyg0uYkoRcDr-nT-t3etxTGrCfrMfnyxKTSrOgV3pVcmoy51HO4CNmcoyg1YIwpaFzgkJ05z64YHUUIiHjUjf0ediYm-TlXHANlYDlIHriJj_XrzIJzVFsVYAJBVxTGnrYz6dd7Gkoh9_gXmoI--ESInBzh5P5IT9C2rR9Sxv9JyK6Ue1uk3ThrRI0QbnRzrctDABDuMi95VZ7_vUEfg8DtV5rxtuGDAFMW1x9sxrlUy0xkIgO0GL7CzXK-BV73aAjkoIztFGCebTn7EyFewLFBga9eedbFqG4rrvZOyYhoCEfnm2pc1kfv9TJ9EMAS8I6BPl9CnEZDG4glZWNGfWoD4NxsJ0j_MPCR9bv1DGUxO1ZiVbMf6P4_27h9NZnAe95kJWVAZap-yH7IhArSAykjREj7FNP1eA4Wo-Sbz66JE_pbfqLUJTS9qZTNnGR3rzO3XEn4LL-sGGk8MCE76SqhpcXJzmimizdLIA7oELmV0asMMbt6S0efXaMcM4SQ2W3L8ybpdbE&maxwidth=400",
+        "googlePlaceId": "ChIJ1UCDJ1NgLxMRtrsCzOHxdvY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "monday": {
+            "open": "11:30",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "11:30",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 0608",
+        "website": "https://fontanaditrevi.roma.it/",
+        "score": 151.31533522099812,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Trevi%20Fountain%20Underground%20Rome%20Tour"
+      },
+      {
+        "id": "gp-ChIJqUCGZ09gLxMRLM42IPpl0co",
+        "name": "Panthéon",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.8986108,
+        "longitude": 12.4768729,
+        "rating": 4.8,
+        "reviewCount": 273347,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWOCkiht_vb84WyYUpZWsdmCn4_EOCAGgc84hta3xcy-mq8BrnkUQvvOQe4gb9WgZaZNSxROrF0Fvrls1v4i-JIBcA5nhbaTiGiCv7xRan3HPfluPr4GHE-zehZj3i2GPws1mjNEslAuL16fZmvWt_zY0WZXbECMDcGcLM9YIV6dyYgL5MPpkfZqoAQ5FoRl8gHcgEbIPN-6_ozV_tWxLQwv_AhrxLGXXZZHXew0SBKdC7GVZAutS8vtFppSoe9mNhV8iITue9YEjPHHFnfc9lA6qCb43XzIc5xqj64RsgAkh8njuRtgC-5dQUlIvATaF_b2vqm0tZvdwYade-DC4tsxhXxwIydO1zFwI4t0vbeB5CZlIAcYLZTrDP7fxxQVA5LidFpUOkbv4VVNaBvL1VaX_OW5ttXK2ZavEIFH2KQT_6Jhc7UrcAYtkWR6q9z1iO-vtf1ewV5kB1mFwvwS4Bhz4SmnwXo3W4Q_ARl_EX77yiySzE6MzEMvH70Zk9zxjG2mluAYsh99wxAI8h4wuGj1VyTpfXnTg6HEj3Sr88DZx6szBtLqvbGOOpNhXpqaPnLzwZf&maxwidth=400",
+        "googlePlaceId": "ChIJqUCGZ09gLxMRLM42IPpl0co",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 6830 0230",
+        "website": "https://direzionemuseiroma.cultura.gov.it/pantheon/",
+        "score": 151.10171932923183,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJWZsUt2FgLxMRg1KHzXfwS3I",
+        "name": "Basilique St Pierre",
+        "type": "religious",
+        "description": "",
+        "latitude": 41.9021667,
+        "longitude": 12.4539367,
+        "rating": 4.8,
+        "reviewCount": 171881,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/400px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+        "googlePlaceId": "ChIJWZsUt2FgLxMRg1KHzXfwS3I",
+        "isOutdoor": false,
+        "score": 149.24320640664865,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-new-ChIJPS3UVwqJJRMRsH46sppPCQA",
+        "name": "Vatican",
+        "type": "culture",
+        "description": "Catholic city-state & home of the Pope, known for Sistine Chapel frescoes & St. Peter’s Basilica.",
+        "duration": 180,
+        "estimatedCost": 14,
+        "latitude": 41.902916,
+        "longitude": 12.453389000000001,
+        "rating": 4,
+        "reviewCount": 0,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "website": "http://www.vatican.va/phome_en.htm",
+        "googleMapsUrl": "https://maps.google.com/?cid=2620800624131760&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWma3SnRZsasrRx4V54ntnau60CqboyzjZBfdiMinNHiieXeVJQlds-3Ydx7rho-eUhaBASDngc8xarRwQ6HuVYI9anNfWcHu7miqaC0v1A4X7lkU-ACoAzwpdUYcACeD3AWntZEnqpME6GG09ROwGdVtSq80kOFcnNDnOtm5qPCXpoqLUZZbWaiVEaNJUz7H2Hjd7AMhoHUquM6XL2dJu7ASk928SWguSwq0Oax2Xz8yYPojLzADqZnlrDyEio5bRBCp1he9mUvDvZfdRSrTpDviiE5BGUDSVvbcpRbVViOFCu3Q6b3t4qxSX9DtP5IkAm0OPW6WOeumfKgnHZSX6FbOODJiiKcZGljCq97FW7GEFPha6PSKp4AAsXTciQ8Er7cK6M06VH1MUdg285rD2ofFmztW5GrbYq4fWH7oQ&maxwidth=400",
+        "googlePlaceId": "ChIJPS3UVwqJJRMRsH46sppPCQA",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 106.92659197224948,
+        "source": "mustsee",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Vatican%20Museums%20Sistine%20Chapel%20Skip%20the%20Line"
+      },
+      {
+        "id": "gp-ChIJ4_TEG1VgLxMROFkd29jWdug",
+        "name": "Piazza di Spagna",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.9056978,
+        "longitude": 12.482327,
+        "rating": 4.7,
+        "reviewCount": 148625,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVzfi3-70yf7MmJtIyKkctQnZ_d1U8KU7XWY27tdMDERihwO7HF65fMNjJv7LAOtMIVxK4X1_jBJL7nGjMd3_LHlI7_B0d354wm6GrrlHS53ThtELhSsrGeWuxsmGwzhor4-hqvwBUBDtZ3_yLuanzvflnEg0DC9OnPEKDwRNIqjwyFrJgDyGQNWb7nBoX8noQ0bFE5qh3VRl6PktmZIkdkmrRvwnzhdPVIu3jNwoFQ1rxZLVuaLvFSVT48xTaYiOUeUxQY-ppV6HbixY_jhJnSUk4AMrsHhUPAtq3VeFiVz9uE0gYbXDGbG9khJF0TqkGIy408O2dYGHQYKjKHy80fEq_xtrX6bE2yjMBEA-CRnz1rnKya9qicCM6rwcFi2P5u6aDa-2B6JcgHq8Tmr1B2_-2JuigFDHdJCreGCQw9M0JZ-ohjh6TqUaGwsxhW9NlbswzDuiw_eVe04Vcx34NJZC7boHJCBItpafBI87AMw5GV4P3btYKBWAwayTQ3TYg0SZED7-0sx58j12HWTsPTc6tj2oSOl-VzlciLON9_97Gzh933ci9DXWiQkzN7zBJLweKE&maxwidth=400",
+        "googlePlaceId": "ChIJ4_TEG1VgLxMROFkd29jWdug",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 0608",
+        "isOutdoor": true,
+        "score": 67.69605158546992,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ782pg7NhLxMR5n3swAdAkfo",
+        "name": "Le Forum Romain",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.8920906,
+        "longitude": 12.4864378,
+        "rating": 4.8,
+        "reviewCount": 141506,
+        "duration": 90,
+        "estimatedCost": 18,
+        "openingHours": {
+          "open": "09:00",
+          "close": "16:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfURigjTPMN2Z7K46rCWg_rWrxTEdnVZNN0ffSOzL_blByG-bhanWI13ktdJsPfhwt-ctcvnv_2klLnP12_T3luQSbNqjZRCWy6wbCOcEIwsT7TZBU25nwRyg5vAP2eBzFlJZalx6cQMEyEcO6Msi3ISlkHlTfjVqnHLJdgyvDnMSqdJ1Uf2Tx8INhXCFv1b-CJrUwTbXQrPBicIF-2tkvs_nG6_BjhM4k9O31pgqdX5DTg-Hpvo_B0vRE2WnFfycTy3vh7juJ67CIF4sUqQVXialxpNP8zSIVmukkxIjfmdcp_0tIRuz3W7vopRHEV55QvW8fE-MeSl-RW3uh14vkSUFR6a8B9tFBXT8wUsMuNGztiWbMrv-KESfs9YEaHbE6V-IRohZtP3ZJNo_YD6UMyfTvHBCOPmGgK2tOY0opYp6Qt4SPTfmgNDwj30BwOYN0m7R1mz1muNtSXuI-lQxT0jFJFuVrLvKiUeW9IJQzmkWQwnbExbefcoOhOGPHYwk5nwfvMsqlNnZvhD96uFwCNNV4NChl_qhkoczd_lg7f71xIIbf9k5V0NCSi7eIAq-0vrZ6D2&maxwidth=400",
+        "googlePlaceId": "ChIJ782pg7NhLxMR5n3swAdAkfo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "16:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "16:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 2111 5843",
+        "website": "https://colosseo.it/area/foro-romano/",
+        "isOutdoor": false,
+        "score": 55.46398048959071,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Colosseum%20Roman%20Forum%20Palatine%20Hill%20Skip%20the%20Line"
+      },
+      {
+        "id": "gp-new-ChIJZQ3ms1pgLxMRGnTxolu6mJE",
+        "name": "Chiostro del Bramante",
+        "type": "culture",
+        "description": "Espace culturel accueillant des expositions temporaires d'art classique dans un cloître conçu par Donato Bramante.",
+        "duration": 120,
+        "estimatedCost": 14,
+        "latitude": 41.9000087,
+        "longitude": 12.471590899999999,
+        "rating": 4.6,
+        "reviewCount": 8316,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "20:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "20:00"
+          }
+        },
+        "phone": "06 6880 9035",
+        "website": "http://www.chiostrodelbramante.it/",
+        "googleMapsUrl": "https://maps.google.com/?cid=10491340234698093594&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVrw_hUAIoCW9wwvPFRFLP2-tqKh23pyKSZ2rvCcwsSece3mmAw2MEd-fhFscxjtg7uClsSp_rdZABsrxTU-kibL7klCnOJvLjZY3QjMc0AWAS9F-kqItyijkMODWk4ZZAPzP85RtKUMwh3pM65KC8g8D5wrePACQY8cClSPgInxqb8YJ7FSrA5Ha8FfgTtmsBWU87gqCP1CM01IVx9bfU7ikqZy-pxijaJ6HLec_yy770DFobK6bvqu9OwVZ_rM74rZCP9qMxFU_uXM49Cz7VlerKDI690o4weBq3xDofCrg&maxwidth=400",
+        "googlePlaceId": "ChIJZQ3ms1pgLxMRGnTxolu6mJE",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 55.12688938266628,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJ0aTnEYeKJRMRiUF95xwRbDY",
+        "name": "Château Saint - Ange",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.9030632,
+        "longitude": 12.466276,
+        "rating": 4.7,
+        "reviewCount": 105221,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Engelsburg_und_Engelsbr%C3%BCcke_abends_(Zuschnitt).jpg/400px-Engelsburg_und_Engelsbr%C3%BCcke_abends_(Zuschnitt).jpg",
+        "googlePlaceId": "ChIJ0aTnEYeKJRMRiUF95xwRbDY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "19:30"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "19:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 681 9111",
+        "website": "http://castelsantangelo.beniculturali.it/",
+        "isOutdoor": false,
+        "score": 52.369055548842944,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ268jxWVgLxMRIj61f4fIFqs",
+        "name": "Chapelle Sixtine",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.9029468,
+        "longitude": 12.4544835,
+        "rating": 4.7,
+        "reviewCount": 91398,
+        "duration": 60,
+        "estimatedCost": 17,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Sistina-interno.jpg/400px-Sistina-interno.jpg",
+        "googlePlaceId": "ChIJ268jxWVgLxMRIj61f4fIFqs",
+        "isOutdoor": false,
+        "score": 50.32773975296024,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Vatican%20Museums%20Sistine%20Chapel%20Skip%20the%20Line"
+      },
+      {
+        "id": "gp-ChIJ412AG01gLxMR4T-4pwdIFSE",
+        "name": "Monument à Victor - Emmanuel II",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.8945976,
+        "longitude": 12.4831269,
+        "rating": 4.8,
+        "reviewCount": 74116,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "19:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUhAZwPQr0VmET26FOjvqAhgYQ3mXDYarnylcOOhhTEkbkeKxcWTq3zUYpRg09R-BFU0Y2PbSSBoUpbfDsZOFy8k_jjCNJKYc2tpmS3YTbqd-TSmMUgSPwULeKt0mGhIVjKdzD1SfF261JgfmLB6Rs4gyaeP3OFSy1T1miTnAwb6vlxEvnwY9OaLun4VEKD5014AV2evjt-jOSv9ff8L599C6hDPpiisrKtczP8Gf-S57bajmadAk7pbyn2lkadrUTIlUjaCNj4WWUTnONcWXg5LWHtAkk1Zef0E2odULus0EEfFLXyBUVC5nVsNT-1FYaXyC0He68VZFdlCwT8mZpNUjXKXbEDDvo_Uag2wB5vnx3aNgSe97Equ4p6ziMDWfedTK6iYVq4yLEBIwexx2D3u0bo-FSwL8oTHUBNDccW7mFshFFx4wJxw0Y4F3cAeao1QmVIEq7mi5pq1EcDqT9jHBnC4eusNWecN9cXDE34kDy4kHfufXa8LGerT8tJsR_3rGsmwXYYTLeZaKt5zkUZno3L_CVwd4k4F0FI1AMCzdEu7N7zXAuNhsubfURrc45ewzYGPpf4zQ&maxwidth=400",
+        "googlePlaceId": "ChIJ412AG01gLxMR4T-4pwdIFSE",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "19:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 6999 4211",
+        "website": "https://vive.cultura.gov.it/it/",
+        "score": 49.8710775635484,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJPRydwYNgLxMRSjOCLlYkV6M",
+        "name": "Piazza Navona",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.8991633,
+        "longitude": 12.4730742,
+        "rating": 4.7,
+        "reviewCount": 210772,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Paolo_Monti_-_Servizio_fotografico_(Roma%2C_1966)_-_BEIC_6329173.jpg/400px-Paolo_Monti_-_Servizio_fotografico_(Roma%2C_1966)_-_BEIC_6329173.jpg",
+        "googlePlaceId": "ChIJPRydwYNgLxMRSjOCLlYkV6M",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.turismoroma.it/it/node/1516",
+        "isOutdoor": true,
+        "score": 48.03790594644087,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxcVH3MphLxMRbNmoLfoNEWg",
+        "name": "Circus Maximus",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.8858762,
+        "longitude": 12.4857578,
+        "rating": 4.5,
+        "reviewCount": 60292,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXAG4xScPSpz-jobcqRhgFxs_Xk1hHIEVEWPP2Dz3xWdtfY1sutCaXFOS2srdIuCJ19TnEpOPOQt0Prd142h1VkoK8cveIHME_khEWtidoBw3xGSTHTukaz8HzJCdrEEheGA5O2c40PQFH4VaSRJNWg53A9r5_qsOfZ9enNiSzzPOZL6H2w0SrZX-KnugPa4y5AE4lLsoexSoOcka5Rg5PMDa2AlWXIjS1Y9m3--ChJ06pUBBAloIN7mvrpfuLYTA8RsLGlyPKH4eZmiHKKFhkXU8QifzwhwuNZsUtr2cY_gIrFrOUxMAJTWSXrBW7MNE-UzEsg_dyO3k-eayQklo67GAGduNe-45Jj9NlrgqtoUJyMM7yGuXmG0CwbNuQ-lIGuJNMhCk8qVZIaT3gaZ-Kdb-qBinLraYfsJbPzr6NuKOi7Fcu2isw2SO7lHy0VMN2xcbjjZvfKK6jZONij_BcFvZhW_fWewr8Ty-q_DTJkAmPIM-txcEbEKUGaFBEDM0bCTbvLHcBHAr2_LcS7iyXnS_scA7qUPFAkvfqoiyMsFec7ZHD7Ppwju5kP0uxZXhUzEpTJJiVY9Q&maxwidth=400",
+        "googlePlaceId": "ChIJxcVH3MphLxMRbNmoLfoNEWg",
+        "isOutdoor": false,
+        "score": 46.71303240568373,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJj1M8HQJhLxMRRI6D_z18Pes",
+        "name": "Villa Borghese",
+        "type": "park",
+        "description": "",
+        "latitude": 41.9138782,
+        "longitude": 12.4853818,
+        "rating": 4.6,
+        "reviewCount": 92065,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUcE58goQplD7IfL45yE_N4yIcUEMQ0-QbSEXRlyK8QFmuD--Npoudge3DF8MyoKCJ7gDyrJNvyLjBon5usttD6vdS-r8i101fbJCZkSZJGIM_WGkIGtVPIijwrDHLJ_w3LL9MsABxbMCs7CG0GXZKQczh_nNVaOjDLMwRwXGKAfzXV0nNIqtN_yn2tqBAiHoFuLyNAkchipdxsjU-mtKchbf6QpTsXz8KDWlZswRQbDbOhkXt9RnG8UlI3ipOs5OWqJOxrExW6_SxvVWkp-yYi50jxGcRs1bRu9BjZiafKUbgpbrUMMfXlo3thZC1o8xWdhoFw9QJDRW9a-xHsJLyxfEfU8rr9iMjYPO6wxIrUYFZq3ytry5o0YDo9Vjr_zVcIaja0XETZ9uQnLSwI7rQUdG7Br4sT1zpYRI3g2qGlPK1KZYeMADn86rwh8wO0d4hPS1crenSJoUF3yNZS5aopXVVVUXi1_SAOu_JXuhJy83J8jXSmrM8dxsCMUT4_ALxhOIVuc9lyyJ2bZsg_6n0TLagNfDNeKtPa5ZICLn_VzyzU_NaV8bGUbYa1YLD09nIhQXmw&maxwidth=400",
+        "googlePlaceId": "ChIJj1M8HQJhLxMRRI6D_z18Pes",
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 0608",
+        "website": "https://www.sovraintendenzaroma.it/i_luoghi/ville_e_parchi_storici/ville_dei_nobili/villa_borghese",
+        "isOutdoor": true,
+        "score": 46.0101869896404,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJhxbo5fhgLxMRUEPO_f-f7kM",
+        "name": "Piazza del Popolo",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.9107038,
+        "longitude": 12.4763579,
+        "rating": 4.7,
+        "reviewCount": 120480,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUr7OJN8V165agY-JgVgQcKOukiBvkA7xOmjFRGDJ6CIFn-8rt5DlP4Y62stn91T57mW4uZXu5SpHgeEryfRzS2MLHFwLxh-Cuai5tFyJ6bGt4B833x5kv1QIG9Yuom-Crc2xBieQlaZSqIZFlfavy_yGck7sf2h78XKG8HZAz_8uCTp8ZZ6qm79S5JNyurK2tccWY8kCcK44PWdsIWbl8Ntpg96jbHK5do98v6rGlmWF3gHvJSDoW41jfl0R4FpE51_pWbdiOxRBjIE6kckTvhP7nUeY-VqxiQQg5Ifh77obq0fD60GLeI0gWP3Wr_8KZtwnJdR5lscFf0GtXwjbM42g1SlY9p08UpPTH6sUp7Paau91n22HfgwlEO0Ehdo8RDGgHY9ZYw-c3kztmtg8U6mgaYO3QlhQrT5Ng2_0EdcwNZ1ajKse7gVsgQoN7wmZFnCkWIwcp6wqXxhdnz6BzEO6ejE4in6FBM7Sg8Rh1lceR_ybAgbYhUNYyVmY72Q8rWDHs9pGFoHSR8oaiG4tzzfoWbhAuAX8BCSsoqOXsbIYOhAhTeZFsfWq0bSIDMSUbmDaNg&maxwidth=400",
+        "googlePlaceId": "ChIJhxbo5fhgLxMRUEPO_f-f7kM",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.turismoroma.it/it/node/1517",
+        "isOutdoor": true,
+        "score": 45.889449026598676,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-75037P8",
+        "name": "Rome 3 - Excursion d'une heure en Vespa Side-car avec dégustation de pizza gastronomique",
+        "type": "culture",
+        "description": "Découvrez Rome à bord d'une icône intemporelle avec la première agence de voyage à Rome à proposer cette visite unique. Une visite nocturne à bord de nos side-cars Vespa constru...",
+        "duration": 180,
+        "estimatedCost": 150,
+        "latitude": 41.901976399999995,
+        "longitude": 12.496448299999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Evening-Vespa-Sidecar-Tour-with-Italian-Aperitivo/d511-75037P8?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/46/8c/b8.jpg",
+        "providerName": "Viator",
+        "reviewCount": 106,
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": 45.77545389757476,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJq-bXVgRhLxMRv3vgOXaktBs",
+        "name": "Galerie Borghèse",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.9142103,
+        "longitude": 12.4921442,
+        "rating": 4.6,
+        "reviewCount": 28629,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Roma_Museo_Borghese.jpg/400px-Roma_Museo_Borghese.jpg",
+        "googlePlaceId": "ChIJq-bXVgRhLxMRv3vgOXaktBs",
+        "isOutdoor": false,
+        "score": 45.70538127716809,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ8-wGeU9gLxMR--zJtnpGod4",
+        "name": "Musées Capitolins",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.8929428,
+        "longitude": 12.4825577,
+        "rating": 4.7,
+        "reviewCount": 18075,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "19:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVvMtA-5FvjdR-fKqOglyBNfyPoYhfvHfPazqAQTgK26-QkMoFijVcEt9JqJQTTXxPSRCcObF0TrCWwAK3adHYQuKU0htMBEUKyDTJKRewk0KkduwbeEgiIk3xO2aw8df5bcCDpihy4tysmXUUWp_eEHY-wYZzdqCWyyJZD1S7Sw6IUX104AS-FP3UsK26teU35a83dPjlyf8Kut-YMtv4GOzyRl3j30v-OjAn7sv6mQHEQm_luKLJ7XnHda4g3m2wdWy69-L-lgGZJp8z909mLAgApoC-z5L5NyeQUtpHaRS1DXo9dUVLfjgEDFaRhROXu7OG-sEsaTUaiqyMze9BdVsr82lMX7BbhR8rn2Tg2Vrt62cVJJLZhekDUWsWU7Ly5vwDcErAkYsT4cQT0b6eF15Q_ptQB3WY89Jq2zTtKYV9kGzshYgVlVzlA8anWF4997DKyjj7tJQmn58aYhukU9Ix07CHY0H0-JqzxM7aVLuNe4aKZUqnEUUbTU_OKuHPsSF0MyQLdq1ndaLQpw-t6ogzaAeMlpaICDNWs2WVuXO3iZkCGYKjFBQ4KFkszpkb1EtNTcdvxIxMV_Ld-dI3CTlpWNg&maxwidth=400",
+        "googlePlaceId": "ChIJ8-wGeU9gLxMR--zJtnpGod4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "19:30"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "19:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 0608",
+        "website": "https://www.museicapitolini.org/",
+        "isOutdoor": false,
+        "score": 45.58485306222226,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-new-ChIJB-6b3zFgLxMR7R-kXLa_VYw",
+        "name": "Testaccio Market",
+        "type": "shopping",
+        "description": "Marché au toit de verre sur un site archéologique romain, avec, entre autres, plus de 100 étals de produits frais et gastronomiques.",
+        "duration": 75,
+        "estimatedCost": 14,
+        "latitude": 41.8776845,
+        "longitude": 12.4738455,
+        "rating": 4.4,
+        "reviewCount": 8551,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "07:00",
+          "close": "15:30"
+        },
+        "openingHoursByDay": {
+          "sunday": null,
+          "monday": {
+            "open": "07:00",
+            "close": "15:30"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "15:30"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "15:30"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "15:30"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "15:30"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "15:30"
+          }
+        },
+        "website": "http://www.mercatoditestaccio.it/",
+        "googleMapsUrl": "https://maps.google.com/?cid=10112199328289529837&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUQJe7PxVDMY52yDH27qYEhqXlyZGfzk2IJvUZaejP3XB6D9FkLaoD8ZbZnVM9gwRqCilx05yOB84J5eUIfkAHCh678NCdjYrxB4elQQJObomTKRtQE-3NwwwfZWA9etU7cne60_krJjEOxrLdeUhrPMt9AyJSXQmrAYPAmK-B2l55BEXLNMf6qLYrpouhM3zBgX9M6Bwf4qRLQ5sDSeWPS_7u32TbN23I2wQdwfyt3p2SSuabbsidhs8XrbXFZcDCc9GJlRlw6Qz4UM94QEDED8O5xWc4EeBkGw5lg35WD68Czv5Eu4gN5dn62FJypnpbgIef2BKHcpVLBKvKjELy_7B5_MeLa-8k4rFu6-D0IV15xZ0XJn_YUXQ5leVWWP973eCSpjPgiSgEpGuUoZ326JD3_B3XIrNrUliocQ67mF0bl&maxwidth=400",
+        "googlePlaceId": "ChIJB-6b3zFgLxMR7R-kXLa_VYw",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 44.91775636614119,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-new-ChIJ1zB926RhLxMRejWMj_tUs_c",
+        "name": "Basilique Sainte - Marie - Majeure",
+        "type": "culture",
+        "description": "Basilique papale emblématique construite au Ve siècle, célèbre pour ses mosaïques romanes et son plafond doré.",
+        "duration": 60,
+        "estimatedCost": 14,
+        "latitude": 41.897598599999995,
+        "longitude": 12.498408399999999,
+        "rating": 4.8,
+        "reviewCount": 52172,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "07:00",
+          "close": "18:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "18:30"
+          }
+        },
+        "phone": "06 6988 6800",
+        "website": "https://www.basilicasantamariamaggiore.va/it.html",
+        "googleMapsUrl": "https://maps.google.com/?cid=17848703187621262714&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWxBg2Tlm4kcaP6_C6av8iDjY82x4NrPGNTolpRfqkKW6uYoes63t1WntE0oNaK2JnVtf7yo2f31M_1fVaPBHTH0eZeCK5EMsjon_pDi8hHtXODHC-Hp7j69oC3U1jkVJv2EB4rdZon56f9rH7p5mBGTy9pvPaWeoxqvGEPcE2d0Fc5F45HyylsPrzCKdFxAnY-a7efV923F4FgmyiRrjliBvbnivqWLv1pWtr5egBPNrZ3YXVBWKQC_-bkJyDwkN_wsJigV66ZD1e-oYzrR8EPiKIcwimKBPEcs-9o_eLmFu-0H8asqzFUZ_uswQweRZKNC1uNwSK07aOVMRuOnSne0yyjU62ZSuemUyQPhNoI_ZHHPgAVr-rMy8oXPDRlerHWz5SR6Ao5nwIY98t_EYUZtSt6DXGW5CUlTOe7VogylJdV&maxwidth=400",
+        "googlePlaceId": "ChIJ1zB926RhLxMRejWMj_tUs_c",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 44.46210631829589,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJr3gt3ExgLxMRYaivihEa9K0",
+        "name": "Piazza Venezia",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.8959886,
+        "longitude": 12.4824632,
+        "rating": 4.7,
+        "reviewCount": 58035,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVA9DBBnA_-IdnsDlLpgk1kcV4co78fXvR9DgdBeSyp7jyslh0hchTIGhr_i9mM631DLMBXBa4qOOZAwFDv_fnvgQlqW36uGA2OF2B8hxvgUvUtpuJBedsb5LokzLV_TIB4Z-0DQQ5U0Yruv_frWuHpE_cxG8ga02ysgcHnhIanFK_Obrm-svoFdJ_yg4QBoCTefgroROSsiqXLxY2W2HQagJQSTEY1JKzBRAyY-QhCer8g8B66ZTArQ3VkZbb5Ec10Is2jVbPsMJ4QV-3HHncTaIwJxsz1QeuySB2NYWitbrXRg5TYs2rjrrQUBrHkuyRZRaiW2-pdQRH7aRNbMhhGEBHKAIQGL8hXuoOM3Jl8IChBBuObhgf2XDvlyjGRMj8PTNtmwpnil2SP_AeCZzdG4BeUmfgorN-lLYPB2I-zGpXu8kZDD9Rv2vSz28jdT_J6q4VtSJeYjxeuM7f2ND3FjbZwivMp_fpLiqoE7znd6vHNn55YcDb_7tQhWaZpZSinHa_CwLLj2n4O14fXCMZ5Me1ypXSeSHTi4LaEd_sl2fTEe2hRaPcPAFIgTpCYKozwBckne3YSjw&maxwidth=400",
+        "googlePlaceId": "ChIJr3gt3ExgLxMRYaivihEa9K0",
+        "isOutdoor": true,
+        "score": 43.081238706536645,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-new-ChIJc6vKf79hLxMR-JBUkZ--MAE",
+        "name": "Basilique Saint-Jean-de-Latran",
+        "type": "culture",
+        "description": "Cathédrale emblématique et siège officiel du pape, façade ornementée du XVIIIe siècle et statues des apôtres.",
+        "duration": 60,
+        "estimatedCost": 14,
+        "latitude": 41.8858811,
+        "longitude": 12.505673,
+        "rating": 4.8,
+        "reviewCount": 32372,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "07:00",
+          "close": "18:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "18:30"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "18:30"
+          }
+        },
+        "phone": "06 6988 6433",
+        "website": "https://www.basilicasangiovanni.va/it.html",
+        "googleMapsUrl": "https://maps.google.com/?cid=85777985467355384&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWxjUk34I0MBKSCBGV2wBskgJDhdGNZ-jAoTATsVauisYtU5dolSDu0_z9S_HWGE4jHj8E1s2WjOEhGtRaC7XHkLmryS3YHr-0rqHWNnwo77Na1mlEbdIwGrdd38aXRX09nPgI4duuXmloaHOoZpDO-tRZcsbhu8NpouhfFgokxVG7khgZF6s3f3kfYT1_KGoz5e5NEZpMRKUBbpgOSf8KWrF5M9-N1AJuY-9kbmMje_CmQgkvlelZyme9VqZqSbmBX_ZvxnU3Qsg7dj_NXIIyEydV_GCJ8hmhko8RCugibkVy8mXvLCwctbh5ScxkOZ5KtYioPuDpRxM9tMwhJ_-TbUCxBqbNopwLJhkcZlMVEI3v4uP0Bkj3_DxdGoO3DcF91GkcWB01Tgh4yxWcnAiZmb0a_as1OCq-7PdLME9QStmBs&maxwidth=400",
+        "googlePlaceId": "ChIJc6vKf79hLxMR-JBUkZ--MAE",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 42.54448168836838,
+        "source": "serpapi"
+      },
+      {
+        "id": "gp-ChIJF0obe01gLxMR0JJHtlD0kMY",
+        "name": "Galerie Doria-Pamphilj",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.8979782,
+        "longitude": 12.4815742,
+        "rating": 4.7,
+        "reviewCount": 7898,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "20:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWsICowKRwULbdmnFuVNBuTCIJfXnYbL0unsaxyGRQxst8Or9FBNwoIVHaZJkP3RWylPtnL1eP-teVlvZ1SDlPyJHtpgq-xzvhFr4gr_UAzxMQ542SA3gcwTeuSioIVuYRhF-PjmUCQT9ybkR4bIT6IFaYUvUjntrSKOgTJmfThYcx09xYTSGN3oy3o7lZUfO15fog7_OdGjcJgXey7GIxNVFg4014QROfYeQMKPrsBdODcX1LbPR4OPVMW37a-Ht9QrU8W7IXf3zHhK9UQ7gxWvFi2OTOjV3GRfJXOTcfeL6v_JTht7e8YcNmLG2Ds17N9asoE7-eOdP9oSAY2an9HugQ3CjEKaeDEPA6R_1UTBOMKBznmkopNpN5HVB9grJqOuQbq3474Ie4jfhq42eElW4KCVAj6IYRALKybJGMdq5XqTThJc7_AEaOsii0-X1XUBDLs_drwuo8wM3W9-XgEJZLXD1S2mfHzwAxqyLZoa6TEjEdgQ9dx-kbyhEdN0Fwmd57cjpL4_JRrkZTc0nxVbVTcPUpEmcwEra1X2HgSKT2AhqhTxSLbEaBe-E0tJhRfsC7_Xzh8Ig&maxwidth=400",
+        "googlePlaceId": "ChIJF0obe01gLxMR0JJHtlD0kMY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": null,
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "06 679 7323",
+        "website": "https://www.doriapamphilj.it/roma/",
+        "isOutdoor": false,
+        "score": 42.3744428945414,
+        "source": "google_places"
+      }
+    ],
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 60,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 20,
+      "transportTips": "Achetez un pass Rome 48h (28€/personne) - rentable pour 4 jours. Couvre métro, bus, tram. Sinon carnet 10 tickets: 15€.",
+      "reasoning": "Budget serré (125€/personne/jour). Airbnb avec cuisine permet d'économiser ~40-50€/jour sur repas. Petit-déj self-catered (2€). Déjeuners mixtes (café/panini alternés ~8€). Dîners au restaurant (15€ moyenne) pour l'expérience culinaire souhaitée. Accommodation: 60€/nuit = 240€ total (24% budget), reste 760€ pour 2pers = nourriture + activités. 4 musées majeurs max (64€ total pour 2) + sites gratuits (Fontaine Trevi, Panthéon, églises). Activités culturelles bon marché: balades architectural, visite basiliques gratuites/low-cost. Stratégie réaliste pour Rome sans compromettre expérience gastronomique.",
+      "maxPricePerActivity": 50
+    },
+    "pipelineVersion": "v3",
+    "stageDurationsMs": {
+      "fetch": 52106,
+      "score": 32,
+      "cluster": 3,
+      "hotel": 1,
+      "anchor-transport": 0,
+      "travel-times": 1206,
+      "restaurants": 3,
+      "schedule": 3,
+      "repair": 1,
+      "contracts": 1,
+      "decorate": 0
+    },
+    "qualityMetrics": {
+      "score": 95,
+      "invariantsPassed": false,
+      "violations": [
+        "P0.2: Day 4 \"Tonnarello | Paglia\" is 1965m from nearest activity (max 800m)"
+      ]
+    },
+    "qualityWarnings": [],
+    "contractViolations": [
+      "P0.2: Day 4 \"Tonnarello | Paglia\" is 1965m from nearest activity (max 800m)"
+    ]
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: paris-rome-4d",
+    "   Paris → Rome (4j)",
+    "   couple (2p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V3] Using V3 pipeline (deterministic 12-step)",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[Pipeline V2] Phase 0b: 1 day trip(s) suggested: Ostia Antica",
+    "[Weather] Cache hit for 2026-03-25 → 2026-03-28",
+    "[Google Places New] Text search \"famous viewpoints markets food streets Rome\": 20 results",
+    "[Google Places New] Text search \"food markets street food districts local cuisine Rome\": 20 results",
+    "[Google Places New] Text search \"meilleur restaurant Rome\": 20 results",
+    "[Google Places New] Found 20 restaurants for \"Rome\" (any)",
+    "[Places Wrapper] ✅ Google Places returned 20 restaurants for \"Rome\"",
+    "[Google Places New] Text search \"Vatican Rome\": 1 results",
+    "[Google Places New] Text search \"best museums art galleries historical sites Rome\": 20 results",
+    "[Google Places New] Text search \"famous temples shrines churches monuments Rome\": 20 results",
+    "[Google Places New] Text search \"Colisée Rome\": 1 results",
+    "[Google Places New] Found 2/2 must-see attractions",
+    "[Places Wrapper] ✅ Google Places returned 2 must-see attractions",
+    "[Google Places New] Text search \"top tourist attractions must see landmarks Rome\": 20 results",
+    "[Google Places New] Found 35 attractions for \"Rome\"",
+    "[Places Wrapper] ✅ Google Places returned 35 attractions for \"Rome\"",
+    "[Google Places] ✅ 26 attractions found for Rome",
+    "[Hotels] Disponibilité live: 4/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (407ms)",
+    "[Pipeline V2] Resolving GPS for 14 Viator activities...",
+    "[Google Places New] Text search \"Visite des jeux et des chasses aux trésors à Rome, Rome Rome\": 2 results",
+    "[Google Places New] Text search \"Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Rome : Séance de photos  au Colisée avec un photographe local, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Excursion d'une journée à Rome en voiture Tivoli Unesco Villa D'Este et Villa d'Hadrien, Rome Rome\": 2 results",
+    "[Google Places New] Text search \"Rome unique de nuit, visite photo et atelier à la belle étoile, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Rome: Colosseum Photoshoot, expérience  et personnalisée, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Repas fait maison privé avec un chef privé à Rome, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Expérience professionnelle de pâtes au laboratoire, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Tour de Rome en Segway avec Guide Local, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Rome : Séance photoshoot de la fontaine de Trevi tôt le matin et sites emblématiques, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Golf Panier Tour Rome : Glide By Ancient Wonders & Hidden Gems, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Rome 3 - Excursion d'une heure en Vespa Side-car avec dégustation de pizza gastronomique, Rome Rome\": 3 results",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/14 activities",
+    "[Pipeline V2] Fetching data for 1 day trip destination(s)...",
+    "[Google Places New] Text search \"meilleur restaurant Ostia Antica\": 13 results",
+    "[Google Places New] Found 8 restaurants for \"Ostia Antica\" (any)",
+    "[Places Wrapper] ✅ Google Places returned 8 restaurants for \"Ostia Antica\"",
+    "[Google Places] ✅ 18 attractions found for Ostia Antica",
+    "[Pipeline V2] Day trip \"Ostia Antica\": 10 activities, 8 restaurants",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Rome\" from local database",
+    "[Pipeline V2]   → Colisée, Musées du Vatican & Chapelle Sixtine, Fontaine de Trevi, Panthéon, Quartier du Trastevere",
+    "[Pipeline V2] Step 1: All data fetched in 52105ms",
+    "[Pipeline V2]   Activities: 26 Google + 35 Places/SerpAPI + 14 Overpass + 14 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 Places/SerpAPI",
+    "[Pipeline V2]   Hotels: 4 | Transport options: 6",
+    "[Pipeline V2] Same-location-type dedup: \"Galerie Doria-Pamphilj\" merged with \"Palais de Venise\" (type=museum)",
+    "[Pipeline V2] Fallback must-see: \"Musées du Vatican\" matched \"vatican\" from user preferences (ratio=0.41)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [153.4] ⭐ \"Colisée\" (src=mustsee, reviews=481886, rating=4.8, tags=none)",
+    "[Pipeline V2]   #2 [152.8] ⭐ \"Musées du Vatican\" (src=google_places, reviews=199058, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #3 [151.3] ⭐ \"Fontaine de Trevi\" (src=google_places, reviews=494911, rating=4.7, tags=none)",
+    "[Pipeline V2]   #4 [151.1] ⭐ \"Panthéon\" (src=google_places, reviews=273347, rating=4.8, tags=none)",
+    "[Pipeline V2]   #5 [149.2] ⭐ \"Basilique St Pierre\" (src=google_places, reviews=171881, rating=4.8, tags=none)",
+    "[Pipeline V2]   #6 [106.9] ⭐ \"Vatican\" (src=mustsee, reviews=0, rating=4, tags=deep_culture)",
+    "[Pipeline V2]   #7 [67.7]    \"Piazza di Spagna\" (src=google_places, reviews=148625, rating=4.7, tags=romantic,relaxing)",
+    "[Pipeline V2]   #8 [55.5]    \"Le Forum Romain\" (src=google_places, reviews=141506, rating=4.8, tags=deep_culture)",
+    "[Pipeline V2]   #9 [55.1]    \"Chiostro del Bramante\" (src=serpapi, reviews=8316, rating=4.6, tags=romantic,relaxing)",
+    "[Pipeline V2]   #10 [52.4]    \"Château Saint - Ange\" (src=google_places, reviews=105221, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #11 [50.3]    \"Chapelle Sixtine\" (src=google_places, reviews=91398, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #12 [49.9]    \"Monument à Victor - Emmanuel II\" (src=google_places, reviews=74116, rating=4.8, tags=deep_culture)",
+    "[Pipeline V2]   #13 [48.0]    \"Piazza Navona\" (src=google_places, reviews=210772, rating=4.7, tags=none)",
+    "[Pipeline V2]   #14 [46.7]    \"Circus Maximus\" (src=google_places, reviews=60292, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #15 [46.0]    \"Villa Borghese\" (src=google_places, reviews=92065, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #16 [45.9]    \"Piazza del Popolo\" (src=google_places, reviews=120480, rating=4.7, tags=none)",
+    "[Pipeline V2]   #17 [45.8]    \"Rome 3 - Excursion d'une heure en Vespa Side-car avec dégustation de pizza gastronomique\" (src=viator, reviews=106, rating=5, tags=romantic,relaxing,foodie)",
+    "[Pipeline V2]   #18 [45.7]    \"Galerie Borghèse\" (src=google_places, reviews=28629, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #19 [45.6]    \"Musées Capitolins\" (src=google_places, reviews=18075, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #20 [44.9]    \"Testaccio Market\" (src=serpapi, reviews=8551, rating=4.4, tags=foodie)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 8/52",
+    "[Pipeline V3] Step 2: 24 activities selected",
+    "[Pipeline V2] City density profile: category=dense, p75=2.56km, median=1.92km, maxClusterRadius=0.64km",
+    "[Pipeline V2] Radius-constrained clustering produced 6 clusters (target 4), running soft pass with 0.96km",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Testaccio Market\" from cluster with 11 → 10 activities to cluster with 5 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Château Saint - Ange\" from cluster with 10 → 9 activities to cluster with 5 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Chiostro del Bramante\" from cluster with 9 → 8 activities to cluster with 6 activities",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (41.8936, 12.4917), Day 2: centroid (41.8965, 12.4812), Day 3: centroid (41.9095, 12.4805), Day 4: centroid (41.8984, 12.4579)",
+    "[Cluster] Inter-cluster swap: 4 improvements",
+    "[Pipeline V2] Cluster Day 1: 6 activities, radius=2.03km, intraDistance=6.70km",
+    "[Pipeline V2] Cluster Day 2: 8 activities, radius=0.73km, intraDistance=2.65km",
+    "[Pipeline V2] Cluster Day 3: 5 activities, radius=1.29km, intraDistance=3.82km",
+    "[Pipeline V2] Cluster Day 4: 5 activities, radius=0.82km, intraDistance=6.91km",
+    "[Pipeline V3] Step 3: 4 clusters created",
+    "[Pipeline V3] Step 4: Hotel selected: Appartamento Baby Fontana",
+    "[Anchor Transport] Generated time windows for 4 days:",
+    "  Day 1: 08:30 → 22:00",
+    "  Day 2: 08:30 → 22:00",
+    "  Day 3: 08:30 → 22:00",
+    "  Day 4: 08:30 → 22:00",
+    "[Pipeline V3] Step 5: Time windows anchored",
+    "[Travel Times] Computed travel times for 4 days (12 API calls)",
+    "[Pipeline V3] Step 6: Travel times computed (selective mode)",
+    "[Place Restaurants] Placed 12 meals across 4 days",
+    "  Day 1 breakfast: \"CiPASSO\" (712m from Hotel)",
+    "  Day 1 lunch: \"Nerone\" (106m from Rome 3 - Excursion d'une heure en Vespa Side-car avec dégustation de pizza gastronomique)",
+    "  Day 1 dinner: \"Trattoria Vecchia Roma\" (910m from Basilique Saint-Jean-de-Latran)",
+    "  Day 2 breakfast: \"CiPASSO\" (712m from Hotel)",
+    "  Day 2 lunch: \"Pane e Salame\" (519m from Piazza Venezia)",
+    "  Day 2 dinner: \"Cantina e Cucina\" (180m from Piazza Navona)",
+    "  Day 3 breakfast: \"CiPASSO\" (712m from Hotel)",
+    "  Day 3 lunch: \"CARPACCIO beef restaurant\" (756m from Villa Borghese)",
+    "  Day 3 dinner: \"Cantina e Cucina\" (229m from Chiostro del Bramante)",
+    "  Day 4 breakfast: \"CiPASSO\" (712m from Hotel)",
+    "  Day 4 lunch: \"Tonnarello San Pietro\" (512m from Basilique St Pierre)",
+    "  Day 4 dinner: \"Tonnarello | Paglia\" (1908m from Chapelle Sixtine)",
+    "[Pipeline V3] Step 7: Restaurants placed for 4 days",
+    "[assembleV3Days] Day 1: skipping \"Testaccio Market\" (ends 17:15 past close 15:30)",
+    "[assembleV3Days] Day 1: skipping \"Rome 3 - Excursion d'une heure en Vespa Side-car avec dégustation de pizza gastronomique\" (ends 20:00 past close 18:00)",
+    "[assembleV3Days] Day 1: skipping \"Basilique Saint-Jean-de-Latran\" (ends 19:45 past close 18:30)",
+    "[assembleV3Days] Day 2: skipping \"Galerie Doria-Pamphilj\" (ends 19:10 past close 19:00)",
+    "[assembleV3Days] Day 4: skipping \"Basilique St Pierre\" (ends 18:50 past close 18:00)",
+    "[assembleV3Days] Day 4: skipping \"Château Saint - Ange\" (ends 20:10 past close 19:30)",
+    "[assembleV3Days] Day 4: skipping \"Chapelle Sixtine\" (ends 19:25 past close 18:00)",
+    "[Pipeline V3] Step 8: Schedule built with 4 days",
+    "[Repair] 1 repairs performed, 3 unresolved",
+    "  [replacement] Day 1: \"Basilique St Pierre\" — Injected must-see \"Basilique St Pierre\", evicted \"Circus Maximus\" (lower rated)",
+    "[Pipeline V3] Step 9: 1 repairs performed",
+    "[Contracts] Score: 95/100, Invariants: FAILED",
+    "  Activities: 17, Restaurants: 12",
+    "  Must-sees: 6/6",
+    "  Violations (1):",
+    "    - P0.2: Day 4 \"Tonnarello | Paglia\" is 1965m from nearest activity (max 800m)",
+    "[Pipeline V3] Step 10: Quality score 95/100, Invariants: FAILED",
+    "[Pipeline V3] Step 11: Decoration complete (LLM: false)",
+    "[Pipeline V3] Trip generated in 53357ms",
+    "  Stage times: fetch=52106ms, score=32ms, cluster=3ms, hotel=1ms, anchor-transport=0ms, travel-times=1206ms, restaurants=3ms, schedule=3ms, repair=1ms, contracts=1ms, decorate=0ms",
+    "  Quality: 95/100, Invariants: FAILED"
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[SerpAPI] Vols filtrés LYS→FCO 2026-03-25: escale_longue=1 (Aéroport international de Barcelone-El Prat×1)",
+    "[RapidAPI Booking] ❌ Google Places résultat rejeté pour \"Atrium Luxury Rooms\": \"Illiados Street 1, Rodos 851 00, Greece\" n'est pas dans Rome",
+    "[Hotels] Check-in 13:30 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-out 08:00 matinal (avant 10h)",
+    "[Place Restaurants] No dinner within 800m, relaxed to 1200.0000000000002m: 2 candidates",
+    "[Place Restaurants] No dinner within 1.2km, last-resort at 2km: 3 candidates",
+    "  [UNRESOLVED] Day 1: Restaurant \"CiPASSO\" is 1885m from nearest activity (max 800m)",
+    "  [UNRESOLVED] Day 4: Restaurant \"CiPASSO\" is 1865m from nearest activity (max 800m)",
+    "  [UNRESOLVED] Day 4: Restaurant \"Tonnarello | Paglia\" is 1965m from nearest activity (max 800m)"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 5963 (line 150 column 4)"
+  ],
+  "durationMs": 53358,
+  "generatedAt": "2026-02-23T11:55:16.866Z",
+  "success": true,
+  "_campaign": {
+    "campaignId": "v3-quality-test",
+    "runId": "S01-paris-rome-4d",
+    "runKind": "scenario",
+    "seed": 424242,
+    "startedAt": "2026-02-23T11:55:16.866Z",
+    "durationMs": 53358
+  }
+}

@@ -32,6 +32,16 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ActivityEditModalProps {
   item: TripItem | null;
@@ -64,6 +74,7 @@ export function ActivityEditModal({
 }: ActivityEditModalProps) {
   const [formData, setFormData] = useState<Partial<TripItem>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -85,10 +96,14 @@ export function ActivityEditModal({
 
   const handleDelete = () => {
     if (!item) return;
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette activité ?')) {
-      onDelete?.(item);
-      onClose();
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteAction = () => {
+    if (!item) return;
+    onDelete?.(item);
+    onClose();
+    setShowDeleteConfirm(false);
   };
 
   if (!item) return null;
@@ -303,6 +318,23 @@ export function ActivityEditModal({
           </div>
         </DialogFooter>
       </DialogContent>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette activité ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &laquo; {item?.title} &raquo; sera retiré de votre itinéraire.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteAction} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

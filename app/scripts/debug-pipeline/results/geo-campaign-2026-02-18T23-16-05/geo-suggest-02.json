@@ -1,0 +1,3176 @@
+{
+  "scenarioId": "geo-suggest-02-escapade-gastronomique-a-lyon-et-ses-env",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Lyon",
+    "startDate": "2026-04-07T23:18:33.149Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Lyon",
+        "days": 1
+      },
+      {
+        "city": "Beaujolais",
+        "days": 1
+      },
+      {
+        "city": "Vienne",
+        "days": 1
+      }
+    ]
+  },
+  "trip": {
+    "id": "604f80e6-8af4-4c7f-b9d9-c57e2f283da1",
+    "createdAt": "2026-02-18T23:19:38.153Z",
+    "updatedAt": "2026-02-18T23:19:38.153Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Lyon",
+      "startDate": "2026-04-07T23:18:33.149Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Lyon",
+          "days": 1
+        },
+        {
+          "city": "Beaujolais",
+          "days": 1
+        },
+        {
+          "city": "Vienne",
+          "days": 1
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-07T23:18:33.149Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "07:40",
+            "endTime": "08:00",
+            "type": "transport",
+            "title": "🧭 Départ depuis Lyon",
+            "description": "Départ depuis Lyon",
+            "locationName": "Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 20,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Lyon%2C%20Lyon",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "transport",
+            "title": "🚗 Voiture → Lyon",
+            "description": "Lyon → Lyon",
+            "locationName": "Lyon → Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 15,
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%97%20Voiture%20%E2%86%92%20Lyon%2C%20Lyon",
+            "transitDataSource": "estimated",
+            "transportMode": "car",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "gp-ChIJoVI7Ddvr9EcR3aluOnj_SGI",
+            "dayNumber": 1,
+            "startTime": "08:20",
+            "endTime": "09:20",
+            "type": "activity",
+            "title": "Fontaine des Jacobins",
+            "description": "Fontaine des Jacobins",
+            "locationName": "Fontaine des Jacobins",
+            "latitude": 45.7605314,
+            "longitude": 4.8335297,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fontaine%20des%20Jacobins%2C%20Lyon",
+            "dataReliability": "verified",
+            "mustSee": false,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ]
+          },
+          {
+            "id": "gp-ChIJd4uoxojr9EcRhSpXQ3INlVI",
+            "dayNumber": 1,
+            "startTime": "09:30",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Traboules du Vieux Lyon",
+            "description": "Traboules du Vieux Lyon",
+            "locationName": "Traboules du Vieux Lyon",
+            "latitude": 45.7627528,
+            "longitude": 4.8277855,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Traboules%20du%20Vieux%20Lyon%2C%20Lyon",
+            "dataReliability": "verified",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 0.51,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJ7-V74qrr9EcReweyBTQBAOM",
+            "dayNumber": 1,
+            "startTime": "10:35",
+            "endTime": "12:35",
+            "type": "activity",
+            "title": "Musée Cinéma et Miniature",
+            "description": "Musée Cinéma et Miniature",
+            "locationName": "Musée Cinéma et Miniature",
+            "latitude": 45.7619231,
+            "longitude": 4.8271497,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Cin%C3%A9ma%20et%20Miniature%2C%20Lyon",
+            "dataReliability": "verified",
+            "mustSee": false,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 0.1,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-1-lunch",
+            "dayNumber": 1,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Mercredi Biscuiterie, Salon de thé et Brunch le dimanche",
+            "description": "Repas sur place",
+            "locationName": "41-43 Rue Franklin, 69002 Lyon",
+            "latitude": 45.7522579,
+            "longitude": 4.830208799999999,
+            "orderIndex": 5,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Mercredi%20Biscuiterie%2C%20Salon%20de%20th%C3%A9%20et%20Brunch%20le%20dimanche%2C%2041-43%20Rue%20Franklin%2C%2069002%20Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mercredi%20Biscuiterie%2C%20Salon%20de%20th%C3%A9%20et%20Brunch%20le%20dimanche%2C%2041-43%20Rue%20Franklin%2C%2069002%20Lyon",
+            "restaurant": {
+              "id": "serp-nearby-ChIJb1DgyODr9EcR8_5p73jF-B8",
+              "name": "Mercredi Biscuiterie, Salon de thé et Brunch le dimanche",
+              "address": "41-43 Rue Franklin, 69002 Lyon",
+              "latitude": 45.7522579,
+              "longitude": 4.830208799999999,
+              "rating": 4.8,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "salon de thé",
+                "salon de thé",
+                "restaurant brunch"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "04 72 64 02 98",
+              "website": "https://www.mercredibiscuiterie.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mercredi%20Biscuiterie%2C%20Salon%20de%20th%C3%A9%20et%20Brunch%20le%20dimanche%2C%2041-43%20Rue%20Franklin%2C%2069002%20Lyon",
+              "googlePlaceId": "ChIJb1DgyODr9EcR8_5p73jF-B8",
+              "openingHours": {
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "18:00"
+                }
+              },
+              "distance": 0.24403463551814855,
+              "walkingTime": 3,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXUQfoY5nqd-stnSY2fMoYnuS274GAv9f_lLvIDWCVYxRuisPAI_wjMjAakJ6VmRrVpPp6prfvq6-GR832SJ2U9eBisA06gXpj8z8efsi8YqJ1dIPdZ4M-vMV2OoLDh9p8Waq957TAvGhqIQcfjmTr7upeCXNm-z923Byaioo8jQMVAJJC72Zw03k8cJPNFXXVJMyWIhVj2jZ7wQDU4R68q1vUVJ75ms0fO9-AZYgOuapfTnauhU-FnKXeNBi3ojVHbuKTBjzig3DcjgxFkRJMG9KdWl5AYBaemM1McBVDY-DVxfkIU5bIuVtgMQJsvEVcH6WqAVC9Tbo6qcM6eYS7xPCVTmGEZ9ucspAEkDQrZtaPsmGJKdR48N4FNUgRtWthCD6imYi8QdZZBKGI1Eds77WZmmVyGz2aBEYVMlUvcPQ&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-857049822857312232",
+                "name": "ART Restaurant Lyon",
+                "address": "3 Rue Sala, 69002 Lyon",
+                "latitude": 45.756793,
+                "longitude": 4.827372,
+                "rating": 4.8,
+                "reviewCount": 1236,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant français"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "09 51 54 79 68",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ART%20Restaurant%20Lyon%2C%203%20Rue%20Sala%2C%2069002%20Lyon",
+                "googlePlaceId": "857049822857312232",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUrVD6CtClXg9Z3T2fsa1o4U74Y1JrrpxIr_P8CItTMVe6ajPo-dqRfuJhG1dDa1Wb95-JmuPatrNcrgWV79DatLXZ1si_B0IdWZTWGtfS18kqN4Y2Nw15mZu0oRWifrS--9v6sSgk1-5OR3gR4uYAcbm4XgHQUFBJjVTGmpI-go_Oi3FL_Zaz-DnLXJ8Ujd_tCHVla05TwXYiQMik7R2kMK9dT72XLVu8_rWlthIwst_NFxHfRDHl_JnOxJxhl0wLrFsGDKLVKBc4R0V5F6aw0WAGP-LuVDDAyg9Afq2YIVVmmM7I&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-1877762156274194877",
+                "name": "Canopée Lyon - Bistronomie de Partage",
+                "address": "12 Rue Major Martin, 69001 Lyon",
+                "latitude": 45.766611,
+                "longitude": 4.832652,
+                "rating": 4.8,
+                "reviewCount": 343,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "09 75 20 11 09",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Canop%C3%A9e%20Lyon%20-%20Bistronomie%20de%20Partage%2C%2012%20Rue%20Major%20Martin%2C%2069001%20Lyon",
+                "googlePlaceId": "1877762156274194877",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW4GKpEGR7L6S397Zh6izAzIaZRFDDZMzJg63S44e1vTIdnlsNjEi8B1y3AYIN_iDvTHlKOc_VaPh6E17qkcoRO-t0rETm5qxGv35EbwzGpXf7-tt-9qgjE8rPc6015urCYYg8RkUfBSOzjFz18vgP7D_fx3HiD52YmYIfFjTFp4ScyYW6l_7_DVc9-mPzszbXPtUCYTerW80tYXHZhNK5_WpNfCGY61kCLqhdG4Cr8ifs3urvg9uYGEHUfoirc8FwfybR_PC0MVBGbSQ77a6zqxj07C7l-GSu3G55wL_8pDBT_yLs&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXUQfoY5nqd-stnSY2fMoYnuS274GAv9f_lLvIDWCVYxRuisPAI_wjMjAakJ6VmRrVpPp6prfvq6-GR832SJ2U9eBisA06gXpj8z8efsi8YqJ1dIPdZ4M-vMV2OoLDh9p8Waq957TAvGhqIQcfjmTr7upeCXNm-z923Byaioo8jQMVAJJC72Zw03k8cJPNFXXVJMyWIhVj2jZ7wQDU4R68q1vUVJ75ms0fO9-AZYgOuapfTnauhU-FnKXeNBi3ojVHbuKTBjzig3DcjgxFkRJMG9KdWl5AYBaemM1McBVDY-DVxfkIU5bIuVtgMQJsvEVcH6WqAVC9Tbo6qcM6eYS7xPCVTmGEZ9ucspAEkDQrZtaPsmGJKdR48N4FNUgRtWthCD6imYi8QdZZBKGI1Eds77WZmmVyGz2aBEYVMlUvcPQ&maxwidth=800",
+            "distanceFromPrevious": 1.1,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "14:00",
+            "endTime": "14:30",
+            "type": "checkin",
+            "title": "Check-in Lyon centre - Appartement quartier Victor Hugo Ainay",
+            "description": "Disponibilité confirmée",
+            "locationName": "20 Rue de l'Abbaye d'Ainay, 69002 Lyon, France",
+            "latitude": 45.7544496,
+            "longitude": 4.830372,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 8,
+            "bookingUrl": "https://www.booking.com/hotel/fr/lyon-centre-appartement-quartier-victor-hugo-ainay.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Lyon%20centre%20-%20Appartement%20quartier%20Victor%20Hugo%20Ainay%2C%20Lyon",
+            "accommodation": {
+              "id": "booking-15799701",
+              "name": "Lyon centre - Appartement quartier Victor Hugo Ainay",
+              "type": "hotel",
+              "address": "20 Rue de l'Abbaye d'Ainay, 69002 Lyon, France",
+              "latitude": 45.7544496,
+              "longitude": 4.830372,
+              "rating": 8,
+              "reviewCount": 0,
+              "stars": 3,
+              "pricePerNight": 73,
+              "totalPrice": 146,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/821970123.jpg?k=fa3acd86e1277fa8f94a51438070d60ac40880e98ad4bb2c4a3b0ec80187f894&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/hotel/fr/lyon-centre-appartement-quartier-victor-hugo-ainay.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/821970123.jpg?k=fa3acd86e1277fa8f94a51438070d60ac40880e98ad4bb2c4a3b0ec80187f894&o=",
+            "distanceFromPrevious": 0.24,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=45.763757,4.827742&destination=45.7544496,4.830372&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJs1rce1Pq9EcRRyCL9YWTnV0",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:30",
+            "type": "activity",
+            "title": "Place Bellecour",
+            "description": "",
+            "locationName": "Place Bellecour",
+            "latitude": 45.757746,
+            "longitude": 4.832148399999999,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Place%20Bellecour%2C%20Lyon",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVQSOvCWZtJg2-TsFP7aJqAR11wv--rFjUqAyztiVDoIhmlhtr9fTySVZ-O1ThTXoi00oKXNS48IyIc419lyvifzyp7MWXF9wyu5GMetJMLd2ZJpM2xtArW2bH27CxEjPkKVATELdEWYV5FVG8w0MGVKUef5aFRaUEQkH32_UzScR6nqgGzMFnxGVNuideB4iLCUwxei1xdah4USmOZ-_ZcEBbNHLCP-4sq-5-Csv_17kKkNbpH_jkFOxji3JPdAGG7VjjlTUT8b8JdkR65DyX4Fw-QsrnTQPD8q9cJLYzyl2V1Owa3c52c7OVZYV1VqrDy-zpqZP6Y-aDQpvlhoZPcaB2IIVa7Hzs5T5zewNNMr84GkYYlwIf2_PUKCbwA7XCzVUv3NfSm5YxFKRk66yeLEwWadj2sXZm8Dkyas64RuOlPCfWif63G-nf8Ttumw3qc8QCzRSRphXQ-KZJ1FZK_viQ76TSVbPGce7pnigYXViwTDB5iQx99KNyWe-P0newAVKqFAPxAv3ngb4nus39hjvB8Fn5QOeGg3q08uQEmZTN2zXcOTD-1T-eIC_gS1mIv4J7_&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 0.39,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJK1Jxdanr9EcRKY5nG3nMG50",
+            "dayNumber": 1,
+            "type": "activity",
+            "title": "Basilique Notre-Dame de Fourvière",
+            "description": "Basilique Notre-Dame de Fourvière",
+            "locationName": "Basilique Notre-Dame de Fourvière",
+            "latitude": 45.7622698,
+            "longitude": 4.822638,
+            "startTime": "16:00",
+            "endTime": "16:45",
+            "duration": 45,
+            "orderIndex": 8,
+            "estimatedCost": 0,
+            "mustSee": true,
+            "rating": 4.8,
+            "reviewCount": 38746,
+            "dataReliability": "verified"
+          },
+          {
+            "id": "viator-168746P2",
+            "dayNumber": 1,
+            "type": "activity",
+            "title": "Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)",
+            "description": "10:00 AM | Français Commencez votre matinée par un délicieux voyage à travers la riche tapisserie culturelle lyonnaise. Notre visite commence à la Place des Terreaux, où vous verrez le majestueux Hôtel de Ville, le fascinant Musée et la magnifique Fontaine Bartholdi. De là, nous allons au charme bohème de la Croix-Rousse. Entrez dans le monde où les travailleurs de la soie ont autrefois insufflé de la vie à la ville, et errez dans les intrigantes Traboules – des passages cachés. Notre guide compétent tissera des histoires captivantes du passé, rendant l'histoire vivante à chaque étape. Ensuite, après avoir admiré la vive Fresque des Lyonnais, nous nous promenons dans la vieille ville, le Vieux Lyon. Flânez dans les rues anciennes en admirant l'allure enchanteresse de la rue Juiverie, où se trouve la superbe Galerie Philibert Delorme. Nous concluons dans le centre animé du Vieux Lyon, en arrivant juste à temps pour déjeuner dans l’un des charmants restaurants du quartier. Pourquoi nous rejoindre? Conseils d'experts, passages cachés et récits immersifs",
+            "locationName": "Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)",
+            "latitude": 45.757746,
+            "longitude": 4.8321483999999995,
+            "startTime": "17:00",
+            "endTime": "17:45",
+            "duration": 45,
+            "orderIndex": 9,
+            "estimatedCost": 5,
+            "mustSee": true,
+            "rating": 4.9,
+            "reviewCount": 750,
+            "dataReliability": "verified"
+          },
+          {
+            "id": "gp-ChIJeyxpHa7r9EcRU1fPzvhSe9U",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Jardin des Curiosités",
+            "description": "",
+            "locationName": "Jardin des Curiosités",
+            "latitude": 45.7549763,
+            "longitude": 4.821871499999999,
+            "orderIndex": 10,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20des%20Curiosit%C3%A9s%2C%20Lyon",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX4E0eozdG2EAQ1rYIxucKHsO65XQAhDPguv-2hq575CW8KEUBx54b1HuF0yV2BSfaYF25QhOqj0UhdB-Oe0dQJmE6_1BSRPNbkfkJA1t30Q4DME10VevNcGTOgzltc7VgjUrTkzMnuDQdyz12AfH88x6GbnbEt3i4NxA7C5hBVAOnY_nUTmqcBp6Eg4q3AKgvYncGyLMxQ3tnJwDtBdVkTgRGHPh1RonKYt_FKqziiinhbYUyKjWmN5FqEfEr0c6nymmvpHdpnyOE-OO6M64TFhpkkxUacOEjUDbJMDh8ytFrEvYKSIhwrEQrWMxnkU56N1ccnAY-WeSHyHidq5OyI0IsknINd0ac_pRQrHdO-3PsZUWcXBYDWRfoNBQSqFRI0UKUzCVCs29IFAigDaWKHiJfo9I5d1ZkHle7Tn1URkX5vVc-8aGyWjnPTAFiof5P4wskalNrM12WLMjvje6sBSe_nO2BCMwOSKn0xPmKdKXeiQbwpgvXeV3WBp9zzSK-1b15031ilz92azSNqKuBkdqxWggsm0sLDeaMdWFKxGbupiwt8-V4lzsxC1NLwINOqjoPL&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.62,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — ART Restaurant Lyon",
+            "description": "Cuisine fine créative dans un cadre élégant",
+            "locationName": "ART Restaurant Lyon",
+            "latitude": 45.756793,
+            "longitude": 4.827372,
+            "orderIndex": 11,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=ART%20Restaurant%20Lyon%2C%203%20Rue%20Sala%2C%2069002%20Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=ART%20Restaurant%20Lyon%2C%203%20Rue%20Sala%2C%2069002%20Lyon",
+            "restaurant": {
+              "id": "serp-857049822857312232",
+              "name": "ART Restaurant Lyon",
+              "address": "3 Rue Sala, 69002 Lyon",
+              "latitude": 45.756793,
+              "longitude": 4.827372,
+              "rating": 4.8,
+              "reviewCount": 1236,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant français"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "09 51 54 79 68",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ART%20Restaurant%20Lyon%2C%203%20Rue%20Sala%2C%2069002%20Lyon",
+              "googlePlaceId": "857049822857312232",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUrVD6CtClXg9Z3T2fsa1o4U74Y1JrrpxIr_P8CItTMVe6ajPo-dqRfuJhG1dDa1Wb95-JmuPatrNcrgWV79DatLXZ1si_B0IdWZTWGtfS18kqN4Y2Nw15mZu0oRWifrS--9v6sSgk1-5OR3gR4uYAcbm4XgHQUFBJjVTGmpI-go_Oi3FL_Zaz-DnLXJ8Ujd_tCHVla05TwXYiQMik7R2kMK9dT72XLVu8_rWlthIwst_NFxHfRDHl_JnOxJxhl0wLrFsGDKLVKBc4R0V5F6aw0WAGP-LuVDDAyg9Afq2YIVVmmM7I&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-1877762156274194877",
+                "name": "Canopée Lyon - Bistronomie de Partage",
+                "address": "12 Rue Major Martin, 69001 Lyon",
+                "latitude": 45.766611,
+                "longitude": 4.832652,
+                "rating": 4.8,
+                "reviewCount": 343,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "09 75 20 11 09",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Canop%C3%A9e%20Lyon%20-%20Bistronomie%20de%20Partage%2C%2012%20Rue%20Major%20Martin%2C%2069001%20Lyon",
+                "googlePlaceId": "1877762156274194877",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW4GKpEGR7L6S397Zh6izAzIaZRFDDZMzJg63S44e1vTIdnlsNjEi8B1y3AYIN_iDvTHlKOc_VaPh6E17qkcoRO-t0rETm5qxGv35EbwzGpXf7-tt-9qgjE8rPc6015urCYYg8RkUfBSOzjFz18vgP7D_fx3HiD52YmYIfFjTFp4ScyYW6l_7_DVc9-mPzszbXPtUCYTerW80tYXHZhNK5_WpNfCGY61kCLqhdG4Cr8ifs3urvg9uYGEHUfoirc8FwfybR_PC0MVBGbSQ77a6zqxj07C7l-GSu3G55wL_8pDBT_yLs&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-2577213887751560569",
+                "name": "L'Atelier des Augustins",
+                "address": "17 Rue Hippolyte Flandrin, 69001 Lyon",
+                "latitude": 45.767755,
+                "longitude": 4.830841,
+                "rating": 4.8,
+                "reviewCount": 1566,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant gastronomique"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Cuisine fine créative dans un cadre élégant"
+                ],
+                "description": "Cuisine fine créative dans un cadre élégant",
+                "phoneNumber": "04 72 00 88 01",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=L'Atelier%20des%20Augustins%2C%2017%20Rue%20Hippolyte%20Flandrin%2C%2069001%20Lyon",
+                "googlePlaceId": "2577213887751560569",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXxRjcrj9qvn88nCX9K3Z_7AarZ_j1L7LybqeA-1r2MEF7Dy52pdtMHFjblXm-HhuXxjvvlrJYfQhMxVFT0XbtIe0Tp90vFY_ncQOxSlNyFv5vbnwWx6ISvvVNzXtAtICA6r0X9gc6rA3ZSCJpPdT0EBVcUS6gxL-2aRfmRyAtM2962bWzmZ2gdozbqsUmdem1EMVeK35phqzBdsBModJjttYttjc6wRD4KSc7H_OXuwHla8mP_PblDcuEZLfE6Ed3b84XLE4IFaBK82s1dgTOK6BkwY3aS2D8YLyPe9IASWVY0LEE&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUrVD6CtClXg9Z3T2fsa1o4U74Y1JrrpxIr_P8CItTMVe6ajPo-dqRfuJhG1dDa1Wb95-JmuPatrNcrgWV79DatLXZ1si_B0IdWZTWGtfS18kqN4Y2Nw15mZu0oRWifrS--9v6sSgk1-5OR3gR4uYAcbm4XgHQUFBJjVTGmpI-go_Oi3FL_Zaz-DnLXJ8Ujd_tCHVla05TwXYiQMik7R2kMK9dT72XLVu8_rWlthIwst_NFxHfRDHl_JnOxJxhl0wLrFsGDKLVKBc4R0V5F6aw0WAGP-LuVDDAyg9Afq2YIVVmmM7I&maxwidth=800",
+            "distanceFromPrevious": 0.47,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=45.7549763,4.821871499999999&destination=45.767755,4.830841&travelmode=transit",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Arrivée et Vieux Lyon",
+        "dayNarrative": "Découverte en douceur du cœur historique avec la Cathédrale Saint-Jean-Baptiste et les célèbres Traboules du Vieux Lyon.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": 5,
+          "tempMax": 16,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 30,
+          "transport": 0,
+          "total": 30
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.1,
+          "p95LegKm": 0.85,
+          "totalTravelMin": 90,
+          "totalLegKm": 4.38,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.47,
+          "mstLowerBoundKm": 2.98
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-08T23:18:33.149Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Le fournil de l'artisan",
+            "description": "Salon de thé & cupcakes à l'honneur. Ce salon de thé convivial propose des repas légers et des gâteaux, notamment des cupcakes, faits maison.",
+            "locationName": "Le fournil de l'artisan",
+            "latitude": 45.7635201,
+            "longitude": 4.8550853,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Le%20fournil%20de%20l'artisan%2C%20152%20Cr%20Lafayette%2C%2069003%20Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Le%20fournil%20de%20l'artisan%2C%20152%20Cr%20Lafayette%2C%2069003%20Lyon",
+            "restaurant": {
+              "id": "serp-nearby-ChIJry8owonq9EcRxDlkbjSM9sc",
+              "name": "Le fournil de l'artisan",
+              "address": "152 Cr Lafayette, 69003 Lyon",
+              "latitude": 45.7635201,
+              "longitude": 4.8550853,
+              "rating": 4.4,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "boulangerie",
+                "boulangerie"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "04 78 60 79 13",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20fournil%20de%20l'artisan%2C%20152%20Cr%20Lafayette%2C%2069003%20Lyon",
+              "googlePlaceId": "ChIJry8owonq9EcRxDlkbjSM9sc",
+              "openingHours": {
+                "wednesday": {
+                  "open": "06:00",
+                  "close": "20:00"
+                }
+              },
+              "distance": 0.35740533684714054,
+              "walkingTime": 4,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWARC8Ek0rCPfaaVdsjHIyfE1-uSJh5ehAKB_dVtdIWNtJNywRQbKVq-pHZ806kvBjDEi18lLFfpQkerkXYiSWayNJGRSaJErjKNdml2vVl5VO838rb14Tu7rPu86plZ2oLn-csCeJnAFoDG43OBoa7a3UNTKcc4zrWGbTFVg9Y1l8CauSIV8FzIGtqz7Se6PvADWeYuqyIK_VDMyi0UNRNlFtnCjAP03_uougQUQASU6OJm9VJQ4DH5fkjHGHpjrceSvQPqeTv03gBh28Lay8jwUlC8bBdVePf07rXoKz95CUX1khwG8gYVAFjt1kQvOQlcBNkXnqQn61QMKeMLW5JadoKh3LiXrrf9A8eeOzXG_So3DME9RL_Nd4TVlFxND1ZWx8h-8Jk-B14NQceDWo4Z0wATy84TOQ5ufCU0ojCFH7TuGGPnd13v63xXA22&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJvWKneuXr9EcRmiaWwSN_1i4",
+                "name": "Hiba",
+                "address": "138 Cr Lafayette, 69003 Lyon",
+                "latitude": 45.7634925,
+                "longitude": 4.854075,
+                "rating": 4.8,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café servant des chocolats chauds",
+                  "café",
+                  "salon de thé"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "04 37 57 33 24",
+                "website": "https://www.instagram.com/hiba_regaldesaison/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hiba%2C%20138%20Cr%20Lafayette%2C%2069003%20Lyon",
+                "googlePlaceId": "ChIJvWKneuXr9EcRmiaWwSN_1i4",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.07843103967478239,
+                "walkingTime": 1,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWBAoKS-m22RAD9a1iKnRXlll5l_UySMlAzrxhASPvJi9TMNfa-qZdkr2vCqrNLCmGraCz2SxiHq4ahW5Fh86BUoVvNliRXkyUS0zSR-K2nyWvf_5Q3yScYgfnV2rpTHzzXBVXeuyyu8mt0IX9gtpwppMkbIfU4-GxRVcuWdTsElX6a_lk8wiaUBfSCD0TgJyq44MyszAOzWfxVcfAsMozeJCooHgMTbfRlyM2LbllJRZQ6cYv90BD-33k2uWKF3IX3r5ZNqXKfGlCf9N3biJBu5RD7KYA43t70ZpdfzyyYuQ&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJpVDkRU_r9EcRRA8uHxzF4FM",
+                "name": "Le Fournil de l'Artisan",
+                "address": "185 Cr Lafayette, 69006 Lyon",
+                "latitude": 45.7637876,
+                "longitude": 4.8578266,
+                "rating": 4.4,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "04 78 52 88 81",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Fournil%20de%20l'Artisan%2C%20185%20Cr%20Lafayette%2C%2069006%20Lyon",
+                "googlePlaceId": "ChIJpVDkRU_r9EcRRA8uHxzF4FM",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "06:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 0.21471773827574236,
+                "walkingTime": 3,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU_246D1FA0oGs6OrrxXxn5L_z4-m9ouWTYWbdKZ69c6A7LK5lKJ6TYbtzLuFYbweLUTjIUmMNcmIXPmccO_eA4xWLjfVBXU9xiSoOoLkVBWMEofkCYykaO8lnEYIA1hfQCFaJsLikBcUsNkZal4aNFt0mI0PuttAeluewBcxEIHmC6nkBfAEaadd38k9BNj9kSNGnIIkeXem-AwYAvGkRiaLK25Ve-K_sIbdxxpygeD5GjmujpePsrZw_GYr9G0IYz3nyw8mz6N3Y9Y8JYIDjnaOtVfhjiL9AJGaqtLEqM1O0fi7kAMFUcFv5rfOY-zcMYpq1fxCGuJsr6Ua5vIUXA5Ll6kAWO6XmCVOZLh8w4KE2djdAVQH-lTGEb7EwhwK8hzuOLcnoz3_Isf9at-D1AJ6fUOrlXMdkKXT8mtIgojkKN-hae3wWRRBEiijCt&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWARC8Ek0rCPfaaVdsjHIyfE1-uSJh5ehAKB_dVtdIWNtJNywRQbKVq-pHZ806kvBjDEi18lLFfpQkerkXYiSWayNJGRSaJErjKNdml2vVl5VO838rb14Tu7rPu86plZ2oLn-csCeJnAFoDG43OBoa7a3UNTKcc4zrWGbTFVg9Y1l8CauSIV8FzIGtqz7Se6PvADWeYuqyIK_VDMyi0UNRNlFtnCjAP03_uougQUQASU6OJm9VJQ4DH5fkjHGHpjrceSvQPqeTv03gBh28Lay8jwUlC8bBdVePf07rXoKz95CUX1khwG8gYVAFjt1kQvOQlcBNkXnqQn61QMKeMLW5JadoKh3LiXrrf9A8eeOzXG_So3DME9RL_Nd4TVlFxND1ZWx8h-8Jk-B14NQceDWo4Z0wATy84TOQ5ufCU0ojCFH7TuGGPnd13v63xXA22&maxwidth=800",
+            "distanceFromPrevious": 0.35740533684714054,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "viator-348419P1",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse",
+            "description": "Lyon est une commune française située dans le centre-est de la France, au confluent du Rhône et de la Saône. Siège du conseil de la métropole de Lyon, à laquelle son statut particulier confère à la fois les attributions d'une métropole et d'un dép...",
+            "locationName": "Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse",
+            "latitude": 45.7627629,
+            "longitude": 4.8506076,
+            "orderIndex": 1,
+            "estimatedCost": 40,
+            "duration": 120,
+            "rating": 4.9,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/Eillins-Food-Tour/d829-348419P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "viatorUrl": "https://www.viator.com/fr-FR/tours/Lyon/Eillins-Food-Tour/d829-348419P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Visite%20culturelle%20gastronomique%20et%20viticole%2C%20dans%20les%20c%C3%A9l%C3%A8bres%20Halles%20Bocuse%2C%20Lyon",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0e/b7/27/aa.jpg",
+            "freeCancellation": true,
+            "instantConfirmation": false,
+            "mustSee": true,
+            "distanceFromPrevious": 0.36,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=45.752649999999996,4.8310832999999995&destination=45.7627629,4.8506076&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJE8bzhJLq9EcR0JkOjOnW-VU",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Jardin Botanique de Lyon",
+            "description": "Le jardin botanique de Lyon est un jardin botanique qui s'étend, au sein du parc de la Tête d'or, sur 8 hectares dont 6 500 m2 de serres. Ses collections comprennent 15 000 taxons.",
+            "locationName": "Jardin Botanique de Lyon",
+            "latitude": 45.77419750000001,
+            "longitude": 4.8563014,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20Botanique%20de%20Lyon%2C%20Lyon",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGZZX8BVKetcA4zJHAeiT0NhJDcfE3fZG-mgJvBnm5MadQ1ASJNzap2WDTBVpG1jt56D01BMXbLro27BsOE2SFBEWgdVAWRQAiaV3TX4-m2LymwfYk1JN3VrOa4CZnW6I3N6iRBTmNAJWQHuHTtmlJVgKinfl2C8vN2qS0HlyCDnMPELeWSa9vmNaRc4gqh7ZAycfVzV5DiCepxyUSg9w8bWShX4ErObzQYscU7naVcMW1v4zS0heMb7WrafMkDKh2d03oqjibHVR5zIGHoxWQrOYQky0AqkDhtnJxKTw0koDAHNYSPHVLof9kqTMYgmytGk0C4yoI_YWdBcPz5QqDXvqiUsnKmdnm-TUd2FR5sQ_xtWIPTUkJsc1D0-JBzVG57JQZxG0A8yvDVJSYOXNxe8xqXdE9LEsEvWUchsE9f6RtPoqzhMigwXugpcHaPQPXFP4pyLQ8qRd0XIUoWIpYv70GbDdShnJ3WNsY464Vc1VEnW47rXze34p4eb8V19URJWde1gDx7bmtthhAmLjUqcXKdhLOyMl4bDXzI0wsD6MUumhmebqv4mroStEvXtgid6WelPzgdg&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.35,
+            "timeFromPrevious": 20,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "gp-ChIJRSpfGOvq9EcRPFTYvmRr9Q4",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "activity",
+            "title": "Parc de la Tête d'Or",
+            "description": "",
+            "locationName": "Parc de la Tête d'Or",
+            "latitude": 45.7755975,
+            "longitude": 4.8504688,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20de%20la%20T%C3%AAte%20d'Or%2C%20Lyon",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXsvWGBCxO4OwqMKiOLN3ZyGVQF0WZF3PXB1XdY6cI4Rn5fupuiMcUgylE_-1n3jo4BNgoLSeaLK-82XjMCKWqKUB2cptNg8EccAg26jlcNnR8z3KvR3NBi2-a6s9Dv0rTIsXQFu4SByQUR-mreHixiJsxWLEXM4_hKAtRauieO8XUnMGxf3yuxpMamsmNXIIPtfjrdOfVGpt27xZOloiJv1TnvqxpG__Uo3sT7ArJpjsJovkF7Iqvl0OSGflR7q9psdp35UnF_9UlunZh5HxrjTR9elQCzPWA3NprtzCP7X0uvvWKsRjRE7SJOpTlKI632lSAuYRqv0EhooUw84HbE6FaLgW5whRNCl1xIqNg4fMihqjbJCKLO0Z0gayO4-P7oVisxGHpzafYjDz4XnthBS7vtPeNdAb2dDFMPBrl-h6Nxcllw8rMh0zWkHZTEWqO1XBpcq-rVcFLfnJyqoFTJtJc25E_1qeYK5UD0OxTPMrYgAm96ytLGYvPHRSpnpR2E1Atb-lcwp3vuN9zfE5EKouJgRVgjbruHzdRAkX8rN-6jnZSaUnkdlmyGSzufIL9hGS7U&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.48,
+            "timeFromPrevious": 8,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — Chez Rosa",
+            "description": "Repas sur place",
+            "locationName": "26 bis Rue Duquesne, 69006 Lyon",
+            "latitude": 45.7726295,
+            "longitude": 4.845888899999999,
+            "orderIndex": 4,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.9,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Rosa%2C%2026%20bis%20Rue%20Duquesne%2C%2069006%20Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Rosa%2C%2026%20bis%20Rue%20Duquesne%2C%2069006%20Lyon",
+            "restaurant": {
+              "id": "serp-nearby-ChIJFbUJ8D3r9EcRJlg_I6QGDA0",
+              "name": "Chez Rosa",
+              "address": "26 bis Rue Duquesne, 69006 Lyon",
+              "latitude": 45.7726295,
+              "longitude": 4.845888899999999,
+              "rating": 4.9,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant gastronomique",
+                "restaurant gastronomique"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "04 78 93 20 91",
+              "website": "https://rosarestaurantlyon.fr/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Chez%20Rosa%2C%2026%20bis%20Rue%20Duquesne%2C%2069006%20Lyon",
+              "googlePlaceId": "ChIJFbUJ8D3r9EcRJlg_I6QGDA0",
+              "openingHours": {
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.4848583890062863,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11309106122379142754",
+                "name": "RESTAURANT TROIS FOIS M",
+                "address": "77A Rue Pierre Corneille, 69003 Lyon",
+                "latitude": 45.763417,
+                "longitude": 4.844194,
+                "rating": 4.9,
+                "reviewCount": 667,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "04 72 61 92 14",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=RESTAURANT%20TROIS%20FOIS%20M%2C%2077A%20Rue%20Pierre%20Corneille%2C%2069003%20Lyon",
+                "googlePlaceId": "11309106122379142754",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXPBGBOCKGsyav34b4VdD8JI5KhmKGJj9G6j_mOMO8X7nB0vbKWBLREZB76yPuE6tIv4K0LrLcRWk3xV2ernFqSu3UE6XO08AnxY9Gsxp_7NNyfb1Cf3ADbzEnR8pyiMb8F6fFcHL_DfKoQlx3YUQ-6Iq8XoQYgCpGJHydSxcbmykQCS5A5rm8yRf7mRdqyswl4OLt9HXDXXMr0f9lnQT4c73TEJ_NNs53m6GcPif56DTMfQvuzSXz7RDZeG8BP-TruT1B5B_ea0Jq8fRQJCuqozaR2l_LaiSuG1K9v5iVkWb00bzk&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-1877762156274194877",
+                "name": "Canopée Lyon - Bistronomie de Partage",
+                "address": "12 Rue Major Martin, 69001 Lyon",
+                "latitude": 45.766611,
+                "longitude": 4.832652,
+                "rating": 4.8,
+                "reviewCount": 343,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "09 75 20 11 09",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Canop%C3%A9e%20Lyon%20-%20Bistronomie%20de%20Partage%2C%2012%20Rue%20Major%20Martin%2C%2069001%20Lyon",
+                "googlePlaceId": "1877762156274194877",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW4GKpEGR7L6S397Zh6izAzIaZRFDDZMzJg63S44e1vTIdnlsNjEi8B1y3AYIN_iDvTHlKOc_VaPh6E17qkcoRO-t0rETm5qxGv35EbwzGpXf7-tt-9qgjE8rPc6015urCYYg8RkUfBSOzjFz18vgP7D_fx3HiD52YmYIfFjTFp4ScyYW6l_7_DVc9-mPzszbXPtUCYTerW80tYXHZhNK5_WpNfCGY61kCLqhdG4Cr8ifs3urvg9uYGEHUfoirc8FwfybR_PC0MVBGbSQ77a6zqxj07C7l-GSu3G55wL_8pDBT_yLs&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.48,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=45.7755975,4.8504688&destination=45.766646,4.837355&travelmode=transit",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse & Parc de la Tête d'Or",
+        "dayNarrative": "Journée consacrée à Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse et Parc de la Tête d'Or. 3 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 5,
+          "tempMax": 18,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 40,
+          "food": 60,
+          "transport": 0,
+          "total": 100
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 300,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.35,
+          "p95LegKm": 0.48,
+          "totalTravelMin": 48,
+          "totalLegKm": 2.67,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.08,
+          "mstLowerBoundKm": 2.48
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-09T23:18:33.149Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out Lyon centre - Appartement quartier Victor Hugo Ainay",
+            "description": "Disponibilité confirmée",
+            "locationName": "20 Rue de l'Abbaye d'Ainay, 69002 Lyon, France",
+            "latitude": 45.7544496,
+            "longitude": 4.830372,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 8,
+            "bookingUrl": "https://www.booking.com/hotel/fr/lyon-centre-appartement-quartier-victor-hugo-ainay.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Lyon%20centre%20-%20Appartement%20quartier%20Victor%20Hugo%20Ainay%2C%20Lyon",
+            "accommodation": {
+              "id": "booking-15799701",
+              "name": "Lyon centre - Appartement quartier Victor Hugo Ainay",
+              "type": "hotel",
+              "address": "20 Rue de l'Abbaye d'Ainay, 69002 Lyon, France",
+              "latitude": 45.7544496,
+              "longitude": 4.830372,
+              "rating": 8,
+              "reviewCount": 0,
+              "stars": 3,
+              "pricePerNight": 73,
+              "totalPrice": 146,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/821970123.jpg?k=fa3acd86e1277fa8f94a51438070d60ac40880e98ad4bb2c4a3b0ec80187f894&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/hotel/fr/lyon-centre-appartement-quartier-victor-hugo-ainay.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/821970123.jpg?k=fa3acd86e1277fa8f94a51438070d60ac40880e98ad4bb2c4a3b0ec80187f894&o="
+          },
+          {
+            "id": "ai-mustsee-lyon-2",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Musée des Confluences",
+            "description": "Musée moderne et spectaculaire consacré aux sciences naturelles et anthropologiques.",
+            "locationName": "Musée des Confluences",
+            "latitude": 45.732355,
+            "longitude": 4.817923,
+            "orderIndex": 1,
+            "estimatedCost": 9,
+            "duration": 180,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20des%20Confluences%2C%20Lyon",
+            "dataReliability": "generated",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVO3mBEvjKGGZda669th0l29Rpd8IVSlzFYm2iax4c1gbmxK3ty8uxuQ9ppThyU27_2rJK2-VAnt0mMu0hJ4OvXEdC9eDMdEGrd-vaR8JjegQZwnC0AhXPozqHJ3EkGp8YDNEDVzGSZPL8xAfOjqne8LeSkV8I_jr5_mzz_DP_F9K8AN5bcJhQMRxy00VQKgBRbyecgDL_3QXWRHWWR8N6TI0OrBiUieYos3jXFRQdv8VnM6vmipq6X82AsxO7ncKKImJAlshS43aaSq7ZIUFxteiV2Fb3LU_4k3LptZmOVHQA96NmW6w6G0QtOe-uoyCDG4iDm-KTSCvac9FL_NnLa4G-8NU9oYtDMlga-SHjEbxk_f7sDoZNZJDPQ36LdCST-Xu4q8uS7yK5s1IAK9RxN8K9l8zr2cAdDJPPDaPLJz_sgzYBfUspK6IDYOha1P1rwC8vguDPpOz92VzoSBYafMvVWL7fTCfkdCRODb4MUdWSrfthS1ZryJAMWuLTARhVbhj1kxXPvuxAb3WVcp6Y4H9yH3JEEhAcSIp4u2h1A-wiTnK-X3vyyDoJi-5fh_S27CMdbuEEv08ZmOKleVYJrThdd3A&maxwidth=800",
+            "mustSee": true,
+            "distanceFromPrevious": 2.64,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — La Maison",
+            "description": "Cuisine française moderne, terrasse verdoyante. Cocktails créatifs et plats français revisités servis dans un restaurant/discothèque chic doté d'une grande terrasse verdoyante.",
+            "locationName": "4 Rue Jonas Salk, 69007 Lyon",
+            "latitude": 45.7313206,
+            "longitude": 4.8230051,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=La%20Maison%2C%204%20Rue%20Jonas%20Salk%2C%2069007%20Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Maison%2C%20Lyon",
+            "restaurant": {
+              "id": "serp-nearby-ChIJodkMWdPr9EcRDKW5km8hVgc",
+              "name": "La Maison",
+              "address": "4 Rue Jonas Salk, 69007 Lyon",
+              "latitude": 45.7313206,
+              "longitude": 4.8230051,
+              "rating": 4,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant français",
+                "restaurant français",
+                "bar",
+                "club",
+                "restaurant méditerranéen",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Cuisine française moderne, terrasse verdoyante. Cocktails créatifs et plats français revisités servis dans un restaurant/discothèque chic doté d'une grande terrasse verdoyante."
+              ],
+              "description": "Cuisine française moderne, terrasse verdoyante. Cocktails créatifs et plats français revisités servis dans un restaurant/discothèque chic doté d'une grande terrasse verdoyante.",
+              "phoneNumber": "04 72 72 96 96",
+              "website": "http://www.lamaisonrestaurant.fr/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Maison%2C%204%20Rue%20Jonas%20Salk%2C%2069007%20Lyon",
+              "googlePlaceId": "ChIJodkMWdPr9EcRDKW5km8hVgc",
+              "openingHours": {
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "14:30"
+                }
+              },
+              "distance": 0.41087980757081843,
+              "walkingTime": 5,
+              "_alternatives": [
+                {
+                  "id": "serp-nearby-ChIJd-RtgDXr9EcRz6GyZwZfKYA",
+                  "name": "Smokey",
+                  "address": "16 Pl. Docteurs Charles et Christophe Mérieux, 69007 Lyon",
+                  "latitude": 45.732140799999996,
+                  "longitude": 4.8260521999999995,
+                  "rating": 4.6,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant",
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "04 82 53 26 06",
+                  "website": "https://www.smokey-france.fr/",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Smokey%2C%2016%20Pl.%20Docteurs%20Charles%20et%20Christophe%20M%C3%A9rieux%2C%2069007%20Lyon",
+                  "googlePlaceId": "ChIJd-RtgDXr9EcRz6GyZwZfKYA",
+                  "openingHours": {
+                    "wednesday": {
+                      "open": "12:00",
+                      "close": "14:00"
+                    }
+                  },
+                  "distance": 0.6314007741823898,
+                  "walkingTime": 8,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXLfcN1o5Cu5an-7VsYBV2I82tZZY0LpLrKBPAB1REkFusv04jB_3XzPBlezJmV9ZwMVE_FZKhP0oO7gtN2_Nc6JqBBKuXBm3X_O1l3QSSWwp-CXanrLxcexVEh7aQ46bBs23b6U0OSw-amTK2W-F33bL50bwiu3gtDA7SJDTPNRQtMiMQIb2cvHruvRR1TVzCoq-ubB0uWG2GfYb2IiMC-Y2x9eq2ReKH2rmxH1p_zWgsl9Fi6NWcB_6i_1Pd-dD4aIp_RYWQr5lIvh0n4FMnBfqTHqzQ-geWhw4P_51r0nw&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-nearby-ChIJ9_BFJ9unyRIRG2TN9NAP5G0",
+                  "name": "Selcius",
+                  "address": "43 Quai Rambaud, 69002 Lyon",
+                  "latitude": 45.7388972,
+                  "longitude": 4.8148064999999995,
+                  "rating": 4,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant méditerranéen",
+                    "restaurant méditerranéen",
+                    "restaurant brunch",
+                    "bar à cocktails",
+                    "restaurant familial",
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Restaurant méditerranéen avec terrasse. Restaurant méditerranéen avec terrasse en bord de rivière, proposant des mezze, et des plats de viande ou de fruits de mer."
+                  ],
+                  "description": "Restaurant méditerranéen avec terrasse. Restaurant méditerranéen avec terrasse en bord de rivière, proposant des mezze, et des plats de viande ou de fruits de mer.",
+                  "phoneNumber": "04 78 92 87 87",
+                  "website": "http://selciusrestaurant.fr/",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Selcius%2C%2043%20Quai%20Rambaud%2C%2069002%20Lyon",
+                  "googlePlaceId": "ChIJ9_BFJ9unyRIRG2TN9NAP5G0",
+                  "openingHours": {
+                    "wednesday": {
+                      "open": "12:00",
+                      "close": "01:00"
+                    }
+                  },
+                  "distance": 0.7666160817454636,
+                  "walkingTime": 10,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVY6OqPnB2vojx_OYw3Xby4JRC6BwyszUqH0H1_8K0NgapvmdBX6l15fZHwiodFgFXCfIS8VSudpfDl3B_30Yx4xhlJZRF7kRQVJh2gt65YvGKbzFOEirQsPrW1sw3zyKZQ_VpjbitR8ER_YtpUp-B8NFudTz5YK_gR7lvh4pF8I09vdt2YSxFz6aG2yV8rKOKwdGhRNfgWAmudPhqbqSeKUhirbNHYOmTB1RehHw5RawonHHTGE7g25FpV-D27m1Sm-AjnePLzklc1eQvtrMJa27abGt6EIOxZqcks4lEGJA&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUv5jtOzAOUrCgJwxbmGUpzFn11_yfKIoULBFYyhJYvL3crpxto1vWPPKwjPmJXo82GhMuaDBVu1csMUiVYWbYAEKa21VOjvQkM35-su1TpsfwtU-l43mcht5a0hEgyaIdnQ_67lXS9q4UmLQGgFLMufRzBNHkImTmd-LPgVPux7ER1XcC5PCEasEJhjxGeZol2duwwSoytwqf9UITXA1iSkwlP4ui3P9Zln-GEQkMmVHjW3wnIszQVt9Ep-fYcMueyr0TZpqMPnT83pVJ3n5NFwRFWTcgAnQd8zf0fWN0lSg&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJd-RtgDXr9EcRz6GyZwZfKYA",
+                "name": "Smokey",
+                "address": "16 Pl. Docteurs Charles et Christophe Mérieux, 69007 Lyon",
+                "latitude": 45.732140799999996,
+                "longitude": 4.8260521999999995,
+                "rating": 4.6,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "04 82 53 26 06",
+                "website": "https://www.smokey-france.fr/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Smokey%2C%2016%20Pl.%20Docteurs%20Charles%20et%20Christophe%20M%C3%A9rieux%2C%2069007%20Lyon",
+                "googlePlaceId": "ChIJd-RtgDXr9EcRz6GyZwZfKYA",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "14:00"
+                  }
+                },
+                "distance": 0.6314007741823898,
+                "walkingTime": 8,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXLfcN1o5Cu5an-7VsYBV2I82tZZY0LpLrKBPAB1REkFusv04jB_3XzPBlezJmV9ZwMVE_FZKhP0oO7gtN2_Nc6JqBBKuXBm3X_O1l3QSSWwp-CXanrLxcexVEh7aQ46bBs23b6U0OSw-amTK2W-F33bL50bwiu3gtDA7SJDTPNRQtMiMQIb2cvHruvRR1TVzCoq-ubB0uWG2GfYb2IiMC-Y2x9eq2ReKH2rmxH1p_zWgsl9Fi6NWcB_6i_1Pd-dD4aIp_RYWQr5lIvh0n4FMnBfqTHqzQ-geWhw4P_51r0nw&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJ9_BFJ9unyRIRG2TN9NAP5G0",
+                "name": "Selcius",
+                "address": "43 Quai Rambaud, 69002 Lyon",
+                "latitude": 45.7388972,
+                "longitude": 4.8148064999999995,
+                "rating": 4,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant méditerranéen",
+                  "restaurant méditerranéen",
+                  "restaurant brunch",
+                  "bar à cocktails",
+                  "restaurant familial",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant méditerranéen avec terrasse. Restaurant méditerranéen avec terrasse en bord de rivière, proposant des mezze, et des plats de viande ou de fruits de mer."
+                ],
+                "description": "Restaurant méditerranéen avec terrasse. Restaurant méditerranéen avec terrasse en bord de rivière, proposant des mezze, et des plats de viande ou de fruits de mer.",
+                "phoneNumber": "04 78 92 87 87",
+                "website": "http://selciusrestaurant.fr/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Selcius%2C%2043%20Quai%20Rambaud%2C%2069002%20Lyon",
+                "googlePlaceId": "ChIJ9_BFJ9unyRIRG2TN9NAP5G0",
+                "openingHours": {
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "01:00"
+                  }
+                },
+                "distance": 0.7666160817454636,
+                "walkingTime": 10,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVY6OqPnB2vojx_OYw3Xby4JRC6BwyszUqH0H1_8K0NgapvmdBX6l15fZHwiodFgFXCfIS8VSudpfDl3B_30Yx4xhlJZRF7kRQVJh2gt65YvGKbzFOEirQsPrW1sw3zyKZQ_VpjbitR8ER_YtpUp-B8NFudTz5YK_gR7lvh4pF8I09vdt2YSxFz6aG2yV8rKOKwdGhRNfgWAmudPhqbqSeKUhirbNHYOmTB1RehHw5RawonHHTGE7g25FpV-D27m1Sm-AjnePLzklc1eQvtrMJa27abGt6EIOxZqcks4lEGJA&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUv5jtOzAOUrCgJwxbmGUpzFn11_yfKIoULBFYyhJYvL3crpxto1vWPPKwjPmJXo82GhMuaDBVu1csMUiVYWbYAEKa21VOjvQkM35-su1TpsfwtU-l43mcht5a0hEgyaIdnQ_67lXS9q4UmLQGgFLMufRzBNHkImTmd-LPgVPux7ER1XcC5PCEasEJhjxGeZol2duwwSoytwqf9UITXA1iSkwlP4ui3P9Zln-GEQkMmVHjW3wnIszQVt9Ep-fYcMueyr0TZpqMPnT83pVJ3n5NFwRFWTcgAnQd8zf0fWN0lSg&maxwidth=800",
+            "distanceFromPrevious": 0.41,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3",
+            "dayNumber": 3,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "transport",
+            "title": "🚗 Voiture → Lyon",
+            "description": "Lyon → Lyon",
+            "locationName": "Lyon → Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 15,
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Lyon",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%97%20Voiture%20%E2%86%92%20Lyon%2C%20Lyon",
+            "transitDataSource": "estimated",
+            "transportMode": "car",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop",
+            "distanceFromPrevious": 7.143,
+            "timeFromPrevious": 67,
+            "transportToPrevious": "car",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=45.7313206,4.8230051&destination=45.764,4.8357&travelmode=transit"
+          }
+        ],
+        "theme": "Gastronomie et Confluences",
+        "dayNarrative": "Matinée gourmande avec la visite des célèbres Halles Bocuse suivie de la découverte du moderne Musée des Confluences.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 7,
+          "tempMax": 18,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 9,
+          "food": 30,
+          "transport": 0,
+          "total": 39
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.41,
+          "p95LegKm": 0.41,
+          "totalTravelMin": 10,
+          "totalLegKm": 0.41,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0.41
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Lyon",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "duration": 0,
+            "price": 0,
+            "co2": 0,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Lyon"
+          }
+        ],
+        "totalDuration": 15,
+        "totalPrice": 0,
+        "totalCO2": 0,
+        "score": 10,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Lyon",
+        "dataSource": "estimated",
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide, écologique"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Lyon",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "duration": 0,
+            "price": 0,
+            "co2": 0,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/lyon?departure_date=2026-04-08"
+          }
+        ],
+        "totalDuration": 55,
+        "totalPrice": 0,
+        "totalCO2": 0,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/lyon?departure_date=2026-04-08"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Lyon",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "duration": 0,
+            "price": 15,
+            "co2": 0,
+            "operator": "Train régional",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/lyon?departure_date=2026-04-08"
+          }
+        ],
+        "totalDuration": 40,
+        "totalPrice": 15,
+        "totalCO2": 0,
+        "score": 4.6,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 3.8,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/lyon?departure_date=2026-04-08",
+        "dataSource": "estimated"
+      }
+    ],
+    "selectedTransport": {
+      "id": "car",
+      "mode": "car",
+      "segments": [
+        {
+          "mode": "car",
+          "from": "Lyon",
+          "to": "Lyon",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "duration": 0,
+          "price": 0,
+          "co2": 0,
+          "frequency": "Flexible",
+          "bookingUrl": "https://www.google.com/maps/dir/Lyon/Lyon"
+        }
+      ],
+      "totalDuration": 15,
+      "totalPrice": 0,
+      "totalCO2": 0,
+      "score": 10,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 10,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.google.com/maps/dir/Lyon/Lyon",
+      "dataSource": "estimated",
+      "recommended": true,
+      "recommendationReason": "Option économique, rapide, écologique"
+    },
+    "accommodation": {
+      "id": "booking-15799701",
+      "name": "Lyon centre - Appartement quartier Victor Hugo Ainay",
+      "type": "hotel",
+      "address": "20 Rue de l'Abbaye d'Ainay, 69002 Lyon, France",
+      "latitude": 45.7544496,
+      "longitude": 4.830372,
+      "rating": 8,
+      "reviewCount": 0,
+      "stars": 3,
+      "pricePerNight": 73,
+      "totalPrice": 146,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/821970123.jpg?k=fa3acd86e1277fa8f94a51438070d60ac40880e98ad4bb2c4a3b0ec80187f894&o="
+      ],
+      "checkInTime": "14:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.booking.com/hotel/fr/lyon-centre-appartement-quartier-victor-hugo-ainay.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-15799701",
+        "name": "Lyon centre - Appartement quartier Victor Hugo Ainay",
+        "type": "hotel",
+        "address": "20 Rue de l'Abbaye d'Ainay, 69002 Lyon, France",
+        "latitude": 45.7544496,
+        "longitude": 4.830372,
+        "rating": 8,
+        "reviewCount": 0,
+        "stars": 3,
+        "pricePerNight": 73,
+        "totalPrice": 146,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/821970123.jpg?k=fa3acd86e1277fa8f94a51438070d60ac40880e98ad4bb2c4a3b0ec80187f894&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/fr/lyon-centre-appartement-quartier-victor-hugo-ainay.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-10597309",
+        "name": "Studio Ideal for professionals or students Lyon Vaise",
+        "type": "hotel",
+        "address": "51 bis Rue de St Cyr, 69009 Lyon, France",
+        "latitude": 45.7779431,
+        "longitude": 4.8049415,
+        "rating": 5.1,
+        "reviewCount": 12,
+        "stars": 3,
+        "pricePerNight": 69,
+        "totalPrice": 138,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/484007706.jpg?k=5cceda5657cfa0d610a25391c4f1a544ece26a769bb2b38f83a886bdf858bff8&o="
+        ],
+        "checkInTime": "16:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Studio+Ideal+for+professionals+or+students+Lyon+Vaise+Lyon&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-12575076",
+        "name": "Appartement Cosy au cœur de Lyon",
+        "type": "hotel",
+        "address": "62 Rte de Lyon, 69450 Saint-Cyr-au-Mont-d'Or, France",
+        "latitude": 45.787772,
+        "longitude": 4.8084395,
+        "rating": 8.2,
+        "reviewCount": 13,
+        "stars": 3,
+        "pricePerNight": 73,
+        "totalPrice": 146,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/585727761.jpg?k=8867c6d482d472d9305d08bf0b6885c197ce4e01198e1da622581c54ebaa939b&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/fr/appartement-cosy-au-coeur-de-lyon.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 345,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 146,
+      "food": 150,
+      "activities": 49,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Français",
+        "phrases": [
+          {
+            "original": "Bonjour, je suis de Lyon et je visite la région",
+            "translation": "Bonjour, je découvre ma propre région",
+            "phonetic": "n/a",
+            "context": "Conversation locale"
+          },
+          {
+            "original": "Pouvez-vous me recommander un bon restaurant lyonnais ?",
+            "translation": "Auriez-vous une adresse de bouchon traditionnel ?",
+            "phonetic": "n/a",
+            "context": "Recherche de spécialité culinaire"
+          },
+          {
+            "original": "Quelles spécialités culinaires dois-je absolument goûter ?",
+            "translation": "Je veux découvrir la gastronomie locale",
+            "phonetic": "n/a",
+            "context": "Intérêt culinaire régional"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Veste légère",
+            "reason": "Température variable d'avril à Lyon"
+          },
+          {
+            "item": "Chaussures de marche confortables",
+            "reason": "Déplacements dans la ville et ses collines"
+          },
+          {
+            "item": "Parapluie compact",
+            "reason": "Possibles averses printanières"
+          },
+          {
+            "item": "Appareil photo",
+            "reason": "Patrimoine architectural remarquable"
+          }
+        ],
+        "plugType": "C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Aucun visa requis (déplacement intérieur)"
+          }
+        ],
+        "importantLaws": [
+          "Respecter les zones de stationnement réglementées",
+          "Être attentif aux limitations de vitesse en ville",
+          "Garder ses papiers d'identité sur soi"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "17",
+        "ambulance": "15",
+        "fire": "18",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Mairie de Lyon",
+            "number": "04 72 10 30 30"
+          },
+          {
+            "label": "Office de Tourisme",
+            "number": "04 72 77 69 69"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 80,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 50,
+      "transportTips": "Acheter pass 3 jours TCL pour transports urbains",
+      "reasoning": "Budget de 333€/jour permet un hébergement confortable avec cuisine, activités culturelles variées et repas mixtes. Airbnb permet économies et flexibilité culinaire. Stratégie équilibrée entre restaurants lyonnais et repas auto-préparés pour profiter de la gastronomie sans épuiser le budget.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJK1Jxdanr9EcRKY5nG3nMG50",
+        "name": "Basilique Notre-Dame de Fourvière",
+        "type": "religious",
+        "description": "",
+        "latitude": 45.7622698,
+        "longitude": 4.822638,
+        "rating": 4.8,
+        "reviewCount": 38746,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "07:00",
+          "close": "21:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUCTL0z3RRaDU3DubPvwYNKIy5LC8b9O-arNyiwylQblTZ3XaYd9IhCwiU4oXiepb3a9F4jscYDutx06xXeOhF7hTVvpN4qWf40kHpFARcLEPw5anVgj2jOFWN4jXbJVJpnOY2RejR1fgLcnCIULCgNqlau-R8TbYx3hAA-8V8zAhBBRhnFMx06uZASa7UKc0BkcEKoN9S2vfPXBILOdID4VV7RRQpHDOXTycnrZJBLKDw_QlRgEUczNMZhic2peV7uTr2F5B8DIMghb8XAI-Bo9vo5pyUwlFEFrBqoG-tjROyDPjFSEVDu_Sisknv1R2gMZGNY9PICSpfNIEw0DlFAZ1a2yTZeOlOKtXO-Y6s7xL8-7hyr-vCw1aDk6DvzfEAAnTO1YXPZypb8o2zVmb3HhnSvH0uR_y737_ntgiWzKsPHTPuWd8TAWLxbxemtNpS1fgtRoTJ-kH3paa3J0LMdMjou-kgC5nJKMn_O4s7zTNcNuwAVeIGYpz_cV5nS8EpD8ZaaY0pBaVRatmiRZdPFSs6JNxRn_ZZUo5c-a1VGRvCv-PW1jGRkx3YiuEZr8EVA8KZQ&maxwidth=400",
+        "googlePlaceId": "ChIJK1Jxdanr9EcRKY5nG3nMG50",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 78 25 13 01",
+        "website": "https://www.fourviere.org/fr/",
+        "isOutdoor": false,
+        "score": 143.26703850214682,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "gp-ChIJs1rce1Pq9EcRRyCL9YWTnV0",
+        "name": "Place Bellecour",
+        "type": "park",
+        "description": "",
+        "latitude": 45.757746,
+        "longitude": 4.832148399999999,
+        "rating": 4.4,
+        "reviewCount": 26739,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVQSOvCWZtJg2-TsFP7aJqAR11wv--rFjUqAyztiVDoIhmlhtr9fTySVZ-O1ThTXoi00oKXNS48IyIc419lyvifzyp7MWXF9wyu5GMetJMLd2ZJpM2xtArW2bH27CxEjPkKVATELdEWYV5FVG8w0MGVKUef5aFRaUEQkH32_UzScR6nqgGzMFnxGVNuideB4iLCUwxei1xdah4USmOZ-_ZcEBbNHLCP-4sq-5-Csv_17kKkNbpH_jkFOxji3JPdAGG7VjjlTUT8b8JdkR65DyX4Fw-QsrnTQPD8q9cJLYzyl2V1Owa3c52c7OVZYV1VqrDy-zpqZP6Y-aDQpvlhoZPcaB2IIVa7Hzs5T5zewNNMr84GkYYlwIf2_PUKCbwA7XCzVUv3NfSm5YxFKRk66yeLEwWadj2sXZm8Dkyas64RuOlPCfWif63G-nf8Ttumw3qc8QCzRSRphXQ-KZJ1FZK_viQ76TSVbPGce7pnigYXViwTDB5iQx99KNyWe-P0newAVKqFAPxAv3ngb4nus39hjvB8Fn5QOeGg3q08uQEmZTN2zXcOTD-1T-eIC_gS1mIv4J7_&maxwidth=400",
+        "googlePlaceId": "ChIJs1rce1Pq9EcRRyCL9YWTnV0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 77 69 69",
+        "isOutdoor": true,
+        "score": 137.27230455769484,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-168746P2",
+        "name": "Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)",
+        "type": "culture",
+        "description": "10:00 AM | Français Commencez votre matinée par un délicieux voyage à travers la riche tapisserie culturelle lyonnaise. Notre visite commence à la Place des Terreaux, où vous verrez le majestueux Hôtel de Ville, le fascinant Musée et la magnifique Fontaine Bartholdi. De là, nous allons au charme bohème de la Croix-Rousse. Entrez dans le monde où les travailleurs de la soie ont autrefois insufflé de la vie à la ville, et errez dans les intrigantes Traboules – des passages cachés. Notre guide compétent tissera des histoires captivantes du passé, rendant l'histoire vivante à chaque étape. Ensuite, après avoir admiré la vive Fresque des Lyonnais, nous nous promenons dans la vieille ville, le Vieux Lyon. Flânez dans les rues anciennes en admirant l'allure enchanteresse de la rue Juiverie, où se trouve la superbe Galerie Philibert Delorme. Nous concluons dans le centre animé du Vieux Lyon, en arrivant juste à temps pour déjeuner dans l’un des charmants restaurants du quartier. Pourquoi nous rejoindre? Conseils d'experts, passages cachés et récits immersifs",
+        "duration": 120,
+        "estimatedCost": 5,
+        "latitude": 45.757746,
+        "longitude": 4.8321483999999995,
+        "rating": 4.9,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/City-Walking-Tour-Lyon/d829-168746P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "17:00",
+          "close": "23:30"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/07/b5/a5/bd.jpg",
+        "providerName": "Viator",
+        "reviewCount": 750,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 135.4872068306739,
+        "source": "viator"
+      },
+      {
+        "id": "viator-348419P1",
+        "name": "Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse",
+        "type": "culture",
+        "description": "Élevez votre expérience de voyage avec une aventure culturelle inoubliable qui promet non seulement un avant-goût de Lyon, mais aussi une connexion authentique à son âme. Vous allez comprendre pourquoi Lyon est la capitale mondiale de la gastronomie, pourquoi Paul Bocuse est le chef le plus célèbre de tous, connaître l'histoire des recettes, pourquoi nous buvons les vins que nous buvons ici à Lyon et surtout, ce qu'est la gastronomie. Aucune dégustation n’est incluse dans ce Tour mais vous vivrez les délices culinaires lyonnais avec un Guide passionné, bilingue, charismatique et joyeux, qui définit l’art de partager et savourer les plaisirs de la vie. Ce circuit culturel et informatif mets et vins vous plongera dans l’essence lyonnaise, où la saveur rencontre l’Histoire, avec un hôte qui résume la chaleur, l’expertise et la joie de partager des moments mémorables. Joignez-vous à moi pour une aventure inoubliable remplie de sourire où chaque histoire est une célébration du riche patrimoine lyonnais.",
+        "duration": 120,
+        "estimatedCost": 40,
+        "latitude": 45.7627629,
+        "longitude": 4.8506076,
+        "rating": 4.9,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/Eillins-Food-Tour/d829-348419P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0e/b7/27/aa.jpg",
+        "providerName": "Viator",
+        "reviewCount": 166,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": 126.07033936508829,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJd4uoxojr9EcRhSpXQ3INlVI",
+        "name": "Traboules du Vieux Lyon",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7627528,
+        "longitude": 4.8277855,
+        "rating": 4.6,
+        "reviewCount": 501,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV5Jjq-2Mgfc_qf7p7xAY5GPOIpA4Xre2s54v3oSyyrPBETl0xUUv_3TBH_aORpklSd4o_Ya76lrmaSWZGfDB2mwU-dAuaih7Kqz6GfX6lOUjCHwsjYIBivPBYONVNDmB9KR5AsWN6Nt1xsiZRs0gyXBYgflV74JsOMbuF6wFvGLnddtvZFZGgAr6Hp75Cbj66IKPYTh4S9CEDrgRncfuU2B6JjQ50yRGN75oKc3qsbwOGYWVPHkwgFAo7pmTvI6_FRE6Ufr-UZWVKJcF337h_y9WHAO2uPt8PbKWI2hej0YFlY3OvFd0ycGiYywNiyeScN-LjYpN7RuI3LhZ_yJ2YrVVhAmctGT96gOP3JKv8qqU86WLLZsjq0m4hDiJD6rhU6ZpYsLbuRidGU6sdewliV4raJZty3IqjoDASUPM3IaNDhbX_oV0TdrHSpvcwP79EccRgThqtk-MsnQvKJM01i26G68qbw2mf1uM0Ugoeiv_fKigmtBFC_mmU2Ma4Ffny9C5qs0kBciwJuN8dPk4I35VmClSkK3XVl8wtwnuk4_CLDzZRe4ngs6AM1OxH184zBKm5p&maxwidth=400",
+        "googlePlaceId": "ChIJd4uoxojr9EcRhSpXQ3INlVI",
+        "score": 123.32083763168285,
+        "source": "google_places"
+      },
+      {
+        "id": "ai-mustsee-lyon-2",
+        "name": "Musée des Confluences",
+        "type": "culture",
+        "description": "Musée moderne et spectaculaire consacré aux sciences naturelles et anthropologiques.",
+        "duration": 180,
+        "estimatedCost": 9,
+        "latitude": 45.732355,
+        "longitude": 4.817923,
+        "rating": 4.5,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "generated",
+        "isOutdoor": false,
+        "score": 106.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJ7-V74qrr9EcReweyBTQBAOM",
+        "name": "Musée Cinéma et Miniature",
+        "type": "museum",
+        "description": "",
+        "latitude": 45.7619231,
+        "longitude": 4.8271497,
+        "rating": 4.7,
+        "reviewCount": 14059,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXTVBQ1sfEmopswWjOuoTJy9KUh1KN3lDSDG5DGk33gdSyaHh5BL9yljX_yHCyKbkjkRqslGppXAP2REOXaYBJ-0HFhde-rwT1PeuL5y22Te3kHtrQYck5uKPCVhW7iHL9aU2RPH_0XYxMpdi7c66DsmbGi_6VZ-t_4M4yOgco3lUrAyF19gW9qJb-C1tEFA5MppsDSkqN6e0BOmjC-KvJ34Ia2FG5R0kbMB53ceDr2Ee4bp9lQ0dHN6Eg6Vdvna_V1UjulAk7ci-kMdLYIltV0p0q28_eT3rVHPj4pFbWBYDFifqK3lUr4frCvAy_1CoZH5j5MNtkuEQD5BHxJJfGUgSauBagvZ3z0PWt1uPr0EkpVQhhyIxS_xaKm0ykawRmnK6JWo-H3TMMJnTHlj3gcBh6Fr5B3bHUEUA859NDtpA2cLj-JlM5vR-uIEnoYnmrYdpvAFktpsHK9fZUA7AYDrU3IYVt_ChaTqKxnhxA-3PomqlGu1QBobKlehMAg6dpjpzTVX59x-UEaGyvmZP9aXO6DXW1YjAC7rHtluJlCez49jFlqSCKcAG7SOurLmcHra7-Q&maxwidth=400",
+        "googlePlaceId": "ChIJ7-V74qrr9EcReweyBTQBAOM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.museeminiatureetcinema.fr/",
+        "isOutdoor": false,
+        "score": 45.61291866989569,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJRSpfGOvq9EcRPFTYvmRr9Q4",
+        "name": "Parc de la Tête d'Or",
+        "type": "park",
+        "description": "",
+        "latitude": 45.7755975,
+        "longitude": 4.8504688,
+        "rating": 4.6,
+        "reviewCount": 59582,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "06:30",
+          "close": "20:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXsvWGBCxO4OwqMKiOLN3ZyGVQF0WZF3PXB1XdY6cI4Rn5fupuiMcUgylE_-1n3jo4BNgoLSeaLK-82XjMCKWqKUB2cptNg8EccAg26jlcNnR8z3KvR3NBi2-a6s9Dv0rTIsXQFu4SByQUR-mreHixiJsxWLEXM4_hKAtRauieO8XUnMGxf3yuxpMamsmNXIIPtfjrdOfVGpt27xZOloiJv1TnvqxpG__Uo3sT7ArJpjsJovkF7Iqvl0OSGflR7q9psdp35UnF_9UlunZh5HxrjTR9elQCzPWA3NprtzCP7X0uvvWKsRjRE7SJOpTlKI632lSAuYRqv0EhooUw84HbE6FaLgW5whRNCl1xIqNg4fMihqjbJCKLO0Z0gayO4-P7oVisxGHpzafYjDz4XnthBS7vtPeNdAb2dDFMPBrl-h6Nxcllw8rMh0zWkHZTEWqO1XBpcq-rVcFLfnJyqoFTJtJc25E_1qeYK5UD0OxTPMrYgAm96ytLGYvPHRSpnpR2E1Atb-lcwp3vuN9zfE5EKouJgRVgjbruHzdRAkX8rN-6jnZSaUnkdlmyGSzufIL9hGS7U&maxwidth=400",
+        "googlePlaceId": "ChIJRSpfGOvq9EcRPFTYvmRr9Q4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "06:30",
+            "close": "20:30"
+          },
+          "monday": {
+            "open": "06:30",
+            "close": "20:30"
+          },
+          "tuesday": {
+            "open": "06:30",
+            "close": "20:30"
+          },
+          "wednesday": {
+            "open": "06:30",
+            "close": "20:30"
+          },
+          "thursday": {
+            "open": "06:30",
+            "close": "20:30"
+          },
+          "friday": {
+            "open": "06:30",
+            "close": "20:30"
+          },
+          "saturday": {
+            "open": "06:30",
+            "close": "20:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 10 30 30",
+        "website": "https://www.lyon.fr/lieu/parcs/parc-de-la-tete-dor",
+        "isOutdoor": true,
+        "score": 43.40779574376526,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJHzRu5q7r9EcRQV-RJ_hw2iU",
+        "name": "LUGDUNUM - Musée & Théâtres romains",
+        "type": "museum",
+        "description": "",
+        "latitude": 45.7604255,
+        "longitude": 4.8199666,
+        "rating": 4.6,
+        "reviewCount": 6508,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVFHDckkpoSbXJltAdo2QpC6ChO39PCDXiaWVNUX6lsaI06F0xJgkoL8A1ygRZgGXyoal71O1E6cSgtQngpr9MWr8rg8kJOf1FJGvbawb9II9sgypgYHJKApbbT9K9m60n0ky1MErcp1AtQ38r1M9mg4mklvLImXaWkaoRbTnPY8kpG6a6iovMTyIV3kLrFbkbiqtyVAuz3qlIe7WfA-SJEiSo1ynv0JTa4a3em25AjlY-Re4yEtthvgwsXCeKtyi6M84tWnAXikO06iK90O6pV2XXrepKZkn1wHBUDeFL6XzQYBG8&maxwidth=400",
+        "googlePlaceId": "ChIJHzRu5q7r9EcRQV-RJ_hw2iU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 38 49 30",
+        "website": "https://lugdunum.grandlyon.com/",
+        "isOutdoor": false,
+        "score": 41.213418488515885,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJjyI4Eavr9EcRKEdGOieOt-0",
+        "name": "Cathédrale et Primatiale Saint-Jean-Baptiste",
+        "type": "religious",
+        "description": "",
+        "latitude": 45.760952,
+        "longitude": 4.8269788,
+        "rating": 4.6,
+        "reviewCount": 14737,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "19:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUkhWId61mFfXGNzKR8tfTRoaazEggaI7OxR-C5iKj63nw3iYnsJEVwsqT1XylMeteRmYK28wn-XkxLTv9gtfoTJVaeO6kmy_W5kQCSPc3DHuiXDMNNuGsyZ55sqfuaVF-hxLRXeL9MPQswMu5ulXxNWlAMrTRhNf1Onu7Zx5xj5XSMEJWAmekd84dG5I7YCGDLAA56guzGv8rMtrPfJU0ACTSWmT0lEo2chVt8dZ8W3q_7G97jea9PcAXfLCxJ3liFB6wP1eqqTguOIHVEvGTyPkh61XgVxA7gu4ExADHC1MIQYBZIUpZjRvHGdS_ygLdNh_8q1BS9Swzx4OoYgUIzq1B9m-xKhGBw0VP5X1iC1kmUL05eP6QFx7NrbXaFGulVeBOH4t5A_gZFLjHytaBuI79f__p2CBee_2gks_zNUPv2jeklktRs0LK5GZhKT4f9_9UO0Edvb-F0NvjlLbW-2CpsEXGjpQxPS9pLkJRuTna8XUGAJUdfan36JJq1RvDu3RLktUODwCsAbkFVBs4ndqq-7Z7UfayDu0oyHnI-iLnT_ONDSfDx3zcza9En3seqhvTtLMg6XQ&maxwidth=400",
+        "googlePlaceId": "ChIJjyI4Eavr9EcRKEdGOieOt-0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "14:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "08:30",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "08:30",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "08:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "08:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "08:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://primatiale.fr/",
+        "isOutdoor": false,
+        "score": 36.250549133776126,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJE8bzhJLq9EcR0JkOjOnW-VU",
+        "name": "Jardin Botanique de Lyon",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.77419750000001,
+        "longitude": 4.8563014,
+        "rating": 4.7,
+        "reviewCount": 4726,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGZZX8BVKetcA4zJHAeiT0NhJDcfE3fZG-mgJvBnm5MadQ1ASJNzap2WDTBVpG1jt56D01BMXbLro27BsOE2SFBEWgdVAWRQAiaV3TX4-m2LymwfYk1JN3VrOa4CZnW6I3N6iRBTmNAJWQHuHTtmlJVgKinfl2C8vN2qS0HlyCDnMPELeWSa9vmNaRc4gqh7ZAycfVzV5DiCepxyUSg9w8bWShX4ErObzQYscU7naVcMW1v4zS0heMb7WrafMkDKh2d03oqjibHVR5zIGHoxWQrOYQky0AqkDhtnJxKTw0koDAHNYSPHVLof9kqTMYgmytGk0C4yoI_YWdBcPz5QqDXvqiUsnKmdnm-TUd2FR5sQ_xtWIPTUkJsc1D0-JBzVG57JQZxG0A8yvDVJSYOXNxe8xqXdE9LEsEvWUchsE9f6RtPoqzhMigwXugpcHaPQPXFP4pyLQ8qRd0XIUoWIpYv70GbDdShnJ3WNsY464Vc1VEnW47rXze34p4eb8V19URJWde1gDx7bmtthhAmLjUqcXKdhLOyMl4bDXzI0wsD6MUumhmebqv4mroStEvXtgid6WelPzgdg&maxwidth=400",
+        "googlePlaceId": "ChIJE8bzhJLq9EcR0JkOjOnW-VU",
+        "isOutdoor": true,
+        "score": 35.367466173757286,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJKW5Swajr9EcRQ2EpEHMgeIY",
+        "name": "Théâtre Gallo Romain",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7597309,
+        "longitude": 4.8201098,
+        "rating": 4.7,
+        "reviewCount": 7584,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUJFHI7Mq5aKFDC9GzaQrnbETJuYjS8-51IwZWycRbY-n1A4iUroOndwVNgzUdgfMPg5QJcZyZk6EFybFgs0T2K2AXjlWMJGw5qyOHvRb7LnIQwIqED4wT_noRHnVqYKxGReV_frs3If8LNLlktBEtFLXq3U7gJ8NpTn61HREEdY8PvwL5LhDz5dyHfbdC1OcZd2KDV9cm2lGCCWhYuhog8Apyht3QOCp8glSWLloTjNUjKg16nAzLLmEfpRa7C2Tmb3fedNtCYcYi0CB01gnomOEOczep123uGrviEB3K1Dli_6fhMR6Q1BNvAq6QCPRSML7XZHcM6Fy0Ax_RyC7tqg8YnGnRmyObrboij_PCjGgFPGIgcyRo0OJsFqMiGvCafByKzjkqvAv4groGyytvpBXzp5kGR-pfw4vZJIXLOOpgkQqneBX8UuqjvZsdgo1qbUl9I--BTl1XcUYzKK_2zH9Ol6GV65ITvlxzx23tnHVzr5HPhjSGp1jiweDEwguPer3kuAr6C-BBRgoJNG5DQ1um10Ux3qO9KJL0QeGTCJjrPGXr-Hs5gD-mA2yYH2a3oVgW2&maxwidth=400",
+        "googlePlaceId": "ChIJKW5Swajr9EcRQ2EpEHMgeIY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 38 49 30",
+        "website": "http://www.museegalloromain.grandlyon.com/",
+        "isOutdoor": false,
+        "score": 35.21643490224032,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJAeNbJBzr9EcRk8M_tMV1AW4",
+        "name": "Mur des Canuts",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7779683,
+        "longitude": 4.8279781,
+        "rating": 4.7,
+        "reviewCount": 6501,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVVQb95G8Rf5APKjws7lT603xXTDmCFCoqu_CVS9cSMstVvS3Z0MfEPk9Im3wsz38XFc5f1lVrk-tIL7bXuk-8bdXRswtnH43ux7magiOd2HLvwPZ_VFz5CuMle0tQO6i2Aq8j1civupOCry8WEPU-wQtlLKGcSKJOvmFwOxfpU6bpMi-xErzV7mwKyduqJPI84PGR1InzkoO2JST9piBRAz2s5sXCHdaE3jrSo0SlxemYIrryfbO5trfqJXcl5CowcOL1SHxsxOfG9Y8dFqH6xc_98XVlvc_m09xV8dFRRlEO8uRz2zwbx9sDIfQV-CI0kRBRVp6B9weyN8NLgxqZtVQBw3xB_Xw5B8-ee7W6P9BhEmfQvQ6TvIG4QAXHaamU7q5BZk3uutCPl_UlP9Ygd40iSutF5zg-HC2E2QZ6Mdxar02MD-3wE7FAimcTRRUoSO4SuQMFOLq9ods1LaKYQBKOIcCXck6R2nBSLxYGbtjOi9sdPwDYnZlGvB8kpyN3ETe-GqWOHlb_dRj6_uWd-iqls_rmr3YZy78vSvSmuDTMcvl9Wuckc6AD9X_CiXvnBzoRm&maxwidth=400",
+        "googlePlaceId": "ChIJAeNbJBzr9EcRk8M_tMV1AW4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 78 50 44 57",
+        "website": "http://www.citecreation.fr/",
+        "score": 34.61552798899115,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxzTjnKrr9EcRQSvpMtbwuUY",
+        "name": "Musée des arts de la marionnette - Gadagne",
+        "type": "museum",
+        "description": "",
+        "latitude": 45.7639348,
+        "longitude": 4.8275291,
+        "rating": 4.3,
+        "reviewCount": 1656,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:30",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWt5c-hNHGGfGTuB1QlxDUeN6MFo1W3gyfWjJIrJXBdF-iKCeDJXZFek6gAVT1qoVUYQOdQdgfwhJanVhS3V1xRXhUAu00X2pjeMtxBhJe8bJQtc_SYql2cFe-rcp_1mH87PnTDl9rB_AIV35RO0yPqdkJBLY6yOsWS0w_hRMpsAHXdp5tu-yaPjiAYULCeWORrEheHIgRQj7-XORLZ1DRqcq5zoxSaQb4r_5qPvcshZYNFAf6U5kkbhlcUOKDI-q6nrQ1LW1FzcZ69EHXURhh_y0eZe--PbnhfdNMUlaB9ZPbfOIyeNKUuI2uBcmuFmt9OwIzROkernHTRVGxE39n4Hk5VsZdKWBgy6Gkz1obd2XyrKZDtagbEWLSXx9zeZmrzXrABHyhPgg2AXf8GntxTvfa8aQlqNmXmmMFl349RzB5XLIIc5PAY4quXGKve0tBKw3D_JDl6cQFPL06KCMZbATTNS_Pra0jUCWCrcYCS4FZpjIk88wz3zrlRMJ4B2vg5GqpmLLW6pkYHvjjwsM0SYHoir0YrPZssjv-kuNDdJ1oLzqTOADgDupox9e1Wa5Iavo_VWJPujg&maxwidth=400",
+        "googlePlaceId": "ChIJxzTjnKrr9EcRQSvpMtbwuUY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 78 42 03 61",
+        "website": "https://www.gadagne-lyon.fr/",
+        "isOutdoor": false,
+        "score": 32.71283658403253,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJeyxpHa7r9EcRU1fPzvhSe9U",
+        "name": "Jardin des Curiosités",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7549763,
+        "longitude": 4.821871499999999,
+        "rating": 4.7,
+        "reviewCount": 2013,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX4E0eozdG2EAQ1rYIxucKHsO65XQAhDPguv-2hq575CW8KEUBx54b1HuF0yV2BSfaYF25QhOqj0UhdB-Oe0dQJmE6_1BSRPNbkfkJA1t30Q4DME10VevNcGTOgzltc7VgjUrTkzMnuDQdyz12AfH88x6GbnbEt3i4NxA7C5hBVAOnY_nUTmqcBp6Eg4q3AKgvYncGyLMxQ3tnJwDtBdVkTgRGHPh1RonKYt_FKqziiinhbYUyKjWmN5FqEfEr0c6nymmvpHdpnyOE-OO6M64TFhpkkxUacOEjUDbJMDh8ytFrEvYKSIhwrEQrWMxnkU56N1ccnAY-WeSHyHidq5OyI0IsknINd0ac_pRQrHdO-3PsZUWcXBYDWRfoNBQSqFRI0UKUzCVCs29IFAigDaWKHiJfo9I5d1ZkHle7Tn1URkX5vVc-8aGyWjnPTAFiof5P4wskalNrM12WLMjvje6sBSe_nO2BCMwOSKn0xPmKdKXeiQbwpgvXeV3WBp9zzSK-1b15031ilz92azSNqKuBkdqxWggsm0sLDeaMdWFKxGbupiwt8-V4lzsxC1NLwINOqjoPL&maxwidth=400",
+        "googlePlaceId": "ChIJeyxpHa7r9EcRU1fPzvhSe9U",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 69 47 60",
+        "isOutdoor": true,
+        "score": 31.984281924559422,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJJ_l3jf7q9EcRk3dfXthb48Y",
+        "name": "Fontaine Bartholdi",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7676319,
+        "longitude": 4.8334627,
+        "rating": 4.6,
+        "reviewCount": 3859,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVqsDkGTGJiGwfZJAzFJdscE0OQ2hd2W_8CNVXYQ4edPFwrT2pwoiU3SfDXaMa_rLOjg-KkCK_jIcTSERzJc4R-Pt2TpsT0-4jGI75yJC6cgyUZDFZZdtFPuCDcOYlBeszNXaqOxd-VNQEudRSg3hjvsM-YPB9Xc9NpiVe-NiO99v7rdc3vj9KSLk4JlhN5TKdksscU_gXlwY2Awfamm6WmZuIXDl9mchOw8kd6sA9dP2IYyT3ZmMG96tmYv-PsNWvjoFk3byhVaE_ZcG8lSjWkMcqCMA2c-0PUXBuOzfKioXbBFdNOmnr2zW5zXb70cMOp_QC0XVdaEqioGBtnQib79hYVfLc9brC9Zpinb-lEHHzKzzuUEg0GJhi_S2xU3Gmm4r9o7xj1aDL6NxiPcXegP-jAEfAwb4IcVz5ETZsN5Ek55UoQnZsq4OJxsnX_7Ao1BIle23PrvyJ-wYptqByJaBnBreOvq0QuDPSsn5kzZ-KgeqJd7mdTsWic7OAZcyX7vp_V2EiLH1reKGJ1qY-L6AlEDdMKpNlJUjXobKjlbcXHAcuhiRItV1xPjeDG06E7WBY2&maxwidth=400",
+        "googlePlaceId": "ChIJJ_l3jf7q9EcRk3dfXthb48Y",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 77 69 69",
+        "isOutdoor": false,
+        "score": 31.255665192050976,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJHb247f7q9EcRM12hB20vobI",
+        "name": "Place des Terreaux",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.76748509999999,
+        "longitude": 4.8334965,
+        "rating": 4.5,
+        "reviewCount": 4410,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW6goNKp2G0i-jBM88P8D9eQRCgbvYJDCYJhxABiSpRWH4tag1Ot655Ub9D_L2w6G829jtoiZPNuBDAtSy8s0wC2duUJoFiWx3UlZ21RnRgIt6e03CjBSmdg-UemLRfcZd4ZAMfZp9VgpJv9os-r725NBirROKcZmTStaq1lczQZUyvofZAVGzOpucViPzYVi4dACj9abrlSDXi7LpT8OQq7fmTJMyFm09AmCql6xqqEab5cIcU7VraVLYRBnFe40WnxxWwciik8cIwxonfiLti2y5pVFC8bT7jtImDsxDZ47e09X_bBR69Qc_fDimnV3r5Ywpr0gA4TjjxnYcwn8I7u6PxpYBcZcvieHGH9OIs3zaBG8NvNdJyJ6Ky1oyWdzanGf38QsXx9GGIBZZCvBRWQQUAijKRjspe-F4PSC6_Pbrvslw8FJQr0mIioesLpbMadPU9paYOVok8RUjj7OrV8lyfZXhaO-4zEPVio6hch0GVjS9RyudVLzKgxbdwC5911xItUvVdP1UYVu4V-UoUznAEdlz3NdvmDr3FoHjkW7Ogx1ifeOEmWuJd3kgVdWeZLG78&maxwidth=400",
+        "googlePlaceId": "ChIJHb247f7q9EcRM12hB20vobI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 98 54 04",
+        "website": "https://mairie1.lyon.fr/lieu/contemporaine-19eme-20eme/place-des-terreaux",
+        "isOutdoor": true,
+        "score": 30.447251503205493,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJC3f81avr9EcRtyvvGK0QLMQ",
+        "name": "Parc des Hauteurs",
+        "type": "park",
+        "description": "",
+        "latitude": 45.7623161,
+        "longitude": 4.8233581,
+        "rating": 4.6,
+        "reviewCount": 1474,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "07:45",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV9iYPLW2PNU5kVMDEgEmKFfhU1QJ0rLN67R7PWaKR4ds7Z-XDkreFHoDrMZkOUcEHbkMM0EVnTU_SqVqqviSNwOYbZQ-zDgV-GbhvoKnaejmWgIpJcszV1__GrTmEpT_75sGGF8nVNFlYTlSFDqq0RebEXt3heaaGTV3EQseR3G85wTAnrrqXAFvcrCZYIrHJkhGw1w7SQOoCh48f1OwExgf325MKLut7AXGD5dkqI3dpQa6BJCbLD2FcOJsHAPlc3JtBsayaTySPXhw49LuWqjhP-nOzd76szvMZd6kVuKxwPgycuXocIrnTsN7lwKQE4UWbElewR2d9vaHy67LzTieBG8vxBKEVsn4yP3muUuwSuCZFnsSnQXssiluIQ8i2Hw6x0EZaS_EE2-GHyuIMFkkvCaSilfCAoFwdV2xwMsnVGlN7ulwqOihJ68oqqSCex564Yz_aKz5YB72XNN1otIO5x017PG1o3b8kEEkb086hlyNEyoHy4wNDEO11GjSL2KvcFr_CzqKBZ61zmEzPvu1BZXDvE2oYp9IMppj_qgPDxZGdqldojpLKDZpLgmXt4W31b6hrRzw&maxwidth=400",
+        "googlePlaceId": "ChIJC3f81avr9EcRtyvvGK0QLMQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:45",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "07:45",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "07:45",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "07:45",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "07:45",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "07:45",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "07:45",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 69 47 60",
+        "isOutdoor": true,
+        "score": 29.591596535598953,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-7812P98",
+        "name": "Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins",
+        "type": "culture",
+        "description": "La nourriture est sans aucun doute l'une des traditions les plus aimées de Lyon. Depuis 1935, la ville est considérée comme la capitale mondiale de la gastronomie. Au moment de forger les traditions culinaires lyonnaises, les célèbres \"Mères Lyonnaises\" ont réussi à faire de la cuisine lyonnaise une institution. Aujourd'hui, les chefs masculins dominent la scène, à l'instar du célèbre Paul Bocuse, mais ce sont les femmes qui ont fait évoluer la cuisine renommée. La plupart des recettes de la ville n'ont pas changé depuis leurs modestes débuts, ce qui signifie que vous aurez l'occasion de goûter à la culture et à l'histoire qui ont fait de Lyon le centre culinaire d'aujourd'hui. Nous vous guiderons à travers ce voyage gastronomique empreint de passion, d'histoire et de cuisine et de vin français exquis. Découvrez pourquoi manger et boire ne sont pas seulement un passe-temps à Lyon, mais un mode de vie.",
+        "duration": 210,
+        "estimatedCost": 0,
+        "latitude": 45.7670288,
+        "longitude": 4.827445099999999,
+        "rating": 4.9,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/Secret-Food-Tours-Lyon/d829-7812P98?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/0d/0e/d4.jpg",
+        "providerName": "Viator",
+        "reviewCount": 575,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 27.237719901136785,
+        "source": "viator"
+      },
+      {
+        "id": "viator-6778P4",
+        "name": "Visite guidée 2h - L'essentiel de Lyon à vélo électrique",
+        "type": "culture",
+        "description": "Découvrez les points forts de Lyon lors de ce circuit de 2 heures à vélo électrique, conçu pour vous montrer les incontournables de la ville en peu de temps et avec un minimum d’efforts. Menée par un Guide local sympathique et compétent, la visite suit un itinéraire fluide et principalement cyclable adapté à tous les niveaux. Promenez-vous le long des berges de la Saône avec vue sur la colline de Fourvière, traversez des places emblématiques comme Bellecour et suivez les pistes cyclables entièrement dédiées au bord du Rhône. Profitez d’une balade relaxante dans le parc de la Tête d’Or, le cœur verdoyant de Lyon, avant de passer par la place des Terreaux et la célèbre Fresque des Lyonnais. Grâce aux vélos électriques, vous pourrez parcourir confortablement une grande partie de Lyon tout en découvrant son histoire, sa culture et son quotidien. Cette visite est l'introduction parfaite à Lyon, combinant culture, nature et vues panoramiques en seulement deux heures.",
+        "duration": 120,
+        "estimatedCost": 35,
+        "latitude": 45.7622687,
+        "longitude": 4.828632799999999,
+        "rating": 4.9,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/1-5-Hour-Small-Group-Electric-Bike-Tour-in-Lyon/d829-6778P4?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/94/6a/9e.jpg",
+        "providerName": "Viator",
+        "reviewCount": 273,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 26.599754068373283,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJu0YXqoTr9EcRKn8fUgXyV0E",
+        "name": "Place de la République",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7604786,
+        "longitude": 4.8356574,
+        "rating": 4.4,
+        "reviewCount": 1500,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWSNOYyjJSxaFpt5fhUVspAzx4dUrTh7eB-X38XtSjcJnpSQNq7VtB75tuJTAzjtzijzoiIf0IjFMLEOQsRmKtzaFcBazYwwmtN3m6sRd3KfugOM9UNlSWK6I_DUaRYZsKw1HacgnXA0pvPfiYETF_coBnuYdAfJX2ZjLeq-u9IA_qU3WQBQvTc9mVWBc2GbgNEgqeeGEiQpTJaeSQa0EmbFNDyZJmdQkfHiHo6CDJOhkDQoJKkZsYaAHAAyzRM-ntMOJfSmjGDXpaTbHsJJfPqTn1QSjbKglVHbjunSgZBboJ1T2vKH-jL-keLVAwsSwH3KTW7-Y-2pPg0-iQOCrN50c-bvWAk4rmcUL3p1ImO2gYunQkXCb_9AXqXwelpWmzFJ-HMdeZtA97ubWQSHCPu6OYfvBJWmo2IvlOA_ZhmNwD_ErrMiNP5cOxYLalcL-wHvQyVQxvqkRdyfcSqp6ZmcM6W1e2so0g3QM7y74OBT7OR5MMtiKNz-5Og-T26SpudsEFpHjlTS6fXKBCMV1-AVGLpAassqL9bhAmmPgCKeYNRoK6uJ3Chm7lpS_wcY3GE8MsS3Z1mgA&maxwidth=400",
+        "googlePlaceId": "ChIJu0YXqoTr9EcRKn8fUgXyV0E",
+        "isOutdoor": true,
+        "score": 25.453834457328426,
+        "source": "google_places"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJK1Jxdanr9EcRKY5nG3nMG50",
+        "name": "Basilique Notre-Dame de Fourvière",
+        "type": "religious",
+        "description": "",
+        "latitude": 45.7622698,
+        "longitude": 4.822638,
+        "rating": 4.8,
+        "reviewCount": 38746,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "07:00",
+          "close": "21:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUCTL0z3RRaDU3DubPvwYNKIy5LC8b9O-arNyiwylQblTZ3XaYd9IhCwiU4oXiepb3a9F4jscYDutx06xXeOhF7hTVvpN4qWf40kHpFARcLEPw5anVgj2jOFWN4jXbJVJpnOY2RejR1fgLcnCIULCgNqlau-R8TbYx3hAA-8V8zAhBBRhnFMx06uZASa7UKc0BkcEKoN9S2vfPXBILOdID4VV7RRQpHDOXTycnrZJBLKDw_QlRgEUczNMZhic2peV7uTr2F5B8DIMghb8XAI-Bo9vo5pyUwlFEFrBqoG-tjROyDPjFSEVDu_Sisknv1R2gMZGNY9PICSpfNIEw0DlFAZ1a2yTZeOlOKtXO-Y6s7xL8-7hyr-vCw1aDk6DvzfEAAnTO1YXPZypb8o2zVmb3HhnSvH0uR_y737_ntgiWzKsPHTPuWd8TAWLxbxemtNpS1fgtRoTJ-kH3paa3J0LMdMjou-kgC5nJKMn_O4s7zTNcNuwAVeIGYpz_cV5nS8EpD8ZaaY0pBaVRatmiRZdPFSs6JNxRn_ZZUo5c-a1VGRvCv-PW1jGRkx3YiuEZr8EVA8KZQ&maxwidth=400",
+        "googlePlaceId": "ChIJK1Jxdanr9EcRKY5nG3nMG50",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "07:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "07:00",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 78 25 13 01",
+        "website": "https://www.fourviere.org/fr/",
+        "isOutdoor": false,
+        "score": 143.26703850214682,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "viator-168746P2",
+        "name": "Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)",
+        "type": "culture",
+        "description": "10:00 AM | Français Commencez votre matinée par un délicieux voyage à travers la riche tapisserie culturelle lyonnaise. Notre visite commence à la Place des Terreaux, où vous verrez le majestueux Hôtel de Ville, le fascinant Musée et la magnifique Fontaine Bartholdi. De là, nous allons au charme bohème de la Croix-Rousse. Entrez dans le monde où les travailleurs de la soie ont autrefois insufflé de la vie à la ville, et errez dans les intrigantes Traboules – des passages cachés. Notre guide compétent tissera des histoires captivantes du passé, rendant l'histoire vivante à chaque étape. Ensuite, après avoir admiré la vive Fresque des Lyonnais, nous nous promenons dans la vieille ville, le Vieux Lyon. Flânez dans les rues anciennes en admirant l'allure enchanteresse de la rue Juiverie, où se trouve la superbe Galerie Philibert Delorme. Nous concluons dans le centre animé du Vieux Lyon, en arrivant juste à temps pour déjeuner dans l’un des charmants restaurants du quartier. Pourquoi nous rejoindre? Conseils d'experts, passages cachés et récits immersifs",
+        "duration": 120,
+        "estimatedCost": 5,
+        "latitude": 45.757746,
+        "longitude": 4.8321483999999995,
+        "rating": 4.9,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/City-Walking-Tour-Lyon/d829-168746P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "17:00",
+          "close": "23:30"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/07/b5/a5/bd.jpg",
+        "providerName": "Viator",
+        "reviewCount": 750,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 135.4872068306739,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJjyI4Eavr9EcRKEdGOieOt-0",
+        "name": "Cathédrale et Primatiale Saint-Jean-Baptiste",
+        "type": "religious",
+        "description": "",
+        "latitude": 45.760952,
+        "longitude": 4.8269788,
+        "rating": 4.6,
+        "reviewCount": 14737,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "19:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUkhWId61mFfXGNzKR8tfTRoaazEggaI7OxR-C5iKj63nw3iYnsJEVwsqT1XylMeteRmYK28wn-XkxLTv9gtfoTJVaeO6kmy_W5kQCSPc3DHuiXDMNNuGsyZ55sqfuaVF-hxLRXeL9MPQswMu5ulXxNWlAMrTRhNf1Onu7Zx5xj5XSMEJWAmekd84dG5I7YCGDLAA56guzGv8rMtrPfJU0ACTSWmT0lEo2chVt8dZ8W3q_7G97jea9PcAXfLCxJ3liFB6wP1eqqTguOIHVEvGTyPkh61XgVxA7gu4ExADHC1MIQYBZIUpZjRvHGdS_ygLdNh_8q1BS9Swzx4OoYgUIzq1B9m-xKhGBw0VP5X1iC1kmUL05eP6QFx7NrbXaFGulVeBOH4t5A_gZFLjHytaBuI79f__p2CBee_2gks_zNUPv2jeklktRs0LK5GZhKT4f9_9UO0Edvb-F0NvjlLbW-2CpsEXGjpQxPS9pLkJRuTna8XUGAJUdfan36JJq1RvDu3RLktUODwCsAbkFVBs4ndqq-7Z7UfayDu0oyHnI-iLnT_ONDSfDx3zcza9En3seqhvTtLMg6XQ&maxwidth=400",
+        "googlePlaceId": "ChIJjyI4Eavr9EcRKEdGOieOt-0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "14:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "08:30",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "08:30",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "08:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "08:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "08:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://primatiale.fr/",
+        "isOutdoor": false,
+        "score": 36.250549133776126,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJKW5Swajr9EcRQ2EpEHMgeIY",
+        "name": "Théâtre Gallo Romain",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7597309,
+        "longitude": 4.8201098,
+        "rating": 4.7,
+        "reviewCount": 7584,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUJFHI7Mq5aKFDC9GzaQrnbETJuYjS8-51IwZWycRbY-n1A4iUroOndwVNgzUdgfMPg5QJcZyZk6EFybFgs0T2K2AXjlWMJGw5qyOHvRb7LnIQwIqED4wT_noRHnVqYKxGReV_frs3If8LNLlktBEtFLXq3U7gJ8NpTn61HREEdY8PvwL5LhDz5dyHfbdC1OcZd2KDV9cm2lGCCWhYuhog8Apyht3QOCp8glSWLloTjNUjKg16nAzLLmEfpRa7C2Tmb3fedNtCYcYi0CB01gnomOEOczep123uGrviEB3K1Dli_6fhMR6Q1BNvAq6QCPRSML7XZHcM6Fy0Ax_RyC7tqg8YnGnRmyObrboij_PCjGgFPGIgcyRo0OJsFqMiGvCafByKzjkqvAv4groGyytvpBXzp5kGR-pfw4vZJIXLOOpgkQqneBX8UuqjvZsdgo1qbUl9I--BTl1XcUYzKK_2zH9Ol6GV65ITvlxzx23tnHVzr5HPhjSGp1jiweDEwguPer3kuAr6C-BBRgoJNG5DQ1um10Ux3qO9KJL0QeGTCJjrPGXr-Hs5gD-mA2yYH2a3oVgW2&maxwidth=400",
+        "googlePlaceId": "ChIJKW5Swajr9EcRQ2EpEHMgeIY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 38 49 30",
+        "website": "http://www.museegalloromain.grandlyon.com/",
+        "isOutdoor": false,
+        "score": 35.21643490224032,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJAeNbJBzr9EcRk8M_tMV1AW4",
+        "name": "Mur des Canuts",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7779683,
+        "longitude": 4.8279781,
+        "rating": 4.7,
+        "reviewCount": 6501,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVVQb95G8Rf5APKjws7lT603xXTDmCFCoqu_CVS9cSMstVvS3Z0MfEPk9Im3wsz38XFc5f1lVrk-tIL7bXuk-8bdXRswtnH43ux7magiOd2HLvwPZ_VFz5CuMle0tQO6i2Aq8j1civupOCry8WEPU-wQtlLKGcSKJOvmFwOxfpU6bpMi-xErzV7mwKyduqJPI84PGR1InzkoO2JST9piBRAz2s5sXCHdaE3jrSo0SlxemYIrryfbO5trfqJXcl5CowcOL1SHxsxOfG9Y8dFqH6xc_98XVlvc_m09xV8dFRRlEO8uRz2zwbx9sDIfQV-CI0kRBRVp6B9weyN8NLgxqZtVQBw3xB_Xw5B8-ee7W6P9BhEmfQvQ6TvIG4QAXHaamU7q5BZk3uutCPl_UlP9Ygd40iSutF5zg-HC2E2QZ6Mdxar02MD-3wE7FAimcTRRUoSO4SuQMFOLq9ods1LaKYQBKOIcCXck6R2nBSLxYGbtjOi9sdPwDYnZlGvB8kpyN3ETe-GqWOHlb_dRj6_uWd-iqls_rmr3YZy78vSvSmuDTMcvl9Wuckc6AD9X_CiXvnBzoRm&maxwidth=400",
+        "googlePlaceId": "ChIJAeNbJBzr9EcRk8M_tMV1AW4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 78 50 44 57",
+        "website": "http://www.citecreation.fr/",
+        "score": 34.61552798899115,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxzTjnKrr9EcRQSvpMtbwuUY",
+        "name": "Musée des arts de la marionnette - Gadagne",
+        "type": "museum",
+        "description": "",
+        "latitude": 45.7639348,
+        "longitude": 4.8275291,
+        "rating": 4.3,
+        "reviewCount": 1656,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:30",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWt5c-hNHGGfGTuB1QlxDUeN6MFo1W3gyfWjJIrJXBdF-iKCeDJXZFek6gAVT1qoVUYQOdQdgfwhJanVhS3V1xRXhUAu00X2pjeMtxBhJe8bJQtc_SYql2cFe-rcp_1mH87PnTDl9rB_AIV35RO0yPqdkJBLY6yOsWS0w_hRMpsAHXdp5tu-yaPjiAYULCeWORrEheHIgRQj7-XORLZ1DRqcq5zoxSaQb4r_5qPvcshZYNFAf6U5kkbhlcUOKDI-q6nrQ1LW1FzcZ69EHXURhh_y0eZe--PbnhfdNMUlaB9ZPbfOIyeNKUuI2uBcmuFmt9OwIzROkernHTRVGxE39n4Hk5VsZdKWBgy6Gkz1obd2XyrKZDtagbEWLSXx9zeZmrzXrABHyhPgg2AXf8GntxTvfa8aQlqNmXmmMFl349RzB5XLIIc5PAY4quXGKve0tBKw3D_JDl6cQFPL06KCMZbATTNS_Pra0jUCWCrcYCS4FZpjIk88wz3zrlRMJ4B2vg5GqpmLLW6pkYHvjjwsM0SYHoir0YrPZssjv-kuNDdJ1oLzqTOADgDupox9e1Wa5Iavo_VWJPujg&maxwidth=400",
+        "googlePlaceId": "ChIJxzTjnKrr9EcRQSvpMtbwuUY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:30",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 78 42 03 61",
+        "website": "https://www.gadagne-lyon.fr/",
+        "isOutdoor": false,
+        "score": 32.71283658403253,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJJ_l3jf7q9EcRk3dfXthb48Y",
+        "name": "Fontaine Bartholdi",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7676319,
+        "longitude": 4.8334627,
+        "rating": 4.6,
+        "reviewCount": 3859,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVqsDkGTGJiGwfZJAzFJdscE0OQ2hd2W_8CNVXYQ4edPFwrT2pwoiU3SfDXaMa_rLOjg-KkCK_jIcTSERzJc4R-Pt2TpsT0-4jGI75yJC6cgyUZDFZZdtFPuCDcOYlBeszNXaqOxd-VNQEudRSg3hjvsM-YPB9Xc9NpiVe-NiO99v7rdc3vj9KSLk4JlhN5TKdksscU_gXlwY2Awfamm6WmZuIXDl9mchOw8kd6sA9dP2IYyT3ZmMG96tmYv-PsNWvjoFk3byhVaE_ZcG8lSjWkMcqCMA2c-0PUXBuOzfKioXbBFdNOmnr2zW5zXb70cMOp_QC0XVdaEqioGBtnQib79hYVfLc9brC9Zpinb-lEHHzKzzuUEg0GJhi_S2xU3Gmm4r9o7xj1aDL6NxiPcXegP-jAEfAwb4IcVz5ETZsN5Ek55UoQnZsq4OJxsnX_7Ao1BIle23PrvyJ-wYptqByJaBnBreOvq0QuDPSsn5kzZ-KgeqJd7mdTsWic7OAZcyX7vp_V2EiLH1reKGJ1qY-L6AlEDdMKpNlJUjXobKjlbcXHAcuhiRItV1xPjeDG06E7WBY2&maxwidth=400",
+        "googlePlaceId": "ChIJJ_l3jf7q9EcRk3dfXthb48Y",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 77 69 69",
+        "isOutdoor": false,
+        "score": 31.255665192050976,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJHb247f7q9EcRM12hB20vobI",
+        "name": "Place des Terreaux",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.76748509999999,
+        "longitude": 4.8334965,
+        "rating": 4.5,
+        "reviewCount": 4410,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW6goNKp2G0i-jBM88P8D9eQRCgbvYJDCYJhxABiSpRWH4tag1Ot655Ub9D_L2w6G829jtoiZPNuBDAtSy8s0wC2duUJoFiWx3UlZ21RnRgIt6e03CjBSmdg-UemLRfcZd4ZAMfZp9VgpJv9os-r725NBirROKcZmTStaq1lczQZUyvofZAVGzOpucViPzYVi4dACj9abrlSDXi7LpT8OQq7fmTJMyFm09AmCql6xqqEab5cIcU7VraVLYRBnFe40WnxxWwciik8cIwxonfiLti2y5pVFC8bT7jtImDsxDZ47e09X_bBR69Qc_fDimnV3r5Ywpr0gA4TjjxnYcwn8I7u6PxpYBcZcvieHGH9OIs3zaBG8NvNdJyJ6Ky1oyWdzanGf38QsXx9GGIBZZCvBRWQQUAijKRjspe-F4PSC6_Pbrvslw8FJQr0mIioesLpbMadPU9paYOVok8RUjj7OrV8lyfZXhaO-4zEPVio6hch0GVjS9RyudVLzKgxbdwC5911xItUvVdP1UYVu4V-UoUznAEdlz3NdvmDr3FoHjkW7Ogx1ifeOEmWuJd3kgVdWeZLG78&maxwidth=400",
+        "googlePlaceId": "ChIJHb247f7q9EcRM12hB20vobI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "04 72 98 54 04",
+        "website": "https://mairie1.lyon.fr/lieu/contemporaine-19eme-20eme/place-des-terreaux",
+        "isOutdoor": true,
+        "score": 30.447251503205493,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-7812P98",
+        "name": "Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins",
+        "type": "culture",
+        "description": "La nourriture est sans aucun doute l'une des traditions les plus aimées de Lyon. Depuis 1935, la ville est considérée comme la capitale mondiale de la gastronomie. Au moment de forger les traditions culinaires lyonnaises, les célèbres \"Mères Lyonnaises\" ont réussi à faire de la cuisine lyonnaise une institution. Aujourd'hui, les chefs masculins dominent la scène, à l'instar du célèbre Paul Bocuse, mais ce sont les femmes qui ont fait évoluer la cuisine renommée. La plupart des recettes de la ville n'ont pas changé depuis leurs modestes débuts, ce qui signifie que vous aurez l'occasion de goûter à la culture et à l'histoire qui ont fait de Lyon le centre culinaire d'aujourd'hui. Nous vous guiderons à travers ce voyage gastronomique empreint de passion, d'histoire et de cuisine et de vin français exquis. Découvrez pourquoi manger et boire ne sont pas seulement un passe-temps à Lyon, mais un mode de vie.",
+        "duration": 210,
+        "estimatedCost": 0,
+        "latitude": 45.7670288,
+        "longitude": 4.827445099999999,
+        "rating": 4.9,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/Secret-Food-Tours-Lyon/d829-7812P98?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/0d/0e/d4.jpg",
+        "providerName": "Viator",
+        "reviewCount": 575,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 27.237719901136785,
+        "source": "viator"
+      },
+      {
+        "id": "viator-6778P4",
+        "name": "Visite guidée 2h - L'essentiel de Lyon à vélo électrique",
+        "type": "culture",
+        "description": "Découvrez les points forts de Lyon lors de ce circuit de 2 heures à vélo électrique, conçu pour vous montrer les incontournables de la ville en peu de temps et avec un minimum d’efforts. Menée par un Guide local sympathique et compétent, la visite suit un itinéraire fluide et principalement cyclable adapté à tous les niveaux. Promenez-vous le long des berges de la Saône avec vue sur la colline de Fourvière, traversez des places emblématiques comme Bellecour et suivez les pistes cyclables entièrement dédiées au bord du Rhône. Profitez d’une balade relaxante dans le parc de la Tête d’Or, le cœur verdoyant de Lyon, avant de passer par la place des Terreaux et la célèbre Fresque des Lyonnais. Grâce aux vélos électriques, vous pourrez parcourir confortablement une grande partie de Lyon tout en découvrant son histoire, sa culture et son quotidien. Cette visite est l'introduction parfaite à Lyon, combinant culture, nature et vues panoramiques en seulement deux heures.",
+        "duration": 120,
+        "estimatedCost": 35,
+        "latitude": 45.7622687,
+        "longitude": 4.828632799999999,
+        "rating": 4.9,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Lyon/1-5-Hour-Small-Group-Electric-Bike-Tour-in-Lyon/d829-6778P4?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/94/6a/9e.jpg",
+        "providerName": "Viator",
+        "reviewCount": 273,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 26.599754068373283,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJu0YXqoTr9EcRKn8fUgXyV0E",
+        "name": "Place de la République",
+        "type": "attraction",
+        "description": "",
+        "latitude": 45.7604786,
+        "longitude": 4.8356574,
+        "rating": 4.4,
+        "reviewCount": 1500,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWSNOYyjJSxaFpt5fhUVspAzx4dUrTh7eB-X38XtSjcJnpSQNq7VtB75tuJTAzjtzijzoiIf0IjFMLEOQsRmKtzaFcBazYwwmtN3m6sRd3KfugOM9UNlSWK6I_DUaRYZsKw1HacgnXA0pvPfiYETF_coBnuYdAfJX2ZjLeq-u9IA_qU3WQBQvTc9mVWBc2GbgNEgqeeGEiQpTJaeSQa0EmbFNDyZJmdQkfHiHo6CDJOhkDQoJKkZsYaAHAAyzRM-ntMOJfSmjGDXpaTbHsJJfPqTn1QSjbKglVHbjunSgZBboJ1T2vKH-jL-keLVAwsSwH3KTW7-Y-2pPg0-iQOCrN50c-bvWAk4rmcUL3p1ImO2gYunQkXCb_9AXqXwelpWmzFJ-HMdeZtA97ubWQSHCPu6OYfvBJWmo2IvlOA_ZhmNwD_ErrMiNP5cOxYLalcL-wHvQyVQxvqkRdyfcSqp6ZmcM6W1e2so0g3QM7y74OBT7OR5MMtiKNz-5Og-T26SpudsEFpHjlTS6fXKBCMV1-AVGLpAassqL9bhAmmPgCKeYNRoK6uJ3Chm7lpS_wcY3GE8MsS3Z1mgA&maxwidth=400",
+        "googlePlaceId": "ChIJu0YXqoTr9EcRKn8fUgXyV0E",
+        "isOutdoor": true,
+        "score": 25.453834457328426,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 24,
+        "byEngine": {
+          "google_local": 4,
+          "google_hotels": 1,
+          "google_maps": 19
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-suggest-02-escapade-gastronomique-a-lyon-et-ses-env",
+    "   Lyon → Lyon (3j)",
+    "   solo (1p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Lyon\", ll=\"@45.764,4.8357,14z\", gl=\"fr\"",
+    "[Weather] 3 days fetched for 2026-04-07 → 2026-04-09",
+    "[Google Places] Filtered \"VISITER LE VIEUX LYON & SES TRABOULES\" (types: travel_agency, point_of_interest, establishment)",
+    "[Google Places] ✅ 28 attractions found for Lyon",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Hotels] Disponibilité live: 5/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (355ms)",
+    "[Pipeline V2] Resolving GPS for 13 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/13 activities",
+    "[Pipeline V2] No curated must-sees for \"Lyon\" — generating via AI...",
+    "[Pipeline V2] AI generated 5 must-sees: Basilique Notre-Dame de Fourvière, Vieux Lyon, Musée des Confluences, Place Bellecour, Les Halles de Lyon Paul Bocuse",
+    "[Pipeline V2] Step 1: All data fetched in 41268ms",
+    "[Pipeline V2]   Activities: 28 Google + 25 SerpAPI + 0 Overpass + 20 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 5 | Transport options: 3",
+    "[Pipeline V2] Step 1 done in 41268ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Same-location-type dedup: \"Fresque des Lyonnais\" merged with \"VISITER LE VIEUX LYON & SES TRABOULES\" (type=adventure)",
+    "[Pipeline V2] Stripped mustSee from \"Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins\" — matches excluded keyword (source=viator)",
+    "[Pipeline V2] Excluded 6 Viator activities with unreliable GPS (city-center fallback)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [143.3] ⭐ \"Basilique Notre-Dame de Fourvière\" (src=google_places, reviews=38746, rating=4.8, tags=none)",
+    "[Pipeline V2]   #2 [137.3] ⭐ \"Place Bellecour\" (src=google_places, reviews=26739, rating=4.4, tags=relaxing)",
+    "[Pipeline V2]   #3 [135.5] ⭐ \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" (src=viator, reviews=750, rating=4.9, tags=deep_culture)",
+    "[Pipeline V2]   #4 [131.6] ⭐ \"Visite guidée à pied culturelle et historique du Vieux Lyon (anglais) \" (src=viator, reviews=944, rating=4.9, tags=none)",
+    "[Pipeline V2]   #5 [126.1] ⭐ \"Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse\" (src=viator, reviews=166, rating=4.9, tags=foodie)",
+    "[Pipeline V2]   #6 [123.3] ⭐ \"Traboules du Vieux Lyon\" (src=google_places, reviews=501, rating=4.6, tags=none)",
+    "[Pipeline V2]   #7 [106.9] ⭐ \"Musée des Confluences\" (src=mustsee, reviews=0, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #8 [45.6]    \"Musée Cinéma et Miniature\" (src=google_places, reviews=14059, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #9 [43.4]    \"Parc de la Tête d'Or\" (src=google_places, reviews=59582, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #10 [41.2]    \"LUGDUNUM - Musée & Théâtres romains\" (src=google_places, reviews=6508, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #11 [36.3]    \"Cathédrale et Primatiale Saint-Jean-Baptiste\" (src=google_places, reviews=14737, rating=4.6, tags=none)",
+    "[Pipeline V2]   #12 [35.4]    \"Jardin Botanique de Lyon\" (src=google_places, reviews=4726, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #13 [35.2]    \"Théâtre Gallo Romain\" (src=google_places, reviews=7584, rating=4.7, tags=none)",
+    "[Pipeline V2]   #14 [34.6]    \"Mur des Canuts\" (src=google_places, reviews=6501, rating=4.7, tags=none)",
+    "[Pipeline V2]   #15 [32.7]    \"Musée des arts de la marionnette - Gadagne\" (src=google_places, reviews=1656, rating=4.3, tags=deep_culture)",
+    "[Pipeline V2]   #16 [32.0]    \"Jardin des Curiosités\" (src=google_places, reviews=2013, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #17 [31.3]    \"Fontaine Bartholdi\" (src=google_places, reviews=3859, rating=4.6, tags=none)",
+    "[Pipeline V2]   #18 [30.4]    \"Place des Terreaux\" (src=google_places, reviews=4410, rating=4.5, tags=none)",
+    "[Pipeline V2]   #19 [29.6]    \"Parc des Hauteurs\" (src=google_places, reviews=1474, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #20 [27.2]    \"Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins\" (src=viator, reviews=575, rating=4.9, tags=foodie)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 6/42",
+    "[Pipeline V2] Category cap: removed \"Visite guidée à pied culturelle et historique du Vieux Lyon (anglais) \" (walking_tour, max=1), replaced with \"Place de la République\"",
+    "[Pipeline V2] Step 2: 21 activities selected (6 must-sees) from 73 total",
+    "[Pipeline V2] Must-sees: \"Basilique Notre-Dame de Fourvière\" (143.3), \"Place Bellecour\" (137.3), \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" (135.5), \"Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse\" (126.1), \"Traboules du Vieux Lyon\" (123.3), \"Musée des Confluences\" (106.9)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=2.21km, median=1.09km, maxClusterRadius=0.74km",
+    "[Pipeline V2] Radius-constrained clustering produced 6 clusters (target 3), running soft pass with 1.11km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (45.7628, 4.8276), Day 2: centroid (45.7709, 4.8525), Day 3: centroid (45.7324, 4.8179)",
+    "[Pipeline V2] Cluster Day 1: 17 activities, radius=1.69km, intraDistance=7.60km",
+    "[Pipeline V2] Cluster Day 2: 3 activities, radius=0.91km, intraDistance=1.91km",
+    "[Pipeline V2] Cluster Day 3: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 17 activities [4 must-sees] (12.0h avail, max 5), Day 2: 3 activities [1 must-sees] (12.0h avail, max 5), Day 3: 1 activities [1 must-sees] (6.0h avail, max 1)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Basilique Notre-Dame de Fourvière\" (score=143.3), \"Place Bellecour\" (score=137.3), \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" (score=135.5), \"Traboules du Vieux Lyon\" (score=123.3), \"Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse\" (score=126.1), \"Musée des Confluences\" (score=106.9)",
+    "[Pipeline V2]   Day 1: Basilique Notre-Dame de Fourvière, Place Bellecour, Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais), Traboules du Vieux Lyon",
+    "[Pipeline V2]   Day 2: Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse",
+    "[Pipeline V2]   Day 3: Musée des Confluences",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1: Basilique Notre-Dame de Fourvière, LUGDUNUM - Musée & Théâtres romains, Théâtre Gallo Romain, Jardin des Curiosités, Place Bellecour, Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais), Place de la République, Place des Terreaux, Fontaine Bartholdi, Mur des Canuts, Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins, Musée des arts de la marionnette - Gadagne, Traboules du Vieux Lyon, Visite guidée 2h - L'essentiel de Lyon à vélo électrique, Musée Cinéma et Miniature, Cathédrale et Primatiale Saint-Jean-Baptiste, Parc des Hauteurs (6.5km intra)",
+    "[Pipeline V2]   Day 2: Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse, Jardin Botanique de Lyon, Parc de la Tête d'Or (1.8km intra)",
+    "[Pipeline V2]   Day 3: Musée des Confluences (0.0km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Lyon centre - Appartement quartier Victor Hugo Ainay\" (1.54 score, 0.56km center, 1.87km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Step 4 prefetch: sparse anchors=1/7 (day-3-centroid)",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Lyon\", ll=\"@45.732355,4.817923,14z\", gl=\"fr\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Step 4: supplemental API restaurants fetched=10, total SerpAPI pool=10",
+    "[Pipeline V2] Restaurants pool: total=38, budgetFiltered=28, geo=9",
+    "[Pipeline V2] Restaurant pass 2 (drop breakfast filter): found 1 candidates for breakfast",
+    "[Pipeline V2] Restaurant pass 3 (relaxed distance 1.6km): found 5 candidates for breakfast",
+    "[Pipeline V2] Restaurant pass 3 (relaxed distance 1.6km): found 3 candidates for dinner",
+    "[Pipeline V2] Restaurant pass 3 (relaxed distance 1.6km): found 3 candidates for breakfast",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=2, targets=2",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Lyon\", ll=\"@45.732355,4.817923,14z\", gl=\"fr\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Lyon\", ll=\"@45.736773920000005,4.820412800000001,14z\", gl=\"fr\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=38, budgetFiltered=28, geo=9",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=10, missing meals 2 -> 9",
+    "[Pipeline V2] Step 4: 0/9 meals assigned restaurants (pool=9)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 2: \"Fourvière et patrimoine romain\" → \"Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse & Parc de la Tête d'Or\"",
+    "[Pipeline V2] Step 6 done in 9124ms — \"Progression logique du centre historique vers les hauteurs de Fourvière, puis vers les quartiers modernes, en évitant les lieux fermés et en privilégiant les activités intérieures les jours couverts.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 21/21 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 24 pairs...",
+    "[Pipeline V2] Directions cache: 24/24 pairs fetched",
+    "[Pipeline V2] Day 1 re-optimized with real times: Place Bellecour → Parc des Hauteurs → Basilique Notre-Dame de Fourvière → LUGDUNUM - Musée & Théâtres romains → Théâtre Gallo Romain → Jardin des Curiosités → Place de la République → Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais) → Cathédrale et Primatiale Saint-Jean-Baptiste → Musée Cinéma et Miniature → Musée des arts de la marionnette - Gadagne → Visite guidée 2h - L'essentiel de Lyon à vélo électrique → Traboules du Vieux Lyon → Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins → Place des Terreaux → Fontaine Bartholdi → Mur des Canuts",
+    "[Pipeline V2] 2-opt re-optimization: 1/3 days changed with real times",
+    "[Pipeline V2] Cross-day dedup: removed 5 duplicate activity(ies) from Day 1",
+    "[Pipeline V2] Day 1: 12 activities to schedule (1 must-sees), dayStart=10:00, dayEnd=22:00, window=12.0h, cursor=10:00",
+    "[Pipeline V2]   → \"Place Bellecour\" (30min, score=137.3, mustSee=true)",
+    "[Pipeline V2]   → \"Parc des Hauteurs\" (60min, score=29.6, mustSee=false)",
+    "[Pipeline V2]   → \"LUGDUNUM - Musée & Théâtres romains\" (120min, score=41.2, mustSee=false)",
+    "[Pipeline V2]   → \"Jardin des Curiosités\" (60min, score=32.0, mustSee=false)",
+    "[Pipeline V2]   → \"Place de la République\" (30min, score=25.5, mustSee=false)",
+    "[Pipeline V2]   → \"Cathédrale et Primatiale Saint-Jean-Baptiste\" (30min, score=36.3, mustSee=false)",
+    "[Pipeline V2]   → \"Musée Cinéma et Miniature\" (120min, score=45.6, mustSee=false)",
+    "[Pipeline V2]   → \"Musée des arts de la marionnette - Gadagne\" (120min, score=32.7, mustSee=false)",
+    "[Pipeline V2]   → \"Visite guidée 2h - L'essentiel de Lyon à vélo électrique\" (120min, score=26.6, mustSee=false)",
+    "[Pipeline V2]   → \"Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins\" (210min, score=27.2, mustSee=false)",
+    "[Pipeline V2]   → \"Place des Terreaux\" (30min, score=30.4, mustSee=false)",
+    "[Pipeline V2]   → \"Mur des Canuts\" (60min, score=34.6, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 lunch, searching pool + API near \"Cathédrale et Primatiale Saint-Jean-Baptiste\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 lunch: found \"LA GÂCHE\" (0.32km from Cathédrale et Primatiale Saint-Jean-Baptiste)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 dinner, searching pool + API near \"Mur des Canuts\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 dinner: found \"L'Atelier des Augustins\" (0.17km from Mur des Canuts)",
+    "[Pipeline V2] Day 1: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Day 2: 3 activities to schedule (1 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse\" (120min, score=126.1, mustSee=true)",
+    "[Pipeline V2]   → \"Jardin Botanique de Lyon\" (60min, score=35.4, mustSee=false)",
+    "[Pipeline V2]   → \"Parc de la Tête d'Or\" (60min, score=43.4, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 breakfast, searching pool + API near \"Lyon centre - Appartement quartier Victor Hugo Ainay\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 breakfast: found \"LITTLE - Petits Gâteaux\" (0.21km from Lyon centre - Appartement quartier Victor Hugo Ainay)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 lunch, searching pool + API near \"Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 lunch: found \"Agastache Restaurant Lyon\" (0.47km from Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Parc de la Tête d'Or\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"Maison Moly\" (0.40km from Parc de la Tête d'Or)",
+    "[Pipeline V2] Day 2: meal-inclusive activity found — skipLunch=true, skipDinner=false",
+    "[Pipeline V2] Day 3: 1 activities to schedule (1 must-sees), dayStart=08:00, dayEnd=14:00, window=6.0h, cursor=08:15",
+    "[Pipeline V2]   → \"Musée des Confluences\" (180min, score=106.9, mustSee=true)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 breakfast, searching pool + API near \"Lyon centre - Appartement quartier Victor Hugo Ainay\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 breakfast: found \"Mercredi Biscuiterie, Salon de thé et Brunch le dimanche\" (0.24km from Lyon centre - Appartement quartier Victor Hugo Ainay)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 lunch, searching pool + API near \"Musée des Confluences\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 lunch: found \"La Maison\" (0.41km from Musée des Confluences)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 dinner, searching pool + API near \"Musée des Confluences\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 dinner: found \"Smokey\" (1.04km from Musée des Confluences)",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Fetching images for 1 items without photos...",
+    "[Pipeline V2] ✅ Place images: 1/1 enriched (restaurants handled in dedicated Google photo pass)",
+    "[Pipeline V2] 📸 Enriching 15 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 15/15 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule re-opt: Day 1 \"Dîner — L'Atelier des Augustins\" (1.6km from neighbor) → \"ART Restaurant Lyon\" (0.5km from ref)",
+    "[Pipeline V2] Post-schedule: 1 restaurant(s) still far — trying SerpAPI nearby search",
+    "[Pipeline V2] Post-schedule SerpAPI re-opt: Day 2 \"Petit-déjeuner — LITTLE - Petits Gâteaux\" (1.9km) → \"Le fournil de l'artisan\" (0.4km from ref)",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 2 restaurant(s) (1 API calls)",
+    "[Pipeline V2] 📸 Enriching 4 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 4/4 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 8 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 1 large intra-day gap segment(s)",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=2, fallback-flagged=0",
+    "[Pipeline V2] Gap fill: Day 1 inserted \"Fontaine des Jacobins\" (60min, detour=0.00km, remainingGap=220min)",
+    "[Pipeline V2] Gap fill: Day 1 inserted \"Traboules du Vieux Lyon\" (60min, detour=0.74km, remainingGap=150min)",
+    "[Pipeline V2] Gap fill: Day 1 inserted \"Musée Cinéma et Miniature\" (120min, detour=0.02km, remainingGap=60min)",
+    "[Pipeline V2] Section 13ha: inserted 3 gap-fill activity(ies)",
+    "[Pipeline V2] Must-see recovery: skipping \"Basilique Notre-Dame de Fourvière\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Vieux Lyon\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Les Halles de Lyon Paul Bocuse\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Place Bellecour\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Step 7: 11 alternatives, pool trimmed to 21/21",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 94/100",
+    "  ⚠️ Day 1: day load is high (675min planned incl. travel)",
+    "  ⚠️ Day 2: 300min gap between \"Parc de la Tête d'Or\" and \"Dîner — Chez Rosa\"",
+    "[Pipeline V2] Step 8: Quality score 94/100 (2 warnings, 0 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 24 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 65171ms (65.2s)",
+    "[Pipeline V2]   3 days, 21 items total",
+    "[Pipeline V2]   Day 1: Fontaine des Jacobins, Traboules du Vieux Lyon, Musée Cinéma et Miniature, Place Bellecour, Basilique Notre-Dame de Fourvière, Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais), Jardin des Curiosités",
+    "[Pipeline V2]   Day 2: Visite culturelle gastronomique et viticole, dans les célèbres Halles Bocuse, Jardin Botanique de Lyon, Parc de la Tête d'Or",
+    "[Pipeline V2]   Day 3: Musée des Confluences"
+  ],
+  "warnings": [
+    "[Google Transit] Status: ZERO_RESULTS",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[RapidAPI Booking] ❌ Google Places résultat rejeté pour \"Le Nazareth\": \"72 Rue Notre Dame de Nazareth, 75003 Paris, France\" n'est pas dans Lyon",
+    "[RapidAPI Booking] ❌ Google Places résultat rejeté pour \"Lovely studio in the 9th arrondissement near the quays\": \"Stouring 11, 11 Rue Mansart Stouring 11, 75009 Paris, France\" n'est pas dans Lyon",
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Beaujolais au départ de Lyon demi-journée, Lyon\": 392.9km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"2h - L'essentiel de Lyon à vélo électrique, Lyon\": 523.9km de la destination (max 30km)",
+    "Google Directions API error, falling back: Error: Google API: ZERO_RESULTS",
+    "[Pipeline V2] Day 1: REJECTED activity \"Place de la République\" (duration=30min, travel=30min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Cathédrale et Primatiale Saint-Jean-Baptiste\" (duration=60min, travel=15min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Musée Cinéma et Miniature\" (duration=120min, travel=10min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Musée des arts de la marionnette - Gadagne\" (duration=120min, travel=10min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Visite guidée 2h - L'essentiel de Lyon à vélo électrique\" (duration=120min, travel=10min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Visite gastronomique de la vieille ville de Lyon avec 6 spécialités Françaises et vins fins\" (duration=210min, travel=5min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Place des Terreaux\" (duration=30min, travel=5min, cursor=21:15, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Mur des Canuts\" (duration=60min, travel=15min, cursor=21:15, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Mercredi Biscuiterie, Salon de thé et Brunch le dimanche\" overlaps with \"Check-out Lyon centre - Appartement quartier Victor Hugo Ainay\"",
+    "[Pipeline V2] ⚠ 1 full day(s) still have gaps >= 3h after gap-fill. Running emergency fill...",
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Basilique Notre-Dame de Fourvière\", \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\"",
+    "[Pipeline V2] Must-see recovery: evicted \"Parc des Hauteurs\" from Day 1",
+    "[Pipeline V2] Must-see recovery: injected \"Basilique Notre-Dame de Fourvière\" into Day 1 at 16:00 (45min, gap=60min)",
+    "[Pipeline V2] Must-see recovery: evicted \"LUGDUNUM - Musée & Théâtres romains\" from Day 1",
+    "[Pipeline V2] Must-see recovery: injected \"Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)\" into Day 1 at 17:00 (45min, gap=60min)"
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Beaujolais au départ de Lyon demi-journée, Lyon\" à Lyon — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 65171,
+  "generatedAt": "2026-02-18T23:18:33.149Z",
+  "success": true,
+  "runType": "suggestion",
+  "suggestionQuery": "Je veux faire un break de 3 jours en Europe",
+  "suggestionTitle": "Escapade Gastronomique à Lyon et ses Environs"
+}

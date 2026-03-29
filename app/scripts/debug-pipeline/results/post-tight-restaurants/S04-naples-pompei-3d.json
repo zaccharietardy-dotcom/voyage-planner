@@ -1,0 +1,2371 @@
+{
+  "scenarioId": "naples-pompei-3d",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Naples",
+    "startDate": "2026-05-15T08:00:00.000Z",
+    "durationDays": 3,
+    "transport": "plane",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Pompei, Spaccanapoli",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Naples",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "00c5984b-451e-4154-84fc-8341d563c303",
+    "createdAt": "2026-03-19T23:19:09.098Z",
+    "updatedAt": "2026-03-19T23:19:09.098Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Naples",
+      "startDate": "2026-05-15T08:00:00.000Z",
+      "durationDays": 3,
+      "transport": "plane",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Pompei, Spaccanapoli",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Naples",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-05-15T08:00:00.000Z",
+        "items": [
+          {
+            "id": "50a20274-fc6f-4111-a3d0-97f23e1340cf",
+            "dayNumber": 1,
+            "startTime": "13:10",
+            "endTime": "14:55",
+            "type": "flight",
+            "title": "LYS → NAP",
+            "description": "Vol U2 U2 4188",
+            "locationName": "Aéroport de Lyon-Saint-Exupéry",
+            "latitude": 45.7256,
+            "longitude": 5.0811,
+            "orderIndex": 0,
+            "duration": 105,
+            "flight": {
+              "id": "serp-U2 4188-2026-05-15",
+              "airline": "U2",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/U2.png",
+              "flightNumber": "U2 4188",
+              "departureAirport": "Aéroport de Lyon-Saint-Exupéry",
+              "departureAirportCode": "LYS",
+              "departureCity": "LYS",
+              "departureTime": "2026-05-15T11:10:00.000Z",
+              "departureTimeDisplay": "13:10",
+              "arrivalAirport": "Aéroport de Naples - Capodichino",
+              "arrivalAirportCode": "NAP",
+              "arrivalCity": "NAP",
+              "arrivalTime": "2026-05-15T12:55:00.000Z",
+              "arrivalTimeDisplay": "14:55",
+              "duration": 105,
+              "stops": 0,
+              "price": 311,
+              "pricePerPerson": 156,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": false,
+              "bookingUrl": "https://www.aviasales.com/search/LYS1505NAP2?currency=eur&locale=fr"
+            },
+            "flightAlternatives": [],
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 311,
+            "bookingUrl": "https://www.aviasales.com/search/LYS1505NAP2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/LYS1505NAP17052?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/lys/nap?departure_date=2026-05-15&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "16:25",
+            "endTime": "16:40",
+            "type": "checkin",
+            "title": "Check-in — Le Stanze del Principe B&b Naples",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Le Stanze del Principe B&b Naples",
+            "latitude": 40.8579015,
+            "longitude": 14.2605276,
+            "orderIndex": 1,
+            "duration": 15,
+            "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop",
+            "estimatedCost": 0,
+            "accommodation": {
+              "id": "serp-hotel-ChkIlPfPqrbyitt5Gg0vZy8xMWt2OGdmMjdxEAE",
+              "name": "Le Stanze del Principe B&b Naples",
+              "type": "hotel",
+              "address": "Via Foria, 118, 80139 Napoli NA, Italy",
+              "latitude": 40.8579015,
+              "longitude": 14.2605276,
+              "rating": 9.8,
+              "reviewCount": 245,
+              "stars": 3,
+              "pricePerNight": 139,
+              "totalPrice": 278,
+              "currency": "EUR",
+              "amenities": [
+                "Free breakfast",
+                "Free Wi-Fi",
+                "Parking ($)",
+                "Air conditioning",
+                "Pet-friendly",
+                "Bar",
+                "Room service",
+                "Airport shuttle",
+                "Kid-friendly",
+                "Smoke-free property"
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "http://www.lestanzedelprincipe.it/",
+              "distanceToCenter": 0.9,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": true,
+              "dataReliability": "verified"
+            }
+          },
+          {
+            "id": "travel-1-1",
+            "dayNumber": 1,
+            "startTime": "17:35",
+            "endTime": "18:50",
+            "type": "transport",
+            "title": "Transport en commun — 15.6km",
+            "description": "Château Sant'Elmo → Zi Teresa",
+            "locationName": "",
+            "latitude": 40.8444515,
+            "longitude": 14.2388951,
+            "orderIndex": 2,
+            "duration": 75,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "g|`xFqfqvAaBxAp@fBbApCLZ@ACMFIHF^YVWNA~@eAVg@Lk@Bs@Ge@Oi@mAiCk@iAeA{BQ_@CMIBCBAKuAaD}CsGmAgCyAyCeAaCA?EACACECWBE{@qBGO@IKQd@k@EEACQCCGqAxAw@`AmGvHaD|DoEjFkPtRwA~As@l@gBvAc@XkEdCyB`AeC`AgI~C{FvB_FfBeBd@_ARkARoEp@W?gDhAqLdGsBbAmMhH_GhD_Al@[ZoA`BkAbBqBjDy@`B{@rBkDjIqC~Gw@fB{@fB}@vA[^mApA}HhGoDpCgAbA[^m@x@m@hAw@jBe@lAsAnDcFtMqClH_AtCWlAU`BSfDBfDNlBT~AXpAZjAzAbEt@lBfCtGd@lAZh@fAxCz@zBx@vBp@vBRz@ZnBR~BDfA@~BMzFUtGK`EG|AG~ASxJStIKhFGpCMjBg@dDcAfFg@jCkAdG_ApEOt@Wv@Wr@s@lAwBfDcEhGiDhEyChD}C`DuGbGuDhDgB`Bg@j@Y`@]n@Y|@On@OlAExABv@Fp@Hh@^tAhBdENb@ZdANpA@z@Ad@GtAI|@IjAEhCK`C}@vCSr@ShAIdACZuBQmC?RAVtKMtE]|EgAlEsKl]sC`OWhB]`D@zBHnDPzC|@jFZn@JTzDhHtD`IfBdLl@hCdCtHzBzDzCzBvFtCdJxBE^RKr@uGV_@`@n@n@hCB^N`C?BL@`@J`CpHoA`A@FlKdc@ET@PZFHH`BmDC_@Ke@GC{@?i@?KC]u@Yc@iAiAu@u@B]BS@KH]z@TDIHSDEVa@",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 15.557,
+            "timeFromPrevious": 75,
+            "transitInfo": {
+              "lines": [
+                {
+                  "number": "13",
+                  "mode": "train",
+                  "color": "#612555"
+                },
+                {
+                  "number": "L2",
+                  "mode": "metro",
+                  "color": "#075a9d"
+                },
+                {
+                  "number": "F2",
+                  "mode": "bus",
+                  "color": "#f29028"
+                }
+              ],
+              "walkingDistance": 0
+            }
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Zi Teresa",
+            "description": "Dîner à Zi Teresa",
+            "locationName": "Zi Teresa",
+            "latitude": 40.8296172,
+            "longitude": 14.2482192,
+            "orderIndex": 3,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJ9c3vV6oJOxMRJfz3Dps1Q-g",
+              "name": "Zi Teresa",
+              "address": "Borgo Marinari, 1, Napoli",
+              "latitude": 40.8296172,
+              "longitude": 14.2482192,
+              "rating": 4,
+              "reviewCount": 5128,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "italian",
+                "pizza",
+                "seafood"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant de style décontracté avec terrasse proposant mets locaux, dont pizzas, poissons et fruits de mer et plats à base de viande."
+              ],
+              "description": "Restaurant de style décontracté avec terrasse proposant mets locaux, dont pizzas, poissons et fruits de mer et plats à base de viande.",
+              "phoneNumber": "081 764 2565",
+              "website": "https://www.ziteresa.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=16736279580326231077&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfX5XvKPpZmcy48XFcNBuXtJa4xcCoxzozn9A9kMRJV4LEggJaG0RpqyYfHEBqsu_hjWnzMuNoPTAB-E8z0DWSwnJFJNQ6L_1YbczTYVJHuPYZuI4A7TFHkyY58sEXkpC17eAK2liGi7NpMPkdAognfO2hA4OINUGC5iABmMzau3uU7Arqx0N8FUiqx4nlJrIX_rdCJCf-x9PB4kikxkuBqGDgL4wsuKnvacNBuyZF4OZSkLx1qbi-4bhSfMvKbWVYUXOrowrMCmzQzz6_xlYMAIMuJi7N3cCGRmXyS827NI3w&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ9c3vV6oJOxMRJfz3Dps1Q-g",
+              "openingHours": {
+                "sunday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "monday": null,
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "friday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                }
+              },
+              "distance": 0.8682477049013296,
+              "walkingTime": 11,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJ7QRRrq0JOxMRaszlEHfPj3s",
+                "name": "Officina - Ba-Bar",
+                "address": "Via Santa Lucia, 169, Napoli",
+                "latitude": 40.8302712,
+                "longitude": 14.2488279,
+                "rating": 4.1,
+                "reviewCount": 1501,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 764 6270",
+                "website": "https://babar-group.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=8903563098626313322&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWtgDxThRZ_wu98mjiMw4BDRTBDiiaJGz9GUbRwx4FXwC5NzAojk7tw9CGH6jx4-pCp_ubxOLwh1d47wwZyCGf-IrLeNEe59VnHEcJhEVVc_ds7X9qSUZY-FBuwNXJk_Hs46r0h86JtwC8m5WWkKwJjoBJW2QBbECrEM9wj4KkD0poMrO2RmlLEUkqA7N5gX6ObwDvEYVRvgHadAza8FxAquUjaYi4HJ6GTVrPWdJVgIqzSV0mCuOpyDBeXciUTZeaC7PhoDDzHqsmvP4krfE1ThZQ70mGwN82m6JMTGamflg&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJ7QRRrq0JOxMRaszlEHfPj3s",
+                "openingHours": {
+                  "sunday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "monday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "friday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "saturday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  }
+                },
+                "distance": 0.8787336382925384,
+                "walkingTime": 11,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJt1GeZSUJOxMRf48oxDi9vvk",
+                "name": "Testa - Braceria & Hamburgeria",
+                "address": "Via Brecce a S. Erasmo, 31/33, Napoli",
+                "latitude": 40.8450275,
+                "longitude": 14.2840843,
+                "rating": 4.9,
+                "reviewCount": 239,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "steak",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 554 4682",
+                "website": "https://social.quandoo.com/en/groups/testa-braceria-hamburgeria-101238",
+                "googleMapsUrl": "https://maps.google.com/?cid=17996029212525891455&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUMNAN0yYgMDoCc-oMdQwPikS6lX3TiUT0oorGxVOuvLBKkNbSkdNjVUaai5XJwVsu9D2qVeMWKTU5BGzQwr1mMlFOYV4PPKwNvJK7Tr_NCNWWVDWlJsE3yYwOAxOhpzmKmq9_LCHNMH0mVGKQrT0oTnRApZSwa09hPqy5CIcsPlD9NopyGRPs5remBNnji9HB71T4gzKte-fpLa9ot2gfi4-F3O2EOWfk3E9dU4XFsXWlcVbyBkmpViRrI96fajdipdB44vi8oUGaTLyfao30ux3jK4wRjS-ZnV8h8dKT-8Prl-PmYCjPt6A0239MADK7bLHgBRzQW4x9aZhAeCn45iwGscNj1aK7l1QsxKMsPnjpxQMQLQY_hBTVl1dMfE3_WO4vxsq9DyYVof82IWZcSyiaib37Fa2kpGd5PXPaf7A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJt1GeZSUJOxMRf48oxDi9vvk",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "14:30"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:30"
+                  },
+                  "friday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.9735148302299461,
+                "walkingTime": 12,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4,
+            "estimatedCost": 45,
+            "bookingUrl": "https://maps.google.com/?cid=16736279580326231077&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJ9c3vV6oJOxMRJfz3Dps1Q-g",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "monday": null,
+              "tuesday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "wednesday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "thursday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "friday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "saturday": {
+                "open": "12:00",
+                "close": "23:30"
+              }
+            }
+          }
+        ],
+        "theme": "Journée de détente",
+        "dayNarrative": ""
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-05-16T08:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Le Stanze del Principe B&b Naples",
+            "description": "Petit-déjeuner à Le Stanze del Principe B&b Naples",
+            "locationName": "Le Stanze del Principe B&b Naples",
+            "latitude": 40.8579015,
+            "longitude": 14.2605276,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "hotel-breakfast-le-stanze-del-principe-b&b-naples",
+              "name": "Le Stanze del Principe B&b Naples",
+              "address": "Le Stanze del Principe B&b Naples",
+              "latitude": 40.8579015,
+              "longitude": 14.2605276,
+              "rating": 4,
+              "reviewCount": 0,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "breakfast",
+                "hotel"
+              ],
+              "dietaryOptions": [],
+              "openingHours": {},
+              "description": "Petit-déjeuner servi à Le Stanze del Principe B&b Naples"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4,
+            "estimatedCost": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Stanze%20del%20Principe%20B%26b%20Naples",
+            "openingHoursByDay": {}
+          },
+          {
+            "id": "viator-30481P3",
+            "dayNumber": 2,
+            "startTime": "09:50",
+            "endTime": "11:50",
+            "type": "activity",
+            "title": "Visite de la faune et de la flore de l'île Marco",
+            "description": "Notre visite touristique et de décorticage de Marco Island part du parc nautique de Goodland, à Goodland, en Floride. Lors de notre écotour de deux heures, vous vivrez l'une des aventures les plus populaires pour lesquelles nous sommes connus, nous vous emmènerons pour une croisière passionnante et pittoresque à travers les Dix Mille Îles, où nos capitaines et guides vous fourniront des informations sur l'écologie de cet écosystème unique. Après une croisière à travers les îles de la mangrove, nous nous arrêterons sur une plage privée à la recherche des coquillages tropicaux les plus exotiques qui font la réputation de la côte du Golfe. Il s'agit d'une aventure très informative qui gardera les petits enfants et les adultes engagés tout le temps. Veuillez noter : Tous les membres de votre groupe doivent signer la renonciation électronique figurant sur votre bon avant d'arriver à votre tour en bateau. Veuillez noter qu'un billet doit être acheté pour chaque personne de votre fête, y compris les tout-petits de 0 +",
+            "locationName": "Visite de la faune et de la flore de l'île Marco",
+            "latitude": 40.8237263,
+            "longitude": 14.1824269,
+            "orderIndex": 1,
+            "duration": 120,
+            "rating": 5,
+            "estimatedCost": 0,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/11/0d/d0/47.jpg",
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Naples/Cape-Romano-Shelling-and-Sightseeing-Tour/d22381-30481P3?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Visite%20de%20la%20faune%20et%20de%20la%20flore%20de%20l'%C3%AEle%20Marco&query=40.8237263,14.1824269",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Zi Teresa",
+            "description": "Déjeuner à Zi Teresa",
+            "locationName": "Zi Teresa",
+            "latitude": 40.8296172,
+            "longitude": 14.2482192,
+            "orderIndex": 2,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJ9c3vV6oJOxMRJfz3Dps1Q-g",
+              "name": "Zi Teresa",
+              "address": "Borgo Marinari, 1, Napoli",
+              "latitude": 40.8296172,
+              "longitude": 14.2482192,
+              "rating": 4,
+              "reviewCount": 5128,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "italian",
+                "pizza",
+                "seafood"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant de style décontracté avec terrasse proposant mets locaux, dont pizzas, poissons et fruits de mer et plats à base de viande."
+              ],
+              "description": "Restaurant de style décontracté avec terrasse proposant mets locaux, dont pizzas, poissons et fruits de mer et plats à base de viande.",
+              "phoneNumber": "081 764 2565",
+              "website": "https://www.ziteresa.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=16736279580326231077&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfX5XvKPpZmcy48XFcNBuXtJa4xcCoxzozn9A9kMRJV4LEggJaG0RpqyYfHEBqsu_hjWnzMuNoPTAB-E8z0DWSwnJFJNQ6L_1YbczTYVJHuPYZuI4A7TFHkyY58sEXkpC17eAK2liGi7NpMPkdAognfO2hA4OINUGC5iABmMzau3uU7Arqx0N8FUiqx4nlJrIX_rdCJCf-x9PB4kikxkuBqGDgL4wsuKnvacNBuyZF4OZSkLx1qbi-4bhSfMvKbWVYUXOrowrMCmzQzz6_xlYMAIMuJi7N3cCGRmXyS827NI3w&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ9c3vV6oJOxMRJfz3Dps1Q-g",
+              "openingHours": {
+                "sunday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "monday": null,
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "friday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "23:30"
+                }
+              },
+              "distance": 0.8682477049013296,
+              "walkingTime": 11,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJ7QRRrq0JOxMRaszlEHfPj3s",
+                "name": "Officina - Ba-Bar",
+                "address": "Via Santa Lucia, 169, Napoli",
+                "latitude": 40.8302712,
+                "longitude": 14.2488279,
+                "rating": 4.1,
+                "reviewCount": 1501,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 764 6270",
+                "website": "https://babar-group.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=8903563098626313322&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWtgDxThRZ_wu98mjiMw4BDRTBDiiaJGz9GUbRwx4FXwC5NzAojk7tw9CGH6jx4-pCp_ubxOLwh1d47wwZyCGf-IrLeNEe59VnHEcJhEVVc_ds7X9qSUZY-FBuwNXJk_Hs46r0h86JtwC8m5WWkKwJjoBJW2QBbECrEM9wj4KkD0poMrO2RmlLEUkqA7N5gX6ObwDvEYVRvgHadAza8FxAquUjaYi4HJ6GTVrPWdJVgIqzSV0mCuOpyDBeXciUTZeaC7PhoDDzHqsmvP4krfE1ThZQ70mGwN82m6JMTGamflg&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJ7QRRrq0JOxMRaszlEHfPj3s",
+                "openingHours": {
+                  "sunday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "monday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "friday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  },
+                  "saturday": {
+                    "open": "07:30",
+                    "close": "02:00"
+                  }
+                },
+                "distance": 0.8787336382925384,
+                "walkingTime": 11,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJt1GeZSUJOxMRf48oxDi9vvk",
+                "name": "Testa - Braceria & Hamburgeria",
+                "address": "Via Brecce a S. Erasmo, 31/33, Napoli",
+                "latitude": 40.8450275,
+                "longitude": 14.2840843,
+                "rating": 4.9,
+                "reviewCount": 239,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "steak",
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 554 4682",
+                "website": "https://social.quandoo.com/en/groups/testa-braceria-hamburgeria-101238",
+                "googleMapsUrl": "https://maps.google.com/?cid=17996029212525891455&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUMNAN0yYgMDoCc-oMdQwPikS6lX3TiUT0oorGxVOuvLBKkNbSkdNjVUaai5XJwVsu9D2qVeMWKTU5BGzQwr1mMlFOYV4PPKwNvJK7Tr_NCNWWVDWlJsE3yYwOAxOhpzmKmq9_LCHNMH0mVGKQrT0oTnRApZSwa09hPqy5CIcsPlD9NopyGRPs5remBNnji9HB71T4gzKte-fpLa9ot2gfi4-F3O2EOWfk3E9dU4XFsXWlcVbyBkmpViRrI96fajdipdB44vi8oUGaTLyfao30ux3jK4wRjS-ZnV8h8dKT-8Prl-PmYCjPt6A0239MADK7bLHgBRzQW4x9aZhAeCn45iwGscNj1aK7l1QsxKMsPnjpxQMQLQY_hBTVl1dMfE3_WO4vxsq9DyYVof82IWZcSyiaib37Fa2kpGd5PXPaf7A&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJt1GeZSUJOxMRf48oxDi9vvk",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "14:30"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:30"
+                  },
+                  "friday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.9735148302299461,
+                "walkingTime": 12,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4,
+            "estimatedCost": 45,
+            "bookingUrl": "https://maps.google.com/?cid=16736279580326231077&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJ9c3vV6oJOxMRJfz3Dps1Q-g",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "monday": null,
+              "tuesday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "wednesday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "thursday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "friday": {
+                "open": "12:00",
+                "close": "23:30"
+              },
+              "saturday": {
+                "open": "12:00",
+                "close": "23:30"
+              }
+            }
+          },
+          {
+            "id": "travel-2-4",
+            "dayNumber": 2,
+            "startTime": "13:30",
+            "endTime": "13:50",
+            "type": "transport",
+            "title": "Transport en commun — 1.8km",
+            "description": "Zi Teresa → Chapelle Sansevero",
+            "locationName": "",
+            "latitude": 40.8492951,
+            "longitude": 14.2548837,
+            "orderIndex": 3,
+            "duration": 20,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "chgxF{a~uAEQBYJMNEBIBs@@m@X?R@ZGg@yBQo@Us@Qc@IO\\OAI@Hc@RGMWOk@S_AWW?_@DKBc@Mo@QUE}@QyCYiBOa@CaCMqAIU?KD]`@gAx@k@`@u@Z[VgAr@eBjAw@f@cCsAoAYYCa@EWw@BAC@CG_@gAME[JaAaE}BgJ[b@I@GCa@c@IJu@z@[kAUN",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 1.777,
+            "timeFromPrevious": 20,
+            "transitInfo": {
+              "lines": [
+                {
+                  "number": "CSN Line A",
+                  "mode": "bus",
+                  "color": "#e11e1c"
+                }
+              ],
+              "walkingDistance": 0
+            }
+          },
+          {
+            "id": "gp-ChIJbRQXpEMIOxMRMRFoCnTu8R8",
+            "dayNumber": 2,
+            "startTime": "13:50",
+            "endTime": "14:50",
+            "type": "activity",
+            "title": "Chapelle Sansevero",
+            "description": "A chapel is a Christian place of prayer and worship that is usually relatively small.  The term has several meanings.",
+            "locationName": "Chapelle Sansevero",
+            "latitude": 40.8492951,
+            "longitude": 14.2548837,
+            "orderIndex": 4,
+            "duration": 60,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwnbUQTkF0mfYfg2Zb7uF07YUbDdaaHXdnEWL52CrUY6CWigejhJRiLhHsWa1WyQDlGMlNfZ2e70CudwVuKaYNcUkRnNTXYsA1M9Q6fB09gs9HYOnoInzSDHhxsfVEWmGyLT10Y6L46i9X7EwMo7mXL2WSRCkHEFjSe-ITdvTesYQFonn5f6P7arYBY6skiJEFu_KFnBFdwFPfRm2ktYk5Ci0i9WOB2yQ8Ip5CbOgcn1Jxnp9ix9dIWgECkubZIo-ZANZ2b6-kPA_IkitPs-hCI6UUH2kCm6MgM_tbocQVsb61GJS5IeHQFxogO3xIBjKpbffodynhwolDNvOnN6673qYL8McOddtRhFc5n8mHcEYf-6r_k64SbuXipYUrVYOABL_ZkgsmiF0Wh6IEux-lA414Ib7jbr8IRdbY1ErjZA&maxwidth=400",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJbRQXpEMIOxMRMRFoCnTu8R8",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "travel-2-6",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "15:30",
+            "type": "transport",
+            "title": "Transport en commun — 2.4km",
+            "description": "Chapelle Sansevero → Galleria Umberto I",
+            "locationName": "",
+            "latitude": 40.8444122,
+            "longitude": 14.2492397,
+            "orderIndex": 5,
+            "duration": 30,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "}cfxF{z|uAa@\\CLUNcF~Cc@XMCUMaCeBa@]Wc@_@m@Q]Gm@@_ABoBA{@CQDCB@@?@HRKVm@~EaEEKO]MY_@y@wAyCoCaGiBgDqBmDgDwF}AgCg@w@}CeFDEoCn@CC?Me@QUIMBoDhBa@P_@Pa@RCXGj@?JWA}BKAd@JxCBn@mAD?FAJIJIDE?C?IEGBODKJCHm@|BGJ[v@UNQb@]t@m@Cg@CC~@",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 2.419,
+            "timeFromPrevious": 30,
+            "transitInfo": {
+              "lines": [
+                {
+                  "number": "L6",
+                  "mode": "metro",
+                  "color": "#179ed6"
+                }
+              ],
+              "walkingDistance": 0
+            }
+          },
+          {
+            "id": "gp-ChIJ3YIUnEEJOxMROixS4Tvud94",
+            "dayNumber": 2,
+            "startTime": "16:40",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Galleria Umberto I",
+            "description": "La galleria Umberto I è una galleria commerciale costruita a Napoli tra il 1887 e il 1890.  È intitolata a Umberto I d'Italia, come omaggio al Re e in ricordo della sua generosa presenza durante l'epidemia di colera del 1884, che mostrò l'esigenza di un risanamento della città.",
+            "locationName": "Galleria Umberto I",
+            "latitude": 40.8385287,
+            "longitude": 14.2494744,
+            "orderIndex": 6,
+            "duration": 140,
+            "rating": 4.6,
+            "estimatedCost": 0,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVU8JKkUuZRS5DstxgIvpnCd3ku2K8SNlf5NhOsjdBcmJqVeMf1Kt6isTMwTOnyS0vcz2wMdjcyfUwUdOD3edl5XlXRz0EyMCpGnOD1VX_aWKw-3w0n8t-UrFu69PMMo-F85i5jbfYxHYJZz6hq0hWLhNQQMOO96sX5EeocM1IIPDmW-68gGLanSyRriXVvpUQ3qwo7EEGz-CHystatL9kYVGsrzHI4XPqq8EUI9pUbzi8ST-vo7QSfFWRcPtiCOKjz9eGStV5jO8AnZytkEzLWszQq4nPkGuS_nXPv_StrRVjPq-2AFIIUmxMGVP5PH7826yk18Fj5IeJb6PaMZh789kQFujKmFuAkacYypQmp6js7PMpyKbKSIYZXsWqartAQLPBGYFaPoeWp0JaoSxBJyAGFVAUSxJ7U5-hKsP0kqiCRb1uhFM-ebERsAWsj&maxwidth=400",
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Galleria%20Umberto%20I%20Naples",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJ3YIUnEEJOxMROixS4Tvud94",
+            "mustSee": false,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Galleria%20Umberto%20I%20Naples"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Transatlantico Restaurant Hotel",
+            "description": "Dîner à Transatlantico Restaurant Hotel",
+            "locationName": "Transatlantico Restaurant Hotel",
+            "latitude": 40.8285916,
+            "longitude": 14.2488193,
+            "orderIndex": 7,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJjdfN1q0JOxMRBOt_4gGnhQM",
+              "name": "Transatlantico Restaurant Hotel",
+              "address": "Via Luculliana, 15, Napoli",
+              "latitude": 40.8285916,
+              "longitude": 14.2488193,
+              "rating": 4.3,
+              "reviewCount": 2289,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian",
+                "seafood",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Hôtel balnéaire, chambres lumineuses avec vue sur baie, resto poissons & fruits de mer convivial, quai privé."
+              ],
+              "description": "Hôtel balnéaire, chambres lumineuses avec vue sur baie, resto poissons & fruits de mer convivial, quai privé.",
+              "phoneNumber": "081 764 8842",
+              "website": "http://www.transatlanticonapoli.com/",
+              "googleMapsUrl": "https://maps.google.com/?cid=253792580553140996&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfU0aX3oWsIqfK02d2JW8cHO34Prec-5OxIv-wbo3MkrV7-lZTkcAJtxWnCdUfo05ehjfiEJ_hWvP-mFZI2OkVcJYEFUPBm9mP3HkNH3RNYzMqXtslD2Sk_UBxb9mUP99JORNPc05RgqyafyFHMfhpqHasiORJSLPZzRGfuLzvMpjDGK_qkjhgmQfXNpdNsolIWInKWFX_3WthBxMZhWAc-3mvLj_PcaC8bXAgWzoUtFpxv3iatO0wJseVCXlcNAmgwvc8iEFPDfpVj6CYrtP7Ym8m43zd4Ev7xARdcdjwk0dA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJjdfN1q0JOxMRBOt_4gGnhQM",
+              "openingHours": {
+                "sunday": {
+                  "open": "19:00",
+                  "close": "22:45"
+                },
+                "monday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "tuesday": null,
+                "wednesday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "19:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.7593505828839753,
+              "walkingTime": 9,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJ93KZna0JOxMR61O0NJ0RMUc",
+                "name": "Rosolino Ristorante",
+                "address": "Via Nazario Sauro, 5/6-7, Napoli",
+                "latitude": 40.830626099999996,
+                "longitude": 14.250264999999999,
+                "rating": 4.3,
+                "reviewCount": 1180,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "081 764 9873",
+                "website": "https://www.rosolinoristorante.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=5129900817443476459&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUN5c9iKqGIJP3dRM3fUC2UWW1VDWJ5mYBZOSPiAXEhFbLI_kOUM6yBwlLwfxaUCcWgKcQ7z7ekyrOcaTr-KsP7M5mon95dq3SiLf8EVan35oEYo_AtuWHoyUIOhUG6hH7BCUSjNpE3kAUgtWi8PbrEN_jZaW0KeyT-ErkKiUxTLSkvhLxYdc-tww9YKBFbYUXHdomdnqAMkHF_Y4lw52Qomjb5MHyv49cl6aAvLMuNUT0OLeyYMffRfEJ0m6xFfZO-o7jwS1k9YhxhjIMyhVA_pNSI0m31Coa55hd66IXxAw&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJ93KZna0JOxMR61O0NJ0RMUc",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.8285476679403614,
+                "walkingTime": 10,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJQ9bDf64JOxMRRcaflNkFu4s",
+                "name": "Officina del Mare",
+                "address": "Piazzetta Marinari, 20-21, Napoli",
+                "latitude": 40.8282883,
+                "longitude": 14.248321599999999,
+                "rating": 4.2,
+                "reviewCount": 2118,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "seafood",
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "333 453 4425",
+                "website": "https://www.officinadelmarenapoli.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=10068647823976416837&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWMU0H51s2ubCfbwcuvcKmusrpNEh50jc3w3vNN_zEwtW3JaAjq0yrcHF0tEDBKXUhCQlab3JcSyIlUviPD5K3Zc5-04dagikKeJUybzuwDAbJ2EG7AuELSI_gRoegy4vi-pzDuQ7QnHD3zjjpMyY8fpaoEr-wK65CuzThlC5IVBtz6HsDbt-n7jtkcMzLMecVkF0wjSCsKXE4oirKvIFxxoBg7gB4iUG_tfmSJyPQOQv5E19y0xDm2xNEg7AcApXTQ9rk_9FDMLQgWEE9Q4-9dS4vCegre1eXPFdJBCR9rFA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJQ9bDf64JOxMRRcaflNkFu4s",
+                "openingHours": {
+                  "sunday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  },
+                  "monday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  },
+                  "tuesday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  },
+                  "wednesday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  },
+                  "thursday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  },
+                  "friday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  },
+                  "saturday": {
+                    "open": "19:00",
+                    "close": "01:00"
+                  }
+                },
+                "distance": 0.7762693208539775,
+                "walkingTime": 10,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.3,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=253792580553140996&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJjdfN1q0JOxMRBOt_4gGnhQM",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "19:00",
+                "close": "22:45"
+              },
+              "monday": {
+                "open": "19:00",
+                "close": "23:00"
+              },
+              "tuesday": null,
+              "wednesday": {
+                "open": "19:00",
+                "close": "23:00"
+              },
+              "thursday": {
+                "open": "19:00",
+                "close": "23:00"
+              },
+              "friday": {
+                "open": "19:00",
+                "close": "23:00"
+              },
+              "saturday": {
+                "open": "19:00",
+                "close": "23:00"
+              }
+            }
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez Visite de la faune et de la flore de l'île Marco, Chapelle Sansevero puis Galleria Umberto I."
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-05-17T08:00:00.000Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:30",
+            "type": "checkout",
+            "title": "Check-out — Le Stanze del Principe B&b Naples",
+            "description": "Libérer la chambre avant 08:30",
+            "locationName": "Le Stanze del Principe B&b Naples",
+            "latitude": 40.8579015,
+            "longitude": 14.2605276,
+            "orderIndex": 0,
+            "duration": 30,
+            "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "11c35659-d170-4ebc-af69-d106c444c613",
+            "dayNumber": 3,
+            "startTime": "07:00",
+            "endTime": "08:55",
+            "type": "flight",
+            "title": "NAP → LYS",
+            "description": "Vol U2 U2 4187",
+            "locationName": "Aéroport de Naples - Capodichino",
+            "latitude": 40.886,
+            "longitude": 14.2908,
+            "orderIndex": 1,
+            "duration": 115,
+            "flight": {
+              "id": "serp-U2 4187-2026-05-17",
+              "airline": "U2",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/U2.png",
+              "flightNumber": "U2 4187",
+              "departureAirport": "Aéroport de Naples - Capodichino",
+              "departureAirportCode": "NAP",
+              "departureCity": "NAP",
+              "departureTime": "2026-05-17T05:00:00.000Z",
+              "departureTimeDisplay": "07:00",
+              "arrivalAirport": "Aéroport de Lyon-Saint-Exupéry",
+              "arrivalAirportCode": "LYS",
+              "arrivalCity": "LYS",
+              "arrivalTime": "2026-05-17T06:55:00.000Z",
+              "arrivalTimeDisplay": "08:55",
+              "duration": 115,
+              "stops": 0,
+              "price": 352,
+              "pricePerPerson": 176,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": false,
+              "bookingUrl": "https://www.aviasales.com/search/NAP1705LYS2?currency=eur&locale=fr"
+            },
+            "flightAlternatives": [],
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 352,
+            "bookingUrl": "https://www.aviasales.com/search/NAP1705LYS2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/NAP1705LYS2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/nap/lys?departure_date=2026-05-17&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "theme": "Journée de détente",
+        "dayNarrative": "",
+        "isDayTrip": true,
+        "dayTripDestination": "Pompei"
+      }
+    ],
+    "accommodation": {
+      "id": "serp-hotel-ChkIlPfPqrbyitt5Gg0vZy8xMWt2OGdmMjdxEAE",
+      "name": "Le Stanze del Principe B&b Naples",
+      "type": "hotel",
+      "address": "Via Foria, 118, 80139 Napoli NA, Italy",
+      "latitude": 40.8579015,
+      "longitude": 14.2605276,
+      "rating": 9.8,
+      "reviewCount": 245,
+      "pricePerNight": 139,
+      "currency": "EUR",
+      "amenities": [
+        "Free breakfast",
+        "Free Wi-Fi",
+        "Parking ($)",
+        "Air conditioning",
+        "Pet-friendly",
+        "Bar",
+        "Room service",
+        "Airport shuttle",
+        "Kid-friendly",
+        "Smoke-free property"
+      ],
+      "checkInTime": "14:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "http://www.lestanzedelprincipe.it/",
+      "breakfastIncluded": true
+    },
+    "accommodationOptions": [
+      {
+        "id": "serp-hotel-ChkIlPfPqrbyitt5Gg0vZy8xMWt2OGdmMjdxEAE",
+        "name": "Le Stanze del Principe B&b Naples",
+        "type": "hotel",
+        "address": "Via Foria, 118, 80139 Napoli NA, Italy",
+        "latitude": 40.8579015,
+        "longitude": 14.2605276,
+        "rating": 9.8,
+        "reviewCount": 245,
+        "pricePerNight": 139,
+        "currency": "EUR",
+        "amenities": [
+          "Free breakfast",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Air conditioning",
+          "Pet-friendly",
+          "Bar",
+          "Room service",
+          "Airport shuttle",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "http://www.lestanzedelprincipe.it/",
+        "breakfastIncluded": true
+      },
+      {
+        "id": "serp-hotel-ChkIxOSenuSglfZaGg0vZy8xMWMzeXd3c2huEAE",
+        "name": "Bed & Breakfast Colori e Note - Centro Storico",
+        "type": "hotel",
+        "address": "Via Amato di Montecassino,11 Materdei, Museo, 80136 Napoli NA, Italy",
+        "latitude": 40.8547158,
+        "longitude": 14.2441951,
+        "rating": 9.8,
+        "reviewCount": 203,
+        "pricePerNight": 139,
+        "currency": "EUR",
+        "amenities": [
+          "Free breakfast",
+          "Free Wi-Fi",
+          "Free parking",
+          "Air conditioning",
+          "Pet-friendly",
+          "Airport shuttle",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "http://www.colorienote.it/",
+        "breakfastIncluded": true
+      },
+      {
+        "id": "serp-hotel-ChkI_pO349uv49VMGg0vZy8xMXQyYzNfenpmEAE",
+        "name": "Alma Adry In Naples - B&B Napoli Centro - bed and breakfast Napoli Centro - BnB Napoli Centro",
+        "type": "hotel",
+        "address": "Via Cardinale Guglielmo Sanfelice, 24, 80134 Napoli NA, Italy",
+        "latitude": 40.843561,
+        "longitude": 14.253946,
+        "rating": 9.8,
+        "reviewCount": 99,
+        "pricePerNight": 138,
+        "currency": "EUR",
+        "amenities": [
+          "Breakfast ($)",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Air conditioning",
+          "Pet-friendly",
+          "Airport shuttle",
+          "Smoke-free property"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://almaadry.com/",
+        "breakfastIncluded": true
+      }
+    ],
+    "outboundFlight": {
+      "id": "serp-U2 4188-2026-05-15",
+      "airline": "U2",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/U2.png",
+      "flightNumber": "U2 4188",
+      "departureAirport": "Aéroport de Lyon-Saint-Exupéry",
+      "departureAirportCode": "LYS",
+      "departureCity": "LYS",
+      "departureTime": "2026-05-15T11:10:00.000Z",
+      "departureTimeDisplay": "13:10",
+      "arrivalAirport": "Aéroport de Naples - Capodichino",
+      "arrivalAirportCode": "NAP",
+      "arrivalCity": "NAP",
+      "arrivalTime": "2026-05-15T12:55:00.000Z",
+      "arrivalTimeDisplay": "14:55",
+      "duration": 105,
+      "stops": 0,
+      "price": 311,
+      "pricePerPerson": 156,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": false,
+      "bookingUrl": "https://www.aviasales.com/search/LYS1505NAP2?currency=eur&locale=fr"
+    },
+    "returnFlight": {
+      "id": "serp-U2 4187-2026-05-17",
+      "airline": "U2",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/U2.png",
+      "flightNumber": "U2 4187",
+      "departureAirport": "Aéroport de Naples - Capodichino",
+      "departureAirportCode": "NAP",
+      "departureCity": "NAP",
+      "departureTime": "2026-05-17T05:00:00.000Z",
+      "departureTimeDisplay": "07:00",
+      "arrivalAirport": "Aéroport de Lyon-Saint-Exupéry",
+      "arrivalAirportCode": "LYS",
+      "arrivalCity": "LYS",
+      "arrivalTime": "2026-05-17T06:55:00.000Z",
+      "arrivalTimeDisplay": "08:55",
+      "duration": 115,
+      "stops": 0,
+      "price": 352,
+      "pricePerPerson": 176,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": false,
+      "bookingUrl": "https://www.aviasales.com/search/NAP1705LYS2?currency=eur&locale=fr"
+    },
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Naples",
+            "duration": 55,
+            "price": 74,
+            "co2": 144
+          }
+        ],
+        "totalDuration": 343,
+        "totalPrice": 98,
+        "totalCO2": 145,
+        "score": 7.3,
+        "scoreDetails": {
+          "priceScore": 7.6,
+          "timeScore": 10,
+          "co2Score": 4.4
+        },
+        "recommended": true,
+        "recommendationReason": "Option rapide"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 703,
+            "price": 38,
+            "co2": 25,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/naples?departure_date=2026-05-15&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "totalDuration": 758,
+        "totalPrice": 38,
+        "totalCO2": 25,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0.5,
+          "co2Score": 9.5
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/naples?departure_date=2026-05-15&passengers%5B%5D=adult&passengers%5B%5D=adult"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 742,
+            "price": 75,
+            "co2": 13,
+            "operator": "SNCF VOYAGEURS",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/naples?departure_date=2026-05-15&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "totalDuration": 782,
+        "totalPrice": 75,
+        "totalCO2": 13,
+        "score": 6.2,
+        "scoreDetails": {
+          "priceScore": 8.5,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/naples?departure_date=2026-05-15&passengers%5B%5D=adult&passengers%5B%5D=adult",
+        "dataSource": "estimated",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lyon Part Dieu",
+            "to": "Genève Cornavin",
+            "departure": "2026-05-15T08:38:00Z",
+            "arrival": "2026-05-15T10:40:00Z",
+            "duration": 122,
+            "operator": "SNCF VOYAGEURS",
+            "line": "K1+"
+          },
+          {
+            "mode": "train",
+            "from": "GENEVE",
+            "to": "MILANO CENTRALE",
+            "departure": "2026-05-15T11:27:00Z",
+            "arrival": "2026-05-15T15:50:00Z",
+            "duration": 263,
+            "operator": "TRENITALIA",
+            "line": "EC"
+          },
+          {
+            "mode": "train",
+            "from": "MILANO CENTRALE",
+            "to": "NAPOLI CENTRALE",
+            "departure": "2026-05-15T16:00:00Z",
+            "arrival": "2026-05-15T20:33:00Z",
+            "duration": 273,
+            "operator": "TRENITALIA",
+            "line": "FR"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 70,
+            "price": 94,
+            "co2": 239,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYS1505NAP2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 360,
+        "totalPrice": 94,
+        "totalCO2": 239,
+        "score": 5.9,
+        "scoreDetails": {
+          "priceScore": 7.8,
+          "timeScore": 9.6,
+          "co2Score": 0.5
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYS1505NAP2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/naples?departure_date=2026-05-15&passengers%5B%5D=adult&passengers%5B%5D=adult"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Naples",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 40.8518,
+              "lng": 14.2681
+            },
+            "duration": 563,
+            "price": 202,
+            "co2": 49,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Naples"
+          }
+        ],
+        "totalDuration": 638,
+        "totalPrice": 202,
+        "totalCO2": 49,
+        "score": 5.1,
+        "scoreDetails": {
+          "priceScore": 3.5,
+          "timeScore": 3.3,
+          "co2Score": 8.5
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Naples",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "train+plane-via-marseille",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Marseille",
+            "duration": 180,
+            "price": 0,
+            "co2": 3,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Marseille&outwardDate=2026-05-15&passengers=2"
+          },
+          {
+            "mode": "plane",
+            "from": "Marseille",
+            "to": "Naples",
+            "duration": 95,
+            "price": 292,
+            "co2": 247,
+            "operator": "FR",
+            "bookingUrl": "https://www.aviasales.com/search/MRS1505NAP2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 395,
+        "totalPrice": 292,
+        "totalCO2": 250,
+        "score": 2.9,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 8.8,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Marseille&outwardDate=2026-05-15&passengers=2"
+      }
+    ],
+    "attractionPool": [
+      {
+        "id": "gp-ChIJed3N-lcIOxMRb0_dM8xIY4w",
+        "name": "Château Sant'Elmo",
+        "type": "museum",
+        "description": "Villafranca è un comune francese di 5. 064 abitanti situato nel dipartimento delle Alpi Marittime della regione della Provenza-Alpi-Costa Azzurra.",
+        "latitude": 40.8444515,
+        "longitude": 14.2388951,
+        "rating": 4.6,
+        "reviewCount": 34693,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWqr_s0qp4dvvbPfivWenmzp3Xo9MMIs4YYoWj0eKcibICzc_Re38hphV6cRf3ZaV-U0_FYR46ysnMYpQ2yLkPmVaE2MA70vgfQRSuNBGHmXbAbBwOTlyQ02OhEPd77HsBdSLSEV0VAS9a0KQpagZ1jyrxlxH0Xipqt0Q_wUqQNNBwtOivGXyVPXNHdnSzkQiP5aFPkEYl3lirNQ1AnAudH5oK5Rh_zVv24jyUKB5_JU_stz1-FOQwT-DqJERK413mZx-KAGAvg4ccIDQRXjjw_b6O-TlBr2ts2QIfGgjxbTvpKSR05LZoCwq9l6jJ0wwdJAGbitbXzDrfN-X1tq1_taHu4huYW8EzXritvHkFVP946wMX_Z0VxC-BcY4qkaOzvOV51v5KETCvSo8Ohd0UKafOL5K7MLeQZGcbZ6cCUbNeWZJxEaquVsYpYVOko&maxwidth=400",
+        "googlePlaceId": "ChIJed3N-lcIOxMRb0_dM8xIY4w",
+        "isOutdoor": false,
+        "score": 148.4142871805532,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "gp-new-ChIJ_____7u8OxMRo4QE6ca-gaI",
+        "name": "Villa des Mystères",
+        "type": "culture",
+        "description": "Villa romaine du IIe siècle av. J.-C. richement décorée de fresques aux significations mystérieuses.",
+        "duration": 90,
+        "estimatedCost": 11,
+        "latitude": 40.7535356,
+        "longitude": 14.477599,
+        "rating": 4.7,
+        "reviewCount": 6579,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "15:30"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "15:30"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "15:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "15:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "15:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "15:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "15:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "15:30"
+          }
+        },
+        "phone": "081 857 5347",
+        "website": "http://pompeiisites.org/sito_archeologico/villa-dei-misteri/",
+        "googleMapsUrl": "https://maps.google.com/?cid=11709850267662189731&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW2BUTUm-BfvRFQqr630xp-W4M01RIWUJt9eghNkGe1m7YvlPTEUZ7aGlHNpPZaTXAg2owiH8p3gh_m5NZ0OArW-Vjaxj9EaIMtrmXnEvFPD7zWOB_ksYt78u-WK3LasC5MKQTxy3oOVKlMqyDEEudQKdAcyrtOYoCBd8WrCbcpaYW3WtHuiEXMwFrJ3LE3zLxdmYXL1N-bpebLbetf5N-WqEWOnXJ50PDX-RR1uwnW3xnjcIN9h1uC1d9pgztAb6ofcYtm5sURKL8My021MEqrh1OKPh24Up08FpigwyH-0ih6Row761NzgVnZZQOxY1_efqCJYKDmbbN1h_O5_HZQiRkJm7Q9tx_fNIzfdui7BQFdD2YiJa4_vpNJXGl7zBDJc_SpjnGJb86HmxnLBn6MfE9uSsFIPqnlV2J8hnoAvx-FgUqJRTtOfjWS0nCV&maxwidth=400",
+        "googlePlaceId": "ChIJ_____7u8OxMRo4QE6ca-gaI",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 134.66208652224037,
+        "source": "mustsee",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 1,
+        "protectedReason": "day_trip_anchor",
+        "sourcePackId": "daytrip:pompei",
+        "destinationEnvelopeId": "daytrip:pompei",
+        "planningToken": "daytrip:pompei:gp-new-ChIJ_____7u8OxMRo4QE6ca-gaI"
+      },
+      {
+        "id": "viator-30481P3",
+        "name": "Visite de la faune et de la flore de l'île Marco",
+        "type": "culture",
+        "description": "Notre visite touristique et de décorticage de Marco Island part du parc nautique de Goodland, à Goodland, en Floride. Lors de notre écotour de deux heures, vous vivrez l'une des aventures les plus populaires pour lesquelles nous sommes connus, nous vous emmènerons pour une croisière passionnante et pittoresque à travers les Dix Mille Îles, où nos capitaines et guides vous fourniront des informations sur l'écologie de cet écosystème unique. Après une croisière à travers les îles de la mangrove, nous nous arrêterons sur une plage privée à la recherche des coquillages tropicaux les plus exotiques qui font la réputation de la côte du Golfe. Il s'agit d'une aventure très informative qui gardera les petits enfants et les adultes engagés tout le temps. Veuillez noter : Tous les membres de votre groupe doivent signer la renonciation électronique figurant sur votre bon avant d'arriver à votre tour en bateau. Veuillez noter qu'un billet doit être acheté pour chaque personne de votre fête, y compris les tout-petits de 0 +",
+        "duration": 120,
+        "estimatedCost": 86,
+        "latitude": 40.8237263,
+        "longitude": 14.1824269,
+        "rating": 5,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Naples/Cape-Romano-Shelling-and-Sightseeing-Tour/d22381-30481P3?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/11/0d/d0/47.jpg",
+        "providerName": "Viator",
+        "reviewCount": 1050,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 134.16914204060458,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "gp-ChIJbRQXpEMIOxMRMRFoCnTu8R8",
+        "name": "Chapelle Sansevero",
+        "type": "museum",
+        "description": "A chapel is a Christian place of prayer and worship that is usually relatively small.  The term has several meanings.",
+        "latitude": 40.8492951,
+        "longitude": 14.2548837,
+        "rating": 4.7,
+        "reviewCount": 41893,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwnbUQTkF0mfYfg2Zb7uF07YUbDdaaHXdnEWL52CrUY6CWigejhJRiLhHsWa1WyQDlGMlNfZ2e70CudwVuKaYNcUkRnNTXYsA1M9Q6fB09gs9HYOnoInzSDHhxsfVEWmGyLT10Y6L46i9X7EwMo7mXL2WSRCkHEFjSe-ITdvTesYQFonn5f6P7arYBY6skiJEFu_KFnBFdwFPfRm2ktYk5Ci0i9WOB2yQ8Ip5CbOgcn1Jxnp9ix9dIWgECkubZIo-ZANZ2b6-kPA_IkitPs-hCI6UUH2kCm6MgM_tbocQVsb61GJS5IeHQFxogO3xIBjKpbffodynhwolDNvOnN6673qYL8McOddtRhFc5n8mHcEYf-6r_k64SbuXipYUrVYOABL_ZkgsmiF0Wh6IEux-lA414Ib7jbr8IRdbY1ErjZA&maxwidth=400",
+        "googlePlaceId": "ChIJbRQXpEMIOxMRMRFoCnTu8R8",
+        "isOutdoor": false,
+        "score": 50.82683241866555,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-new-ChIJl8kMVgAJOxMR4f2WCe2j9lw",
+        "name": "SpaccaNapoli",
+        "type": "culture",
+        "description": "SpaccaNapoli à Naples",
+        "duration": 90,
+        "estimatedCost": 11,
+        "latitude": 40.8500845,
+        "longitude": 14.2602324,
+        "rating": 4.7,
+        "reviewCount": 1227,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "00:00",
+          "close": "18:00"
+        },
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "googleMapsUrl": "https://maps.google.com/?cid=6698721734223658465&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWxWWIPlXIgjhmJBwa-5q0kijkgIYZwHrxpUTtDOLQW1mycID8ZYLZLtjKIuE9MMK8dDWq2U-dYW9jX4Bo6qHeVDDynudWOmjCNQ-suCmsCOxSKkQ6N4E66adxv6GMpGmmlma-QHIwI9dfOtYbBh8WcFNWyheK8Jd-D9Tb3jxG7yyveQSbmop2GtY8ggYS1qHytXJwVXF9FytLF6TrA1BaQTLgrNvTCTuEwnLXPp93znu-0dySsYN-b1ryYrle9RtEsDfPPq5ZuhkMXm5tdX8xj4Pcbj8HiSdpOHk-QzyCo3stycNWkUpvpmX2ftYSPxxhIYmweJb9m90uLhK8ZMMfrfCGGOdnxxlFhQ4vp3Gh7xu_P27SIw7aEK0WC6GIZ2RCmMciTsUvFuoV9k5oFHZtv9ME0dqclt0_FANGzRwAE5SIKGAxkiw1OspFPPkWH&maxwidth=400",
+        "googlePlaceId": "ChIJl8kMVgAJOxMR4f2WCe2j9lw",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 48.97873065857368,
+        "source": "mustsee",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJQcLh8EEIOxMRaFoJF9rRld8",
+        "name": "Underground Naples",
+        "type": "museum",
+        "description": "Marco Ruggiero è un musicista italiano, è il chitarrista fondatore dei St. Anger.  Nell'ambito della musica emergente partenopea è conosciuto per essere l'ex-chitarrista dei Nameless Crime.",
+        "latitude": 40.8510429,
+        "longitude": 14.2567975,
+        "rating": 4.6,
+        "reviewCount": 30351,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWeWCnNfRRDdpUpRtA9hPpA6vCLs0hFFudUx12k9vrjKgAhKvva4LVJd-U_249zNiS7k5cwdl4bS6WKhtR3HSU-UKwha65JhyrTn-OJi3Q9-o5Rkioh1fT8Kxtw7BO41KNDU6y22aIiGUgE7dGWIfCxzwbZA78ODnd65jATupxEofTC9zYEihr5y3RURXX_gOGZY84MpKtIqwJo703d9ppcj1SzUZmaKruV_o2xNzjV4i8bS63S2UbP91SwBaqTyhjTZEXY6S8E61zz7NdIbu6h1yHN9NPxZWNNblZbxPFYqeUicQB8qgL_dL5e94YmSqB68mecKt_-o2XLZVvGyVRU-foaj7M-VBQtzxhnhEI9m3etX4l0gzJqPx9Xddo8PqZrtKBBBOB1ejysRrYaKFblD8fAUZ6JIdyeBFezJ-v4xCXFIY4BySCmGqyarw&maxwidth=400",
+        "googlePlaceId": "ChIJQcLh8EEIOxMRaFoJF9rRld8",
+        "isOutdoor": false,
+        "score": 47.920958286068625,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJBaUMSlIIOxMRGsTFJxHQ-G0",
+        "name": "Napoli sotterranea",
+        "type": "museum",
+        "description": "Il sottosuolo di Napoli è attraversato da una grande rete di cunicoli, gallerie, acquedotti e spazi scavati ed utilizzati dall'uomo durante la storia della città sin da diversi secoli avanti Cristo fino a pochi anni dopo la fine del secondo conflitto mondiale, ed ancora oggi, almeno in parte, visitabili. \nI siti del sottosuolo si distinguono dai reperti archeologici sotterranei per la loro origine sotterranea sin dalla realizzazione.",
+        "latitude": 40.8372868,
+        "longitude": 14.2454761,
+        "rating": 4.7,
+        "reviewCount": 9155,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVbaYIszEDMmS7GctpueN7S4FhERK5OqtwGm_x9h7EAOOGqr2MRnsXxVBBMH7q6ByGQsHxleHMmFoeEYt0TUqJNQ7ZZYp7r_9rspj1xF6oU3YnWsnV5UhoBHvH8rGWlGtIlLdErkjUSj1yELW7r3Vj0Zywgg6_l-ukf-rrTOU6i7fIjRaUoSi-98lXT2MxbS_FTGvoOSW7ceuBq4Z1Sb02xgkP6P9_CT8s_IPz2pTlvq85anx5ur70eAYAIQ3xZCuEzGOxzQdl6IRHCAeA-dqiXHmWfUqR4N7LFvdDa6ZotRbkbSaKKuxnxp4WdemWXoUVAZhu7-XYBbDgA-wzJvXqOXARt3K-zVimnYmrKJLruvGDgQWLavbprgUQSM2WfeCTwt6JFoVnxLLNRkHXRERLOg6G3oCE5QVkuDMgZUNhHfg&maxwidth=400",
+        "googlePlaceId": "ChIJBaUMSlIIOxMRGsTFJxHQ-G0",
+        "isOutdoor": false,
+        "score": 44.949016382199694,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJuVTsVVIIOxMRFDyARSoS2Yo",
+        "name": "Piazza del Plebiscito",
+        "type": "attraction",
+        "description": "Piazza del Plebiscito è una piazza di Napoli posizionata al termine di via Toledo, non appena oltrepassata piazza Trieste e Trento.",
+        "latitude": 40.8358256,
+        "longitude": 14.2485831,
+        "rating": 4.7,
+        "reviewCount": 88238,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWUUaey4l1VJlpJj-a6lzWOKRXFx7XaqSr3bs9JswYZnSVOae6Og1qvGzZ3KVB2qL8MImpSIjCHUEUkQzJJe0Afvw0Su9L43yPsGHSZ_yzyyKnXlMZOcs5rZpG20pNZ2a6rJ_9wSfVY7RVnN2OD3tiUY0rj1FK-vUV4JUOq24AJSpp1xTGsFgbGqy78TQ8tFFcQxDDKtPGDtFclE0lAOZRkD9h_D4nQh1lgoyw8VJdPDNPa3yrtcB2yA3AGoE936Xy0bTnmZx3LTgqISdWK_WcrDvgQ30hTldE1wKLuSpm1TSLKGhNlijGbeFt_0IJeIExTB35Imnc0bMwYY4PXFtRgpEO68O42npTrl-g8B0O2Dc9XvdbQLzy-_QWy7BokiB8P_2BmWDIVxg_-fRL6W5k3wivDh3m5k09U9VLPyVxY5syR&maxwidth=400",
+        "googlePlaceId": "ChIJuVTsVVIIOxMRFDyARSoS2Yo",
+        "isOutdoor": true,
+        "score": 44.69248529070025,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJn-dEW1IIOxMRye0kDMu7iz8",
+        "name": "Palais royal de Naples",
+        "type": "museum",
+        "description": "Il sugo alla genovese o \"la Genovese\" è un condimento bianco a base di cipolle e carne di manzo, tipico della cucina napoletana.",
+        "latitude": 40.8362316,
+        "longitude": 14.2494027,
+        "rating": 4.6,
+        "reviewCount": 10779,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "20:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGtVRSlS_4HeHPbxjq302KBAQk73sbffVXB8qTzurPtaqAJ_0a2T6j7mxsGGZdf_lKNhtmWNqeyNu8gZ5gO_7M-xB2Q3nXXNySqMb0Ng6oauBuWAw4W4ioC0_XKLleXeC9TY221wgHCRASnDM2tgOiLY1HP6fsHVWJwC4VbB2ezunt0Qd_y3nrdzBhuhR4NADsAAZiucBO2-Jf62OYz_CBGKNTmnZQiF37IKyalgg_RbYkHVCS7IDsmBCfabEgo3fhw8V-9KrBND1al1DSg3e7i5on6IN9280CmlzrqV6ChZGWtQxSBlFZaEdDXpS59eWRODoRGfOV68M9qmJGW6GTQ3jc1pdSLb55osLJUlZt_OSblJotHG7fGb5ROP4Illfe_ohDTavUyzEXT1LZrLfQnP6yCrFl7w78NW6jP3-Sbv-H&maxwidth=400",
+        "googlePlaceId": "ChIJn-dEW1IIOxMRye0kDMu7iz8",
+        "openingHoursByDay": {
+          "friday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "sunday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "wednesday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "081 580 8255",
+        "website": "https://palazzorealedinapoli.org/",
+        "isOutdoor": false,
+        "score": 44.09098563966113,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJg-rRh728OxMRNZtSjoBipHw",
+        "name": "Parc Archéologique de Pompei",
+        "type": "museum",
+        "description": "Bibracte era un oppidum gallico o città fortificata, capitale degli Edui dalla fine del II alla fine del I secolo a. C.",
+        "latitude": 40.7512189,
+        "longitude": 14.4886761,
+        "rating": 4.7,
+        "reviewCount": 81925,
+        "duration": 90,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUNN-qBJq9wfRnTplqoBKz24860frts8sFH9NsaB9KbIZ6U0OosxP84rnsVlBwvE7zV9bfXLviSi3Le8QxpVIMeTL3mzc5lmmUCRPJ2xETMzx0HVCy6j7qWAwCI_lKkUgLwr_l3V854FoxhPZVJss2-Mrm6XN7BVWQlfWCMpucSbje2TZ8sAAYNYTfmMPIe5dzxcs30XFjpxL8tzn9HDn0omB-9nae9KtXv_RFcHFDpAd6aif_utUtbWczX5qLliL72RyuvheTn_5cZlHOBSgP4I-aI8lcnib0E75MabSWqXsFSz5pFOEwUkCZyYFsL0G6MfAGNrjNTN9ja2CPHTjevd583DoIKrbQbrUtzgvb4HZQJy20dvO2gJGNHZLrhyT3TQ3irtzC0Zi6cFmCPiM8Ry7ukNvpwkTLH8yCY3AQ&maxwidth=400",
+        "googlePlaceId": "ChIJg-rRh728OxMRNZtSjoBipHw",
+        "isOutdoor": true,
+        "score": 43.407107103846855,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 1
+      },
+      {
+        "id": "gp-ChIJr-AbDHsIOxMR7U8MwBo2riE",
+        "name": "Catacombes de San Gennaro",
+        "type": "museum",
+        "description": "Le catacombe di Parigi sono un ossario sotterraneo nel comune di Parigi, Francia, e si estendono per alcuni chilometri, tra la rete di passaggi molto più ampia, ricavati da una cava sotterranea di una lunghezza complessiva di circa 285 km.  Situato a sud della precedente porta della città, l'ossario conserva i resti di circa 6 milioni di persone, che ne fanno la più grande necropoli del mondo, e occupa una parte di caverne e gallerie di un'antica cava.",
+        "latitude": 40.8650615,
+        "longitude": 14.2474297,
+        "rating": 4.7,
+        "reviewCount": 13021,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVSungbTqXVZHqdIm8uGIqaMULYlqeC122tHKDPhLGkVSAY8ZpUr5wyiqrtG4_s9FAYkzVzmmcv3HgMX1hw_eAMhqfCsGdc0unOOp1bVhNfiuU1z06ISbjgixGhiytMv6ZH4kf331OdA1dQdisJnnzEmXZL4E2oNYyCLHb-RodXrAaBDzYD0M-JqaIyned_7AvpGBe3qHlQQobOSHg5RgHATWeTnHvPV9zMksf1wuXZrWUFIRPndfywiebphVwczLaBn9r3zZBA7-THkDQjD5tIjKCvMkVmSYZB8fWIwaTBMyhnYh6CplovAzXJ_eWnvUmKLQh8bu8j22z_JmOBwfG4XS-CSMnZsTr8-OuA8twgVQTTd_DNjiFwu7Z6GJxLIUZXkwuzRt-cIUEmzk0F6GXCKbSj5m1lpYnsdZXH9OO5mnw&maxwidth=400",
+        "googlePlaceId": "ChIJr-AbDHsIOxMR7U8MwBo2riE",
+        "isOutdoor": false,
+        "score": 43.315876934716684,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJUd9aPKsJOxMR2L56YaZkKPE",
+        "name": "Galleria Borbonica",
+        "type": "museum",
+        "description": "La Galleria Borbonica è una cavità sotterranea di Napoli che si estende sotto la collina di Pizzofalcone, nei pressi di Palazzo Reale, nel quartiere San Ferdinando.",
+        "latitude": 40.8329046,
+        "longitude": 14.2433952,
+        "rating": 4.8,
+        "reviewCount": 4621,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWDPXDlgxN1b34PVBPHffL0wImsxA9AbUqvRsa3VZcLrFh5iH2Mn5_VBnD-k7Tp2THVeBQjeKu7J5nNIsd23IJp3DKCHIklnUPWSof6tBntZacoHy18aeDPmH9UlhId66Dv7nCb00K8FTkYTWOrryBGiq9imNY_ZVtoWEUS9ilNRvBLL-yrm3htvH-JgqgJeqGUoVa7midXkxLqh4AjhE_TvMK97BC39mpv7hX4jK_xObwL1W52K2hNuu7JcBuIKH57oAgfAmWTImVBVwKcfUtSo7G_yk3WzB9V2p8FKg463EIGWvOCz6lwR-McH7FOJty4btI3xRawkcXdwW1hlwACXmQNklV8YaBrUtNcBOrDm5lu8vhrB8EK9X6uoWrM_4t0p5q7CgqFFLUptlSSU7WC-MtZV7K3d08Eqsb9bCJQ2w&maxwidth=400",
+        "googlePlaceId": "ChIJUd9aPKsJOxMR2L56YaZkKPE",
+        "isOutdoor": false,
+        "score": 42.15466688444211,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJMRgscFMIOxMRswX1hl4rvjU",
+        "name": "Galleria Borbonica - Ingresso Vico Grottone",
+        "type": "museum",
+        "description": "La Galleria Borbonica è una cavità sotterranea di Napoli che si estende sotto la collina di Pizzofalcone, nei pressi di Palazzo Reale, nel quartiere San Ferdinando.",
+        "latitude": 40.8354885,
+        "longitude": 14.2462258,
+        "rating": 4.7,
+        "reviewCount": 2331,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV4nlrYEAEuugBnJnSpInkLT7S6LqLOOsZ5Id1xJrVbMi3y5Ucr8-G0Oqo91NCz4IpnnMrk4t9tsROPdydd0xKS03zwKk8fqvFd4Zjfp11XdAZxp6mb6HfucKg2LMN_C20NMDZIt8UIjblwS_0fpNj-5z5YezjGDAEfXAW8XdHylo5dy4-FEP59_CVEWeLnCE2Pbft7K7jTn8jR-rm50lIXRXCkReRGZCqMDssUvDrPyULZeg6NaRhImFKh8HuM1Hnc0gBoUIbdrBKxGyVLCH1G9YsENopCq24Nx2dsv1lcVDCVp-QeI1ZHEwji9x-81bjjaoZfXsO12g_o9vB3OKJfFl19yhNpMh5uoSAiT5CQeKdMPxzts87ApRet06ZqtnqN2aqU7Lsx3waHp6N67LlLR65Qgaq2bTuZRTCvgnT3owQSGu4JeKjAgJjCKg&maxwidth=400",
+        "googlePlaceId": "ChIJMRgscFMIOxMRswX1hl4rvjU",
+        "isOutdoor": false,
+        "score": 39.571403145113834,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJ17d1Me-mOxMRe4JncVKqWGI",
+        "name": "Archaeological Park of Herculaneum",
+        "type": "museum",
+        "description": "Ercolano è un comune italiano di 49 175 abitanti della città metropolitana di Napoli in Campania.",
+        "latitude": 40.8059253,
+        "longitude": 14.3473869,
+        "rating": 4.8,
+        "reviewCount": 14852,
+        "duration": 90,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXBSLn4Ij8W5A46nW0iYapc9uWyc1TCoTVG8Xl7kU40Uem2pJEprOLSUYBlGs3rHAPIXRsIODaDwNIUhJe-_Ag_25Hh-m_Rv7MPcY9rj0E7CHtal19HP6u1nh4Du5XOfgiLIsc9e--xI4ozk9LhgDbnaKJxKkWi1kTGA6pnHkdz00ogDrVcTTFtUNevMLxq0nyoQbxm9I98AQVUrvcKXSvcr9nPXBPfco5tFYk62iEjjd03dsnRlvO53E0nb5WbEBKjUAE6EjDq2ebTctRlZiSKheTWnQJIm1uM3oE1k_pi4u3dPvSLCa-BBiUBagOfyMwHxd8YeEfgkOyoDM5YAhvIdGa58ezqy7HNDoNiPZv9MbEUCimq0ntx4F2_w8tNTYWbeT0AJ86UsbKDzUTzgpQ1xGgBjfjQw56XaHYyAllsHw&maxwidth=400",
+        "googlePlaceId": "ChIJ17d1Me-mOxMRe4JncVKqWGI",
+        "isOutdoor": true,
+        "score": 36.40445120305989,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0.17651620407843394
+      },
+      {
+        "id": "gp-ChIJ3YIUnEEJOxMROixS4Tvud94",
+        "name": "Galleria Umberto I",
+        "type": "market",
+        "description": "La galleria Umberto I è una galleria commerciale costruita a Napoli tra il 1887 e il 1890.  È intitolata a Umberto I d'Italia, come omaggio al Re e in ricordo della sua generosa presenza durante l'epidemia di colera del 1884, che mostrò l'esigenza di un risanamento della città.",
+        "latitude": 40.8385287,
+        "longitude": 14.2494744,
+        "rating": 4.6,
+        "reviewCount": 12605,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVU8JKkUuZRS5DstxgIvpnCd3ku2K8SNlf5NhOsjdBcmJqVeMf1Kt6isTMwTOnyS0vcz2wMdjcyfUwUdOD3edl5XlXRz0EyMCpGnOD1VX_aWKw-3w0n8t-UrFu69PMMo-F85i5jbfYxHYJZz6hq0hWLhNQQMOO96sX5EeocM1IIPDmW-68gGLanSyRriXVvpUQ3qwo7EEGz-CHystatL9kYVGsrzHI4XPqq8EUI9pUbzi8ST-vo7QSfFWRcPtiCOKjz9eGStV5jO8AnZytkEzLWszQq4nPkGuS_nXPv_StrRVjPq-2AFIIUmxMGVP5PH7826yk18Fj5IeJb6PaMZh789kQFujKmFuAkacYypQmp6js7PMpyKbKSIYZXsWqartAQLPBGYFaPoeWp0JaoSxBJyAGFVAUSxJ7U5-hKsP0kqiCRb1uhFM-ebERsAWsj&maxwidth=400",
+        "googlePlaceId": "ChIJ3YIUnEEJOxMROixS4Tvud94",
+        "isOutdoor": false,
+        "score": 35.67152279147777,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "gp-ChIJoZP2jailOxMRz4SXRTU1BR8",
+        "name": "Parc national du Vésuve",
+        "type": "park",
+        "description": "L'inizio della storia del caffè risale molto probabilmente al Medioevo, attorno al X secolo o più presumibilmente al XV secolo, ma con possibili precedenti in tutta una serie di relazioni e leggende che circondano il suo primo utilizzo.",
+        "latitude": 40.8283589,
+        "longitude": 14.4266508,
+        "rating": 4.4,
+        "reviewCount": 37928,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUBwQsLj6cnCMWFeAgm7wWW59EcuTw3UJSj80HRqHjs_kowxZZeA1Ws-B1WbzlTAfbOIvFIuQEM5a8EwItEx7KyKdmQQV0qQwo2R6QYYFBq15XBZP3q-HB-ZVIUbxUN1vPk5ADJGCFm0oFThaHGMge3FJpKYvGFA9muBaabO8bpfMQtwYo2i29tseWfLAkf6k1tmZKoNrPDI2i-8CX8XBzcH416XhOqcPAyOwHiz_OHoMBkFCUSxmJadeFiLya3Iv2kbkvYiXZd2l3elMWrbr70WE20-vF3Bud2qynwLDp8_051ofkk_ZMNmlq3rFnRGfEQEAGxzON2qPKa-J_BNxzLBnxLJCK_CUUSXuacv7d0AyXZ5Q8XYymj_QzkDYDqZa5-6w0msW8PII94Qe7LFF9CK_xl1oSr9cuIlvbJXpOMag7J&maxwidth=400",
+        "googlePlaceId": "ChIJoZP2jailOxMRz4SXRTU1BR8",
+        "isOutdoor": true,
+        "score": 29.451066911553355,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0.5023576872595509
+      },
+      {
+        "id": "gp-ChIJTcHv7FoIOxMRrzhmwu2sCQI",
+        "name": "Monumento a Salvo D'Acquisto C 10",
+        "type": "attraction",
+        "description": "Salvo Rosario Antonio D'Acquisto è stato un militare italiano, vicebrigadiere dell'Arma dei Carabinieri Reali, insignito della Medaglia d'oro al valor militare per essersi sacrificato il 23 settembre 1943 allo scopo di salvare un gruppo di civili durante un rastrellamento delle truppe naziste nel corso della seconda guerra mondiale.  Dopo essere stato per alcuni decenni servo di Dio è stato dichiarato, il 25 febbraio 2025, venerabile da papa Francesco e ne è in corso il processo di beatificazione.",
+        "latitude": 40.8444122,
+        "longitude": 14.2492397,
+        "rating": 4.4,
+        "reviewCount": 546,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU_Pj5yk682nmrKTgWH0y5TmmT7Y6A9dQXFux0ekMuqHKEbl-9xg1lXJ_wgKaHiKNsnjvlp1K4zlmb7KX7AwG__4GYMwa3Z-e8kRTAfaFD5BJpRmcfM_88QYj65Qq6FYRkxrxMb-iwfBAIZzyBMdpjdsgLJFd30N89atS6dbncgkG5WFfluikjgWP0jUSgq4y01LUGiWgxWrvXMs8QtH2jbqyHOliX_p8haG-TLd8eSb5wP7xGMVVyDWyDj9eE6RBIcMlBY_v9rzw1hQDV2sGZgnvuXQt-FOXl-e6UUUXmjL6ksw09No2xx4YPwudQjIgHpkTjmR62K3hkZd3Axwsr90toqlJ8olUCXHjypcIEXZb2h6KxOOBL8cN3hTobkcRm-cCYTLjP1HGvjhKzaw1zZMDERz_iStRwDTSyACzgTDu5V&maxwidth=400",
+        "googlePlaceId": "ChIJTcHv7FoIOxMRrzhmwu2sCQI",
+        "score": 25.8807938591208,
+        "source": "google_places",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "medium",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "serp-attr-ChIJ5Td6SHoIOxMR_DK35ZaEpCM",
+        "name": "Museo e Real Bosco di Capodimonte",
+        "type": "adventure",
+        "description": "Parc d'un palais avec chemins boisés et jardins. Situé en face du palais royal, ce vaste parc public comprend des sentiers boisés, des statues et des fontaines.",
+        "duration": 150,
+        "estimatedCost": 11,
+        "latitude": 40.8690827,
+        "longitude": 14.251460199999999,
+        "rating": 4.6,
+        "mustSee": false,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "08:30",
+          "close": "19:30"
+        },
+        "tips": "Parc d'un palais avec chemins boisés et jardins. Situé en face du palais royal, ce vaste parc public comprend des sentiers boisés, des statues et des fontaines.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Museo%20e%20Real%20Bosco%20di%20Capodimonte%2C%20Naples",
+        "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerx7mZkrqjjGaJrBA_7PObOMQ-q4GdfgHo-1_HPyPYom4kZRE3tsQxlInJ_Mh5PdpmXvopdXgsO-jV8Sw6jQFwMpHaBSRglOeg-QOdJBuPbSApyDFafu4YyEq7TBk7gYsDEW19T=w129-h92-k-no",
+        "isOutdoor": true,
+        "score": 21.92659197224948,
+        "source": "serpapi",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      }
+    ],
+    "budgetStrategy": {
+      "accommodationType": "hotel",
+      "accommodationBudgetPerNight": 100,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 25,
+      "maxPricePerActivity": 50,
+      "transportTips": "Mix transports en commun et quelques taxis",
+      "reasoning": "Budget modéré, hôtel correct avec restaurants"
+    },
+    "pipelineVersion": "v3",
+    "stageDurationsMs": {
+      "fetch": 0,
+      "score": 8,
+      "anchor-transport": 0,
+      "cluster": 1,
+      "hotel": 0,
+      "travel-times": 861,
+      "restaurants": 89,
+      "schedule": 3,
+      "contracts": 0,
+      "decorate": 0
+    },
+    "qualityMetrics": {
+      "score": 79,
+      "invariantsPassed": false,
+      "violations": [
+        "P0.2: Day 1 \"Dîner — Zi Teresa\" is 3311m from nearest activity (max 1500m)",
+        "P0.8: Must-see ID \"gp-ChIJed3N-lcIOxMRb0_dM8xIY4w\" not found in final plan",
+        "P0.8: Must-see ID \"gp-new-ChIJ_____7u8OxMRo4QE6ca-gaI\" not found in final plan"
+      ]
+    },
+    "qualityWarnings": [],
+    "contractViolations": [
+      "P0.2: Day 1 \"Dîner — Zi Teresa\" is 3311m from nearest activity (max 1500m)",
+      "P0.8: Must-see ID \"gp-ChIJed3N-lcIOxMRb0_dM8xIY4w\" not found in final plan",
+      "P0.8: Must-see ID \"gp-new-ChIJ_____7u8OxMRo4QE6ca-gaI\" not found in final plan"
+    ],
+    "plannerDiagnostics": {
+      "plannerVersion": "v3.0",
+      "beamUsed": false,
+      "beamFallbackUsed": false,
+      "dayTripPackCount": 1,
+      "repairRejectedCount": 0,
+      "zigzagTurnsTotal": 0,
+      "routeInefficiencyTotal": 0,
+      "criticalGeoCount": 0,
+      "contractsPassed": false,
+      "rescueStage": 0,
+      "protectedBreakCount": 0,
+      "lateMealReplacementCount": 0,
+      "dayNumberMismatchCount": 0,
+      "dayTripEvictionCount": 0,
+      "finalIntegrityFailures": 0,
+      "orphanTransportCount": 0,
+      "teleportLegCount": 0,
+      "staleNarrativeCount": 0,
+      "freeTimeOverBudgetCount": 0,
+      "mealFallbackCount": 0,
+      "routeRebuildCount": 0,
+      "restaurantRefetchMissCount": 0,
+      "missingProtectedMustSeeCount": 2,
+      "dayTripAtomicityBreakCount": 1,
+      "arrivalFatigueViolationCount": 0,
+      "temporalImpossibleItemCount": 0,
+      "sparseFullCityDayCount": 1,
+      "dayTripDestinationMismatchCount": 0,
+      "sameFamilyOverloadCount": 0
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: naples-pompei-3d",
+    "   Lyon → Naples (3j)",
+    "   couple (2p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V3] Step 1: Using fixture data (no API calls)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Zoo at Caribbean Gardens\" (8615km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Clam Pass Park\" (8614km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Botanical Garden\" (8618km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Lowdermilk Park\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Conservancy of Southwest Florida\" (8615km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"The Naples Preserve\" (8616km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Cambier Park\" (8618km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Historical Society\" (8619km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Freedom Park\" (8614km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Depot Museum\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"parc d'État Delnor-Wiggins Pass\" (8611km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"5th Avenue South\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Trolley Tours\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Train Museum\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Art Institute\" (8618km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Sugden Regional Park\" (8616km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Tin City Waterfront Shops\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples City Dock\" (8618km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Coral Cay Adventure Golf\" (8617km from destination, max 50km)",
+    "[Pipeline V2] ❌ GPS outlier rejected: \"Naples Beach Wharf\" (8619km from destination, max 50km)",
+    "[Pipeline V2] Same-location-type dedup: \"Visite de l'île en pédale HOBIE / kayak / SUP - Fort Myers Beach \" merged with \"Visite guidée de Hobie Kayak EcoTour: Premium Eco Experience Bonita Springs\" (type=beach)",
+    "[Pipeline V2] Same-location-type dedup: \"Exclusive Détendez-vous et explorez Pedal Kayak Tour Marco Island & Naples\" merged with \"Visite guidée de Hobie Kayak EcoTour: Premium Eco Experience Bonita Springs\" (type=beach)",
+    "[Pipeline V2] Stripped mustSee from \"SpaccaNapoli\" — matches excluded keyword (source=mustsee)",
+    "[Pipeline V2] Auto must-see: \"Château Sant'Elmo\" (pop=38.4, reviews=34693, rating=4.6)",
+    "[Pipeline V2] Excluded 4 Viator activities with unreliable GPS (city-center fallback)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [148.4] ⭐ \"Château Sant'Elmo\" (src=google_places, reviews=34693, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #2 [134.7] ⭐ \"Villa des Mystères\" (src=mustsee, reviews=6579, rating=4.7, tags=none)",
+    "[Pipeline V2]   #3 [134.2] ⭐ \"Visite de la faune et de la flore de l'île Marco\" (src=viator, reviews=1050, rating=5, tags=romantic,relaxing)",
+    "[Pipeline V2]   #4 [50.8]    \"Chapelle Sansevero\" (src=google_places, reviews=41893, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #5 [49.0]    \"SpaccaNapoli\" (src=mustsee, reviews=1227, rating=4.7, tags=romantic,relaxing)",
+    "[Pipeline V2]   #6 [47.9]    \"Underground Naples\" (src=google_places, reviews=30351, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #7 [44.9]    \"Napoli sotterranea\" (src=google_places, reviews=9155, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #8 [44.7]    \"Piazza del Plebiscito\" (src=google_places, reviews=88238, rating=4.7, tags=none)",
+    "[Pipeline V2]   #9 [44.1]    \"Palais royal de Naples\" (src=google_places, reviews=10779, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #10 [43.4]    \"Parc Archéologique de Pompei\" (src=google_places, reviews=81925, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #11 [43.3]    \"Catacombes de San Gennaro\" (src=google_places, reviews=13021, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #12 [42.2]    \"Galleria Borbonica\" (src=google_places, reviews=4621, rating=4.8, tags=deep_culture)",
+    "[Pipeline V2]   #13 [39.6]    \"Galleria Borbonica - Ingresso Vico Grottone\" (src=google_places, reviews=2331, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #14 [36.4]    \"Archaeological Park of Herculaneum\" (src=google_places, reviews=14852, rating=4.8, tags=deep_culture,relaxing)",
+    "[Pipeline V2]   #15 [35.7]    \"Galleria Umberto I\" (src=google_places, reviews=12605, rating=4.6, tags=none)",
+    "[Pipeline V2]   #16 [29.5]    \"Parc national du Vésuve\" (src=google_places, reviews=37928, rating=4.4, tags=relaxing)",
+    "[Pipeline V2]   #17 [25.9]    \"Monumento a Salvo D'Acquisto C 10\" (src=google_places, reviews=546, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #18 [21.9]    \"Museo e Real Bosco di Capodimonte\" (src=serpapi, reviews=0, rating=4.6, tags=deep_culture,relaxing)",
+    "[Pipeline V2]   #19 [16.5]    \"Visite en tricycle électrique à Naples en Floride - Du plaisir pour toute la famille !\" (src=viator, reviews=52, rating=5, tags=none)",
+    "[Pipeline V2]   #20 [11.9]    \"Jago Museum\" (src=serpapi, reviews=0, rating=4.9, tags=deep_culture)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 6/30",
+    "[Pipeline V3] Step 2: 18 activities selected",
+    "[Trust Layer] 18 activities enriched in 1ms — coords: 2H/16M/0L, protected: 3, dayTripAffinity: 3",
+    "[Pipeline V3] Step 2b: Wikipedia enriched 14/14 descriptions",
+    "[Anchor Transport] Generated time windows for 3 days:",
+    "  Day 1: 16:25 → 22:00 (arrival)",
+    "  Day 2: 08:30 → 22:00",
+    "  Day 3: 08:30 → 04:30 (departure)",
+    "[Pipeline V3] Step 2c: Time windows anchored",
+    "[DayTripPack] 1 pack(s) built: \"Pompei\" (35min train, 4 acts, confidence=high)",
+    "[Pipeline V2] City density profile: category=spread, p75=10.04km, median=3.21km, maxClusterRadius=3.35km, hardRadiusCap=5.00km (spread city)",
+    "[Pipeline V2] Radius-constrained clustering produced 5 clusters (target 2), running soft pass with 5.02km",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Museo e Real Bosco di Capodimonte\" from cluster with 14 → 13 activities to cluster with 4 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Catacombes de San Gennaro\" from cluster with 13 → 12 activities to cluster with 5 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"SpaccaNapoli\" from cluster with 12 → 11 activities to cluster with 6 activities",
+    "[Pipeline V3] Time rebalance: moved \"Monumento a Salvo D'Acquisto C 10\" from Day 1 (10 acts, 140min) → Day 2 (7 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Galleria Umberto I\" from Day 1 (9 acts, 140min) → Day 2 (8 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Galleria Borbonica - Ingresso Vico Grottone\" from Day 1 (8 acts, 140min) → Day 2 (9 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Galleria Borbonica\" from Day 1 (7 acts, 140min) → Day 2 (10 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Palais royal de Naples\" from Day 1 (6 acts, 140min) → Day 2 (11 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Piazza del Plebiscito\" from Day 1 (5 acts, 140min) → Day 2 (12 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Napoli sotterranea\" from Day 1 (4 acts, 140min) → Day 2 (13 acts, 615min)",
+    "[Pipeline V3] Time rebalance: moved \"Underground Naples\" from Day 1 (3 acts, 140min) → Day 2 (14 acts, 615min)",
+    "[Cluster] \"SpaccaNapoli\" closed on Day 2 (saturday) — will try to swap",
+    "[Cluster] Inter-cluster swap: 1 improvements",
+    "[Pipeline V3] Type diversity: swapped \"Archaeological Park of Herculaneum\" (museum) from Day 2 ↔ \"Monumento a Salvo D'Acquisto C 10\" (attraction) from Day 1",
+    "[Pipeline V2] Cluster Day 1: 3 activities, radius=7.95km, intraDistance=24.11km",
+    "[Pipeline V2] Cluster Day 2: 13 activities, radius=19.86km, intraDistance=53.19km",
+    "[Pipeline V3] Step 3: 3 clusters created (1 day trip packs, planner=v3.0)",
+    "[Pipeline V3] Step 4: Hotel selected: Le Stanze del Principe B&b Naples",
+    "[Cache L2] HIT directions (43ms)",
+    "[Cache L2] HIT directions (41ms)",
+    "[Cache L2] HIT directions (40ms)",
+    "[Cache L2] HIT directions (38ms)",
+    "[Cache L2] HIT directions (88ms)",
+    "[Cache L2] HIT directions (37ms)",
+    "[Cache L2] HIT directions (36ms)",
+    "[Cache L2] HIT directions (39ms)",
+    "[Cache L2] HIT directions (37ms)",
+    "[Cache L2] HIT directions (39ms)",
+    "[Cache L2] HIT directions (36ms)",
+    "[Directions] Transit failed, driving fallback succeeded for 40.8510429,14.2567975 → 40.8283589,14.4266508",
+    "[Cache L2] HIT directions (38ms)",
+    "[Directions] Transit failed, driving fallback succeeded for 40.8283589,14.4266508 → 40.7512189,14.4886761",
+    "[Cache L2] HIT directions (40ms)",
+    "[Cache L2] HIT directions (53ms)",
+    "[Cache L2] HIT directions (37ms)",
+    "[Travel Times] Computed travel times for 3 days (15 API calls)",
+    "[Pipeline V3] Step 6: Travel times computed (selective mode)",
+    "[Cache L2] HIT nearby-search (42ms)",
+    "[Google Places New] Found 2 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 2 nearby restaurants",
+    "[Cache L2] HIT nearby-search (80ms)",
+    "[Google Places New] Found 13 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Cache L2] HIT nearby-search (89ms)",
+    "[Google Places New] Found 18 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[enrichRestaurantPool] Enriched pool: 40 → 62 restaurants (22 added from cluster searches)",
+    "[Pipeline V3] Step 7: Restaurant pool enriched (62 restaurants)",
+    "[Unified] Day 1: constrained window (16:25–22:00) — breakfast:false lunch:false dinner:true",
+    "[Unified] Day 1: 2-opt saved 3.0km (1 passes)",
+    "[Unified] Day 1: skipping \"Archaeological Park of Herculaneum\" (ends past close 18:00)",
+    "[Unified] Dedup: removing similar \"Palais royal de Naples\" (duplicate of \"Piazza del Plebiscito\") from Day 2",
+    "[Unified] Day 2: 2-opt saved 4.6km (1 passes)",
+    "[Unified] Day 2: skipping \"Piazza del Plebiscito\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Galleria Borbonica - Ingresso Vico Grottone\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Napoli sotterranea\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Galleria Borbonica\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Catacombes de San Gennaro\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Museo e Real Bosco di Capodimonte\" (ends past close 19:30)",
+    "[Unified] Day 2: skipping \"Parc national du Vésuve\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Parc Archéologique de Pompei\" (ends past close 18:00)",
+    "[Unified] Day 3: constrained window (08:30–04:30) — breakfast:false lunch:false dinner:false",
+    "[Unified] Day 3: capping checkout to 08:30 (departure constraint)",
+    "[Unified] Day 3: day trip \"Pompei\" — outbound 35min (train)",
+    "[Unified] Day 3: added 8 restaurants from \"Pompei\"",
+    "[Unified] Day 3: stopping at activity 0/4 (08:30 >= 04:30)",
+    "[Unified] Hard stop: dropping \"Train retour → Naples — 25km\" on Day 3 (past 04:30)",
+    "[Unified] Empty day rescue: moved \"Monumento a Salvo D'Acquisto C 10\" from Day 2 → Day 1",
+    "[Unified] Empty day rescue: moved \"Underground Naples\" from Day 2 → Day 1",
+    "[Unified] Empty day rescue: skipping Day 3 (departure, no activity window)",
+    "[Unified] Removing orphan transport \"Château Sant'Elmo → Visite de la faune et de la flore de l'île Marco\" on Day 1",
+    "[Unified P0.2] Day 1: found closer restaurant \"Zi Teresa\" (1827m)",
+    "[Unified] 4 repairs performed, 0 unresolved",
+    "  [replacement] Day 1: \"Château Sant'Elmo\" — Injected must-see \"Château Sant'Elmo\", evicted \"Monumento a Salvo D'Acquisto C 10\" (lower rated)",
+    "  [replacement] Day 1: \"Villa des Mystères\" — Injected must-see \"Villa des Mystères\", evicted \"Underground Naples\" (lower rated)",
+    "  [replacement] Day 2: \"Visite de la faune et de la flore de l'île Marco\" — Injected must-see \"Visite de la faune et de la flore de l'île Marco\", evicted \"Underground Naples\" (lower rated)",
+    "  [extension] Day 2: \"Galleria Umberto I\" — Extended by 80min to fill gap (60→140min)",
+    "[Pipeline V3] Step 8: Unified schedule built with 3 days, 4 repairs",
+    "[Pipeline V3] Step 11b: Transport items injected (mode: plane)",
+    "[Pipeline V3] Post-injection sweep: removed 3 pre-arrival items on Day 1",
+    "[Contracts] Score: 79/100, Invariants: FAILED",
+    "  Activities: 3, Restaurants: 4",
+    "  Must-sees: 1/3",
+    "  Distribution: imbalance=0.0, empty=0, overloaded=0",
+    "  Routing: travel=36min, longLegs=2, zigzag=2",
+    "  Meals: fallbacks=0",
+    "  Violations (3):",
+    "    - P0.2: Day 1 \"Dîner — Zi Teresa\" is 3311m from nearest activity (max 1500m)",
+    "    - P0.8: Must-see ID \"gp-ChIJed3N-lcIOxMRb0_dM8xIY4w\" not found in final plan",
+    "    - P0.8: Must-see ID \"gp-new-ChIJ_____7u8OxMRo4QE6ca-gaI\" not found in final plan",
+    "[Pipeline V3] Step 10: Quality score 79/100, Invariants: FAILED",
+    "[Pipeline V3] Step 11: Decoration complete (LLM: false)",
+    "[Pipeline V3] Trip generated in 967ms",
+    "  Stage times: fetch=0ms, score=8ms, anchor-transport=0ms, cluster=1ms, hotel=0ms, travel-times=861ms, restaurants=89ms, schedule=3ms, contracts=0ms, decorate=0ms",
+    "  Quality: 79/100, Invariants: FAILED",
+    "  API cost: €0.11 / €5.00 — {\"directions\":22}"
+  ],
+  "warnings": [
+    "[Unified] Day 1: must-see \"Château Sant'Elmo\" placed at 16:25 (truncated, must-see priority)",
+    "[Unified] Day 1: skipping \"Château Sant'Elmo\" — too late for close 18:00",
+    "[Unified] Day 1: must-see \"Visite de la faune et de la flore de l'île Marco\" placed at 16:25 (truncated, must-see priority)",
+    "[Unified] Day 1: skipping \"Visite de la faune et de la flore de l'île Marco\" — too late for close 18:00",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 10 candidates for dinner",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 2 candidates for breakfast",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 5 candidates for lunch",
+    "[Place Restaurants] Pass 3 (1.5km): found 6 candidates for dinner",
+    "[Schedule Safety] Day 1: keeping \"Dîner — Zi Teresa\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 2: keeping \"Déjeuner — Zi Teresa\" despite validation issue (no better alternative found)",
+    "[Schedule Safety] Day 2: keeping \"Dîner — Transatlantico Restaurant Hotel\" despite validation issue (no better alternative found)",
+    "[Unified P0.2] Day 1: \"Dîner — Zi Teresa\" is 1827m from nearest activity — searching closer restaurant",
+    "[Place Restaurants] Pass 4 (5km, reuse): found 10 candidates for dinner"
+  ],
+  "errors": [],
+  "durationMs": 968,
+  "generatedAt": "2026-03-19T23:19:08.131Z",
+  "success": true,
+  "_campaign": {
+    "campaignId": "post-tight-restaurants",
+    "runId": "S04-naples-pompei-3d",
+    "runKind": "scenario",
+    "seed": 424242,
+    "startedAt": "2026-03-19T23:19:08.130Z",
+    "durationMs": 968
+  }
+}

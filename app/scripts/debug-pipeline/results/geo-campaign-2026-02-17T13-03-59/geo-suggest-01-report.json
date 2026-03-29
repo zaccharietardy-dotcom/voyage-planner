@@ -1,0 +1,226 @@
+{
+  "tripId": "42a06304-fef4-462e-8ae7-45e4f4ed2ecb",
+  "scenarioId": "geo-suggest-01-escapade-gourmande-a-bologne-capitale-ga",
+  "generatedAt": "2026-02-17T13:17:10.029Z",
+  "destination": "Bologne",
+  "summary": {
+    "totalIssues": 8,
+    "critical": 0,
+    "warning": 1,
+    "info": 7,
+    "score": 99,
+    "weightedScore": 99
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 96,
+      "critical": 0,
+      "warning": 0,
+      "info": 6,
+      "totalIssues": 6,
+      "weightedPenalty": 4.2
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 5,
+      "impactScore": 5,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Museo Civico Archeologico Bologna\" n'a pas de description",
+        "Jour 1: \"Palais de l'Archiginnasio\" n'a pas de description",
+        "Jour 2: \"Piazza Santo Stefano\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2 (7 activités) vs jour 3 (2 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2 (7 activités) vs jour 3 (2 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Museo Civico Archeologico Bologna\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Museo Civico Archeologico Bologna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Palais de l'Archiginnasio\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Palais de l'Archiginnasio",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Piazza Santo Stefano\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Piazza Santo Stefano",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Basilica San Petronio\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Basilica San Petronio",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Piazza Maggiore\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Piazza Maggiore",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2 (7 activités) vs jour 3 (2 activités) — déséquilibre important",
+        "details": {
+          "day1": 7,
+          "day2": 2
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 18,
+    "activitiesCount": 8,
+    "restaurantsCount": 5,
+    "avgItemsPerDay": 6,
+    "totalEstimatedCost": 271,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

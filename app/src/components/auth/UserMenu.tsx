@@ -132,7 +132,7 @@ export function UserMenu({ onAction, mode = 'dropdown' }: UserMenuProps) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:ring-2 hover:ring-primary/50 transition-all">
+        <Button variant="ghost" className="relative h-11 w-11 rounded-full p-0 touch-manipulation hover:ring-2 hover:ring-primary/50 transition-all">
           <Avatar className="h-10 w-10 border-2 border-primary/20">
             <AvatarImage src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" />
             <AvatarFallback className="text-sm font-semibold bg-primary/10">{initials}</AvatarFallback>

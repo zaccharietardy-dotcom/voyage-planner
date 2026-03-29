@@ -79,73 +79,84 @@ export function StepGroup({ data, onChange }: StepGroupProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Avec qui partez-vous ?</h2>
-        <p className="text-muted-foreground">Indiquez la taille et le type de votre groupe</p>
+    <div className="space-y-12 max-w-[600px] mx-auto w-full">
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+          Avec qui partez-vous ?
+        </h2>
+        <p className="text-[17px] text-[#94a3b8] font-light">
+          Pour adapter les activités et le rythme de votre séjour.
+        </p>
       </div>
 
-      {/* Nombre de personnes */}
-      <div className="space-y-4">
-        <Label className="text-base font-medium">Nombre de voyageurs</Label>
-        <div className="flex items-center justify-center gap-6 p-6 rounded-xl border bg-card">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="h-12 w-12 rounded-full"
-            onClick={decrement}
-            disabled={groupSize <= 1}
-          >
-            <Minus className="h-5 w-5" />
-          </Button>
-          <div className="text-center min-w-[100px]">
-            <span className="text-5xl font-bold text-primary">{groupSize}</span>
-            <p className="text-sm text-muted-foreground mt-1">
-              {groupSize === 1 ? 'personne' : 'personnes'}
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="h-12 w-12 rounded-full"
-            onClick={increment}
-            disabled={groupSize >= 20}
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Type de groupe */}
-      <div className="space-y-4">
-        <Label className="text-base font-medium">Type de voyage</Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {availableOptions.map((type) => (
-            <button
-              key={type}
+      <div className="space-y-10">
+        {/* Nombre de personnes */}
+        <div className="space-y-4">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Nombre de voyageurs</p>
+          <div className="flex items-center justify-center gap-8 p-10 rounded-[2.5rem] border border-white/[0.08] bg-[#0e1220]/50 shadow-inner relative overflow-hidden">
+            <div className="absolute inset-0 bg-gold/5 blur-3xl opacity-20" />
+            <Button
               type="button"
-              onClick={() => handleGroupTypeChange(type)}
-              className={cn(
-                'flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left',
-                'hover:border-primary hover:bg-primary/5',
-                data.groupType === type
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card'
-              )}
+              variant="ghost"
+              size="icon"
+              className="h-16 w-16 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all"
+              onClick={decrement}
+              disabled={groupSize <= 1}
             >
-              <div
+              <Minus className="h-6 w-6 text-white" />
+            </Button>
+            <div className="text-center min-w-[120px] z-10">
+              <span className="text-[5rem] leading-none font-serif font-bold text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">{groupSize}</span>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gold/80 mt-4">
+                {groupSize === 1 ? 'Voyageur' : 'Voyageurs'}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-16 w-16 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all"
+              onClick={increment}
+              disabled={groupSize >= 20}
+            >
+              <Plus className="h-6 w-6 text-white" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Type de groupe */}
+        <div className="space-y-4">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Type de voyage</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {availableOptions.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleGroupTypeChange(type)}
                 className={cn(
-                  'p-3 rounded-full',
-                  data.groupType === type ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                  'flex items-center gap-5 p-5 rounded-[1.5rem] border transition-all duration-300 relative group text-left',
+                  data.groupType === type
+                    ? 'border-gold bg-[#0e1220] shadow-[0_10px_30px_rgba(197,160,89,0.15)] scale-[1.02]'
+                    : 'border-white/[0.08] bg-[#0e1220]/50 hover:bg-[#0f1429] hover:border-white/20'
                 )}
               >
-                {GROUP_ICONS[type]}
-              </div>
-              <span className="font-medium">{GROUP_TYPE_LABELS[type]}</span>
-            </button>
-          ))}
+                <div
+                  className={cn(
+                    'p-4 rounded-2xl transition-all duration-300',
+                    data.groupType === type ? 'bg-gold text-black shadow-lg shadow-gold/30' : 'bg-white/5 text-white/40 group-hover:text-white/60'
+                  )}
+                >
+                  {GROUP_ICONS[type]}
+                </div>
+                <span className={cn(
+                  'text-lg font-bold tracking-tight transition-colors',
+                  data.groupType === type ? 'text-white' : 'text-white/70 group-hover:text-white/90'
+                )}>
+                  {GROUP_TYPE_LABELS[type]}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

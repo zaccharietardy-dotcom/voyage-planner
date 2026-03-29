@@ -1,0 +1,362 @@
+{
+  "tripId": "f7fe722f-f095-40bf-91ce-21bfe420e73a",
+  "scenarioId": "paris-rome-4d",
+  "generatedAt": "2026-03-20T21:41:05.911Z",
+  "destination": "Rome",
+  "summary": {
+    "totalIssues": 15,
+    "critical": 0,
+    "warning": 7,
+    "info": 8,
+    "score": 95,
+    "weightedScore": 95
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 87,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 12.6
+    },
+    "budget": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "links": {
+      "score": 97,
+      "critical": 0,
+      "warning": 0,
+      "info": 4,
+      "totalIssues": 4,
+      "weightedPenalty": 2.8
+    },
+    "dataQuality": {
+      "score": 91,
+      "critical": 0,
+      "warning": 2,
+      "info": 3,
+      "totalIssues": 5,
+      "weightedPenalty": 9.1
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 14.4,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "LINK_RESTAURANT_MAPS_MISSING",
+      "code": "LINK_RESTAURANT_MAPS_MISSING",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/restaurants",
+      "count": 4,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 2: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 3: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps"
+      ]
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ]
+    },
+    {
+      "key": "relevance:Tous les must-see présents (2/2)",
+      "category": "relevance",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Tous les must-see présents (2/2)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.43,
+          "totalLegKm": 4.58
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.41,
+          "totalLegKm": 1.76
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      },
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas d'hébergement défini dans le voyage"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 1,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 2,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 3,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 4,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas d'hébergement défini"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [
+      {
+        "severity": "info",
+        "category": "relevance",
+        "message": "Tous les must-see présents (2/2)"
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 38,
+    "activitiesCount": 14,
+    "restaurantsCount": 11,
+    "avgItemsPerDay": 9.5,
+    "totalEstimatedCost": null,
+    "hasAccommodation": false,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

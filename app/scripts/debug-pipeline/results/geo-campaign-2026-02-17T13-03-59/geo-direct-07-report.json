@@ -1,0 +1,250 @@
+{
+  "tripId": "dd54cf27-cd31-412d-86a4-6c2b400c6847",
+  "scenarioId": "geo-direct-07",
+  "generatedAt": "2026-02-17T13:13:37.888Z",
+  "destination": "Dublin",
+  "summary": {
+    "totalIssues": 7,
+    "critical": 0,
+    "warning": 3,
+    "info": 4,
+    "score": 98,
+    "weightedScore": 98
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 92,
+      "critical": 0,
+      "warning": 2,
+      "info": 2,
+      "totalIssues": 4,
+      "weightedPenalty": 8.4
+    },
+    "relevance": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "rhythm:Jour 1: seulement 46min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: seulement 46min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2: seulement 30min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: seulement 30min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: dîner \"Dîner — Holi Indian Restaurant, Dublin\" à 13:15 — trop ",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: dîner \"Dîner — Holi Indian Restaurant, Dublin\" à 13:15 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1 (1 activités) vs jour 2 (5 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1 (1 activités) vs jour 2 (5 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2 (5 activités) vs jour 3 (1 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2 (5 activités) vs jour 3 (1 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "schedule:Jour 3: 4h de vide entre \"Check-out The Dawson Hostel - DUBLIN\" (fin 0",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: 4h de vide entre \"Check-out The Dawson Hostel - DUBLIN\" (fin 08:15) et \"Déjeuner — Restaurant à proximité\" (début 12:00)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: dîner \"Dîner — Holi Indian Restaurant, Dublin\" à 13:15 — trop tôt (attendu après 18h00)",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Holi Indian Restaurant, Dublin"
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 3: 4h de vide entre \"Check-out The Dawson Hostel - DUBLIN\" (fin 08:15) et \"Déjeuner — Restaurant à proximité\" (début 12:00)",
+        "dayNumber": 3,
+        "details": {
+          "gapMinutes": 225
+        }
+      }
+    ],
+    "geography": [],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: seulement 46min de temps libre — pas de pause",
+        "dayNumber": 1,
+        "details": {
+          "freeMinutes": 46,
+          "occupiedMinutes": 755
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 2: seulement 30min de temps libre — pas de pause",
+        "dayNumber": 2,
+        "details": {
+          "freeMinutes": 30,
+          "occupiedMinutes": 360
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (1 activités) vs jour 2 (5 activités) — déséquilibre important",
+        "details": {
+          "day1": 1,
+          "day2": 5
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2 (5 activités) vs jour 3 (1 activités) — déséquilibre important",
+        "details": {
+          "day1": 5,
+          "day2": 1
+        }
+      }
+    ],
+    "relevance": [],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 12,
+    "activitiesCount": 3,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 4,
+    "totalEstimatedCost": 231,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

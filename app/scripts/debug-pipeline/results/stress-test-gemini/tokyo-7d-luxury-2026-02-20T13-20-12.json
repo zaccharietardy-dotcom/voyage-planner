@@ -1,0 +1,3819 @@
+{
+  "scenarioId": "tokyo-7d-luxury",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Tokyo",
+    "startDate": "2026-03-02T13:17:16.475Z",
+    "durationDays": 7,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "luxury",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Senso-ji, Shibuya, Meiji Shrine",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Tokyo",
+        "days": 7
+      }
+    ]
+  },
+  "trip": {
+    "id": "71e677c5-29f8-4190-aabc-ace634c35acc",
+    "createdAt": "2026-02-20T13:19:49.823Z",
+    "updatedAt": "2026-02-20T13:19:49.823Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Tokyo",
+      "startDate": "2026-03-02T13:17:16.475Z",
+      "durationDays": 7,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "luxury",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Senso-ji, Shibuya, Meiji Shrine",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Tokyo",
+          "days": 7
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-02T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "06:55",
+            "endTime": "09:25",
+            "type": "transport",
+            "title": "✈️ Vol aller",
+            "description": "Paris → Tokyo (estimation, lien vols recommandé)",
+            "locationName": "Paris → Tokyo",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 777,
+            "bookingUrl": "https://www.aviasales.com/search/PARIS0203TOKYO2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/PARIS0203TOKYO2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/paris/tokyo?departure_date=2026-03-02",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ]
+          },
+          {
+            "id": "39379a3b-a4ac-4a5d-a617-99ee42cff9d4",
+            "dayNumber": 1,
+            "startTime": "09:25",
+            "endTime": "06:50",
+            "type": "flight",
+            "title": "CDG → HND",
+            "description": "Vol AF AF 282",
+            "locationName": "Aéroport de Paris-Charles de Gaulle",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 1,
+            "duration": 805,
+            "flight": {
+              "id": "serp-AF 282-2026-03-02",
+              "airline": "AF",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/AF.png",
+              "flightNumber": "AF 282",
+              "departureAirport": "Aéroport de Paris-Charles de Gaulle",
+              "departureAirportCode": "CDG",
+              "departureCity": "CDG",
+              "departureTime": "2026-03-02T08:25:00.000Z",
+              "departureTimeDisplay": "09:25",
+              "arrivalAirport": "Aéroport international de Tokyo-Haneda",
+              "arrivalAirportCode": "HND",
+              "arrivalCity": "HND",
+              "arrivalTime": "2026-03-03T05:50:00.000Z",
+              "arrivalTimeDisplay": "06:50",
+              "duration": 805,
+              "stops": 0,
+              "price": 2301,
+              "pricePerPerson": 1151,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/CDG0203HND2?currency=eur&locale=fr"
+            },
+            "flightAlternatives": [],
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 2301
+          },
+          {
+            "id": "d0ef3861-5644-445e-8ae9-dd53cdee754b",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "16:15",
+            "type": "checkin",
+            "title": "Check-in Aakabane Apart ment 3 Wei hefuyan7190",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Aakabane Apart ment 3 Wei hefuyan7190",
+            "latitude": 35.7767675,
+            "longitude": 139.7169279,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "booking-13049025",
+              "name": "Aakabane Apart ment 3 Wei hefuyan7190",
+              "type": "hotel",
+              "address": "Adresse non disponible",
+              "latitude": 35.7767675,
+              "longitude": 139.7169279,
+              "rating": 9,
+              "reviewCount": 3,
+              "stars": 3,
+              "pricePerNight": 61,
+              "totalPrice": 366,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/674599126.jpg?k=d130bd7a610feb3d3221cf3dcac14ffdad03cae92ed948abbe9f5e408f0b0e7a&o="
+              ],
+              "checkInTime": "16:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Aakabane+Apart+ment+3+Wei+hefuyan7190+Tokyo&checkin=2026-03-02&checkout=2026-03-08&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Aakabane+Apart+ment+3+Wei+hefuyan7190+Tokyo&checkin=2026-03-02&checkout=2026-03-09&group_adults=2&group_children=0&no_rooms=1"
+          },
+          {
+            "id": "05da118e-e326-4450-a684-a1308507b31f",
+            "dayNumber": 1,
+            "startTime": "16:30",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Kaminarimon Gate",
+            "description": "Sensō-ji , is an ancient Buddhist temple in Asakusa, Tokyo, Japan.  It is Tokyo's oldest-established temple, and one of its most significant.",
+            "locationName": "Kaminarimon Gate",
+            "latitude": 35.7111163,
+            "longitude": 139.7963656,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.7111163,139.7963656",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Kaminarimon%20Gate&query_place_id=&center=35.7111163,139.7963656",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV8dneUY_RunVRAlVe6v_QMSjUlOJNJntgNYiHiVtRhPFUhHxzB_RFR0Mk1hOJX-gbRNgQUtSkK-kc7yQ-cPyvwwef812pvSzfT_HDNCrREu044l0Gj2F973LlAtdKX6jLzHafJaB0hMZT1gzoX2iNrXtb6vOm3HlPLSym6ODPLN7gY2uzAM3-vOLsl3SvMZI3Ffv9CmIXU2lWE5yqSIXO5ykX_R0E_IQrE8g1HhqD0i5hUK8a177NYAVbrl5nwW_v6Cxx8rL4-0XdyNX5YkBhHE7QKzjRRptOBk_fw0SctpqGvTPdsgmgUmcE6j8QVgMWeHcTrt2jOvJMnGOLQ9O7JXqZfZ4OfbCBY-NSXhKcUVEUEFXGsKLU4scgfSRIsT96cep2lOapKg7xKI3DXUk-WC2URMmdK7zw9zCJeb5rP4THZSb32e3R7sqbnDD7HRToZApo6PQjcRHjRwNHHpJ-RiyK8arguXEXFVSWaYwFBM38eddQR5j_cIMZOvwq2J3vneuYMZZEm5pDtSPDCA6-KhiHSacxBJOjch7LccxPVCQJNHZXT379xdTxk5-SX4BY7fqIxACmA-w&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 10.23,
+            "timeFromPrevious": 128,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "7179e12f-c55f-4f86-9e8a-6953c2a21689",
+            "dayNumber": 1,
+            "startTime": "17:15",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Sanctuaire Asakusa",
+            "description": "",
+            "locationName": "Sanctuaire Asakusa",
+            "latitude": 35.7147651,
+            "longitude": 139.7966553,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.7147651,139.7966553",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sanctuaire%20Asakusa&query_place_id=&center=35.7147651,139.7966553",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVbYulCeqTl7LlyOTq4EM7Y1JUCiOZbeOTU0Cn0vyAlkB546QIisfikihszjpVVbaqcIqZb9w2qyrTs7P6evziEI9CDb-Qh849t4nX0tQS-_NwSOkO9AN7UR9Opraxb_-lmT2Fz6hXWaUIy_gkG2PiQPI6L3SHt2WlN40nPtTQKFqP-r9RkTeQyCBn790JGm6ARMjBUf1v-lJXt2aQCKzN9zgz5D7hbSfgvtSB-Nx3JD84ntHieWfwC28IPYP6Rc2oBFSsURWOmeOXDQERQ7AVZN9AHFsYCbS9D3IPTlM351VMHvYcn9PmaBxmR2JM9CmoSzr8JdGrg3zpYC61bXhPj6MKPJOxvVgiHaT-UAx_-qAeapRi_tCtzw6OesPBE4VsGJLFSUq75TrjXPtg1a9_-ugWE3xDh8j8SkWDB--pI0F5deSeniuPLJ0JmCD1nQR0GehSaWPjyDFbhELh5peXW1J8tjCVnomwaw9UIk12ebu1x-fs9sf-gmJ4pV2_mJT1B9BnjGkP8-rO-lzovK9VVw2LKyk844fdtluFvTqhGCUVL2q7q3XUo9mbCttollnycfCY-VDXomA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.41,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "c3e25630-cd65-485d-b3b8-0aab731f405e",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — ReserveOnly Veganic Monkey Magic",
+            "description": "\"Excellente adresse, un service incroyable et du bœuf wagyu délicieux !\"",
+            "locationName": "お宿 松むら 1階, 2 Chome-27-16 Asakusa, Tokyo 111-0032",
+            "latitude": 35.7162304,
+            "longitude": 139.7953155,
+            "orderIndex": 5,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.9,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.702625,139.77809",
+            "restaurant": {
+              "id": "serp-nearby-ChIJDXXepRyPGGARsLOuoaIskkA",
+              "name": "ReserveOnly Veganic Monkey Magic",
+              "address": "お宿 松むら 1階, 2 Chome-27-16 Asakusa, Tokyo 111-0032",
+              "latitude": 35.7162304,
+              "longitude": 139.7953155,
+              "rating": 4.9,
+              "reviewCount": 115,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant végétalien",
+                "restaurant végétalien"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ReserveOnly%20Veganic%20Monkey%20Magic%2C%20%E3%81%8A%E5%AE%BF%20%E6%9D%BE%E3%82%80%E3%82%89%201%E9%9A%8E%2C%202%20Chome-27-16%20Asakusa%2C%20Tokyo%20111-0032",
+              "googlePlaceId": "ChIJDXXepRyPGGARsLOuoaIskkA",
+              "openingHours": {
+                "friday": {
+                  "open": "12:00",
+                  "close": "15:30"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "14:30"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                }
+              },
+              "distance": 0.2029254731802593,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ0RmS2MGOGGAR-Gci3Q134HA",
+                "name": "浅草 こととい",
+                "address": "3 Chome-5-7 Asakusa, Taito City, Tokyo 111-0032",
+                "latitude": 35.7166085,
+                "longitude": 139.7966775,
+                "rating": 4.3,
+                "reviewCount": 160,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant de type syokudo et teishoku",
+                  "restaurant de type syokudo et teishoku",
+                  "restaurant cuisine créative",
+                  "restaurant de nouilles (ramen)",
+                  "restaurant de tempura (japon)",
+                  "restaurant d'anguilles (unagi)"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-6875-2463",
+                "website": "http://instagram.com/asakusa_kototoi",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%B5%85%E8%8D%89%20%E3%81%93%E3%81%A8%E3%81%A8%E3%81%84%2C%203%20Chome-5-7%20Asakusa%2C%20Taito%20City%2C%20Tokyo%20111-0032",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerqQYMOmqAUbsRbZOKATvKuTKUvuX3Qnc07l_KZJrx9OgNjNBScuQA0f71LNLj_H2kyjSI0zbj36DpOaFCNrSVektV0f6K3rcsLD3WnQdhAj0OE4XNgKkLnOOr8E_wyXPwtUXGwPg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ0RmS2MGOGGAR-Gci3Q134HA",
+                "openingHours": {},
+                "distance": 0.20498652631782108,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJyVu3-K-PGGAR97BEeTYra5w",
+                "name": "Fukumen",
+                "address": "ユーフォリアカワタ １F, 2 Chome-14-13 Asakusa, Taito City, Tokyo 111-0032",
+                "latitude": 35.7155057,
+                "longitude": 139.7935186,
+                "rating": 4.6,
+                "reviewCount": 394,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant mexicain",
+                  "restaurant mexicain",
+                  "bar à tapas"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-4361-0440",
+                "website": "https://fukumen-asakusa.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Fukumen%2C%20%E3%83%A6%E3%83%BC%E3%83%95%E3%82%A9%E3%83%AA%E3%82%A2%E3%82%AB%E3%83%AF%E3%82%BF%20%EF%BC%91F%2C%202%20Chome-14-13%20Asakusa%2C%20Taito%20City%2C%20Tokyo%20111-0032",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoALx86bpSxCrgbJOqKRygGeH084TLxz-m5WpRlhwI0hvGHaxTHKwF4bFTuBeRVtI_9k1xxD-EfzFDf6yK2BLtgpJpwTifiiV0JPjqEwCXBOPpR2UDDesIPhyU3z3ZqH7pVXMt7=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJyVu3-K-PGGAR97BEeTYra5w",
+                "openingHours": {
+                  "friday": {
+                    "open": "17:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "13:00",
+                    "close": "23:00"
+                  },
+                  "sunday": {
+                    "open": "13:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "17:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": null,
+                  "wednesday": {
+                    "open": "17:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "17:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.29491968926500556,
+                "walkingTime": 4
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 2.15,
+            "timeFromPrevious": 27,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=ReserveOnly%20Veganic%20Monkey%20Magic%2C%20%E3%81%8A%E5%AE%BF%20%E6%9D%BE%E3%82%80%E3%82%89%201%E9%9A%8E%2C%202%20Chome-27-16%20Asakusa%2C%20Tokyo%20111-0032",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=ReserveOnly%20Veganic%20Monkey%20Magic%2C%20%E3%81%8A%E5%AE%BF%20%E6%9D%BE%E3%82%80%E3%82%89%201%E9%9A%8E%2C%202%20Chome-27-16%20Asakusa%2C%20Tokyo%20111-0032",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Arrivée et découverte d'Asakusa",
+        "dayNarrative": "Après votre arrivée matinale, détendez-vous avant de plonger dans l'ambiance traditionnelle d'Asakusa, en visitant ses sites emblématiques et en profitant d'un dîner local.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.41,
+          "p95LegKm": 0.2,
+          "totalTravelMin": 11,
+          "totalLegKm": 0.61,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.01,
+          "mstLowerBoundKm": 0.61
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 550,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-03T13:17:16.475Z",
+        "items": [
+          {
+            "id": "7bd6a1e8-2f65-485c-8bca-b559ddfd4931",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+            "description": "\"Viande de Wagyu halal sublime et délicieuse pour un prix raisonnable\"",
+            "locationName": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.708958,139.77248",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "name": "栄養士Cafe VertVert（ヴェールヴェール）",
+              "address": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+              "latitude": 35.772257599999996,
+              "longitude": 139.7148849,
+              "rating": 4.7,
+              "reviewCount": 96,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-5993-8471",
+              "website": "https://cafevertvert.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+              "googlePlaceId": "ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "openingHours": {
+                "friday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.5342753622145672,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "name": "Umenoki",
+                "address": "パレジューレ 2F, 2 Chome-24-10 Kamijujo, Kita City, Tokyo 114-0034",
+                "latitude": 35.761350799999995,
+                "longitude": 139.72130199999998,
+                "rating": 4.1,
+                "reviewCount": 203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3905-6078",
+                "website": "http://umenokijujo.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Umenoki%2C%20%E3%83%91%E3%83%AC%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AC%202F%2C%202%20Chome-24-10%20Kamijujo%2C%20Kita%20City%2C%20Tokyo%20114-0034",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqG7aYC5d4ns5QZU7ahtUc4yVgpDjdt1mhUmC2N4tLbVI-_NgLKzG4kEsIFHH2XVyl_i5y7av-MalrRnTwdkINVZstIC8ShOeLtOis0tuVaUEVJENbXAIbL4unZwGG8L8HYhrDn=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 1.3438935728143138,
+                "walkingTime": 17
+              },
+              {
+                "id": "serp-nearby-ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "name": "Sweet kitchen",
+                "address": "〒114-0001 Tokyo, Kita City, Higashijujo, 3 Chome−14−8",
+                "latitude": 35.7661447,
+                "longitude": 139.7287282,
+                "rating": 4.3,
+                "reviewCount": 161,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3919-5509",
+                "website": "https://sweetkitchen.gorp.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20kitchen%2C%20%E3%80%92114-0001%20Tokyo%2C%20Kita%20City%2C%20Higashijujo%2C%203%20Chome%E2%88%9214%E2%88%928",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepib7an8tu-xFWSXxIcVKqGlIlzR-a9zXf-tfuHPjWCn_JAmla9iYQ-L4P5sevSpGlzjQ11-Qe_Jv-xPm0F6-PvXURmLdwkTH50AXU2dvGTlkTucRTUKOkVVst-PQVlSdxRFlLJGg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.421942541470844,
+                "walkingTime": 18
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "selectionSource": "api"
+          },
+          {
+            "id": "3cfc919a-8a71-4ab7-a0d6-52a1a2cff6d1",
+            "dayNumber": 2,
+            "startTime": "09:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Musée national de Tokyo",
+            "description": "パリの16区 は、フランスの首都・パリ市を構成する20の行政区のひとつである。第16区、パリ16区ともいう。市の西部に位置しており、ブローニュの森を含む。南北に蛇行するセーヌ川に挟まれた区域であり、区の東西でセーヌ川に接している。",
+            "locationName": "Musée national de Tokyo",
+            "latitude": 35.7188351,
+            "longitude": 139.7765215,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.7188351,139.7765215",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20national%20de%20Tokyo&query_place_id=&center=35.7188351,139.7765215",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXYjSNO_JOGDQRVmQo1BRdy1ZpTstsXKWsJRrikNRj_bTlJ4S-7eUa4rKfw45A8BfGSGTdsrXtW4Shm_ujl-yhhKzgAbYrXEELoGP6kX8rFy1r9huu1IwfnVHi51e5JotTdKw4S-Id5g3yYCGqgGQiC9-5z5i0YXdau-sTwJfRMlGmITnv8X0NnrA-QDf70oCQ-hBNibtCeqtjTINuQ8rqBDD1hNhHPq6XJ_rORJ9WxrPm-yJ_yP3f6wBxPc0boSgO5e9QeBqgtDR0LDIcDqmGQQXogesa23woLAoEQSZxgmfOHBEWX00w4MbuGIyxyQ8Em0vZqa4ysoZc6S5B5LY5ckhONN40buY4GZVdQUAGbGQf7LPm7x6LXJmnvZjaUrdXk-2VTI2k7Kmf4s6a8UVWNAbfXYar7dR-o-jZd1hPwnFOXxk8_VMsGoB6laiDeFlbbq7IIno-NZmzG_Yrm-lT3bf8cXoNL0U6dQeasWwyYLOCNUYZ_A4W1-x7f0i8hzkpYU-LJkIyzwqxPoDWLOj2_NIfNZJXT40oc9LM9RzYciPsGkAPy98Y9sl-TUsBN2lXOs2V7YtI_GQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.16,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "62216014-5b56-4c2f-965d-9bcbf1b8921d",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Tokyo Skytree",
+            "description": "Tokyo Skytree , also written as Tokyo Sky Tree, is a broadcasting and observation tower, located in Sumida, Tokyo, Japan.  It has been the tallest tower in Japan since opening in 2012, and reached its",
+            "locationName": "Tokyo Skytree",
+            "latitude": 35.7100627,
+            "longitude": 139.8107004,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.7100627,139.8107004",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20Skytree&query_place_id=&center=35.7100627,139.8107004",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW_34wZwXZpdLAJNIFh_nkq8496xmjSFr0hjYSsri6h5aC-y5ZljO1OXSMT6ZzRjppZA5Js-vYIhiQGYWgzzgxnLcGIDWoC2AUwRRQ9lSark9_KdgYgG7Sab8_Az2tFResMz9eZwTguaSY1HB6dYwoMnfZ-zIYbKYmgjCCp8YSiDsxWv3g3S9YOi1WA9-5V_-qK-nZ8QT9qFpBH_aZbzzaE8pgymS01PVbA_F2mPGZGfznILRJo4SVMDoDhVNOCfDLed1-8jroIgTg_2OKahyfoQUU1inafljNrD8n2XtBqYxxK7MSnc4BsuYr3CotJGq7WhZqqSymTyzFnnqfksWegpvfVQIWJvgl0qgjhpPfhJaIoUR-QUs2kNsKuAqW9dut_GZ88IZ2SGBTUUaD_AFkZmiYPHCQZv4W1ZeL0BJzpVHm-G7x2WvF35cyRLacCDnsLnrbNCz5vokV1koE0MTOO2Ghn3db9OHwfbLighIOROq2AGyolyHwSyKTUn4dV5gDYDXIkJSQHvW2UVD0cfzGEaa3Owjd5qSNxhVnEnRqLaabfwU4Ksap1R-L-Zh4V9Cyez68s&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 3.24,
+            "timeFromPrevious": 41,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "4bc63dbb-4b3b-4f55-a9c2-51fd17f5e90d",
+            "dayNumber": 2,
+            "startTime": "13:15",
+            "endTime": "14:45",
+            "type": "activity",
+            "title": "Tokyo Disneyland",
+            "description": "東京ディズニーランドホテル は、千葉県浦安市にある東京ディズニーリゾート (TDR) 内にあるディズニーホテルである。",
+            "locationName": "Tokyo Disneyland",
+            "latitude": 35.6328964,
+            "longitude": 139.8803943,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6328964,139.8803943",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20Disneyland&query_place_id=&center=35.6328964,139.8803943",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXlUAYHykgn7E6vsCdleBw43lBZZIihFfYlvgoyyJxsq-VVqm6Yb4NjJglkAW_eApM6YrkXp__Drl4h4j51wiiJtYu3TO9j7gT8dujmUXiWROyAHz6alukE_3vdOpUY2y90KawO7_ugkI8a-DQgbfTZi0CocUCRB7aEufD5cZkwbc8tvB4GD6bmP2QRsBd0qdJde7GP0e9Z0ohuzIY8nJiMHaRhP5RQ3p-evJTKk8csKgp7ndAdkPtB6ol0ztE2Wn34pT0PZJ20q9P67ZleneiDRj-oWYhPRECK5lLRjFKANbXR_-Sx5m6sZfcGt50oOV5ZYKGPtFA7vB8jYM80pyj5YchkS9dAvLOGnVzyZNCIxS1_PQcBV7HQWxJUgiB8-UkmQ3H0P9iJFkc2N8HqPADxVXxflUko17inVwAbVMXMHztsEqoxABkNi6YfHl4Ore-N92PYpxKZqC2NQd96nS74nPWaI5afq-v-ceRGjNB5wq0k4nzKf77hsVmiUeLCAgKJdq05aTbfoCy3atQVAqJ7jBGi4tlANXh-lVeYkehGruCPS4UFyGmwB1_jUU0sxITa_bWGsGV1DQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 10.64,
+            "timeFromPrevious": 134,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "d3cd77d9-39a9-4f18-9228-053fbe4dce10",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Tokyo Sushi Making Class : Sake Ceremony & Matcha Experience",
+            "description": "Entrez au cœur d'Asakusa pour une expérience de sushis vivante et pratique mêlant culture, compétence et célébration. Commencez par le Kagami-biraki, un baril de saké traditionn...",
+            "locationName": "Tokyo Sushi Making Class : Sake Ceremony & Matcha Experience",
+            "latitude": 35.7125622,
+            "longitude": 139.7991204,
+            "orderIndex": 4,
+            "estimatedCost": 39,
+            "duration": 90,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Interactive-Sushi-Making-with-Sake-Ceremony/d334-5596969P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.7125622,139.7991204",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20Sushi%20Making%20Class%20%3A%20Sake%20Ceremony%20%26%20Matcha%20Experience&query_place_id=&center=35.7125622,139.7991204",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/15/7d/fc.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Tokyo Sushi Making Class : Sake Ceremony & Matcha Experience",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/15/7d/fc.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 51,
+            "viatorPrice": 39,
+            "viatorDuration": 90,
+            "distanceFromPrevious": 11.51,
+            "timeFromPrevious": 144,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "080948c1-cd65-49eb-8c4f-11dd529a2c34",
+            "dayNumber": 2,
+            "startTime": "17:00",
+            "endTime": "20:00",
+            "type": "activity",
+            "title": "Tokyo Ueno Food Tour Sushi Ramen et favoris locaux",
+            "description": "Bienvenue à Ueno, le berceau de Tokyo ! Avant même que Shibuya, Shinjuku et Harajuku n'existent, c'était le cœur d'Edo il y a plus de 400 ans. Cette histoire a façonné les saveu...",
+            "locationName": "Tokyo Ueno Food Tour Sushi Ramen et favoris locaux",
+            "latitude": 35.7057935,
+            "longitude": 139.7782863,
+            "orderIndex": 5,
+            "estimatedCost": 76,
+            "duration": 180,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Tokyo-Guided-Food-Tour-with-Food-and-Japanese-Alcohol/d334-470703P3?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.7057935,139.7782863",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20Ueno%20Food%20Tour%20Sushi%20Ramen%20et%20favoris%20locaux&query_place_id=&center=35.7057935,139.7782863",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/0b/c4/3c.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Tokyo Ueno Food Tour Sushi Ramen et favoris locaux",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/17/0b/c4/3c.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 55,
+            "viatorPrice": 76,
+            "viatorDuration": 180,
+            "distanceFromPrevious": 2.03,
+            "timeFromPrevious": 26,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "3c79ce8b-fa4e-4682-bb7a-3ad5ba4b561e",
+            "dayNumber": 2,
+            "startTime": "20:15",
+            "endTime": "21:30",
+            "type": "restaurant",
+            "title": "Dîner — Japanese food Wagyu Restaurant (Halal) Steak&Burger-Ramen 5W-Tokyo AkihabaraUeno Beef Dining",
+            "description": "\"Très bonne expérience, personnel adorable, nourriture délicieuse\"",
+            "locationName": "Taito City, Tokyo",
+            "latitude": 35.702625,
+            "longitude": 139.77809,
+            "orderIndex": 6,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.70202,139.7706",
+            "restaurant": {
+              "id": "serp-12008374681832219165",
+              "name": "Japanese food Wagyu Restaurant (Halal) Steak&Burger-Ramen 5W-Tokyo AkihabaraUeno Beef Dining",
+              "address": "Taito City, Tokyo",
+              "latitude": 35.702625,
+              "longitude": 139.77809,
+              "rating": 4.8,
+              "reviewCount": 1700,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "hamburger"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Excellente adresse, un service incroyable et du bœuf wagyu délicieux !\""
+              ],
+              "description": "\"Excellente adresse, un service incroyable et du bœuf wagyu délicieux !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Japanese%20food%20Wagyu%20Restaurant%20(Halal)%20Steak%26Burger-Ramen%205W-Tokyo%20AkihabaraUeno%20Beef%20Dining%2C%20Taito%20City%2C%20Tokyo",
+              "googlePlaceId": "12008374681832219165",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-4605856578078533612",
+                "name": "Gyukatsu Ichinisan",
+                "address": "Chiyoda City, Tokyo",
+                "latitude": 35.70202,
+                "longitude": 139.7706,
+                "rating": 4.8,
+                "reviewCount": 14000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant de porc pané et frit (tonkatsu)"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne expérience, personnel adorable, nourriture délicieuse\""
+                ],
+                "description": "\"Très bonne expérience, personnel adorable, nourriture délicieuse\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gyukatsu%20Ichinisan%2C%20Chiyoda%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/_dBJxW8N-nVUDLiT--7nuOlbSgqJgmo80-Soy1rsB0s.jpeg"
+                ],
+                "googlePlaceId": "4605856578078533612",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-17836070793709888590",
+                "name": "Maid Cafe MAID MADE Akihabara Electric Town-exit Store",
+                "address": "Chiyoda City, Tokyo",
+                "latitude": 35.69767,
+                "longitude": 139.7723,
+                "rating": 4.9,
+                "reviewCount": 2600,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le prix est raisonnable pour l’endroit et l’expérience.\""
+                ],
+                "description": "\"Le prix est raisonnable pour l’endroit et l’expérience.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Maid%20Cafe%20MAID%20MADE%20Akihabara%20Electric%20Town-exit%20Store%2C%20Chiyoda%20City%2C%20Tokyo",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipNNv97X0tw_H6bvACJZc6cceNOZMIpY6CROZt8a=w90-h90-n-k-no-l75"
+                ],
+                "googlePlaceId": "17836070793709888590",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.81,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Japanese%20food%20Wagyu%20Restaurant%20(Halal)%20Steak%26Burger-Ramen%205W-Tokyo%20AkihabaraUeno%20Beef%20Dining%2C%20Taito%20City%2C%20Tokyo",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Japanese%20food%20Wagyu%20Restaurant%20(Halal)%20Steak%26Burger-Ramen%205W-Tokyo%20AkihabaraUeno%20Beef%20Dining%2C%20Taito%20City%2C%20Tokyo",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Musée national de Tokyo et Tokyo Skytree",
+        "dayNarrative": "Explorez l'histoire et l'art japonais au Musée national de Tokyo, puis admirez les vues imprenables depuis la Tokyo Skytree. Terminez la journée par une expérience culinaire unique.",
+        "geoDiagnostics": {
+          "maxLegKm": 11.51,
+          "p95LegKm": 10.64,
+          "totalTravelMin": 454,
+          "totalLegKm": 36.37,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.53,
+          "mstLowerBoundKm": 23.7
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-04T13:17:16.475Z",
+        "items": [
+          {
+            "id": "2867da0c-196e-41cf-bba3-cdc5514ec704",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+            "description": "\"Viande de Wagyu halal sublime et délicieuse pour un prix raisonnable\"",
+            "locationName": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.708958,139.77248",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "name": "栄養士Cafe VertVert（ヴェールヴェール）",
+              "address": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+              "latitude": 35.772257599999996,
+              "longitude": 139.7148849,
+              "rating": 4.7,
+              "reviewCount": 96,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-5993-8471",
+              "website": "https://cafevertvert.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+              "googlePlaceId": "ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "openingHours": {
+                "friday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.5342753622145672,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "name": "Sweet kitchen",
+                "address": "〒114-0001 Tokyo, Kita City, Higashijujo, 3 Chome−14−8",
+                "latitude": 35.7661447,
+                "longitude": 139.7287282,
+                "rating": 4.3,
+                "reviewCount": 161,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3919-5509",
+                "website": "https://sweetkitchen.gorp.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20kitchen%2C%20%E3%80%92114-0001%20Tokyo%2C%20Kita%20City%2C%20Higashijujo%2C%203%20Chome%E2%88%9214%E2%88%928",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepib7an8tu-xFWSXxIcVKqGlIlzR-a9zXf-tfuHPjWCn_JAmla9iYQ-L4P5sevSpGlzjQ11-Qe_Jv-xPm0F6-PvXURmLdwkTH50AXU2dvGTlkTucRTUKOkVVst-PQVlSdxRFlLJGg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.421942541470844,
+                "walkingTime": 18
+              },
+              {
+                "id": "serp-nearby-ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "name": "Umenoki",
+                "address": "パレジューレ 2F, 2 Chome-24-10 Kamijujo, Kita City, Tokyo 114-0034",
+                "latitude": 35.761350799999995,
+                "longitude": 139.72130199999998,
+                "rating": 4.1,
+                "reviewCount": 203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3905-6078",
+                "website": "http://umenokijujo.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Umenoki%2C%20%E3%83%91%E3%83%AC%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AC%202F%2C%202%20Chome-24-10%20Kamijujo%2C%20Kita%20City%2C%20Tokyo%20114-0034",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqG7aYC5d4ns5QZU7ahtUc4yVgpDjdt1mhUmC2N4tLbVI-_NgLKzG4kEsIFHH2XVyl_i5y7av-MalrRnTwdkINVZstIC8ShOeLtOis0tuVaUEVJENbXAIbL4unZwGG8L8HYhrDn=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 1.3438935728143138,
+                "walkingTime": 17
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "2eac4af4-ef6d-4c04-ae3c-bdd320e6e79d",
+            "dayNumber": 3,
+            "startTime": "09:30",
+            "endTime": "10:15",
+            "type": "activity",
+            "title": "Meiji-jingū",
+            "description": "明治神宮野球場 は、東京都新宿区の明治神宮外苑に所在する野球場。宗教法人明治神宮が所有する。通称は「神宮球場」「神宮」（本項では以下、神宮球場に統一）。",
+            "locationName": "Meiji-jingū",
+            "latitude": 35.6763976,
+            "longitude": 139.6993259,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6763976,139.6993259",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Meiji-jing%C5%AB&query_place_id=&center=35.6763976,139.6993259",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9HDBCNM4pBABWFcU0OgpkcDdlKJM6igMF6JTaPP8OAY9Zbr_mZPxMTFGuBWiZMAjkZqwgDDn6gtjjwujsmG6B3wgK4LPQ7a--aJe_YWdFtU4wzaZLaXZkWrncObxsvN_AprbdAX41_P1QmFL53tVbSiMMZzjDCD1ea74lyzaS4TiCqt4zXPVI059nfs3OlCRmelBVk15NnaYqBUwQI6JuOkUIs_10URa-v3mDg_DuN2Gow0uL-GQoViWlT0Q48t21_o79IIWhak_DZPjssV9aBj67YzRwqeD8iB-mQgSG88QF0PJ0lukoz2-YwNdTuBbhir2ufGwe0KANxlxL6V1iKadisX9gWCa6WXumQzoAuCw1DVW8PWXF2fgD1VaGZAMtw8se0DS8lVPSuvJsjMJBMwBBOF4XOc9LRnMe9ls41yilnCOCUsjGLsZxlSlND87oLlweoPRJf0gJQz1TYzVidqOF1QI4ifJsYI2HOhqqB6bMAycwRgUdiJkH9hERuJGzFua7tFwr9PpgaL-5BaZaZt1eWIeHzKWHvbNNLmFUxFYSo2jxECu6VRVoAwlG4BlOAE2YRQNtfQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 7.53,
+            "timeFromPrevious": 95,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "632b820e-47bc-4366-8f28-a92630fc3051",
+            "dayNumber": 3,
+            "startTime": "10:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Yoyogi-kōen",
+            "description": "代々木公園駅（よよぎこうえんえき）は、東京都渋谷区富ヶ谷一丁目にある、東京地下鉄（東京メトロ）千代田線の駅である。駅番号はC 02。",
+            "locationName": "Yoyogi-kōen",
+            "latitude": 35.6700649,
+            "longitude": 139.6949656,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6700649,139.6949656",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Yoyogi-k%C5%8Den&query_place_id=&center=35.6700649,139.6949656",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUA1WAWOYdF_mcBUpDFhOfCTvzrLCJMe2l5MlhGefZZ1yX3HhdbGLnUuvo7EE4zBizJ31233urQZmo8QU3_dwKiHvSbAnahYkUShK5zNLJVqRIupYICGPzAa7qYw089PTx-YVjSWw6c9YwOSJJ-6N9yxzXXRm602uzADbnobo01wdwInZEwDHi8zdDPA0zk8H0LLIwCJvYbISyPv8qWRSqmYl3v-YduhKvhQa_J37CSldexSjXMON4HaucDFqqKdhAjoiYgM9EDWdL8_EpicFaw1xq_D5EWuJLGR36pIq58-XvLx_DC_PsSwcWCrQxzTN1Fs2gdo_GOf1Mhcb988nd1hDnhFPyE0HaHlR0Aqbh9oYMy2zKASp6KDGIczUMXzfLTv6iDkDm61d9EhSQOeTSq5VCX82fK9goUuvGkQJ6GGEDXPbc_a5ZuVrea2VmmKn5Q8yBrVxHtYT9U8OA69Fo9K6EK8xf9WZcL_uVUPmKGywYlJeIc7jfGNYOV1Hu3KAg-ephGOmvSsW6yM7Xx3hCDACS70YuisaJ8tkigA6arj-4R8LRijbdyRSqtxdpwecotLw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.81,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e9098a20-439b-46c5-9a89-7d3a247d4153",
+            "dayNumber": 3,
+            "startTime": "11:45",
+            "endTime": "12:45",
+            "type": "activity",
+            "title": "Shinjuku Gyoen Park",
+            "description": "ザ・ヒーナキャット とは、日本・神奈川県出身のひーちゃんを中心に結成された音楽ユニットである。2020年9月からはソロプロジェクトとして活動中。",
+            "locationName": "Shinjuku Gyoen Park",
+            "latitude": 35.68517629999999,
+            "longitude": 139.7100517,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.68517629999999,139.7100517",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Shinjuku%20Gyoen%20Park&query_place_id=&center=35.68517629999999,139.7100517",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVz5aKKo7hewCNho5QhQyeurogS9vxSDDeiNWcAsh1rDCh38wnrqaX4K-hp5ValNh1gcxhKOXaQDmUkIV_ghFkB46nsLdHzWQO8zubAz8bWOBPw67bPRiRHNsbI3XWrKu7hcaN6-5s5DgYUVjueKZuGEYYRTh8KGlk23fTxV0i8eyOT9tR4Ta8VGSzi_SNP2O5Wa3jJJ1ith__GtFep34fwXGJtMqjI9MdVVEhbJB-zt97IFtL4O_4CoepXipQQ45ZBvsJhRXgmq6GZVMWnBbzU6ctG6dhUuHT7YHUI0APD6cFP-eEJ8hu-ZsPiP1y1mahfFnWU2aYEBMHP7bcEKo-BbVcTPcIGt6uncqH59SdpaDeMgNrdkXXP1elmPBb1QrYDblFyqNqhgJkGKEkHcdcSn27umAA0kRDZmlKb_VKKdbvL_Sg_qNOYb1cTHFZZ49wKb9nsiScP9Y1S8hgQOIFNIbqhvY9luUllYDc8u-j-LaULupKKxFx-3_o35okiTZm2p-RBoanNrkKZukPbCZK3x9-SkNgt2k9IqICCs0pCG5lCsKlt_RtzoCjzRIHKGBzWxOHUGV3Shw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.16,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "11091033-e607-4665-967f-3734cf7612c8",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "14:15",
+            "type": "restaurant",
+            "title": "Déjeuner — T’s Tantan",
+            "description": "\"Très bons ramen vegan, service impeccable\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Chiyoda City, Tokyo",
+            "latitude": 35.679764,
+            "longitude": 139.76695,
+            "orderIndex": 4,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.679764,139.76695",
+            "restaurant": {
+              "id": "serp-9135049959594238619",
+              "name": "T’s Tantan",
+              "address": "Chiyoda City, Tokyo",
+              "latitude": 35.679764,
+              "longitude": 139.76695,
+              "rating": 4.6,
+              "reviewCount": 2700,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "végétalienne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bons ramen vegan, service impeccable\""
+              ],
+              "description": "\"Très bons ramen vegan, service impeccable\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=T%E2%80%99s%20Tantan%2C%20Chiyoda%20City%2C%20Tokyo",
+              "photos": [
+                "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/EEfoe5Cfgg-4MGZok2qXwyhHnsPHp3Wvqh97AfyiNbA.jpeg"
+              ],
+              "googlePlaceId": "9135049959594238619",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-330846275618765114",
+                "name": "Kyobashi Sushi Kōjitsu",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.676624,
+                "longitude": 139.77066,
+                "rating": 4.9,
+                "reviewCount": 83,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Une cuisine extraordinaire, un accueil parfait .\""
+                ],
+                "description": "\"Une cuisine extraordinaire, un accueil parfait .\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Kyobashi%20Sushi%20K%C5%8Djitsu%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoaT2N8oFY84tf5T1zONlencCo1kqElZb6e9NzmoXgua9mf4A7CJRTPeiUV55ux7rIagt23KcE5gReJ_m3U5R-u8J5DRR0p55a9LWHQuTNtd7TAw6drURnomj61by7OHoAQD73ycQ=w90-h90-n-k-no-l75"
+                ],
+                "googlePlaceId": "330846275618765114",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-12795855873889199973",
+                "name": "ISHIDA GINZA",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.67448,
+                "longitude": 139.76817,
+                "rating": 4.8,
+                "reviewCount": 41,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "française"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ISHIDA%20GINZA%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/3GCsvZ_t3BIsxhWwohwUTovpnaEbsoMBb4i297drrU4.jpeg"
+                ],
+                "googlePlaceId": "12795855873889199973",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 5.17,
+            "timeFromPrevious": 65,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "dd9564ac-38e2-4360-9f45-2f0cd94c3a81",
+            "dayNumber": 3,
+            "startTime": "15:00",
+            "endTime": "16:00",
+            "type": "activity",
+            "title": "Hachiko Statue",
+            "description": "A statue of the Akita dog Hachikō, remembered for his unwavering loyalty to his deceased owner, is installed outside Tokyo's Shibuya Station, in Japan.",
+            "locationName": "Hachiko Statue",
+            "latitude": 35.6590579,
+            "longitude": 139.7006293,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6590579,139.7006293",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Hachiko%20Statue&query_place_id=&center=35.6590579,139.7006293",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUbjBJ8OyHYehPasT6hbkNV0ptCRiWQ5UgySWhJe_xeeHxtem13WLWbD-pYz5e9q3-LjrtPya4UoayrqLSMs_PNjCxKJ8qAvbqBtSUDjIFHVnQnzIpU1scUZu7e4TJmL2YilafV65UAY3a0yN_j9tyLAIrBQSoSvRqLZAzssJKxJ-7DwSun0nQ18BGJn352XoDot5DmNGlqPj-1LXd4tCyRColjw4ucn3v_lTS1kCj0Anefi_XfMrNyq43QVKk5UDWjRm2nH-pdwkVFw5_cn7wr1ZydTJI4H9S5qF73gHMmQb2Yh3qo2UFaZozvuN0vEpsZ4vJaZKrcof2d2cQf8fmSsua1ffS9fI12OwkptT4cdsKgx7Op3KWu7TfUMt755GBpk-CxrdiLXGdJREPWzHG4FIlMLDEyinG5VP8LM5Zvb9icr6zQ9HkNm8qMIqJcBMocOIpffd8kXvn9f4brC6-VXTYfSLrxtZ9DpMIaOALMcvsML4MLmj_Ty-aenMSRtfzZpdgfv1PutVbNMxQenhCoimiCfgV5aU638SzUYiwBZhvd395n6hsJQYpV8uaLuB_jj2fbRnTUZKSYg1Q1wItIr_Or6A&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 6.42,
+            "timeFromPrevious": 81,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "d47cd308-e2a7-41d2-9149-31fe6fb173c8",
+            "dayNumber": 3,
+            "startTime": "16:15",
+            "endTime": "17:15",
+            "type": "activity",
+            "title": "Shibuya Sky",
+            "description": "渋谷スクランブルスクエア は、東京都渋谷区渋谷二丁目にある渋谷駅に直結した複合施設型超高層ビル（駅ビル）。東棟はセルリアンタワーを抜いて渋谷エリアで最も高いビル。",
+            "locationName": "Shibuya Sky",
+            "latitude": 35.6586719,
+            "longitude": 139.7019848,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6586719,139.7019848",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Shibuya%20Sky&query_place_id=&center=35.6586719,139.7019848",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXNQN23uSlGIsgFMzWBHHJBiPjM692SOhbHvGLAatE-Zz04JCR3v09CQxJMAtshbIVZ_fzFmYcvTUP8kdqdLrH2WjG3UXoCI1pBCP1jbAF5Dj2Benb8bMHtYMiXMgKAr1qjKXUw0Td3dh6eiwXW1bNIVfRuY4Ffj-3mrXhbv0urSnRofXWVz-Tl4HR9h7bByy46cVCZNXJvGtT6_HDWcFiy8LhSigrFflSCWWiBixgMrog2VvDl-_SrcsZ4c_b7WcM_RJxSxIsP2zD_k97GOlnvPo3ppFkYSFvsAGDM0qlUIdskmMs&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.13,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "ff6484fc-65f5-42c8-a95c-2318d51f3edf",
+            "dayNumber": 3,
+            "startTime": "17:30",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Tokyo DisneySea",
+            "description": "東京ディズニーシー は、千葉県浦安市舞浜にある東京ディズニーリゾートを構成するディズニーパーク。",
+            "locationName": "Tokyo DisneySea",
+            "latitude": 35.6267108,
+            "longitude": 139.8850779,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 105,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6267108,139.8850779",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20DisneySea&query_place_id=&center=35.6267108,139.8850779",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWo_LJXzLnUf42lkLFDOnOTdYtBseLy3FzeNvsNVYJRCQrUL1QucGEoSm_FDUO6BdsaT9kb59imf7HlkHU2G35wHTzqV-catG53oBsVbbSPZl1c6yqskIyviJSO_nNbjoZsfKQ7qwK-tlG9gToFBloLdftl4YoeA3Vr9YSf8Yb4CU0F15FSRyiTBOe34hMdktft6y1kv4eLIMWtHbuWRdQN7gizP4LhGkcVFs6ZPyPZ0XE1ErAsCdcYe6k_QSF3uwYIkd4ZN2mKpBjSiYuk9iekjXw7U3VSbji01cyd8tCkgTtn7nknWJFCzlAkWVOo4TdMbQlcu59UmQn8g-5QcWJka2gT0oqGr9HGy1hdfie5PTchFUZZdp6kKs0mqB55-WOk_vVhauTr1oDxEKnEsGB-h-HvpQQvUkELCqc5V3eKJrP7fP-up4wgCkCcMf5CH35ta9VWQiNGwgGCMY0Vm422Snu01gs1Gy-dPM1cw_OjwLxw1C6Wc1dbDVGN7TAYX5h97_QyQ-2S5owxSzW53XPYXzVtYQpkokG8ZndIq0WuKaHI-jVxXwzwmPPN3_UMdfFwsudf0rM-yA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 16.92,
+            "timeFromPrevious": 212,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "e247fe2a-173c-4cb5-ac39-1558b7d5203f",
+            "dayNumber": 3,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — GYOPAO Gyoza Roppongi",
+            "description": "\"Très bonne ambiance, personnel très accueillant et cuisine excellente.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Minato City, Tokyo",
+            "latitude": 35.663586,
+            "longitude": 139.73215,
+            "orderIndex": 8,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.663586,139.73215",
+            "restaurant": {
+              "id": "serp-11783576429337268977",
+              "name": "GYOPAO Gyoza Roppongi",
+              "address": "Minato City, Tokyo",
+              "latitude": 35.663586,
+              "longitude": 139.73215,
+              "rating": 4.8,
+              "reviewCount": 17000,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "izakaya"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bonne ambiance, personnel très accueillant et cuisine excellente.\""
+              ],
+              "description": "\"Très bonne ambiance, personnel très accueillant et cuisine excellente.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=GYOPAO%20Gyoza%20Roppongi%2C%20Minato%20City%2C%20Tokyo",
+              "photos": [
+                "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/l1ke2AoCkUh72HLHDTtdskrx774Se_Xbhrk2pLbdDiw.png"
+              ],
+              "googlePlaceId": "11783576429337268977",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJB9dzubyLGGARssbpJf9vcyM",
+                "name": "Métis六本木",
+                "address": "〒106-0032 Tokyo, Minato City, Roppongi, 5 Chome−18−22 FORCEビル １F",
+                "latitude": 35.6611352,
+                "longitude": 139.7369704,
+                "rating": 4.8,
+                "reviewCount": 126,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant français",
+                  "restaurant français",
+                  "bistro",
+                  "restaurant cuisine créative",
+                  "restaurant gastronomique",
+                  "restaurant de grillades à la française",
+                  "cuisine française moderne",
+                  "restaurant de spécialités du sud-ouest de la france",
+                  "caviste"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-5544-9778",
+                "website": "https://metis-roppongi.jp/?utm_source=gbp&utm_medium=referral",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C3%A9tis%E5%85%AD%E6%9C%AC%E6%9C%A8%2C%20%E3%80%92106-0032%20Tokyo%2C%20Minato%20City%2C%20Roppongi%2C%205%20Chome%E2%88%9218%E2%88%9222%20FORCE%E3%83%93%E3%83%AB%20%EF%BC%91F",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipODRYFKZI8mVYHgZwz0vFwntJ8PFziLC9816GFb=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJB9dzubyLGGARssbpJf9vcyM",
+                "openingHours": {
+                  "friday": {
+                    "open": "17:30",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "15:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "17:30",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "17:30",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "17:30",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "17:30",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.5137244474659691,
+                "walkingTime": 6
+              },
+              {
+                "id": "serp-nearby-ChIJdTl5Ap6LGGARPQhK3unBcdY",
+                "name": "Hainanese Chicken Rice Azabujuban Main Shop",
+                "address": "〒106-0032 Tokyo, Minato City, Roppongi, 6 Chome−11−16 中銀マンション, 裏手１F",
+                "latitude": 35.6581463,
+                "longitude": 139.7320057,
+                "rating": 4.3,
+                "reviewCount": 883,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant singapourien",
+                  "restaurant singapourien",
+                  "restaurant de type izakaya",
+                  "restaurant de spécialités du sud-est asiatique"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-5474-3200",
+                "website": "https://shop.create-restaurants.co.jp/1358/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hainanese%20Chicken%20Rice%20Azabujuban%20Main%20Shop%2C%20%E3%80%92106-0032%20Tokyo%2C%20Minato%20City%2C%20Roppongi%2C%206%20Chome%E2%88%9211%E2%88%9216%20%E4%B8%AD%E9%8A%80%E3%83%9E%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%B3%2C%20%E8%A3%8F%E6%89%8B%EF%BC%91F",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepY7q1zE8h1wXNj9q-z_Z-rHN2OcL7z0FERYOILg4cAek6I13GdXfS9O95DpOaCGho1lHpVWD6RFXaqcQccfIBL0bxWhuiUdnbbrADKIFCyF6INzGrmph46LaHdE0CBSV9IhXMx=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJdTl5Ap6LGGARPQhK3unBcdY",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:30",
+                    "close": "14:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "14:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "14:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "14:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "14:30"
+                  }
+                },
+                "distance": 0.6050075144337149,
+                "walkingTime": 8
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 14.41,
+            "timeFromPrevious": 181,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Shibuya et Shinjuku, entre tradition et modernité",
+        "dayNarrative": "Découvrez le sanctuaire Meiji-jingū, explorez les jardins de Shinjuku et profitez de l'effervescence de Shibuya, avec ses célèbres passages piétons et une vue imprenable depuis Shibuya Sky.",
+        "geoDiagnostics": {
+          "maxLegKm": 16.92,
+          "p95LegKm": 14.41,
+          "totalTravelMin": 709,
+          "totalLegKm": 56.77,
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.78,
+          "mstLowerBoundKm": 31.93
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 2,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-05T13:17:16.475Z",
+        "items": [
+          {
+            "id": "00fccb3d-861c-4285-81a1-6f16c8692a91",
+            "dayNumber": 4,
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+            "description": "\"Viande de Wagyu halal sublime et délicieuse pour un prix raisonnable\"",
+            "locationName": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.708958,139.77248",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "name": "栄養士Cafe VertVert（ヴェールヴェール）",
+              "address": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+              "latitude": 35.772257599999996,
+              "longitude": 139.7148849,
+              "rating": 4.7,
+              "reviewCount": 96,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-5993-8471",
+              "website": "https://cafevertvert.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+              "googlePlaceId": "ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "openingHours": {
+                "friday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.5342753622145672,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "name": "Sweet kitchen",
+                "address": "〒114-0001 Tokyo, Kita City, Higashijujo, 3 Chome−14−8",
+                "latitude": 35.7661447,
+                "longitude": 139.7287282,
+                "rating": 4.3,
+                "reviewCount": 161,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3919-5509",
+                "website": "https://sweetkitchen.gorp.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20kitchen%2C%20%E3%80%92114-0001%20Tokyo%2C%20Kita%20City%2C%20Higashijujo%2C%203%20Chome%E2%88%9214%E2%88%928",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepib7an8tu-xFWSXxIcVKqGlIlzR-a9zXf-tfuHPjWCn_JAmla9iYQ-L4P5sevSpGlzjQ11-Qe_Jv-xPm0F6-PvXURmLdwkTH50AXU2dvGTlkTucRTUKOkVVst-PQVlSdxRFlLJGg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.421942541470844,
+                "walkingTime": 18
+              },
+              {
+                "id": "serp-nearby-ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "name": "Umenoki",
+                "address": "パレジューレ 2F, 2 Chome-24-10 Kamijujo, Kita City, Tokyo 114-0034",
+                "latitude": 35.761350799999995,
+                "longitude": 139.72130199999998,
+                "rating": 4.1,
+                "reviewCount": 203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3905-6078",
+                "website": "http://umenokijujo.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Umenoki%2C%20%E3%83%91%E3%83%AC%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AC%202F%2C%202%20Chome-24-10%20Kamijujo%2C%20Kita%20City%2C%20Tokyo%20114-0034",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqG7aYC5d4ns5QZU7ahtUc4yVgpDjdt1mhUmC2N4tLbVI-_NgLKzG4kEsIFHH2XVyl_i5y7av-MalrRnTwdkINVZstIC8ShOeLtOis0tuVaUEVJENbXAIbL4unZwGG8L8HYhrDn=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 1.3438935728143138,
+                "walkingTime": 17
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "9b131e0f-a843-4d08-ac15-e389ab888871",
+            "dayNumber": 4,
+            "startTime": "09:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "teamLab Borderless: MORI Building DIGITAL ART MUSEUM",
+            "description": "株式会社エス・エヌ・ケイ は、1970年代から2001年にかけてゲーム機やゲームソフトの企画・開発・販売、およびアミューズメント施設の経営などの事業を行っていた日本のゲームメーカー。",
+            "locationName": "teamLab Borderless: MORI Building DIGITAL ART MUSEUM",
+            "latitude": 35.6620689,
+            "longitude": 139.7432671,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6620689,139.7432671",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=teamLab%20Borderless%3A%20MORI%20Building%20DIGITAL%20ART%20MUSEUM&query_place_id=&center=35.6620689,139.7432671",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWhPZ_phex3C6HibOec13OJ0ZQBcBHKvIImOAnBWXVhNr8oKqPjASFO-IPc3o-DSp3QEyIsLJaC7hNpWaxmAJi2p3Co0-XA1QutMsDEVVuYIDBaITB-D4l_HlX1Syn4aViIlGRUvpjlhyRDuzA1dEskglXDZgS0-Gi8r8-RHn5waXezIEismVBAxwz4aCK6_h5NpecGKRpGPHlF2UPsMS_vozBXq_R9r43Wpcdxj8fXABEz3KCj6myQstQDkLF1kdxKLcwF_bFdsZcHPWEFjihZfJVOJ9aN8Y71jzcu5wKNKPhsmKC0VqhqXRVN8-ZMxzmx8Es23FITqnnD_CzPa3v6oQYUAkYTtrIuRC-FmXg8JlU3e28fEolXWRNQKmJFNO_Rw4YeKlL_oKbD-3Lc-DrXY0iKGx-oRMFN1dk-Xhj4zBuZzEMsV25t9WDkjOv8KcMrXrm4gC5k3R60jFqDS_NAo9tFUGMVUETeZAI-88xAG1J0o2wVkTw8a_mgny_aj5gbpiNq2th94MzP4-s2v2NZzmLMrMukJhcyBMMeaeOgjotefNzj8GWtgQWVppaVcuyvtXAyWRrh_Q&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 5.84,
+            "timeFromPrevious": 74,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "5a169773-fb6b-4d71-880f-42f92c6215d2",
+            "dayNumber": 4,
+            "startTime": "11:45",
+            "endTime": "12:45",
+            "type": "activity",
+            "title": "La Tour de Tokyo",
+            "description": "『ayumi hamasaki ARENA TOUR 2016 A 〜M(A)DE IN JAPAN〜』（アユミ・ハマサキ・アリーナ・ツアー・2016・エー・メイド・イン・ジャパン）は、浜崎あゆみが2016年に行ったライブツアーであり、2016年12月21日発売のDVD及びBlu-ray Discである。タイトルにある「M(A)DE」の「A」はロゴ表記。",
+            "locationName": "La Tour de Tokyo",
+            "latitude": 35.6585805,
+            "longitude": 139.7454329,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6585805,139.7454329",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Tour%20de%20Tokyo&query_place_id=&center=35.6585805,139.7454329",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXk0fDxAlLsbuZNidybicLACP-nIpl67X_FnKY_IFwE_UymfmNLD7BW9X2pmZTY2cdcP6WwMvCBKO64Dv4WDLJBIkFoysNYkkNw8TbTt69tbTOGiBGgQrrJee1XiE_AcKg90qO6MXfwV9QlnaBqd0EeKq2rCJ0mj5bLDsA08y5RaQ4PBj9FvTft3mOPlCNUY43ybIcz5SYEmczfdxkofwr6f9Hg1Fnbb2Wp6f7BvAcD6COhrdbPFdLEYZgvk0RfopSShw5dV7aPhGxEfSbBH1SgEk4UvsUvgQNjAMTiP6ML835pzYU&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.43,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "196b974f-10bf-43f0-8e29-8e0427a0d40c",
+            "dayNumber": 4,
+            "startTime": "13:00",
+            "endTime": "14:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Godaime Wagyu Tokyo",
+            "description": "\"Cuisine délicieuse et service adorable.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Chuo City, Tokyo",
+            "latitude": 35.666176,
+            "longitude": 139.76506,
+            "orderIndex": 3,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.666176,139.76506",
+            "restaurant": {
+              "id": "serp-11265066035121321357",
+              "name": "Godaime Wagyu Tokyo",
+              "address": "Chuo City, Tokyo",
+              "latitude": 35.666176,
+              "longitude": 139.76506,
+              "rating": 4.7,
+              "reviewCount": 4600,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "steak"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Cuisine délicieuse et service adorable.\""
+              ],
+              "description": "\"Cuisine délicieuse et service adorable.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Godaime%20Wagyu%20Tokyo%2C%20Chuo%20City%2C%20Tokyo",
+              "photos": [
+                "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/thRx6swNf3AhM9KfliILh-tiPvF08ILXAZvD-lJSg8M.jpeg"
+              ],
+              "googlePlaceId": "11265066035121321357",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3342363753007324535",
+                "name": "Kushiyaki Bistro Fukumimi Ginza",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.66961,
+                "longitude": 139.76518,
+                "rating": 4.4,
+                "reviewCount": 1700,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "izakaya"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le staff est vraiment incroyable !!!\""
+                ],
+                "description": "\"Le staff est vraiment incroyable !!!\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Kushiyaki%20Bistro%20Fukumimi%20Ginza%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/ABcGnr7D37zlsUs7LDNtq-xqRxufFTvV1AzXlzLI0VM.jpeg"
+                ],
+                "googlePlaceId": "3342363753007324535",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-12795855873889199973",
+                "name": "ISHIDA GINZA",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.67448,
+                "longitude": 139.76817,
+                "rating": 4.8,
+                "reviewCount": 41,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "française"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ISHIDA%20GINZA%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/3GCsvZ_t3BIsxhWwohwUTovpnaEbsoMBb4i297drrU4.jpeg"
+                ],
+                "googlePlaceId": "12795855873889199973",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 1.96,
+            "timeFromPrevious": 25,
+            "transportToPrevious": "walk",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "c12c7185-f0d7-4be1-89d1-c74326513e12",
+            "dayNumber": 4,
+            "startTime": "14:45",
+            "endTime": "15:45",
+            "type": "activity",
+            "title": "Jardins Est du Palais Impérial",
+            "description": "世界遺産の一覧 (仏語索引) では、ユネスコ世界遺産センターが公表している正式登録名によるアルファベット順索引を提供する。",
+            "locationName": "Jardins Est du Palais Impérial",
+            "latitude": 35.6867824,
+            "longitude": 139.7571445,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6867824,139.7571445",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardins%20Est%20du%20Palais%20Imp%C3%A9rial&query_place_id=&center=35.6867824,139.7571445",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWFn6LA4gm5gbLGsmMQPbzAGOIfrS8JFQGRk1-P3LkGmWUTp4y-Ehp5QuvPXjlyJ0t7oARM_wArQhUL9t67rUkMvw2Vu2PdBn34h0xcIKXNJBzY8rs1txnHZmSGMyyIH86p2hm7UoQfvlRXZN2Pmr9Vv86UK1r_BYiRbJY5shUgjAR7Gkk8vKGLudqi3dzAX0XMVHgKnBYXuNPCOrKVgZh5mTh0xXNZtZ2YKhPPHbPdaB9djrOXC9ntlDgFZeKFh4VAFDDTPkg53Rn0fC4dsZhPxstwgp6eoJWNya5G_AcL3F2ywLsTPksgBfMN5JIVEneRGNlTMVe6BjpLr1Hfv_UmSF1-46akjNDkzCBzjBNeVaHp2l3xvVXhvA9J-TUDteoTIRWMKCXt5a94kxX4R_ye2WelnKkgMXeJQUBQ3Ous13MB8YlxftHr1uT5ejb8FyXhuv5NkCsjQfO4FWmQEwQcrtDTPbrfIsnfksJCPCSfbFOqBuXAejSzqb-ZXaYIdfM8MzdG0u8N6rlJXb48KZNzuPH-zctfhoNpcBUZyaSDMuTRKKbTOkulu4eQKROtYZil-jGy&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.4,
+            "timeFromPrevious": 31,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "dd6259a1-42f5-4975-a027-4605ba04cf54",
+            "dayNumber": 4,
+            "startTime": "16:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Jardin Hama-Rikyū",
+            "description": "Japanese gardens are traditional gardens whose designs are accompanied by Japanese aesthetics and philosophical ideas, avoid artificial ornamentation, and highlight the natural landscape.  Plants and ",
+            "locationName": "Jardin Hama-Rikyū",
+            "latitude": 35.6596559,
+            "longitude": 139.7634091,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6596559,139.7634091",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardin%20Hama-Riky%C5%AB&query_place_id=&center=35.6596559,139.7634091",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUFevbKKlASCzJL_OhSJBDnOKV29LWoIe-TeGIZ-WgFVErq4VCyx86ykaEayKZDF3Y9GlomHf-4xJSOWBbBeXVLHLoLDOngpSw2GIHyxY4-jZjpuumwZ-V_eAL46L5lnDj_2JEK2zObc-piLapASSCv2MvBvaOo_BmcZaw_pDqIt9qUSPf5eoPyTolcCb-WcP-Xx7f4QiOgGtEcJD6t7ol9lJxbeFQlXDcgNv6CvHejbThmXYECs3XbYh1pYsbhS2xIg_ER9T81wD-G8CUtB3EfI6fUtwgCyTDj5FnaLkqrxWEUi-blcCckUECzB6YUC3tBQ8rXSfH-3IIlnTstIDvcDjRJFnK4zWpXG5RVlYjcr4_YOwnVaZeDaF-XlrtnkBgArjUuDlhV1PSJFoQa4jVPVCFgsSo5PHk60ESRITiRskzvAZDcD4R8wvLGOWXdYGM_LwUYQkVvKAiUBkdacdV6s03sUhgMfvzSmInKYjGymNS9RIL-5yVcH9ufwij1_4nKQzFaAho4K3Wq73puKCcuKxcfC-kvzqS_10jUvXN4H6BTPv7FimYx8fJEOXgSYuS4uVjVZDXPHw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 3.07,
+            "timeFromPrevious": 39,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "3f40e0b6-feb6-48f4-86fb-5d56e2f362d7",
+            "dayNumber": 4,
+            "startTime": "17:15",
+            "endTime": "18:15",
+            "type": "activity",
+            "title": "Unicorn Gundam",
+            "description": "GUNDAM FIX FIGURATION（ガンダム・フィックス・フィギュレーション）は、ガンダムシリーズに登場するガンダムタイプのモビルスーツを主な題材とした、バンダイ の販売によるフィギュアシリーズである。派生シリーズにGUNDAM FIX FIGURATION METAL COMPOSITE（ガンダム・フィックス・フィギュレーション・メタル・コンポジット）及びGUNDAM FIX FIGUR",
+            "locationName": "Unicorn Gundam",
+            "latitude": 35.624451,
+            "longitude": 139.7754917,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.624451,139.7754917",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Unicorn%20Gundam&query_place_id=&center=35.624451,139.7754917",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU61eV5ucRFxSBidqDwwj3uR5TBfcAghGMOzE6RN5VeR32r-JZPfmJyWvoMbtZ5N4RRYkd7KUjbWPAs_-brJXJ83UOwiHrzEfLq65viJyXHc8ipB5Bk6C43fPnctMg7UwD4hJuSYDlTzaFd20bxW4IQ9_YlCuozLN8fyVGX9WkSzAeRyY0p9EWpItD4DwGgRe3wdtNaNt4KuPb0ypfK6ixCZ5F_3YmQloA7m2ITw_UY5mG_Uk0FIWR2GI7t7OzdhBGn7rKiz4_R7Y3KgyDxHvFRobOLIyxdiKIsdBx_7ryrUjW5NDDt2ChZOByI2a2POAF2rJn9CsD054xZadQS_f_pRgjq_KNHWqou6CoCzyyVdovE14SaYJ2bZ3_T6zn0HrPfBITNj_bMBTRIPrH7l_LxpmbZ7ANWzDeCYiW4niO7-Qo4-hFdDZOE44r_3f-tg8M1JyblsjOKyqWO8A0VavXEwOFGsSBu4jRcvV6mKgX49u86bLV9Xa4RcJADZ_7QYAfyFWe1UCX8XQoY94EUL7T2nzibviwYd5ABYlL_c0rJHqlrxve6lhcAtpMnE9Uxwu7N6ETbVk8Upw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 4.06,
+            "timeFromPrevious": 51,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "2c43aa81-7484-4ade-a958-a338605c6b84",
+            "dayNumber": 4,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — Hokuto – Casual Sukiyaki, Ginza Corridor Branch",
+            "description": "\"Le meilleur plat que nous avons mangé à Tokyo !\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Chuo City, Tokyo",
+            "latitude": 35.671654,
+            "longitude": 139.76056,
+            "orderIndex": 7,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.671654,139.76056",
+            "restaurant": {
+              "id": "serp-10654999715245695643",
+              "name": "Hokuto – Casual Sukiyaki, Ginza Corridor Branch",
+              "address": "Chuo City, Tokyo",
+              "latitude": 35.671654,
+              "longitude": 139.76056,
+              "rating": 4.7,
+              "reviewCount": 1400,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "shabu-shabu"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Le meilleur plat que nous avons mangé à Tokyo !\""
+              ],
+              "description": "\"Le meilleur plat que nous avons mangé à Tokyo !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hokuto%20%E2%80%93%20Casual%20Sukiyaki%2C%20Ginza%20Corridor%20Branch%2C%20Chuo%20City%2C%20Tokyo",
+              "photos": [
+                "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/OF4KT4uscs9MgepF-Y5jezR860UtDPP52yypb5MR5GE.jpeg"
+              ],
+              "googlePlaceId": "10654999715245695643",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-6943492769827639962",
+                "name": "まとい 銀座 -Matoi Ginza- Wagyu!",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.670895,
+                "longitude": 139.76257,
+                "rating": 4.8,
+                "reviewCount": 127,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très belle expérience.\""
+                ],
+                "description": "\"Très belle expérience.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E3%81%BE%E3%81%A8%E3%81%84%20%E9%8A%80%E5%BA%A7%20-Matoi%20Ginza-%20Wagyu!%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/of2sMpm1oBL6LzAaDS47-UQ2Ds6daEmz3LOgtrBgL0o.jpeg"
+                ],
+                "googlePlaceId": "6943492769827639962",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-15273123982521204023",
+                "name": "Iro（イロ）",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.664936,
+                "longitude": 139.77289,
+                "rating": 5,
+                "reviewCount": 173,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "viande"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le chef est extrêmement sympathique et cuisine admirablement bien.\""
+                ],
+                "description": "\"Le chef est extrêmement sympathique et cuisine admirablement bien.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Iro%EF%BC%88%E3%82%A4%E3%83%AD%EF%BC%89%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/l0yIVPnMkN6EFCk8r3KCEjTWr2vOGSDxlVp2IwRq_R0.jpeg"
+                ],
+                "googlePlaceId": "15273123982521204023",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 5.42,
+            "timeFromPrevious": 68,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "teamLab Borderless: MORI Building DIGITAL ART MUSEUM et La Tour de Tokyo",
+        "dayNarrative": "Plongez dans l'art immersif de teamLab Borderless, admirez la Tour de Tokyo et explorez les Jardins Est du Palais Impérial, avant de profiter d'une soirée animée.",
+        "geoDiagnostics": {
+          "maxLegKm": 12.52,
+          "p95LegKm": 5.42,
+          "totalTravelMin": 370,
+          "totalLegKm": 29.86,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.53,
+          "mstLowerBoundKm": 19.55
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 2,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-03-06T13:17:16.475Z",
+        "items": [
+          {
+            "id": "9e143530-6161-467c-a959-d73ac0954e84",
+            "dayNumber": 5,
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+            "description": "\"Viande de Wagyu halal sublime et délicieuse pour un prix raisonnable\"",
+            "locationName": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.708958,139.77248",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "name": "栄養士Cafe VertVert（ヴェールヴェール）",
+              "address": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+              "latitude": 35.772257599999996,
+              "longitude": 139.7148849,
+              "rating": 4.7,
+              "reviewCount": 96,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-5993-8471",
+              "website": "https://cafevertvert.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+              "googlePlaceId": "ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "openingHours": {
+                "friday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.5342753622145672,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "name": "Sweet kitchen",
+                "address": "〒114-0001 Tokyo, Kita City, Higashijujo, 3 Chome−14−8",
+                "latitude": 35.7661447,
+                "longitude": 139.7287282,
+                "rating": 4.3,
+                "reviewCount": 161,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3919-5509",
+                "website": "https://sweetkitchen.gorp.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20kitchen%2C%20%E3%80%92114-0001%20Tokyo%2C%20Kita%20City%2C%20Higashijujo%2C%203%20Chome%E2%88%9214%E2%88%928",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepib7an8tu-xFWSXxIcVKqGlIlzR-a9zXf-tfuHPjWCn_JAmla9iYQ-L4P5sevSpGlzjQ11-Qe_Jv-xPm0F6-PvXURmLdwkTH50AXU2dvGTlkTucRTUKOkVVst-PQVlSdxRFlLJGg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.421942541470844,
+                "walkingTime": 18
+              },
+              {
+                "id": "serp-nearby-ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "name": "Umenoki",
+                "address": "パレジューレ 2F, 2 Chome-24-10 Kamijujo, Kita City, Tokyo 114-0034",
+                "latitude": 35.761350799999995,
+                "longitude": 139.72130199999998,
+                "rating": 4.1,
+                "reviewCount": 203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3905-6078",
+                "website": "http://umenokijujo.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Umenoki%2C%20%E3%83%91%E3%83%AC%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AC%202F%2C%202%20Chome-24-10%20Kamijujo%2C%20Kita%20City%2C%20Tokyo%20114-0034",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqG7aYC5d4ns5QZU7ahtUc4yVgpDjdt1mhUmC2N4tLbVI-_NgLKzG4kEsIFHH2XVyl_i5y7av-MalrRnTwdkINVZstIC8ShOeLtOis0tuVaUEVJENbXAIbL4unZwGG8L8HYhrDn=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 1.3438935728143138,
+                "walkingTime": 17
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "3f905baf-2bc4-470b-9aab-0e6d82bc98a0",
+            "dayNumber": 5,
+            "startTime": "09:30",
+            "endTime": "13:30",
+            "type": "activity",
+            "title": "Profitez de tous les cours de culture japonaise et de cuisine japonaise \"origami, udon, cuisine japonaise, thé vert, calligraphie\" en 4 heures",
+            "description": "En 4 heures, vous découvrirez la culture et l'hospitalité japonaise chez nous.Les expériences comprennent l'origami, les nouilles udon faites à la main et la cuisine japonaise c...",
+            "locationName": "Profitez de tous les cours de culture japonaise et de cuisine japonaise \"origami, udon, cuisine japonaise, thé vert, calligraphie\" en 4 heures",
+            "latitude": 35.704796699999996,
+            "longitude": 139.7983724,
+            "orderIndex": 1,
+            "estimatedCost": 79,
+            "duration": 240,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Experience-all-of-Japanese-Culture-and-Japanese-Food-Experience-Classes-Origami-Udon-yaki-Japanese-Cuisine-Matcha-Calligraphy-in-4-hours/d334-128348P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.704796699999996,139.7983724",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Profitez%20de%20tous%20les%20cours%20de%20culture%20japonaise%20et%20de%20cuisine%20japonaise%20%22origami%2C%20udon%2C%20cuisine%20japonaise%2C%20th%C3%A9%20vert%2C%20calligraphie%22%20en%204%20heures&query_place_id=&center=35.704796699999996,139.7983724",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/ac/6b/04.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Profitez de tous les cours de culture japonaise et de cuisine japonaise \"origami, udon, cuisine japonaise, thé vert, calligraphie\" en 4 heures",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/ac/6b/04.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 106,
+            "viatorPrice": 79,
+            "viatorDuration": 240,
+            "distanceFromPrevious": 2.38,
+            "timeFromPrevious": 30,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "fb4f9baa-05df-4a07-bc31-d5a1770e62e0",
+            "dayNumber": 5,
+            "startTime": "13:45",
+            "endTime": "15:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Tsujita Nihonbashi Ningyocho",
+            "description": "\"Excellent service, ramen incroyable!\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Chuo City, Tokyo",
+            "latitude": 35.686665,
+            "longitude": 139.78214,
+            "orderIndex": 2,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.686665,139.78214",
+            "restaurant": {
+              "id": "serp-3867271467921573087",
+              "name": "Tsujita Nihonbashi Ningyocho",
+              "address": "Chuo City, Tokyo",
+              "latitude": 35.686665,
+              "longitude": 139.78214,
+              "rating": 4.7,
+              "reviewCount": 1300,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "ramen"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Excellent service, ramen incroyable!\""
+              ],
+              "description": "\"Excellent service, ramen incroyable!\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Tsujita%20Nihonbashi%20Ningyocho%2C%20Chuo%20City%2C%20Tokyo",
+              "photos": [
+                "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/TOMTk5TtbioA_ONWIPBBVSzH1a-SVjyB4WnVxyPG3zg.jpeg"
+              ],
+              "googlePlaceId": "3867271467921573087",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12420996587421216621",
+                "name": "Tapas Molecular Bar",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.68705,
+                "longitude": 139.77306,
+                "rating": 4.6,
+                "reviewCount": 335,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "tapas"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Oui, chaque plat (8) représente 2 bouchées.\""
+                ],
+                "description": "\"Oui, chaque plat (8) représente 2 bouchées.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Tapas%20Molecular%20Bar%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/s5UaNv8v1GArLwhH4Ip3ZZmY4FTDOcOEIcr_gtjZD_o.jpeg"
+                ],
+                "googlePlaceId": "12420996587421216621",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-nearby-ChIJE7zbGRuJGGARri89gNVs0Ww",
+                "name": "Yakiniku Happy",
+                "address": "重本ビル １Ｆ, 1 Chome-4-13 Nihonbashiningyocho, Chuo City, Tokyo 103-0013",
+                "latitude": 35.6855208,
+                "longitude": 139.7816585,
+                "rating": 4.8,
+                "reviewCount": 2857,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant de viande grillée (yakiniku)",
+                  "restaurant de viande grillée (yakiniku)",
+                  "restaurant de grillades coréennes",
+                  "restaurant de bœuf coréen",
+                  "restaurant de viande",
+                  "restaurant de spécialités à base de langue"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-6661-7308",
+                "website": "https://www.yakiniku-happy.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Yakiniku%20Happy%2C%20%E9%87%8D%E6%9C%AC%E3%83%93%E3%83%AB%20%EF%BC%91%EF%BC%A6%2C%201%20Chome-4-13%20Nihonbashiningyocho%2C%20Chuo%20City%2C%20Tokyo%20103-0013",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerjKetTMazLw3maPjRzE4rbzZlJR2-ht7p-_gVkax520UJ9DOw0ZEtD2RvvHaZYiNH0gU-MR7Pk0BDf3CaRE9fZydg-vD87AO_FEYfueyxSORoTOw2jxbjK8j4rr8AZv-iqn24=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJE7zbGRuJGGARri89gNVs0Ww",
+                "openingHours": {
+                  "friday": {
+                    "open": "16:00",
+                    "close": "23:30"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "23:30"
+                  },
+                  "tuesday": {
+                    "open": "16:00",
+                    "close": "23:30"
+                  },
+                  "wednesday": {
+                    "open": "16:00",
+                    "close": "23:30"
+                  },
+                  "thursday": {
+                    "open": "16:00",
+                    "close": "23:30"
+                  }
+                },
+                "distance": 0.13445587432113765,
+                "walkingTime": 2
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 2.49,
+            "timeFromPrevious": 32,
+            "transportToPrevious": "walk",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "78536b3a-0574-4a3c-ac59-6454dff46bc2",
+            "dayNumber": 5,
+            "startTime": "16:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Omoide Yokocho Memory Lane",
+            "description": "The history of Tokyo, Japan's capital prefecture and largest city, starts with archaeological remains in the area dating back around 5,000 years.  Tokyo's oldest temple is possibly Sensō-ji in Asakusa",
+            "locationName": "Omoide Yokocho Memory Lane",
+            "latitude": 35.6927011,
+            "longitude": 139.6995778,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6927011,139.6995778",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Omoide%20Yokocho%20Memory%20Lane&query_place_id=&center=35.6927011,139.6995778",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWyzSAQI70eA3bN2FfngWmr3cmYs7RhoEKKOnaLlHOaAnd9UKL8gg_JvnYNaP9iPG1uZCLBsaTX8Dpjn737Cm_fdwSgq9r5eym1EZ2zRBfkClQiCjUy1S1yg2oZmQZLWiWjX0YDIsvsPAJPR9mKa8tKp8ELF0YJ3fHLUjjjjEpiv_Xnf-qpSd8FH35NMEis7CeyY0kwhNjFXqRRw0U5LF4xwn0sQPZvbWASKwvErAEAp_Ca-PNWcsB8lGcTvixJ4hM1XmJl8DFoY4nW2-FWaf5xCAl3aNknSX0DVz7hCsvlwnSlQEJL4etBDdncI0jbtwaqppqZKOgB8fssI9ahIlAvF1w9WIns_TWBOk9w1sPPOWZusNKyb7f_J7-gNhenW_v9p8WQxUyKkMlA5F5RT63gkueOUV_hExYc8noK3t21rT16_dQ__Xtd9bG4Wgx_j3lgpFgRRvu1yIXNfxeDvKA5c9wUxkMaXzMVQ4Ctx8LWj1BW9bTYvvw5HGHJbebxZ8kNLPT26kdI1vdOfVNZIrXoGgl3lDcVIzAIdjlAGMs-2dOHnSXIxYfwguZ16qGYOZILYTck&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 7.49,
+            "timeFromPrevious": 94,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "57751f80-2355-4bad-8c1e-ae5f2689ec59",
+            "dayNumber": 5,
+            "startTime": "17:15",
+            "endTime": "18:15",
+            "type": "activity",
+            "title": "Shinjuku Golden Gai",
+            "description": "Shinjuku Golden Gai is a district of Kabukicho within Shinjuku, a special ward of Tokyo, Japan.  It is composed of a network of six narrow alleys, connected by even narrower passageways which are abou",
+            "locationName": "Shinjuku Golden Gai",
+            "latitude": 35.6941118,
+            "longitude": 139.7047611,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6941118,139.7047611",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Shinjuku%20Golden%20Gai&query_place_id=&center=35.6941118,139.7047611",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUbtVH4R3ZeP0ewYQIDCr6nPPjkHNwGJ3bPRXjOlWoijqOrFdV_3c4c_fGkhGSg4bD0k3or-hGh_9274WVjouz840qk5JLR4IqmEqMWWD59HFnii76dW2tCgYS6kqD67BsKGwVGeSvZ5hKja1rZflHI1wVXhB3Ojn7MyFHb1gpe8AtG5FKXvqDLwaG5Jizx8ZKli_Xa8uQDEAfQGT9oF6VQ_uG05yaXbimhS6zghyUW6hfr2IX50Y2mp2rMV_gEIruS72gtgLqf43tmDHzBH5mWlJBs1mi5ciJKr2lY-ANza2d94u2l84MJ3FcyMiNFvLvqJfSVSI1MRaT7SppfpCc8yp48EmRnyBPW0ApF3cJOHtoW2WjyzDb2hp-bgmpwCrYlcK-o8iaUSzz-oaZvxBZq_0eeY-vkMNDST85SitbtNsoJyJMRcDnFvKX3y1JW8UwRyiKG8DOQSycGKTerU2-YFcEt-1W0ECZsCaOaO88vExPsqoAL2P3qn21yYV5qtKl1oWOFDfAesjsTzpWyfyR0P2vuynOkUopL0izh-5and6LR1g-E9aNQMFcV9ltFuN1SGrRJlxArRIuTIkJ5XZ_60Vg-Ug&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.49,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "4394f704-f9be-445c-add6-ab9023a03109",
+            "dayNumber": 5,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Shokuno Hanamichi Edo Restaurant",
+            "description": "Dîner — française",
+            "locationName": "〒160-0021 Tokyo, Shinjuku City, Kabukicho, 1 Chome−6−12, HANAMICHI TOKYO KABUKICHO 3F・4F",
+            "latitude": 35.6939462,
+            "longitude": 139.7029356,
+            "orderIndex": 5,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.68447,139.76225",
+            "restaurant": {
+              "id": "serp-nearby-ChIJbdIqXLONGGARxY6gBqEvoP8",
+              "name": "Shokuno Hanamichi Edo Restaurant",
+              "address": "〒160-0021 Tokyo, Shinjuku City, Kabukicho, 1 Chome−6−12, HANAMICHI TOKYO KABUKICHO 3F・4F",
+              "latitude": 35.6939462,
+              "longitude": 139.7029356,
+              "rating": 4.7,
+              "reviewCount": 710,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "restaurant asiatique",
+                "restaurant ryotei",
+                "restaurant de type izakaya",
+                "restaurant japonais",
+                "restaurant de sukiyaki et shabu-shabu",
+                "restaurant de nouilles au sarrasin (soba)",
+                "restaurant de sushis",
+                "restaurant de tempura (japon)",
+                "restaurant d'anguilles (unagi)"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-4570-8731",
+              "website": "https://shoku-hanamichi.tokyo/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Shokuno%20Hanamichi%20Edo%20Restaurant%2C%20%E3%80%92160-0021%20Tokyo%2C%20Shinjuku%20City%2C%20Kabukicho%2C%201%20Chome%E2%88%926%E2%88%9212%2C%20HANAMICHI%20TOKYO%20KABUKICHO%203F%E3%83%BB4F",
+              "googlePlaceId": "ChIJbdIqXLONGGARxY6gBqEvoP8",
+              "openingHours": {
+                "friday": {
+                  "open": "16:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "11:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "16:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "16:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "16:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "16:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.16587941371578938,
+              "walkingTime": 2
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ1URZRaqNGGAREW96qWaaWPo",
+                "name": "Nikuno-né",
+                "address": "Kabukicho Shotengai Shinkou Kumiai Bldg., 8F, 1 Chome-19-3 Kabukicho, Shinjuku City, Tokyo 160-0021",
+                "latitude": 35.6958268,
+                "longitude": 139.70188149999998,
+                "rating": 4.9,
+                "reviewCount": 1049,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant de viande grillée (yakiniku)",
+                  "restaurant de viande grillée (yakiniku)",
+                  "restaurant de grillades coréennes"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-6457-6782",
+                "website": "https://www.akito-co.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Nikuno-n%C3%A9%2C%20Kabukicho%20Shotengai%20Shinkou%20Kumiai%20Bldg.%2C%208F%2C%201%20Chome-19-3%20Kabukicho%2C%20Shinjuku%20City%2C%20Tokyo%20160-0021",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipM9ajSHOvbGuVBKzkb3YzCdzYr9tRw2drJdGYua=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJ1URZRaqNGGAREW96qWaaWPo",
+                "openingHours": {
+                  "friday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  },
+                  "saturday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  },
+                  "sunday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  },
+                  "monday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  },
+                  "tuesday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  },
+                  "wednesday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  },
+                  "thursday": {
+                    "open": "17:00",
+                    "close": "04:00"
+                  }
+                },
+                "distance": 0.3224726438250613,
+                "walkingTime": 4
+              },
+              {
+                "id": "serp-nearby-ChIJR6uRHtiMGGAReQ8n5o8U6nc",
+                "name": "MO-MO-PARADISE Kabukicho",
+                "address": "ヒューマックスパビリオン新宿歌舞伎町 8F, 1 Chome-20-1 Kabukicho, Shinjuku City, Tokyo 160-0021",
+                "latitude": 35.6957719,
+                "longitude": 139.7015463,
+                "rating": 4.8,
+                "reviewCount": 3036,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant de sukiyaki et shabu-shabu",
+                  "restaurant de sukiyaki et shabu-shabu"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "050-1807-5884",
+                "website": "https://mo-mo-paradise.com/shop/kabuki",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=MO-MO-PARADISE%20Kabukicho%2C%20%E3%83%92%E3%83%A5%E3%83%BC%E3%83%9E%E3%83%83%E3%82%AF%E3%82%B9%E3%83%91%E3%83%93%E3%83%AA%E3%82%AA%E3%83%B3%E6%96%B0%E5%AE%BF%E6%AD%8C%E8%88%9E%E4%BC%8E%E7%94%BA%208F%2C%201%20Chome-20-1%20Kabukicho%2C%20Shinjuku%20City%2C%20Tokyo%20160-0021",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipO3QCt0Pkx5lExj0Qd-Y8LtOmbDSdMUb_fXVuzx=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJR6uRHtiMGGAReQ8n5o8U6nc",
+                "openingHours": {
+                  "friday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  },
+                  "tuesday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "17:00",
+                    "close": "22:30"
+                  }
+                },
+                "distance": 0.34403068319428914,
+                "walkingTime": 4
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 5.3,
+            "timeFromPrevious": 67,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Shokuno%20Hanamichi%20Edo%20Restaurant%2C%20%E3%80%92160-0021%20Tokyo%2C%20Shinjuku%20City%2C%20Kabukicho%2C%201%20Chome%E2%88%926%E2%88%9212%2C%20HANAMICHI%20TOKYO%20KABUKICHO%203F%E3%83%BB4F",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Shokuno%20Hanamichi%20Edo%20Restaurant%2C%20%E3%80%92160-0021%20Tokyo%2C%20Shinjuku%20City%2C%20Kabukicho%2C%201%20Chome%E2%88%926%E2%88%9212%2C%20HANAMICHI%20TOKYO%20KABUKICHO%203F%E3%83%BB4F",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Immersion culturelle et gastronomie",
+        "dayNarrative": "Participez à un atelier de cuisine japonaise, explorez les quartiers animés de Shinjuku et terminez la journée par une expérience culinaire raffinée.",
+        "geoDiagnostics": {
+          "maxLegKm": 10.63,
+          "p95LegKm": 7.49,
+          "totalTravelMin": 266,
+          "totalLegKm": 21.27,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.13,
+          "mstLowerBoundKm": 18.77
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 75,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 6,
+        "date": "2026-03-07T13:17:16.475Z",
+        "items": [
+          {
+            "id": "97ea7cbf-3948-4959-abf9-1a84e511f439",
+            "dayNumber": 6,
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+            "description": "\"Viande de Wagyu halal sublime et délicieuse pour un prix raisonnable\"",
+            "locationName": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.708958,139.77248",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "name": "栄養士Cafe VertVert（ヴェールヴェール）",
+              "address": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+              "latitude": 35.772257599999996,
+              "longitude": 139.7148849,
+              "rating": 4.7,
+              "reviewCount": 96,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-5993-8471",
+              "website": "https://cafevertvert.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+              "googlePlaceId": "ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "openingHours": {
+                "friday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.5342753622145672,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "name": "Sweet kitchen",
+                "address": "〒114-0001 Tokyo, Kita City, Higashijujo, 3 Chome−14−8",
+                "latitude": 35.7661447,
+                "longitude": 139.7287282,
+                "rating": 4.3,
+                "reviewCount": 161,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3919-5509",
+                "website": "https://sweetkitchen.gorp.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20kitchen%2C%20%E3%80%92114-0001%20Tokyo%2C%20Kita%20City%2C%20Higashijujo%2C%203%20Chome%E2%88%9214%E2%88%928",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepib7an8tu-xFWSXxIcVKqGlIlzR-a9zXf-tfuHPjWCn_JAmla9iYQ-L4P5sevSpGlzjQ11-Qe_Jv-xPm0F6-PvXURmLdwkTH50AXU2dvGTlkTucRTUKOkVVst-PQVlSdxRFlLJGg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.421942541470844,
+                "walkingTime": 18
+              },
+              {
+                "id": "serp-nearby-ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "name": "Umenoki",
+                "address": "パレジューレ 2F, 2 Chome-24-10 Kamijujo, Kita City, Tokyo 114-0034",
+                "latitude": 35.761350799999995,
+                "longitude": 139.72130199999998,
+                "rating": 4.1,
+                "reviewCount": 203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3905-6078",
+                "website": "http://umenokijujo.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Umenoki%2C%20%E3%83%91%E3%83%AC%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AC%202F%2C%202%20Chome-24-10%20Kamijujo%2C%20Kita%20City%2C%20Tokyo%20114-0034",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqG7aYC5d4ns5QZU7ahtUc4yVgpDjdt1mhUmC2N4tLbVI-_NgLKzG4kEsIFHH2XVyl_i5y7av-MalrRnTwdkINVZstIC8ShOeLtOis0tuVaUEVJENbXAIbL4unZwGG8L8HYhrDn=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 1.3438935728143138,
+                "walkingTime": 17
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "c3d62e70-a484-4508-a472-7fb82eb53a37",
+            "dayNumber": 6,
+            "startTime": "09:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Centre d'Art national de Tokyo",
+            "description": "Espace moderne, expositions temporaires. Grand centre moderne présentant expositions temporaires d'art japonais et international.",
+            "locationName": "Centre d'Art national de Tokyo",
+            "latitude": 35.665289,
+            "longitude": 139.726374,
+            "orderIndex": 1,
+            "estimatedCost": 17,
+            "duration": 120,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.665289,139.726374",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Centre%20d'Art%20national%20de%20Tokyo&query_place_id=&center=35.665289,139.726374",
+            "mustSee": false,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Paris_department_land_cover_location_map.svg/langja-330px-Paris_department_land_cover_location_map.svg.png",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 6.4,
+            "timeFromPrevious": 80,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "e4913a86-b380-4c9d-a74a-59c575f7eac4",
+            "dayNumber": 6,
+            "startTime": "11:45",
+            "endTime": "13:45",
+            "type": "activity",
+            "title": "Musée Nezu",
+            "description": "Musée sur l'art au Japon et en Asie de l'Est. Musée sur l'art au Japon et en Asie de l'Est avec objets pré-modernes sur divers supports, café et boutique de cadeaux.",
+            "locationName": "Musée Nezu",
+            "latitude": 35.6622568,
+            "longitude": 139.7170937,
+            "orderIndex": 2,
+            "estimatedCost": 17,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6622568,139.7170937",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Nezu&query_place_id=&center=35.6622568,139.7170937",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXIf5OOuqBiKmHTJ5IM3Cz0QbdvviGLW5ZDcagBXtgM54mhPmolc3Bxgc5ft1MknVODhs96c7s56493jX_EjN-MQHOIE4_iSPnXCHkRqBG-uwf9e-aHoP3yMN0LtyKAWnesXQaMNKjkBurmM51YMdzCC0xan7l5QGLdHvoR5hON8d7lHF4dnNiq19JtFl6RNspctst7unH9axSTUEFcidPWlZ-r44VDpnTRceeftEVL9KaavHGoaXhNC8gdj5ofjIOKOUmPC7P0oKpBv4XpcojLaUqsMbEtSBMFdmm-wD0Ruh0xc819wt9MAFD9t8883-PelSGQGXHEJHqBWqoaoK-gdENCZ4eCSSDGcewqz67_ciQGglBYi_idJ9ypC3i6uJxl9qEWtV0fBY2r6veHAXVCgh3Abc0Daw6P8Qkxo07vyoceS4NNBqMRpzD3cF0L4P38uV96TlzhhpW_szhr_FC0MAbZsylP_XUJqg3TfO1eRjY56APkiP4ZVEsdZbrvyLPCiT17nb4n5SZGPsDofbMLgZIJIlocdk-Hzuhxc8RKyy03AFfMueHFtM_dwhmt81zbUe5O&maxwidth=800",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.9,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a3734c43-7faa-40fa-b58b-8927a5505d98",
+            "dayNumber": 6,
+            "startTime": "14:00",
+            "endTime": "15:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Oniku Karyu",
+            "description": "\"Le chef est un maitre dans son domaine.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Chuo City, Tokyo",
+            "latitude": 35.673042,
+            "longitude": 139.76985,
+            "orderIndex": 3,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.673042,139.76985",
+            "restaurant": {
+              "id": "serp-685582916898827024",
+              "name": "Oniku Karyu",
+              "address": "Chuo City, Tokyo",
+              "latitude": 35.673042,
+              "longitude": 139.76985,
+              "rating": 4.6,
+              "reviewCount": 350,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant gastronomique japonais (kaiseki)"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Le chef est un maitre dans son domaine.\""
+              ],
+              "description": "\"Le chef est un maitre dans son domaine.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Oniku%20Karyu%2C%20Chuo%20City%2C%20Tokyo",
+              "photos": [
+                "https://lh3.googleusercontent.com/gps-proxy/ALd4DhHPykvIOVl3CvuxCXiFk50Y_zwc9D_gEsio4CJNULi7VBRKgf2n30UkdTkudtCtYQ8TwW-uPdLj3vVrk0stnaYBTpseq2wNMHD4JjAVAen8UGSaV7C9S4rLKN_cw3iVUOHMBc5_ZbqVUVob6nwtpxxzzgsfGyvZOCtM0lblGd9Iy9-de6tQ_qjt=w90-h90-n-k-no-l75"
+              ],
+              "googlePlaceId": "685582916898827024",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12795855873889199973",
+                "name": "ISHIDA GINZA",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.67448,
+                "longitude": 139.76817,
+                "rating": 4.8,
+                "reviewCount": 41,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "française"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ISHIDA%20GINZA%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/3GCsvZ_t3BIsxhWwohwUTovpnaEbsoMBb4i297drrU4.jpeg"
+                ],
+                "googlePlaceId": "12795855873889199973",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-9082107553436738105",
+                "name": "割烹 瑞兆 東京店/ Kappo Zuicho Tokyo",
+                "address": "The Peninsula Tokyo, 4F, 1 Chome-8-1 Yurakucho",
+                "latitude": 35.674698,
+                "longitude": 139.76065,
+                "rating": 4.8,
+                "reviewCount": 46,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%89%B2%E7%83%B9%20%E7%91%9E%E5%85%86%20%E6%9D%B1%E4%BA%AC%E5%BA%97%2F%20Kappo%20Zuicho%20Tokyo%2C%20The%20Peninsula%20Tokyo%2C%204F%2C%201%20Chome-8-1%20Yurakucho",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/Kk7BUfDP0ozsBO-DAKBHS9MN9JBPcrVVKlzF6DCc9G0.jpeg"
+                ],
+                "googlePlaceId": "9082107553436738105",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 4.91,
+            "timeFromPrevious": 62,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "9e03e442-e17b-4e8a-a156-63992947f0c9",
+            "dayNumber": 6,
+            "startTime": "15:45",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "Tokyo Manga Drawing Experience Expert Artist Workshop & MangaHistoire",
+            "description": "Joignez-vous à cet atelier de dessin manga en petit groupe, animé par un artiste manga professionnel. Étape par étape, vous apprendrez à créer des mangas – du brainstorming aux ...",
+            "locationName": "Tokyo Manga Drawing Experience Expert Artist Workshop & MangaHistoire",
+            "latitude": 35.6573834,
+            "longitude": 139.7042806,
+            "orderIndex": 4,
+            "estimatedCost": 86,
+            "duration": 180,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Tokyo-Manga-Adventure/d334-5501196P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.6573834,139.7042806",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tokyo%20Manga%20Drawing%20Experience%20Expert%20Artist%20Workshop%20%26%20MangaHistoire&query_place_id=&center=35.6573834,139.7042806",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/6f/62/6a.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": "Tokyo Manga Drawing Experience Expert Artist Workshop & MangaHistoire",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/6f/62/6a.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 62,
+            "viatorPrice": 86,
+            "viatorDuration": 180,
+            "distanceFromPrevious": 6.17,
+            "timeFromPrevious": 78,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "b0bb1d46-bd0e-4465-b900-b019616f0613",
+            "dayNumber": 6,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Ginza Kyūbey Honten",
+            "description": "\"Sinon les cuisiniers et les serveuses sont marrants et très sympathiques.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Chuo City, Tokyo",
+            "latitude": 35.66847,
+            "longitude": 139.76128,
+            "orderIndex": 5,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.66847,139.76128",
+            "restaurant": {
+              "id": "serp-8263217184568084951",
+              "name": "Ginza Kyūbey Honten",
+              "address": "Chuo City, Tokyo",
+              "latitude": 35.66847,
+              "longitude": 139.76128,
+              "rating": 4.4,
+              "reviewCount": 2500,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "sushis"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Sinon les cuisiniers et les serveuses sont marrants et très sympathiques.\""
+              ],
+              "description": "\"Sinon les cuisiniers et les serveuses sont marrants et très sympathiques.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ginza%20Ky%C5%ABbey%20Honten%2C%20Chuo%20City%2C%20Tokyo",
+              "photos": [
+                "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/CTWjd1JrhRUhQcmi8hva8o4dTfNUPeqiCqNFB_fcMyY.jpeg"
+              ],
+              "googlePlaceId": "8263217184568084951",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-9082107553436738105",
+                "name": "割烹 瑞兆 東京店/ Kappo Zuicho Tokyo",
+                "address": "The Peninsula Tokyo, 4F, 1 Chome-8-1 Yurakucho",
+                "latitude": 35.674698,
+                "longitude": 139.76065,
+                "rating": 4.8,
+                "reviewCount": 46,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E5%89%B2%E7%83%B9%20%E7%91%9E%E5%85%86%20%E6%9D%B1%E4%BA%AC%E5%BA%97%2F%20Kappo%20Zuicho%20Tokyo%2C%20The%20Peninsula%20Tokyo%2C%204F%2C%201%20Chome-8-1%20Yurakucho",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/Kk7BUfDP0ozsBO-DAKBHS9MN9JBPcrVVKlzF6DCc9G0.jpeg"
+                ],
+                "googlePlaceId": "9082107553436738105",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-15273123982521204023",
+                "name": "Iro（イロ）",
+                "address": "Chuo City, Tokyo",
+                "latitude": 35.664936,
+                "longitude": 139.77289,
+                "rating": 5,
+                "reviewCount": 173,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "viande"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le chef est extrêmement sympathique et cuisine admirablement bien.\""
+                ],
+                "description": "\"Le chef est extrêmement sympathique et cuisine admirablement bien.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Iro%EF%BC%88%E3%82%A4%E3%83%AD%EF%BC%89%2C%20Chuo%20City%2C%20Tokyo",
+                "photos": [
+                  "https://serpapi.com/searches/69985f2d054e5f16b4c16a20/images/l0yIVPnMkN6EFCk8r3KCEjTWr2vOGSDxlVp2IwRq_R0.jpeg"
+                ],
+                "googlePlaceId": "15273123982521204023",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 5.29,
+            "timeFromPrevious": 67,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Centre d'Art national de Tokyo et Musée Nezu",
+        "dayNarrative": "Découvrez l'art contemporain, explorez les quartiers commerçants et terminez la journée par une expérience unique de dessin de manga.",
+        "geoDiagnostics": {
+          "maxLegKm": 11.94,
+          "p95LegKm": 6.17,
+          "totalTravelMin": 362,
+          "totalLegKm": 29.21,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.6,
+          "mstLowerBoundKm": 18.22
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 2,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 7,
+        "date": "2026-03-08T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-ret-7-fallback",
+            "dayNumber": 7,
+            "startTime": "06:20",
+            "endTime": "08:50",
+            "type": "transport",
+            "title": "✈️ Vol retour",
+            "description": "Tokyo → Paris (estimation, lien vols recommandé)",
+            "locationName": "Tokyo → Paris",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 777,
+            "bookingUrl": "https://www.aviasales.com/search/TOKYO0803PARIS2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/TOKYO0803PARIS2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/paris/tokyo?departure_date=2026-03-08",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ]
+          },
+          {
+            "id": "c15d4f81-1bb9-4afb-a197-1831b9551bba",
+            "dayNumber": 7,
+            "startTime": "08:00",
+            "endTime": "09:00",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+            "description": "\"Viande de Wagyu halal sublime et délicieuse pour un prix raisonnable\"",
+            "locationName": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+            "latitude": 35.772257599999996,
+            "longitude": 139.7148849,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.708958,139.77248",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "name": "栄養士Cafe VertVert（ヴェールヴェール）",
+              "address": "〒115-0055 Tokyo, Kita City, Akabanenishi, 4 Chome−35−6",
+              "latitude": 35.772257599999996,
+              "longitude": 139.7148849,
+              "rating": 4.7,
+              "reviewCount": 96,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "03-5993-8471",
+              "website": "https://cafevertvert.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+              "googlePlaceId": "ChIJ76sUF-GSGGARp6vqRF-qjv8",
+              "openingHours": {
+                "friday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "14:00"
+                }
+              },
+              "distance": 0.5342753622145672,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "name": "Sweet kitchen",
+                "address": "〒114-0001 Tokyo, Kita City, Higashijujo, 3 Chome−14−8",
+                "latitude": 35.7661447,
+                "longitude": 139.7287282,
+                "rating": 4.3,
+                "reviewCount": 161,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3919-5509",
+                "website": "https://sweetkitchen.gorp.jp/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20kitchen%2C%20%E3%80%92114-0001%20Tokyo%2C%20Kita%20City%2C%20Higashijujo%2C%203%20Chome%E2%88%9214%E2%88%928",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepib7an8tu-xFWSXxIcVKqGlIlzR-a9zXf-tfuHPjWCn_JAmla9iYQ-L4P5sevSpGlzjQ11-Qe_Jv-xPm0F6-PvXURmLdwkTH50AXU2dvGTlkTucRTUKOkVVst-PQVlSdxRFlLJGg=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ_WdcAvWSGGARTpclzLUxiH4",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 1.421942541470844,
+                "walkingTime": 18
+              },
+              {
+                "id": "serp-nearby-ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "name": "Umenoki",
+                "address": "パレジューレ 2F, 2 Chome-24-10 Kamijujo, Kita City, Tokyo 114-0034",
+                "latitude": 35.761350799999995,
+                "longitude": 139.72130199999998,
+                "rating": 4.1,
+                "reviewCount": 203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "03-3905-6078",
+                "website": "http://umenokijujo.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Umenoki%2C%20%E3%83%91%E3%83%AC%E3%82%B8%E3%83%A5%E3%83%BC%E3%83%AC%202F%2C%202%20Chome-24-10%20Kamijujo%2C%20Kita%20City%2C%20Tokyo%20114-0034",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqG7aYC5d4ns5QZU7ahtUc4yVgpDjdt1mhUmC2N4tLbVI-_NgLKzG4kEsIFHH2XVyl_i5y7av-MalrRnTwdkINVZstIC8ShOeLtOis0tuVaUEVJENbXAIbL4unZwGG8L8HYhrDn=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJp5tBZe2SGGARf7DZ_EfroPc",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 1.3438935728143138,
+                "walkingTime": 17
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E6%A0%84%E9%A4%8A%E5%A3%ABCafe%20VertVert%EF%BC%88%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%E3%83%B4%E3%82%A7%E3%83%BC%E3%83%AB%EF%BC%89%2C%20%E3%80%92115-0055%20Tokyo%2C%20Kita%20City%2C%20Akabanenishi%2C%204%20Chome%E2%88%9235%E2%88%926",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "dc70951a-0e51-40f8-a3b0-6818aa6dc87e",
+            "dayNumber": 7,
+            "startTime": "09:15",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": " Tokyo :Atelier de calligraphie et création originale de T-shirts",
+            "description": "[Points forts] - Créer un T-shirt avec votre propre calligraphie - Transformer votre nom en kanji - Leçon avec un calligraphe professionnel - Vivez une expérience guidée en Angl...",
+            "locationName": " Tokyo :Atelier de calligraphie et création originale de T-shirts",
+            "latitude": 35.654012,
+            "longitude": 139.700054,
+            "orderIndex": 2,
+            "estimatedCost": 28,
+            "duration": 120,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Tokyo/Tokyo-Experience-Calligraphy-and-Create-Original-T-Shirt/d334-5523026P5?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=35.654012,139.700054",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%20Tokyo%20%3AAtelier%20de%20calligraphie%20et%20cr%C3%A9ation%20originale%20de%20T-shirts&query_place_id=&center=35.654012,139.700054",
+            "mustSee": false,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/6f/89/76.jpg",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "viatorTitle": " Tokyo :Atelier de calligraphie et création originale de T-shirts",
+            "viatorImageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/6f/89/76.jpg",
+            "viatorRating": 5,
+            "viatorReviewCount": 88,
+            "viatorPrice": 28,
+            "viatorDuration": 120,
+            "distanceFromPrevious": 8.95,
+            "timeFromPrevious": 112,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "5a64dc5f-b0a9-480d-bfbf-af79fb65d37c",
+            "dayNumber": 7,
+            "startTime": "10:00",
+            "endTime": "10:15",
+            "type": "checkout",
+            "title": "Check-out Aakabane Apart ment 3 Wei hefuyan7190",
+            "description": "Départ de l'hôtel",
+            "locationName": "Aakabane Apart ment 3 Wei hefuyan7190",
+            "latitude": 35.7767675,
+            "longitude": 139.7169279,
+            "orderIndex": 3,
+            "accommodation": {
+              "id": "booking-13049025",
+              "name": "Aakabane Apart ment 3 Wei hefuyan7190",
+              "type": "hotel",
+              "address": "Adresse non disponible",
+              "latitude": 35.7767675,
+              "longitude": 139.7169279,
+              "rating": 9,
+              "reviewCount": 3,
+              "stars": 3,
+              "pricePerNight": 61,
+              "totalPrice": 366,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/674599126.jpg?k=d130bd7a610feb3d3221cf3dcac14ffdad03cae92ed948abbe9f5e408f0b0e7a&o="
+              ],
+              "checkInTime": "16:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Aakabane+Apart+ment+3+Wei+hefuyan7190+Tokyo&checkin=2026-03-02&checkout=2026-03-08&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 13.73,
+            "timeFromPrevious": 172,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "4a3fc5d8-58e2-4e1c-8aba-f3c1d853584d",
+            "dayNumber": 7,
+            "startTime": "22:55",
+            "endTime": "05:50",
+            "type": "flight",
+            "title": "HND → CDG",
+            "description": "Vol AF AF 279",
+            "locationName": "Aéroport international de Tokyo-Haneda",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 4,
+            "duration": 895,
+            "flight": {
+              "id": "serp-AF 279-2026-03-08",
+              "airline": "AF",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/AF.png",
+              "flightNumber": "AF 279",
+              "departureAirport": "Aéroport international de Tokyo-Haneda",
+              "departureAirportCode": "HND",
+              "departureCity": "HND",
+              "departureTime": "2026-03-08T21:55:00.000Z",
+              "departureTimeDisplay": "22:55",
+              "arrivalAirport": "Aéroport de Paris-Charles de Gaulle",
+              "arrivalAirportCode": "CDG",
+              "arrivalCity": "CDG",
+              "arrivalTime": "2026-03-09T04:50:00.000Z",
+              "arrivalTimeDisplay": "05:50",
+              "duration": 895,
+              "stops": 0,
+              "price": 2821,
+              "pricePerPerson": 1411,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/HND0803CDG2?currency=eur&locale=fr"
+            },
+            "flightAlternatives": [],
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 2821
+          }
+        ],
+        "theme": "Derniers moments à Tokyo",
+        "dayNarrative": "Profitez d'une dernière activité culturelle avant votre départ, en explorant l'art de la calligraphie et en créant un souvenir unique de votre voyage.",
+        "geoDiagnostics": {
+          "maxLegKm": 13.22,
+          "p95LegKm": 13.22,
+          "totalTravelMin": 159,
+          "totalLegKm": 13.22,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 13.22
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 760,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Tokyo",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 35.6762,
+              "lng": 139.6503
+            },
+            "duration": 728,
+            "price": 777,
+            "co2": 1476,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/PARIS0203TOKYO2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 1018,
+        "totalPrice": 777,
+        "totalCO2": 1476,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.aviasales.com/search/PARIS0203TOKYO2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/tokyo?departure_date=2026-03-02",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Tokyo",
+            "duration": 713,
+            "price": 951,
+            "co2": 1855
+          }
+        ],
+        "totalDuration": 1001,
+        "totalPrice": 975,
+        "totalCO2": 1856,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 0
+        }
+      }
+    ],
+    "selectedTransport": {
+      "id": "plane",
+      "mode": "plane",
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Tokyo",
+          "fromCoords": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "toCoords": {
+            "lat": 35.6762,
+            "lng": 139.6503
+          },
+          "duration": 728,
+          "price": 777,
+          "co2": 1476,
+          "frequency": "Plusieurs vols par jour",
+          "bookingUrl": "https://www.aviasales.com/search/PARIS0203TOKYO2?currency=eur&locale=fr"
+        }
+      ],
+      "totalDuration": 1018,
+      "totalPrice": 777,
+      "totalCO2": 1476,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 0,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.aviasales.com/search/PARIS0203TOKYO2?currency=eur&locale=fr",
+      "omioFlightUrl": "https://www.omio.fr/vols/paris/tokyo?departure_date=2026-03-02",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "outboundFlight": {
+      "id": "serp-AF 282-2026-03-02",
+      "airline": "AF",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/AF.png",
+      "flightNumber": "AF 282",
+      "departureAirport": "Aéroport de Paris-Charles de Gaulle",
+      "departureAirportCode": "CDG",
+      "departureCity": "CDG",
+      "departureTime": "2026-03-02T08:25:00.000Z",
+      "departureTimeDisplay": "09:25",
+      "arrivalAirport": "Aéroport international de Tokyo-Haneda",
+      "arrivalAirportCode": "HND",
+      "arrivalCity": "HND",
+      "arrivalTime": "2026-03-03T05:50:00.000Z",
+      "arrivalTimeDisplay": "06:50",
+      "duration": 805,
+      "stops": 0,
+      "price": 2301,
+      "pricePerPerson": 1151,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/CDG0203HND2?currency=eur&locale=fr"
+    },
+    "returnFlight": {
+      "id": "serp-AF 279-2026-03-08",
+      "airline": "AF",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/AF.png",
+      "flightNumber": "AF 279",
+      "departureAirport": "Aéroport international de Tokyo-Haneda",
+      "departureAirportCode": "HND",
+      "departureCity": "HND",
+      "departureTime": "2026-03-08T21:55:00.000Z",
+      "departureTimeDisplay": "22:55",
+      "arrivalAirport": "Aéroport de Paris-Charles de Gaulle",
+      "arrivalAirportCode": "CDG",
+      "arrivalCity": "CDG",
+      "arrivalTime": "2026-03-09T04:50:00.000Z",
+      "arrivalTimeDisplay": "05:50",
+      "duration": 895,
+      "stops": 0,
+      "price": 2821,
+      "pricePerPerson": 1411,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/HND0803CDG2?currency=eur&locale=fr"
+    },
+    "accommodation": {
+      "id": "booking-13049025",
+      "name": "Aakabane Apart ment 3 Wei hefuyan7190",
+      "type": "hotel",
+      "address": "Adresse non disponible",
+      "latitude": 35.7767675,
+      "longitude": 139.7169279,
+      "rating": 9,
+      "reviewCount": 3,
+      "stars": 3,
+      "pricePerNight": 61,
+      "totalPrice": 366,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/674599126.jpg?k=d130bd7a610feb3d3221cf3dcac14ffdad03cae92ed948abbe9f5e408f0b0e7a&o="
+      ],
+      "checkInTime": "16:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Aakabane+Apart+ment+3+Wei+hefuyan7190+Tokyo&checkin=2026-03-02&checkout=2026-03-08&group_adults=2&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-13049025",
+        "name": "Aakabane Apart ment 3 Wei hefuyan7190",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 35.7767675,
+        "longitude": 139.7169279,
+        "rating": 9,
+        "reviewCount": 3,
+        "stars": 3,
+        "pricePerNight": 61,
+        "totalPrice": 366,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/674599126.jpg?k=d130bd7a610feb3d3221cf3dcac14ffdad03cae92ed948abbe9f5e408f0b0e7a&o="
+        ],
+        "checkInTime": "16:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Aakabane+Apart+ment+3+Wei+hefuyan7190+Tokyo&checkin=2026-03-02&checkout=2026-03-08&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-9365672",
+        "name": "Minimalism HOTEL TOKYO Katsushika",
+        "type": "hotel",
+        "address": "3-chōme-27 Takasago, Katsushika City, Tokyo 125-0054, Japan",
+        "latitude": 35.748529382284,
+        "longitude": 139.869160852675,
+        "rating": 8.5,
+        "reviewCount": 344,
+        "stars": 3,
+        "pricePerNight": 46,
+        "totalPrice": 276,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/700424248.jpg?k=aee1160062a2ee673da36886ac7c153ebd179324e91ff21c30d78713e436c980&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/jp/sugu-takasago.html?checkin=2026-03-02&checkout=2026-03-08&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-13564226",
+        "name": "レザンドールll",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 35.5667465,
+        "longitude": 139.7008934,
+        "rating": 6.8,
+        "reviewCount": 18,
+        "stars": 3,
+        "pricePerNight": 48,
+        "totalPrice": 288,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/646077256.jpg?k=e910e1f7a6e2327e15287eea113d3f965e861f4204d3c1c00083797b8e0c6eec&o="
+        ],
+        "checkInTime": "16:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/jp/lesandre-ii.html?checkin=2026-03-02&checkout=2026-03-08&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 6785,
+    "costBreakdown": {
+      "flights": 5122,
+      "accommodation": 427,
+      "food": 552,
+      "activities": 684,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 140,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 35,
+      "transportTips": "Acheter un IC card (Suica/Pasmo) pour transports illimités. Budget 6€/jour suffisant avec cette carte.",
+      "reasoning": "Budget serré (429€/personne/jour). Tokyo offre excellente gastronomie bon marché (ramen 5-8€, gyudon 3-5€, konbini). Stratégie: Airbnb avec cuisine (140€/nuit pour 2) permet petit-déj maison. Midi restaurant (6-8€ avec plats locaux économiques). Dîner mixed: 3-4 sorties restaurant qualité + 3-4 repas légers maison. Activités: musées + lieux gratuits/bas-coût (temples, parcs, quartiers). Cela laisse 35€/personne/jour pour culture. Gain: restaurants Tokyo moins chers que cuisiner, donc maximize expérience gastronomique plutôt que self-catering complet.",
+      "maxPricePerActivity": 200
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: tokyo-7d-luxury",
+    "   Paris → Tokyo (7j)",
+    "   couple (2p) | luxury | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Tokyo\", ll=\"@35.6762,139.6503,14z\", gl=\"jp\"",
+    "[Google Places] ✅ 25 attractions found for Tokyo",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Hotels] Disponibilité live: 1/8 hôtels confirmés",
+    "[Hotels] Disponibilité live partielle (1 confirmés), complété à 5 options pour garder des hôtels centraux",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (509ms)",
+    "[Pipeline V2] Resolving GPS for 15 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/15 activities",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Tokyo\" from local database",
+    "[Pipeline V2]   → Temple Senso-ji, Carrefour de Shibuya, Sanctuaire Meiji",
+    "[Flights] Airport search scope: full (2 airport pairs)",
+    "[Pipeline V2] Flights found in 9649ms",
+    "[Pipeline V2] Step 1: All data fetched in 48535ms",
+    "[Pipeline V2]   Activities: 25 Google + 23 SerpAPI + 0 Overpass + 15 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 5 | Transport options: 2",
+    "[Pipeline V2 LLM] Step 1 done in 48535ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Aakabane Apart ment 3 Wei hefuyan7190\" (9★, €61/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 68 activities → 42 after dedup (dropped 26)",
+    "[Pipeline V2 LLM] Step 2: Selected 35 activities (0 must-sees, 35 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 50 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 374 pairs",
+    "[Pipeline V2 LLM] Step 2: 35 activities, 18 restaurants, 374 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 10ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 20465 in + 4040 out, ~$0.0055, 23951ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Arrivée et découverte d'Asakusa\",\n      \"narrative\": \"Après votre arrivée matinale, détendez-vous avant de plonger dans l'ambiance traditionne...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 1 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 120min gap on day 2 with \"Tokyo Disneyland\"",
+    "[Pipeline V2 LLM] Enrichment: filled 135min gap on day 3 with \"Tokyo DisneySea\"",
+    "[Pipeline V2 LLM] Enrichment: filled 120min gap on day 4 with \"Unicorn Gundam\"",
+    "[Pipeline V2 LLM] Enrichment complete: added 3 activities",
+    "[Pipeline V2 LLM] Plan: 7 days, 25 activities, 16 meals",
+    "[Pipeline V2 LLM] Step 3 done in 23953ms — 7 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 35 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 7 days with 41 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 4540ms",
+    "[Pipeline V2 LLM] Step 4 done in 4540ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 9 restaurants swapped, 7 kept as fallback (13577ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 32 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 4516ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 78/100",
+    "  📦 Complétude: 23/25",
+    "  ⏱️  Rythme:     19/25",
+    "  🗺️  Géo:        11/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 7: transport retour manquant",
+    "  ⚠️ Jour 7: chevauchement ✈️ Vol retour / Petit-déjeuner — 栄養士Cafe VertVert（ヴェールヴェール）",
+    "  ⚠️ Jour 7: chevauchement  Tokyo :Atelier de calligraphie et création originale de T-shirts / Check-out Aakabane Apart ment 3 Wei hefuyan7190",
+    "  ⚠️ Jour 3: Déjeuner — T’s Tantan est à 5174m de l'activité la plus proche",
+    "  ⚠️ Jour 3: Dîner — GYOPAO Gyoza Roppongi est à 14414m de l'activité la plus proche",
+    "  ⚠️ Jour 4: Déjeuner — Godaime Wagyu Tokyo est à 1964m de l'activité la plus proche",
+    "  ⚠️ Jour 4: Dîner — Hokuto – Casual Sukiyaki, Ginza Corridor Branch est à 5419m de l'activité la plus proche",
+    "  ⚠️ Jour 5: Déjeuner — Tsujita Nihonbashi Ningyocho est à 2493m de l'activité la plus proche",
+    "  ⚠️ Jour 6: Déjeuner — Oniku Karyu est à 4914m de l'activité la plus proche",
+    "  ⚠️ Jour 6: Dîner — Ginza Kyūbey Honten est à 5295m de l'activité la plus proche",
+    "  ⚠️ Distance moyenne entre items: 5.5km (élevée)",
+    "  ⚠️ Hôtel à 11.7km du centre des activités",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 7: transport retour inséré (fallback)",
+    "  🔧 Jour 2: thème régénéré \"Culture et vues panoramiques\" → \"Musée national de Tokyo et Tokyo Skytree\"",
+    "  🔧 Jour 4: thème régénéré \"Art numérique et vues emblématiques\" → \"teamLab Borderless: MORI Building DIGITAL ART MUSEUM et La Tour de Tokyo\"",
+    "  🔧 Jour 6: thème régénéré \"Art, shopping et divertissement\" → \"Centre d'Art national de Tokyo et Musée Nezu\"",
+    "[Pipeline V2 LLM] Step 5 done in 4ms — score: 78/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 95136ms ==="
+  ],
+  "warnings": [
+    "[Weather] Fetch failed (non-critical): Open-Meteo forecast API error: 400",
+    "[RapidAPI Booking] ❌ Google Places résultat rejeté pour \"レザンドールll\": \"Japan, 〒810-0002 Fukuoka, Chuo Ward, Nishinakasu, 2−25 ＳＴＡＧＥ１西中洲 1階\" n'est pas dans Tokyo",
+    "[SerpAPI] Vols filtrés ORY→HND 2026-03-02: escale_nuit=6 (Aéroport de Milan-Linate×4, Aéroport international Jean-Paul II de Cracovie-Balice×1, Aéropuerto Adolfo-Suárez de Madrid-Barajas×1), escale_longue=2 (Aéroport de Milan Malpensa×2)",
+    "[SerpAPI] Vols filtrés HND→ORY 2026-03-08: escale_nuit=3 (Aéroport Léonard-de-Vinci de Rome Fiumicino×2, Aéropuerto Adolfo-Suárez de Madrid-Barajas×1), escale_longue=2 (Aéroport international de Hong Kong×2)",
+    "[SerpAPI] Vols filtrés CDG→HND 2026-03-02: escale_nuit=1 (Aéroport international Indira Gandhi×1), escale_longue=2 (Aéroport Suvarnabhumi de Bangkok×2)",
+    "[SerpAPI] Vols filtrés HND→CDG 2026-03-08: escale_nuit=5 (Aéroport de Copenhague×2, Aéroport international d'Incheon×1, Aéroport international Hamad×1), escale_longue=1 (Aéroport international de Dubaï×1)",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"serp-1\" from day 2"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5948 (line 160 column 8)",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite à pied du sanctuaire Harajuku Meiji à Tokyo, Tokyo\" à Tokyo — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"3 - Visite  de Tokyo en vélo électrique à partir de votre hôtel, Tokyo\" à Tokyo — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 95136,
+  "generatedAt": "2026-02-20T13:18:37.324Z",
+  "success": true
+}

@@ -452,7 +452,7 @@ export async function compareTransportOptions(
       console.warn('[Transport] Multi-modal search failed:', err instanceof Error ? err.message : err);
     }
   } else if (shouldTryMultiModal && skipMultiModalForLongHaul) {
-    console.log(`[Transport] Multi-modal skipped for long-haul route (${Math.round(distance)}km)`);
+    console.debug(`[Transport] Multi-modal skipped for long-haul route (${Math.round(distance)}km)`);
   }
 
   // Calculer les scores

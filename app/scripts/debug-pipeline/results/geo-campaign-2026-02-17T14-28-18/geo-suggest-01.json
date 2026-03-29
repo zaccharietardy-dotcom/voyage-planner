@@ -1,0 +1,2802 @@
+{
+  "scenarioId": "geo-suggest-01-le-festin-portugais-a-porto",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Porto",
+    "startDate": "2026-04-03T14:31:55.386Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "economic",
+    "activities": [
+      "gastronomy",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Porto",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "13e1569c-3884-4b57-9d21-2f48a8aa9f03",
+    "createdAt": "2026-02-17T14:33:14.474Z",
+    "updatedAt": "2026-02-17T14:33:14.474Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Porto",
+      "startDate": "2026-04-03T14:31:55.386Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "economic",
+      "activities": [
+        "gastronomy",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Porto",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-03T14:31:55.386Z",
+        "items": [
+          {
+            "id": "home-airport-out-1",
+            "dayNumber": 1,
+            "startTime": "04:52",
+            "endTime": "05:30",
+            "type": "transport",
+            "title": "🚗 Trajet vers LYS",
+            "description": "Lyon → Lyon Saint-Exupéry",
+            "locationName": "Lyon Saint-Exupéry",
+            "latitude": 45.7256,
+            "longitude": 5.0811,
+            "orderIndex": 0,
+            "estimatedCost": 4,
+            "duration": 38,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%97%20Trajet%20vers%20LYS%2C%20Porto",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "airport_parking_included"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "parking-out-1",
+            "dayNumber": 1,
+            "startTime": "05:30",
+            "endTime": "06:00",
+            "type": "parking",
+            "title": "Parking aéroport — P5 Économique",
+            "description": "",
+            "locationName": "Lyon Saint-Exupéry",
+            "latitude": 45.72,
+            "longitude": 5.09,
+            "orderIndex": 1,
+            "estimatedCost": 36,
+            "duration": 30,
+            "rating": 3.8,
+            "bookingUrl": "https://www.lyonaeroports.com/parkings",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=P5%20%C3%89conomique%2C%20Porto",
+            "parking": {
+              "id": "lys-p5",
+              "name": "P5 Économique",
+              "type": "airport",
+              "address": "Lyon Saint-Exupéry",
+              "latitude": 45.72,
+              "longitude": 5.09,
+              "distanceToTerminal": 1500,
+              "pricePerDay": 12,
+              "currency": "EUR",
+              "amenities": [
+                "outdoor",
+                "24h",
+                "shuttle"
+              ],
+              "rating": 3.8,
+              "reviewCount": 320,
+              "bookingUrl": "https://www.lyonaeroports.com/parkings",
+              "totalPrice": 36,
+              "locationName": "Lyon Saint-Exupéry",
+              "estimatedCost": 36,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "airport_parking_selected"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "airport_parking_selected"
+            ],
+            "distanceFromPrevious": 0.93,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "21:20",
+            "type": "transport",
+            "title": "✈️ Vol → Porto",
+            "description": "Lyon → Porto (estimation, lien vols recommandé)",
+            "locationName": "Lyon → Porto",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 2,
+            "estimatedCost": 120,
+            "duration": 800,
+            "bookingUrl": "https://www.aviasales.com/search/LYON0304PORTO1?currency=eur&locale=fr",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%E2%9C%88%EF%B8%8F%20Vol%20%E2%86%92%20Porto%2C%20Porto",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ],
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg"
+          },
+          {
+            "id": "checkin-fallback-1",
+            "dayNumber": 1,
+            "startTime": "21:20",
+            "endTime": "21:50",
+            "type": "checkin",
+            "title": "Check-in Fantasy Hostel Porto",
+            "description": "Disponibilité confirmée",
+            "locationName": "R. dos Heróis e dos Mártires de Angola 34, 4000-285 Porto, Portugal",
+            "latitude": 41.1511338,
+            "longitude": -8.6105741,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 7.5,
+            "bookingUrl": "https://www.booking.com/hotel/pt/fantasy-hostel-porto-porto.html?checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fantasy%20Hostel%20Porto%2C%20Porto",
+            "accommodation": {
+              "id": "booking-12236251",
+              "name": "Fantasy Hostel Porto",
+              "type": "hotel",
+              "address": "R. dos Heróis e dos Mártires de Angola 34, 4000-285 Porto, Portugal",
+              "latitude": 41.1511338,
+              "longitude": -8.6105741,
+              "rating": 7.5,
+              "reviewCount": 4143,
+              "stars": 3,
+              "pricePerNight": 16,
+              "totalPrice": 32,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/806448314.jpg?k=296ec60c6d879ca8f52499901a4a70bf402bd8abcf7f4377e837cea739ec4863&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/hotel/pt/fantasy-hostel-porto-porto.html?checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "budget_fallback_hotel_suggestion"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "budget_fallback_hotel_suggestion"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/806448314.jpg?k=296ec60c6d879ca8f52499901a4a70bf402bd8abcf7f4377e837cea739ec4863&o="
+          }
+        ],
+        "theme": "Arrivée et installation",
+        "dayNarrative": "",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Bruine légère",
+          "tempMin": 10,
+          "tempMax": 18,
+          "icon": "🌦️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 0,
+          "transport": 160,
+          "total": 160
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 120,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-04T14:31:55.386Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Pão Fôfo",
+            "description": "pâtisserie, restaurant",
+            "locationName": "Rua de Camões 216, 4000-286 Porto",
+            "latitude": 41.1521434,
+            "longitude": -8.6102115,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.3,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=P%C3%A3o%20F%C3%B4fo%2C%20Rua%20de%20Cam%C3%B5es%20216%2C%204000-286%20Porto",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=P%C3%A3o%20F%C3%B4fo%2C%20Porto",
+            "restaurant": {
+              "id": "serp-nearby-ChIJt07Hg_tkJA0RoZZq-RQfANQ",
+              "name": "Pão Fôfo",
+              "address": "Rua de Camões 216, 4000-286 Porto",
+              "latitude": 41.1521434,
+              "longitude": -8.6102115,
+              "rating": 4.3,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "pâtisserie",
+                "pâtisserie",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "22 201 0616",
+              "website": "https://m.facebook.com/padariapaofofotrindade/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=P%C3%A3o%20F%C3%B4fo%2C%20Rua%20de%20Cam%C3%B5es%20216%2C%204000-286%20Porto",
+              "googlePlaceId": "ChIJt07Hg_tkJA0RoZZq-RQfANQ",
+              "openingHours": {
+                "tuesday": {
+                  "open": "07:00",
+                  "close": "20:00"
+                }
+              },
+              "distance": 0.11629500870100296,
+              "walkingTime": 1,
+              "_alternatives": [
+                {
+                  "id": "serp-nearby-ChIJ3WaF1JJlJA0R088gWJ_O4ug",
+                  "name": "Carlotta Cake Boutique - Loja Trindade",
+                  "address": "R. do Alferes Malheiro 120, 4000-059 Porto",
+                  "latitude": 41.1522544,
+                  "longitude": -8.6106489,
+                  "rating": 4.9,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "café spécialisé dans les boissons expresso",
+                    "café spécialisé dans les boissons expresso",
+                    "pastelaria brésilienne",
+                    "restaurant brunch",
+                    "cafétéria",
+                    "magasin de gâteaux",
+                    "confiserie",
+                    "boutique de desserts",
+                    "snack"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "967 701 506",
+                  "website": "http://www.carlottacakeboutique.pt/",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Carlotta%20Cake%20Boutique%20-%20Loja%20Trindade%2C%20R.%20do%20Alferes%20Malheiro%20120%2C%204000-059%20Porto",
+                  "googlePlaceId": "ChIJ3WaF1JJlJA0R088gWJ_O4ug",
+                  "openingHours": {
+                    "tuesday": {
+                      "open": "12:00",
+                      "close": "19:00"
+                    }
+                  },
+                  "distance": 0.12476232036265189,
+                  "walkingTime": 2,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXgT8N95bB70qmlEW6iNXmSLQgzDuLz8CR57-hkpqcHtNwgjxRqWUCG6Mra7X9wW01h3zfVNul0C5HeAbCAujdNybzKOvmQMuReEyktTxC4BxL1RGwRKhEAS2-kuRWFNk_u-AQ-HL0TJroE6BSDJG1fhhAl8XhmuY7Zu2xEW0ZhgMxwekc0tDkLgb4en6cjcj6eJjvEog46kA39b4Q_FbK4N7K6YPNO6DNWEPsgy_mm70P5rrbxM2_EBvnWEPdJKSblK3A3OZjQgBrRzRoVaeptnncgYtueqSLrHNo-kwZO0Q&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-nearby-ChIJxbY2EP1kJA0R5oahKOmjBgs",
+                  "name": "Oporto Bakery",
+                  "address": "R. do Pinheiro 86, 4050-361 Porto",
+                  "latitude": 41.150763,
+                  "longitude": -8.6141927,
+                  "rating": 4.3,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "boulangerie",
+                    "boulangerie"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "22 203 9057",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Oporto%20Bakery%2C%20R.%20do%20Pinheiro%2086%2C%204050-361%20Porto",
+                  "googlePlaceId": "ChIJxbY2EP1kJA0R5oahKOmjBgs",
+                  "openingHours": {
+                    "tuesday": {
+                      "open": "07:00",
+                      "close": "19:30"
+                    }
+                  },
+                  "distance": 0.3057685841182278,
+                  "walkingTime": 4,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVGAL3fJ8sKnE8O07TVpAHtWHwxyhmNbQzCARp8xFDsBzyF_Cb1RmTTOncRqst2QpsncNEj7xYY8XJz2LlIwEFpTEabbpEjkyZz3A1ARCY-WAEmpHewtXXPE009ZrQ49h7lOd4a-YGxgDMJIJhozUCT6i3Cf4inJe5AtSc5D8nebU79_GrKwvRhxSXR4sbZ5Yf3rgCbiaUjxiPXiBbZCTka1k30_B8j85yewS1tglxuzYWtOm4G0hlFqQ5kMrU3UP2j38sPCArsrjoyGoZvdFAAlMm8aQBuOrtQ7FkQANy89IgjYS4DMQaGNeUsPX4YdwiCZabvOJYcfKKsdthnlahhAG1i-CawWddvcOHF4VAXMy22rm1aR8TNn1InU89L61dSWBLTXF18KLDDStc7MxeH9PgU4ltCkhGy_tJhdTrw9g&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUurcYoY56tho0_DsQApeWSaIZsQwwEm40n86CoLwEbAGEqCY1maaVDuzRLroIudT2P6FZ8yJjlzUkha5Ko_AzBW_q9TWiZfn_djL_iAo-D93ecmQXmo8m65q26CHw2LtOto5XivDEQ50n-0UjhZq0IX89TchRV6JmV2Ra3Dj6qBsvg9HYz3Jy7Oy5TbE2ITSFvTbkHsN2WxLOcfmyy-LU9dcjl24e09DmDGCTmj6xme1PRwVGIr7RYF4HmOr02VajwdqWLdDEHWfH7Cer_PzR2DhTfeimqu38A2A52qD9pPzReNcAhHTwOoJ-fs17j1nIObH6STNqun33Q4EuwQmoJ6-h-nwT2HVnTNjK90RfY0_-Nq65cctmukkSXypCXq7O5AbdQchOFu1dt1gq7So66uhZv0BTe_fTFGzTo8ukfQktcVFCwx7LIBCrtbA&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ3WaF1JJlJA0R088gWJ_O4ug",
+                "name": "Carlotta Cake Boutique - Loja Trindade",
+                "address": "R. do Alferes Malheiro 120, 4000-059 Porto",
+                "latitude": 41.1522544,
+                "longitude": -8.6106489,
+                "rating": 4.9,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "café spécialisé dans les boissons expresso",
+                  "café spécialisé dans les boissons expresso",
+                  "pastelaria brésilienne",
+                  "restaurant brunch",
+                  "cafétéria",
+                  "magasin de gâteaux",
+                  "confiserie",
+                  "boutique de desserts",
+                  "snack"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "967 701 506",
+                "website": "http://www.carlottacakeboutique.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Carlotta%20Cake%20Boutique%20-%20Loja%20Trindade%2C%20R.%20do%20Alferes%20Malheiro%20120%2C%204000-059%20Porto",
+                "googlePlaceId": "ChIJ3WaF1JJlJA0R088gWJ_O4ug",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 0.12476232036265189,
+                "walkingTime": 2,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXgT8N95bB70qmlEW6iNXmSLQgzDuLz8CR57-hkpqcHtNwgjxRqWUCG6Mra7X9wW01h3zfVNul0C5HeAbCAujdNybzKOvmQMuReEyktTxC4BxL1RGwRKhEAS2-kuRWFNk_u-AQ-HL0TJroE6BSDJG1fhhAl8XhmuY7Zu2xEW0ZhgMxwekc0tDkLgb4en6cjcj6eJjvEog46kA39b4Q_FbK4N7K6YPNO6DNWEPsgy_mm70P5rrbxM2_EBvnWEPdJKSblK3A3OZjQgBrRzRoVaeptnncgYtueqSLrHNo-kwZO0Q&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJxbY2EP1kJA0R5oahKOmjBgs",
+                "name": "Oporto Bakery",
+                "address": "R. do Pinheiro 86, 4050-361 Porto",
+                "latitude": 41.150763,
+                "longitude": -8.6141927,
+                "rating": 4.3,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "22 203 9057",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Oporto%20Bakery%2C%20R.%20do%20Pinheiro%2086%2C%204050-361%20Porto",
+                "googlePlaceId": "ChIJxbY2EP1kJA0R5oahKOmjBgs",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "19:30"
+                  }
+                },
+                "distance": 0.3057685841182278,
+                "walkingTime": 4,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVGAL3fJ8sKnE8O07TVpAHtWHwxyhmNbQzCARp8xFDsBzyF_Cb1RmTTOncRqst2QpsncNEj7xYY8XJz2LlIwEFpTEabbpEjkyZz3A1ARCY-WAEmpHewtXXPE009ZrQ49h7lOd4a-YGxgDMJIJhozUCT6i3Cf4inJe5AtSc5D8nebU79_GrKwvRhxSXR4sbZ5Yf3rgCbiaUjxiPXiBbZCTka1k30_B8j85yewS1tglxuzYWtOm4G0hlFqQ5kMrU3UP2j38sPCArsrjoyGoZvdFAAlMm8aQBuOrtQ7FkQANy89IgjYS4DMQaGNeUsPX4YdwiCZabvOJYcfKKsdthnlahhAG1i-CawWddvcOHF4VAXMy22rm1aR8TNn1InU89L61dSWBLTXF18KLDDStc7MxeH9PgU4ltCkhGy_tJhdTrw9g&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUurcYoY56tho0_DsQApeWSaIZsQwwEm40n86CoLwEbAGEqCY1maaVDuzRLroIudT2P6FZ8yJjlzUkha5Ko_AzBW_q9TWiZfn_djL_iAo-D93ecmQXmo8m65q26CHw2LtOto5XivDEQ50n-0UjhZq0IX89TchRV6JmV2Ra3Dj6qBsvg9HYz3Jy7Oy5TbE2ITSFvTbkHsN2WxLOcfmyy-LU9dcjl24e09DmDGCTmj6xme1PRwVGIr7RYF4HmOr02VajwdqWLdDEHWfH7Cer_PzR2DhTfeimqu38A2A52qD9pPzReNcAhHTwOoJ-fs17j1nIObH6STNqun33Q4EuwQmoJ6-h-nwT2HVnTNjK90RfY0_-Nq65cctmukkSXypCXq7O5AbdQchOFu1dt1gq7So66uhZv0BTe_fTFGzTo8ukfQktcVFCwx7LIBCrtbA&maxwidth=800",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJ00b9XOdkJA0Rq2pFmc9AW8I",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "09:45",
+            "type": "activity",
+            "title": "Pont Dom-Luís",
+            "description": "Ponte D. Luís pode referir-se a:Ponte de D. Luís (Porto) Ponte de D.",
+            "locationName": "Pont Dom-Luís",
+            "latitude": 41.1399589,
+            "longitude": -8.6094485,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pont%20Dom-Lu%C3%ADs%2C%20Porto",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUs2JD247hTEtpXA87mHiMvaaGPZPM_dL2DsVhxdau_VlqQWSRpZPfVADKnhlIxo8lW2-k5WNbTsDpWGG6eY50qUU1FSpPku6EFyfVk4lRYvNZizpGUG3OcekIyXJ-h8s6BZLsKTWmXRUAoUKemibikmaEM7I5zmLZrHpCEckQkTDeui-IJr-eiUjP69QTHmMjdmF0FR9poHMWQVANa8MbDz5Kelkn1yYRW3R1nCqmFGEMlQ0_q8dKUq6gSf6323f20HKNS525F8TDUas-YyiJyBVIjHClKAzbv7j8e6UndkTq0dk_0LoMAQRsi9tNZIx2-dot2VRaW2RzFyuIBopGwB9FiZZbJ6nlrP2HS7mAk4FqtIJpAeAK0AzvHXjXsgAvgjRzkOZMfQcVT4uBvZrwolCl1WnJ8W3zorz1oCtVzE5CPg2lEDHo62pskwx8wny28XuhRndWgWIYUuRLt9sTqQAG2X5P9P-3_p00uz1JhC4SrCbau9747Vpaf2BhkmzvA3fpSFjbLZbtQXsRI8GJ0qOiiSZvPAYUtfHCY9hgvq319N5Q2BzrJf1uTzJLQ4RZRbA&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 1.36,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.1521434,-8.6102115&destination=41.1399589,-8.6094485&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJW3NQxR1lJA0R36dtNv8LUi8",
+            "dayNumber": 2,
+            "startTime": "10:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Parque das Virtudes",
+            "description": "A Casa das Virtudes ou Casa dos Albuquerques é uma abastada residência barroca, localizada em Miragaia, na atual União de Freguesias de Cedofeita, Santo Ildefonso, Sé, Miragaia, São Nicolau e Vitória, município do Porto, Portugal.",
+            "locationName": "Parque das Virtudes",
+            "latitude": 41.1447,
+            "longitude": -8.6189879,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parque%20das%20Virtudes%2C%20Porto",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXHAAZulkEX3OwdVGQNTm4WE1eBQhSqnWqr66_AhvHuV5spEYT1qcl147TjShKeOyXAeYz0itme8jWy13UPrWvLnG-k5rssDgNdzy5Sa-Z8nnRVCDU1mSnDP9fNEPeMEF075DCnKTpX5hBXtk9JQRadlyvpqlgC35dJmWBQtyaK9dTgpPnF7BGiFdupjmIBfHqvnyVuBwKmOb4o5CC1UBpwrVYMkZ1zGqzXGjEk03tgH9P-3vEdQJtde3yqV6IbiSg3kxB_QZEf6C8y1cy6yVyJ8cSPHz8-AOItV_YSC78uZPJqxTTebaMLIz8d-yfJKd7xm43aFBT5ZvT10C7iMb3RptDkbLKoXDrfVJmNrErzGs2UGuHSAI_7-4cqcUO9BOR-mcMRZiYHTHPlkGhD3ifndnbJ3XQ1nNd2SpVJ3dmz7gkPLFjQIwIMlh_X-m57CwMo-jJeQRe0atzwDTJ0y080F3MOHLAibZsKfxxtQOMeXOF4grRG9NbEQDjTgGE5ZoxFsH9hqgKVcVndtX6e4jEdBUs8XzHAjSpw_y_t1f7BPLeneXgHVcXH2RjB9-e9UctEuvmd&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.96,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Oporto Bakery",
+            "description": "boulangerie",
+            "locationName": "R. do Pinheiro 86, 4050-361 Porto",
+            "latitude": 41.150763,
+            "longitude": -8.6141927,
+            "orderIndex": 3,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.3,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Oporto%20Bakery%2C%20R.%20do%20Pinheiro%2086%2C%204050-361%20Porto",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Oporto%20Bakery%2C%20Porto",
+            "restaurant": {
+              "id": "serp-nearby-ChIJxbY2EP1kJA0R5oahKOmjBgs",
+              "name": "Oporto Bakery",
+              "address": "R. do Pinheiro 86, 4050-361 Porto",
+              "latitude": 41.150763,
+              "longitude": -8.6141927,
+              "rating": 4.3,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "boulangerie",
+                "boulangerie"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "22 203 9057",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Oporto%20Bakery%2C%20R.%20do%20Pinheiro%2086%2C%204050-361%20Porto",
+              "googlePlaceId": "ChIJxbY2EP1kJA0R5oahKOmjBgs",
+              "openingHours": {
+                "tuesday": {
+                  "open": "07:00",
+                  "close": "19:30"
+                }
+              },
+              "distance": 0.3057685841182278,
+              "walkingTime": 4,
+              "_alternatives": [],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVx0T3lGeIR3WOt3E7ioUsWHBzpA5HablLkNg_vC4EWKi5HcZpf-VsnPovwfCueHvcylvta_55jUx_DoxfmTYJEgwfugaPNuDoiJ9f2nKttSx3iOj9gI5p2dET76KSTBmWtZ_uWgZAQHeoMD_MkR8b3MF8i_-SJCQvM6EvkDD2jVb5il-CjF_ZYofKjVQRCYM9miNmJqXIB4aKbQLJAprRZJSQD4WjQQjvTnY3euVZEqG8jbhX4hOIWu3Jdc8ddHd_AIjkrm5wlYEyA7C6um7QGlxEsdni7CQv0HNZJ2qvy_coWrLYNivnnbeW7Xk-IUSls8RTeNxZdLgbEMkvm5k4OOFsB7MeOA1Uy6UAgb6sn9CvyBUzkHdoOXGFtXyzU25CLjQatDtkB6HxblztQAk1wBGscpfpUX-WthEOShl6-EA&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJH5LosuJkJA0RNBiBFClWuoI",
+                "name": "Lareira - Baixa",
+                "address": "R. Das Oliveiras 8, 4050-159 Porto",
+                "latitude": 41.148792,
+                "longitude": -8.615256,
+                "rating": 4.5,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant portugais",
+                  "restaurant portugais",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "22 208 0917",
+                "website": "http://www.restaurantelareira.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lareira%20-%20Baixa%2C%20R.%20Das%20Oliveiras%208%2C%204050-159%20Porto",
+                "googlePlaceId": "ChIJH5LosuJkJA0RNBiBFClWuoI",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.3652767857710133,
+                "walkingTime": 5,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU3zkMRJU24_9wW2CeSgNNe4rkDD5TMEOcybnSsFy0PbjgMEc-OxRLM8daglDyAqkdW2eCpp1YBbN7KnbbmDrdaDW5A0hPvYaYvBdXDEY0cQvkpC1x5rN_yz9cBxp69Snukjmrk3msipe9vAx5JtpU6lbXvRCPzcaY44XWdQh0fdDLnF8hxPD5ILNqXJ2XOH-6miZ3AUofx_RprkTV2l5tLvoRTRi7lNP2ZJ_iMrSeUA6Qd7H5rC6Pd6dky2gOQL8GpuBO2aDb1fhWywEfp_64HadxtnaSJc_3Qvt81NNwyJA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJa4rq8nZlJA0Re3QVSXMXgX0",
+                "name": "The Door",
+                "address": "Rua das Taipas 94 a 96, 4050-598 Porto",
+                "latitude": 41.144196099999995,
+                "longitude": -8.616688,
+                "rating": 4.8,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "964 963 136",
+                "website": "http://www.instagram.com/thedoor.porto",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Door%2C%20Rua%20das%20Taipas%2094%20a%2096%2C%204050-598%20Porto",
+                "googlePlaceId": "ChIJa4rq8nZlJA0Re3QVSXMXgX0",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "18:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.6274577236595069,
+                "walkingTime": 8,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUS6hM0EUg79Fvv6PHycRZnLzsKoh_Jo2R0iwrGclzzQ-R8x5bQW5gpF-TwdYovBA6501JHTskfBGe6hTfqM8TFNAsgcYnAmE-ACIwShio6zsLsPj-HVNAEt5f_C7oLz1yTN0W3PsSGeM5frQRkmoTYr0Pr7CBMpDx2dYPtmvti6yYTrtV96P4T6_VJdlyc5FoI3WB_76IrlFckeNpKDsto_j2cWSg5hwrnoC0E25JBbNVLW5tPZhmVHzA9org5fJXhqYYlUol9b4EHNYKaRkemYnrTobpc_rtfikPWpKF14g&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVx0T3lGeIR3WOt3E7ioUsWHBzpA5HablLkNg_vC4EWKi5HcZpf-VsnPovwfCueHvcylvta_55jUx_DoxfmTYJEgwfugaPNuDoiJ9f2nKttSx3iOj9gI5p2dET76KSTBmWtZ_uWgZAQHeoMD_MkR8b3MF8i_-SJCQvM6EvkDD2jVb5il-CjF_ZYofKjVQRCYM9miNmJqXIB4aKbQLJAprRZJSQD4WjQQjvTnY3euVZEqG8jbhX4hOIWu3Jdc8ddHd_AIjkrm5wlYEyA7C6um7QGlxEsdni7CQv0HNZJ2qvy_coWrLYNivnnbeW7Xk-IUSls8RTeNxZdLgbEMkvm5k4OOFsB7MeOA1Uy6UAgb6sn9CvyBUzkHdoOXGFtXyzU25CLjQatDtkB6HxblztQAk1wBGscpfpUX-WthEOShl6-EA&maxwidth=800",
+            "distanceFromPrevious": 0.78,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJd5pejOJkJA0RT-Sh6F5ACH8",
+            "dayNumber": 2,
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Librairie Lello",
+            "description": "Euclides Rodrigues Pimenta da Cunha foi um escritor e jornalista brasileiro identificado com o pré-modernismo, conhecido por seu romance Os Sertões e por sua atividade intelectual nos primeiros anos da República Brasileira.",
+            "locationName": "Librairie Lello",
+            "latitude": 41.1468104,
+            "longitude": -8.6148718,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Librairie%20Lello%2C%20Porto",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWhzX-q_JBM3oRUYVBpd4NTJJ1QJ0TvFtjYem9T3pN1fTfdfurfLENtyp3OoJFQsydY_ieAnPqgNJ37rMT3zt-8z_lbpImYAsIo2tvdveWQG_4bbyezr3oNXW_kBDCDtRImX5atmTJaJd1VViiFgbe5YofyWpooXBhPSGqiY41Mx7Cx21i46a24jAMhHI-Pbq4BVUD1HlzCjIJ2ZYQKy3DAug2I9bZ7cIUyHqAyRKBBODz4W3sKBGXH7YgmZuDRfbGlGsGXGRHemJVE-ehQUmIwqK1DibiIBf1BILX5QEbRR70ks3pZ_kv53FNgj5nylZN1rWn6hEKxMd7kFXUfwvcBi-3l8MluZIooC4E_qHjaEmHi8enV-VF_YxKEx-gAEPS-bWlFskpx75MfB8AtJnkz9z3M3kjKHhqY5MJtIBotONTZhVRtoZuhrn9s7NYftI8Cqdf6tHJA6_-_jIIp2Scs9Ls_z_WNcS7wkYXNEdT0_L2DPjPupOt2TE50C3Yvfg0jhX4YVSH2YReb_CFmyx2cuhc1TW6oYZH_5vSUKxy_6D63Vd-wiKAIXdM-wK8x7vOmIJchK9AEbDmszLTeKK9DhkPUQQ&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 0.44,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "16:10",
+            "endTime": "17:25",
+            "type": "restaurant",
+            "title": "Dîner — Sabor Da Fazenda",
+            "description": "restaurant",
+            "locationName": "R. de Clemente Meneres 44, 4050-201 Porto",
+            "latitude": 41.1484179,
+            "longitude": -8.6195712,
+            "orderIndex": 5,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Sabor%20Da%20Fazenda%2C%20R.%20de%20Clemente%20Meneres%2044%2C%204050-201%20Porto",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sabor%20Da%20Fazenda%2C%20Porto",
+            "restaurant": {
+              "id": "serp-nearby-ChIJWUkFzRxlJA0RnyamlG-FC14",
+              "name": "Sabor Da Fazenda",
+              "address": "R. de Clemente Meneres 44, 4050-201 Porto",
+              "latitude": 41.1484179,
+              "longitude": -8.6195712,
+              "rating": 4.7,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "925 899 423",
+              "website": "https://pt-pt.facebook.com/SabordaFazendaPorto/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sabor%20Da%20Fazenda%2C%20R.%20de%20Clemente%20Meneres%2044%2C%204050-201%20Porto",
+              "googlePlaceId": "ChIJWUkFzRxlJA0RnyamlG-FC14",
+              "openingHours": {
+                "tuesday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                }
+              },
+              "distance": 0.11084189605233855,
+              "walkingTime": 1,
+              "_alternatives": [
+                {
+                  "id": "serp-nearby-ChIJH5LosuJkJA0RNBiBFClWuoI",
+                  "name": "Lareira - Baixa",
+                  "address": "R. Das Oliveiras 8, 4050-159 Porto",
+                  "latitude": 41.148792,
+                  "longitude": -8.615256,
+                  "rating": 4.5,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant portugais",
+                    "restaurant portugais",
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "22 208 0917",
+                  "website": "http://www.restaurantelareira.pt/",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lareira%20-%20Baixa%2C%20R.%20Das%20Oliveiras%208%2C%204050-159%20Porto",
+                  "googlePlaceId": "ChIJH5LosuJkJA0RNBiBFClWuoI",
+                  "openingHours": {
+                    "tuesday": {
+                      "open": "12:00",
+                      "close": "23:00"
+                    }
+                  },
+                  "distance": 0.3652767857710133,
+                  "walkingTime": 5,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfU3zkMRJU24_9wW2CeSgNNe4rkDD5TMEOcybnSsFy0PbjgMEc-OxRLM8daglDyAqkdW2eCpp1YBbN7KnbbmDrdaDW5A0hPvYaYvBdXDEY0cQvkpC1x5rN_yz9cBxp69Snukjmrk3msipe9vAx5JtpU6lbXvRCPzcaY44XWdQh0fdDLnF8hxPD5ILNqXJ2XOH-6miZ3AUofx_RprkTV2l5tLvoRTRi7lNP2ZJ_iMrSeUA6Qd7H5rC6Pd6dky2gOQL8GpuBO2aDb1fhWywEfp_64HadxtnaSJc_3Qvt81NNwyJA&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-nearby-ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                  "name": "Casa Viúva",
+                  "address": "R. do Actor João Guedes 17, 4050-526 Porto",
+                  "latitude": 41.148022499999996,
+                  "longitude": -8.615475199999999,
+                  "rating": 4.8,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant portugais",
+                    "restaurant portugais"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Vi%C3%BAva%2C%20R.%20do%20Actor%20Jo%C3%A3o%20Guedes%2017%2C%204050-526%20Porto",
+                  "googlePlaceId": "ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                  "openingHours": {
+                    "tuesday": {
+                      "open": "11:30",
+                      "close": "15:00"
+                    }
+                  },
+                  "distance": 0.3738522002171504,
+                  "walkingTime": 5,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVO5wPeHG-HUhoZgpU8O6J8w93D9ar8JGgGsARx-rhJrdXpwWtz_fydhK_uccquJlzxB4cauE1U0PGK71mdzlBmpcdqamoFAFIrjdQeY9uVNDjcecBlPti6l3-VGUWGZubJ-U1QKlE0WHT7j_2krrpC2Xm7iSOS3FwyMScg7rP-FNjGN408gqtOnnK3eP0yR-IEThlCFyXy9a-Ot6sa1DqhTceoDxlVPn5xB0kfljdXVko5ZUaw3G4JVYzdxYEpRnstYOB1b1schqsTTDel7j8VmkSJaCuc3v0-NgnoA8vewns6tZKPEm79nMnTWgZTi5k2nFSsN6xJdfs7GGWcpGpQVXR3bRHs3YzG4rCeDfjGxPxEsDzj6hc8W5tNiGYTIhLmXolzqgNvSZrCm3wPgc2er-a-uHgUkSMNWXsziKKcesL5K5YKF6do3rShAZO7&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWKUQiulAH-dKhnOJLKrEnYd92qR0jJDvv8bxMm8_7Dw3MshDvyUZe_nMvx9gB2woS54wl6-FD3xfUiImxiOD51_PwBaNrw4ONMQ-oiF7iRUMEeYsikoVn3mq0xhg3Q55T-opAL_NYipVJkFJBvaFhvC6vLNfNpea-7qY8xuUWx2M97Sw8hVADnC7kPXk1Fw7XQPhO-lArvdKRyuKVpQ_0lqv46MBlmEuhBxjk8u6cK6zbqkfgrFsBZ2Cfr5dlLImMz5in9pjDy4987HXhenaM3t17rlg0Q0N8ytp81ggrtoVMWgtcuSsR4WPITMCGjMK8a1obeu6IYFLK7ho4pa51HaSPk3aH_AstNUUQhg7OfiMEciwe6_I8X7FJyiaHgaCL8TUl4hWB-dIF1ZgJWXAv_CZSxXkd5bQBRPvEobnZ3Bng&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJH5LosuJkJA0RNBiBFClWuoI",
+                "name": "Lareira - Baixa",
+                "address": "R. Das Oliveiras 8, 4050-159 Porto",
+                "latitude": 41.148792,
+                "longitude": -8.615256,
+                "rating": 4.5,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant portugais",
+                  "restaurant portugais",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "22 208 0917",
+                "website": "http://www.restaurantelareira.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lareira%20-%20Baixa%2C%20R.%20Das%20Oliveiras%208%2C%204050-159%20Porto",
+                "googlePlaceId": "ChIJH5LosuJkJA0RNBiBFClWuoI",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.3652767857710133,
+                "walkingTime": 5,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU3zkMRJU24_9wW2CeSgNNe4rkDD5TMEOcybnSsFy0PbjgMEc-OxRLM8daglDyAqkdW2eCpp1YBbN7KnbbmDrdaDW5A0hPvYaYvBdXDEY0cQvkpC1x5rN_yz9cBxp69Snukjmrk3msipe9vAx5JtpU6lbXvRCPzcaY44XWdQh0fdDLnF8hxPD5ILNqXJ2XOH-6miZ3AUofx_RprkTV2l5tLvoRTRi7lNP2ZJ_iMrSeUA6Qd7H5rC6Pd6dky2gOQL8GpuBO2aDb1fhWywEfp_64HadxtnaSJc_3Qvt81NNwyJA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                "name": "Casa Viúva",
+                "address": "R. do Actor João Guedes 17, 4050-526 Porto",
+                "latitude": 41.148022499999996,
+                "longitude": -8.615475199999999,
+                "rating": 4.8,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant portugais",
+                  "restaurant portugais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Vi%C3%BAva%2C%20R.%20do%20Actor%20Jo%C3%A3o%20Guedes%2017%2C%204050-526%20Porto",
+                "googlePlaceId": "ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  }
+                },
+                "distance": 0.3738522002171504,
+                "walkingTime": 5,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVO5wPeHG-HUhoZgpU8O6J8w93D9ar8JGgGsARx-rhJrdXpwWtz_fydhK_uccquJlzxB4cauE1U0PGK71mdzlBmpcdqamoFAFIrjdQeY9uVNDjcecBlPti6l3-VGUWGZubJ-U1QKlE0WHT7j_2krrpC2Xm7iSOS3FwyMScg7rP-FNjGN408gqtOnnK3eP0yR-IEThlCFyXy9a-Ot6sa1DqhTceoDxlVPn5xB0kfljdXVko5ZUaw3G4JVYzdxYEpRnstYOB1b1schqsTTDel7j8VmkSJaCuc3v0-NgnoA8vewns6tZKPEm79nMnTWgZTi5k2nFSsN6xJdfs7GGWcpGpQVXR3bRHs3YzG4rCeDfjGxPxEsDzj6hc8W5tNiGYTIhLmXolzqgNvSZrCm3wPgc2er-a-uHgUkSMNWXsziKKcesL5K5YKF6do3rShAZO7&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWKUQiulAH-dKhnOJLKrEnYd92qR0jJDvv8bxMm8_7Dw3MshDvyUZe_nMvx9gB2woS54wl6-FD3xfUiImxiOD51_PwBaNrw4ONMQ-oiF7iRUMEeYsikoVn3mq0xhg3Q55T-opAL_NYipVJkFJBvaFhvC6vLNfNpea-7qY8xuUWx2M97Sw8hVADnC7kPXk1Fw7XQPhO-lArvdKRyuKVpQ_0lqv46MBlmEuhBxjk8u6cK6zbqkfgrFsBZ2Cfr5dlLImMz5in9pjDy4987HXhenaM3t17rlg0Q0N8ytp81ggrtoVMWgtcuSsR4WPITMCGjMK8a1obeu6IYFLK7ho4pa51HaSPk3aH_AstNUUQhg7OfiMEciwe6_I8X7FJyiaHgaCL8TUl4hWB-dIF1ZgJWXAv_CZSxXkd5bQBRPvEobnZ3Bng&maxwidth=800",
+            "distanceFromPrevious": 0.43,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Jardins du Palais de Cristal et Librairie Lello",
+        "dayNarrative": "Journée consacrée à Jardins du Palais de Cristal, Librairie Lello, Parque das Virtudes. 3 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Pluie modérée",
+          "tempMin": 12,
+          "tempMax": 18,
+          "icon": "🌧️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 90,
+          "transport": 0,
+          "total": 90
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 120,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": true,
+          "geoPrunedActivitiesCount": 2
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.36,
+          "p95LegKm": 0.96,
+          "totalTravelMin": 64,
+          "totalLegKm": 3.97,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.57,
+          "mstLowerBoundKm": 2.53
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-05T14:31:55.386Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "09:15",
+            "type": "checkout",
+            "title": "Check-out Fantasy Hostel Porto",
+            "description": "Disponibilité confirmée",
+            "locationName": "R. dos Heróis e dos Mártires de Angola 34, 4000-285 Porto, Portugal",
+            "latitude": 41.1511338,
+            "longitude": -8.6105741,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 7.5,
+            "bookingUrl": "https://www.booking.com/hotel/pt/fantasy-hostel-porto-porto.html?checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fantasy%20Hostel%20Porto%2C%20Porto",
+            "accommodation": {
+              "id": "booking-12236251",
+              "name": "Fantasy Hostel Porto",
+              "type": "hotel",
+              "address": "R. dos Heróis e dos Mártires de Angola 34, 4000-285 Porto, Portugal",
+              "latitude": 41.1511338,
+              "longitude": -8.6105741,
+              "rating": 7.5,
+              "reviewCount": 4143,
+              "stars": 3,
+              "pricePerNight": 16,
+              "totalPrice": 32,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/806448314.jpg?k=296ec60c6d879ca8f52499901a4a70bf402bd8abcf7f4377e837cea739ec4863&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/hotel/pt/fantasy-hostel-porto-porto.html?checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "budget_fallback_hotel_suggestion"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "budget_fallback_hotel_suggestion"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/806448314.jpg?k=296ec60c6d879ca8f52499901a4a70bf402bd8abcf7f4377e837cea739ec4863&o="
+          },
+          {
+            "id": "viator-58705P12",
+            "dayNumber": 3,
+            "startTime": "11:00",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "5 Dégustations de Porto avec accords",
+            "description": "Nous sommes situés juste au centre-ville, juste en face du Palácio da Bolsa, Rua Mouzinho da SIlveira 34, ce qui vous permet de vous arrêter très facilement pour apprendre et déguster quelques vins de Porto. Chaque dégustation durera environ 30 mi...",
+            "locationName": "5 Dégustations de Porto avec accords",
+            "latitude": 41.1369189,
+            "longitude": -8.619280999999999,
+            "orderIndex": 1,
+            "estimatedCost": 35,
+            "duration": 90,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Porto/5-Port-Wine-Tasting/d26879-58705P12?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "viatorUrl": "https://www.viator.com/fr-FR/tours/Porto/5-Port-Wine-Tasting/d26879-58705P12?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=5%20D%C3%A9gustations%20de%20Porto%20avec%20accords%2C%20Porto",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/14/be/43/7c.jpg",
+            "freeCancellation": true,
+            "instantConfirmation": false,
+            "mustSee": false,
+            "distanceFromPrevious": 1.74,
+            "timeFromPrevious": 19,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "gp-ChIJQQ2CwuFkJA0RUdkM5HFBMmk",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Palacio da Bolsa",
+            "description": "",
+            "locationName": "Palacio da Bolsa",
+            "latitude": 41.1413772,
+            "longitude": -8.615672499999999,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palacio%20da%20Bolsa%2C%20Porto",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXHuOvLHH58CAMOPolM9Q2-zLTm6QfiByqN062Nkm42MckaMa59Lqzy343ZfudjfLxG_0gyoB7gKbGsvIIqnbEGqNvPn8j3tkTRFkw2QDy9oDDZGKaBHt0YB9cz3FBj-POhZAycKvkIGY-WcF6QMlurlYTJ3EIaea6v-Q-Lk-gyPsV4Ajwifupw9QN-nBIWJvQW5BoAucAozK0lHFdHEh4vOAkJEeRnuk64_XOm32qU5AJSeJqBivjAfwCpsOkyqx-nee1z6bzOV9mfgGVPM2jovh30dg4FPF2udPK0No76dr50IiUh1jgs4ampfUrYo1zcn0UQi7yYJUYT6IjzBhlI38TKQp7xvEci0d_0dhQwErpA6XonfOPZE7HQdGi88nghgz7P5WCrM4Dn_0wvW7zthp31FSa99lyJnqyNmuX3kch6R_FWzkwBEMhjjS1KzV5kcMUXlZ-EG2KooL_VnMIKvXRqekuYMT0uQU9D5T7aoKxE2-pZY_fxAxBW7U2qVRZ8_sVtspSzAlzLvIlpSifW1gz66xBWup8_MP5Fplp-ryr6X6VrgrUQRzQ7EDILnqtyk_uHCN7CTQ&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.58,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJHwb6td1kJA0R5zTqv3nKOSk",
+            "dayNumber": 3,
+            "startTime": "15:00",
+            "endTime": "16:00",
+            "type": "activity",
+            "title": "Jardim do Morro",
+            "description": "O Jardim do Morro é um espaço verde na freguesia de Santa Marinha, em Vila Nova de Gaia, Portugal.",
+            "locationName": "Jardim do Morro",
+            "latitude": 41.1371459,
+            "longitude": -8.6092935,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jardim%20do%20Morro%2C%20Porto",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXWj43hYxI7uY7huRAb66wF-dw85OIt_WtP2LG16RxhU24Vw_B-PX--dnT-o-Maa1eEaSkM6S2i6VKOZMwSIc_1XjtNYtYFTicMa6toW0XpMp9-pG9Ja5oA_3BAvYllJF55-Xp__rvs1JTVY9hU8Dm2892ExiCPnrobug7nmbCdFK-128B3LXFOPdw7OiaHId7xcstAlehauPZ3C8C9eZCmBe_2TwAcJXd0RYCn3q6c-q3lhhgIfL7x59V8bSbifPbWGi2YLSPmGEpd-8HH75nj2FItNNjO7Zk_lU_wqWsOtiq2MZIIBHO9vWSvs1FxyiwwQfY_OfsB01o9bdGzfYOsYHaTn1ghqx__hBh4mRT67xUtmo1nc-7gsgIfrfOiBNJifmJjsq7dOOfPrDTPx5nIFaO14sd2E9EskhTh2GwVdPnFXyowroZGF9d2s8bjwzYjlCAB9sow7e25Pk72gwsIKC0B5eJAyCwefGF52rbSBrhteMFu4cyREUhkpBoUDRNE0SLlLSqBKvXynS91YP_Nvo20_Y1dIfIxZdhZVzMOTVNkSyYzA6GmMK22Agppq5u4SABD&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.71,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-3-dinner",
+            "dayNumber": 3,
+            "startTime": "16:10",
+            "endTime": "17:25",
+            "type": "restaurant",
+            "title": "Dîner — ENCAIXADOS",
+            "description": "restaurant portugais · Plats traditionnels, resto aux murs en briques. Restaurant intimiste et cosy proposant sélection de plats portugais typiques comme la morue salée.",
+            "locationName": "R. do Conde de Vizela 14, 4050-639 Porto",
+            "latitude": 41.1462232,
+            "longitude": -8.6134836,
+            "orderIndex": 4,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.6,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=ENCAIXADOS%2C%20R.%20do%20Conde%20de%20Vizela%2014%2C%204050-639%20Porto",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=ENCAIXADOS%2C%20Porto",
+            "restaurant": {
+              "id": "serp-nearby-ChIJIxSnVeJkJA0RaUwFYWHkh3U",
+              "name": "ENCAIXADOS",
+              "address": "R. do Conde de Vizela 14, 4050-639 Porto",
+              "latitude": 41.1462232,
+              "longitude": -8.6134836,
+              "rating": 4.6,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant portugais",
+                "restaurant portugais"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Plats traditionnels, resto aux murs en briques. Restaurant intimiste et cosy proposant sélection de plats portugais typiques comme la morue salée."
+              ],
+              "description": "Plats traditionnels, resto aux murs en briques. Restaurant intimiste et cosy proposant sélection de plats portugais typiques comme la morue salée.",
+              "phoneNumber": "916 945 311",
+              "website": "http://www.encaixados.pt/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=ENCAIXADOS%2C%20R.%20do%20Conde%20de%20Vizela%2014%2C%204050-639%20Porto",
+              "googlePlaceId": "ChIJIxSnVeJkJA0RaUwFYWHkh3U",
+              "openingHours": {
+                "tuesday": {
+                  "open": "18:30",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.6189027409784557,
+              "walkingTime": 8,
+              "_alternatives": [
+                {
+                  "id": "serp-nearby-ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                  "name": "Casa Viúva",
+                  "address": "R. do Actor João Guedes 17, 4050-526 Porto",
+                  "latitude": 41.148022499999996,
+                  "longitude": -8.615475199999999,
+                  "rating": 4.8,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant portugais",
+                    "restaurant portugais"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Vi%C3%BAva%2C%20R.%20do%20Actor%20Jo%C3%A3o%20Guedes%2017%2C%204050-526%20Porto",
+                  "googlePlaceId": "ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                  "openingHours": {
+                    "tuesday": {
+                      "open": "11:30",
+                      "close": "15:00"
+                    }
+                  },
+                  "distance": 0.3738522002171504,
+                  "walkingTime": 5,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVO5wPeHG-HUhoZgpU8O6J8w93D9ar8JGgGsARx-rhJrdXpwWtz_fydhK_uccquJlzxB4cauE1U0PGK71mdzlBmpcdqamoFAFIrjdQeY9uVNDjcecBlPti6l3-VGUWGZubJ-U1QKlE0WHT7j_2krrpC2Xm7iSOS3FwyMScg7rP-FNjGN408gqtOnnK3eP0yR-IEThlCFyXy9a-Ot6sa1DqhTceoDxlVPn5xB0kfljdXVko5ZUaw3G4JVYzdxYEpRnstYOB1b1schqsTTDel7j8VmkSJaCuc3v0-NgnoA8vewns6tZKPEm79nMnTWgZTi5k2nFSsN6xJdfs7GGWcpGpQVXR3bRHs3YzG4rCeDfjGxPxEsDzj6hc8W5tNiGYTIhLmXolzqgNvSZrCm3wPgc2er-a-uHgUkSMNWXsziKKcesL5K5YKF6do3rShAZO7&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-nearby-ChIJH5LosuJkJA0RNBiBFClWuoI",
+                  "name": "Lareira - Baixa",
+                  "address": "R. Das Oliveiras 8, 4050-159 Porto",
+                  "latitude": 41.148792,
+                  "longitude": -8.615256,
+                  "rating": 4.5,
+                  "reviewCount": 0,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant portugais",
+                    "restaurant portugais",
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "22 208 0917",
+                  "website": "http://www.restaurantelareira.pt/",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lareira%20-%20Baixa%2C%20R.%20Das%20Oliveiras%208%2C%204050-159%20Porto",
+                  "googlePlaceId": "ChIJH5LosuJkJA0RNBiBFClWuoI",
+                  "openingHours": {
+                    "tuesday": {
+                      "open": "12:00",
+                      "close": "23:00"
+                    }
+                  },
+                  "distance": 0.3652767857710133,
+                  "walkingTime": 5,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfU3zkMRJU24_9wW2CeSgNNe4rkDD5TMEOcybnSsFy0PbjgMEc-OxRLM8daglDyAqkdW2eCpp1YBbN7KnbbmDrdaDW5A0hPvYaYvBdXDEY0cQvkpC1x5rN_yz9cBxp69Snukjmrk3msipe9vAx5JtpU6lbXvRCPzcaY44XWdQh0fdDLnF8hxPD5ILNqXJ2XOH-6miZ3AUofx_RprkTV2l5tLvoRTRi7lNP2ZJ_iMrSeUA6Qd7H5rC6Pd6dky2gOQL8GpuBO2aDb1fhWywEfp_64HadxtnaSJc_3Qvt81NNwyJA&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVwA8CEDM30TXfQK-CilknqzrMec-x7mcEG32EKufrZ97psV1hCv82bKjpLr-XPgxrt2E7EN3dU4oPHGgia088IzA1ls7IlJ3ThWmez8loNBX-M5A-Mpg4Uq83K7BODkzj7o_MwllNKVB3BSVtotHQYdEujOxpDZPHS3YmE4amx9eeoa0HOu4-CWzyM1GtDJZg6OpuO85i0Q9KWVAcCtJUc2GJM5SBDR7HnktbVonskk5pCxFzOVxUqpXJTiRkepI0ZgwV9Ce5Oc3Z00QyP0Td4mSBwx7WZNezaPdFhchkY9g&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                "name": "Casa Viúva",
+                "address": "R. do Actor João Guedes 17, 4050-526 Porto",
+                "latitude": 41.148022499999996,
+                "longitude": -8.615475199999999,
+                "rating": 4.8,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant portugais",
+                  "restaurant portugais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Vi%C3%BAva%2C%20R.%20do%20Actor%20Jo%C3%A3o%20Guedes%2017%2C%204050-526%20Porto",
+                "googlePlaceId": "ChIJqangsgtlJA0Ro6sj_WCuIN0",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "15:00"
+                  }
+                },
+                "distance": 0.3738522002171504,
+                "walkingTime": 5,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVO5wPeHG-HUhoZgpU8O6J8w93D9ar8JGgGsARx-rhJrdXpwWtz_fydhK_uccquJlzxB4cauE1U0PGK71mdzlBmpcdqamoFAFIrjdQeY9uVNDjcecBlPti6l3-VGUWGZubJ-U1QKlE0WHT7j_2krrpC2Xm7iSOS3FwyMScg7rP-FNjGN408gqtOnnK3eP0yR-IEThlCFyXy9a-Ot6sa1DqhTceoDxlVPn5xB0kfljdXVko5ZUaw3G4JVYzdxYEpRnstYOB1b1schqsTTDel7j8VmkSJaCuc3v0-NgnoA8vewns6tZKPEm79nMnTWgZTi5k2nFSsN6xJdfs7GGWcpGpQVXR3bRHs3YzG4rCeDfjGxPxEsDzj6hc8W5tNiGYTIhLmXolzqgNvSZrCm3wPgc2er-a-uHgUkSMNWXsziKKcesL5K5YKF6do3rShAZO7&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-nearby-ChIJH5LosuJkJA0RNBiBFClWuoI",
+                "name": "Lareira - Baixa",
+                "address": "R. Das Oliveiras 8, 4050-159 Porto",
+                "latitude": 41.148792,
+                "longitude": -8.615256,
+                "rating": 4.5,
+                "reviewCount": 0,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant portugais",
+                  "restaurant portugais",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "22 208 0917",
+                "website": "http://www.restaurantelareira.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lareira%20-%20Baixa%2C%20R.%20Das%20Oliveiras%208%2C%204050-159%20Porto",
+                "googlePlaceId": "ChIJH5LosuJkJA0RNBiBFClWuoI",
+                "openingHours": {
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.3652767857710133,
+                "walkingTime": 5,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU3zkMRJU24_9wW2CeSgNNe4rkDD5TMEOcybnSsFy0PbjgMEc-OxRLM8daglDyAqkdW2eCpp1YBbN7KnbbmDrdaDW5A0hPvYaYvBdXDEY0cQvkpC1x5rN_yz9cBxp69Snukjmrk3msipe9vAx5JtpU6lbXvRCPzcaY44XWdQh0fdDLnF8hxPD5ILNqXJ2XOH-6miZ3AUofx_RprkTV2l5tLvoRTRi7lNP2ZJ_iMrSeUA6Qd7H5rC6Pd6dky2gOQL8GpuBO2aDb1fhWywEfp_64HadxtnaSJc_3Qvt81NNwyJA&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwA8CEDM30TXfQK-CilknqzrMec-x7mcEG32EKufrZ97psV1hCv82bKjpLr-XPgxrt2E7EN3dU4oPHGgia088IzA1ls7IlJ3ThWmez8loNBX-M5A-Mpg4Uq83K7BODkzj7o_MwllNKVB3BSVtotHQYdEujOxpDZPHS3YmE4amx9eeoa0HOu4-CWzyM1GtDJZg6OpuO85i0Q9KWVAcCtJUc2GJM5SBDR7HnktbVonskk5pCxFzOVxUqpXJTiRkepI0ZgwV9Ce5Oc3Z00QyP0Td4mSBwx7WZNezaPdFhchkY9g&maxwidth=800",
+            "distanceFromPrevious": 1.07,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=41.1371459,-8.6092935&destination=41.1462232,-8.6134836&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3-fallback",
+            "dayNumber": 3,
+            "startTime": "17:55",
+            "endTime": "20:25",
+            "type": "transport",
+            "title": "✈️ Vol retour",
+            "description": "Porto → Lyon (estimation, lien vols recommandé)",
+            "locationName": "Porto → Lyon",
+            "latitude": 41.1511338,
+            "longitude": -8.6105741,
+            "orderIndex": 5,
+            "duration": 150,
+            "estimatedCost": 120,
+            "bookingUrl": "https://www.aviasales.com/search/PORTO0504LYON1?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/PORTO0504LYON1?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/lyon/porto?departure_date=2026-04-05",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ]
+          }
+        ],
+        "theme": "Cathédrale de Porto et 5 Dégustations de Porto avec accords",
+        "dayNarrative": "Journée consacrée à Cathédrale de Porto, 5 Dégustations de Porto avec accords, Palacio da Bolsa. 3 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Pluie modérée",
+          "tempMin": 11,
+          "tempMax": 17,
+          "icon": "🌧️"
+        },
+        "dailyBudget": {
+          "activities": 35,
+          "food": 30,
+          "transport": 0,
+          "total": 65
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 105,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": true,
+          "geoPrunedActivitiesCount": 1
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.07,
+          "p95LegKm": 0.71,
+          "totalTravelMin": 42,
+          "totalLegKm": 2.36,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.27,
+          "mstLowerBoundKm": 1.86
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Porto",
+            "duration": 75,
+            "price": 100,
+            "co2": 195
+          }
+        ],
+        "totalDuration": 363,
+        "totalPrice": 124,
+        "totalCO2": 196,
+        "score": 7.2,
+        "scoreDetails": {
+          "priceScore": 9.7,
+          "timeScore": 10,
+          "co2Score": 2.2
+        },
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Porto",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 41.1579,
+              "lng": -8.6291
+            },
+            "duration": 90,
+            "price": 120,
+            "co2": 234,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON0304PORTO1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 380,
+        "totalPrice": 120,
+        "totalCO2": 234,
+        "score": 6.5,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 9.6,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON0304PORTO1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/porto?departure_date=2026-04-03"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Porto",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 41.1579,
+              "lng": -8.6291
+            },
+            "duration": 720,
+            "price": 246,
+            "co2": 62,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Porto"
+          }
+        ],
+        "totalDuration": 825,
+        "totalPrice": 246,
+        "totalCO2": 62,
+        "score": 3.4,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Porto",
+        "dataSource": "estimated",
+        "recommendationReason": "Option la plus écologique"
+      }
+    ],
+    "selectedTransport": {
+      "id": "plane",
+      "mode": "plane",
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Lyon",
+          "to": "Porto",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 41.1579,
+            "lng": -8.6291
+          },
+          "duration": 90,
+          "price": 120,
+          "co2": 234,
+          "frequency": "Plusieurs vols par jour",
+          "bookingUrl": "https://www.aviasales.com/search/LYON0304PORTO1?currency=eur&locale=fr"
+        }
+      ],
+      "totalDuration": 380,
+      "totalPrice": 120,
+      "totalCO2": 234,
+      "score": 6.5,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 9.6,
+        "co2Score": 0
+      },
+      "bookingUrl": "https://www.aviasales.com/search/LYON0304PORTO1?currency=eur&locale=fr",
+      "omioFlightUrl": "https://www.omio.fr/vols/lyon/porto?departure_date=2026-04-03"
+    },
+    "accommodation": {
+      "id": "booking-12236251",
+      "name": "Fantasy Hostel Porto",
+      "type": "hotel",
+      "address": "R. dos Heróis e dos Mártires de Angola 34, 4000-285 Porto, Portugal",
+      "latitude": 41.1511338,
+      "longitude": -8.6105741,
+      "rating": 7.5,
+      "reviewCount": 4143,
+      "stars": 3,
+      "pricePerNight": 16,
+      "totalPrice": 32,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/806448314.jpg?k=296ec60c6d879ca8f52499901a4a70bf402bd8abcf7f4377e837cea739ec4863&o="
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.booking.com/hotel/pt/fantasy-hostel-porto-porto.html?checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified",
+      "qualityFlags": [
+        "budget_fallback_hotel_suggestion"
+      ]
+    },
+    "parking": {
+      "id": "lys-p5",
+      "name": "P5 Économique",
+      "type": "airport",
+      "address": "Lyon Saint-Exupéry",
+      "latitude": 45.72,
+      "longitude": 5.09,
+      "distanceToTerminal": 1500,
+      "pricePerDay": 12,
+      "currency": "EUR",
+      "amenities": [
+        "outdoor",
+        "24h",
+        "shuttle"
+      ],
+      "rating": 3.8,
+      "reviewCount": 320,
+      "bookingUrl": "https://www.lyonaeroports.com/parkings",
+      "totalPrice": 36
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-12236251",
+        "name": "Fantasy Hostel Porto",
+        "type": "hotel",
+        "address": "R. dos Heróis e dos Mártires de Angola 34, 4000-285 Porto, Portugal",
+        "latitude": 41.1511338,
+        "longitude": -8.6105741,
+        "rating": 7.5,
+        "reviewCount": 4143,
+        "stars": 3,
+        "pricePerNight": 16,
+        "totalPrice": 32,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/806448314.jpg?k=296ec60c6d879ca8f52499901a4a70bf402bd8abcf7f4377e837cea739ec4863&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/pt/fantasy-hostel-porto-porto.html?checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-6254791",
+        "name": "Garden in Town Hostel",
+        "type": "hotel",
+        "address": "Região Norte, Rua da Alegria 1000, 4000-040 Porto, Portugal",
+        "latitude": 41.160934,
+        "longitude": -8.600347,
+        "rating": 7.8,
+        "reviewCount": 2453,
+        "stars": 3,
+        "pricePerNight": 21,
+        "totalPrice": 42,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/484754820.jpg?k=412d719a71218296913b4958cbba3fea4ff2601c9c0acb1f1c5a78889726110d&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Garden+in+Town+Hostel+Porto&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-12612055",
+        "name": "Cozy Nest",
+        "type": "hotel",
+        "address": "R. do Bonfim 481, 4300-068 Porto, Portugal",
+        "latitude": 41.1537645,
+        "longitude": -8.5912026,
+        "rating": 7.6,
+        "reviewCount": 963,
+        "stars": 3,
+        "pricePerNight": 22,
+        "totalPrice": 44,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/688144864.jpg?k=67356e1f7d2f56adc423e1084f1aa5b7f7c0986e99c3beb45366d08db5493ae5&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Cozy+Nest+Porto&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-9927408",
+        "name": "Casa da Música Guesthouse",
+        "type": "hotel",
+        "address": "R. Cónego Ferreira Pinto 204, 4050-256 Porto, Portugal",
+        "latitude": 41.1616793563047,
+        "longitude": -8.62612410608215,
+        "rating": 7.6,
+        "reviewCount": 1158,
+        "stars": 3,
+        "pricePerNight": 24,
+        "totalPrice": 48,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/710649508.jpg?k=6c869038da5c8b8263874a1007817b2bd8c808382a854c04f6bab1799556ee1a&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Casa+da+M%C3%BAsica+Guesthouse+Porto&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-7818291",
+        "name": "Avenue View Rooms - Guest House",
+        "type": "hotel",
+        "address": "Av. da Boavista 730 1 direito, 4100-127 Porto, Portugal",
+        "latitude": 41.1585855,
+        "longitude": -8.6322541,
+        "rating": 7.9,
+        "reviewCount": 1453,
+        "stars": 3,
+        "pricePerNight": 25,
+        "totalPrice": 50,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/322965166.jpg?k=c741b6f3a372e43b438daf13a0ca42d6870fbd50e6229252590049fbc355a4fb&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Avenue+View+Rooms+-+Guest+House+Porto&checkin=2026-04-03&checkout=2026-04-05&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 223,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 32,
+      "food": 120,
+      "activities": 35,
+      "transport": 0,
+      "parking": 36,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Portugais",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Olá",
+            "phonetic": "Ol-lah",
+            "context": "Salutation générale"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Muito obrigado",
+            "phonetic": "Moui-tou obri-gadu",
+            "context": "Remerciement"
+          },
+          {
+            "original": "S'il vous plaît",
+            "translation": "Por favor",
+            "phonetic": "Por fa-vor",
+            "context": "Politesse"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Onde estão as casas de banho?",
+            "phonetic": "Onde es-tao as ka-zas de ban-you",
+            "context": "Demander les toilettes"
+          },
+          {
+            "original": "Je voudrais commander",
+            "translation": "Eu gostaria de pedir",
+            "phonetic": "Eu gosh-ta-ria de pe-jir",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "Quanto custa?",
+            "phonetic": "Kwan-tou kust-ta",
+            "context": "Prix"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "Eu não compreendo",
+            "phonetic": "Eu naon kom-preen-do",
+            "context": "Incompréhension"
+          },
+          {
+            "original": "Pouvez-vous m'aider ?",
+            "translation": "Pode ajudar-me?",
+            "phonetic": "Pode a-jou-dar-me",
+            "context": "Demander de l'aide"
+          },
+          {
+            "original": "Je cherche...",
+            "translation": "Estou à procura de...",
+            "phonetic": "Es-tou ah pro-ku-ra de",
+            "context": "Chercher quelque chose"
+          },
+          {
+            "original": "Un, deux, trois",
+            "translation": "Um, dois, três",
+            "phonetic": "Um, doish, tresh",
+            "context": "Compter"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Socorro!",
+            "phonetic": "So-ko-rou",
+            "context": "Urgence"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "Fala francês?",
+            "phonetic": "Fa-la fran-ses",
+            "context": "Communication"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Pull léger",
+            "reason": "Températures fraîches en avril"
+          },
+          {
+            "item": "Imperméable compact",
+            "reason": "Risque de pluie à Porto"
+          },
+          {
+            "item": "Adaptateur prise européen",
+            "reason": "Compatibilité électrique"
+          },
+          {
+            "item": "Chaussures de marche confortables",
+            "reason": "Terrain vallonné de Porto"
+          },
+          {
+            "item": "Crème solaire",
+            "reason": "Soleil printanier"
+          },
+          {
+            "item": "Petit parapluie",
+            "reason": "Climat variable"
+          },
+          {
+            "item": "Bouteille d'eau réutilisable",
+            "reason": "Hydratation facile"
+          }
+        ],
+        "plugType": "C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Pas de visa requis pour un séjour touristique de moins de 90 jours. Passeport ou carte d'identité valide suffisant."
+          }
+        ],
+        "importantLaws": [
+          "Interdiction de fumer dans les lieux publics fermés",
+          "Alcoolémie limitée à 0,5g/l",
+          "Respect des sites historiques et patrimoniaux",
+          "Port de la ceinture de sécurité obligatoire"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "112",
+        "fire": "112",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Ligne d'urgence médicale",
+            "number": "808 242 424"
+          },
+          {
+            "label": "Service de garde national",
+            "number": "808 250 143"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 45,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 25,
+      "transportTips": "Utilisez le pass metro/bus 3 jours",
+      "reasoning": "Budget serré nécessite optimisation. Airbnb permet cuisine économique. Mix restaurant/courses locales pour découvrir gastronomie sans surcoût. Activités culturelles gratuites/low-cost complétées par quelques visites payantes. Stratégie équilibrée entre expérience et économies.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJ00b9XOdkJA0Rq2pFmc9AW8I",
+        "name": "Pont Dom-Luís",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1399589,
+        "longitude": -8.6094485,
+        "rating": 4.8,
+        "reviewCount": 93388,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUs2JD247hTEtpXA87mHiMvaaGPZPM_dL2DsVhxdau_VlqQWSRpZPfVADKnhlIxo8lW2-k5WNbTsDpWGG6eY50qUU1FSpPku6EFyfVk4lRYvNZizpGUG3OcekIyXJ-h8s6BZLsKTWmXRUAoUKemibikmaEM7I5zmLZrHpCEckQkTDeui-IJr-eiUjP69QTHmMjdmF0FR9poHMWQVANa8MbDz5Kelkn1yYRW3R1nCqmFGEMlQ0_q8dKUq6gSf6323f20HKNS525F8TDUas-YyiJyBVIjHClKAzbv7j8e6UndkTq0dk_0LoMAQRsi9tNZIx2-dot2VRaW2RzFyuIBopGwB9FiZZbJ6nlrP2HS7mAk4FqtIJpAeAK0AzvHXjXsgAvgjRzkOZMfQcVT4uBvZrwolCl1WnJ8W3zorz1oCtVzE5CPg2lEDHo62pskwx8wny28XuhRndWgWIYUuRLt9sTqQAG2X5P9P-3_p00uz1JhC4SrCbau9747Vpaf2BhkmzvA3fpSFjbLZbtQXsRI8GJ0qOiiSZvPAYUtfHCY9hgvq319N5Q2BzrJf1uTzJLQ4RZRbA&maxwidth=400",
+        "googlePlaceId": "ChIJ00b9XOdkJA0Rq2pFmc9AW8I",
+        "businessStatus": "OPERATIONAL",
+        "score": 120.54058214927818,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJd5pejOJkJA0RT-Sh6F5ACH8",
+        "name": "Librairie Lello",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1468104,
+        "longitude": -8.6148718,
+        "rating": 4,
+        "reviewCount": 83051,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWhzX-q_JBM3oRUYVBpd4NTJJ1QJ0TvFtjYem9T3pN1fTfdfurfLENtyp3OoJFQsydY_ieAnPqgNJ37rMT3zt-8z_lbpImYAsIo2tvdveWQG_4bbyezr3oNXW_kBDCDtRImX5atmTJaJd1VViiFgbe5YofyWpooXBhPSGqiY41Mx7Cx21i46a24jAMhHI-Pbq4BVUD1HlzCjIJ2ZYQKy3DAug2I9bZ7cIUyHqAyRKBBODz4W3sKBGXH7YgmZuDRfbGlGsGXGRHemJVE-ehQUmIwqK1DibiIBf1BILX5QEbRR70ks3pZ_kv53FNgj5nylZN1rWn6hEKxMd7kFXUfwvcBi-3l8MluZIooC4E_qHjaEmHi8enV-VF_YxKEx-gAEPS-bWlFskpx75MfB8AtJnkz9z3M3kjKHhqY5MJtIBotONTZhVRtoZuhrn9s7NYftI8Cqdf6tHJA6_-_jIIp2Scs9Ls_z_WNcS7wkYXNEdT0_L2DPjPupOt2TE50C3Yvfg0jhX4YVSH2YReb_CFmyx2cuhc1TW6oYZH_5vSUKxy_6D63Vd-wiKAIXdM-wK8x7vOmIJchK9AEbDmszLTeKK9DhkPUQQ&maxwidth=400",
+        "googlePlaceId": "ChIJd5pejOJkJA0RT-Sh6F5ACH8",
+        "score": 118.83868973213876,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ50HseVBlJA0RpO37vntQ_ao",
+        "name": "Ribeira do Porto",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1404099,
+        "longitude": -8.612566400000002,
+        "rating": 4.8,
+        "reviewCount": 11033,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXNNsLrQuBNbG8OFUCU43gj2vSRIsj6fOn6zL_A19AXi_McAUH2SB1aSrtExuCFes407Wc-Rv8iJ2Wb2IIwTk1Tnq5ZGKbUGMzzWXdm-ROzcUrKZlBzYBzEAvw6WoHPYkgmSjWpYlW2zf9WWymLR6QG8tIecC1232W_nraaO1VfgZv9RqB7WZoXcJStXDFiLs6hk5y0tKLBxfVElaZYQLOH19b6S1kVy-70mvfDy_QrIddlykoSxldzCX6Ze6WCRM3BR9l5qo4HfaNYUG-SyVx2G3XeG4zZ83il5r2VQ3TmxhZNRnii55qkccJPyRYhk9naW9Ba-w8utThrxb2C5jRzk9xo9dvmJAUE2p2UQdI0ZzOZU71TGPab4pL1aSs15Gt-iCpZD5xqmG-Gf4ZJeVdmwgfiOFbSLAUxc_fFFbSychYtvfgeRx712z1N8Mby_zHHExDKNKZyHiEOewFFT93WuR76lrc-zwEZdTPJgERDoe6T_oCXb6iA9KsIsIGodS1eHnKrPJIP5Mlb5xEr4IVdVmfEBkiVFaLuC_Wv6pwjSE2tX5gzQyR-QWio-ZoXcx7Y6g&maxwidth=400",
+        "googlePlaceId": "ChIJ50HseVBlJA0RpO37vntQ_ao",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "score": 118.68538723635729,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJSdbOUeJkJA0RIXwSJxPFXkI",
+        "name": "Torre dos Clérigos",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.1456705,
+        "longitude": -8.6145977,
+        "rating": 4.6,
+        "reviewCount": 20748,
+        "duration": 90,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGRh2RB4XMyf5aye3JCwbuxhC7Sylxq9lPV2GPlSNhmPjddBkYDh3PolmkDsdXu95Zn1n6j3czn5O32l_niCidjKhv07RKFaejqKhxTX8JPc15R6ktszUXRVEEo4TsRUOJePC959KTDax7ZmKK5wXuu8wbLKnIL2K8volXYAV2YisqOZJIeI6SE6NvVtvpn5gFotCw32lf4csZj9HHWUqpdOrMuQqp4_0ln9ELqA_XekJ_rlJ_nHJ2queoo7Nxo-7so1uEvnqbTpHeOUJ5qAJZoFr2enNHDTBV2W5CzzMyPBcK5TKU-YTOejeDnAviyrsswk-M52aVvHt0vw_Im8qM7v7hT-AB8E1GEP8IOvBoVQPyC5NjpOiNEm2HlsVgYNotv30Nq0L86-cNkNsRF6r7WNPh5WW3o-UqWzo-2Y3Ov4lqh-WwRlHyhvxge9vXzpUQQ2EoOgs8hW26jos37I9UmxmJIEd9vVRCarpl5tneIYk05ZlVgiHgK3kYPT__vG2m4C64BBebf4rKGwzR3ifsHxeenWNKfQnuugN8fr41NYV-VRQVDNYvdHm96lsHy5owpyuq&maxwidth=400",
+        "googlePlaceId": "ChIJSdbOUeJkJA0RIXwSJxPFXkI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 014 5489",
+        "website": "https://www.torredosclerigos.pt/",
+        "isOutdoor": false,
+        "score": 26.83395247864309,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJo2WgoxplJA0ROB2wNY66bGQ",
+        "name": "Jardins du Palais de Cristal",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1482682,
+        "longitude": -8.6255165,
+        "rating": 4.6,
+        "reviewCount": 46481,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfURXim-FSxFkpo_1BbguJDswUhxETQRQ7JuFiEiKJ4Q92ir4KOe9ngRa_gBgqo6rrIjaxulfvra-fiHZs8Z2yAIsxd3nf1pHaPLoTijFNqITCKFcxgnowxAKRV7DkIGl-u8jo9R3bJ0w3FWv9KDAkQx9lhXeo8jOLnqJBw8OWz6hHHg6Hq4uKWpS3J_RBlJ0mUNGgFr583YE3Dpy_ilXHXGtyGkFomv_kv3yzzeHCIcdtEHuLxzkbv7EERy5y4cDofMDg2GwLlVjdrcwfphekoXjckvV3u2kZ3KOzMIJds-rM4Bbbc2LZqG0x9mHJEyYP3APESrrfrTy7aC1VYGJqfVrT8uN1JsQt1TLpOzK9vivmc-ELWR8oyLvxLmhcXTh_xJ2M39kWvpuFF3gXvjYhUc6td35L2CS2So_dcC-BaIkVfF8lvfcdA17BAoZkJ8VSDKHmQfPVxiR9WmdADyo48QqTT0hnV80Aww3h5HEpd7M1gvyqzjhGR-WpUFkcY0III4nfzOEvtV3L35yNuiZkFTYm1Lpr9nfE56IBnF61U9Lf67foid6pnW8DPul6ge7Fv86kOD&maxwidth=400",
+        "googlePlaceId": "ChIJo2WgoxplJA0ROB2wNY66bGQ",
+        "isOutdoor": true,
+        "score": 26.534550925933658,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJQQ2CwuFkJA0RUdkM5HFBMmk",
+        "name": "Palacio da Bolsa",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.1413772,
+        "longitude": -8.615672499999999,
+        "rating": 4.5,
+        "reviewCount": 12907,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXHuOvLHH58CAMOPolM9Q2-zLTm6QfiByqN062Nkm42MckaMa59Lqzy343ZfudjfLxG_0gyoB7gKbGsvIIqnbEGqNvPn8j3tkTRFkw2QDy9oDDZGKaBHt0YB9cz3FBj-POhZAycKvkIGY-WcF6QMlurlYTJ3EIaea6v-Q-Lk-gyPsV4Ajwifupw9QN-nBIWJvQW5BoAucAozK0lHFdHEh4vOAkJEeRnuk64_XOm32qU5AJSeJqBivjAfwCpsOkyqx-nee1z6bzOV9mfgGVPM2jovh30dg4FPF2udPK0No76dr50IiUh1jgs4ampfUrYo1zcn0UQi7yYJUYT6IjzBhlI38TKQp7xvEci0d_0dhQwErpA6XonfOPZE7HQdGi88nghgz7P5WCrM4Dn_0wvW7zthp31FSa99lyJnqyNmuX3kch6R_FWzkwBEMhjjS1KzV5kcMUXlZ-EG2KooL_VnMIKvXRqekuYMT0uQU9D5T7aoKxE2-pZY_fxAxBW7U2qVRZ8_sVtspSzAlzLvIlpSifW1gz66xBWup8_MP5Fplp-ryr6X6VrgrUQRzQ7EDILnqtyk_uHCN7CTQ&maxwidth=400",
+        "googlePlaceId": "ChIJQQ2CwuFkJA0RUdkM5HFBMmk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "18:30"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "18:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 339 9000",
+        "website": "https://palaciodabolsa.com/",
+        "isOutdoor": false,
+        "score": 26.22165062010993,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJrUh_QKhlJA0RGlOMuRNUDVc",
+        "name": "Casa-Museu Marta Ortigão Sampaio",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.1593654,
+        "longitude": -8.6255364,
+        "rating": 4.5,
+        "reviewCount": 304,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWKqO61_FW_6jkdHEkF0pAsP1mVBgYIMuV8iqpLJk_C_4sfCj6SJoZFCQoCDiSfYYAM7fyR0vizLRAK7Rtvgw2lzoUDylkEPiWOk5jNJH8Owx1nDdOwbsrcmubvpA1g4qlcBi2u_FVqY5VGzRV2iAiaTS0KtRelANcjm4zhfry-jlgP8lmboJ2pzxwZoP6bzdHyX-GHJI8-5j4S-V_6zBzGjoy4YXXzEjBC7KN6LeH2__NA03GbtN5I63Ohu25rlypR-_vgWFmWg_F1_ouAicjp467dwtrYOO24_4UPQ6gI3g53uBb0IMk15c50w3rCgQCHLnJPJkaM7Kuo9YmQCLPCzjxYqlTYUmAXgyrSY1qx0CXlJktQN2RqOyOKy2amxi84SPS9X9FcjcMdsRdRhOJjlChMSSONSuFR30EWd7N95mYKpOpWTv-1ICZUaBT08bG939p7kTc2VOJvcld8ERlou5xP2QaiPx86L6u2J__CL3FjLIad4a0VahEpvMIhEygY0fBr8eUFKhhXdO7eL_RO-CPBkSSfewHYCvV8IzWgZjKE4R67Kz5sFwKalf74wCMKnA&maxwidth=400",
+        "googlePlaceId": "ChIJrUh_QKhlJA0RGlOMuRNUDVc",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 606 6568",
+        "website": "https://museudacidadeporto.pt/",
+        "isOutdoor": false,
+        "score": 22.965747167217508,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ-WzEKQhlJA0RtFdnbFNeh1c",
+        "name": "Monumento aos Heróis da Guerra Peninsular",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1579768,
+        "longitude": -8.6291475,
+        "rating": 4.7,
+        "reviewCount": 522,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW6dLpRhPz2H0UM9e0Yb24-dc8T50BAO3giL04ifHnWthyTzVqAA5arVsMeG3HHxZLmk1_x8qFJdNuwIvcVap3DnMd7VW-zfN9i-WFRzMzBR6iOoGUe0Ylmco_YG_Aj7FnVLWH_QLPX50y9Va0_nh2JhCBADN7Jy8Isue75dVmPF9egZfJSjWvdm3C0NUQAo5onUXhMgo92s8oZK5bbJfcja6rPSnr2GjwclZJAYNp_ASDGqbAAv_AjX4FMEN5EQAdHwEQ6-xZSzYjamLbvqsTvEGalP5EQ212oNfLFV7M-UT_tmp5zOg5XUxvDXefxK9tfs5KadzkJ_PoOuOaqxdZNKDj417kUC9shFz6KgfqcXdeLFL2V1Ded82i2SbEMZmdTSlWnOwqIHS9Q2ODy_MdvM6TZhxkRqEQDunfsI1fwOiu1l8yFfAhLUbiGHotttFVhxiDSoi_lPUTTAY-IcfcGEy7QmGA-0tTUCE3cyD-SAnZApvoJPtSjS-md73NvMPByJxxCKdmIr2UJMaHzTaUwmOKuowLgmmFqmQ7Pr9kodCb6nXFEDLvVKumMFaA5vPVEkZfV&maxwidth=400",
+        "googlePlaceId": "ChIJ-WzEKQhlJA0RtFdnbFNeh1c",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "http://www.porto.pt/",
+        "score": 20.835341006004526,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJW3NQxR1lJA0R36dtNv8LUi8",
+        "name": "Parque das Virtudes",
+        "type": "park",
+        "description": "",
+        "latitude": 41.1447,
+        "longitude": -8.6189879,
+        "rating": 4.6,
+        "reviewCount": 7068,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXHAAZulkEX3OwdVGQNTm4WE1eBQhSqnWqr66_AhvHuV5spEYT1qcl147TjShKeOyXAeYz0itme8jWy13UPrWvLnG-k5rssDgNdzy5Sa-Z8nnRVCDU1mSnDP9fNEPeMEF075DCnKTpX5hBXtk9JQRadlyvpqlgC35dJmWBQtyaK9dTgpPnF7BGiFdupjmIBfHqvnyVuBwKmOb4o5CC1UBpwrVYMkZ1zGqzXGjEk03tgH9P-3vEdQJtde3yqV6IbiSg3kxB_QZEf6C8y1cy6yVyJ8cSPHz8-AOItV_YSC78uZPJqxTTebaMLIz8d-yfJKd7xm43aFBT5ZvT10C7iMb3RptDkbLKoXDrfVJmNrErzGs2UGuHSAI_7-4cqcUO9BOR-mcMRZiYHTHPlkGhD3ifndnbJ3XQ1nNd2SpVJ3dmz7gkPLFjQIwIMlh_X-m57CwMo-jJeQRe0atzwDTJ0y080F3MOHLAibZsKfxxtQOMeXOF4grRG9NbEQDjTgGE5ZoxFsH9hqgKVcVndtX6e4jEdBUs8XzHAjSpw_y_t1f7BPLeneXgHVcXH2RjB9-e9UctEuvmd&maxwidth=400",
+        "googlePlaceId": "ChIJW3NQxR1lJA0R36dtNv8LUi8",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://ambiente.cm-porto.pt/parques-e-jardins/parque-das-virtudes",
+        "isOutdoor": true,
+        "score": 19.898593081669453,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJHwb6td1kJA0R5zTqv3nKOSk",
+        "name": "Jardim do Morro",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1371459,
+        "longitude": -8.6092935,
+        "rating": 4.7,
+        "reviewCount": 33743,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXWj43hYxI7uY7huRAb66wF-dw85OIt_WtP2LG16RxhU24Vw_B-PX--dnT-o-Maa1eEaSkM6S2i6VKOZMwSIc_1XjtNYtYFTicMa6toW0XpMp9-pG9Ja5oA_3BAvYllJF55-Xp__rvs1JTVY9hU8Dm2892ExiCPnrobug7nmbCdFK-128B3LXFOPdw7OiaHId7xcstAlehauPZ3C8C9eZCmBe_2TwAcJXd0RYCn3q6c-q3lhhgIfL7x59V8bSbifPbWGi2YLSPmGEpd-8HH75nj2FItNNjO7Zk_lU_wqWsOtiq2MZIIBHO9vWSvs1FxyiwwQfY_OfsB01o9bdGzfYOsYHaTn1ghqx__hBh4mRT67xUtmo1nc-7gsgIfrfOiBNJifmJjsq7dOOfPrDTPx5nIFaO14sd2E9EskhTh2GwVdPnFXyowroZGF9d2s8bjwzYjlCAB9sow7e25Pk72gwsIKC0B5eJAyCwefGF52rbSBrhteMFu4cyREUhkpBoUDRNE0SLlLSqBKvXynS91YP_Nvo20_Y1dIfIxZdhZVzMOTVNkSyYzA6GmMK22Agppq5u4SABD&maxwidth=400",
+        "googlePlaceId": "ChIJHwb6td1kJA0R5zTqv3nKOSk",
+        "score": 19.456367383864013,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJueuROeFkJA0R6Td1oK7MHEo",
+        "name": "Cathédrale de Porto",
+        "type": "religious",
+        "description": "",
+        "latitude": 41.1428531,
+        "longitude": -8.6111165,
+        "rating": 4.6,
+        "reviewCount": 36316,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwnL2CPnvfk_EKGNvUOWlYZrl6kNvIydjIWMotwrvYdKMU2srGsLDz1bnxdJjIJ_9al_K_M6cuVZoW8gU1qfkNSj630nzE1yXJTfbtElBqd9hKrsgRZ_Of7saHuK2fPTA_HdTThbY_poqKI5eI5KFdLz5Zh1eWAK_017JdfVAlcP4QGjTKHeARLzriVK1onSO9pNwjvC63Uv4i8NyEWOXvrsptpBznfXa_cMBJs1Ga7jRbZ5TcPo0iQ4ZiOL8S7i-WJ6xk_WGQUTK-_F-0j5rMLoMcCfyx81002N7DQ61CWQOuou0&maxwidth=400",
+        "googlePlaceId": "ChIJueuROeFkJA0R6Td1oK7MHEo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 205 9028",
+        "website": "https://www.diocese-porto.pt/pt/catedral-do-porto/",
+        "isOutdoor": false,
+        "score": 19.3201960148526,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJZVtU9AhlJA0RMc7_SQzAMrM",
+        "name": "Mercado Bom Sucesso",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.155487,
+        "longitude": -8.629203000000002,
+        "rating": 4.5,
+        "reviewCount": 31450,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX7AvQWuFm8-K0kZ5iDcF07-cUo_k_G-cc2fGMa3ZxrzgjYI3FNY6XUpRVM6KaamJlWrNpMv_4ycvpUuuvfhqtWLVI7Z0QEkAoeKN0vvz2TSejuYT11EmVW8SpoquYAZqrpB7-Y8s3-L-eRhd3IE_wM2rzHJvbrdcAiYQleT9l5LvHXxm53tfISvuUX12d2m1QOOjVfeeGg-nCpTyqqry__hHeL8Hr3thYSpMMftg0xglSkFMry446U2EUY6yCBQNOwn2Q2bKzqssIQhAncX6x4xmzB92flnGGcpZCSFdcruI2-zp8&maxwidth=400",
+        "googlePlaceId": "ChIJZVtU9AhlJA0RMc7_SQzAMrM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 605 6610",
+        "website": "http://www.mercadobomsucesso.pt/",
+        "score": 18.995241299562576,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-58705P12",
+        "name": "5 Dégustations de Porto avec accords",
+        "type": "culture",
+        "description": "Nous sommes situés juste au centre-ville, juste en face du Palácio da Bolsa, Rua Mouzinho da SIlveira 34, ce qui vous permet de vous arrêter très facilement pour apprendre et déguster quelques vins de Porto. Chaque dégustation durera environ 30 minutes et c'est tout ce dont vous aurez besoin pour mieux comprendre les vins de Porto. Pour la dégustation, nous commencerons par expliquer l'histoire du porto puis les différents vins de porto que nous avons au Portugal. Pour cette dégustation nous aurons sur la table 2 Blancs, 1 Tawny, 1 Ruby et 1 LBV (Late Bottle Vintage).",
+        "duration": 90,
+        "estimatedCost": 35,
+        "latitude": 41.1369189,
+        "longitude": -8.619280999999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Porto/5-Port-Wine-Tasting/d26879-58705P12?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/14/be/43/7c.jpg",
+        "providerName": "Viator",
+        "reviewCount": 67,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "includesMeal": true,
+        "score": 18.652149605401654,
+        "source": "viator"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJ50HseVBlJA0RpO37vntQ_ao",
+        "name": "Ribeira do Porto",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1404099,
+        "longitude": -8.612566400000002,
+        "rating": 4.8,
+        "reviewCount": 11033,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXNNsLrQuBNbG8OFUCU43gj2vSRIsj6fOn6zL_A19AXi_McAUH2SB1aSrtExuCFes407Wc-Rv8iJ2Wb2IIwTk1Tnq5ZGKbUGMzzWXdm-ROzcUrKZlBzYBzEAvw6WoHPYkgmSjWpYlW2zf9WWymLR6QG8tIecC1232W_nraaO1VfgZv9RqB7WZoXcJStXDFiLs6hk5y0tKLBxfVElaZYQLOH19b6S1kVy-70mvfDy_QrIddlykoSxldzCX6Ze6WCRM3BR9l5qo4HfaNYUG-SyVx2G3XeG4zZ83il5r2VQ3TmxhZNRnii55qkccJPyRYhk9naW9Ba-w8utThrxb2C5jRzk9xo9dvmJAUE2p2UQdI0ZzOZU71TGPab4pL1aSs15Gt-iCpZD5xqmG-Gf4ZJeVdmwgfiOFbSLAUxc_fFFbSychYtvfgeRx712z1N8Mby_zHHExDKNKZyHiEOewFFT93WuR76lrc-zwEZdTPJgERDoe6T_oCXb6iA9KsIsIGodS1eHnKrPJIP5Mlb5xEr4IVdVmfEBkiVFaLuC_Wv6pwjSE2tX5gzQyR-QWio-ZoXcx7Y6g&maxwidth=400",
+        "googlePlaceId": "ChIJ50HseVBlJA0RpO37vntQ_ao",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "score": 118.68538723635729,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJSdbOUeJkJA0RIXwSJxPFXkI",
+        "name": "Torre dos Clérigos",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.1456705,
+        "longitude": -8.6145977,
+        "rating": 4.6,
+        "reviewCount": 20748,
+        "duration": 90,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGRh2RB4XMyf5aye3JCwbuxhC7Sylxq9lPV2GPlSNhmPjddBkYDh3PolmkDsdXu95Zn1n6j3czn5O32l_niCidjKhv07RKFaejqKhxTX8JPc15R6ktszUXRVEEo4TsRUOJePC959KTDax7ZmKK5wXuu8wbLKnIL2K8volXYAV2YisqOZJIeI6SE6NvVtvpn5gFotCw32lf4csZj9HHWUqpdOrMuQqp4_0ln9ELqA_XekJ_rlJ_nHJ2queoo7Nxo-7so1uEvnqbTpHeOUJ5qAJZoFr2enNHDTBV2W5CzzMyPBcK5TKU-YTOejeDnAviyrsswk-M52aVvHt0vw_Im8qM7v7hT-AB8E1GEP8IOvBoVQPyC5NjpOiNEm2HlsVgYNotv30Nq0L86-cNkNsRF6r7WNPh5WW3o-UqWzo-2Y3Ov4lqh-WwRlHyhvxge9vXzpUQQ2EoOgs8hW26jos37I9UmxmJIEd9vVRCarpl5tneIYk05ZlVgiHgK3kYPT__vG2m4C64BBebf4rKGwzR3ifsHxeenWNKfQnuugN8fr41NYV-VRQVDNYvdHm96lsHy5owpyuq&maxwidth=400",
+        "googlePlaceId": "ChIJSdbOUeJkJA0RIXwSJxPFXkI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 014 5489",
+        "website": "https://www.torredosclerigos.pt/",
+        "isOutdoor": false,
+        "score": 26.83395247864309,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJo2WgoxplJA0ROB2wNY66bGQ",
+        "name": "Jardins du Palais de Cristal",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1482682,
+        "longitude": -8.6255165,
+        "rating": 4.6,
+        "reviewCount": 46481,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfURXim-FSxFkpo_1BbguJDswUhxETQRQ7JuFiEiKJ4Q92ir4KOe9ngRa_gBgqo6rrIjaxulfvra-fiHZs8Z2yAIsxd3nf1pHaPLoTijFNqITCKFcxgnowxAKRV7DkIGl-u8jo9R3bJ0w3FWv9KDAkQx9lhXeo8jOLnqJBw8OWz6hHHg6Hq4uKWpS3J_RBlJ0mUNGgFr583YE3Dpy_ilXHXGtyGkFomv_kv3yzzeHCIcdtEHuLxzkbv7EERy5y4cDofMDg2GwLlVjdrcwfphekoXjckvV3u2kZ3KOzMIJds-rM4Bbbc2LZqG0x9mHJEyYP3APESrrfrTy7aC1VYGJqfVrT8uN1JsQt1TLpOzK9vivmc-ELWR8oyLvxLmhcXTh_xJ2M39kWvpuFF3gXvjYhUc6td35L2CS2So_dcC-BaIkVfF8lvfcdA17BAoZkJ8VSDKHmQfPVxiR9WmdADyo48QqTT0hnV80Aww3h5HEpd7M1gvyqzjhGR-WpUFkcY0III4nfzOEvtV3L35yNuiZkFTYm1Lpr9nfE56IBnF61U9Lf67foid6pnW8DPul6ge7Fv86kOD&maxwidth=400",
+        "googlePlaceId": "ChIJo2WgoxplJA0ROB2wNY66bGQ",
+        "isOutdoor": true,
+        "score": 26.534550925933658,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJrUh_QKhlJA0RGlOMuRNUDVc",
+        "name": "Casa-Museu Marta Ortigão Sampaio",
+        "type": "museum",
+        "description": "",
+        "latitude": 41.1593654,
+        "longitude": -8.6255364,
+        "rating": 4.5,
+        "reviewCount": 304,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWKqO61_FW_6jkdHEkF0pAsP1mVBgYIMuV8iqpLJk_C_4sfCj6SJoZFCQoCDiSfYYAM7fyR0vizLRAK7Rtvgw2lzoUDylkEPiWOk5jNJH8Owx1nDdOwbsrcmubvpA1g4qlcBi2u_FVqY5VGzRV2iAiaTS0KtRelANcjm4zhfry-jlgP8lmboJ2pzxwZoP6bzdHyX-GHJI8-5j4S-V_6zBzGjoy4YXXzEjBC7KN6LeH2__NA03GbtN5I63Ohu25rlypR-_vgWFmWg_F1_ouAicjp467dwtrYOO24_4UPQ6gI3g53uBb0IMk15c50w3rCgQCHLnJPJkaM7Kuo9YmQCLPCzjxYqlTYUmAXgyrSY1qx0CXlJktQN2RqOyOKy2amxi84SPS9X9FcjcMdsRdRhOJjlChMSSONSuFR30EWd7N95mYKpOpWTv-1ICZUaBT08bG939p7kTc2VOJvcld8ERlou5xP2QaiPx86L6u2J__CL3FjLIad4a0VahEpvMIhEygY0fBr8eUFKhhXdO7eL_RO-CPBkSSfewHYCvV8IzWgZjKE4R67Kz5sFwKalf74wCMKnA&maxwidth=400",
+        "googlePlaceId": "ChIJrUh_QKhlJA0RGlOMuRNUDVc",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:30"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 606 6568",
+        "website": "https://museudacidadeporto.pt/",
+        "isOutdoor": false,
+        "score": 22.965747167217508,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ-WzEKQhlJA0RtFdnbFNeh1c",
+        "name": "Monumento aos Heróis da Guerra Peninsular",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.1579768,
+        "longitude": -8.6291475,
+        "rating": 4.7,
+        "reviewCount": 522,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW6dLpRhPz2H0UM9e0Yb24-dc8T50BAO3giL04ifHnWthyTzVqAA5arVsMeG3HHxZLmk1_x8qFJdNuwIvcVap3DnMd7VW-zfN9i-WFRzMzBR6iOoGUe0Ylmco_YG_Aj7FnVLWH_QLPX50y9Va0_nh2JhCBADN7Jy8Isue75dVmPF9egZfJSjWvdm3C0NUQAo5onUXhMgo92s8oZK5bbJfcja6rPSnr2GjwclZJAYNp_ASDGqbAAv_AjX4FMEN5EQAdHwEQ6-xZSzYjamLbvqsTvEGalP5EQ212oNfLFV7M-UT_tmp5zOg5XUxvDXefxK9tfs5KadzkJ_PoOuOaqxdZNKDj417kUC9shFz6KgfqcXdeLFL2V1Ded82i2SbEMZmdTSlWnOwqIHS9Q2ODy_MdvM6TZhxkRqEQDunfsI1fwOiu1l8yFfAhLUbiGHotttFVhxiDSoi_lPUTTAY-IcfcGEy7QmGA-0tTUCE3cyD-SAnZApvoJPtSjS-md73NvMPByJxxCKdmIr2UJMaHzTaUwmOKuowLgmmFqmQ7Pr9kodCb6nXFEDLvVKumMFaA5vPVEkZfV&maxwidth=400",
+        "googlePlaceId": "ChIJ-WzEKQhlJA0RtFdnbFNeh1c",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "http://www.porto.pt/",
+        "score": 20.835341006004526,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJueuROeFkJA0R6Td1oK7MHEo",
+        "name": "Cathédrale de Porto",
+        "type": "religious",
+        "description": "",
+        "latitude": 41.1428531,
+        "longitude": -8.6111165,
+        "rating": 4.6,
+        "reviewCount": 36316,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwnL2CPnvfk_EKGNvUOWlYZrl6kNvIydjIWMotwrvYdKMU2srGsLDz1bnxdJjIJ_9al_K_M6cuVZoW8gU1qfkNSj630nzE1yXJTfbtElBqd9hKrsgRZ_Of7saHuK2fPTA_HdTThbY_poqKI5eI5KFdLz5Zh1eWAK_017JdfVAlcP4QGjTKHeARLzriVK1onSO9pNwjvC63Uv4i8NyEWOXvrsptpBznfXa_cMBJs1Ga7jRbZ5TcPo0iQ4ZiOL8S7i-WJ6xk_WGQUTK-_F-0j5rMLoMcCfyx81002N7DQ61CWQOuou0&maxwidth=400",
+        "googlePlaceId": "ChIJueuROeFkJA0R6Td1oK7MHEo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:30"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 205 9028",
+        "website": "https://www.diocese-porto.pt/pt/catedral-do-porto/",
+        "isOutdoor": false,
+        "score": 19.3201960148526,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJZVtU9AhlJA0RMc7_SQzAMrM",
+        "name": "Mercado Bom Sucesso",
+        "type": "attraction",
+        "description": "",
+        "latitude": 41.155487,
+        "longitude": -8.629203000000002,
+        "rating": 4.5,
+        "reviewCount": 31450,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "23:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX7AvQWuFm8-K0kZ5iDcF07-cUo_k_G-cc2fGMa3ZxrzgjYI3FNY6XUpRVM6KaamJlWrNpMv_4ycvpUuuvfhqtWLVI7Z0QEkAoeKN0vvz2TSejuYT11EmVW8SpoquYAZqrpB7-Y8s3-L-eRhd3IE_wM2rzHJvbrdcAiYQleT9l5LvHXxm53tfISvuUX12d2m1QOOjVfeeGg-nCpTyqqry__hHeL8Hr3thYSpMMftg0xglSkFMry446U2EUY6yCBQNOwn2Q2bKzqssIQhAncX6x4xmzB92flnGGcpZCSFdcruI2-zp8&maxwidth=400",
+        "googlePlaceId": "ChIJZVtU9AhlJA0RMc7_SQzAMrM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "23:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "22 605 6610",
+        "website": "http://www.mercadobomsucesso.pt/",
+        "score": 18.995241299562576,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 27,
+        "byEngine": {
+          "google_local": 9,
+          "google_hotels": 1,
+          "google_maps": 17
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-suggest-01-le-festin-portugais-a-porto",
+    "   Lyon → Porto (3j)",
+    "   solo (1p) | economic | gastronomy, culture",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.1579,-8.6291,14z\", gl=\"pt\"",
+    "[Weather] 3 days fetched for 2026-04-03 → 2026-04-05",
+    "[Google Places] ✅ 30 attractions found for Porto",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Hotels] Booking pass relax: 21 options retained (strict=1, relaxed=20)",
+    "[Hotels] Disponibilité live: 15/21 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (355ms)",
+    "[Pipeline V2] Resolving GPS for 11 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/11 activities",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Porto\" from local database",
+    "[Pipeline V2]   → Quartier de la Ribeira, Librairie Lello, Pont Dom Luís I",
+    "[Pipeline V2] Step 1: All data fetched in 54782ms",
+    "[Pipeline V2]   Activities: 30 Google + 23 SerpAPI + 0 Overpass + 16 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 15 | Transport options: 3",
+    "[Pipeline V2] Step 1 done in 54782ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Same-location-type dedup: \"Église des Clercs\" merged with \"Torre dos Clérigos\" (type=museum)",
+    "[Pipeline V2] Same-location-type dedup: \"Église Sao Francisco\" merged with \"Palacio da Bolsa\" (type=museum)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [120.5] ⭐ \"Pont Dom-Luís\" (src=google_places, reviews=93388, rating=4.8, tags=none)",
+    "[Pipeline V2]   #2 [118.8] ⭐ \"Librairie Lello\" (src=google_places, reviews=83051, rating=4, tags=none)",
+    "[Pipeline V2]   #3 [118.7] ⭐ \"Ribeira do Porto\" (src=google_places, reviews=11033, rating=4.8, tags=none)",
+    "[Pipeline V2]   #4 [26.8]    \"Torre dos Clérigos\" (src=google_places, reviews=20748, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #5 [26.5]    \"Jardins du Palais de Cristal\" (src=google_places, reviews=46481, rating=4.6, tags=deep_culture,relaxing)",
+    "[Pipeline V2]   #6 [26.2]    \"Palacio da Bolsa\" (src=google_places, reviews=12907, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #7 [23.0]    \"Casa-Museu Marta Ortigão Sampaio\" (src=google_places, reviews=304, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #8 [20.8]    \"Monumento aos Heróis da Guerra Peninsular\" (src=google_places, reviews=522, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #9 [19.9]    \"Parque das Virtudes\" (src=google_places, reviews=7068, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #10 [19.5]    \"Jardim do Morro\" (src=google_places, reviews=33743, rating=4.7, tags=none)",
+    "[Pipeline V2]   #11 [19.3]    \"Cathédrale de Porto\" (src=google_places, reviews=36316, rating=4.6, tags=none)",
+    "[Pipeline V2]   #12 [19.0]    \"Mercado Bom Sucesso\" (src=google_places, reviews=31450, rating=4.5, tags=none)",
+    "[Pipeline V2]   #13 [18.8]    \"Casa da Música\" (src=google_places, reviews=20703, rating=4.6, tags=none)",
+    "[Pipeline V2]   #14 [18.7]    \"5 Dégustations de Porto avec accords\" (src=viator, reviews=67, rating=5, tags=foodie)",
+    "[Pipeline V2]   #15 [18.3]    \"Chapelle des Ames de Saint Catherine\" (src=google_places, reviews=10700, rating=4.6, tags=none)",
+    "[Pipeline V2]   #16 [18.0]    \"Ponte da Arrábida\" (src=google_places, reviews=6480, rating=4.7, tags=none)",
+    "[Pipeline V2]   #17 [17.8]    \"Porto Exit Games (Baixa)\" (src=google_places, reviews=3006, rating=4.9, tags=kid_friendly,relaxing)",
+    "[Pipeline V2]   #18 [17.7]    \"Belvédère de Vitoria\" (src=google_places, reviews=6755, rating=4.5, tags=none)",
+    "[Pipeline V2]   #19 [17.5]    \"Monde des decouvertes\" (src=google_places, reviews=6865, rating=4.4, tags=none)",
+    "[Pipeline V2]   #20 [17.4]    \"Igreja do Carmo\" (src=google_places, reviews=4875, rating=4.5, tags=none)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 3/48",
+    "[Pipeline V2] Added guaranteed experiential: \"5 Dégustations de Porto avec accords\"",
+    "[Pipeline V2] Step 2: 13 activities selected (3 must-sees) from 69 total",
+    "[Pipeline V2] Must-sees: \"Pont Dom-Luís\" (120.5), \"Librairie Lello\" (118.8), \"Ribeira do Porto\" (118.7)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=1.83km, median=1.05km, maxClusterRadius=0.61km",
+    "[Pipeline V2] Radius-constrained clustering produced 5 clusters (target 3), running soft pass with 0.92km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (41.1576, -8.6280), Day 2: centroid (41.1483, -8.6255), Day 3: centroid (41.1418, -8.6140)",
+    "[Pipeline V2] Cluster Day 1: 3 activities, radius=0.28km, intraDistance=0.62km",
+    "[Pipeline V2] Cluster Day 2: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Cluster Day 3: 9 activities, radius=0.70km, intraDistance=4.24km",
+    "[Pipeline V2] Must-see audit: moved \"Librairie Lello\" (60min) from Day 3 → Day 2",
+    "[Pipeline V2] Phase 4: moved non-must-see \"Parque das Virtudes\" from overloaded Day 3 → Day 2 to protect must-sees",
+    "[Pipeline V2] Phase 4: moved non-must-see \"Torre dos Clérigos\" from overloaded Day 3 → Day 2 to protect must-sees",
+    "[Pipeline V2] Phase 5: moved must-see \"Ribeira do Porto\" from overloaded Day 3 (360min avail, 705min needed) → Day 2 (190min remaining)",
+    "[Pipeline V2] Phase 5: moved must-see \"Pont Dom-Luís\" from overloaded Day 3 (360min avail, 625min needed) → Day 2 (110min remaining)",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 3 activities [0 must-sees] (6.0h avail, max 2), Day 2: 6 activities [3 must-sees] (12.0h avail, max 6), Day 3: 4 activities [0 must-sees] (6.0h avail, max 3)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Librairie Lello\" (score=118.8), \"Ribeira do Porto\" (score=118.7), \"Pont Dom-Luís\" (score=120.5)",
+    "[Pipeline V2]   Day 2: Librairie Lello, Ribeira do Porto, Pont Dom-Luís",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1: Casa-Museu Marta Ortigão Sampaio, Monumento aos Heróis da Guerra Peninsular, Mercado Bom Sucesso (0.6km intra)",
+    "[Pipeline V2]   Day 2: Jardins du Palais de Cristal, Librairie Lello, Parque das Virtudes, Torre dos Clérigos, Ribeira do Porto, Pont Dom-Luís (2.6km intra)",
+    "[Pipeline V2]   Day 3: Cathédrale de Porto, 5 Dégustations de Porto avec accords, Palacio da Bolsa, Jardim do Morro (2.2km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Being Porto Hostel\" (0.86 score, 0.42km center, 1.11km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Step 4 prefetch: sparse anchors=4/4 (hotel, day-1-centroid, day-2-first, day-2-last)",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.1427296989931,-8.61561975767211,14z\", gl=\"pt\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.1482682,-8.6255165,14z\", gl=\"pt\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.1399589,-8.6094485,14z\", gl=\"pt\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Step 4: supplemental API restaurants fetched=10, total SerpAPI pool=10",
+    "[Pipeline V2] Restaurants pool: total=40, budgetFiltered=7, geo=6",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=9, targets=6",
+    "[SerpAPI Places] Requête: q=\"café pequeno almoço padaria\", location=\"Porto\", ll=\"@41.1427296989931,-8.61561975767211,14z\", gl=\"pt\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.1593654,-8.6255364,14z\", gl=\"pt\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.15293553979863,-8.626486351534425,14z\", gl=\"pt\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.1447,-8.6189879,14z\", gl=\"pt\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Porto\", ll=\"@41.14051305979863,-8.610682751534423,14z\", gl=\"pt\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=50, budgetFiltered=17, geo=16",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=20, missing meals 9 -> 9",
+    "[Pipeline V2] Step 4: 0/9 meals assigned restaurants (pool=16)",
+    "[Pipeline V2] Step 5: Hotel selected: \"Being Porto Hostel\" (1.31 score, 0.42km center, 1.11km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] Restaurants pool: total=50, budgetFiltered=17, geo=16",
+    "[Pipeline V2] Budget balancing: transport combined->plane | self-catered skipped (no kitchen) | hotel budget fallback Fantasy Hostel Porto | self-catered skipped (post-hotel, no kitchen)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 1: \"Arrivée et découverte douce\" → \"Casa-Museu Marta Ortigão Sampaio et Monumento aos Heróis da Guerra Peninsular\"",
+    "[Pipeline V2] Theme mismatch fixed for day 2: \"Patrimoine et culture intérieure\" → \"Jardins du Palais de Cristal et Librairie Lello\"",
+    "[Pipeline V2] Theme mismatch fixed for day 3: \"Points de vue et librairie emblématique\" → \"Cathédrale de Porto et 5 Dégustations de Porto avec accords\"",
+    "[Pipeline V2] Step 6 done in 10181ms — \"Jour d'arrivée allégé, activités intérieures concentrées le jour 2 pour éviter la pluie, et sites emblématiques le dernier jour malgré la météo.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 12/13 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 16 pairs...",
+    "[Pipeline V2] Directions cache: 16/16 pairs fetched",
+    "[Pipeline V2] Day 2 re-optimized with real times: Pont Dom-Luís → Ribeira do Porto → Parque das Virtudes → Torre dos Clérigos → Librairie Lello → Jardins du Palais de Cristal",
+    "[Pipeline V2] Day 3 re-optimized with real times: Cathédrale de Porto → 5 Dégustations de Porto avec accords → Palacio da Bolsa → Jardim do Morro",
+    "[Pipeline V2] 2-opt re-optimization: 2/3 days changed with real times",
+    "[Pipeline V2] Day 1: 3 activities to schedule (0 must-sees), dayStart=09:00, dayEnd=22:00, window=13.0h, cursor=21:20",
+    "[Pipeline V2]   → \"Casa-Museu Marta Ortigão Sampaio\" (120min, score=23.0, mustSee=false)",
+    "[Pipeline V2]   → \"Monumento aos Heróis da Guerra Peninsular\" (60min, score=20.8, mustSee=false)",
+    "[Pipeline V2]   → \"Mercado Bom Sucesso\" (60min, score=19.0, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 breakfast, searching pool + API near \"Fantasy Hostel Porto\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 breakfast: found \"A Padaria Portuguesa\" (0.05km from Fantasy Hostel Porto)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 lunch, searching pool + API near \"Casa-Museu Marta Ortigão Sampaio\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 lunch: found \"Restaurante Universal comida tradicional portuguesa\" (0.55km from Casa-Museu Marta Ortigão Sampaio)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 dinner, searching pool + API near \"Mercado Bom Sucesso\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 dinner: found \"OLÁ VIETNAM RESTAURANT\" (0.73km from Mercado Bom Sucesso)",
+    "[Pipeline V2] Day 1: Skipping \"Monumento aos Heróis da Guerra Peninsular\" — closed on friday",
+    "[Pipeline V2] Day 2: 6 activities to schedule (3 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Pont Dom-Luís\" (45min, score=120.5, mustSee=true)",
+    "[Pipeline V2]   → \"Ribeira do Porto\" (60min, score=118.7, mustSee=true)",
+    "[Pipeline V2]   → \"Parque das Virtudes\" (60min, score=19.9, mustSee=false)",
+    "[Pipeline V2]   → \"Torre dos Clérigos\" (90min, score=26.8, mustSee=false)",
+    "[Pipeline V2]   → \"Librairie Lello\" (60min, score=118.8, mustSee=true)",
+    "[Pipeline V2]   → \"Jardins du Palais de Cristal\" (60min, score=26.5, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 breakfast, searching pool + API near \"Fantasy Hostel Porto\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 breakfast: found \"Pão Fôfo\" (0.12km from Fantasy Hostel Porto)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 lunch, searching pool + API near \"Parque das Virtudes\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 lunch: found \"Oporto Bakery\" (0.78km from Parque das Virtudes)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Jardins du Palais de Cristal\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"Sabor Da Fazenda\" (0.11km from Jardins du Palais de Cristal)",
+    "[Pipeline V2] Day 2: Skipping \"Ribeira do Porto\" — closed on saturday",
+    "[Pipeline V2] Day 3: 4 activities to schedule (0 must-sees), dayStart=09:00, dayEnd=22:00, window=13.0h, cursor=09:15",
+    "[Pipeline V2]   → \"Cathédrale de Porto\" (30min, score=19.3, mustSee=false)",
+    "[Pipeline V2]   → \"5 Dégustations de Porto avec accords\" (90min, score=18.7, mustSee=false)",
+    "[Pipeline V2]   → \"Palacio da Bolsa\" (120min, score=26.2, mustSee=false)",
+    "[Pipeline V2]   → \"Jardim do Morro\" (60min, score=19.5, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 breakfast, searching pool + API near \"Fantasy Hostel Porto\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 breakfast: found \"Carlotta Cake Boutique - Loja Trindade\" (0.12km from Fantasy Hostel Porto)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 lunch, searching pool + API near \"5 Dégustations de Porto avec accords\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 lunch: found \"The Door\" (0.84km from 5 Dégustations de Porto avec accords)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 dinner, searching pool + API near \"Jardim do Morro\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 dinner: found \"ENCAIXADOS\" (0.49km from Jardim do Morro)",
+    "[Pipeline V2] Day 3: meal-inclusive activity found — skipLunch=true, skipDinner=false",
+    "[Pipeline V2] 📸 Enriching 10 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 10/10 enriched with Google Places photos",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 1 restaurant(s) (0 API calls)",
+    "[Pipeline V2] 📸 Enriching 1 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 1/1 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 9 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 2 large intra-day gap segment(s)",
+    "[Pipeline V2] Geo strict prune: Day 2 removed 2 optional activity(ies)",
+    "[Pipeline V2] Geo strict prune: Day 3 removed 1 optional activity(ies)",
+    "[Pipeline V2] Section 13i: pruned 3 optional activity(ies) to reduce intra-day zigzags",
+    "[Pipeline V2] Step 7: 7 alternatives, pool trimmed to 13/13",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 88/100",
+    "  ⚠️ Day 2: zigzag route detected (2 turnbacks)",
+    "  ⚠️ Day 3: missing explicit inter-city return transport",
+    "  🔧 Day 3: inserted fallback return longhaul transport",
+    "  🔧 Day 1: Cleared narrative (no activities)",
+    "  🔧 Day 2: Fixed activity count in narrative (6 → 3)",
+    "  🔧 Day 3: Fixed activity count in narrative (4 → 3)",
+    "[Pipeline V2] Step 8: Quality score 88/100 (2 warnings, 4 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 27 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 79202ms (79.2s)",
+    "[Pipeline V2]   3 days, 16 items total"
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite à pied de Porto, Porto\": 1728.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Concert de Fado avec verre de bienvenue, Porto\": 1210.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Authentique Braga & Guimarães: Visite en petit groupe historique, Porto\": 42.7km de la destination (max 30km)",
+    "[Scheduler] Conflict: \"Check-in Fantasy Hostel Porto\" overlaps with \"✈️ Vol → Porto\"",
+    "[Pipeline V2] Day 1: REJECTED activity \"Casa-Museu Marta Ortigão Sampaio\" (duration=120min, travel=15min, cursor=21:50, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Mercado Bom Sucesso\" (duration=60min, travel=20min, cursor=21:50, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Carlotta Cake Boutique - Loja Trindade\" overlaps with \"Check-out Fantasy Hostel Porto\"",
+    "[Scheduler] Conflict: \"✈️ Vol → Lyon\" overlaps with \"Jardim do Morro\""
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite à pied de Porto, Porto\" à Porto — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Authentique Braga & Guimarães: Visite en petit groupe historique, Porto\" à Porto — aucune API n'a pu résoudre",
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Ribeira do Porto\"",
+    "[Pipeline V2]   Day 1: (no activities)",
+    "[Pipeline V2]   Day 2: Pont Dom-Luís, Parque das Virtudes, Librairie Lello",
+    "[Pipeline V2]   Day 3: 5 Dégustations de Porto avec accords, Palacio da Bolsa, Jardim do Morro"
+  ],
+  "durationMs": 79202,
+  "generatedAt": "2026-02-17T14:31:55.386Z",
+  "success": true,
+  "runType": "suggestion",
+  "suggestionQuery": "Je veux un city-break gastronomie pas cher depuis Lyon",
+  "suggestionTitle": "Le Festin Portugais à Porto"
+}

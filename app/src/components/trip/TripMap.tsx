@@ -226,6 +226,13 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
   });
 }
 
+function safeImageUrl(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('/')) return url;
+  try { const u = new URL(url); return u.protocol === 'https:' ? url : ''; }
+  catch { return ''; }
+}
+
 function getPopupContent(item: TripItem, index: number): string {
   const color = getDayColor(item.dayNumber).bg;
   const googleMapsUrl = item.googleMapsPlaceUrl ||
@@ -258,10 +265,11 @@ function getPopupContent(item: TripItem, index: number): string {
     : (item.title || '');
 
   // Photo — onerror hides only the img, not the container
-  const hasImage = !!item.imageUrl;
+  const sanitizedImageUrl = safeImageUrl(item.imageUrl || '');
+  const hasImage = !!sanitizedImageUrl;
   const imageHtml = hasImage
     ? `<div style="position:relative;width:100%;height:160px;overflow:hidden;border-radius:15px 15px 0 0;background:#0f172a;">
-        <img src="${item.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+        <img src="${sanitizedImageUrl}" alt="${escapeHtml(displayTitle)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
         <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,rgba(2,6,23,0.9));"></div>
         <div style="position:absolute;bottom:12px;left:15px;right:15px;display:flex;align-items:center;gap:10px;">
           <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg, #c5a059 0%, #a37f3d 100%);color:white;font-family:'Playfair Display', serif;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.3);box-shadow:0 4px 10px rgba(0,0,0,0.3);">${index}</div>

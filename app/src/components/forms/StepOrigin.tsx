@@ -72,22 +72,22 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-10"
+      className="space-y-12 max-w-[600px] mx-auto w-full"
     >
-      <div className="text-center space-y-3">
-        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
           D&apos;où partez-vous ?
         </h2>
-        <p className="text-lg text-muted-foreground/80 max-w-md mx-auto">
+        <p className="text-[17px] text-[#94a3b8] font-light">
           Pour calculer vos temps de trajet et options de transport.
         </p>
       </div>
 
-      <div className="space-y-6 max-w-xl mx-auto">
+      <div className="space-y-6">
         <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gold/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -inset-0.5 bg-gold/20 rounded-[1.2rem] blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
           <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gold/50 group-focus-within:text-gold transition-colors" />
+            <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-white/50 group-focus-within:text-white transition-colors z-10" strokeWidth={2} />
             <Input
               value={query}
               onChange={(e) => {
@@ -95,7 +95,7 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
                 onChange({ origin: e.target.value });
               }}
               placeholder="Ex: Paris, Lyon, Bordeaux..."
-              className="pl-12 h-16 text-xl rounded-2xl bg-white/[0.03] border-white/10 focus:border-gold/50 focus:bg-white/[0.05] transition-all"
+              className="pl-[3.25rem] pr-6 h-[56px] text-[15px] rounded-[1.2rem] bg-[#0e1220]/50 border-white/[0.08] text-white placeholder:text-white/40 focus:border-white/20 focus:bg-[#0f1429] focus-visible:ring-0 shadow-inner transition-all"
             />
           </div>
 
@@ -121,14 +121,16 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
           variant="outline"
           onClick={handleGeolocation}
           disabled={isLocating}
-          className="w-full h-12 rounded-xl gap-2"
+          className="w-full h-[52px] rounded-[1.2rem] border border-dashed border-white/[0.15] bg-transparent text-white/90 hover:text-white hover:border-white/30 hover:bg-white/[0.03] transition-all gap-3"
         >
           {isLocating ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Navigation className="h-4 w-4" />
+            <Navigation className="h-4 w-4" strokeWidth={1.5} />
           )}
-          {isLocating ? 'Localisation...' : 'Utiliser ma position actuelle'}
+          <span className="font-medium tracking-wide">
+            {isLocating ? 'Localisation...' : 'Utiliser ma position actuelle'}
+          </span>
         </Button>
       </div>
     </motion.div>

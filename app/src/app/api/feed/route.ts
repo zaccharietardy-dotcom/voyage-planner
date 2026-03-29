@@ -90,6 +90,9 @@ export async function GET(request: Request) {
     const offset = (page - 1) * limit;
 
     const destination = searchParams.get('destination');
+    if (destination && destination.length > 200) {
+      return NextResponse.json({ error: 'Invalid destination' }, { status: 400 });
+    }
     const minDaysParsed = parseOptionalPositiveInt(searchParams.get('minDays'), 'minDays');
     const maxDaysParsed = parseOptionalPositiveInt(searchParams.get('maxDays'), 'maxDays');
     if (minDaysParsed.error || maxDaysParsed.error) {

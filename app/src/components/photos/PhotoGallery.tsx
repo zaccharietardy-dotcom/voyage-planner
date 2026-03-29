@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Eye, EyeOff, X, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,7 +26,7 @@ interface PhotoGalleryProps {
   isOwner?: boolean;
 }
 
-export function PhotoGallery({ tripId, isOwner = false }: PhotoGalleryProps) {
+function PhotoGalleryInner({ tripId, isOwner = false }: PhotoGalleryProps) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -168,5 +168,47 @@ export function PhotoGallery({ tripId, isOwner = false }: PhotoGalleryProps) {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+class PhotoGalleryErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.error('[PhotoGallery] Render error:', error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <p className="text-sm text-muted-foreground mb-2">
+            Galerie indisponible
+          </p>
+          <button
+            onClick={() => this.setState({ hasError: false })}
+            className="text-xs text-primary underline hover:no-underline"
+          >
+            R&eacute;essayer
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export function PhotoGallery(props: PhotoGalleryProps) {
+  return (
+    <PhotoGalleryErrorBoundary>
+      <PhotoGalleryInner {...props} />
+    </PhotoGalleryErrorBoundary>
   );
 }

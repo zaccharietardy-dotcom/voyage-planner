@@ -270,7 +270,7 @@ async function filterHotelsWithLiveAvailability(
     }
 
     if (matchedHotels.length < hotels.length) {
-      console.log(`[Hotels] Disponibilité live: ${matchedHotels.length}/${hotels.length} hôtels confirmés`);
+      console.debug(`[Hotels] Disponibilité live: ${matchedHotels.length}/${hotels.length} hôtels confirmés`);
     }
 
     const confirmedHotels = matchedHotels.map((hotel) => ({
@@ -306,7 +306,7 @@ async function filterHotelsWithLiveAvailability(
       ...fallbackCandidates.slice(0, Math.max(0, targetCount - confirmedHotels.length)),
     ];
 
-    console.log(
+    console.debug(
       `[Hotels] Disponibilité live partielle (${confirmedHotels.length} confirmés), ` +
       `complété à ${completedHotels.length} options pour garder des hôtels centraux`
     );

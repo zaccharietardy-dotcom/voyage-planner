@@ -2386,7 +2386,6 @@ OUTPUT FORMAT - JSON array, no text before or after:
   }
 ]`;
 
-    console.log('[Day Trips AI] Calling Gemini 2.5 Flash for day trip suggestions...');
     const startTime = Date.now();
 
     const response = await fetch(
@@ -2421,7 +2420,7 @@ OUTPUT FORMAT - JSON array, no text before or after:
       return [];
     }
 
-    console.log(`[Day Trips AI] Gemini response received in ${durationMs}ms`);
+    console.debug(`[Day Trips AI] Gemini response received in ${durationMs}ms`);
 
     // Parse JSON response
     const rawTrips = JSON.parse(text);

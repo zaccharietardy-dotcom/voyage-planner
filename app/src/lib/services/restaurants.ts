@@ -189,7 +189,7 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
         });
         filtered = filterByForbiddenNames(filtered, destination);
 
-        console.log(`[Restaurants] ${taRestaurants.length} restaurants TripAdvisor, ${filtered.length} après filtrage`);
+        console.debug(`[Restaurants] ${taRestaurants.length} restaurants TripAdvisor, ${filtered.length} après filtrage`);
         if (filtered.length > 0) {
           finalRestaurants = filtered.slice(0, limit);
           return applyFinalFilter(finalRestaurants, destination, limit, mealType, dietary);
@@ -203,9 +203,9 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
   // 3. Google Places (gratuit, $200 crédit/mois)
   if (getGooglePlacesKey()) {
     try {
-      console.log(`[Restaurants] Google Places: recherche (${latitude}, ${longitude}), radius=${Math.max(radius, 2000)}`);
+      console.debug(`[Restaurants] Google Places: recherche (${latitude}, ${longitude}), radius=${Math.max(radius, 2000)}`);
       const googleResults = await searchWithGooglePlaces(params);
-      console.log(`[Restaurants] Google Places: ${googleResults.length} résultats bruts`);
+      console.debug(`[Restaurants] Google Places: ${googleResults.length} résultats bruts`);
       // Filtrer les chaînes ET les cuisines incohérentes
       let filtered = filterOutChains(googleResults);
       if (destination) {
@@ -224,14 +224,14 @@ export async function searchRestaurants(params: RestaurantSearchParams): Promise
   // 4. SerpAPI Google Local (payant ~$0.01/req, 100 req/mois gratuit — dernier recours payant)
   if (destination && isSerpApiPlacesConfigured()) {
     try {
-      console.log(`[Restaurants] SerpAPI: recherche "${destination}" (${latitude}, ${longitude})`);
+      console.debug(`[Restaurants] SerpAPI: recherche "${destination}" (${latitude}, ${longitude})`);
       const serpRestaurants = await searchRestaurantsWithFallback(destination, {
         mealType,
         limit: limit + 10,
         latitude,
         longitude,
       });
-      console.log(`[Restaurants] SerpAPI: ${serpRestaurants.length} résultats bruts`);
+      console.debug(`[Restaurants] SerpAPI: ${serpRestaurants.length} résultats bruts`);
 
       if (serpRestaurants.length > 0) {
         try {

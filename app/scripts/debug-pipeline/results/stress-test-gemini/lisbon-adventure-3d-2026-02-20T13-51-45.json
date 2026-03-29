@@ -1,0 +1,1732 @@
+{
+  "scenarioId": "lisbon-adventure-3d",
+  "preferences": {
+    "origin": "Marseille",
+    "destination": "Lisbon",
+    "startDate": "2026-02-25T13:47:18.701Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 5,
+    "groupType": "friends",
+    "budgetLevel": "economic",
+    "activities": [
+      "adventure",
+      "gastronomy"
+    ],
+    "dietary": [
+      "vegetarian"
+    ],
+    "mustSee": "Torre de Belém, Alfama",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Lisbon",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "496882e7-84ab-416b-bb51-d43ff2711560",
+    "createdAt": "2026-02-20T13:51:36.565Z",
+    "updatedAt": "2026-02-20T13:51:36.565Z",
+    "preferences": {
+      "origin": "Marseille",
+      "destination": "Lisbon",
+      "startDate": "2026-02-25T13:47:18.701Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 5,
+      "groupType": "friends",
+      "budgetLevel": "economic",
+      "activities": [
+        "adventure",
+        "gastronomy"
+      ],
+      "dietary": [
+        "vegetarian"
+      ],
+      "mustSee": "Torre de Belém, Alfama",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Lisbon",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-25T13:47:18.701Z",
+        "items": [
+          {
+            "id": "8c750845-bef2-4ad2-8cf9-9be9550e4a65",
+            "dayNumber": 1,
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Praça do Comércio",
+            "description": "A Praça do Comércio, ainda comumente referido pela sua antiga designação de Terreiro do Paço, é uma praça da Baixa de Lisboa situada junto ao rio Tejo, na zona que foi o local do palácio dos reis de P",
+            "locationName": "Praça do Comércio",
+            "latitude": 38.7072828,
+            "longitude": -9.136361299999999,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7072828,-9.136361299999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pra%C3%A7a%20do%20Com%C3%A9rcio&query_place_id=&center=38.7072828,-9.136361299999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU_CUyvmlXVed5XnT6ha0xglxvGpvQjevPDShxtEtbrIk47S0sOT-C8vDJqEVNTURbobSw0mkpCiEOHvotCNVpO1vJ37ylKAIXJT84HqxnHmVQEdhMVtc3hB-7qJYA8QWnatzMel_wc_7O7UdBCMC6y6WLYuHs9x_sAKwn1R7qmtgVEZvPHUPrJrFlMMf7P9pWJcLEAxYTdS8WPrVhGHQgvFvA_dmHg704ijW1Jn1iFa5ZM9DbRpkb_nKX1rkPMR6JYEjBJPF7PEkAQeROGmiMccqrETV09uPRr3XUP0JzES7PDiLgeKDLRm6-Wh3I_fVpbKli61NAuUcJCIgGtpzjAJiyHRjz0TaaWKeNMVlh_HJ3yMJf1LtKi7rH8kih-95-TSu_oT-eYeJ1b7TRNSOX3Rch7LQQRu-dTcJ2943XQ0puTgy5oLk6sMTCg5mf9VBJftN5kezjz23TkyCwfNeLRLJViGE6gQk6f6BXwYAc0LeOuu-uc2VLQXjfoqUVT1jUiQYZcMKBCeZkdaEnJVNGIRWMIEq3UQa7CZY6YCxYgfU_P7qPuGbkm37az0JN4wVxRfxCg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "43ded679-9b0a-4fc4-bc19-d9d15c266e46",
+            "dayNumber": 1,
+            "startTime": "14:26",
+            "endTime": "23:00",
+            "type": "transport",
+            "title": "Marseille-St-Charles → Santa Apolónia",
+            "description": "Train Train, Train, Train, Train, Train, Train, Train, Train",
+            "locationName": "Marseille-St-Charles",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 1,
+            "duration": 1994,
+            "transitLegs": [
+              {
+                "mode": "train",
+                "from": "Marseille-St-Charles",
+                "to": "Narbonne",
+                "departure": "2026-02-25T14:26:00.000Z",
+                "arrival": "2026-02-25T16:58:00.000Z",
+                "duration": 152,
+                "line": "INTERCITES"
+              },
+              {
+                "mode": "train",
+                "from": "Narbonne",
+                "to": "Girona",
+                "departure": "2026-02-25T18:24:00.000Z",
+                "arrival": "2026-02-25T19:47:00.000Z",
+                "duration": 83,
+                "line": "TGV INOUI"
+              },
+              {
+                "mode": "train",
+                "from": "Girona",
+                "to": "Gare de Madrid-Atocha",
+                "departure": "2026-02-26T04:44:00.000Z",
+                "arrival": "2026-02-26T08:52:00.000Z",
+                "duration": 248,
+                "line": "Ave"
+              },
+              {
+                "mode": "train",
+                "from": "Atocha",
+                "to": "Madrid Chamartin Train Station",
+                "departure": "2026-02-26T09:04:00.000Z",
+                "arrival": "2026-02-26T09:18:00.000Z",
+                "duration": 14,
+                "line": "C4b"
+              },
+              {
+                "mode": "train",
+                "from": "Madrid Chamartin Train Station",
+                "to": "Santiago de Compostela",
+                "departure": "2026-02-26T10:17:00.000Z",
+                "arrival": "2026-02-26T13:21:00.000Z",
+                "duration": 184,
+                "line": "Ave"
+              },
+              {
+                "mode": "train",
+                "from": "Santiago de Compostela",
+                "to": "Vigo Guixar",
+                "departure": "2026-02-26T14:11:00.000Z",
+                "arrival": "2026-02-26T15:53:00.000Z",
+                "duration": 102,
+                "line": "Regional"
+              },
+              {
+                "mode": "train",
+                "from": "Vigo Guixar",
+                "to": "Campanha",
+                "departure": "2026-02-26T17:05:00.000Z",
+                "arrival": "2026-02-26T19:35:00.000Z",
+                "duration": 150,
+                "line": "Trencelta"
+              },
+              {
+                "mode": "train",
+                "from": "Campanha",
+                "to": "Santa Apolónia",
+                "departure": "2026-02-26T19:45:00.000Z",
+                "arrival": "2026-02-26T23:00:00.000Z",
+                "duration": 195,
+                "line": "IC"
+              }
+            ],
+            "transitDataSource": "api",
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg",
+            "estimatedCost": 0,
+            "bookingUrl": "https://www.omio.fr/trains/marseille/lisbon?departure_date=2026-02-25"
+          },
+          {
+            "id": "a172da98-8456-49d0-a4c3-7208294e2b52",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in Urban Garden",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Urban Garden",
+            "latitude": 38.724501599999996,
+            "longitude": -9.1469472,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "serp-hotel-ChkI2om_7__w8PO9ARoML2cvMWhjNDNyN3MyEAE",
+              "name": "Urban Garden",
+              "type": "hotel",
+              "address": "Adresse non disponible",
+              "latitude": 38.724501599999996,
+              "longitude": -9.1469472,
+              "rating": 7.8,
+              "reviewCount": 831,
+              "stars": 2,
+              "pricePerNight": 90,
+              "totalPrice": 180,
+              "currency": "EUR",
+              "amenities": [
+                "Free Wi-Fi",
+                "Air conditioning",
+                "Kitchen in some rooms"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.urbangardenhostel.com/",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.urbangardenhostel.com/"
+          },
+          {
+            "id": "c01063e5-2150-41d0-95d2-1a9e10b47e5b",
+            "dayNumber": 1,
+            "startTime": "15:15",
+            "endTime": "16:15",
+            "type": "activity",
+            "title": "Arc de triomphe de la rue Augusta",
+            "description": "O Arco do Triunfo do Carrossel é um monumento datando de 1809, construído por Napoleão I.  Existem entradas sobre cada uma de suas quatro faces.",
+            "locationName": "Arc de triomphe de la rue Augusta",
+            "latitude": 38.7084447,
+            "longitude": -9.136824299999999,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7084447,-9.136824299999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Arc%20de%20triomphe%20de%20la%20rue%20Augusta&query_place_id=&center=38.7084447,-9.136824299999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW4Wyopz9PA5bfwtwkKyyakU5uYLYcH4xnuX9p3SPeVIEBctrKY5nInkYauczd8Ye2uN1KV9IJ1EBFZjmmF1PsLVWo4Bjid2zMDp_2BnSemh-aKCTiQyK06ps2YsZR22aTjmvqdh8q_Dp1J3EwlgIrbWDq_mb-PoJZGklOBl7vIj_IDndvhf4TY79jgMMuh7x8S3rbnHkf_MUkLIa-QYoTdgO3yqxMiBL-4pOUpEFD3RYwa1XeLCREpn9YWQGRHEhJEyrAlySdenvACW-c82HlDgu5ghEx1flhSTV59xtS-2t_S765ObCZpIASyGbiv_rpNvlWcdMGzFizu5sUnc0VdLcrVH2JhLCVB9bM0ps8PmE2b85ojfI8n9xMa0vIZm0Jyd23uagNh_2ZVDkiUDaKeaqNGZMe3xeeSwKDrGCiFSdKu8e9nrSuyrxcxEq8nQ0FkUTuAM3sY0tFamjufJPrIWQp9U0oL7y4AfKwM4xqpSquCYUDVy7V96dFzi44wCyEgeUsYyvagfB7kmCeaqvMEBXZn3yyerazIOa1njtvBty_zqsNuIIVE1VyjBd26j50bgIiqlC9YLw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.99,
+            "timeFromPrevious": 25,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "db91cc6c-271a-4c02-b27d-437c28b94f2d",
+            "dayNumber": 1,
+            "startTime": "16:30",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Cathédrale de Santa Maria Maior, Sé de Lisbonne",
+            "description": "António Correa Braga foi um compositor e organista português do Barroco.",
+            "locationName": "Cathédrale de Santa Maria Maior, Sé de Lisbonne",
+            "latitude": 38.7098339,
+            "longitude": -9.1329535,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7098339,-9.1329535",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cath%C3%A9drale%20de%20Santa%20Maria%20Maior%2C%20S%C3%A9%20de%20Lisbonne&query_place_id=&center=38.7098339,-9.1329535",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWc6OCXeg8mjin9lLwc-WMbq7YFD9FQ0X6544KBdfAP9pViqfwBboBUVYp9pd040moPAJ9BXRDw2SKJ7pivgWoYzWohPkMgT6hT94NHhFu1xSim65JnZghzUfMliBMALLMDbyHaDUROzipyZjjcz3AG6qy5hBKkwIiVbfeeG04ewMrEIz1ZnBPt-9i6PdtEaacK90-VZmPe38bHOvAAcutLaBwUhGZ92n0nMXAn2Atzlu4ktX7DAFbt6z_nF4xH6pkZrl8erQikADpWyH1-qdhbo_hcciE82M2gZoKnjSOUgr3m4y1xtFz19YyY5DWWq6vdld0NgI6gmLHSzKDKDEOKZTVoxkoTanT00TOylxD7dNbGCqgr8RHSFQV2714Rh_83fd1orxDeIYbAWeu8eO5FksAOrFhDWzTAwkT2WPczpvmZryfPny9nbuHyVRg7MLJ6C9LAIQEGrVAmUbuUoy6In6XnlGkyU8ngIzU3LNUM0LEo-gyF7KdAjY0xU_GMkghwvW5TVP-p2woSzThoCxUvnE0cxyC7qW3-EveokJ-ouFvRrwOcp4jsuu1AiIsGuVWvhw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.37,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "5e423454-fde1-44bf-93d2-16c3d7bead42",
+            "dayNumber": 1,
+            "startTime": "17:15",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Château Saint-Georges",
+            "description": "Saint-Georges-du-Bois é uma comuna francesa na região administrativa da Nova Aquitânia, no departamento de Charente-Maritime.  Estende-se por uma área de 27,90 km².  Em 2010 a comuna tinha 1 801 habit",
+            "locationName": "Château Saint-Georges",
+            "latitude": 38.7139092,
+            "longitude": -9.1334762,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7139092,-9.1334762",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20Saint-Georges&query_place_id=&center=38.7139092,-9.1334762",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXkjxID6Xf0taPedFX0LjS3BZromp8fBTha_bBmQamtQeGmpqtJsOaqbDWG05n5nh62C8yx_4ZiHmWDsDDH3mr1h11m0Z5xFYAUZhLC1VE-7pw5ILHxGtJOLHSmGy5jFtMa2ZFbgW4-sos9lNbvNUlJT0hvLkox_3vYhMVwIdWYGkFFmnHqRqvhXdpZPWDU0t4IDGH-70V6c9b7OW0OER8gz42m8I9JGMZe7GF7ZPipCQDf5GC6esbin2N0uGMmWjeutP4YUpfFhR3QPOTYEC6ucPt-8OKD-xiyPSkHYOVlUJG8BZjJUNfXqHVxZgZMdFHx9M0ckXduVIxU9BDXjCvA6UysZcQVTamPwOcpeQLR4Oyj-53u6v2iuQldDPxc9MGUf6odllW0K_vFb_LaV47IAQogEkgmzQfTgbQQd6uAnn2oSnEkiMGqbIc77H4iW44bfwSe_YU8M4lxtW_Kr_5GzxOlUBGi5IiZnBbdwFDNtjPy_yHcUfVgT-EMTy6q8H3laldQ53UFkMPmXb4Zin0WImnW9HkxWA6cymIhXIUJPoCcqFHFqPdEcHOXwmPadByZ8rwr&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.46,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "97d86add-9358-492b-88be-73f01d40a57f",
+            "dayNumber": 1,
+            "startTime": "18:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Aquarium de Lisbonne",
+            "description": "Cities are a major topic for popular songs.  Music journalist Nick Coleman said that apart from love, \"pop is better on cities than anything else.",
+            "locationName": "Aquarium de Lisbonne",
+            "latitude": 38.7635435,
+            "longitude": -9.0937415,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7635435,-9.0937415",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Aquarium%20de%20Lisbonne&query_place_id=&center=38.7635435,-9.0937415",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU92D2TQWD_tQ6myZytNc1it8eJylUL85m8OTmmefu6an0_SPieT_8gx9arSqYCz03V9DO-2yXGcRmgPVWPqBtmc9WactJFr6L_AQzjkDLGlZxLIc5jbhsE7CEG3Ve9_6TIAMJWT0TErG39rwAcUupwcb9KkJ4DeWmrkN0uhHKQyrRMtjDqylE8LmUz_YxXruWbZuv3GjRM3zv9RuKpgwrbew8VkWD1x1bF6RQPkgwUaH_91f9jXeN_G9kRUQoV24iruXK1o9zzGcluhe-_kcI3LydXvR6Ps0YGEoMJi6ASxKGO_SHTMi_V7ugWGTUwRLtiFz6x_ypv2zRo_qClVLmFQnXIUzBFUqDQleUSWxlEISTKN3dxmxX3z6I3u6p1hQ2DqvKC-2hYxq2oBjoBMe7cJ_4R91xWFbek_jntQIq_X8s-gTEKIEAdAKzfCPiTe9trilQxTHo60BxWmhPPFQLlb1ySZgdJc0KPbU4DLAB8nZ3yA8j277bSg0sqYPyZ1kNncMfinNrlY8M4jCebLEx5wFeEJlQ_q0Zy6j1FyBbW1HFhRC4YC1UuVmkGx-RltQYSKA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 6.51,
+            "timeFromPrevious": 82,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "9b2da4db-050a-48ea-9dcd-e7a2d908a589",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Honest Greens Parque das Nações",
+            "description": "Repas sur place",
+            "locationName": "Alameda dos Oceanos 21101F, 1990-225 Lisboa",
+            "latitude": 38.764561,
+            "longitude": -9.095521,
+            "orderIndex": 7,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.711482,-9.134936",
+            "restaurant": {
+              "id": "serp-nearby-ChIJO0Ylwy4xGQ0Rbgf631adBkc",
+              "name": "Honest Greens Parque das Nações",
+              "address": "Alameda dos Oceanos 21101F, 1990-225 Lisboa",
+              "latitude": 38.764561,
+              "longitude": -9.095521,
+              "rating": 4.4,
+              "reviewCount": 3610,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "923 217 520",
+              "website": "https://honestgreens.com/pt/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Honest%20Greens%20Parque%20das%20Na%C3%A7%C3%B5es%2C%20Alameda%20dos%20Oceanos%2021101F%2C%201990-225%20Lisboa",
+              "googlePlaceId": "ChIJO0Ylwy4xGQ0Rbgf631adBkc",
+              "openingHours": {
+                "friday": {
+                  "open": "08:30",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "08:30",
+                  "close": "00:00"
+                },
+                "sunday": {
+                  "open": "08:30",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:30",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:30",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:30",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:30",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.1913247301244211,
+              "walkingTime": 2
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJz0fT7IYxGQ0RO_ES7_8-MCQ",
+                "name": "Butchers",
+                "address": "R. do Polo Sul 15C, 1990-271 Lisboa",
+                "latitude": 38.7653354,
+                "longitude": -9.0972103,
+                "rating": 4.4,
+                "reviewCount": 3602,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant de viande",
+                  "restaurant de viande"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant de grillades moderne avec terrasse. Restaurant chic et moderne spécialisé dans les plats de viande, comprenant une salle à manger claire et une terrasse."
+                ],
+                "description": "Restaurant de grillades moderne avec terrasse. Restaurant chic et moderne spécialisé dans les plats de viande, comprenant une salle à manger claire et une terrasse.",
+                "phoneNumber": "936 221 553",
+                "website": "https://www.butchers.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Butchers%2C%20R.%20do%20Polo%20Sul%2015C%2C%201990-271%20Lisboa",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqpSfIkPZ10b3iFqQgnVktT-nbhnsqYbnmCDJXj8rkt2n5TmFeO6wFdNgM5Y8CRSyBr9ZoQfGxmisBd7DcQNCifg2R8NSiDK-Ol4rg00_3_SKvxVPFeimrL6SF3kzjfxDYwziXF=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJz0fT7IYxGQ0RO_ES7_8-MCQ",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "saturday": {
+                    "open": "12:30",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "12:30",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  }
+                },
+                "distance": 0.36076532783342663,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJI0hNMAAxGQ0RWdieixkUL9M",
+                "name": "Restaurant Parce Que",
+                "address": "R. do Polo Sul 2 2h, 1990-273 Lisboa",
+                "latitude": 38.7619063,
+                "longitude": -9.0971152,
+                "rating": 4.6,
+                "reviewCount": 270,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "restaurant portugais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "964 178 456",
+                "website": "https://parceque.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Parce%20Que%2C%20R.%20do%20Polo%20Sul%202%202h%2C%201990-273%20Lisboa",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipOaxTN6gxvG8iLTyRlYNAcJrebOHZON6gF5j243=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJI0hNMAAxGQ0RWdieixkUL9M",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "23:00"
+                  },
+                  "saturday": null,
+                  "sunday": null,
+                  "monday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.3445360664858601,
+                "walkingTime": 4
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 6.8,
+            "timeFromPrevious": 86,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Honest%20Greens%20Parque%20das%20Na%C3%A7%C3%B5es%2C%20Alameda%20dos%20Oceanos%2021101F%2C%201990-225%20Lisboa",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Honest%20Greens%20Parque%20das%20Na%C3%A7%C3%B5es%2C%20Alameda%20dos%20Oceanos%2021101F%2C%201990-225%20Lisboa",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Praça do Comércio et Arc de triomphe de la rue Augusta",
+        "dayNarrative": "Après l'arrivée et l'installation, cette journée se concentre sur le cœur historique de Lisbonne, l'Alfama, avec ses vues emblématiques et ses monuments, en privilégiant les activités intérieures ou partiellement couvertes en raison des averses légères.",
+        "geoDiagnostics": {
+          "maxLegKm": 6.51,
+          "p95LegKm": 0.46,
+          "totalTravelMin": 103,
+          "totalLegKm": 7.67,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 7.66
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-26T13:47:18.701Z",
+        "items": [
+          {
+            "id": "127ab179-9e44-42c6-940e-530598e8dba7",
+            "dayNumber": 2,
+            "startTime": "09:15",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Couvent des Carmes de Lisbonne",
+            "description": "The term monument historique is a designation given to some national heritage sites in France.  It may also refer to the state procedure in France by which National Heritage protection is extended to ",
+            "locationName": "Couvent des Carmes de Lisbonne",
+            "latitude": 38.7120383,
+            "longitude": -9.140612899999999,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 90,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7120383,-9.140612899999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Couvent%20des%20Carmes%20de%20Lisbonne&query_place_id=&center=38.7120383,-9.140612899999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXCRGoARxxk4vPCJNsD5MnqFO_UTJLXdqpsMNgArjfLTZE4ovlc3wirBJz4AzePFZgVaB5LXZfRhcYX_shjlmDbSPvygJXj_4MEICMCOX_ntlUhlrY10nm8s0SNUSB5ika1JXt5O6Qbi3uA0c8qtOe2k99Sq0yxbx1xp06GkUbWlh9CORNhKhZ3PBLjCkyikc5c3YSZyB9hDh1hytANlbvbSZMTM52kJyQYJwqzrHfhRB3HDf_QAkb7jG0grfo9BAoLFKGJ-7UiuUPMwC78JgAs83zfQfOVFxXgmI3UmbO3SfiaA2O3U07I5wJYBB-ZocQGJwo3dOsUyLbsXHQhsw-vIVSGCtjrjq4mrkAPg7SmvhjqRSxBo3f7qB1XxmMh5_fSjPbjxUIzHlto4Qu-453ISYrwEls2RGE-FXCnBoBWrO5deNKf0hIwBUeNseCQWV1AYsPXqtj1wgurQClFr2FXFsjjx1fUgotAHl3gZ-xU-PzQWXUnsn0hN5pKKc5EmwsxX13LDxWZwzNuSkDQMju5ZmJvXXC_m1rS-nYslM_d1XDuh7LWuRHCXKicsyH4975ZXQU4&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "5e400a11-e066-4108-bb42-f077949b76d7",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "11:45",
+            "type": "activity",
+            "title": "Miradouro de São Pedro de Alcântara",
+            "description": "O Jardim de São Pedro de Alcântara é um jardim situado em Lisboa, na freguesia da Misericórdia.  Foi construído em 1864, em dois socalcos.",
+            "locationName": "Miradouro de São Pedro de Alcântara",
+            "latitude": 38.7153042,
+            "longitude": -9.1441702,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7153042,-9.1441702",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Miradouro%20de%20S%C3%A3o%20Pedro%20de%20Alc%C3%A2ntara&query_place_id=&center=38.7153042,-9.1441702",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV4O27TEg3EdUAdtzNhIzkQyG6Gx79k56PHlqYlHmT4ud9dVRsOQi0rnsNtq9pb0EvCpqmG_m1swgTB76XxUCLCtTvMErtsdv-Ws0AiLP826uygMw_PkpIfTB07EB4nfX_NJp1wwAY74sgxPZgnZcq6375hLPJOvmWbEDlof0P5p40ztdsusmSCNKwWNCH8Ms8k5KEG3QJlk-W42MCIV_FyqkCDBvS9Ik7qHwPJkyxvTl3MKftGnnlDrLsjAjuzCGl5OXHjvsm43vI4H6iGjGI9jliqUH75Aqp_qEy9Ii5MxYbqrSzP8zAMOuK-eY-_6-iciZ_FDBfPZs9skSdf2zG9ofnhmJC1NjHEheXleTRkncmF2Vu1Hz_0XC2Kda4cY0HX1FH_KE1Dicme841LLnGe23vUvSlAnkwxsaf_MZxbr13ceE-OTpr5TOQPIJOFE_5U4qZkwahmVkyFDtiSwskZGvpHEGkU__6xMVMRaGA9SY6ufGNSEp0eSyjMXpCWGGnr6zWisLXgTKIVYYjE7xY9iaelhOo9ES2OfxvabD4GC3uSJBPXughM951rxYpEbPGhwbajFA4bQw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.48,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "63594441-3754-4dc4-87e1-096112938c59",
+            "dayNumber": 2,
+            "startTime": "12:30",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Augusto Lisboa - Alfama",
+            "description": "Déjeuner — restaurant",
+            "locationName": "R. de Santa M.nha 26, 1100-491 Lisboa",
+            "latitude": 38.714425,
+            "longitude": -9.130207,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.712056,-9.13871",
+            "restaurant": {
+              "id": "serp-1723599969667055652",
+              "name": "Augusto Lisboa - Alfama",
+              "address": "R. de Santa M.nha 26, 1100-491 Lisboa",
+              "latitude": 38.714425,
+              "longitude": -9.130207,
+              "rating": 4.8,
+              "reviewCount": 3344,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant brunch"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant branché proposant brunch et café"
+              ],
+              "description": "Restaurant branché proposant brunch et café",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Augusto%20Lisboa%20-%20Alfama%2C%20R.%20de%20Santa%20M.nha%2026%2C%201100-491%20Lisboa",
+              "googlePlaceId": "1723599969667055652",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-16077694862433830046",
+                "name": "Taverna Alfacinha",
+                "address": "R. dos Sapateiros no 179, 1100-577 Lisboa",
+                "latitude": 38.712056,
+                "longitude": -9.13871,
+                "rating": 4.7,
+                "reviewCount": 7590,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "21 347 0352",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Taverna%20Alfacinha%2C%20R.%20dos%20Sapateiros%20no%20179%2C%201100-577%20Lisboa",
+                "photos": [
+                  "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/1F8-tQKRn2da3HHFHFrwdjmHW6wTZ-TAAhuH6KFXd1M.jpeg"
+                ],
+                "googlePlaceId": "16077694862433830046",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-2938909672004917802",
+                "name": "Han Table Barbecue - Anjos (Lisboa)",
+                "address": "R. Gomes Freire 11B, 1150-119 Lisboa",
+                "latitude": 38.724543,
+                "longitude": -9.140296,
+                "rating": 4.9,
+                "reviewCount": 6494,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant de grillades coréennes"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Grillades de style coréen, ambiance détendue"
+                ],
+                "description": "Grillades de style coréen, ambiance détendue",
+                "phoneNumber": "21 354 0987",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Han%20Table%20Barbecue%20-%20Anjos%20(Lisboa)%2C%20R.%20Gomes%20Freire%2011B%2C%201150-119%20Lisboa",
+                "photos": [
+                  "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/CwJ_dTAYkiHhLMEahMGzFaUvhVJPamuk25mo2YluPkE.jpeg"
+                ],
+                "googlePlaceId": "2938909672004917802",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.6,
+            "timeFromPrevious": 8,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Augusto%20Lisboa%20-%20Alfama%2C%20R.%20de%20Santa%20M.nha%2026%2C%201100-491%20Lisboa",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Augusto%20Lisboa%20-%20Alfama%2C%20R.%20de%20Santa%20M.nha%2026%2C%201100-491%20Lisboa",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "92cb19af-45ad-4585-bdc6-8175d0ab7702",
+            "dayNumber": 2,
+            "startTime": "14:15",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Miradouro de Santa Luzia",
+            "description": "O Miradouro de Santa Luzia tem uma ampla vista sobre Alfama e o rio Tejo.  Os pontos característicos, da esquerda para a direita, são a cúpula de Santa Engrácia, a Igreja de Santo Estêvão e as duas to",
+            "locationName": "Miradouro de Santa Luzia",
+            "latitude": 38.7116956,
+            "longitude": -9.1301972,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7116956,-9.1301972",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Miradouro%20de%20Santa%20Luzia&query_place_id=&center=38.7116956,-9.1301972",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVOupr9GCxajOmxXRZDpA_ErmC3SNgHAYCmtb9RnOlL82RyaREfxhWAsbS3QIBbHo3-2mkbVLwW6H-rGVoTiny6HlLVMT76bxpm-lS01DzuN4aY_BvexLDVBe8pmxM0qYayaBZoZnKkb3zCuaj7uFjVQkzKc7lAQjzh8ed7FlP0Bh8LUESKYyjJYJj9UcxVHZzswp2RkFbNxVN81VvO8ec134Lh3mhlxV4JXhu2_o3qqzTF1IWQpT0tGvZ4TS2olf4rzOukXxSD0oaO9NvUBPET-_l4IeJW2p3fdQwDC2pofzgYcuOsiEHSN2h2wmF87jVoO4c1lePqqucGZk4157muRuwf183LKX7nnH0bhIm4GVTkTPG2or88V1AdAP3lVdw_-aJDw1_V5IsvI4IITfrP-maylgZOHwbNYkh454DWsVvOHGZ84xjW24db1FHbyUcG0bUOVa6vg0T8Wzir58_GmXtTyXVIC2F9sitDYgV2I_1Q8KIc6vFL9GVSxbRsrxe9yWKwAw2D9vH_TvKBOhSgwGShrNjhuY9zH-EXlXuGSVrrDasr10kL-Rejx0igTbc&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.74,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "cde26cf6-dad2-4c74-a7a4-f6554e854d0c",
+            "dayNumber": 2,
+            "startTime": "15:15",
+            "endTime": "16:00",
+            "type": "activity",
+            "title": "Miradouro da Senhora do Monte",
+            "description": "Miradouro da Senhora do Monte encontra-se na freguesia de São Vicente (Graça), em Lisboa.",
+            "locationName": "Miradouro da Senhora do Monte",
+            "latitude": 38.7192133,
+            "longitude": -9.1328298,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7192133,-9.1328298",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Miradouro%20da%20Senhora%20do%20Monte&query_place_id=&center=38.7192133,-9.1328298",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUdVkh_6I_GjhI1FXUQw-K8lgFQaVPdGSuGN8hvigDv2DYx8MpCFYi_Pwfpk6TB3uAEi_iNS4_PFn9XMwH6lpE4yo7LE7JEffKjMIi-D7qvUFW0lXigIT53hm06OzazYnGXPJTSSmEQC0gVRjLhBMJrvkWMKbFPfqny_5VCT-phgd5UAGeVckI08Illqadw7ULFK_8opFfSQWA5eBQp0hVeL7WLiQ1loXrS1c2uOghOyMWMzavLVBQU3amM98XKtlL_km3zylCtVf6X32-6yKuBbKuC9iMzYu3S-rWu3AeYmry9bUKTwX717BltZi_ZlrpZd2AwcrF91O4WjvEGmKjiFqQJCWEGfJC1Qh38dandFh_4L4bPONRAD4TOQLK2icHTtecOUlg0O5U4TdPahKN1jDM59B-LsLOmgqj6tvmq3QASeeGodYKioXJ_OmyXTIxWEL6EEpf52hrGEjyAnAvg7LWhNbApFidCPLjH1k5Xy0dfo3WKdhxcfrQW5tqJ4LMmC6QVPzf9UDlgGLu5x2sDBwYpuvG85Ub7IcksATo_yTq76rD1dkbyVNKRNaHpVspt7y3O9rnhdQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.87,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "064db9d4-8114-46c2-b5dc-a0ac3fe4ce45",
+            "dayNumber": 2,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "LX Factory",
+            "description": "A LXFactory é um espaço comercial e artístico da cidade de Lisboa.  Ubicado no bairro de Alcântara, uma antiga zona industrial da capital portuguesa, a estrutura foi reformada em 2008 e hoje represent",
+            "locationName": "LX Factory",
+            "latitude": 38.70346019999999,
+            "longitude": -9.1787831,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.70346019999999,-9.1787831",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=LX%20Factory&query_place_id=&center=38.70346019999999,-9.1787831",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW06t1nnq9vDJ5zb2XSvwUq0kYE6aJG7XB-AgRyZnfLu-DyVLTM27VS2JFIjtzxJi8Cf8Y6KUNjDlrChHuiN0OukUpTFO8waKg3a5b15talzZ3Iq7IRT4B8sX4PV-M4i9pO3KZnWPUmUlnNyOxV_sK-qUcruqk3i_2QrgLWTf3aEC8Z25femexJZeIYXdV2rj764ViHQxcXOHijYdCWPOKnYCtb1_SxKLM1lo-JN-Esnj798NYTYyryA8WssogM0jaB9VEpguWoPn9dffmPp4cXWk_5vW16Gn_LzVcAYB_Ue6ERlMKv860MfgGhEvVfcAuVmYYukMTliBo-ykzowrpXVQmSsiTzKyPYIbMwMGoRL5DQikh7HHafBI5FPJ262y5ro6DtNcF87hLtAGjk4aShlEzYNL_FHbP2lHeQvtDo9_3QSyKzM4bz2W225wtofgH_dNmTWP_aWfz8Sg0xo7qcJiFnj7uV2bLWde5tUd0pCmsztT8IWItP2j5HkvSyY5Mo6AYyLjgZ6DRDyvdhcYmcb_ZmLExtPnK06Gt-UeCBu1_1NHBrOH1askt8zr0w2FLPfbvxilrEZg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 4.35,
+            "timeFromPrevious": 55,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "00f8e8cf-5390-4285-8872-2820f1e6017b",
+            "dayNumber": 2,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Cabo da Roca",
+            "description": "O Cabo da Roca é o ponto mais ocidental de Portugal Continental e da Europa continental.  Situa-se na freguesia de Colares, no Município de Sintra e Distrito de Lisboa.  As suas coordenadas geográfica",
+            "locationName": "Cabo da Roca",
+            "latitude": 38.7804282,
+            "longitude": -9.4989171,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.7804282,-9.4989171",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cabo%20da%20Roca&query_place_id=&center=38.7804282,-9.4989171",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUV7SJvhPbM-2qP7kJrZpl1ZcPiXOFUZ6bhKGBI201DW3XvZV0iecMT1hj5h7THIky3iL1Aimk9u2StUQAq1rY_NEfRDdiyT4MON_KozeVRY3CmuYZQCqKCVRknZAlXDpXb3kXwDeZbCyBml2ZozQ7qqdOKhlQoL8LBnvTsaOnIeZBsV4JkcAOoJmPr5qttoNB1STz0zI2Vl44rz5j75U48YK-Dd9oi4cgRXrHo2LL0gA-4Q_de-4swSHul_Kl2gXopdZDAJi6MxeFHGz8AMZWgrF6a45mRe04iuJnVN1jHFALmnirMDTXdEACkTUdJbwAj39WWEVTDChNkxO2EnVQF4ErkyLNTHYQUHFYGOW5c9lk7rV8GGuMfKt0nsrijcbGEqLJBO4acnleB5cAY1yqm9Frk9X3TazZCYbwCz2rXYVlo71alqI-QPva9Wnvr12pqGU_UZYXxxdO7UAW-sjPogqnIjOGaKf-HCcnmZrLc2jdOSlBKcTJ1Tod4C77hmvwOLfar_BMxCAMw5Mt-N9g9xgolQXZu3Xb9MxJQ6WwdKwwLysu8l5m0Rzvyq8gLN55--mjGXKPKWp6GzfNQHyzEb3o&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 29.05,
+            "timeFromPrevious": 364,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "9b29951d-c9d7-46e7-9189-44a96653bf28",
+            "dayNumber": 2,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — Taverna do Marisco l Restaurante",
+            "description": "Repas sur place · Restaurant conservé faute d'alternative proche",
+            "locationName": "R. das Portas de Santo Antão 22, 1150-268 Lisboa",
+            "latitude": 38.715521,
+            "longitude": -9.139687,
+            "orderIndex": 7,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.715521,-9.139687",
+            "restaurant": {
+              "id": "serp-2188497006100466317",
+              "name": "Taverna do Marisco l Restaurante",
+              "address": "R. das Portas de Santo Antão 22, 1150-268 Lisboa",
+              "latitude": 38.715521,
+              "longitude": -9.139687,
+              "rating": 4.8,
+              "reviewCount": 2592,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant de fruits de mer"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "920 363 522",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Taverna%20do%20Marisco%20l%20Restaurante%2C%20R.%20das%20Portas%20de%20Santo%20Ant%C3%A3o%2022%2C%201150-268%20Lisboa",
+              "photos": [
+                "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/qjENSmRp-UrI5s2bh83KGKXK0xoF4G4DvptcV9sWZ4U.jpeg"
+              ],
+              "googlePlaceId": "2188497006100466317",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-8877361517152356960",
+                "name": "El Clan",
+                "address": "R. Dom Duarte 4A, 1100-198 Lisboa",
+                "latitude": 38.714576,
+                "longitude": -9.137356,
+                "rating": 4.7,
+                "reviewCount": 4203,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "963 878 863",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Clan%2C%20R.%20Dom%20Duarte%204A%2C%201100-198%20Lisboa",
+                "photos": [
+                  "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/CoXrRV64PHtzZZOR4QTRLzSkmNyuPYINxeK1C70OfS8.jpeg"
+                ],
+                "googlePlaceId": "8877361517152356960",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-2938909672004917802",
+                "name": "Han Table Barbecue - Anjos (Lisboa)",
+                "address": "R. Gomes Freire 11B, 1150-119 Lisboa",
+                "latitude": 38.724543,
+                "longitude": -9.140296,
+                "rating": 4.9,
+                "reviewCount": 6494,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant de grillades coréennes"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Grillades de style coréen, ambiance détendue"
+                ],
+                "description": "Grillades de style coréen, ambiance détendue",
+                "phoneNumber": "21 354 0987",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Han%20Table%20Barbecue%20-%20Anjos%20(Lisboa)%2C%20R.%20Gomes%20Freire%2011B%2C%201150-119%20Lisboa",
+                "photos": [
+                  "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/CwJ_dTAYkiHhLMEahMGzFaUvhVJPamuk25mo2YluPkE.jpeg"
+                ],
+                "googlePlaceId": "2938909672004917802",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 31.98,
+            "timeFromPrevious": 400,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Couvent des Carmes de Lisbonne et Miradouro de São Pedro de Alcântara",
+        "dayNarrative": "Une journée équilibrée entre visites culturelles, points de vue spectaculaires et immersion dans l'atmosphère vibrante de Lisbonne, en profitant du temps couvert pour des activités variées.",
+        "geoDiagnostics": {
+          "maxLegKm": 31.98,
+          "p95LegKm": 29.05,
+          "totalTravelMin": 854,
+          "totalLegKm": 68.07,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.96,
+          "mstLowerBoundKm": 34.72
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-02-27T13:47:18.701Z",
+        "items": [
+          {
+            "id": "6c17c438-70f4-4e1b-97ad-2cf2ca5b415e",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Instant Crunch",
+            "description": "Restaurant paisible servant brunch et tapas",
+            "locationName": "R. da Mãe d'Água 9, 1250-154 Lisboa",
+            "latitude": 38.717399,
+            "longitude": -9.146542,
+            "orderIndex": 0,
+            "estimatedCost": 12,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.717399,-9.146542",
+            "restaurant": {
+              "id": "serp-16831805777993508154",
+              "name": "Instant Crunch",
+              "address": "R. da Mãe d'Água 9, 1250-154 Lisboa",
+              "latitude": 38.717399,
+              "longitude": -9.146542,
+              "rating": 4.8,
+              "reviewCount": 1651,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant paisible servant brunch et tapas"
+              ],
+              "description": "Restaurant paisible servant brunch et tapas",
+              "phoneNumber": "21 151 1516",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Instant%20Crunch%2C%20R.%20da%20M%C3%A3e%20d'%C3%81gua%209%2C%201250-154%20Lisboa",
+              "photos": [
+                "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/Yex1Ce2CaP5Cyr4qszUY7r4axc1zr4HlhHbChoOHD0M.jpeg"
+              ],
+              "googlePlaceId": "16831805777993508154",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12400844518518389771",
+                "name": "A Cozinha - Sr. Lisboa",
+                "address": "R. São José 134, 1150-325 Lisboa",
+                "latitude": 38.719881,
+                "longitude": -9.143742,
+                "rating": 4.6,
+                "reviewCount": 2316,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Bar à tapas chaleureux à la décoration éclectique"
+                ],
+                "description": "Bar à tapas chaleureux à la décoration éclectique",
+                "phoneNumber": "21 342 3512",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=A%20Cozinha%20-%20Sr.%20Lisboa%2C%20R.%20S%C3%A3o%20Jos%C3%A9%20134%2C%201150-325%20Lisboa",
+                "photos": [
+                  "https://serpapi.com/searches/69985fb5bc3f0b5e70d54298/images/rFThkA0AGICXEC6ggrURmWV9PrIbhFLft2Nm6M4NaiI.jpeg"
+                ],
+                "googlePlaceId": "12400844518518389771",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-nearby-ChIJufB38yIzGQ0R1Mf60apQaAY",
+                "name": "A Padaria Portuguesa",
+                "address": "R. Dom Pedro V 102, 1250-093 Lisboa",
+                "latitude": 38.7160504,
+                "longitude": -9.1470282,
+                "rating": 4.2,
+                "reviewCount": 1322,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "restaurant servant le petit-déjeuner",
+                  "restaurant brunch",
+                  "cafétéria",
+                  "restaurant ouvert le midi",
+                  "pâtisserie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "926 818 019",
+                "website": "http://apadariaportuguesa.pt/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=A%20Padaria%20Portuguesa%2C%20R.%20Dom%20Pedro%20V%20102%2C%201250-093%20Lisboa",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweq3WdSE1fH0AeD5J2QtYF1GmGOeqYAb0imWOT69KMNIxWzCDQRXqG_Ap8rVQaH7Yv1sCWp2LlfEVlyyJfz3vGnjmoGakOdwMSiNz_Dzmbp1m9xjdj-jcGNbi9d5Hc-cYc16otBv=w92-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJufB38yIzGQ0R1Mf60apQaAY",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "00:00",
+                    "close": "19:00"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "19:00"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "19:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "19:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "19:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 0.15577743797851468,
+                "walkingTime": 2
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "fdd71dfd-ad94-4408-97dc-0174944e6faf",
+            "dayNumber": 3,
+            "startTime": "09:45",
+            "endTime": "10:15",
+            "type": "activity",
+            "title": "Monastère des Hiéronymites",
+            "description": "The royal monastery of Saint-Bernard, better known as the Couvent des Feuillants or Les Feuillants Convent, was a Feuillant nunnery or convent in Paris, behind what is now numbers 229—235 rue Saint-Ho",
+            "locationName": "Monastère des Hiéronymites",
+            "latitude": 38.6978909,
+            "longitude": -9.206703899999999,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.6978909,-9.206703899999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Monast%C3%A8re%20des%20Hi%C3%A9ronymites&query_place_id=&center=38.6978909,-9.206703899999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVYm2pkJI6CKXxCd3kszbf7XlR2BwZ2YgVJaOii7GGwa_FbAfTPQdFB0VoSMR0xaoM5pi2qn43GedYnIs3EgGWaKXbSDyg9yiPYbEQwgSdqVoLe_MU8hSj3GhlJpZ9KUD-F4lGmKdk-4SgAFQgUUIyII-_Q7wcabCNBV1td9-ZO58CHKOoSDh4BVwy6CTc4itFhwcJodp3b7jxv1SzUOj6q45uORAuWVLrskuluu-wPCaCYydFRzYSGki6olk_8x3ZgUQLRJbWLqbOZoaCpiJdAPEmpgusoeWJGAQRBUBvJYyU3oprjcAB4atVFallBATv52C2ScBBmKUSjbIYz1BW6qRCtwzn6GU5VcvOc2Uqjy9b81Ybyy2e8kTamnC_Tk-8CjnSYyGLodNdqQsuawDcJjkczaZMdWezBQsmT8YnNcDcOpV07Og5JDI4a9YrKJ-2ALYXu9H03Ol3i8UWFDJ5UciGXRYE5kOccoSgxJEv0KC7v-rJuqlDVkI2C2RRvVR_UhBO5A4GJ-arvuqXJ2Q8vbgbi6ZHlv4xc7chTv94tjN94tCQA81icSYb7ahGL_DOurOSqFY0DQg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 5.65,
+            "timeFromPrevious": 71,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "57850a8f-5a9d-4b27-a366-f7c82cbbf864",
+            "dayNumber": 3,
+            "startTime": "10:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Padrão dos Descobrimentos",
+            "description": "O Padrão dos Descobrimentos localiza-se na freguesia de Belém, na cidade e Distrito de Lisboa, em Portugal.  A conceção arquitetónica é de Cottinelli Telmo e as esculturas são de Leopoldo de Almeida.",
+            "locationName": "Padrão dos Descobrimentos",
+            "latitude": 38.6935973,
+            "longitude": -9.2057115,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=38.6935973,-9.2057115",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Padr%C3%A3o%20dos%20Descobrimentos&query_place_id=&center=38.6935973,-9.2057115",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXgmGx8b_SbMI3f-uPrcMNkupaDRYkl94RLss0jbIJl08gX0ahZcDjdE7kEOovxcYr3YRpffmVzS8J0M1R24Wy3lYpqyDf7by-UagI6RGHzuhjbUibCAX0quOvy_p-yrFxRNwug8ePuzIxhBoB-AGwpbhQfqm-sTcghZkkKMaFMlaJvOLwcNrkRHTRheU_KQJySntKPveC5BtvbfxPj6jEqXchlX4AGBqg_sUbYGDmBehGXGWqgcF6UCT6591u23UGJrr2axhAybaxd-vftS0iRuSOPUlKdyAUelUhTehNZ6rgE-ZfzuOyBFxP7-HACQl2OF2eYLGHfy0dLsOKdL_nSZPLVGEniYPvdx2RCrYWx5L4-bGfCBgKDb7m_f0i_cxtuQntlskBWVIzAtJlZMLkoGlMydCxlgQqhyFMTdRdtGtxCoFNCKjun1hjQcgFkozQJJwQ9ibXSLFWuJcJUKOLkN5OYx4cLefv3sBkQ_wHWAe0AU-C99zk64EQviQQprlHApX_UmydsCERrmbntQvyBIe3LWu6JmCNque_odcxR2EBJQFW8SiqvCl5CdPCbN4sNOLZ0&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.49,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a4c71693-df00-4fe1-a2a3-c13e0303c251",
+            "dayNumber": 3,
+            "startTime": "12:00",
+            "endTime": "12:15",
+            "type": "checkout",
+            "title": "Check-out Urban Garden",
+            "description": "Départ de l'hôtel",
+            "locationName": "Urban Garden",
+            "latitude": 38.724501599999996,
+            "longitude": -9.1469472,
+            "orderIndex": 3,
+            "accommodation": {
+              "id": "serp-hotel-ChkI2om_7__w8PO9ARoML2cvMWhjNDNyN3MyEAE",
+              "name": "Urban Garden",
+              "type": "hotel",
+              "address": "Adresse non disponible",
+              "latitude": 38.724501599999996,
+              "longitude": -9.1469472,
+              "rating": 7.8,
+              "reviewCount": 831,
+              "stars": 2,
+              "pricePerNight": 90,
+              "totalPrice": 180,
+              "currency": "EUR",
+              "amenities": [
+                "Free Wi-Fi",
+                "Air conditioning",
+                "Kitchen in some rooms"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.urbangardenhostel.com/",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 6.15,
+            "timeFromPrevious": 77,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "4d5d1aa5-6029-4501-b7ba-9e452f445182",
+            "dayNumber": 3,
+            "startTime": "14:26",
+            "endTime": "23:00",
+            "type": "transport",
+            "title": "Marseille-St-Charles → Santa Apolónia",
+            "description": "Train Train, Train, Train, Train, Train, Train, Train, Train",
+            "locationName": "Marseille-St-Charles",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 4,
+            "duration": 1994,
+            "transitLegs": [
+              {
+                "mode": "train",
+                "from": "Marseille-St-Charles",
+                "to": "Narbonne",
+                "departure": "2026-02-25T14:26:00.000Z",
+                "arrival": "2026-02-25T16:58:00.000Z",
+                "duration": 152,
+                "line": "INTERCITES"
+              },
+              {
+                "mode": "train",
+                "from": "Narbonne",
+                "to": "Girona",
+                "departure": "2026-02-25T18:24:00.000Z",
+                "arrival": "2026-02-25T19:47:00.000Z",
+                "duration": 83,
+                "line": "TGV INOUI"
+              },
+              {
+                "mode": "train",
+                "from": "Girona",
+                "to": "Gare de Madrid-Atocha",
+                "departure": "2026-02-26T04:44:00.000Z",
+                "arrival": "2026-02-26T08:52:00.000Z",
+                "duration": 248,
+                "line": "Ave"
+              },
+              {
+                "mode": "train",
+                "from": "Atocha",
+                "to": "Madrid Chamartin Train Station",
+                "departure": "2026-02-26T09:04:00.000Z",
+                "arrival": "2026-02-26T09:18:00.000Z",
+                "duration": 14,
+                "line": "C4b"
+              },
+              {
+                "mode": "train",
+                "from": "Madrid Chamartin Train Station",
+                "to": "Santiago de Compostela",
+                "departure": "2026-02-26T10:17:00.000Z",
+                "arrival": "2026-02-26T13:21:00.000Z",
+                "duration": 184,
+                "line": "Ave"
+              },
+              {
+                "mode": "train",
+                "from": "Santiago de Compostela",
+                "to": "Vigo Guixar",
+                "departure": "2026-02-26T14:11:00.000Z",
+                "arrival": "2026-02-26T15:53:00.000Z",
+                "duration": 102,
+                "line": "Regional"
+              },
+              {
+                "mode": "train",
+                "from": "Vigo Guixar",
+                "to": "Campanha",
+                "departure": "2026-02-26T17:05:00.000Z",
+                "arrival": "2026-02-26T19:35:00.000Z",
+                "duration": 150,
+                "line": "Trencelta"
+              },
+              {
+                "mode": "train",
+                "from": "Campanha",
+                "to": "Santa Apolónia",
+                "departure": "2026-02-26T19:45:00.000Z",
+                "arrival": "2026-02-26T23:00:00.000Z",
+                "duration": 195,
+                "line": "IC"
+              }
+            ],
+            "transitDataSource": "api",
+            "transportMode": "train",
+            "transportRole": "longhaul",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg",
+            "estimatedCost": 0,
+            "bookingUrl": "https://www.omio.fr/trains/marseille/lisbon?departure_date=2026-02-25"
+          }
+        ],
+        "theme": "Monastère des Hiéronymites et Padrão dos Descobrimentos",
+        "dayNarrative": "Le dernier jour est dédié à la découverte du quartier de Belém, avec ses monuments emblématiques, avant le départ. Les activités sont choisies pour être compatibles avec la pluie légère et l'heure de départ.",
+        "geoDiagnostics": {
+          "maxLegKm": 5.65,
+          "p95LegKm": 0.49,
+          "totalTravelMin": 78,
+          "totalLegKm": 6.14,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 6.14
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 131,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Marseille",
+            "to": "Lisbon",
+            "fromCoords": {
+              "lat": 43.2965,
+              "lng": 5.3698
+            },
+            "toCoords": {
+              "lat": 38.7223,
+              "lng": -9.1393
+            },
+            "duration": 1954,
+            "price": 0,
+            "co2": 18,
+            "operator": "INTERCITES",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/marseille/lisbon?departure_date=2026-02-25"
+          }
+        ],
+        "totalDuration": 1994,
+        "totalPrice": 0,
+        "totalCO2": 18,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/marseille/lisbon?departure_date=2026-02-25",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Marseille-St-Charles",
+            "to": "Narbonne",
+            "departure": "2026-02-25T14:26:00.000Z",
+            "arrival": "2026-02-25T16:58:00.000Z",
+            "duration": 152,
+            "line": "INTERCITES"
+          },
+          {
+            "mode": "train",
+            "from": "Narbonne",
+            "to": "Girona",
+            "departure": "2026-02-25T18:24:00.000Z",
+            "arrival": "2026-02-25T19:47:00.000Z",
+            "duration": 83,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "train",
+            "from": "Girona",
+            "to": "Gare de Madrid-Atocha",
+            "departure": "2026-02-26T04:44:00.000Z",
+            "arrival": "2026-02-26T08:52:00.000Z",
+            "duration": 248,
+            "line": "Ave"
+          },
+          {
+            "mode": "train",
+            "from": "Atocha",
+            "to": "Madrid Chamartin Train Station",
+            "departure": "2026-02-26T09:04:00.000Z",
+            "arrival": "2026-02-26T09:18:00.000Z",
+            "duration": 14,
+            "line": "C4b"
+          },
+          {
+            "mode": "train",
+            "from": "Madrid Chamartin Train Station",
+            "to": "Santiago de Compostela",
+            "departure": "2026-02-26T10:17:00.000Z",
+            "arrival": "2026-02-26T13:21:00.000Z",
+            "duration": 184,
+            "line": "Ave"
+          },
+          {
+            "mode": "train",
+            "from": "Santiago de Compostela",
+            "to": "Vigo Guixar",
+            "departure": "2026-02-26T14:11:00.000Z",
+            "arrival": "2026-02-26T15:53:00.000Z",
+            "duration": 102,
+            "line": "Regional"
+          },
+          {
+            "mode": "train",
+            "from": "Vigo Guixar",
+            "to": "Campanha",
+            "departure": "2026-02-26T17:05:00.000Z",
+            "arrival": "2026-02-26T19:35:00.000Z",
+            "duration": 150,
+            "line": "Trencelta"
+          },
+          {
+            "mode": "train",
+            "from": "Campanha",
+            "to": "Santa Apolónia",
+            "departure": "2026-02-26T19:45:00.000Z",
+            "arrival": "2026-02-26T23:00:00.000Z",
+            "duration": 195,
+            "line": "IC"
+          }
+        ],
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Marseille",
+            "to": "Lisbon",
+            "fromCoords": {
+              "lat": 43.2965,
+              "lng": 5.3698
+            },
+            "toCoords": {
+              "lat": 38.7223,
+              "lng": -9.1393
+            },
+            "duration": 790,
+            "price": 270,
+            "co2": 27,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Marseille/Lisbon"
+          }
+        ],
+        "totalDuration": 895,
+        "totalPrice": 270,
+        "totalCO2": 27,
+        "score": 5.5,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 6.8,
+          "co2Score": 9.6
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Marseille/Lisbon",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Marseille",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Lisbon",
+            "duration": 84,
+            "price": 112,
+            "co2": 218
+          }
+        ],
+        "totalDuration": 372,
+        "totalPrice": 136,
+        "totalCO2": 219,
+        "score": 5.5,
+        "scoreDetails": {
+          "priceScore": 5,
+          "timeScore": 10,
+          "co2Score": 1.6
+        }
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Marseille",
+            "to": "Lisbon",
+            "fromCoords": {
+              "lat": 43.2965,
+              "lng": 5.3698
+            },
+            "toCoords": {
+              "lat": 38.7223,
+              "lng": -9.1393
+            },
+            "duration": 99,
+            "price": 132,
+            "co2": 257,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/MARSEILLE2502LISBON5?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 389,
+        "totalPrice": 132,
+        "totalCO2": 257,
+        "score": 5,
+        "scoreDetails": {
+          "priceScore": 5.1,
+          "timeScore": 9.9,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/MARSEILLE2502LISBON5?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/marseille/lisbon?departure_date=2026-02-25"
+      }
+    ],
+    "selectedTransport": {
+      "id": "train_api",
+      "mode": "train",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Marseille",
+          "to": "Lisbon",
+          "fromCoords": {
+            "lat": 43.2965,
+            "lng": 5.3698
+          },
+          "toCoords": {
+            "lat": 38.7223,
+            "lng": -9.1393
+          },
+          "duration": 1954,
+          "price": 0,
+          "co2": 18,
+          "operator": "INTERCITES",
+          "frequency": "1-3 par jour",
+          "bookingUrl": "https://www.omio.fr/trains/marseille/lisbon?departure_date=2026-02-25"
+        }
+      ],
+      "totalDuration": 1994,
+      "totalPrice": 0,
+      "totalCO2": 18,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 0,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.omio.fr/trains/marseille/lisbon?departure_date=2026-02-25",
+      "dataSource": "api",
+      "transitLegs": [
+        {
+          "mode": "train",
+          "from": "Marseille-St-Charles",
+          "to": "Narbonne",
+          "departure": "2026-02-25T14:26:00.000Z",
+          "arrival": "2026-02-25T16:58:00.000Z",
+          "duration": 152,
+          "line": "INTERCITES"
+        },
+        {
+          "mode": "train",
+          "from": "Narbonne",
+          "to": "Girona",
+          "departure": "2026-02-25T18:24:00.000Z",
+          "arrival": "2026-02-25T19:47:00.000Z",
+          "duration": 83,
+          "line": "TGV INOUI"
+        },
+        {
+          "mode": "train",
+          "from": "Girona",
+          "to": "Gare de Madrid-Atocha",
+          "departure": "2026-02-26T04:44:00.000Z",
+          "arrival": "2026-02-26T08:52:00.000Z",
+          "duration": 248,
+          "line": "Ave"
+        },
+        {
+          "mode": "train",
+          "from": "Atocha",
+          "to": "Madrid Chamartin Train Station",
+          "departure": "2026-02-26T09:04:00.000Z",
+          "arrival": "2026-02-26T09:18:00.000Z",
+          "duration": 14,
+          "line": "C4b"
+        },
+        {
+          "mode": "train",
+          "from": "Madrid Chamartin Train Station",
+          "to": "Santiago de Compostela",
+          "departure": "2026-02-26T10:17:00.000Z",
+          "arrival": "2026-02-26T13:21:00.000Z",
+          "duration": 184,
+          "line": "Ave"
+        },
+        {
+          "mode": "train",
+          "from": "Santiago de Compostela",
+          "to": "Vigo Guixar",
+          "departure": "2026-02-26T14:11:00.000Z",
+          "arrival": "2026-02-26T15:53:00.000Z",
+          "duration": 102,
+          "line": "Regional"
+        },
+        {
+          "mode": "train",
+          "from": "Vigo Guixar",
+          "to": "Campanha",
+          "departure": "2026-02-26T17:05:00.000Z",
+          "arrival": "2026-02-26T19:35:00.000Z",
+          "duration": 150,
+          "line": "Trencelta"
+        },
+        {
+          "mode": "train",
+          "from": "Campanha",
+          "to": "Santa Apolónia",
+          "departure": "2026-02-26T19:45:00.000Z",
+          "arrival": "2026-02-26T23:00:00.000Z",
+          "duration": 195,
+          "line": "IC"
+        }
+      ],
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "serp-hotel-ChkI2om_7__w8PO9ARoML2cvMWhjNDNyN3MyEAE",
+      "name": "Urban Garden",
+      "type": "hotel",
+      "address": "Adresse non disponible",
+      "latitude": 38.724501599999996,
+      "longitude": -9.1469472,
+      "rating": 7.8,
+      "reviewCount": 831,
+      "stars": 2,
+      "pricePerNight": 90,
+      "totalPrice": 180,
+      "currency": "EUR",
+      "amenities": [
+        "Free Wi-Fi",
+        "Air conditioning",
+        "Kitchen in some rooms"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "12:00",
+      "bookingUrl": "https://www.urbangardenhostel.com/",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [],
+    "totalEstimatedCost": 510,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 270,
+      "food": 240,
+      "activities": 0,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 45,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "restaurant",
+        "dinner": "mixed"
+      },
+      "groceryShoppingNeeded": true,
+      "activitiesLevel": "mostly_free",
+      "dailyActivityBudget": 3,
+      "transportTips": "Achetez le passe 7 jours Viva Viagem (37,50€ pour 5 jours recommandé). Utilisez trams/bus gratuits avec certains musées. Les passerelles et miradouros offrent des vues gratuites exceptionnelles.",
+      "reasoning": "Budget très serré (17€/pers/jour). Portugal offre restauration bon marché : menus du jour 7-10€. Stratégie : logement partagé avec cuisine (45€/nuit = 9€/pers/nuit), petit-déj maison, déjeuner en restaurant local bon marché, dîner alternant courses/petits restaurants. Activités : randos gratuites (Sintra trails), miradouros libres, street art (gratuit). 1 musée seulement (8€). Transport minimal via passe. Laisse 3€/pers/jour activités aventure (rando, exploration urbaine gratuite).",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: lisbon-adventure-3d",
+    "   Marseille → Lisbon (3j)",
+    "   friends (5p) | economic | adventure, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Lisbon\", ll=\"@38.7223,-9.1393,14z\", gl=\"pt\"",
+    "[Weather] Cache hit for 2026-02-25 → 2026-02-27",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Google Places] ✅ 26 attractions found for Lisbon",
+    "[Hotels] Disponibilité live: 1/2 hôtels confirmés",
+    "[Hotels] Disponibilité live partielle (1 confirmés), complété à 2 options pour garder des hôtels centraux",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (469ms)",
+    "[Pipeline V2] Resolving GPS for 15 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/15 activities",
+    "[Pipeline V2] Injected 4 curated must-see attractions for \"Lisbon\" from local database",
+    "[Pipeline V2]   → Tour de Belém, Quartier de l'Alfama, Pastéis de Belém, Tramway 28",
+    "[Pipeline V2] Step 1: All data fetched in 58773ms",
+    "[Pipeline V2]   Activities: 26 Google + 23 SerpAPI + 2 Overpass + 15 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 2 | Transport options: 4",
+    "[Pipeline V2 LLM] Step 1 done in 58773ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Urban Garden\" (7.8★, €90/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 71 activities → 44 after dedup (dropped 27)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 activities (0 must-sees, 18 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 10 restaurants from 40 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 161 pairs",
+    "[Pipeline V2 LLM] Step 2: 18 activities, 10 restaurants, 161 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 12ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 12459 in + 1830 out, ~$0.0030, 16911ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Découverte de l'Alfama et du centre historique\",\n      \"narrative\": \"Après l'arrivée et l'installation, cette journée se concentre sur le cœur...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 1 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 90min gap on day 1 with \"Aquarium de Lisbonne\" (fill 1/3)",
+    "[Pipeline V2 LLM] Enrichment: filled 135min gap on day 2 with \"Cabo da Roca\" (fill 1/3)",
+    "[Pipeline V2 LLM] Enrichment complete: added 2 activities",
+    "[Pipeline V2 LLM] Plan: 3 days, 13 activities, 4 meals",
+    "[Pipeline V2 LLM] Step 3 done in 16913ms — 3 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 18 activities, 10 restaurants",
+    "[Pipeline V2 LLM] Built 3 days with 17 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 5029ms",
+    "[Pipeline V2 LLM] Step 4 done in 5029ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 2 restaurants swapped, 1 kept as fallback (3915ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 8 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 265ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 85/100",
+    "  📦 Complétude: 22/25",
+    "  ⏱️  Rythme:     18/25",
+    "  🗺️  Géo:        20/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: chevauchement Praça do Comércio / Marseille-St-Charles → Santa Apolónia",
+    "  ⚠️ Jour 1: chevauchement Marseille-St-Charles → Santa Apolónia / Check-in Urban Garden",
+    "  ⚠️ Jour 2: Dîner — Taverna do Marisco l Restaurante est à 31978m de l'activité la plus proche",
+    "  🔧 Jour 1: thème régénéré \"Découverte de l'Alfama et du centre historique\" → \"Praça do Comércio et Arc de triomphe de la rue Augusta\"",
+    "  🔧 Jour 2: thème régénéré \"Culture, vues panoramiques et ambiance locale\" → \"Couvent des Carmes de Lisbonne et Miradouro de São Pedro de Alcântara\"",
+    "  🔧 Jour 3: thème régénéré \"Exploration de Belém et départ\" → \"Monastère des Hiéronymites et Padrão dos Descobrimentos\"",
+    "[Pipeline V2 LLM] Step 5 done in 1ms — score: 85/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 84908ms ==="
+  ],
+  "warnings": [
+    "[RapidAPI Booking] ❌ Google Places résultat rejeté pour \"Urban Garden\": \"Via di Rebibbia, 18/34, 00156 Roma RM, Italy\" n'est pas dans Lisbon",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"premium de toute la ville en tuk-tuk à Lisbonne, Lisbon\": 1127.6km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"de 3 heures de Lisbonne via Tuk Tuk, Lisbon\": 1452.7km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Château des Templiers, Nazaré et Óbidos️ Visite  d'une journée, Lisbon\": 71.3km de la destination (max 30km)",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"serp-7777361517152356960\" from day 2"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5860 (line 165 column 8)",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Château des Templiers, Nazaré et Óbidos️ Visite  d'une journée, Lisbon\" à Lisbon — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 84908,
+  "generatedAt": "2026-02-20T13:50:20.865Z",
+  "success": true
+}

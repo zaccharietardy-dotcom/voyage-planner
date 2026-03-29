@@ -1,0 +1,2258 @@
+{
+  "scenarioId": "prague-culture-4d",
+  "preferences": {
+    "origin": "Berlin",
+    "destination": "Prague",
+    "startDate": "2026-02-26T13:17:16.475Z",
+    "durationDays": 4,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "family_without_kids",
+    "budgetLevel": "comfort",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "gluten_free"
+    ],
+    "mustSee": "Prague Castle, Charles Bridge",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Prague",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "ffb0551c-bc44-47f5-9822-64513047656e",
+    "createdAt": "2026-02-20T13:28:16.194Z",
+    "updatedAt": "2026-02-20T13:28:16.194Z",
+    "preferences": {
+      "origin": "Berlin",
+      "destination": "Prague",
+      "startDate": "2026-02-26T13:17:16.475Z",
+      "durationDays": 4,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "family_without_kids",
+      "budgetLevel": "comfort",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "gluten_free"
+      ],
+      "mustSee": "Prague Castle, Charles Bridge",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Prague",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-26T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "14:30",
+            "endTime": "17:00",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Berlin → Prague (estimation)",
+            "locationName": "Berlin → Prague",
+            "latitude": 50.0862662,
+            "longitude": 14.450773,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 11,
+            "bookingUrl": "https://www.omio.fr/bus/berlin/prague?departure_date=2026-02-26",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "85f3c6d2-d3a6-44f1-a393-f54e4b0171f2",
+            "dayNumber": 1,
+            "startTime": "17:00",
+            "endTime": "17:15",
+            "type": "checkin",
+            "title": "Check-in Romantic and atypical apartments in Prague's Montmartre",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Romantic and atypical apartments in Prague's Montmartre",
+            "latitude": 50.0862662,
+            "longitude": 14.450773,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "booking-11820377",
+              "name": "Romantic and atypical apartments in Prague's Montmartre",
+              "type": "hotel",
+              "address": "Cimburkova 275/20, 130 00 Praha 3-Žižkov, Czechia",
+              "latitude": 50.0862662,
+              "longitude": 14.450773,
+              "rating": 9.3,
+              "reviewCount": 74,
+              "stars": 3,
+              "pricePerNight": 52,
+              "totalPrice": 156,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/562593365.jpg?k=6aa9338f97cf590a0952d32d3b5cfd8948af8aadf8b43c2456da016cd2a165c5&o="
+              ],
+              "checkInTime": "17:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/cz/charming-vaulted-ceilings-amp-king-size-bed.html?checkin=2026-02-26&checkout=2026-03-01&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.booking.com/hotel/cz/charming-vaulted-ceilings-amp-king-size-bed.html?checkin=2026-02-26&checkout=2026-03-02&group_adults=2&group_children=0&no_rooms=1"
+          },
+          {
+            "id": "2712527b-a08f-485c-91d6-d718194fc129",
+            "dayNumber": 1,
+            "startTime": "17:15",
+            "endTime": "18:15",
+            "type": "activity",
+            "title": "Tour de transmission de Žižkov",
+            "description": "The following events occurred in September 1901:",
+            "locationName": "Tour de transmission de Žižkov",
+            "latitude": 50.0810526,
+            "longitude": 14.4511741,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0810526,14.4511741",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tour%20de%20transmission%20de%20%C5%BDi%C5%BEkov&query_place_id=&center=50.0810526,14.4511741",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWr4mKl7_NXPZtwHeRrKxWA03O1fTL4KupioxTOZxY7GOvmoq6QMSvtbJ3a50IVvVMGCvpUP45flXqHOpCtUPRH6mDNoJOUDkxEWkDC992iaqgTKCjmezBm4G3x0BtPzzP5IH3QmkQdsDmmXT4Prf-ZEfshjTiAMC5f5FxhE1CehkKCTNN-xxhIdNCkgYlhjteCWZpgYr7dY9ltgtPcb46V4m6WPt3IcXed4IGxBsrHdFb6IIs2y5NNFTnvsWAN29RVkI3zSDSz_68rlOhz472E1GRsa9gbsfSfS4DFxJQKuQBcyPSrgUJOP7y52p-x-wv9sqJd_rB1Bldld6XEb7hHOCf1GgvnBIvEkuzVD2xwRROk6lYM8NoG1VPqeOGKY_-f30giGQNlA1-Y7L4YWzrWGRSXWppx2SqocTHIqJVst3O-SKd7LG7JWzMXxg0CtpUKD3ebkLsh8lY3wb_9Y-6z4fYpcXB-xioey8fszizKFP5KWj_ekMY-2UWcOdTIyc12BJGzZXHxg9uM6EzmSpp9BEM7wYerecS7lwV8vX_3d00daH891-1o2Ejy8KxnCWJth4g9&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.58,
+            "timeFromPrevious": 8,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "40b9c7fa-895d-4d7c-ac13-31e05c91ce7c",
+            "dayNumber": 1,
+            "startTime": "18:30",
+            "endTime": "19:30",
+            "type": "activity",
+            "title": "Mémorial national de Vítkov",
+            "description": "The Che Guevara Mausoleum is a memorial in Santa Clara, Cuba, located in \"Plaza Che Guevara\".  It houses the remains of the revolutionary Ernesto \"Che\" Guevara and 29 fellow combatants killed in 1967 ",
+            "locationName": "Mémorial national de Vítkov",
+            "latitude": 50.0883569,
+            "longitude": 14.449522,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0883569,14.449522",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=M%C3%A9morial%20national%20de%20V%C3%ADtkov&query_place_id=&center=50.0883569,14.449522",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWIno2T25HdVuKfa7V1HvnNkSH5rmQp110WQPmwRqGNQ-Fi6Xabv4d3KD3sjoVBFPzLBT6TwVfjkTIoDCzG9v4xw5xCFApS8JXAMdcKhF_C-kQ_Nz2O4rQrMGZoDGO0NSzT-E3LzgI53aQzl1XlhH51RXIJ0c0qK8JgSiF5FNAW6wn_qsO2V7fpgZy3sPTYEc3C0uWTz218Lp4ueTUYjjGLpvir5H0tXrGquEpOFI4DX3R3cFB4izPNbvNbY2dWCFcmkSeExsqIc5BoJ49YyvUvWgVSuzGedadRuP8gPPOdUEMgn9YhwQikTjARYE3XU-YNK9kqFdRAqCfDGANTfDbz5Dpkg6SJ0DBoFitajFLhqMYuxyvQaiQp3nf-puHIISJPlKhwIwtPHXRR5p76WrjSL32rzsOdkAvGEGhYW7ppKhvpBrrG4TUzIztP_nqLQtq7VpzyhcwDfwWjQ1APDJEUCDU65LSHnqscAf_jIaZWfpFZniNOO3G2H3iQ6Q2jS1ay5LnwW7Npnu7l3vG0QDcNACCPcgTJT7Y0oZtCjMBa5u-BvfiLXlL-P19SnkCiKtq3pjkwkwybmQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.82,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "cbe7a878-9298-4005-8ba4-e1459532e289",
+            "dayNumber": 1,
+            "startTime": "19:45",
+            "endTime": "21:00",
+            "type": "restaurant",
+            "title": "Dîner — BarFood Žižkov",
+            "description": "\"Le meilleur restaurant de sushi à Prague.\"",
+            "locationName": "Husitská 3, 130 00 Praha 3-Žižkov, Tchéquie",
+            "latitude": 50.0871722,
+            "longitude": 14.4442589,
+            "orderIndex": 4,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.079956,14.447612",
+            "restaurant": {
+              "id": "serp-nearby-ChIJnxck85eUC0cRv_co3Li4-nY",
+              "name": "BarFood Žižkov",
+              "address": "Husitská 3, 130 00 Praha 3-Žižkov, Tchéquie",
+              "latitude": 50.0871722,
+              "longitude": 14.4442589,
+              "rating": 4.6,
+              "reviewCount": 1731,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant américain",
+                "restaurant américain",
+                "bar",
+                "restaurant spécialisé dans les ailes de poulet",
+                "restaurant de hamburgers",
+                "pub"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+420 774 220 001",
+              "website": "https://www.barfood.cz/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=BarFood%20%C5%BDi%C5%BEkov%2C%20Husitsk%C3%A1%203%2C%20130%2000%20Praha%203-%C5%BDi%C5%BEkov%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "ChIJnxck85eUC0cRv_co3Li4-nY",
+              "openingHours": {
+                "friday": {
+                  "open": "18:00",
+                  "close": "01:00"
+                },
+                "saturday": {
+                  "open": "18:00",
+                  "close": "01:00"
+                },
+                "sunday": {
+                  "open": "18:00",
+                  "close": "00:00"
+                },
+                "monday": null,
+                "tuesday": {
+                  "open": "18:00",
+                  "close": "00:00"
+                },
+                "wednesday": {
+                  "open": "18:00",
+                  "close": "00:00"
+                },
+                "thursday": {
+                  "open": "18:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.3979287787614798,
+              "walkingTime": 5
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-607592543148614994",
+                "name": "Sumi Garden",
+                "address": "Slavíkova 18",
+                "latitude": 50.079956,
+                "longitude": 14.447612,
+                "rating": 4.8,
+                "reviewCount": 1400,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le meilleur restaurant de sushi à Prague.\""
+                ],
+                "description": "\"Le meilleur restaurant de sushi à Prague.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sumi%20Garden%2C%20Slav%C3%ADkova%2018",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/K6H4EOLyA4JBxIKZ3fRvH9X-sesfp9QYqZHP3FUdExc.png"
+                ],
+                "googlePlaceId": "607592543148614994",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-8752560307184670079",
+                "name": "Le Grill Restaurant",
+                "address": "New Town, Prague 1, Tchéquie",
+                "latitude": 50.08708,
+                "longitude": 14.431378,
+                "rating": 4.6,
+                "reviewCount": 1000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Superbe lieu, cuisine gastronomique excellente et service impeccable !\""
+                ],
+                "description": "\"Superbe lieu, cuisine gastronomique excellente et service impeccable !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Grill%20Restaurant%2C%20New%20Town%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/PHuibid6P5xhabpSXpMsaPYNWZ9dDdfBQxMr-r09Jsc.jpeg"
+                ],
+                "googlePlaceId": "8752560307184670079",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.94,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=BarFood%20%C5%BDi%C5%BEkov%2C%20Husitsk%C3%A1%203%2C%20130%2000%20Praha%203-%C5%BDi%C5%BEkov%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=BarFood%20%C5%BDi%C5%BEkov%2C%20Husitsk%C3%A1%203%2C%20130%2000%20Praha%203-%C5%BDi%C5%BEkov%2C%20Tch%C3%A9quie",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Tour de transmission de Žižkov et Mémorial national de Vítkov",
+        "dayNarrative": "Après le check-in, cette première journée vous plonge directement dans l'ambiance de la Vieille Ville de Prague avec ses sites emblématiques et une balade le long du fleuve.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.94,
+          "p95LegKm": 0.82,
+          "totalTravelMin": 23,
+          "totalLegKm": 1.76,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.44,
+          "mstLowerBoundKm": 1.22
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-27T13:17:16.475Z",
+        "items": [
+          {
+            "id": "86405abe-8b6d-4e0b-ac05-30a580682d3e",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Eska Restaurant and Bakery",
+            "description": "\"Ambiance top, superbe déco, petits dej’ très bon\"",
+            "locationName": "Pernerova 49, 186 00 Praha 8-Karlín, Tchéquie",
+            "latitude": 50.0913817,
+            "longitude": 14.4545739,
+            "orderIndex": 0,
+            "estimatedCost": 45,
+            "duration": 45,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.07403,14.430561",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ1UI14KOUC0cRusXMeIpR260",
+              "name": "Eska Restaurant and Bakery",
+              "address": "Pernerova 49, 186 00 Praha 8-Karlín, Tchéquie",
+              "latitude": 50.0913817,
+              "longitude": 14.4545739,
+              "rating": 4.5,
+              "reviewCount": 4955,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "bistro",
+                "bistro",
+                "café",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "https://eska.ambi.cz/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "ChIJ1UI14KOUC0cRusXMeIpR260",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "19:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "19:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                }
+              },
+              "distance": 0.49297053992160306,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ433WHqSUC0cR-hbWXbPMSuE",
+                "name": "Můj šálek kávy",
+                "address": "Křižíkova 386/105, 186 00 Praha 8-Karlín, Tchéquie",
+                "latitude": 50.0935309,
+                "longitude": 14.4550938,
+                "rating": 4.7,
+                "reviewCount": 4466,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café original et torréfacteur. Établissement urbain branché proposant une sélection de mets fraîchement cuisinés, ainsi que son propre café préparé avec soin."
+                ],
+                "description": "Café original et torréfacteur. Établissement urbain branché proposant une sélection de mets fraîchement cuisinés, ainsi que son propre café préparé avec soin.",
+                "phoneNumber": "+420 725 556 944",
+                "website": "http://www.mujsalekkavy.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C5%AFj%20%C5%A1%C3%A1lek%20k%C3%A1vy%2C%20K%C5%99i%C5%BE%C3%ADkova%20386%2F105%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqsNQZ1DmeHNsOPVoI6z9KkALb51LjWBoMNt7lddy_lO_3NHJrbqHZosPfyL7MePBPvAH4HWMRnAZT2wduMjZ4Y5pM2C6jl6muK_pSefZE4jpEG9IMg8iR3YVLnNMEZEfybAGK-JvtLK_U=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ433WHqSUC0cR-hbWXbPMSuE",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.24184093939060627,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJV5l4iL-VC0cRIo6IRthmF2o",
+                "name": "Kavárna Tika",
+                "address": "Vnitroblok Karolina Plazza, Křižíkova 703, 186 00 Karlín, Tchéquie",
+                "latitude": 50.0937864,
+                "longitude": 14.4543463,
+                "rating": 4.7,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "fleuriste"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+420 774 888 483",
+                "website": "http://www.kavarnatika.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Kav%C3%A1rna%20Tika%2C%20Vnitroblok%20Karolina%20Plazza%2C%20K%C5%99i%C5%BE%C3%ADkova%20703%2C%20186%2000%20Karl%C3%ADn%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweptlqal9Nh6x3CPxGR4BNaGrlnSTWVoaHr_9gwFkeQW2Tto8dcls1WGdAyo-sRtCW97zhbE_niqN8OFbSEz55rbqWd5Gs0sTxbE41TlQbuUcerZq04WCAM2UyNn4tn1zgVJUipO=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJV5l4iL-VC0cRIo6IRthmF2o",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.26788293119639145,
+                "walkingTime": 3
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "256513f3-4ab6-4aba-8aff-f5a2eb40c2ab",
+            "dayNumber": 2,
+            "startTime": "09:30",
+            "endTime": "10:15",
+            "type": "activity",
+            "title": "Cathédrale Saint-Guy",
+            "description": "Aix Cathedral in Aix-en-Provence in southern France is a Roman Catholic church and the seat of the Archbishop of Aix-en-Provence and Arles.  The cathedral is built on the site of the 1st-century Roman",
+            "locationName": "Cathédrale Saint-Guy",
+            "latitude": 50.09089179999999,
+            "longitude": 14.4005114,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.09089179999999,14.4005114",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cath%C3%A9drale%20Saint-Guy&query_place_id=&center=50.09089179999999,14.4005114",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV9O5l3B9AFwxcayRLUk-C2PTB63FjX5isZIpdCgtu9gr_c5XtpmASVrPPqEDwmXXRNxMzdDqJwEFHkwQM1B-0oYvuH8xbmYB7ztyb2_gqfeEJUX94ixkLlYj7FZSZXliRJqtVQaVCw4Y31EgLLp82oIJvGyo4CixJF9veJK_B2LT_zTqNks3LV2xk0S95UvVIptT-D3zGsaPddjoBa5WYxyL4qR4wJ8FG3Z1SQY59IQ9wU5SDd5AOh5x_H3wUN_83hGdDGLO6NLXsBXQrB6B8jCeM1Ghu6an2gruKcoAPnUtz77cyJfWQk-W5UY0ZAzLe316Ey96mFrPESqMCsL8sftYMgwXKS4qW_1VF_9noIrhTJzA1ijL2SWeSKal5hPbGGJCa0QUi-eQsKH6TJuakwcHBgjQr161CcVQOjjZRkcDf3iSIHRvZm5Yj2O3OZHPmm_uNyp0IaK2lECkKQZ2KPHdYKBH9BH0_lDMOnSj3Pp7aYiV85JHbTD2vLWtxw8gkLCTpIdikUhkMos3oxAhnXEwz6gX4EpYwHnnjst8JmANHNjIA6qNeTTAVX5FAw4rj1ew&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.85,
+            "timeFromPrevious": 36,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "84b5cdfd-a185-43be-801f-de08647b4c5a",
+            "dayNumber": 2,
+            "startTime": "10:30",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "Palais Lobkowicz",
+            "description": "The House of Lobkowicz is an important Bohemian noble family that dates back to the 14th century and is one of the oldest noble families of the region.  Over the centuries, the family expanded their p",
+            "locationName": "Palais Lobkowicz",
+            "latitude": 50.0916483,
+            "longitude": 14.4049502,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0916483,14.4049502",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20Lobkowicz&query_place_id=&center=50.0916483,14.4049502",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV_9ahMbkgM3zKcmillFOtrH7YzqKF0GDaAoWtmVrrzoIY9TPIw7OXsjkDNzxNXvaZD5jHylap19hmg9hZZirnwQESwdG6m-HpjNnrTQxv4S3sn1LwCFq93sVMdcGHMKsEyRvilNFhtm01UVzX3G_ftAXuFYXWdX6s4UZEuMYt2gQYxkW8tVstQz77NePIf5GKQ8WBpLa7VEeb7L7CMN3wRF0jwf-UArFp1XpM-2--ssObGHue79s6y7fi3zzoZa_jvCHhjwgXyHvoOjlHbYC2l4FmsPIxlGpE4oV5IxMqec-0AyJOLWQgXXUz6BhOS9Rx_YiI6YzkSPhzEDnUdHhlHfcJ33QPuozzKSqZAItqM5NcqsOyxvb6tRorkp8XHHbcAGa0Q7lGUvWVKGq-MGpNQOgEzXwYv6rmpoLFlqVSclXtmHStM5Cb6nvp3TFi8Y5_Q51tZW62KTsNG03gICL3ufNWnABDMYIxDb1V1KhK6bNLMWKKZYXzJ0aDh2BL0HW3JK6EY4JEVvIsuJ4-SgPSa0uP6AbeiivuzyJbetIJRhp9sNXxXlC9gpAjuqbrPICuecq5_f-A5Zw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.33,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "f09ec00f-05fa-4fd6-a758-8b1dc0d78639",
+            "dayNumber": 2,
+            "startTime": "12:45",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant Mlýnec",
+            "description": "\"Repas top top qualité prix top top génial bonne expérience\"",
+            "locationName": "Novotného lávka 9",
+            "latitude": 50.085407,
+            "longitude": 14.413599,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.08177,14.404632",
+            "restaurant": {
+              "id": "serp-14868495288080310998",
+              "name": "Restaurant Mlýnec",
+              "address": "Novotného lávka 9",
+              "latitude": 50.085407,
+              "longitude": 14.413599,
+              "rating": 4.7,
+              "reviewCount": 4900,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\""
+              ],
+              "description": "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Novotn%C3%A9ho%20l%C3%A1vka%209",
+              "googlePlaceId": "14868495288080310998",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5766173190595042808",
+                "name": "OMG restaurant",
+                "address": "Myslíkova 2/26",
+                "latitude": 50.07791,
+                "longitude": 14.418378,
+                "rating": 4.9,
+                "reviewCount": 3300,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne expérience Cuisine élaborée et immersive !\""
+                ],
+                "description": "\"Très bonne expérience Cuisine élaborée et immersive !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=OMG%20restaurant%2C%20Mysl%C3%ADkova%202%2F26",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/8K7m-6z8lt_OVB0gAIOrhRXBYgZsHoKJXULDYQNJ5Qg.jpeg"
+                ],
+                "googlePlaceId": "5766173190595042808",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-6707465867377608907",
+                "name": "FAT CAT Downtown",
+                "address": "New Town, Prague 1, Tchéquie",
+                "latitude": 50.081173,
+                "longitude": 14.428443,
+                "rating": 4.7,
+                "reviewCount": 3200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "hamburger"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne cuisine, super ambiance, endroit très chaleureux.\""
+                ],
+                "description": "\"Très bonne cuisine, super ambiance, endroit très chaleureux.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=FAT%20CAT%20Downtown%2C%20New%20Town%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/7ACHHmy2G-BThdMyv79jFltuh6tj6hsU629NU-FWgXQ.jpeg"
+                ],
+                "googlePlaceId": "6707465867377608907",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 1.1,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Novotn%C3%A9ho%20l%C3%A1vka%209",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Novotn%C3%A9ho%20l%C3%A1vka%209",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "3ad8065e-5ff8-4c7f-8034-a04e8b30db7b",
+            "dayNumber": 2,
+            "startTime": "14:15",
+            "endTime": "15:15",
+            "type": "activity",
+            "title": "Pont Charles",
+            "description": "The du Pont family or Du Pont family is a prominent family descended from Pierre Samuel du Pont de Nemours (1739–1817), a French minor aristocrat.  Currently residing in the U.",
+            "locationName": "Pont Charles",
+            "latitude": 50.0864771,
+            "longitude": 14.4114366,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0864771,14.4114366",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pont%20Charles&query_place_id=&center=50.0864771,14.4114366",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWNU5LR-zBR9Q8prBypZLkUDvs7wnHkTSD3KN1IhMsHnFwG7P749Q4vqUoxxY04DJmdV97-6cVgGfjljYYVZDPJyLrZOzio-7rUumGn11GLSNWyA2IfezkdP2cBE0hd2qMhe5IjkbqYZk5jpW6Y3Q0loC5aNsl0HhhzLqgJm5q9o53ffECzCykW-V7bbb6btU_wmrDcx_zlOmRVUkdoNZlfVblUCAbKptsHSxSZ5A481tBc2SyPn688oNww6gmrp3hfC0AGL0cEN7KRJmFI0yr3VYvj9UCujkymSprSwLnyrxP-sSjufLqalM2OAlTruuwV0MEjl6FbvehZ87PvDIPrlubCQNQi3Bbv5Z4HYAifaWSlAjxk6jNRTM8CuK-BzsbQiisPAY4f_luepurEOqpMH8x7t5q5BnwkQfnkjsdaSD-DpzRxweAVk4FlI84bFVcoNZ8PsSOhSFCzbLsJMijNmJO5Q6nAPnyOk4c8s5JzdN6n802OpLhBGy2f-9KoU38O-qgtKdQNZCzX6ol2mIAmHRIwffSBF_JIfztsU4DBhAvFwDFpjjnsOs9p69pjNkKV0GKp&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.71,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e3a65375-5787-418c-8569-80284f3b9442",
+            "dayNumber": 2,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Mur Lennon",
+            "description": "Merseyside is a ceremonial and metropolitan county in North West England.  It borders Lancashire to the north, Greater Manchester to the east, Cheshire to the south, the Welsh county of Flintshire acr",
+            "locationName": "Mur Lennon",
+            "latitude": 50.0862506,
+            "longitude": 14.4067918,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.1,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0862506,14.4067918",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mur%20Lennon&query_place_id=&center=50.0862506,14.4067918",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWyka2FsUd9RDcYYdDqujqrB8P4wO5K-wWixC7-rJQo8zxEBbCsxatr1NJEJQhqXmouXDdg6oI-a-zrIh64fGGbbg0TT5DF6jFm_JC44yLgzMNRumNbfBG3GRbtEiw41ta20CqwdkaadLPj4Nck9-UgmYCWQYaTVvOam67GYanURlNHBVjFzaKZx2mQG2MSK_MXnybEnnyIS85oNUO2ZCzxm5mXi3znerklei_vxYLA51mdIG099zmc-V4PA-TBAg5QWaBI4AHMzuJzz9Trmu3u4FqIjqnDAhMGxSBnaZChGgNms9Ei4izPrr4e3dceZaK-pUhMvPuH18qBP0Ql6M_LYHPQWaXmv25sRj3UsSOVmRwa6rs6L9HE4gbunDjMoCCuJJj3uaUNytoBIOjngcaUlJ1iq7H6x-YIukuFCbGMw42Zg47SVz0wm4KHnYVmYAHECg1I7TCcRXfVGIviDnNnZQnex7DNyIcoGBRtju9l88lTa4LvTukIkR2-_Yf9_w6F-epBPkIZXR7TUEbpIBSaB1bmxnIInA5t5iH4y5HhaSgaDOAGIche5R8IO04Qq0eRTA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.33,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "0c0b0ecb-0148-4ba7-882e-a5a87b979c7e",
+            "dayNumber": 2,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Prague's narrowest alley",
+            "description": "The history of Zaporizhzhia shows the origins of Zaporizhzhia, a city located in modern day Ukraine.",
+            "locationName": "Prague's narrowest alley",
+            "latitude": 50.0879158,
+            "longitude": 14.4095785,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0879158,14.4095785",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Prague's%20narrowest%20alley&query_place_id=&center=50.0879158,14.4095785",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWDQGZmQ2Uc56tiBhIb6eeUHR2OGSEnI6wQ0oZFyfauCWr9MtaLo5rZeXmrH0a67benCWKwfkA0UrfewJljBnYXO6kMI7-7G0PeFV3nEe1jPudoyl8tXpy9ukhsRauF83pMaixdKmO-Vrx8Ut_zqGCLefFqjiVySs6M2je_Clw0ESUJubEGoMxsA4MN10xW9zZapp_KPE2AKjBhWU2tK7A99AyyG_d1yRfVOoPYX_ouGhx5sJah3WFStT5q0AZ0stWSqkalNZlUoCGMCn9AUKLSXGp4UQ7qbEd_K0HQnCNdOgosKlZVYJ8VQPZZkTRwOt6-eRE0of_G2hgrX5UNvDX0ttoCbb7OWDPQ6Tm9aBXtDJepImMTkyGBq2UAfUiqfOloBLk7Oy0eYOFj43GXXABkT4tawukzjFI9LjfSts2YdkbNm1p3gFAlHU2mHk6WQ89zRnOTRz-eaIwZo-Tc3ayy5tHE3WNtGpzOoSwbiNFkPgZdZ9jAlXg5iTmah8GDb52OxKy0isjxbk9XsAxpSYfYYEEnAsk3tK_ZrabbZqrIKSuTpNqsufOXg-wprGTqUKV2dGln&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.27,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "173e1384-f717-47d0-aa14-f2af4cc1bc87",
+            "dayNumber": 2,
+            "startTime": "18:00",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Zoo de Prague",
+            "description": "Prague is the capital and largest city of the Czech Republic and the historical capital of Bohemia.  Prague, located on the Vltava River, has a population of about 1.",
+            "locationName": "Zoo de Prague",
+            "latitude": 50.1177321,
+            "longitude": 14.4062013,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.1177321,14.4062013",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Zoo%20de%20Prague&query_place_id=&center=50.1177321,14.4062013",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWLD3B2MNeADkHbAfCuDIj8WVozzHEGzhB_DVbkvUfiepMN1NFQP4tbyFpXyhjjGuIDGArIwdQrZ2dualLTwvNhlSH7Dxfi1S-vOfdPKDxPp0EAuSOH_870h1W968A1O5NUCCovVQmZoK1YcQ1J_ZMkgh_XpranqLVdRKfVw849fqvifAgpUvuC4VLkSLiAyN2AG4NWDDRK3WqRcQ528PaokPHwrtGPqtrv9Pohp5JPLCYRRm7A_Q2ZqdTJmrynl4x1QYWgSKQ1QY0NyKxYdqHOJLwcPMVTf-fwlpF8fVRBIDKI2lKiBSr4aCGJfZR_gRWDYhyT-AXRvAi0trL9VshBjk1_mtrgPj_KbrA9hZIIWni2vRWB0-EI0V7iqx8niztwENlgyNh8TTCyxNIiOAgTzEI-Txz-VCtjMeH4QrxdcrVek_L407zKzZzmdv-aXcFsNxR2qtwRlkO0_28bf6sq7hKxEQ4WoWz30L8-cAGzYEcEDZQNhZZb8KxjWATZReoca8Jm9fnYb6EbZKAIB3jTRx23vktoXPfmfLZFEuBbZQ8dje_RPpSdpAQKl-b6jkDzWsBxx-9VjQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 3.32,
+            "timeFromPrevious": 42,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "28b4fbc1-e002-44da-b920-ba5cccfaca51",
+            "dayNumber": 2,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Gulab Restaurant",
+            "description": "\"Service impeccable, personnel très gentil, nourriture excellente !\"",
+            "locationName": "Pod Hrachovkou 703, 171 00 Praha-Troja, Tchéquie",
+            "latitude": 50.1188916,
+            "longitude": 14.407567799999999,
+            "orderIndex": 8,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.086067,14.418764",
+            "restaurant": {
+              "id": "serp-nearby-ChIJf3qq29PqC0cRcbtH-9if5WU",
+              "name": "Gulab Restaurant",
+              "address": "Pod Hrachovkou 703, 171 00 Praha-Troja, Tchéquie",
+              "latitude": 50.1188916,
+              "longitude": 14.407567799999999,
+              "rating": 4,
+              "reviewCount": 681,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+420 296 112 230",
+              "website": "https://www.zoopraha.cz/zvirata-a-expozice/kam-v-zoo/ostatni-stavby/5827-gulab-restaurant",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gulab%20Restaurant%2C%20Pod%20Hrachovkou%20703%2C%20171%2000%20Praha-Troja%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "ChIJf3qq29PqC0cRcbtH-9if5WU",
+              "openingHours": {
+                "friday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                },
+                "monday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                },
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "15:30"
+                }
+              },
+              "distance": 0.16160325991716548,
+              "walkingTime": 2
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJUQb3NtHqC0cRfrJUIITVkjU",
+                "name": "Salabka",
+                "address": "Troja Praha 7-Troja CZ, K Bohnicím 849/2a, 171 00 Praha 7, Tchéquie",
+                "latitude": 50.1208659,
+                "longitude": 14.409886799999999,
+                "rating": 4.7,
+                "reviewCount": 390,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "établissement vinicole"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+420 778 019 002",
+                "website": "http://www.salabka.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Salabka%2C%20Troja%20Praha%207-Troja%20CZ%2C%20K%20Bohnic%C3%ADm%20849%2F2a%2C%20171%2000%20Praha%207%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerVgd4kqyHPAF8_Sk4n-VHb61QTxsd0jF-rxJzK71ytQRASz1U7tJcF7AzxoUPZsVueQ-opqrsgvy74mfAIf2zwF4W27kcS5NTR_4dLkaw8sHgEq6XR98N1Af1UFpGZ1CTKq-S_9A=w139-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJUQb3NtHqC0cRfrJUIITVkjU",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "16:00"
+                  },
+                  "sunday": null,
+                  "monday": null,
+                  "tuesday": null,
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.4364311194843769,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJUWReny7rC0cRY8Ftu3BEYgY",
+                "name": "Sokol Troja Restaurant",
+                "address": "Trojská 744, 171 00 Praha-Troja, Tchéquie",
+                "latitude": 50.1173589,
+                "longitude": 14.425422099999999,
+                "rating": 4,
+                "reviewCount": 146,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+420 607 001 133",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sokol%20Troja%20Restaurant%2C%20Trojsk%C3%A1%20744%2C%20171%2000%20Praha-Troja%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipP-7E1AK-o-EyJ_tiSh-DhC4Sc9Z-0Kv_I58uhW=w138-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJUWReny7rC0cRY8Ftu3BEYgY",
+                "openingHours": {
+                  "friday": {
+                    "open": "16:00",
+                    "close": "21:00"
+                  },
+                  "saturday": null,
+                  "sunday": {
+                    "open": "16:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "16:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "16:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "16:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "16:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 1.2843507602326019,
+                "walkingTime": 16
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 3.63,
+            "timeFromPrevious": 46,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Gulab%20Restaurant%2C%20Pod%20Hrachovkou%20703%2C%20171%2000%20Praha-Troja%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Gulab%20Restaurant%2C%20Pod%20Hrachovkou%20703%2C%20171%2000%20Praha-Troja%2C%20Tch%C3%A9quie",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Château de Prague et Mala Strana",
+        "dayNarrative": "Explorez le majestueux Château de Prague et la Cathédrale Saint-Guy, puis traversez le célèbre Pont Charles pour découvrir le quartier pittoresque de Mala Strana et ses trésors cachés.",
+        "geoDiagnostics": {
+          "maxLegKm": 3.86,
+          "p95LegKm": 3.32,
+          "totalTravelMin": 130,
+          "totalLegKm": 10.08,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.33,
+          "mstLowerBoundKm": 7.59
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-02-28T13:17:16.475Z",
+        "items": [
+          {
+            "id": "620bbd65-658b-4865-a0d2-546d750dd5e0",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Eska Restaurant and Bakery",
+            "description": "\"Ambiance top, superbe déco, petits dej’ très bon\"",
+            "locationName": "Pernerova 49, 186 00 Praha 8-Karlín, Tchéquie",
+            "latitude": 50.0913817,
+            "longitude": 14.4545739,
+            "orderIndex": 0,
+            "estimatedCost": 45,
+            "duration": 45,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.07403,14.430561",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ1UI14KOUC0cRusXMeIpR260",
+              "name": "Eska Restaurant and Bakery",
+              "address": "Pernerova 49, 186 00 Praha 8-Karlín, Tchéquie",
+              "latitude": 50.0913817,
+              "longitude": 14.4545739,
+              "rating": 4.5,
+              "reviewCount": 4955,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "bistro",
+                "bistro",
+                "café",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "https://eska.ambi.cz/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "ChIJ1UI14KOUC0cRusXMeIpR260",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "19:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "19:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                }
+              },
+              "distance": 0.49297053992160306,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ433WHqSUC0cR-hbWXbPMSuE",
+                "name": "Můj šálek kávy",
+                "address": "Křižíkova 386/105, 186 00 Praha 8-Karlín, Tchéquie",
+                "latitude": 50.0935309,
+                "longitude": 14.4550938,
+                "rating": 4.7,
+                "reviewCount": 4466,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café original et torréfacteur. Établissement urbain branché proposant une sélection de mets fraîchement cuisinés, ainsi que son propre café préparé avec soin."
+                ],
+                "description": "Café original et torréfacteur. Établissement urbain branché proposant une sélection de mets fraîchement cuisinés, ainsi que son propre café préparé avec soin.",
+                "phoneNumber": "+420 725 556 944",
+                "website": "http://www.mujsalekkavy.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C5%AFj%20%C5%A1%C3%A1lek%20k%C3%A1vy%2C%20K%C5%99i%C5%BE%C3%ADkova%20386%2F105%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqsNQZ1DmeHNsOPVoI6z9KkALb51LjWBoMNt7lddy_lO_3NHJrbqHZosPfyL7MePBPvAH4HWMRnAZT2wduMjZ4Y5pM2C6jl6muK_pSefZE4jpEG9IMg8iR3YVLnNMEZEfybAGK-JvtLK_U=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ433WHqSUC0cR-hbWXbPMSuE",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.24184093939060627,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJV5l4iL-VC0cRIo6IRthmF2o",
+                "name": "Kavárna Tika",
+                "address": "Vnitroblok Karolina Plazza, Křižíkova 703, 186 00 Karlín, Tchéquie",
+                "latitude": 50.0937864,
+                "longitude": 14.4543463,
+                "rating": 4.7,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "fleuriste"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+420 774 888 483",
+                "website": "http://www.kavarnatika.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Kav%C3%A1rna%20Tika%2C%20Vnitroblok%20Karolina%20Plazza%2C%20K%C5%99i%C5%BE%C3%ADkova%20703%2C%20186%2000%20Karl%C3%ADn%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweptlqal9Nh6x3CPxGR4BNaGrlnSTWVoaHr_9gwFkeQW2Tto8dcls1WGdAyo-sRtCW97zhbE_niqN8OFbSEz55rbqWd5Gs0sTxbE41TlQbuUcerZq04WCAM2UyNn4tn1zgVJUipO=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJV5l4iL-VC0cRIo6IRthmF2o",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.26788293119639145,
+                "walkingTime": 3
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "94074252-29fc-4440-8053-0bdb2d203794",
+            "dayNumber": 3,
+            "startTime": "09:15",
+            "endTime": "10:15",
+            "type": "activity",
+            "title": "Horloge astronomique de Prague",
+            "description": "Jacques-Théodore Saconney was a Senior French Army General, a scientist, and an adventurous balloonist.",
+            "locationName": "Horloge astronomique de Prague",
+            "latitude": 50.0870215,
+            "longitude": 14.4207065,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0870215,14.4207065",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Horloge%20astronomique%20de%20Prague&query_place_id=&center=50.0870215,14.4207065",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV00WXg_wPuOwkEo5wHH8JJ6gcrPPHt_8MF-nfNPzr9BSfsYnGH9mGOU-4atVwzmAIgNa32F4ynDBJa-66N38787eLqYbEw6urv1O0C_SMe1tQs9MkIkQU-pYBgOaizZujBCYAkoUQ3JRGuMbeS5LsJUM2wtyauVRdr-0m2RHqMPNNWluKgtRavM7eMCRRlZW9F_bcJPsmr-r6XVl0KbMS2TPR6loOYWV5oZI1C5v3v7z2fgU3tMLxLc6quisp50ksmEap5DZ-KA9x-tuvIFRjQD3NXCx1HieDifGUuyNoVUnvvFLXt1pZaBfYIgb3m1GWyvT-G7LgABzuKzrg_1nOzZ1ubHt1T_cc11y7aaquzL6s-84CYQ6dYxcvkWsmL8uIrR12cXpvdbbVpfrz7CZPpEFVvJsZJjtskPcXYv788Odz1eMAU4QT7WfClntF3U6bxjL7L5XbgLNulhvogFdqlA_cLwf3oHY-ayoIm3Ilk3wKRkUXqEZnr0oFSYMCCnTnPUH_LiUvx9i02xh8pipjycuBX5FkjU8ndZ4AcEvEsDAh5ZamxyUUgUB9_t-M7-ppUVupc-JpBbw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.61,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "01827585-10dd-4f92-aa74-1c1bea2cf063",
+            "dayNumber": 3,
+            "startTime": "10:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Clementinum",
+            "description": "The Clementinum is a historic complex of buildings in Prague which houses the National Library of the Czech Republic.",
+            "locationName": "Clementinum",
+            "latitude": 50.0865979,
+            "longitude": 14.4160186,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0865979,14.4160186",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Clementinum&query_place_id=&center=50.0865979,14.4160186",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVNsPO_Vg0u_5bn8LYmnmMtoLLsx0nU3ob_jgV4IztgPQI6Y-n7k7i7rWYayd4GVPIoimVz2jUL9dKfCK_MwuKz-PCPPdNh90aWZEIDX4PKRL_FFTal0ofCQGQkdO-OhXrcsn4JUzgjzJcgHcVmmot3ECpjhVQDIvBoPVejdVZbJKhz37ZYVBR1Qd5rehrkX6oeosOE2iF_FrRlHnQvryRNG3kUtZ3IAuV0YV03tosdX9ygZ9rrpN6Vpqsrbb3UdeUhAlNMmOTJWSH5-MU0WbAgOyKH7EoF-jR0M4V8x6fxg3SOaGF-maQi_QQdhIL3pWLNM1ipxQACaePlnUMa7sd32xXiBoBVoNE16srTzZ9Ahu28T1c7LnKGWzT4klqWA51K_ZXA8VcSeSksZeARjNIi0ffxOO5vSTKWNTfQiOTquMNtgVNNO6oed_Gcn06ycGwcxUi-BTz21u5BAuvw3-m4tZxfy668Cympe8SDHKH0l79NbCbiEkBWF5OAtZ45mqqPK-vV7O-pu1gahsX2hGwnTOUFjo0Ays1s8J71-hNQjxE3e-T_FMhkodDxX4haH83ceG41Yf8oEQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.34,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "036df4eb-2a50-419b-84f5-a35d431bd43c",
+            "dayNumber": 3,
+            "startTime": "11:45",
+            "endTime": "12:45",
+            "type": "activity",
+            "title": "Tour du pont de la Vieille Ville",
+            "description": "The communal section is the smallest administrative division in Haiti.  The 144 communes are further divided into 571 communal sections.",
+            "locationName": "Tour du pont de la Vieille Ville",
+            "latitude": 50.0862306,
+            "longitude": 14.4136141,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0862306,14.4136141",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tour%20du%20pont%20de%20la%20Vieille%20Ville&query_place_id=&center=50.0862306,14.4136141",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUpIdz2A5IYiaKW2l7dM8J6UBsLaofvvmvt9DPkvYa7ioY2gx8z8B52gwm58FLSwtoz8LcP-Zmc3sMRjpBfXgEUEMRfiqbZnTENhJ2JCAHuDZmIhd2N8PtNnCFN3DGCvWQva7S5Pax8Y6niJPBY6w0lkZq5f4utitLrq5fjLvKvuzyGoB8AuAxJZ2an7vGl0DufiA04Hm3A62KOtuoQjRAKbPvEWTyABejcdSPacGeqrE4qZeDm0bF27XdIaCWdY6QV8-tOaPPEQkLqAnTK9WY8OMZ-0xuPkQin-P2NXygBR47gYM_xRhWRT71iR-S5SPJ3vFz4AAciY8jHM8sCeGxbvcA0v-oDr-Qi3wvT5a3NPwqL7tGYt8LwxLI96ivDoLsHMYL_GpGtYKzJDhJy16buMzWTp9GW79O7sCodaWi8sh0mu4UnMYkNi1u9a7Af5GwXkgTA1IWLk_nn94UdOF5vJfLKtHXrj-u4Kpm4R9Rla4tr9XqFyVgMI4Wl0aYlj4n0ek6Vt2iXBN2x9wBU3bONOgq3v-7W8DqYpFq0Qbhj8xlQ3I02VX3n8b-WsFd5TIxCso97WCeA6w&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.18,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "cffca69c-df31-4b7b-aa30-17f3ccabf5e5",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "14:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant Mlýnec",
+            "description": "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\"",
+            "locationName": "Novotného lávka 9",
+            "latitude": 50.085407,
+            "longitude": 14.413599,
+            "orderIndex": 4,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.085407,14.413599",
+            "restaurant": {
+              "id": "serp-14868495288080310998",
+              "name": "Restaurant Mlýnec",
+              "address": "Novotného lávka 9",
+              "latitude": 50.085407,
+              "longitude": 14.413599,
+              "rating": 4.7,
+              "reviewCount": 4900,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\""
+              ],
+              "description": "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Novotn%C3%A9ho%20l%C3%A1vka%209",
+              "photos": [
+                "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/jZIXroJJnxi6ryQ2eD6hl03EyNHFinYbWbUB3ew5MmA.jpeg"
+              ],
+              "googlePlaceId": "14868495288080310998",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5766173190595042808",
+                "name": "OMG restaurant",
+                "address": "Myslíkova 2/26",
+                "latitude": 50.07791,
+                "longitude": 14.418378,
+                "rating": 4.9,
+                "reviewCount": 3300,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne expérience Cuisine élaborée et immersive !\""
+                ],
+                "description": "\"Très bonne expérience Cuisine élaborée et immersive !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=OMG%20restaurant%2C%20Mysl%C3%ADkova%202%2F26",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/8K7m-6z8lt_OVB0gAIOrhRXBYgZsHoKJXULDYQNJ5Qg.jpeg"
+                ],
+                "googlePlaceId": "5766173190595042808",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-6707465867377608907",
+                "name": "FAT CAT Downtown",
+                "address": "New Town, Prague 1, Tchéquie",
+                "latitude": 50.081173,
+                "longitude": 14.428443,
+                "rating": 4.7,
+                "reviewCount": 3200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "hamburger"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne cuisine, super ambiance, endroit très chaleureux.\""
+                ],
+                "description": "\"Très bonne cuisine, super ambiance, endroit très chaleureux.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=FAT%20CAT%20Downtown%2C%20New%20Town%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/7ACHHmy2G-BThdMyv79jFltuh6tj6hsU629NU-FWgXQ.jpeg"
+                ],
+                "googlePlaceId": "6707465867377608907",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.09,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "6af310a7-2712-458a-898b-1c26429db22d",
+            "dayNumber": 3,
+            "startTime": "14:45",
+            "endTime": "15:45",
+            "type": "activity",
+            "title": "Tour Poudrière de Prague",
+            "description": "The 2025 Annecy International Animation Film Festival took place from 8 to 14 June 2025, in Annecy, France.  Unlike previous editions, the festival opened with the world premiere of a selection of fiv",
+            "locationName": "Tour Poudrière de Prague",
+            "latitude": 50.087273,
+            "longitude": 14.4277887,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.087273,14.4277887",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tour%20Poudri%C3%A8re%20de%20Prague&query_place_id=&center=50.087273,14.4277887",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUQ1wK0R2qDL_a8biqbtq2LDESj-dtDkTHdVzG6FouE05hfUhfzoDkNQq-eJhkbERpcFJE_2sWvWrLQIIuv1K9VJ_BSMbkBKSnYBfIHjQ9YHhGjc1UklDNv4_NwMSfJQjXmeQs5sGx8DJGA3FTigAiEIghgi4GgwZI8v94oOw2Dmxv3zAxXFLifq-QXH-SSUY4WESUKbIp_nehESvF0wUoime7kYTR7l2_iLVIdL7V1DWw-E3YQvQrLj9sC-fc9OUKmOfHzpgkScLtTDHTX7KE3TMqdlfg4NWonQT3ko7BFF8RTVAE&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.03,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "2411e32d-e402-4b4b-a308-fa45da22ef07",
+            "dayNumber": 3,
+            "startTime": "16:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Musée national de Prague",
+            "description": "Paintings of Adam and Eve by Lucas Cranach the Elder include the following, depicted either together in a double portrait or separately in a pair of paintings:",
+            "locationName": "Musée national de Prague",
+            "latitude": 50.0789704,
+            "longitude": 14.4309369,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0789704,14.4309369",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20national%20de%20Prague&query_place_id=&center=50.0789704,14.4309369",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWFL9-R9Y54DcqZVzCpjC6YvmdRpPViVOam6U4AuobrnW75S56NfU7NAPN6Wuy7xriihT1W8f-WQoIZ2JAOchc8Z4Hz-9xIri25yxlKPl6yEA47dLbFRublnTsPPcYqQnDdRPCvUedIBK9rJqHx47O_ks24vIC6SxiByoWXqO8JaERJYtLBQNkIgalwrMYa7EbEjLkmtHz5vuZC0y2xIkd674DhieayMzqA8LgYieETuSYsrddGyVjK7rhdnmXJ5xWoaWp7RVlj7kgjXGHtNGmwvK9TlHvT4hhFWXyUqlhyBGXhNR5K8om7J48SCC1kCifIyWx6Pm9iWn3TY-QFEB0e34NltazA-FiBBI1x0-PDurN9yj0aYFbiNr2iZcDO5bWVuv7TDiov3ujjag290TeeJTVj5BeSWl0jKfu4L3y2w4GIF0HCQVchGaQ1dlxI-Dcx9Xrjzo7YoM3QFGTQG3N_Lof131QDNE1BqikwYOPtMd_-iq6Qts0vTPC3gaTskbxT5bftbpe1soF519YG5lAZ2Of4UnfVWkSD1yfP0yzwJtPmlxuGm0yH4AZvey3dt37h1rsJjP9k5A&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.95,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "35db29a1-8d98-4c46-bed2-febabe61c3a3",
+            "dayNumber": 3,
+            "startTime": "18:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Vyšehrad",
+            "description": "Vyšehrad is a historic fort in Prague, Czech Republic, just over 3 km southeast of Prague Castle, on the east bank of the Vltava River.  It was likely constructed in the 10th century.",
+            "locationName": "Vyšehrad",
+            "latitude": 50.06419409999999,
+            "longitude": 14.4188977,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.06419409999999,14.4188977",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vy%C5%A1ehrad&query_place_id=&center=50.06419409999999,14.4188977",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUVsWNq3efvrrc5EMDJROIQK3S_jj7xu-rwS6KW20-4xiJt45xdElCD0OKrtkPzRmOYE42lpw6DTWKntasw-pvXyZ5IEhoUmxfEPhsohymwuL8mnZi4JYEwvkt6GK56hcOEncdKBx_N52xNQtIAsTGg-IIROa7HpN_u6wSWbHqq2ifD8qNHoxzAl73WMsjbsmZ4e5blP463ByOKwGZHHvVpgVdKCn0Vp4U4fSQ3hAkKCGKMFYdSU0U_JBP6OBv-rd8V43pBgfa3qjfJ5lN9qqx0hzzOS79PFqWQq0Ku1Or2zgPsibq5tgsPVZloasJGMggs74N8Zy4oY_ZZJdoPDV5aZWkLnXlqNxbvGKZJwwq1bNJhtis8Ov6-E-EfxJ5ejnMs6TUFSBfwBcRofTbLpBP2omqy7EuJnKVw0baeUIcBZw2s19sab5S0Kl8RPjFFkjhHmJ4aeMwsGrW8dPFZrKVx8SUBjryCIeujMkalT0BBFLcENASgIab6NLmypOKqNriuY9MsJJYc6iTOqreGs_YTXltnSTzVhTBYmQO_cH-sBrMF-vH_XZ6nEoVbyNPLJW4TiAPT&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.85,
+            "timeFromPrevious": 24,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "59fdaad3-863b-4905-abb8-b119c7ecab47",
+            "dayNumber": 3,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — U Kroka",
+            "description": "\"Superbe lieu, cuisine gastronomique excellente et service impeccable !\"",
+            "locationName": "Prague 2, Tchéquie",
+            "latitude": 50.066612,
+            "longitude": 14.417964,
+            "orderIndex": 8,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.08708,14.431378",
+            "restaurant": {
+              "id": "serp-10644314521069821426",
+              "name": "U Kroka",
+              "address": "Prague 2, Tchéquie",
+              "latitude": 50.066612,
+              "longitude": 14.417964,
+              "rating": 4.7,
+              "reviewCount": 8000,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "tchèque"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Restaurant charmant, cuisine savoureuse, service rapide et prifessionnel\""
+              ],
+              "description": "\"Restaurant charmant, cuisine savoureuse, service rapide et prifessionnel\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=U%20Kroka%2C%20Prague%202%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "10644314521069821426",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-8635237407251853285",
+                "name": "Trattoria Da Adi",
+                "address": "Nusle, Prague 2, Tchéquie",
+                "latitude": 50.065796,
+                "longitude": 14.42519,
+                "rating": 4.8,
+                "reviewCount": 439,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "italienne"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le service est irréprochable, attentif et professionnel ;\""
+                ],
+                "description": "\"Le service est irréprochable, attentif et professionnel ;\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Trattoria%20Da%20Adi%2C%20Nusle%2C%20Prague%202%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/QSw_1VVwzLYSauqe0mMbIQRjBAL_4oUv2rRuOxNgBIs.jpeg"
+                ],
+                "googlePlaceId": "8635237407251853285",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-5766173190595042808",
+                "name": "OMG restaurant",
+                "address": "Myslíkova 2/26",
+                "latitude": 50.07791,
+                "longitude": 14.418378,
+                "rating": 4.9,
+                "reviewCount": 3300,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne expérience Cuisine élaborée et immersive !\""
+                ],
+                "description": "\"Très bonne expérience Cuisine élaborée et immersive !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=OMG%20restaurant%2C%20Mysl%C3%ADkova%202%2F26",
+                "photos": [
+                  "https://serpapi.com/searches/69986138f3fc7b78ce91ec3c/images/8K7m-6z8lt_OVB0gAIOrhRXBYgZsHoKJXULDYQNJ5Qg.jpeg"
+                ],
+                "googlePlaceId": "5766173190595042808",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 2.7,
+            "timeFromPrevious": 34,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=U%20Kroka%2C%20Prague%202%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=U%20Kroka%2C%20Prague%202%2C%20Tch%C3%A9quie",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Vieille Ville et Quartier Juif",
+        "dayNarrative": "Cette journée est dédiée à la découverte de la Vieille Ville, de son Horloge Astronomique emblématique, du Clementinum et de la Tour Poudrière, avec une immersion dans l'histoire et la culture de Prague.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.46,
+          "p95LegKm": 1.85,
+          "totalTravelMin": 94,
+          "totalLegKm": 7.18,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.2,
+          "mstLowerBoundKm": 5.96
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-01T13:17:16.475Z",
+        "items": [
+          {
+            "id": "eadbf742-f475-4039-9d8e-a9a6ff9cb031",
+            "dayNumber": 4,
+            "startTime": "07:45",
+            "endTime": "08:30",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Eska Restaurant and Bakery",
+            "description": "\"Ambiance top, superbe déco, petits dej’ très bon\"",
+            "locationName": "Pernerova 49, 186 00 Praha 8-Karlín, Tchéquie",
+            "latitude": 50.0913817,
+            "longitude": 14.4545739,
+            "orderIndex": 0,
+            "estimatedCost": 45,
+            "duration": 45,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.07403,14.430561",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ1UI14KOUC0cRusXMeIpR260",
+              "name": "Eska Restaurant and Bakery",
+              "address": "Pernerova 49, 186 00 Praha 8-Karlín, Tchéquie",
+              "latitude": 50.0913817,
+              "longitude": 14.4545739,
+              "rating": 4.5,
+              "reviewCount": 4955,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "bistro",
+                "bistro",
+                "café",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "website": "https://eska.ambi.cz/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "ChIJ1UI14KOUC0cRusXMeIpR260",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "19:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "19:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "19:00"
+                }
+              },
+              "distance": 0.49297053992160306,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ433WHqSUC0cR-hbWXbPMSuE",
+                "name": "Můj šálek kávy",
+                "address": "Křižíkova 386/105, 186 00 Praha 8-Karlín, Tchéquie",
+                "latitude": 50.0935309,
+                "longitude": 14.4550938,
+                "rating": 4.7,
+                "reviewCount": 4466,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café original et torréfacteur. Établissement urbain branché proposant une sélection de mets fraîchement cuisinés, ainsi que son propre café préparé avec soin."
+                ],
+                "description": "Café original et torréfacteur. Établissement urbain branché proposant une sélection de mets fraîchement cuisinés, ainsi que son propre café préparé avec soin.",
+                "phoneNumber": "+420 725 556 944",
+                "website": "http://www.mujsalekkavy.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=M%C5%AFj%20%C5%A1%C3%A1lek%20k%C3%A1vy%2C%20K%C5%99i%C5%BE%C3%ADkova%20386%2F105%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqsNQZ1DmeHNsOPVoI6z9KkALb51LjWBoMNt7lddy_lO_3NHJrbqHZosPfyL7MePBPvAH4HWMRnAZT2wduMjZ4Y5pM2C6jl6muK_pSefZE4jpEG9IMg8iR3YVLnNMEZEfybAGK-JvtLK_U=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ433WHqSUC0cR-hbWXbPMSuE",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.24184093939060627,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJV5l4iL-VC0cRIo6IRthmF2o",
+                "name": "Kavárna Tika",
+                "address": "Vnitroblok Karolina Plazza, Křižíkova 703, 186 00 Karlín, Tchéquie",
+                "latitude": 50.0937864,
+                "longitude": 14.4543463,
+                "rating": 4.7,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "fleuriste"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+420 774 888 483",
+                "website": "http://www.kavarnatika.cz/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Kav%C3%A1rna%20Tika%2C%20Vnitroblok%20Karolina%20Plazza%2C%20K%C5%99i%C5%BE%C3%ADkova%20703%2C%20186%2000%20Karl%C3%ADn%2C%20Tch%C3%A9quie",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweptlqal9Nh6x3CPxGR4BNaGrlnSTWVoaHr_9gwFkeQW2Tto8dcls1WGdAyo-sRtCW97zhbE_niqN8OFbSEz55rbqWd5Gs0sTxbE41TlQbuUcerZq04WCAM2UyNn4tn1zgVJUipO=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJV5l4iL-VC0cRIo6IRthmF2o",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "15:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "15:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.26788293119639145,
+                "walkingTime": 3
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Eska%20Restaurant%20and%20Bakery%2C%20Pernerova%2049%2C%20186%2000%20Praha%208-Karl%C3%ADn%2C%20Tch%C3%A9quie",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "04818135-4b8e-498b-bdbe-52b88f7e85c5",
+            "dayNumber": 4,
+            "startTime": "08:45",
+            "endTime": "09:45",
+            "type": "activity",
+            "title": "Franz Kafka - Tête Pivotante",
+            "description": "",
+            "locationName": "Franz Kafka - Tête Pivotante",
+            "latitude": 50.0816514,
+            "longitude": 14.420821,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=50.0816514,14.420821",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Franz%20Kafka%20-%20T%C3%AAte%20Pivotante&query_place_id=&center=50.0816514,14.420821",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV7YHgf3S9YjCuYoAapehMDqgU1LPMBwfYNLdL27h7HMgKfjzV_XhRbzgTgs3ROLCmdmetpLLktsAyGNgyE6-LF3okEtRnwLBgz66H67gwRwtr5X0IPU28DKA4uVfQUhrbdzQfedkWHUvcHsM0vVXuo1lnjWmv8TxOn5-roxfxm16x6FMxuFFVPW9m1XTFg7HZQBlUp2aV5s03VjZW59n4bA8LCVVQox6-wP-JgRQclq8CtGKEL_kOqCAL0--F9f-QEFyEZ0OVTxmQ6hSXz8NcDc4-1vaYD9n9R7VO6SUSpMo22jAN9AuPmBQnhasoZm-yKTw_uGx-G7PoRHOvOcOfXiHD5VMz1PWvsxUf7P0wJDoiZnZ7fVEEKi2Gb4tQeffzKzkGkhReQgw2Hfw7brPmVEx3_B931GzjvcpCz5t2iX42Pnsx3ITwzrK39AUiSZhTA7P9F_Zk5ltxYMZkXuqTBF3cMHUUhPBdJK7uuPT5CqIyLBP-CMDDCUW6tledCtvafyDHk3HoIwt7F3uXm5K183Mm7A1TYe-7kXDQqhoT2WGyi4WDebWdHW2T9YMYdKE6cPJe3&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.1,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "a2bd05a7-b240-4f30-a80d-90e2bc9deef8",
+            "dayNumber": 4,
+            "startTime": "10:00",
+            "endTime": "10:15",
+            "type": "checkout",
+            "title": "Check-out Romantic and atypical apartments in Prague's Montmartre",
+            "description": "Départ de l'hôtel",
+            "locationName": "Romantic and atypical apartments in Prague's Montmartre",
+            "latitude": 50.0862662,
+            "longitude": 14.450773,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "booking-11820377",
+              "name": "Romantic and atypical apartments in Prague's Montmartre",
+              "type": "hotel",
+              "address": "Cimburkova 275/20, 130 00 Praha 3-Žižkov, Czechia",
+              "latitude": 50.0862662,
+              "longitude": 14.450773,
+              "rating": 9.3,
+              "reviewCount": 74,
+              "stars": 3,
+              "pricePerNight": 52,
+              "totalPrice": 156,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/562593365.jpg?k=6aa9338f97cf590a0952d32d3b5cfd8948af8aadf8b43c2456da016cd2a165c5&o="
+              ],
+              "checkInTime": "17:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/cz/charming-vaulted-ceilings-amp-king-size-bed.html?checkin=2026-02-26&checkout=2026-03-01&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 2.2,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "transport-ret-4-fallback",
+            "dayNumber": 4,
+            "startTime": "10:45",
+            "endTime": "13:15",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "Prague → Berlin (estimation)",
+            "locationName": "Prague → Berlin",
+            "latitude": 50.0913817,
+            "longitude": 14.4545739,
+            "orderIndex": 3,
+            "duration": 150,
+            "estimatedCost": 11,
+            "bookingUrl": "https://www.omio.fr/bus/berlin/prague?departure_date=2026-03-01",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "Franz Kafka - Tête Pivotante",
+        "dayNarrative": "Pour ce dernier jour, profitez d'une visite culturelle légère avant de vous diriger vers votre départ, en passant par des œuvres d'art modernes et des vues panoramiques.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.64,
+          "p95LegKm": 2.64,
+          "totalTravelMin": 32,
+          "totalLegKm": 2.64,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 2.64
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Berlin",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 211,
+            "price": 11,
+            "co2": 8,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/berlin/prague?departure_date=2026-02-26"
+          }
+        ],
+        "totalDuration": 266,
+        "totalPrice": 11,
+        "totalCO2": 8,
+        "score": 6,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 1.7,
+          "co2Score": 6.4
+        },
+        "bookingUrl": "https://www.omio.fr/bus/berlin/prague?departure_date=2026-02-26",
+        "recommended": true,
+        "recommendationReason": "Option économique"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Berlin",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 240,
+            "price": 34,
+            "co2": 4,
+            "operator": "S3",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/berlin/prague?departure_date=2026-02-26"
+          }
+        ],
+        "totalDuration": 280,
+        "totalPrice": 34,
+        "totalCO2": 4,
+        "score": 3.5,
+        "scoreDetails": {
+          "priceScore": 0.4,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/berlin/prague?departure_date=2026-02-26",
+        "dataSource": "estimated",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Hackescher Markt",
+            "to": "Gare centrale de Berlin",
+            "departure": "2026-02-26T14:14:54.000Z",
+            "arrival": "2026-02-26T14:19:06.000Z",
+            "duration": 4,
+            "line": "S3"
+          },
+          {
+            "mode": "train",
+            "from": "Gare centrale de Berlin",
+            "to": "Prague-Holesovice",
+            "departure": "2026-02-26T14:28:00.000Z",
+            "arrival": "2026-02-26T18:15:00.000Z",
+            "duration": 227,
+            "line": "RJ 177"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Berlin",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 169,
+            "price": 35,
+            "co2": 15,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Berlin/Prague"
+          }
+        ],
+        "totalDuration": 199,
+        "totalPrice": 35,
+        "totalCO2": 15,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Berlin/Prague",
+        "dataSource": "estimated"
+      }
+    ],
+    "selectedTransport": {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Berlin",
+          "to": "Prague",
+          "fromCoords": {
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          "toCoords": {
+            "lat": 50.0755,
+            "lng": 14.4378
+          },
+          "duration": 211,
+          "price": 11,
+          "co2": 8,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/berlin/prague?departure_date=2026-02-26"
+        }
+      ],
+      "totalDuration": 266,
+      "totalPrice": 11,
+      "totalCO2": 8,
+      "score": 6,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 1.7,
+        "co2Score": 6.4
+      },
+      "bookingUrl": "https://www.omio.fr/bus/berlin/prague?departure_date=2026-02-26",
+      "recommended": true,
+      "recommendationReason": "Option économique"
+    },
+    "accommodation": {
+      "id": "booking-11820377",
+      "name": "Romantic and atypical apartments in Prague's Montmartre",
+      "type": "hotel",
+      "address": "Cimburkova 275/20, 130 00 Praha 3-Žižkov, Czechia",
+      "latitude": 50.0862662,
+      "longitude": 14.450773,
+      "rating": 9.3,
+      "reviewCount": 74,
+      "stars": 3,
+      "pricePerNight": 52,
+      "totalPrice": 156,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/562593365.jpg?k=6aa9338f97cf590a0952d32d3b5cfd8948af8aadf8b43c2456da016cd2a165c5&o="
+      ],
+      "checkInTime": "17:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/hotel/cz/charming-vaulted-ceilings-amp-king-size-bed.html?checkin=2026-02-26&checkout=2026-03-01&group_adults=2&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-11820377",
+        "name": "Romantic and atypical apartments in Prague's Montmartre",
+        "type": "hotel",
+        "address": "Cimburkova 275/20, 130 00 Praha 3-Žižkov, Czechia",
+        "latitude": 50.0862662,
+        "longitude": 14.450773,
+        "rating": 9.3,
+        "reviewCount": 74,
+        "stars": 3,
+        "pricePerNight": 52,
+        "totalPrice": 156,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/562593365.jpg?k=6aa9338f97cf590a0952d32d3b5cfd8948af8aadf8b43c2456da016cd2a165c5&o="
+        ],
+        "checkInTime": "17:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/cz/charming-vaulted-ceilings-amp-king-size-bed.html?checkin=2026-02-26&checkout=2026-03-01&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-11498741",
+        "name": "The Cloud One Prague",
+        "type": "hotel",
+        "address": "Hybernská 17, 110 00 Nové Město, Czechia",
+        "latitude": 50.0874679534635,
+        "longitude": 14.4353579323547,
+        "rating": 8.7,
+        "reviewCount": 5392,
+        "stars": 4,
+        "pricePerNight": 79,
+        "totalPrice": 237,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/818929749.jpg?k=022b6b1862155ffaa2ccd578ef3bff4191bbd5b6a008eb631420c43ad2ed7376&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/hotel/cz/the-cloud-one-prague.html?checkin=2026-02-26&checkout=2026-03-01&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-1189764",
+        "name": "Motel One Prague-Florentinum",
+        "type": "hotel",
+        "address": "Na Poříčí 1048/30, 110 00 Nové Město, Czechia",
+        "latitude": 50.0897575330436,
+        "longitude": 14.434366571164,
+        "rating": 8.7,
+        "reviewCount": 5072,
+        "stars": 3,
+        "pricePerNight": 74,
+        "totalPrice": 222,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/819453704.jpg?k=d756e1c7914070f9413d666e11c920ead2f3266b9368c6abbdb2736837a2886f&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Motel+One+Prague-Florentinum+Prague&checkin=2026-02-26&checkout=2026-03-01&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 472,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 208,
+      "food": 264,
+      "activities": 0,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 90,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 35,
+      "transportTips": "Achetez un pass 24h à 5€ pour tram/métro/bus. Prague est très piétonne, marchez le maximum pour découvrir gratuitement la vieille ville.",
+      "reasoning": "Budget moyen de 281€/personne/jour. Airbnb avec cuisine permet d'économiser ~30€/jour via petits-déjeuners et certains déjeuners (importantes économies). Logement 90€/nuit (45€ × 2) reste raisonnable. Stratégie mixte pour repas: self-catering le matin et midi alternativement, restaurants authentiques et bon marché le soir (10-15€/personne). Prague offre une gastronomie excellente à bas coût - privilégier restaurants locaux plutôt que cuisiner. Activités: mélange musées payants (8€ entrée) et découvertes gratuites (architecture, ponts, parcs). Budget 35€/jour/personne pour culture permet ~4 musées + visites guidées gratuites.",
+      "maxPricePerActivity": 80
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: prague-culture-4d",
+    "   Berlin → Prague (4j)",
+    "   family_without_kids (2p) | comfort | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Prague\", ll=\"@50.0755,14.4378,14z\", gl=\"us\"",
+    "[Weather] 4 days fetched for 2026-02-26 → 2026-03-01",
+    "[Google Places] ✅ 29 attractions found for Prague",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Hotels] Disponibilité live: 7/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (323ms)",
+    "[Pipeline V2] Resolving GPS for 15 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/15 activities",
+    "[Pipeline V2] Injected 1 curated must-see attractions for \"Prague\" from local database",
+    "[Pipeline V2]   → Pont Charles, Château de Prague, Place de la Vieille-Ville",
+    "[Pipeline V2] Step 1: All data fetched in 37440ms",
+    "[Pipeline V2]   Activities: 29 Google + 14 SerpAPI + 5 Overpass + 15 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 7 | Transport options: 3",
+    "[Pipeline V2 LLM] Step 1 done in 37440ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Romantic and atypical apartments in Prague's Montmartre\" (9.3★, €52/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 66 activities → 38 after dedup (dropped 28)",
+    "[Pipeline V2 LLM] Step 2: Selected 24 activities (0 must-sees, 24 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 50 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 688 pairs",
+    "[Pipeline V2 LLM] Step 2: 24 activities, 18 restaurants, 688 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 16ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 25671 in + 2390 out, ~$0.0053, 18004ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Arrivée et Cœur Historique\",\n      \"narrative\": \"Après le check-in, cette première journée vous plonge directement dans l'ambiance de la Vieil...",
+    "[Pipeline V2 LLM] Enrichment: filled 105min gap on day 2 with \"Zoo de Prague\"",
+    "[Pipeline V2 LLM] Enrichment: filled 90min gap on day 3 with \"Vyšehrad\"",
+    "[Pipeline V2 LLM] Enrichment complete: added 2 activities",
+    "[Pipeline V2 LLM] Plan: 4 days, 15 activities, 8 meals",
+    "[Pipeline V2 LLM] Step 3 done in 18006ms — 4 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 24 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 4 days with 23 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 1990ms",
+    "[Pipeline V2 LLM] Step 4 done in 1990ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 7 restaurants swapped, 0 kept as fallback (2191ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 16 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 3296ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 93/100",
+    "  📦 Complétude: 21/25",
+    "  ⏱️  Rythme:     24/25",
+    "  🗺️  Géo:        23/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 4: transport retour manquant",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 4: transport retour inséré (fallback)",
+    "  🔧 Jour 1: thème régénéré \"Arrivée et Cœur Historique\" → \"Tour de transmission de Žižkov et Mémorial national de Vítkov\"",
+    "  🔧 Jour 4: thème régénéré \"Art Moderne et Départ\" → \"Franz Kafka - Tête Pivotante\"",
+    "[Pipeline V2 LLM] Step 5 done in 2ms — score: 93/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 62942ms ==="
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Promenade  à Prague avec votre ami local, Prague\": 1363.9km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite  à pied: Du pont Charles au château de Prague, Prague\": 958.3km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite de la bière artisanale de Prague, Prague\": 1192.1km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Prague: Visite  de la vieille ville avec prise en charge à l'hôtel, Prague\": 882.8km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Kutná Hora, église d'Os et village populaire Excursion d'une journée en petit groupe, Prague\": 62.1km de la destination (max 30km)"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 5801 (line 158 column 4)",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Kutná Hora, église d'Os et village populaire Excursion d'une journée en petit groupe, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Vue imprenable sur la Suisse bohémienne: Porte, Tisa Rocks, Bastei, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite  à pied: Du pont Charles au château de Prague, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Prague: Visite  de la vieille ville avec prise en charge à l'hôtel, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Český Krumlov & Holašovice Visite d'une journée en petit groupe du village UNESCO, Prague\" à Prague — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 62942,
+  "generatedAt": "2026-02-20T13:27:20.730Z",
+  "success": true
+}

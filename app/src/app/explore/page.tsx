@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import {
@@ -23,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { RecommendedUsers } from '@/components/social/RecommendedUsers';
@@ -186,7 +188,7 @@ export default function ExplorePage() {
               onClick={() => { hapticImpactLight(); setFeedTab('discover'); }}
               className={cn(
                 'text-[11px] font-black uppercase tracking-widest transition-all pb-2 border-b-2 relative',
-                feedTab === 'discover' ? 'text-gold border-gold' : 'text-white/40 border-transparent hover:text-white/70'
+                feedTab === 'discover' ? 'text-gold border-gold' : 'text-white/60 border-transparent hover:text-white/70'
               )}
             >
               Découvrir
@@ -196,7 +198,7 @@ export default function ExplorePage() {
                 onClick={() => { hapticImpactLight(); setFeedTab('following'); }}
                 className={cn(
                   'text-[11px] font-black uppercase tracking-widest transition-all pb-2 border-b-2 relative',
-                  feedTab === 'following' ? 'text-gold border-gold' : 'text-white/40 border-transparent hover:text-white/70'
+                  feedTab === 'following' ? 'text-gold border-gold' : 'text-white/60 border-transparent hover:text-white/70'
                 )}
               >
                 Suivis
@@ -215,9 +217,25 @@ export default function ExplorePage() {
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scrollbar-hide" ref={containerRef}>
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-32 gap-4">
-              <Loader2 className="h-10 w-10 animate-spin text-gold" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">Recherche d'horizons...</p>
+            <div className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-[2rem] overflow-hidden border border-white/5">
+                  <Skeleton className="h-56 w-full rounded-none" />
+                  <div className="p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-9 w-16 rounded-xl" />
+                      <Skeleton className="h-9 w-9 rounded-xl" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : trips.length === 0 ? (
             <div className="text-center py-32">
@@ -233,13 +251,12 @@ export default function ExplorePage() {
             <>
               <div className="space-y-6">
                 {trips.map((trip, idx) => (
+                  <Link key={trip.id} href={`/trip/${trip.id}`} onClick={() => hapticImpactLight()} className="block">
                   <motion.div
-                    key={trip.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
                     className="group relative cursor-pointer"
-                    onClick={() => { hapticImpactLight(); router.push(`/trip/${trip.id}`); }}
                   >
                     <div className="relative overflow-hidden rounded-[2rem] bg-[#0A1628]/40 border border-white/5 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:shadow-[0_15px_40px_rgba(197,160,89,0.15)] group-hover:border-gold/30 transition-all duration-500 active:scale-[0.98]">
                       {/* Hero Image Section */}
@@ -303,6 +320,7 @@ export default function ExplorePage() {
                       </div>
                     </div>
                   </motion.div>
+                  </Link>
                 ))}
               </div>
               <div ref={loadMoreRef} className="py-10 flex justify-center">

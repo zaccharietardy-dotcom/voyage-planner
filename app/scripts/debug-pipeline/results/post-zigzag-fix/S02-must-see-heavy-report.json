@@ -1,0 +1,339 @@
+{
+  "tripId": "3d3fec7e-52f4-4e38-9e23-7c80f1f1fab3",
+  "scenarioId": "must-see-heavy",
+  "generatedAt": "2026-03-19T23:02:46.685Z",
+  "destination": "Rome",
+  "summary": {
+    "totalIssues": 12,
+    "critical": 1,
+    "warning": 7,
+    "info": 4,
+    "score": 94,
+    "weightedScore": 94
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 90,
+      "critical": 1,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 10
+    },
+    "geography": {
+      "score": 81,
+      "critical": 0,
+      "warning": 3,
+      "info": 0,
+      "totalIssues": 3,
+      "weightedPenalty": 18.9
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 94,
+      "critical": 0,
+      "warning": 1,
+      "info": 3,
+      "totalIssues": 4,
+      "weightedPenalty": 5.6
+    },
+    "rhythm": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "relevance": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 21.6,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 3: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 4: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 5: \"basilique Saint-Pierre\" (fin 17:50) chevauche \"Rome → Paris\" ",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 5: \"basilique Saint-Pierre\" (fin 17:50) chevauche \"Rome → Paris\" (début 17:00)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1: seulement 55min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: seulement 55min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ]
+    },
+    {
+      "key": "relevance:Tous les must-see présents (5/5)",
+      "category": "relevance",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Tous les must-see présents (5/5)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 5: \"basilique Saint-Pierre\" (fin 17:50) chevauche \"Rome → Paris\" (début 17:00)",
+        "dayNumber": 5,
+        "itemTitle": "basilique Saint-Pierre",
+        "details": {
+          "currentEnd": "17:50",
+          "nextStart": "17:00",
+          "overlapMinutes": 50
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.3,
+          "totalLegKm": 5.61
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.38,
+          "totalLegKm": 3.05
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 4,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.58,
+          "totalLegKm": 3.75
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: seulement 55min de temps libre — pas de pause",
+        "dayNumber": 1,
+        "details": {
+          "freeMinutes": 55,
+          "occupiedMinutes": 665
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "info",
+        "category": "relevance",
+        "message": "Tous les must-see présents (5/5)"
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 5,
+    "totalItems": 43,
+    "activitiesCount": 14,
+    "restaurantsCount": 14,
+    "avgItemsPerDay": 8.6,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

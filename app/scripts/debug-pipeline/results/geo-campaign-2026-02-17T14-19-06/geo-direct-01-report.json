@@ -1,0 +1,142 @@
+{
+  "tripId": "f4e99851-9325-46ec-bf89-04e836740d56",
+  "scenarioId": "geo-direct-01",
+  "generatedAt": "2026-02-17T14:20:22.799Z",
+  "destination": "Berlin",
+  "summary": {
+    "totalIssues": 2,
+    "critical": 0,
+    "warning": 1,
+    "info": 1,
+    "score": 99,
+    "weightedScore": 99
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "schedule:Jour 2: dîner \"Dîner — Restaurant Dae Mon\" à 14:15 — trop tôt (attendu",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: dîner \"Dîner — Restaurant Dae Mon\" à 14:15 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: dîner \"Dîner — Restaurant Dae Mon\" à 14:15 — trop tôt (attendu après 18h00)",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Restaurant Dae Mon"
+      }
+    ],
+    "geography": [],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 12,
+    "activitiesCount": 3,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 4,
+    "totalEstimatedCost": 236,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

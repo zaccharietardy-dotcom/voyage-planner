@@ -114,7 +114,7 @@ export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
                 ${isSelected
                   ? 'bg-gold/20 border-gold/50 text-gold border'
                   : selectedId
-                    ? 'bg-white/3 border-white/5 text-white/30 border'
+                    ? 'bg-white/3 border-white/5 text-white/50 border'
                     : 'bg-white/5 border-white/10 text-white border hover:bg-white/10 hover:border-white/20 active:scale-[0.98]'
                 }
               `}
@@ -127,7 +127,7 @@ export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
                   {option.label}
                 </span>
                 {option.subtitle && (
-                  <span className="text-xs text-white/40 block mt-0.5">
+                  <span className="text-xs text-white/60 block mt-0.5">
                     {option.subtitle}
                   </span>
                 )}

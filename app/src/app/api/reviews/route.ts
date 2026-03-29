@@ -1,6 +1,7 @@
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 function getServiceClient() {
   return createClient(
@@ -150,6 +151,12 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    const rateLimitKey = `reviews:${user.id}`;
+    const { allowed } = checkRateLimit(rateLimitKey, { windowMs: 3_600_000, maxRequests: 5 });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
     const body = await request.json();

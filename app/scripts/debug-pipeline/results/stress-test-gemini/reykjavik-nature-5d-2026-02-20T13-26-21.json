@@ -1,0 +1,2270 @@
+{
+  "scenarioId": "reykjavik-nature-5d",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Reykjavik",
+    "startDate": "2026-02-28T13:17:16.475Z",
+    "durationDays": 5,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "economic",
+    "activities": [
+      "nature",
+      "adventure"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Blue Lagoon, Golden Circle",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Reykjavik",
+        "days": 5
+      }
+    ]
+  },
+  "trip": {
+    "id": "d3f4cdbd-3e0f-4555-9bb8-ef14624813ce",
+    "createdAt": "2026-02-20T13:25:58.670Z",
+    "updatedAt": "2026-02-20T13:25:58.670Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Reykjavik",
+      "startDate": "2026-02-28T13:17:16.475Z",
+      "durationDays": 5,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "economic",
+      "activities": [
+        "nature",
+        "adventure"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Blue Lagoon, Golden Circle",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Reykjavik",
+          "days": 5
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-28T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "12:30",
+            "endTime": "15:00",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Paris → Reykjavik (estimation)",
+            "locationName": "Paris → Reykjavik",
+            "latitude": 64.1460424,
+            "longitude": -21.9276384,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 227,
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "e042075c-050e-48a6-9b13-aa35296ca7ba",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in Reykjavik Residence Apartment Hotel",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Reykjavik Residence Apartment Hotel",
+            "latitude": 64.1460424,
+            "longitude": -21.9276384,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "ta-hotel-1966925",
+              "name": "Reykjavik Residence Apartment Hotel",
+              "type": "apartment",
+              "address": "Reykjavik",
+              "latitude": 64.1460424,
+              "longitude": -21.9276384,
+              "rating": 4.8,
+              "reviewCount": 3091,
+              "pricePerNight": 0,
+              "totalPrice": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/27/d3/ae/caption.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://cityhub.com/reykjavik/?utm_source=google_my_business_rkv&utm_medium=organic",
+              "description": "Miðborg • Prix via Booking.com • Disponibilité confirmée"
+            },
+            "bookingUrl": "https://cityhub.com/reykjavik/?utm_source=google_my_business_rkv&utm_medium=organic"
+          },
+          {
+            "id": "7f515166-cfce-44be-a66b-0722c4d89f91",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Hallgrímskirkja",
+            "description": "Hallgrímskirkja is a Protestant Lutheran parish church in Reykjavík, Iceland.  At 74.",
+            "locationName": "Hallgrímskirkja",
+            "latitude": 64.1420229,
+            "longitude": -21.9265493,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1420229,-21.9265493",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Hallgr%C3%ADmskirkja&query_place_id=&center=64.1420229,-21.9265493",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXNzX2umHf_f3sWq5AXY_VQAiSRW98kRIW9UBW4k4GxPHuWw9xm6FWufZybQrvLnzIwrKNuXTrnR781MWf5PHVz4J1cePLgmiprFY4nosjOeijFAQJYpvhocSKfNkFbF9wbM2pmQHO8-47hDLMm7IQJ-zikyGmizShr6bYfi-44EnEYHm7LdyMlR9WB-0guQ8dtxFCSe7mZ07yg1RJCVKfIPKrH5v7poMkFMkzw46xr5VbHZtlbH4tbAchtUEZCwkzRFRdr0D5PQiiM4IU5frw180_A85O-8k95XEjoiJmx6eKwLGVK7Qzq3A_oavhZI7vMXKXJameRuxOnWlxGuFsPA8XxZv0Pjs6kexegltv-5TnAiCb9mGNNbyrH0dJNZg5BQDmz5Xu7u7vL7AUafvkOnuEkjdXFDpzwfgm3sAc5Mgv-g9-TNxw5sX15iqFpW09OnfVsdmMQ2-xlXo5DtSqSWqomTHqavSiwJbjq17sh2IQ5P1zzFuui3PJD68BDxurfqR2gEGU8lvVoyvuQsLI30p51H-0sFX0jUxKCUSSX-DP7pU3wtBI_r5AfQc8Frc5vxQrQ7yxPfg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.45,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "ddd79ded-7120-4589-bc04-80bcb23f5941",
+            "dayNumber": 1,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Skólavörðustígur Rainbow Street",
+            "description": "",
+            "locationName": "Skólavörðustígur Rainbow Street",
+            "latitude": 64.146022,
+            "longitude": -21.9325495,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.146022,-21.9325495",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sk%C3%B3lav%C3%B6r%C3%B0ust%C3%ADgur%20Rainbow%20Street&query_place_id=&center=64.146022,-21.9325495",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfULJBf8WDZXIm8IQD8rbMX-aEn79ERUiRGaMTnQOJYPaCCoVWflPgifgDqufXCaPA5q6Ln4p0lPoFTemfHnNhbfItLC6Ow4OAAQM0uIjzYhI2kLW48CGRN32de5H8u6g_8Xnavg6ReYXYlIrj39DZlCWWoxK9w9GsRliuOk7MiykLLGHFO-LkAyLrd7E83J7bsQBgqjn050VlKM9ZVn1qHoY3QHAKnZ4x1guAo5wMxU7FyOZ2Za7iT8MPqqglijXvht5_P9FmwkZAqkT55kNwt0T_k-gybYw90qywCfQ-MI-7bORlQUIJdWNOOJVxMhmCm0xGVO4qI0IKjX3mkIEtP0dSKCfOy9POkldLYG5-QbawFmKWqeiOm74Pz7PKkXwyAFU6hzmazq5np-Wk9VXUThafHA4hiPBrW33hQmCFkiGntmFbTxHczXCwjnTNAe3bQV5tem-cXAC2MxNSnJh3j6SxIZJaIxDkmXZwkZyOM6Yoxfe8Y1rCggBZwh7At4d_uGiWLslVwR5Ax5vFL7pbGGTRVQTfXPet5l78tc1-HCIUI1gRIii6vPfo0Tmuo2anVdujXG&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.53,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "5d08fa44-30a2-4be2-ae9f-a8cd623f7a6b",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Le Voyageur du Soleil",
+            "description": "Les Feuilles d'Automne is a collection of poems written by Victor Hugo, and published in 1831.  It contains a multitude of poems, six of which are especially known as Soleils Couchants.",
+            "locationName": "Le Voyageur du Soleil",
+            "latitude": 64.1476306,
+            "longitude": -21.9222846,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1476306,-21.9222846",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Voyageur%20du%20Soleil&query_place_id=&center=64.1476306,-21.9222846",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW5imwggoO3_9V57-7Bic6wKnMhS-gcde-J8O0uN-lwH42pEQjoaRTWPL8sSg3rI8m5NPTORMaJZShowYisPfCwAWlQHECg8h8HTct6A-2WosXgyQ2ocLccDsL-v8ndIbJseWFZvqk7rb1aeX0wZ8hRK0iYiYs9A_C0VnKSZbKwroN10TPQyDIehs1h1OQdWspdlYGSXlMqzl-5AhCOwYQtpIs0NwvxyxOQPvjDp9fXF0RmviEPfQt0fVfx3HkLt-dnp0AzI1GxBwbsCKYUJCZrUvt51pr91MZuqOZJkP1ORXSEZkyRel5qSZeTBxtjQ5YffPafvVMNmkb7GnolEEAXW-N8mKHSHJOvDBrCSRr-MVQW4rjiHznHG6i6WcKdlsVpopc3jRCiEgFs1ftiWfaPX5o-xl0mtaIsgNeIs8Xi0IWR4pvRrzHSeqxgenhKuuEAY2MC0Py3UFgopr3gQB4XBq4Y02hj8v-mB5C0rMp_r86vAGA8GryAJeVtWd4-JQmZhM0duY9dPizzY8FPm72i1GGbt7uU4ILvruBl_jyUu3zwivafhptTqRuMJ3aXmpy5wa5cvUj-KA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.53,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          }
+        ],
+        "theme": "Hallgrímskirkja et Skólavörðustígur Rainbow Street",
+        "dayNarrative": "Après le check-in, explorez les icônes du centre de Reykjavik avec une balade colorée et une vue panoramique, avant de savourer un dîner local.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.53,
+          "p95LegKm": 0.53,
+          "totalTravelMin": 14,
+          "totalLegKm": 1.06,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 1.06
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-01T13:17:16.475Z",
+        "items": [
+          {
+            "id": "d0240951-5fb6-4165-935c-862aa12f335b",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Old Iceland",
+            "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+            "locationName": "Laugavegur 72",
+            "latitude": 64.143906,
+            "longitude": -21.920366,
+            "orderIndex": 0,
+            "estimatedCost": 36,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.143906,-21.920366",
+            "restaurant": {
+              "id": "serp-12128553188736262016",
+              "name": "Old Iceland",
+              "address": "Laugavegur 72",
+              "latitude": 64.143906,
+              "longitude": -21.920366,
+              "rating": 4.8,
+              "reviewCount": 2800,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "islandaise"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Bonne cuisine, très bon service, personnel compétent !\""
+              ],
+              "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Old%20Iceland%2C%20Laugavegur%2072",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/Thp6hrVEJUAuLLjY4FyiWrcSafL0oII8UG1-N1nOlHk.jpeg"
+              ],
+              "googlePlaceId": "12128553188736262016",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "name": "Hygge Coffee & Micro Bakery",
+                "address": "Barónsstígur 6, 101 Reykjavík, Islande",
+                "latitude": 64.14417159999999,
+                "longitude": -21.919022299999998,
+                "rating": 4.7,
+                "reviewCount": 91,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "http://hyggebakery.is/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hygge%20Coffee%20%26%20Micro%20Bakery%2C%20Bar%C3%B3nsst%C3%ADgur%206%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerhBhEWaGRwOGhFxZSKqAmAxyxiKAVL68u9SvlcMxWJ3xfPyahLuBMN7LaTJ_hTfAl5jt_M_sCYgQ2oLT19XAjilGrWSC5ch9RGlpxtXAZpto9uOOdYReejXHZb8Q8IZGPlPRaA2_UDH5Y=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.0715408591744704,
+                "walkingTime": 1
+              },
+              {
+                "id": "serp-nearby-ChIJMSbHo8501kgR8P79owdsjgM",
+                "name": "Emilie and the Cool Kids",
+                "address": "Barónsstígur 9, 101 Reykjavík, Islande",
+                "latitude": 64.144196,
+                "longitude": -21.9183861,
+                "rating": 4.7,
+                "reviewCount": 809,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+354 571 5887",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Emilie%20and%20the%20Cool%20Kids%2C%20Bar%C3%B3nsst%C3%ADgur%209%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwergdd0A7CO6fABosvY6Z6GWUWcTHGCXY1VP9OTIJ1cBu-O1bMZQeNADc9jaX16iPvFrr48d6XFFn3pU9lq-E0ATPQc_TOYOazvq3oUBzOuDzQWNZ7rwZsBH_GrxZDxI_bNoc0I=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJMSbHo8501kgR8P79owdsjgM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.10128223937894017,
+                "walkingTime": 1
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "7fc7a0f3-34a2-4a44-9dc4-96f971fc9214",
+            "dayNumber": 2,
+            "startTime": "09:15",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Perlan",
+            "description": "Perlan is a natural history museum in Reykjavík, Iceland.  It is situated on the top of Öskjuhlíð hill.",
+            "locationName": "Perlan",
+            "latitude": 64.1292528,
+            "longitude": -21.9188709,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1292528,-21.9188709",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Perlan&query_place_id=&center=64.1292528,-21.9188709",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUT3RGRB2VxpsoK8d_dveYRO5hBYYln_Atxnqh4GXrRBrJrR1axXYuoBCrdD1dP5876W5SRm4ZpAXlw16Dr0CNABk5vYPGJSukhv4R3r1GzpXGv5e9hao2mgCxi23fzQfbzxhZsIAkueS4xpjeXOAfH4AEMwvae7XnOEemJ5hnJdPHJ6Jo2ww7GPoDv3Xd4i9Mn0G2nCVbB6N8XozuGb3LsQisEoXGu58WYA9ZW7L4MGmtzVOuRWvQyZgQ4sw9F4J252x-ZrDGRUyiR8GTcG7njSvcMJj2a-yfUtgCvYzoa7dhlCTMjbyiWE3koK3QlJUGLBsd6RZw3vdqLiJKa19lKvyKSsRdx3kDC7oHHKBVBwaAaor5SV_3Vrn5Oi3TRlCURBFNoupKg22vJhgU6-znIVd8tro1O60LxGhY71k0P9sF-KuBHcsvqBNUejjubEj-RHZ8mcWon1S7f_LEVVTnS7JsnQw4F_W1CJth2A1-Rt-p0piQ3B_a-UFF6G6mUnS8pTEQFU1Buko5z_D3lVrt2DRIgUKtDXMOUCmvePciQy1JJjHmnU8A-QJR_9buFysYqvRS1&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.63,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "2de80c32-abe0-41cf-8bcb-38c164b65822",
+            "dayNumber": 2,
+            "startTime": "11:30",
+            "endTime": "13:30",
+            "type": "activity",
+            "title": "The Settlement Exhibition",
+            "description": "The Settlement Exhibition Reykjavík 871±2 is an exhibition on the settlement of Reykjavík, Iceland.  Created by the Reykjavik City Museum, the exhibition is based on the archaeological excavation of t",
+            "locationName": "The Settlement Exhibition",
+            "latitude": 64.14739420000001,
+            "longitude": -21.942473,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.14739420000001,-21.942473",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=The%20Settlement%20Exhibition&query_place_id=&center=64.14739420000001,-21.942473",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWsUAJ65o5jtNNLkOFQkyN5WSyXx8qYlLD4pm3Z-6qRitKd7fAyXASCZQTO5pEoTEeqDV36qCgvnUJuRAKK65JVAVNXrSFth65rJtpiQ7zCSGKiwWEd20-eTfzmI6RHPcAEmi38_m0lM5cvs6mCcTPjUV2dLT1zytYTaMxNtgSCaBg6nR2gxUhds2p4o8kgEFqvOY4GqY2ypr9QC9FONIKNf5Dy4VRchr3uN50eBGnuiqTAsKGUf6AZZ3ux5rlxHxZIDvJso1fMM1-_UiqNeeRAcAb9pYSPxASz19KTV410w1RYgyXoi8IF112-8BCYQUle1Lk67D1ZC2lDJSqsZOa5AIKP_QPYNfVXneW8cXUF-8JSEPjL0TMW0dmbKV2LC3xYZPt6-obQeMx2R1jg7OOYVGXmIsj-y60J44VkomRZWzmVfn7FM7Y5ZKTQywNR-hNxGQVZohbAbwBY_aCAYV26o5SO1um1_Y1w2y35QQTUrvLw1hjH5ArDUeKkSz7PD5VG4vUNT03S1VdtMDivVTBLab3s5uJTxARNkpF9AehSImK3JNgua6rG8ienTr4oyCSsIiQY&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.32,
+            "timeFromPrevious": 29,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "b6942cdb-44f8-4e04-a415-8d5354dd3f9e",
+            "dayNumber": 2,
+            "startTime": "13:45",
+            "endTime": "15:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Icelandic Street Food",
+            "description": "\"Très bonnes soupes, service sympa et souriant !\"",
+            "locationName": "Lækjargata 8",
+            "latitude": 64.14646,
+            "longitude": -21.93801,
+            "orderIndex": 3,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.14646,-21.93801",
+            "restaurant": {
+              "id": "serp-5250831366143188047",
+              "name": "Icelandic Street Food",
+              "address": "Lækjargata 8",
+              "latitude": 64.14646,
+              "longitude": -21.93801,
+              "rating": 4.7,
+              "reviewCount": 6400,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "islandaise"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bonnes soupes, service sympa et souriant !\""
+              ],
+              "description": "\"Très bonnes soupes, service sympa et souriant !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Icelandic%20Street%20Food%2C%20L%C3%A6kjargata%208",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/ksylE0gzbWVCItcyEQrDmnB9myd_ScmWMl7FJPN3Cgo.jpeg"
+              ],
+              "googlePlaceId": "5250831366143188047",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12292033316742520567",
+                "name": "Messinn",
+                "address": "Lækjargata 6",
+                "latitude": 64.14658,
+                "longitude": -21.937727,
+                "rating": 4.6,
+                "reviewCount": 3400,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisson au top, plats délicieux et service très sympathique.\""
+                ],
+                "description": "\"Cuisson au top, plats délicieux et service très sympathique.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Messinn%2C%20L%C3%A6kjargata%206",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/P-XB8TKMQ0aBw5zypjAl8rqcFdm6j3WZ2nBWJhoANec.jpeg"
+                ],
+                "googlePlaceId": "12292033316742520567",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-6081284947285632981",
+                "name": "Grillmarkaðurinn",
+                "address": "Lækjargata 2a",
+                "latitude": 64.14717,
+                "longitude": -21.937471,
+                "rating": 4.6,
+                "reviewCount": 2700,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "islandaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Nous avons choisi le menu 6 plats et ce fut une délicieuse expérience.\""
+                ],
+                "description": "\"Nous avons choisi le menu 6 plats et ce fut une délicieuse expérience.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Grillmarka%C3%B0urinn%2C%20L%C3%A6kjargata%202a",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/-qVBG4Zbk92lH0dU3XOg0BUpLM7tUMICGWPpj9mb_ZQ.jpeg"
+                ],
+                "googlePlaceId": "6081284947285632981",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.24,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "666991cc-99d4-4f30-9b78-59b4f2d7b4f4",
+            "dayNumber": 2,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Sky Lagoon",
+            "description": "Sky Lagoon is a geothermal spa in southwestern Iceland.",
+            "locationName": "Sky Lagoon",
+            "latitude": 64.1164891,
+            "longitude": -21.9462908,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1164891,-21.9462908",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sky%20Lagoon&query_place_id=&center=64.1164891,-21.9462908",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW0GRno8c4OJNaz4rHmHgyHkvVfbBLkoYhr1JkqL2naSWHNPTi06xv0VCdHyPB6m3udXLS1dwPiLDlK0vwfN8K-ubOgWNZWt19LPwwPnj_vWmorFKDcPYvYaov4rl9qhWYw3g4KAIItxynX-FW6o33g9dPSWdAr72gGVwIbyj1MLLgdHdW0Vu-25qalxzKNH2CO4pPRlXfpL2zLyObmfuWcrKAXPSnDg0lR5IHjiR47-mNro-A5yxmwF1oLeyMdHUQus2jEhELI_SKPHXVTG8xEeTBOSOyBb6Lufqxp7skjFO3MkNO3E35tK02mQdvitlAyK09MrVVusOXoovwl13Gmd7-c6R0gZHQp_e897XYL29yTWxSuzrDuvpgh5CulequdzpGtG-cok5X6GatolRIwzHhWQaUKYTxMOpSGvJDv9DjqCBwufYavLEWGsUyaSL12EF6A3sNq1bPY1hmgYpZsXgEWsC8uC193dEXTNlxHkc1zUIfvSKccTkRVF01LgY93NH3jLMt206XjM51rVtt1SQFVQE-cs8MH2W6mUnZhnWifjyS7-ryWQKou9O3mZmSPyI4e&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 3.36,
+            "timeFromPrevious": 42,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "8ff21f22-c277-4154-b3ca-e2e6f444ec80",
+            "dayNumber": 2,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Parc national de Glacier",
+            "description": "Écrins National Park is a French national park located in the southeastern part of France in the Dauphiné Alps south of Grenoble and north of Gap, shared between the departments of Isère and Hautes-Al",
+            "locationName": "Parc national de Glacier",
+            "latitude": 48.756063,
+            "longitude": -113.7797316,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.756063,-113.7797316",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20national%20de%20Glacier&query_place_id=&center=48.756063,-113.7797316",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVGTp_q-0rOYfgJZFmhn3iuDRA56YEA1RCmMuygCz-9eKfjCB2XX1lhlOta-AT4nelEVfxeJzoimMd9QtXOMBjgKWAX-HD5t-nfIvad4G0XAe0QqGxoYlZO6RySzdhcP2MgqmHg-SAUjHg2C3kjEjKdYZH_rdpVnklCYGz_UQNtrO4GjEzIhCV4T32z1yHx0L6q8awrY_p6TW76Jtu2cecVO1e8zchzPzrt6HPbnH2_Fp9gyBCP5IUkwgrPO4daXdgcOV2g6dWpsX9H_DPNAyjMAX8YLuks8aa7OvJt7TobyUAy13LxKVAkXzhqPz0f-z2qsnlfZEorbBNd1MagLFY6PHgOYB73_RJRpQGBWgTjeKJTAXNdrQVycHjCpEYbyYT4JNBT-XOpHyO__5eEsTfh9ztLg3DWYKRrClPV-LKgLwqAHCSXSIwhWpyOZS5667qrBiJe8V9Vj3lB5bCUZExWgDsXzsdpBmPcBdwKUMh84GuX2XrWxuoJ8fL86mba7pwcL6j2GHpWG9TG0idupM_n9gJWdtWURwApBqIOCurq1basqqScHfnRQPiLO4edVcCxiw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 5353.27,
+            "timeFromPrevious": 66916,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "b6531387-3349-4880-82e0-5cc76d9827a0",
+            "dayNumber": 2,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Sæta Svínið Gastropub",
+            "description": "\"Excellent repas dans une ambiance conviviale et avec un bon service.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Hafnarstræti 1-3",
+            "latitude": 64.14849,
+            "longitude": -21.94123,
+            "orderIndex": 6,
+            "estimatedCost": 36,
+            "duration": 75,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.14849,-21.94123",
+            "restaurant": {
+              "id": "serp-15318057651241659090",
+              "name": "Sæta Svínið Gastropub",
+              "address": "Hafnarstræti 1-3",
+              "latitude": 64.14849,
+              "longitude": -21.94123,
+              "rating": 4.6,
+              "reviewCount": 1800,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Excellent repas dans une ambiance conviviale et avec un bon service.\""
+              ],
+              "description": "\"Excellent repas dans une ambiance conviviale et avec un bon service.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=S%C3%A6ta%20Sv%C3%ADni%C3%B0%20Gastropub%2C%20Hafnarstr%C3%A6ti%201-3",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/lkIRjj4nOQSlJ7lUlBCQzdwpYn913arO-5Odrn8liiM.jpeg"
+              ],
+              "googlePlaceId": "15318057651241659090",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-7866405964167577092",
+                "name": "Vegan World Peace",
+                "address": "Aðalstræti 2",
+                "latitude": 64.1485,
+                "longitude": -21.941666,
+                "rating": 4.8,
+                "reviewCount": 490,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Délicieux... peut-être un des 10 meilleurs restaurant vegan sur terre.\""
+                ],
+                "description": "\"Délicieux... peut-être un des 10 meilleurs restaurant vegan sur terre.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Vegan%20World%20Peace%2C%20A%C3%B0alstr%C3%A6ti%202",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/aB1tM9ClLw9-L0NiGvs8Sb5v_B-O2hFFzN4aSRhATj4.jpeg"
+                ],
+                "googlePlaceId": "7866405964167577092",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-5724393451963055446",
+                "name": "Fish Company",
+                "address": "Vesturgata 2a, Grófartorg",
+                "latitude": 64.14894,
+                "longitude": -21.941492,
+                "rating": 4.7,
+                "reviewCount": 1700,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Service très agréable, cuisine délicieuse, poissons excellents.\""
+                ],
+                "description": "\"Service très agréable, cuisine délicieuse, poissons excellents.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Fish%20Company%2C%20Vesturgata%202a%2C%20Gr%C3%B3fartorg",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/yiYT7oG_Bnmt2llgG_DadfvTenAyqpKYqXsx0vthuZ4.jpeg"
+                ],
+                "googlePlaceId": "5724393451963055446",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 5351.83,
+            "timeFromPrevious": 66898,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Perlan et The Settlement Exhibition",
+        "dayNarrative": "Cette journée est dédiée à la richesse culturelle de Reykjavik, avec des musées fascinants et une expérience de relaxation unique au Sky Lagoon, suivie d'une soirée animée.",
+        "geoDiagnostics": {
+          "maxLegKm": 5353.27,
+          "p95LegKm": 5351.83,
+          "totalTravelMin": 133910,
+          "totalLegKm": 10712.65,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2,
+          "mstLowerBoundKm": 5356.68
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 105,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-02T13:17:16.475Z",
+        "items": [
+          {
+            "id": "f5bea82a-38f7-4b11-9e1c-452c3293ed80",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Old Iceland",
+            "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+            "locationName": "Laugavegur 72",
+            "latitude": 64.143906,
+            "longitude": -21.920366,
+            "orderIndex": 0,
+            "estimatedCost": 36,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.143906,-21.920366",
+            "restaurant": {
+              "id": "serp-12128553188736262016",
+              "name": "Old Iceland",
+              "address": "Laugavegur 72",
+              "latitude": 64.143906,
+              "longitude": -21.920366,
+              "rating": 4.8,
+              "reviewCount": 2800,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "islandaise"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Bonne cuisine, très bon service, personnel compétent !\""
+              ],
+              "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Old%20Iceland%2C%20Laugavegur%2072",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/Thp6hrVEJUAuLLjY4FyiWrcSafL0oII8UG1-N1nOlHk.jpeg"
+              ],
+              "googlePlaceId": "12128553188736262016",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "name": "Hygge Coffee & Micro Bakery",
+                "address": "Barónsstígur 6, 101 Reykjavík, Islande",
+                "latitude": 64.14417159999999,
+                "longitude": -21.919022299999998,
+                "rating": 4.7,
+                "reviewCount": 91,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "http://hyggebakery.is/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hygge%20Coffee%20%26%20Micro%20Bakery%2C%20Bar%C3%B3nsst%C3%ADgur%206%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerhBhEWaGRwOGhFxZSKqAmAxyxiKAVL68u9SvlcMxWJ3xfPyahLuBMN7LaTJ_hTfAl5jt_M_sCYgQ2oLT19XAjilGrWSC5ch9RGlpxtXAZpto9uOOdYReejXHZb8Q8IZGPlPRaA2_UDH5Y=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.0715408591744704,
+                "walkingTime": 1
+              },
+              {
+                "id": "serp-nearby-ChIJMSbHo8501kgR8P79owdsjgM",
+                "name": "Emilie and the Cool Kids",
+                "address": "Barónsstígur 9, 101 Reykjavík, Islande",
+                "latitude": 64.144196,
+                "longitude": -21.9183861,
+                "rating": 4.7,
+                "reviewCount": 809,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+354 571 5887",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Emilie%20and%20the%20Cool%20Kids%2C%20Bar%C3%B3nsst%C3%ADgur%209%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwergdd0A7CO6fABosvY6Z6GWUWcTHGCXY1VP9OTIJ1cBu-O1bMZQeNADc9jaX16iPvFrr48d6XFFn3pU9lq-E0ATPQc_TOYOazvq3oUBzOuDzQWNZ7rwZsBH_GrxZDxI_bNoc0I=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJMSbHo8501kgR8P79owdsjgM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.10128223937894017,
+                "walkingTime": 1
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "9d73611c-18d2-448a-8aba-cf4e463f8dbd",
+            "dayNumber": 3,
+            "startTime": "09:45",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Þingvellir",
+            "description": "Þingvellir was the site of the Alþing, the annual parliament of Iceland from the year 930 until the last session held at Þingvellir in 1798.  Since 1881, the parliament has been located within Alþingi",
+            "locationName": "Þingvellir",
+            "latitude": 64.2821725,
+            "longitude": -21.0764492,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.2821725,-21.0764492",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%C3%9Eingvellir&query_place_id=&center=64.2821725,-21.0764492",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWc9FVmk_XZ_RjOw2HMDP4zUsc7O5YsgMQBoVGAV4QBiuAfEGQ2hq_5VvHeB9AopzqaWpMxpcePiynAKK2rOXjDmBiwjIuBHoIBuOh1Uacz4Zzs6GPMjXshNbyMtnBfu4-bja_rgKOpm_dB31FtIAc3AKBF1ZJWmwO4ULiRI9yiS4ZkMcZ6Rncd_2zxkWZTX__vHg2AIkSzlKinLEjcnWh_MxhdBfJfKAICCJZ6z3vOyo6KJSYgbY0iqE5XkWclY5Hdizt7Up5AHzKeLXF-raxtI1uFgAIq7unVsYIpufjpHWaXStxIsfPPaGBGkCB-iS5vUm_x0PHKijrDEy0y1_iPIWNS_eBGQiwk1HQp1tgXcZeXiKhNuWbIc4Czad5U5iyvS_sVZx92b5vhu5-ICbb5xqHTQvPJV56N9fcIYTFMYIMgfDBe0n0phim-0iWtiErXXXwsDyCKyIyIWosfM99q6rFiDuFsq_DphT8BZc8ecWKyvTMtMEAVwj-iA-pq-r7F7k2-rauu49rEJhz9lPJSBysE-4S3RdOPEahMo_8Ud5S55d7sieo0YAooMecgwG-oXiGb&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 43.62,
+            "timeFromPrevious": 546,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "68296f6b-3c55-48cf-ba84-47de59504b46",
+            "dayNumber": 3,
+            "startTime": "11:15",
+            "endTime": "12:15",
+            "type": "activity",
+            "title": "Secret Lagoon",
+            "description": "47 Meters Down: Uncaged is a 2019 survival horror film directed by Johannes Roberts, and written by Roberts and Ernest Riera.  A standalone sequel to 47 Meters Down (2017), none of the cast from the p",
+            "locationName": "Secret Lagoon",
+            "latitude": 64.1375944,
+            "longitude": -20.3092298,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1375944,-20.3092298",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Secret%20Lagoon&query_place_id=&center=64.1375944,-20.3092298",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXtG_cRuTcqbkuUNoWFbnMrlspWW6SKr6uiMFcMyYDXGL2MdNgGQoSUd5dhwT7BM1V1-sqLr4k4bA3e8btL1UDBUzN_ghpMHNdxHBpgYvA9ZXN6wdK0X4Qepi1s79HFchq3CiLI-oONkjKLtl5wRY5LywwsfeTmKA-NZMBy8gFdua2r-hvwFTnxC5FmH9TmWwCBnQNDLlkeH3l58purLVaf-0_pFuehpurBl1cCumDq8lESPImeVxGM2KfRF4ema6tRnXRMFXkpVLcd2eL9u9hfa39wqz66W4BdN2F6RePQwTmOtBuT1OTRrv13y4zqiai0dD2E8GPCeJlyVEXZmyj4Gb7CqDoZJ5rzH9gh7ecmL2ArmuJXIiQO0eWIg64QGH2F7WOB6UQIjEZAbauBJ-IvaU3i-LmUgC0R8M2yPl-WckRZUCSW8uUbs8a2TLd8mDT5KyT_oRbmuYfApHM1KW0Gw-yKlA7k1VxCBWw6bkKOXLtgUwzaUPdo8yFGcqJPSO_qfLMwHPVZkx0fttYt4f5HOL85lTzYXbqfo8EffbIhbs6FvmiFSr4Hpj9XUEL8vMUuFXAEyF_Wxw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 40.45,
+            "timeFromPrevious": 506,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "11768238-1c13-4df4-bfa7-d6027382d55e",
+            "dayNumber": 3,
+            "startTime": "12:45",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — 101 Reykjavik Street Food",
+            "description": "\"Le fish and chips est délicieux et les prix défient toute concurrence\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Skólavörðustígur 8",
+            "latitude": 64.145874,
+            "longitude": -21.932617,
+            "orderIndex": 3,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.145874,-21.932617",
+            "restaurant": {
+              "id": "serp-7939043340378079618",
+              "name": "101 Reykjavik Street Food",
+              "address": "Skólavörðustígur 8",
+              "latitude": 64.145874,
+              "longitude": -21.932617,
+              "rating": 4.5,
+              "reviewCount": 3400,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Le fish and chips est délicieux et les prix défient toute concurrence\""
+              ],
+              "description": "\"Le fish and chips est délicieux et les prix défient toute concurrence\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=101%20Reykjavik%20Street%20Food%2C%20Sk%C3%B3lav%C3%B6r%C3%B0ust%C3%ADgur%208",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/B1A9mz8xBNu8Ijsj3oXIVDZz5DIvnY8R6oUZDbCfY0I.jpeg"
+              ],
+              "googlePlaceId": "7939043340378079618",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11968135968062065302",
+                "name": "Restaurant Sjávargrillið",
+                "address": "Skólavörðustígur 14",
+                "latitude": 64.145195,
+                "longitude": -21.931747,
+                "rating": 4.7,
+                "reviewCount": 2100,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "islandaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bon restaurant, service rapide et plats délicieux.\""
+                ],
+                "description": "\"Très bon restaurant, service rapide et plats délicieux.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Sj%C3%A1vargrilli%C3%B0%2C%20Sk%C3%B3lav%C3%B6r%C3%B0ust%C3%ADgur%2014",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/xO2VdwcswOWtmFALGzdewL8L8QZYrcf3STNP4uR4zJY.jpeg"
+                ],
+                "googlePlaceId": "11968135968062065302",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-12292033316742520567",
+                "name": "Messinn",
+                "address": "Lækjargata 6",
+                "latitude": 64.14658,
+                "longitude": -21.937727,
+                "rating": 4.6,
+                "reviewCount": 3400,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisson au top, plats délicieux et service très sympathique.\""
+                ],
+                "description": "\"Cuisson au top, plats délicieux et service très sympathique.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Messinn%2C%20L%C3%A6kjargata%206",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/P-XB8TKMQ0aBw5zypjAl8rqcFdm6j3WZ2nBWJhoANec.jpeg"
+                ],
+                "googlePlaceId": "12292033316742520567",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 78.73,
+            "timeFromPrevious": 985,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "137f0adf-b730-452b-a447-4543ad2c3968",
+            "dayNumber": 3,
+            "startTime": "14:15",
+            "endTime": "15:15",
+            "type": "activity",
+            "title": "Jökulsárlón Glacier Lagoon Boat Tours and Cafe",
+            "description": "This is a list of locations where films in the James Bond series were set and filmed.",
+            "locationName": "Jökulsárlón Glacier Lagoon Boat Tours and Cafe",
+            "latitude": 64.04854929999999,
+            "longitude": -16.1792735,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.04854929999999,-16.1792735",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=J%C3%B6kuls%C3%A1rl%C3%B3n%20Glacier%20Lagoon%20Boat%20Tours%20and%20Cafe&query_place_id=&center=64.04854929999999,-16.1792735",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVdqOm6pvXMVNEtOWIyvr1ozuVf7GOIxCk7yLGTeFP0C2Oo7bLgh0Wg1Ur39-eD7g-J39izlKtCOChx8tKAUKMGQzVthoWTVClEr4RGYr2NsMikbZzjsxXvz8a61TCGyCgXKWAjUKS8PdilKOQgDT60XLjJnnOLFz5HQiR5PGS4pR8ylULpsuDkLm09eki4zbxaMg3zNXlRe3I87IUds6Kp63zGyUj2ygonaMQFM1cYtsRKiD2h-Zf2OI1TEqXyG4E8rkhA_rz-9q1Jp_hP6xNFomX9roGEqEDMTDxnEptv3f49p_q2aHfCNIYTayjF_zJrorxQMS4zHkVM6oYUG0Jr-Mz9EsgFFy2L8L3oDRIccW4m7fAd2MyIUFjkNngZiedtiYx2xESf8pp6nXyQYJLD0UrxfwsAuMSbEr3Kqf8nybP3DKH4O9t6aaVgnAdPcEPYMchpHcyGs0YZcM-mzVUDZauVYUTLjXmXxGgIRUzCGbp_RIj2U6XBpvj8ykgxo8WY-dvrsg1QYTx2NEMRcGZltigJI6BGvhsBRWKdMm6iqR7mbpYwDa6v6Qndv1jLQAo3cbwm&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 279.58,
+            "timeFromPrevious": 3495,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "31c5eb21-5df7-47d7-b93e-53d2057ea13f",
+            "dayNumber": 3,
+            "startTime": "16:30",
+            "endTime": "17:30",
+            "type": "activity",
+            "title": "Blue Lagoon Islande",
+            "description": "Eldvörp–Svartsengi ; \"fire cones–black meadow\" in Icelandic also Svartsengi volcanic system) is a volcanic system in the southwest of Iceland on the Southern Peninsula, southeast of Keflavík Internati",
+            "locationName": "Blue Lagoon Islande",
+            "latitude": 63.8807176,
+            "longitude": -22.4472964,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=63.8807176,-22.4472964",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Blue%20Lagoon%20Islande&query_place_id=&center=63.8807176,-22.4472964",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUKjFOG-7TgRxF7dNHWMTKpSkB6rEry2-vfjQBB-fd-9pckwaNoRvksSgx-z1dLVf6fjM0U2iHOfDr5sulTCqQp12ts0VjvOj-HBLWPJlGkvxjHloPptQQdn3QAqQnDwga_sp07Ch-p1IfxhdtZQ19edgIyAaY9erllS00pC8t_k0PVruHcAtsdlEPybViaSG8xRuNDr_skiqbKFphbYCSNQ8yG8GcJpNu6wn3hWOqli4jqScPLXTTNzA8GIYo1gHc88ZqZ7BZYYBarVQ2pgJbn0fKiu_F2d_v9RzS1E36sNNmJzavNY-pdaRqRg6Ky9YRkT4ATt_Fh_aOawsd7X8nWiYv6Dk-9omdx5r9B_UcULqa5d3dyJew8rNRk-0cJS9kmqVGPpogvBHESVBQfUfnM4xlDfnfZI7T_YAvFlDquNmU_WtzQg2nhFw5Gft7uW7RERmlJcmUXbQ9MJckU1xV3DH99q5ubQyRaC-S1q6Q70xstZzy3tjklgURVrGbxA1gHfsYCynYjIzDKD_E2KWef0YmlAkgvKdFn86dMxb7E-EVk-b9ZwPPJ6iHFzD4RFL3A-Pu2YyHWww&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 306.36,
+            "timeFromPrevious": 3830,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "98fc5382-7eb5-4542-a26c-728aefe24244",
+            "dayNumber": 3,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — Moss Restaurant",
+            "description": "\"Cuisson au top, plats délicieux et service très sympathique.\"",
+            "locationName": "Nordurljosavegur 11, 240 Grindavík, Islande",
+            "latitude": 63.879801,
+            "longitude": -22.450114,
+            "orderIndex": 6,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.14658,-21.937727",
+            "restaurant": {
+              "id": "serp-nearby-ChIJhQptAHcd1kgR3TKqo6ANnTo",
+              "name": "Moss Restaurant",
+              "address": "Nordurljosavegur 11, 240 Grindavík, Islande",
+              "latitude": 63.879801,
+              "longitude": -22.450114,
+              "rating": 4.7,
+              "reviewCount": 174,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant islandais",
+                "restaurant islandais"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+354 420 8700",
+              "website": "https://www.bluelagoon.com/restaurant/moss",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Moss%20Restaurant%2C%20Nordurljosavegur%2011%2C%20240%20Grindav%C3%ADk%2C%20Islande",
+              "googlePlaceId": "ChIJhQptAHcd1kgR3TKqo6ANnTo",
+              "openingHours": {
+                "friday": {
+                  "open": "18:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "18:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "18:00",
+                  "close": "23:00"
+                },
+                "monday": null,
+                "tuesday": null,
+                "wednesday": {
+                  "open": "18:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "18:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.171502004693637,
+              "walkingTime": 2
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJA9Om_3Yd1kgRPBH89qBzmbs",
+                "name": "Lava Restaurant",
+                "address": "Nordurljosavegur 9, 240 Grindavik, Islande",
+                "latitude": 63.880032199999995,
+                "longitude": -22.4494305,
+                "rating": 4.4,
+                "reviewCount": 1460,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+354 420 8800",
+                "website": "https://www.bluelagoon.com/restaurant/lava",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lava%20Restaurant%2C%20Nordurljosavegur%209%2C%20240%20Grindavik%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepYPEkaVSx2hED5UyXOSDgf92CMa76iT5xvD2ds0AyFEPuacWV4lesHxD8qrh4i570SlWr6Y8TRYGt7WqhE4ZXlcZZJmdMe40YKmv50FUd6FpCuntPk6LD2yUmiku2tOalIQOw=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJA9Om_3Yd1kgRPBH89qBzmbs",
+                "openingHours": {
+                  "friday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.12931596331348752,
+                "walkingTime": 2
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 38.6,
+            "timeFromPrevious": 483,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Moss%20Restaurant%2C%20Nordurljosavegur%2011%2C%20240%20Grindav%C3%ADk%2C%20Islande",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Moss%20Restaurant%2C%20Nordurljosavegur%2011%2C%20240%20Grindav%C3%ADk%2C%20Islande",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Þingvellir et Secret Lagoon",
+        "dayNarrative": "Explorez les merveilles naturelles du Cercle d'Or avec des sites emblématiques comme Þingvellir et Kerið, et terminez par une détente dans une source chaude naturelle.",
+        "geoDiagnostics": {
+          "maxLegKm": 306.36,
+          "p95LegKm": 279.58,
+          "totalTravelMin": 9367,
+          "totalLegKm": 748.91,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.31,
+          "mstLowerBoundKm": 324.43
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 90,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-03T13:17:16.475Z",
+        "items": [
+          {
+            "id": "5ef1ee83-2ab2-47ee-9627-fcded1eef739",
+            "dayNumber": 4,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Old Iceland",
+            "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+            "locationName": "Laugavegur 72",
+            "latitude": 64.143906,
+            "longitude": -21.920366,
+            "orderIndex": 0,
+            "estimatedCost": 36,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.143906,-21.920366",
+            "restaurant": {
+              "id": "serp-12128553188736262016",
+              "name": "Old Iceland",
+              "address": "Laugavegur 72",
+              "latitude": 64.143906,
+              "longitude": -21.920366,
+              "rating": 4.8,
+              "reviewCount": 2800,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "islandaise"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Bonne cuisine, très bon service, personnel compétent !\""
+              ],
+              "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Old%20Iceland%2C%20Laugavegur%2072",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/Thp6hrVEJUAuLLjY4FyiWrcSafL0oII8UG1-N1nOlHk.jpeg"
+              ],
+              "googlePlaceId": "12128553188736262016",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "name": "Hygge Coffee & Micro Bakery",
+                "address": "Barónsstígur 6, 101 Reykjavík, Islande",
+                "latitude": 64.14417159999999,
+                "longitude": -21.919022299999998,
+                "rating": 4.7,
+                "reviewCount": 91,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "http://hyggebakery.is/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hygge%20Coffee%20%26%20Micro%20Bakery%2C%20Bar%C3%B3nsst%C3%ADgur%206%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerhBhEWaGRwOGhFxZSKqAmAxyxiKAVL68u9SvlcMxWJ3xfPyahLuBMN7LaTJ_hTfAl5jt_M_sCYgQ2oLT19XAjilGrWSC5ch9RGlpxtXAZpto9uOOdYReejXHZb8Q8IZGPlPRaA2_UDH5Y=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.0715408591744704,
+                "walkingTime": 1
+              },
+              {
+                "id": "serp-nearby-ChIJMSbHo8501kgR8P79owdsjgM",
+                "name": "Emilie and the Cool Kids",
+                "address": "Barónsstígur 9, 101 Reykjavík, Islande",
+                "latitude": 64.144196,
+                "longitude": -21.9183861,
+                "rating": 4.7,
+                "reviewCount": 809,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+354 571 5887",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Emilie%20and%20the%20Cool%20Kids%2C%20Bar%C3%B3nsst%C3%ADgur%209%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwergdd0A7CO6fABosvY6Z6GWUWcTHGCXY1VP9OTIJ1cBu-O1bMZQeNADc9jaX16iPvFrr48d6XFFn3pU9lq-E0ATPQc_TOYOazvq3oUBzOuDzQWNZ7rwZsBH_GrxZDxI_bNoc0I=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJMSbHo8501kgR8P79owdsjgM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.10128223937894017,
+                "walkingTime": 1
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "dc030130-d172-444b-b4f9-68dc3502de12",
+            "dayNumber": 4,
+            "startTime": "09:15",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Whales of Iceland",
+            "description": "Whales of Iceland is a natural history museum located in the Grandi harbour district of Reykjavík, Iceland.  First opened in 2015, the museum is dedicated to educating visitors about the various cetac",
+            "locationName": "Whales of Iceland",
+            "latitude": 64.155369,
+            "longitude": -21.9482795,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.155369,-21.9482795",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Whales%20of%20Iceland&query_place_id=&center=64.155369,-21.9482795",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUATLBVwfk2jIBkKbdMEVGGybevlEpM0Zlvq9Y70t8cKe50rLPHDeXafDScKDmXOXRwdNaB6_Tc48eiG193bjyRhVH4ZugQ1PyP9LOOSyVITiGI-mUyjxRbzspR-D1QH0Kjo9zExk5vWUAjcuPfeByOSYTYRAhyyrIvJ8Vb_HWL4M8J6fhiyY5QmUWwr0SFnXfHPz212NOIopUipI4j7Hzauj7mCkeF8xVPERges1TOomA8tJrGW-tOYUtwnI8qmShXYFTMzWFmhu5l1q7WfLc2OypB3mocOCO8SrP00pebNZ6uqbIoXSwuE8zB4dqCuEJnp_OL8VfIAUxAIQ2tPW28VPelbGxgicwImAnl6_qxsqOxgkpiLJgqraHiGO2PJ5wPHtVdPpGp65LLHaLdm7uxm_lujqk5B4-T0UJ2SZTKlOqObeaDPA4ODTstfeTVRH9c00zPLyQ2UyLtnZBeLX3_LTX60Rf-WZE7BnvD6avFjoj4Kv5DrCtC27dUITNZrg2G5eEqu2dlPhy46EjZEFDozw_JxEc0vGV_axJgrjlldA8-0F7cHmqb0AZrxet-vV5JveTxSTtQm9ehUBJJnXmh5AHy2A&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.86,
+            "timeFromPrevious": 24,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "4bbf374d-30c8-41ab-ab20-b50ede6767df",
+            "dayNumber": 4,
+            "startTime": "11:30",
+            "endTime": "12:30",
+            "type": "activity",
+            "title": "Kerið",
+            "description": "Kerið is a volcanic crater lake located in the Grímsnes area in south Iceland, along the Golden Circle.  It is one of several crater lakes in the area, known as Iceland's Western Volcanic Zone, which ",
+            "locationName": "Kerið",
+            "latitude": 64.04127849999999,
+            "longitude": -20.8851466,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.04127849999999,-20.8851466",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Keri%C3%B0&query_place_id=&center=64.04127849999999,-20.8851466",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX84dNbbISNIefOAxN8471lHIO4C764zDrkuPKq_zGEQFsZ-sHSKTPNSzPPKMayHXCfK94tfd67EItDSujqsKMnsE1DB5v_X3nz69oA73mP74ILARVj8lUJbVRzvkzHHK1y8vwKCA1Z801w1ybvOoXJ9F5Q-7MijAxsYzdFsSbT8kdagtwyxVF4hg9zIo5CZ3E_mI-XdZ-l359byviAw0ZGwHAS4lBb6ks50H0GeR1hH2gfS9gCg994bfhNi6cLD4ziVKnljZ8SKdKxwyFvELARomkl4vx_Pul78rj18-pGByjQj98oLOnE5xmrZ7xOLzfDMQHZLYWdg9MDYQlUcvrxj42i70NKDUCLDcsi6NsUeD9xCT90bX7L4L_VWDjjt-klbNidKSZ2AwBHHaiBBBj728wFNii8HfI7kXrEDU1ao7AQhi9xp7ZT7m6IC2tamewMT6hmKT6TSX6x1WtRFokhVcqAGXnYU8dfbpyNVpeilK4_UU4hhqo54LC4EYCoZCs_9B3JlIXzNeN9ut2Lr6kyvCWjam7wenBiv6MY9UfsKxwWH4Qx-kJOEEv1j7MHX7VJo7tbEADsMqNdDGN7G6WGG9p5kA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 53.17,
+            "timeFromPrevious": 665,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "74e85409-baf8-4165-b603-1a6d86bb6f91",
+            "dayNumber": 4,
+            "startTime": "13:45",
+            "endTime": "15:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Le KocK",
+            "description": "\"Que dire de cette ambiance jazzy du lundi 🎶🎶🎶 La cuisine est délicieuse\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Tryggvagata 12",
+            "latitude": 64.15014,
+            "longitude": -21.943447,
+            "orderIndex": 3,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.15014,-21.943447",
+            "restaurant": {
+              "id": "serp-14141956527662610255",
+              "name": "Le KocK",
+              "address": "Tryggvagata 12",
+              "latitude": 64.15014,
+              "longitude": -21.943447,
+              "rating": 4.7,
+              "reviewCount": 1200,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Que dire de cette ambiance jazzy du lundi 🎶🎶🎶 La cuisine est délicieuse\""
+              ],
+              "description": "\"Que dire de cette ambiance jazzy du lundi 🎶🎶🎶 La cuisine est délicieuse\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20KocK%2C%20Tryggvagata%2012",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/MI3Eff4UR6x9wq0xYATWX3zaB0aVe6zzJO1nmP0sDPc.jpeg"
+              ],
+              "googlePlaceId": "14141956527662610255",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5724393451963055446",
+                "name": "Fish Company",
+                "address": "Vesturgata 2a, Grófartorg",
+                "latitude": 64.14894,
+                "longitude": -21.941492,
+                "rating": 4.7,
+                "reviewCount": 1700,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Service très agréable, cuisine délicieuse, poissons excellents.\""
+                ],
+                "description": "\"Service très agréable, cuisine délicieuse, poissons excellents.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Fish%20Company%2C%20Vesturgata%202a%2C%20Gr%C3%B3fartorg",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/yiYT7oG_Bnmt2llgG_DadfvTenAyqpKYqXsx0vthuZ4.jpeg"
+                ],
+                "googlePlaceId": "5724393451963055446",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-6081284947285632981",
+                "name": "Grillmarkaðurinn",
+                "address": "Lækjargata 2a",
+                "latitude": 64.14717,
+                "longitude": -21.937471,
+                "rating": 4.6,
+                "reviewCount": 2700,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "islandaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Nous avons choisi le menu 6 plats et ce fut une délicieuse expérience.\""
+                ],
+                "description": "\"Nous avons choisi le menu 6 plats et ce fut une délicieuse expérience.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Grillmarka%C3%B0urinn%2C%20L%C3%A6kjargata%202a",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/-qVBG4Zbk92lH0dU3XOg0BUpLM7tUMICGWPpj9mb_ZQ.jpeg"
+                ],
+                "googlePlaceId": "6081284947285632981",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 52.81,
+            "timeFromPrevious": 661,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "e77cfc79-220d-4a77-87eb-58d41324940e",
+            "dayNumber": 4,
+            "startTime": "15:15",
+            "endTime": "16:15",
+            "type": "activity",
+            "title": "FlyOver Iceland",
+            "description": "Flyover is a flying theater attraction.  The first Flyover attraction opened in 2013 at Canada Place in downtown Vancouver, British Columbia, Canada.",
+            "locationName": "FlyOver Iceland",
+            "latitude": 64.1567623,
+            "longitude": -21.9487487,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1567623,-21.9487487",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=FlyOver%20Iceland&query_place_id=&center=64.1567623,-21.9487487",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXyxK-YGzY_73ocDN-e87gvcjM5nv-huPHJmKdSAXX490a_f4qC8BIHAoVH_kV6XPVbjR6eiJAX66K7xT4KuB5N72BOSC9cmxi2FRPiIo_5BEPYEpH-qEAu9kjGblhgrS0HMs8chj5rgmo9q8hUy7MWfhRR8bFURfdhMCsDba7EUoF9F46--RbXh1CDHveuJ5Ax5W2MGFIxAhB03609yUs7ifOXe11_sDhUZNpjrYlNbGnOhP_QrIxDaOvLBzi534coQDraHRfkDHQEbcMdRHC4HA7jSoMv1AUDrVzgXQK3ghep8cXjLPjskHaC4Qv9CHdMZPdNMqbU4pdpcuimDd1uXusi8NVyMJcWa72fBJsBiW80g5HarZ6G5xHU8s8RnJynyaRqGbDxvUmy_u6ixBJplM_cRdmIgJRaF6WQ_Lo-POPprql1upw3HxtKXeJ7hKzfFxqDeQhf00b2pupp3CLLt1XibMfeVAnXZ8M9GajZuls9znIvWFK1dB7OB1swbpwU_8IngXxRpK9-HR7L1K1-VWgUdGEOUlI8ydQttCdpl8O4AEOCu3OOFI94QYYjns0aKSl3cjonhA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.78,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "023ce1ec-654b-4d42-a379-56b8b9d5f4cf",
+            "dayNumber": 4,
+            "startTime": "16:30",
+            "endTime": "17:30",
+            "type": "activity",
+            "title": "Þúfa",
+            "description": "In geology, a hummock is a small knoll or mound above ground.  They are typically less than 15 meters (50 ft) in height and tend to appear in groups or fields.",
+            "locationName": "Þúfa",
+            "latitude": 64.15438739999999,
+            "longitude": -21.9338071,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.15438739999999,-21.9338071",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%C3%9E%C3%BAfa&query_place_id=&center=64.15438739999999,-21.9338071",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWgEXfwjJZHECBL7lVfOQ2ll831I0tH9fQTt2PgFYRlrSw00Va7RZncTYzz14at-sJB5NIOBr12ax9JkFEw1WCiMlG8KMf7HQJ8uthaoqUvjQiWPbsJYVK3Fn_llNvb_JxXeYJYeuaHgXQgQ8NMbf7Ct87Nu7WSpy_xt8ErBTNMQuBMw96t9XqZux7HrfDpoJ3d_1yBlUQYxQ0znKmwUIlqoPklxGewymVZv4Ifh4UHiaWGcUaDd8bhgcZhKA0117Yela8zcD_gAu47C45pwu9QvdcnyJnkT12df3asIqNK7aBR9gBZPEFXp9Q-UV7jV6ZCAHeRdBA4qMvM-TCPBmF5WMo8YGF-AJIBs3j8tlUeF9JSNE9cQyqOHwW31pjp_9cu_6q1oymvGt8x4hI5LS3rM9__-L8OzB_OXLSxr5LfImUQ6_mAxWL2_07SAD34bSkM4gD6nJySMOvj4R4UI4ckTyL1iN6kyjd0SzHan77CHVRaaYP-aswoWQsb9RiL7EQ5RDau2Pn-m1eOeqZorMBqLHoxhGRt67hb-Id8ZSdXynbL8T6wORpcBLwSgOFxZtKrdBwr&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.77,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "59766f71-de63-493c-a50e-66c2c3edb802",
+            "dayNumber": 4,
+            "startTime": "17:45",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "Hofdi",
+            "description": "Höfði is a house in Reykjavík, Iceland, built in 1909, and best known as the location for the 1986 Reykjavík Summit meeting of President Ronald Reagan of the United States and General Secretary Mikhai",
+            "locationName": "Hofdi",
+            "latitude": 64.1465149,
+            "longitude": -21.9063612,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.1465149,-21.9063612",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Hofdi&query_place_id=&center=64.1465149,-21.9063612",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVibp_mB3UNXqg8PwFcxAM-i-CiroUp-UPLkCVVu1UjFuAimLot2A9pFp_R4ITvficX6HgY0o1Ix5hsYAY17FnLgtiU2Ow8U3Qn0AcAtjTse5nj3UK0oOWI8FjrbhFF_dXmCx2Yo33IXInugQTUxl92Nt7Hz_m9qP-6HaI5B3wiw_nu_O1aLNqnXlDvGNEqM9WmzYntzGi1du_1UfL7tSMlLkHTKCFd4Q6LCi5VAjq6h0DzPj9I0rEZnBn6S_sJdGyDzFy9EkP1vCXd_dU5nmDFw1OXAaC7_tRWTvJ1Rz8UWT0FItb2TPwssfhmq9rZczQJoWulUthtBqoxjMAcQ9VqsLsCLrA73rxWTg1Aks3qt2cxgBXYX8T-gsPnzF4oBvqxFbgkGKdpOWd6Qsw82jNlKyQ1VaZInwyoCRnPgHWWMinv4G9rGHtYAEg3XZmpgxC24NVSOITeVQQmLmRIRz0B1bsyBEXXDav4-jITTccqq6fyGcnCt7wSco7emNDW3H7x7H4jvm0XBwdWadKzsMcCyAd2HPE_06dUu9RDeA-c2crf9lM_pzQfTpHBU8r-6EFkYeb9&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.59,
+            "timeFromPrevious": 20,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "0afa0bc0-f749-496a-9925-7bcaa488e7de",
+            "dayNumber": 4,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Höfnin Restaurant",
+            "description": "\"Très bon restaurant, on y retrouve des plats typiques d'Islande.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Geirsgata 7",
+            "latitude": 64.15084,
+            "longitude": -21.943342,
+            "orderIndex": 7,
+            "estimatedCost": 36,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.15084,-21.943342",
+            "restaurant": {
+              "id": "serp-846555790573898983",
+              "name": "Höfnin Restaurant",
+              "address": "Geirsgata 7",
+              "latitude": 64.15084,
+              "longitude": -21.943342,
+              "rating": 4.7,
+              "reviewCount": 1300,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "islandaise"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bon restaurant, on y retrouve des plats typiques d'Islande.\""
+              ],
+              "description": "\"Très bon restaurant, on y retrouve des plats typiques d'Islande.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=H%C3%B6fnin%20Restaurant%2C%20Geirsgata%207",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/1Hzg1M0rT-SnlTfwzVWjPELAiSquuLdzY-TvlWqqByY.jpeg"
+              ],
+              "googlePlaceId": "846555790573898983",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5724393451963055446",
+                "name": "Fish Company",
+                "address": "Vesturgata 2a, Grófartorg",
+                "latitude": 64.14894,
+                "longitude": -21.941492,
+                "rating": 4.7,
+                "reviewCount": 1700,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Service très agréable, cuisine délicieuse, poissons excellents.\""
+                ],
+                "description": "\"Service très agréable, cuisine délicieuse, poissons excellents.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Fish%20Company%2C%20Vesturgata%202a%2C%20Gr%C3%B3fartorg",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/yiYT7oG_Bnmt2llgG_DadfvTenAyqpKYqXsx0vthuZ4.jpeg"
+                ],
+                "googlePlaceId": "5724393451963055446",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-6081284947285632981",
+                "name": "Grillmarkaðurinn",
+                "address": "Lækjargata 2a",
+                "latitude": 64.14717,
+                "longitude": -21.937471,
+                "rating": 4.6,
+                "reviewCount": 2700,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "islandaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Nous avons choisi le menu 6 plats et ce fut une délicieuse expérience.\""
+                ],
+                "description": "\"Nous avons choisi le menu 6 plats et ce fut une délicieuse expérience.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Grillmarka%C3%B0urinn%2C%20L%C3%A6kjargata%202a",
+                "photos": [
+                  "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/-qVBG4Zbk92lH0dU3XOg0BUpLM7tUMICGWPpj9mb_ZQ.jpeg"
+                ],
+                "googlePlaceId": "6081284947285632981",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 1.86,
+            "timeFromPrevious": 24,
+            "transportToPrevious": "walk",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Whales of Iceland et Kerið",
+        "dayNarrative": "Plongez dans l'histoire maritime et la faune islandaise avec des musées captivants, puis profitez d'une balade au bord de l'eau et d'une vue imprenable sur la ville.",
+        "geoDiagnostics": {
+          "maxLegKm": 53.17,
+          "p95LegKm": 52.81,
+          "totalTravelMin": 1414,
+          "totalLegKm": 112.84,
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 2.07,
+          "mstLowerBoundKm": 54.43
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 75,
+          "outlierRestaurantsCount": 2,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-03-04T13:17:16.475Z",
+        "items": [
+          {
+            "id": "7acad1f9-f432-4828-be62-03f09f2c5bfa",
+            "dayNumber": 5,
+            "startTime": "07:45",
+            "endTime": "08:30",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Old Iceland",
+            "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+            "locationName": "Laugavegur 72",
+            "latitude": 64.143906,
+            "longitude": -21.920366,
+            "orderIndex": 0,
+            "estimatedCost": 36,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.143906,-21.920366",
+            "restaurant": {
+              "id": "serp-12128553188736262016",
+              "name": "Old Iceland",
+              "address": "Laugavegur 72",
+              "latitude": 64.143906,
+              "longitude": -21.920366,
+              "rating": 4.8,
+              "reviewCount": 2800,
+              "priceLevel": 3,
+              "cuisineTypes": [
+                "islandaise"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Bonne cuisine, très bon service, personnel compétent !\""
+              ],
+              "description": "\"Bonne cuisine, très bon service, personnel compétent !\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Old%20Iceland%2C%20Laugavegur%2072",
+              "photos": [
+                "https://serpapi.com/searches/699860bc88aca42271dcdf28/images/Thp6hrVEJUAuLLjY4FyiWrcSafL0oII8UG1-N1nOlHk.jpeg"
+              ],
+              "googlePlaceId": "12128553188736262016",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "name": "Hygge Coffee & Micro Bakery",
+                "address": "Barónsstígur 6, 101 Reykjavík, Islande",
+                "latitude": 64.14417159999999,
+                "longitude": -21.919022299999998,
+                "rating": 4.7,
+                "reviewCount": 91,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "http://hyggebakery.is/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hygge%20Coffee%20%26%20Micro%20Bakery%2C%20Bar%C3%B3nsst%C3%ADgur%206%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerhBhEWaGRwOGhFxZSKqAmAxyxiKAVL68u9SvlcMxWJ3xfPyahLuBMN7LaTJ_hTfAl5jt_M_sCYgQ2oLT19XAjilGrWSC5ch9RGlpxtXAZpto9uOOdYReejXHZb8Q8IZGPlPRaA2_UDH5Y=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ0e0AFQB11kgRD7w87mPCoXM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.0715408591744704,
+                "walkingTime": 1
+              },
+              {
+                "id": "serp-nearby-ChIJMSbHo8501kgR8P79owdsjgM",
+                "name": "Emilie and the Cool Kids",
+                "address": "Barónsstígur 9, 101 Reykjavík, Islande",
+                "latitude": 64.144196,
+                "longitude": -21.9183861,
+                "rating": 4.7,
+                "reviewCount": 809,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "+354 571 5887",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Emilie%20and%20the%20Cool%20Kids%2C%20Bar%C3%B3nsst%C3%ADgur%209%2C%20101%20Reykjav%C3%ADk%2C%20Islande",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwergdd0A7CO6fABosvY6Z6GWUWcTHGCXY1VP9OTIJ1cBu-O1bMZQeNADc9jaX16iPvFrr48d6XFFn3pU9lq-E0ATPQc_TOYOazvq3oUBzOuDzQWNZ7rwZsBH_GrxZDxI_bNoc0I=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJMSbHo8501kgR8P79owdsjgM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.10128223937894017,
+                "walkingTime": 1
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "34faa026-77b6-4d57-ab7b-301ed62a276b",
+            "dayNumber": 5,
+            "startTime": "08:45",
+            "endTime": "09:30",
+            "type": "activity",
+            "title": "The Einar Jónsson Museum",
+            "description": "Einar Jónsson was an Icelandic sculptor, born in Galtafell, a farm in southern Iceland.",
+            "locationName": "The Einar Jónsson Museum",
+            "latitude": 64.14191629999999,
+            "longitude": -21.9288843,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=64.14191629999999,-21.9288843",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=The%20Einar%20J%C3%B3nsson%20Museum&query_place_id=&center=64.14191629999999,-21.9288843",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVZUkAgJtgePsEQSpw8lXVb78PJPY-6vQRMaHhWQiaJ8UV_lrbU3Jnvk6CH36I4eLRGtlXnfeXkEnnNbd-tw8-lqrE8NCRaKjYwd3qOPmqonjNfeRMGiUhEzyjG9UKz6FbFbteFOEPmI2Db-hLzriFTUrq7sbQa-jE1eTbTZCxneLidHQMN9u4G6OhFWosriFHXUJWvv3FN-yHcNnZw4Sk8wG97KOPobRZ8yP544C2IOuT2ZhtdQuUvP5nQ6Xgh64_JW50gMIMhpKlMDnUD4xsyjJjnpiqcrrYumUB94i8fwH_8jiIsnYGAHs-8MBgTlxq3uidNJn9D811GpEH7-YaJbqj7ByFDvJaqsVfkDEHEc2joObcMGgPIHG9qX8TvTdKUUl4F4j6-f3QMNtpoNfWVNAwradUOV3bczM3mhYqIpp7nHKgrZtESz91vqWb_wiKokS6owSr0P9xCYtgFqEgEeAmrOMswSHxDXcObWx5Dmug9JV2QwVhDNRO06bLp9uYDQEIpJW4HhKBrJp-A9xTYgWFfCZrEvjQEHIDBIjJd2ComRn_R9sNXIZpQRMdZcRUgKofj&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.47,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "60b064ab-9966-4ab4-bfe8-01b20d40576d",
+            "dayNumber": 5,
+            "startTime": "11:00",
+            "endTime": "11:15",
+            "type": "checkout",
+            "title": "Check-out Reykjavik Residence Apartment Hotel",
+            "description": "Départ de l'hôtel",
+            "locationName": "Reykjavik Residence Apartment Hotel",
+            "latitude": 64.1460424,
+            "longitude": -21.9276384,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "ta-hotel-1966925",
+              "name": "Reykjavik Residence Apartment Hotel",
+              "type": "apartment",
+              "address": "Reykjavik",
+              "latitude": 64.1460424,
+              "longitude": -21.9276384,
+              "rating": 4.8,
+              "reviewCount": 3091,
+              "pricePerNight": 0,
+              "totalPrice": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/27/d3/ae/caption.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://cityhub.com/reykjavik/?utm_source=google_my_business_rkv&utm_medium=organic",
+              "description": "Miðborg • Prix via Booking.com • Disponibilité confirmée"
+            },
+            "distanceFromPrevious": 0.46,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "transport-ret-5-fallback",
+            "dayNumber": 5,
+            "startTime": "11:45",
+            "endTime": "14:15",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "Reykjavik → Paris (estimation)",
+            "locationName": "Reykjavik → Paris",
+            "latitude": 64.143906,
+            "longitude": -21.920366,
+            "orderIndex": 3,
+            "duration": 150,
+            "estimatedCost": 227,
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "The Einar Jónsson Museum",
+        "dayNarrative": "Profitez d'une dernière immersion dans l'art et la culture islandaise avant de vous diriger vers l'aéroport, en emportant des souvenirs mémorables de Reykjavik.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.47,
+          "p95LegKm": 0.47,
+          "totalTravelMin": 6,
+          "totalLegKm": 0.47,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0.47
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 90,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Reykjavik",
+            "duration": 152,
+            "price": 203,
+            "co2": 396
+          }
+        ],
+        "totalDuration": 440,
+        "totalPrice": 227,
+        "totalCO2": 397,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "recommended": true,
+        "recommendationReason": "Option rapide, écologique"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Reykjavik",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 64.145981,
+              "lng": -21.9422367
+            },
+            "duration": 167,
+            "price": 179,
+            "co2": 435,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/PARIS2802REYKJAVIK1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 457,
+        "totalPrice": 179,
+        "totalCO2": 435,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/PARIS2802REYKJAVIK1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/reykjavik?departure_date=2026-02-28"
+      }
+    ],
+    "selectedTransport": {
+      "id": "combined_train_plane",
+      "mode": "combined",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Paris",
+          "to": "Paris",
+          "duration": 48,
+          "price": 24,
+          "co2": 1,
+          "operator": "Train grande vitesse"
+        },
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Reykjavik",
+          "duration": 152,
+          "price": 203,
+          "co2": 396
+        }
+      ],
+      "totalDuration": 440,
+      "totalPrice": 227,
+      "totalCO2": 397,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 0,
+        "timeScore": 10,
+        "co2Score": 10
+      },
+      "recommended": true,
+      "recommendationReason": "Option rapide, écologique"
+    },
+    "accommodation": {
+      "id": "ta-hotel-1966925",
+      "name": "Reykjavik Residence Apartment Hotel",
+      "type": "apartment",
+      "address": "Reykjavik",
+      "latitude": 64.1460424,
+      "longitude": -21.9276384,
+      "rating": 4.8,
+      "reviewCount": 3091,
+      "pricePerNight": 0,
+      "totalPrice": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/27/d3/ae/caption.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://cityhub.com/reykjavik/?utm_source=google_my_business_rkv&utm_medium=organic",
+      "description": "Miðborg • Prix via Booking.com • Disponibilité confirmée"
+    },
+    "accommodationOptions": [],
+    "totalEstimatedCost": 264,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 0,
+      "food": 264,
+      "activities": 0,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "hostel",
+      "accommodationBudgetPerNight": 25,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "self_catered",
+        "dinner": "mixed"
+      },
+      "groceryShoppingNeeded": true,
+      "activitiesLevel": "mostly_free",
+      "dailyActivityBudget": 8,
+      "transportTips": "Acheter un ticket Reykjavik Card 1 jour (15€) pour bus illimité + attractions. Pour le reste, utiliser les bus réguliers (single ticket ~3€) ou marcher en centre-ville.",
+      "reasoning": "Reykjavik est très cher (restauration 20-35€/repas, hôtels 80-150€/nuit). Avec 50€/jour, un hostel (25€/nuit) + repas self-catered (8-10€/jour) + activités gratuites (randos nature, géothermie gratuite) est la seule stratégie viable. Un dîner restaurant par jour en fin de séjour pour célébrer. Les meilleures activités nature (cascades, sources chaudes accessibles) sont gratuites ou très bon marché avec la Reykjavik Card.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: reykjavik-nature-5d",
+    "   Paris → Reykjavik (5j)",
+    "   solo (1p) | economic | nature, adventure",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 130ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Reykjavik\", ll=\"@64.145981,-21.9422367,14z\", gl=\"us\"",
+    "[Weather] 5 days fetched for 2026-02-28 → 2026-03-04",
+    "[Google Places] Filtered \"Reykjavík\" (types: locality, political)",
+    "[Google Places] ✅ 33 attractions found for Reykjavik",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (273ms)",
+    "[Pipeline V2] Step 1: All data fetched in 20544ms",
+    "[Pipeline V2]   Activities: 33 Google + 14 SerpAPI + 0 Overpass + 4 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 6 | Transport options: 2",
+    "[Pipeline V2 LLM] Step 1 done in 20544ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Reykjavik Residence Apartment Hotel\" (4.8★, €0/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 53 activities → 37 after dedup (dropped 16)",
+    "[Pipeline V2 LLM] Step 2: Selected 30 activities (0 must-sees, 30 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 50 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 526 pairs",
+    "[Pipeline V2 LLM] Step 2: 30 activities, 18 restaurants, 526 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 7ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 23523 in + 3220 out, ~$0.0055, 21836ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Arrivée et découverte du centre-ville\",\n      \"narrative\": \"Après le check-in, explorez les icônes du centre de Reykjavik avec une balade colo...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 6 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 180min gap on day 2 with \"Parc national de Glacier\"",
+    "[Pipeline V2 LLM] Enrichment: filled 150min gap on day 3 with \"Jökulsárlón Glacier Lagoon Boat Tours and Cafe\"",
+    "[Pipeline V2 LLM] Enrichment: filled 150min gap on day 4 with \"Kerið\"",
+    "[Pipeline V2 LLM] Enrichment complete: added 3 activities",
+    "[Pipeline V2 LLM] Plan: 5 days, 17 activities, 10 meals",
+    "[Pipeline V2 LLM] Step 3 done in 21839ms — 5 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 30 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 5 days with 27 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 4402ms",
+    "[Pipeline V2 LLM] Step 4 done in 4402ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 1 restaurants swapped, 4 kept as fallback (15468ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 19 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 2559ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 82/100",
+    "  📦 Complétude: 20/25",
+    "  ⏱️  Rythme:     25/25",
+    "  🗺️  Géo:        12/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 5: transport retour manquant",
+    "  ⚠️ Jour 2: Dîner — Sæta Svínið Gastropub est à 5351825m de l'activité la plus proche",
+    "  ⚠️ Jour 3: Déjeuner — 101 Reykjavik Street Food est à 78733m de l'activité la plus proche",
+    "  ⚠️ Jour 4: Dîner — Höfnin Restaurant est à 1856m de l'activité la plus proche",
+    "  ⚠️ Distance moyenne entre items: 526.2km (élevée)",
+    "  ⚠️ Hôtel à 262.2km du centre des activités",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 5: transport retour inséré (fallback)",
+    "  🔧 Jour 1: thème régénéré \"Arrivée et découverte du centre-ville\" → \"Hallgrímskirkja et Skólavörðustígur Rainbow Street\"",
+    "  🔧 Jour 2: thème régénéré \"Immersion dans la culture islandaise\" → \"Perlan et The Settlement Exhibition\"",
+    "  🔧 Jour 3: thème régénéré \"Aventures sur le Cercle d'Or\" → \"Þingvellir et Secret Lagoon\"",
+    "  🔧 Jour 4: thème régénéré \"Musées et vues panoramiques\" → \"Whales of Iceland et Kerið\"",
+    "  🔧 Jour 5: thème régénéré \"Derniers instants à Reykjavik\" → \"The Einar Jónsson Museum\"",
+    "[Pipeline V2 LLM] Step 5 done in 1ms — score: 82/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 64820ms ==="
+  ],
+  "warnings": [
+    "Aéroports non trouvés pour \"Reykjavik\", utilisation de Paris par défaut",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"hotel\" from day 1",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"serp-101 Reykjavik Street Food\" from day 1",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"gp-ChIJLV7eGn111kgRC4WDapRPvnw\" from day 2",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"gp-ChIJJV_L2VbeL1kgRB9kuweBEWlE\" from day 3",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"gp-ChIJJKZ4b4CoL1kgRjvWvUKA1HPo\" from day 4",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"hotel\" from day 5"
+  ],
+  "errors": [
+    "[Overpass] Query error: Error: Overpass API error: 504 Gateway Timeout",
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5125 (line 148 column 8)"
+  ],
+  "durationMs": 64820,
+  "generatedAt": "2026-02-20T13:25:16.279Z",
+  "success": true
+}

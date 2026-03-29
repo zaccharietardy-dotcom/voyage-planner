@@ -268,12 +268,12 @@ export async function searchRestaurantsWithSerpApi(
 
   const searchPromise = (async (): Promise<Restaurant[]> => {
     try {
-      console.log(`[SerpAPI Places] Requête: q="${query}", location="${destination}", ll="${serpParams.ll || 'none'}", gl="${serpParams.gl}"`);
+      console.debug(`[SerpAPI Places] Requête: q="${query}", location="${destination}", ll="${serpParams.ll || 'none'}", gl="${serpParams.gl}"`);
       let data = await tryFetch(serpParams);
 
       // Fallback: si location échoue, mettre le nom de la ville dans la query
       if (!data) {
-        console.log(`[SerpAPI Places] Location "${destination}" non supportée, fallback → query avec nom de ville`);
+        console.debug(`[SerpAPI Places] Location "${destination}" non supportée, fallback → query avec nom de ville`);
         const fallbackParams = { ...serpParams };
         delete fallbackParams.location;
         fallbackParams.q = `${query} ${destination}`;
@@ -286,7 +286,7 @@ export async function searchRestaurantsWithSerpApi(
       }
 
       const results = data.local_results || [];
-      console.log(`[SerpAPI Places] ${results.length} résultats local_results`);
+      console.debug(`[SerpAPI Places] ${results.length} résultats local_results`);
 
       // Filtrer les restaurants fermés définitivement
       const openResults = results.filter(r => {
@@ -1780,7 +1780,7 @@ export async function searchRestaurantsWithFallback(
     try {
       const results = await searchRestaurantsGooglePlaces(destination, options);
       if (results.length > 0) {
-        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} restaurants for "${destination}"`);
+        console.debug(`[Places Wrapper] Google Places returned ${results.length} restaurants for "${destination}"`);
         return results;
       }
     } catch (error) {
@@ -1789,7 +1789,7 @@ export async function searchRestaurantsWithFallback(
   }
 
   // Fallback to SerpAPI
-  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for restaurants "${destination}"`);
+  console.debug(`[Places Wrapper] Falling back to SerpAPI for restaurants "${destination}"`);
   return searchRestaurantsWithSerpApi(destination, options);
 }
 
@@ -1812,7 +1812,7 @@ export async function searchRestaurantsNearbyWithFallback(
     try {
       const results = await searchRestaurantsNearbyGooglePlaces(activityCoords, destination, options);
       if (results.length > 0) {
-        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} nearby restaurants`);
+        console.debug(`[Places Wrapper] Google Places returned ${results.length} nearby restaurants`);
         return results;
       }
     } catch (error) {
@@ -1820,7 +1820,7 @@ export async function searchRestaurantsNearbyWithFallback(
     }
   }
 
-  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for nearby restaurants`);
+  console.debug(`[Places Wrapper] Falling back to SerpAPI for nearby restaurants`);
   return searchRestaurantsNearby(activityCoords, destination, options);
 }
 
@@ -1844,7 +1844,7 @@ export async function searchAttractionsMultiQueryWithFallback(
         limit: options.limit,
       });
       if (results.length > 0) {
-        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} attractions for "${destination}"`);
+        console.debug(`[Places Wrapper] Google Places returned ${results.length} attractions for "${destination}"`);
         return results;
       }
     } catch (error) {
@@ -1852,7 +1852,7 @@ export async function searchAttractionsMultiQueryWithFallback(
     }
   }
 
-  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for attractions "${destination}"`);
+  console.debug(`[Places Wrapper] Falling back to SerpAPI for attractions "${destination}"`);
   return searchAttractionsMultiQuery(destination, cityCenter, options);
 }
 
@@ -1869,7 +1869,7 @@ export async function searchMustSeeWithFallback(
     try {
       const results = await searchMustSeeGooglePlaces(mustSee, destination, cityCenter);
       if (results.length > 0) {
-        console.log(`[Places Wrapper] ✅ Google Places returned ${results.length} must-see attractions`);
+        console.debug(`[Places Wrapper] Google Places returned ${results.length} must-see attractions`);
         return results;
       }
     } catch (error) {
@@ -1877,7 +1877,7 @@ export async function searchMustSeeWithFallback(
     }
   }
 
-  console.log(`[Places Wrapper] ⚠️ Falling back to SerpAPI for must-see attractions`);
+  console.debug(`[Places Wrapper] Falling back to SerpAPI for must-see attractions`);
   return searchMustSeeAttractions(mustSee, destination, cityCenter);
 }
 

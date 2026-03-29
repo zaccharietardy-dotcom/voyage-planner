@@ -86,7 +86,9 @@ export async function POST(request: Request) {
         action: 'trip_created',
         details: { destination: trip.destination, tripType: 'past' },
       });
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.error('[trips/past] activity_log insert failed:', e);
+    }
 
     return NextResponse.json({ ...trip, userRole: 'owner' });
   } catch (error) {

@@ -1,0 +1,366 @@
+{
+  "tripId": "da60a8a3-d870-40aa-b290-8aa9ee87fa38",
+  "scenarioId": "paris-rome-4d",
+  "generatedAt": "2026-02-14T22:43:30.208Z",
+  "destination": "Rome",
+  "summary": {
+    "totalIssues": 13,
+    "critical": 0,
+    "warning": 6,
+    "info": 7,
+    "score": 97,
+    "weightedScore": 97
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "geography": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 97,
+      "critical": 0,
+      "warning": 0,
+      "info": 4,
+      "totalIssues": 4,
+      "weightedPenalty": 2.8
+    },
+    "rhythm": {
+      "score": 95,
+      "critical": 0,
+      "warning": 1,
+      "info": 2,
+      "totalIssues": 3,
+      "weightedPenalty": 4.9
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ]
+    },
+    {
+      "key": "geography:Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre"
+      ]
+    },
+    {
+      "key": "geography:Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14.1km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): colisée",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): colisée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 50min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: seulement 50min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 3,
+      "impactScore": 3,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "Jour 3: \"Piazza di Spagna\" n'a pas de description",
+        "Jour 3: \"Musées Capitolins\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "schedule:Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol ",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)",
+        "dayNumber": 4,
+        "details": {
+          "gapMinutes": 310
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — La locanda del tempio",
+        "details": {
+          "distanceKm": 15
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: restaurant \"Déjeuner — Benso 215\" est à 16.4km du centre",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — Benso 215",
+        "details": {
+          "distanceKm": 16
+        }
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+        "dayNumber": 4,
+        "itemTitle": "Petit-déjeuner à l'hôtel"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Musées du Vatican",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Piazza di Spagna\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Piazza di Spagna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Musées Capitolins\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Musées Capitolins",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 3: seulement 50min de temps libre — pas de pause",
+        "dayNumber": 3,
+        "details": {
+          "freeMinutes": 50,
+          "occupiedMinutes": 515
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (2 activités) vs jour 2 (8 activités) — déséquilibre important",
+        "details": {
+          "day1": 2,
+          "day2": 8
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+        "details": {
+          "day1": 6,
+          "day2": 1
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): colisée",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "colisée"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Petit-déjeuner — TE cioccolateria - TE Caffè\" à 14.1km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Petit-déjeuner — TE cioccolateria - TE Caffè",
+        "details": {
+          "distKm": "14.1",
+          "gapMin": 0
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 27,
+    "activitiesCount": 9,
+    "restaurantsCount": 8,
+    "avgItemsPerDay": 6.75,
+    "totalEstimatedCost": 753,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

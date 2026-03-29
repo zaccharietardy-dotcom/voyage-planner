@@ -197,40 +197,44 @@ export function DraggableActivity({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-9 w-9"
+                      aria-label="Monter"
                       onClick={(e) => { e.stopPropagation(); onMoveUp(); }}
                     >
-                      <ChevronUp className="h-3.5 w-3.5" />
+                      <ChevronUp className="h-4 w-4" />
                     </Button>
                   )}
                   {!isLast && onMoveDown && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-9 w-9"
+                      aria-label="Descendre"
                       onClick={(e) => { e.stopPropagation(); onMoveDown(); }}
                     >
-                      <ChevronDown className="h-3.5 w-3.5" />
+                      <ChevronDown className="h-4 w-4" />
                     </Button>
                   )}
                   {onEdit && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-9 w-9"
+                      aria-label="Modifier"
                       onClick={(e) => { e.stopPropagation(); onEdit(); }}
                     >
-                      <Pencil className="h-3.5 w-3.5" />
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   )}
                   {onDelete && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      className="h-9 w-9 text-destructive hover:text-destructive"
+                      aria-label="Supprimer"
                       onClick={(e) => { e.stopPropagation(); onDelete(); }}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
                 </div>

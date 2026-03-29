@@ -421,7 +421,7 @@ export function insertDay(
   // Get local meal times for this destination
   const localMealTimes = destination ? getMealTimes(destination) : { breakfast: '09:00', lunch: '12:30', dinner: '19:30' };
 
-  const newDays: TripDay[] = JSON.parse(JSON.stringify(days));
+  const newDays: TripDay[] = structuredClone(days);
 
   // Coordonnées par défaut (hôtel ou centre approximatif du trip)
   const defaultLat = accommodation?.latitude || days[0]?.items?.[0]?.latitude || 0;

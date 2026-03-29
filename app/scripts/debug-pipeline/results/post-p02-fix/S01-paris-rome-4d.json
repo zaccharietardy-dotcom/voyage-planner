@@ -1,0 +1,2647 @@
+{
+  "scenarioId": "paris-rome-4d",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Rome",
+    "startDate": "2026-05-06T09:00:00.000Z",
+    "durationDays": 4,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Colisée, Vatican",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Rome",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "783d9cb8-6391-412a-8b39-7ed66a1fba20",
+    "createdAt": "2026-03-19T09:22:54.541Z",
+    "updatedAt": "2026-03-19T09:22:54.541Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Rome",
+      "startDate": "2026-05-06T09:00:00.000Z",
+      "durationDays": 4,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Colisée, Vatican",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Rome",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-05-06T09:00:00.000Z",
+        "items": [
+          {
+            "id": "d101f3ad-85ac-4f63-8843-39863116615e",
+            "dayNumber": 1,
+            "startTime": "14:55",
+            "endTime": "17:00",
+            "type": "flight",
+            "title": "ORY → FCO",
+            "description": "Vol TO TO 3918",
+            "locationName": "Aéroport de Paris-Orly",
+            "latitude": 48.7262,
+            "longitude": 2.3652,
+            "orderIndex": 0,
+            "duration": 125,
+            "flight": {
+              "id": "serp-TO 3918-2026-05-06",
+              "airline": "TO",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+              "flightNumber": "TO 3918",
+              "departureAirport": "Aéroport de Paris-Orly",
+              "departureAirportCode": "ORY",
+              "departureCity": "ORY",
+              "departureTime": "2026-05-06T12:55:00.000Z",
+              "departureTimeDisplay": "14:55",
+              "arrivalAirport": "Aéroport Léonard-de-Vinci de Rome Fiumicino",
+              "arrivalAirportCode": "FCO",
+              "arrivalCity": "FCO",
+              "arrivalTime": "2026-05-06T15:00:00.000Z",
+              "arrivalTimeDisplay": "17:00",
+              "duration": 125,
+              "stops": 0,
+              "price": 222,
+              "pricePerPerson": 111,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/ORY0605FCO2?currency=eur&locale=fr"
+            },
+            "flightAlternatives": [],
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 222,
+            "bookingUrl": "https://www.aviasales.com/search/ORY0605FCO2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/ORY0605FCO09052?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/ory/fco?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "18:30",
+            "endTime": "18:45",
+            "type": "checkin",
+            "title": "Check-in — Rome Ciampino Smart Hotel",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Rome Ciampino Smart Hotel",
+            "latitude": 41.8026541,
+            "longitude": 12.5972869,
+            "orderIndex": 1,
+            "duration": 15,
+            "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop",
+            "estimatedCost": 0,
+            "accommodation": {
+              "id": "serp-hotel-ChoI7bSYnPHBzI_QARoNL2cvMTFsZDJyXzhrbBAB",
+              "name": "Rome Ciampino Smart Hotel",
+              "type": "hotel",
+              "address": "Via S. Francesco D'Assisi, 58, 00043 Ciampino RM, Italy",
+              "latitude": 41.8026541,
+              "longitude": 12.5972869,
+              "rating": 9.4,
+              "reviewCount": 305,
+              "stars": 3,
+              "pricePerNight": 103,
+              "totalPrice": 309,
+              "currency": "EUR",
+              "amenities": [
+                "Free breakfast",
+                "Free Wi-Fi",
+                "Air conditioning",
+                "Pet-friendly",
+                "Restaurant",
+                "Airport shuttle",
+                "Accessible"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://romeciampinosmarthotel.com/?utm_source=google_maps&utm_medium=organic&utm_campaign=mybusiness",
+              "distanceToCenter": 13.9,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": true,
+              "dataReliability": "verified"
+            }
+          },
+          {
+            "id": "travel-1-4",
+            "dayNumber": 1,
+            "startTime": "19:20",
+            "endTime": "19:30",
+            "type": "transport",
+            "title": "Marche — 588m",
+            "description": "Temps libre — Exploration du quartier → Fontaine de Trevi",
+            "locationName": "",
+            "latitude": 41.9009,
+            "longitude": 12.4833,
+            "orderIndex": 2,
+            "duration": 10,
+            "estimatedCost": 0,
+            "transportToPrevious": "walk",
+            "distanceFromPrevious": 0.5881991375870567,
+            "timeFromPrevious": 10
+          },
+          {
+            "id": "trevi-fountain",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "20:00",
+            "type": "activity",
+            "title": "Fontaine de Trevi",
+            "description": "Fontaine baroque monumentale",
+            "locationName": "Fontaine de Trevi",
+            "latitude": 41.9009,
+            "longitude": 12.4833,
+            "orderIndex": 3,
+            "duration": 30,
+            "rating": 4.7,
+            "estimatedCost": 0,
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Trevi%20Fountain%20Underground%20Rome%20Tour",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fontaine%20de%20Trevi&query=41.9009,12.4833",
+            "mustSee": true,
+            "openingHours": {
+              "open": "00:00",
+              "close": "23:59"
+            }
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "20:10",
+            "endTime": "21:40",
+            "type": "restaurant",
+            "title": "Dîner — Pane e Salame",
+            "description": "Dîner à Pane e Salame",
+            "locationName": "Pane e Salame",
+            "latitude": 41.900628999999995,
+            "longitude": 12.481772,
+            "orderIndex": 4,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJV_Yr41JgLxMRQZaiulxyYN4",
+              "name": "Pane e Salame",
+              "address": "Via Santa Maria in Via, 19, Roma",
+              "latitude": 41.900628999999995,
+              "longitude": 12.481772,
+              "rating": 4.8,
+              "reviewCount": 8161,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "italian",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Brasserie moderne branchée et retirée, connue pour ses assiettes de fromages et de charcuterie avec vins italiens."
+              ],
+              "description": "Brasserie moderne branchée et retirée, connue pour ses assiettes de fromages et de charcuterie avec vins italiens.",
+              "phoneNumber": "06 679 1352",
+              "website": "https://www.facebook.com/panesalameroma/",
+              "googleMapsUrl": "https://maps.google.com/?cid=16023933216777999937&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWtbHR7EUI3kOx5_gzpkRaYVHBuKJjCDhcXXqsPO7hycj-KAFtJomaESUW8wbrskhwQPlmjfzdcegjSN4kvm0TR1Q9xY1cSayuQiG2UDwxaKnRJZDa5Y1mY5cb7Lwyp7jgrmSkiuhH_Vdl5sRG4--yWWy1qFpyhTH3hNzSU92qlANOi4gEZVQVrShArI-47xc9rqQSgRNVOIvthQajXqfzUNcOECHDe2UK5Q9i9eZ5tm8JwPqBjUWwCUJdMDV4tEUCIm4GDQfdX__QWhya-NXOA3kym7EWiVFAJeCAoXGEKiw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJV_Yr41JgLxMRQZaiulxyYN4",
+              "openingHours": {
+                "sunday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.5592696796193952,
+              "walkingTime": 7,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJNfvaqE1gLxMRlswHIiAOnUA",
+                "name": "Scholars Lounge Irish Pub",
+                "address": "Via del Plebiscito, 101B, Roma",
+                "latitude": 41.8962487,
+                "longitude": 12.4799183,
+                "rating": 4.2,
+                "reviewCount": 8701,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Plats de bar, whisky et bières proposés dans un pub simple organisant des concerts et des soirées quiz."
+                ],
+                "description": "Plats de bar, whisky et bières proposés dans un pub simple organisant des concerts et des soirées quiz.",
+                "phoneNumber": "06 6920 2208",
+                "website": "http://www.scholarsloungerome.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=4655893120943639702&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVKObWnJrU9j_0uVslmjIybuqQ_YEyFzYTlCmJb1_qy_PizV-XjBwbS0teVQVso04zqGZ4CLVF-Bb5DSzmIGlPOroGJhmgE5cgfThijXQzUf_vbYb4c6uVs7yxIjgx3aE3EggXNCw6eRi0ub_dcWYPoDyAPylZS2mwaEUDdJwGmABl1cICcs4YbEgrkOTMnE4nAjGm9SFT3sGHl_ZN8rFr7A-oVkGXG3iT5OaAlz16VFk6OfJv0NcNDRhgxg53aMKErzJX1Jx-QtfcgqVMfuSzPBNcDHZDUODQvxeOCd4EFnFPkHLTpRXnp2l_4QBbEjgo7nY6LQNpWlNzZdMP1JKhPh33smKtSEzs-endPGJpFjMCuk2j57DIqqWKIbvGXNJvwaIvpsB9gGZCEwiTevwpP6NxFrCgQ8phcQvz8cdMmDV4&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJNfvaqE1gLxMRlswHIiAOnUA",
+                "openingHours": {
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "03:30"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "saturday": {
+                    "open": "10:00",
+                    "close": "03:30"
+                  }
+                },
+                "distance": 0.3484327163705279,
+                "walkingTime": 4,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJG4e8u_RhLxMRSKc4HUIxmpI",
+                "name": "Oro Bistrot",
+                "address": "Via di S. Eufemia, 19, Roma",
+                "latitude": 41.8961556,
+                "longitude": 12.4849047,
+                "rating": 4.4,
+                "reviewCount": 2041,
+                "priceLevel": 4,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Brasserie chic sur toit-terrasse proposant cuisine raffinée et menus de dégustation dans hôtel NH Collection Roma Fori Imperiali."
+                ],
+                "description": "Brasserie chic sur toit-terrasse proposant cuisine raffinée et menus de dégustation dans hôtel NH Collection Roma Fori Imperiali.",
+                "phoneNumber": "349 889 2632",
+                "website": "https://www.orobistrot.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=10563810035978774344&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVzUg3gn9DJ_SU-cLe5xlikqGEo1muI67zhMYF_txd2Mx4gMu3vgf0zkBonbFqdFf7L7nlYYgurYcaaXuyHV91XNnZaqeAEM2uOrPzTPEUXbESXndJGZl1bo2blx7GjutjmeP8-qiUDIFGDldRUZ7nIt7CGyFjm3ePanwLMnEbU5D-cwRxapJk8cDIHLOQAFr9fjEnR2zKlI-SgHZ2jZ3wyg1GTB0I3BEITirgyTBqxB9WAscUK5HsSIz3bj-bR1r_Nqkk63IrQxlzj086ZfangWYohScCV-XWdBusiJl_xyQ&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJG4e8u_RhLxMRSKc4HUIxmpI",
+                "openingHours": {
+                  "sunday": {
+                    "open": "13:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "13:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "13:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "13:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "13:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "13:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "13:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.07182966559912043,
+                "walkingTime": 1,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 15,
+            "bookingUrl": "https://maps.google.com/?cid=16023933216777999937&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJV_Yr41JgLxMRQZaiulxyYN4",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "12:00",
+                "close": "22:00"
+              },
+              "monday": {
+                "open": "12:00",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "12:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "12:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "12:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "12:00",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "12:00",
+                "close": "22:00"
+              }
+            }
+          }
+        ],
+        "theme": "Première découverte",
+        "dayNarrative": "Journée centrée sur Fontaine de Trevi."
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-05-07T09:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Rome Ciampino Smart Hotel",
+            "description": "Petit-déjeuner à Rome Ciampino Smart Hotel",
+            "locationName": "Rome Ciampino Smart Hotel",
+            "latitude": 41.8026541,
+            "longitude": 12.5972869,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "hotel-breakfast-rome-ciampino-smart-hotel",
+              "name": "Rome Ciampino Smart Hotel",
+              "address": "Rome Ciampino Smart Hotel",
+              "latitude": 41.8026541,
+              "longitude": 12.5972869,
+              "rating": 4,
+              "reviewCount": 0,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "breakfast",
+                "hotel"
+              ],
+              "dietaryOptions": [],
+              "openingHours": {},
+              "description": "Petit-déjeuner servi à Rome Ciampino Smart Hotel"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4,
+            "estimatedCost": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rome%20Ciampino%20Smart%20Hotel",
+            "openingHoursByDay": {}
+          },
+          {
+            "id": "travel-2-1",
+            "dayNumber": 2,
+            "startTime": "09:30",
+            "endTime": "09:40",
+            "type": "transport",
+            "title": "Marche — 464m",
+            "description": "Rome Ciampino Smart Hotel → musées du Vatican",
+            "locationName": "",
+            "latitude": 41.9062675,
+            "longitude": 12.4527441,
+            "orderIndex": 1,
+            "duration": 10,
+            "estimatedCost": 0,
+            "transportToPrevious": "walk",
+            "distanceFromPrevious": 0.4635459980609664,
+            "timeFromPrevious": 10
+          },
+          {
+            "id": "osm-Q182955",
+            "dayNumber": 2,
+            "startTime": "09:40",
+            "endTime": "12:40",
+            "type": "activity",
+            "title": "musées du Vatican",
+            "description": "ensemble de musées dans la Cité du Vatican",
+            "locationName": "musées du Vatican",
+            "latitude": 41.9062675,
+            "longitude": 12.4527441,
+            "orderIndex": 2,
+            "duration": 180,
+            "rating": 4.1338934190276815,
+            "estimatedCost": 17,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Mura_vaticane_-_ingresso_ai_Musei_00410.JPG/400px-Mura_vaticane_-_ingresso_ai_Musei_00410.JPG",
+            "bookingUrl": "http://www.museivaticani.va",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=mus%C3%A9es%20du%20Vatican&query=41.9062675,12.4527441",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            },
+            "officialBookingUrl": "https://tickets.museivaticani.va/home",
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=mus%C3%A9es%20du%20Vatican%20Rome"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "12:50",
+            "endTime": "14:05",
+            "type": "restaurant",
+            "title": "Déjeuner — Pastasciutta",
+            "description": "Déjeuner à Pastasciutta",
+            "locationName": "Pastasciutta",
+            "latitude": 41.9046721,
+            "longitude": 12.458083799999999,
+            "orderIndex": 3,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJvXHn32ZgLxMRm_G_okClNeE",
+              "name": "Pastasciutta",
+              "address": "Via delle Grazie, 5, Roma",
+              "latitude": 41.9046721,
+              "longitude": 12.458083799999999,
+              "rating": 4.7,
+              "reviewCount": 9659,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "349 258 6793",
+              "website": "http://www.pastasciuttaroma.it/",
+              "googleMapsUrl": "https://maps.google.com/?cid=16228058529326428571&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXOI9mP0jtE1FVTB9QyhUOnWVDILvdB7xXD4y61V44vyynp4dhGCgITbcZy_2UqVTwC4QaIoCrH9wHMyP7o-2pGFkzH8F1aCDEgWhC_DrMKKztt90MYSEu-B6K2O3Z72C1Kq-GkQ-1tSRMZ1MUDAWbQ0Dc1dHq3iECOe-wszevCfaONtYPkgqDakC_b90Ss_bJ0I1RjBuglpCDCwduE6WPVY-2gwXSg69mWP2u95NsbFnSw5FDCgaBUBe_aUfRr_HI6Zicttu_ipuvv58ni5CfQrD1_M70vx6nrk26B1HmTPg&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJvXHn32ZgLxMRm_G_okClNeE",
+              "openingHours": {
+                "sunday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.4635685580840163,
+              "walkingTime": 6,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJk9b_C0lhLxMRVZU0LFFikiQ",
+                "name": "Tonnarello San Pietro",
+                "address": "Via del Mascherino, 80, Roma",
+                "latitude": 41.9048543,
+                "longitude": 12.4589588,
+                "rating": 4.8,
+                "reviewCount": 7759,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 4544 8433",
+                "website": "https://www.tonnarellosanpietro.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=2635276832738678101&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXJ6FcOaTUdd6JDZctIKI6mcNXBjgzrVSqB-TyJx2grYCy7RzmiDhjSmSvMyU3jVVRj9npSdOn3uFwgJaeDkw2HJwYlPIbzDRUL5vOioPx0oT9nvXxMF1_75z0JRiAG20X4E_mH5Nh2TAeKrWh_B84pjKkq9QrZq9O1DyAB7xr75Jaz0inTI1t0c8D30PY3CHSsAU34GrI4lw0y_Jmv6DGFCkMSYHrFoiQyQZLAJ8AoNiyKVrg2FA_Hm_YeHKoaWgm1GK1ZZkkCsttHarXRWo7zxUb8ccaUYuTSMqo5m53nEOY_aSQScgEVFGUlA8MMTgZyErFY3oiwEUAxTLpc_6k7eQ7hQEjAtya9i48wI4wC_mEVTdnwzPrmzsxA9nolJEUSRtSvMVRyf3B8NX6W-a2iNNLl4YDOr35bjFKaJ147vg_Z&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJk9b_C0lhLxMRVZU0LFFikiQ",
+                "openingHours": {
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.44410894198505174,
+                "walkingTime": 6,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJSWoYoJOTLxMRhHtF68_8CAo",
+                "name": "Ristorante Da Marcello",
+                "address": "Borgo Pio, 87, Roma",
+                "latitude": 41.903847,
+                "longitude": 12.459047,
+                "rating": 4.6,
+                "reviewCount": 6488,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "pizza",
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "https://www.google.com/search?ie=UTF-8&client=ms-android-samsung-rvo1&source=android-browser&q=ristorante+da+marcello+borgo+pio",
+                "googleMapsUrl": "https://maps.google.com/?cid=723105710128593796&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUCGB7mu7alyQcdFLymIefxcG530ZwXe_7zKsl6d9B_R5NlMMKmm_pQXsxzirt4lytEYqFdcZ78UU28BVOR0_cGZqB3-lUNV_ikXb4HntPn0QKIyeDhR14KYVPXvBq0gRfZ1lOsXdvXanji-9wtD8qq6ob5SEgtSjxFp99MaZsM7vK6YE2WXh_Acfv42-1YvxGet5NPPb-As5Te0OBsQgWuLPI6HqvcfVD4HxLCOhiik7pzM04INbIQyQHs2PwwQ06iCF5ISJMYhwkn0rU7ePehl5H3mT4xTx3oZmlvpcCLFA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJSWoYoJOTLxMRhHtF68_8CAo",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  }
+                },
+                "distance": 0.34287653864496975,
+                "walkingTime": 4,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 15,
+            "bookingUrl": "https://maps.google.com/?cid=16228058529326428571&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJvXHn32ZgLxMRm_G_okClNeE",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "monday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "tuesday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "wednesday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "thursday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "friday": {
+                "open": "10:00",
+                "close": "22:00"
+              },
+              "saturday": {
+                "open": "10:00",
+                "close": "22:00"
+              }
+            }
+          },
+          {
+            "id": "travel-2-4",
+            "dayNumber": 2,
+            "startTime": "14:20",
+            "endTime": "14:30",
+            "type": "transport",
+            "title": "Marche — 414m",
+            "description": "Pastasciutta → basilique Saint-Pierre",
+            "locationName": "",
+            "latitude": 41.8980142,
+            "longitude": 12.471566,
+            "orderIndex": 4,
+            "duration": 10,
+            "estimatedCost": 0,
+            "transportToPrevious": "walk",
+            "distanceFromPrevious": 0.41413036536165215,
+            "timeFromPrevious": 10
+          },
+          {
+            "id": "osm-Q12512",
+            "dayNumber": 2,
+            "startTime": "14:30",
+            "endTime": "15:30",
+            "type": "activity",
+            "title": "basilique Saint-Pierre",
+            "description": "basilique catholique de la Cité du Vatican",
+            "locationName": "basilique Saint-Pierre",
+            "latitude": 41.9021616,
+            "longitude": 12.4537132,
+            "orderIndex": 5,
+            "duration": 60,
+            "rating": 4.616244071283537,
+            "estimatedCost": 0,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/400px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+            "bookingUrl": "https://www.basilicasanpietro.va/",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=basilique%20Saint-Pierre&query=41.9021616,12.4537132",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            }
+          },
+          {
+            "id": "free-time-2-5",
+            "dayNumber": 2,
+            "startTime": "15:40",
+            "endTime": "17:30",
+            "type": "free_time",
+            "title": "Temps libre — Exploration du quartier",
+            "description": "Profitez de ce temps libre pour flâner dans le quartier, faire du shopping ou prendre un café",
+            "locationName": "",
+            "latitude": 41.9021616,
+            "longitude": 12.4537132,
+            "orderIndex": 6,
+            "duration": 110,
+            "imageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Ristorante Pizzeria Castello",
+            "description": "Dîner à Ristorante Pizzeria Castello",
+            "locationName": "Ristorante Pizzeria Castello",
+            "latitude": 41.8992088,
+            "longitude": 12.456399200000002,
+            "orderIndex": 7,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJAafz_llhLxMRvj5gJU5jiys",
+              "name": "Ristorante Pizzeria Castello",
+              "address": "Via delle Fornaci, 27, Roma",
+              "latitude": 41.8992088,
+              "longitude": 12.456399200000002,
+              "rating": 4.7,
+              "reviewCount": 16180,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "pizza",
+                "seafood",
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant avec patio au style détendu, proposant pizzas, pâtes et plats traditionnels, ainsi que café et vin."
+              ],
+              "description": "Restaurant avec patio au style détendu, proposant pizzas, pâtes et plats traditionnels, ainsi que café et vin.",
+              "phoneNumber": "06 632690",
+              "website": "http://ristorantepizzeriacastello.com/",
+              "googleMapsUrl": "https://maps.google.com/?cid=3137710752679345854&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVczmq7lY6jpz00rXF-_MJUQcO9HN6qUW2zIyg0CPyYZIdLQQaSq0-5Y7sinaZH3WmNjzMHAYbDKrvxvc67leeOMuWmYiPeDFziEGCBMj00YyiPU1dfmNfDbHnk__gpzAQuGdbhS8iMukVkgjBpLyAj2xweyTDzeUo0_LUeUAZuy1v4Vm8e0TrrnEp1F-yb1bFcmb4ggq8PYoZcOihVtYtE6ZXBzLLbrxkCPO_1hNP0RhDCaGk7wnnkvdlcI9EsNZRlLbOV0Aeb2aWmBE_gC_QBN1Cc1ZvtnvEMZXTh4HkeVA&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJAafz_llhLxMRvj5gJU5jiys",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "11:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.46630077974464496,
+              "walkingTime": 6,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJk9b_C0lhLxMRVZU0LFFikiQ",
+                "name": "Tonnarello San Pietro",
+                "address": "Via del Mascherino, 80, Roma",
+                "latitude": 41.9048543,
+                "longitude": 12.4589588,
+                "rating": 4.8,
+                "reviewCount": 7759,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "06 4544 8433",
+                "website": "https://www.tonnarellosanpietro.it/",
+                "googleMapsUrl": "https://maps.google.com/?cid=2635276832738678101&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXJ6FcOaTUdd6JDZctIKI6mcNXBjgzrVSqB-TyJx2grYCy7RzmiDhjSmSvMyU3jVVRj9npSdOn3uFwgJaeDkw2HJwYlPIbzDRUL5vOioPx0oT9nvXxMF1_75z0JRiAG20X4E_mH5Nh2TAeKrWh_B84pjKkq9QrZq9O1DyAB7xr75Jaz0inTI1t0c8D30PY3CHSsAU34GrI4lw0y_Jmv6DGFCkMSYHrFoiQyQZLAJ8AoNiyKVrg2FA_Hm_YeHKoaWgm1GK1ZZkkCsttHarXRWo7zxUb8ccaUYuTSMqo5m53nEOY_aSQScgEVFGUlA8MMTgZyErFY3oiwEUAxTLpc_6k7eQ7hQEjAtya9i48wI4wC_mEVTdnwzPrmzsxA9nolJEUSRtSvMVRyf3B8NX6W-a2iNNLl4YDOr35bjFKaJ147vg_Z&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJk9b_C0lhLxMRVZU0LFFikiQ",
+                "openingHours": {
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "friday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.44410894198505174,
+                "walkingTime": 6,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJSWoYoJOTLxMRhHtF68_8CAo",
+                "name": "Ristorante Da Marcello",
+                "address": "Borgo Pio, 87, Roma",
+                "latitude": 41.903847,
+                "longitude": 12.459047,
+                "rating": 4.6,
+                "reviewCount": 6488,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "pizza",
+                  "italian"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "https://www.google.com/search?ie=UTF-8&client=ms-android-samsung-rvo1&source=android-browser&q=ristorante+da+marcello+borgo+pio",
+                "googleMapsUrl": "https://maps.google.com/?cid=723105710128593796&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUCGB7mu7alyQcdFLymIefxcG530ZwXe_7zKsl6d9B_R5NlMMKmm_pQXsxzirt4lytEYqFdcZ78UU28BVOR0_cGZqB3-lUNV_ikXb4HntPn0QKIyeDhR14KYVPXvBq0gRfZ1lOsXdvXanji-9wtD8qq6ob5SEgtSjxFp99MaZsM7vK6YE2WXh_Acfv42-1YvxGet5NPPb-As5Te0OBsQgWuLPI6HqvcfVD4HxLCOhiik7pzM04INbIQyQHs2PwwQ06iCF5ISJMYhwkn0rU7ePehl5H3mT4xTx3oZmlvpcCLFA&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJSWoYoJOTLxMRhHtF68_8CAo",
+                "openingHours": {
+                  "sunday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "monday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "tuesday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "wednesday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "thursday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "friday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  },
+                  "saturday": {
+                    "open": "11:30",
+                    "close": "21:30"
+                  }
+                },
+                "distance": 0.34287653864496975,
+                "walkingTime": 4,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.7,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=3137710752679345854&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJAafz_llhLxMRvj5gJU5jiys",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:00",
+                "close": "23:00"
+              },
+              "monday": {
+                "open": "11:00",
+                "close": "23:00"
+              },
+              "tuesday": {
+                "open": "11:00",
+                "close": "23:00"
+              },
+              "wednesday": {
+                "open": "11:00",
+                "close": "23:00"
+              },
+              "thursday": {
+                "open": "11:00",
+                "close": "23:00"
+              },
+              "friday": {
+                "open": "11:00",
+                "close": "23:00"
+              },
+              "saturday": {
+                "open": "11:00",
+                "close": "23:00"
+              }
+            }
+          }
+        ],
+        "theme": "Art et culture",
+        "dayNarrative": "Découvrez musées du Vatican puis basilique Saint-Pierre."
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-05-08T09:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-3-breakfast",
+            "dayNumber": 3,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Rome Ciampino Smart Hotel",
+            "description": "Petit-déjeuner à Rome Ciampino Smart Hotel",
+            "locationName": "Rome Ciampino Smart Hotel",
+            "latitude": 41.8026541,
+            "longitude": 12.5972869,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "hotel-breakfast-rome-ciampino-smart-hotel",
+              "name": "Rome Ciampino Smart Hotel",
+              "address": "Rome Ciampino Smart Hotel",
+              "latitude": 41.8026541,
+              "longitude": 12.5972869,
+              "rating": 4,
+              "reviewCount": 0,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "breakfast",
+                "hotel"
+              ],
+              "dietaryOptions": [],
+              "openingHours": {},
+              "description": "Petit-déjeuner servi à Rome Ciampino Smart Hotel"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4,
+            "estimatedCost": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rome%20Ciampino%20Smart%20Hotel",
+            "openingHoursByDay": {}
+          },
+          {
+            "id": "travel-3-1",
+            "dayNumber": 3,
+            "startTime": "09:30",
+            "endTime": "10:00",
+            "type": "transport",
+            "title": "Transport en commun — 32.5km",
+            "description": "Rome Ciampino Smart Hotel → Rome : Séance de photos privée au Colisée avec un photographe local",
+            "locationName": "",
+            "latitude": 41.946135299999995,
+            "longitude": 12.772902199999999,
+            "orderIndex": 1,
+            "duration": 30,
+            "estimatedCost": 0,
+            "routePolylineFromPrevious": "cqc~Fql{kA_AmBcDhDYXC@EBCF?DYRENw@z@kAnA}BfCc@h@u@fB[h@SX}BlCwB~B_F~FgE|EqElF[b@K^Cb@Hf@dAvBfCbFf@|AN~@DfA@j@Ez@MfAOr@Yv@Wh@S\\_AfAcDpDQb@CZB^FRfAtCdDzIrAnD@LVt@\\fAf@jBx@zBDPB\\E^KZ[VUHUFe@BaAAKHYASA[@o@J}Cn@gDr@_@HEAK?w@Lo@JiF`A]?SC[My@g@mBkA{A{@e@Kg@UUM}A{@wBqAsBkAoF_DcHcE{LiHwJqF{PoJcJuEcE{BaEiCi@WsCgBoEeCwAu@_Ai@oAu@cDwBaBcA_EyBiJ}E{G_DyBcAoGkCiJgEsJoE{DgBoBw@uBu@qBo@eCm@{K}Bwb@uImNoCmJgB_KuBeAYaC{@{Am@sFgCi]_Pqd@}S{r@a\\{IaE{EwBqDoAiCq@oE}@iC[oCUcDQiGGcYYwg@g@mh@g@wHGsFGaA@kAHsAReAXcA\\m@VcAl@yAdA_CbBi@^M?M?KF[R_B~@cBlAQJKDe@PWFs@Dy@CoDi@aAQqA]c@QYQWWY_@O_@i@wA}@wCi@qBUg@a@aBk@aD_@iCYmDYaGKkFH_Gv@iTVyGX}HLmGFyE@mEIaK_@iO[cKm@ySC{DA_EHeEV}E\\kDx@oFz@uDl@yB^kAlAaDd@iAzC_GvBgElAoC~@gC~@_Dj@}Bj@qCn@iEXaCXmELaDDyFGaEM}CMkBSuB[kCeAyGuAmI_BqJqB{LaI_f@cNwy@w@mFc@uDk@mFOSCQu@_K[{FWkGO{EU_IA}@@iEFiBBa@Ec@HcADsF?uAEyCi@qK_@mIQcFGeEa@u\\s@ep@}@ku@gBu~AMoKSmOGyHDU@u@BiADk@TsARs@p@uAf@}@fBkCZ{@Te@|@{An@uAPu@L{@BoAGk@Ki@Sc@c@k@MMWK_AWiAKe@@w@Fq@Po@Xo@^{@r@qChCk@h@y@v@SJo@l@kAjAaAl@k@n@yBlBqAjAq@PqF\\aCLy@LeGv@mAHcAEq@OsC_Ao@QcAO_FKuRk@_@K]Q_@c@g@uAKg@m@sGIgAMm@Uk@S_@U][Yc@Wc@OkB_@i@E_A]c@Ii@SYEaAGcAM{AUkFiAmAWX_ESyAaCeOsAsIa@{AGaAA[E}@GoASuAcAmFUw@i@uAY{@Xc@j@eAv@sAhCmDpB}C~@eBVe@vAh@PFv@Fz@TJUPRp@r@|@~@@?LUHF",
+            "transportToPrevious": "public",
+            "distanceFromPrevious": 32.543,
+            "timeFromPrevious": 30
+          },
+          {
+            "id": "viator-5499038P2",
+            "dayNumber": 3,
+            "startTime": "10:00",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Rome : Séance de photos privée au Colisée avec un",
+            "description": "Profitez d'une séance photo privée avec Eidos Photography au Colisée et ses points de vue les plus photogéniques, dirigée par un photographe local axé sur la pose naturelle et un flux fluide et détendu. Choisissez votre itinéraire préféré (Colisée uniquement, Colisée + Colline Capitoline, ou Colisée + Forum Romain) et nous adapterons la session à votre style, votre rythme et vos plans de voyage. Idéal pour les couples, les voyageurs en solo, les familles et les propositions. Vous recevrez une galerie organisée de photos magnifiquement retouchées livrées dans les 48 heures, afin de revivre votre expérience à Rome immédiatement.",
+            "locationName": "Rome : Séance de photos privée au Colisée avec un photographe local",
+            "latitude": 41.8916325,
+            "longitude": 12.4909123,
+            "orderIndex": 2,
+            "duration": 90,
+            "rating": 5,
+            "estimatedCost": 89,
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/e7/d6/28.jpg",
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Private-Photoshoot-in-Rome-at-Colosseum-and-Surroundings/d511-5499038P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rome%20%3A%20S%C3%A9ance%20de%20photos%20priv%C3%A9e%20au%20Colis%C3%A9e%20avec%20un%20photographe%20local&query=41.8916325,12.4909123",
+            "mustSee": true,
+            "openingHours": {
+              "open": "09:00",
+              "close": "18:00"
+            },
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Excursion%20d'une%20journ%C3%A9e%20%C3%A0%20Rome%20en%20voiture%20Tivoli%20Unesco%20Rome"
+          },
+          {
+            "id": "free-time-3-2",
+            "dayNumber": 3,
+            "startTime": "11:40",
+            "endTime": "13:00",
+            "type": "free_time",
+            "title": "Temps libre — Exploration du quartier",
+            "description": "Profitez de ce temps libre pour flâner dans le quartier, faire du shopping ou prendre un café",
+            "locationName": "",
+            "latitude": 41.9200076,
+            "longitude": 12.632353299999998,
+            "orderIndex": 3,
+            "duration": 80,
+            "imageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "13:10",
+            "endTime": "14:25",
+            "type": "restaurant",
+            "title": "Déjeuner — La Nuova Piazzetta",
+            "description": "Déjeuner à La Nuova Piazzetta",
+            "locationName": "La Nuova Piazzetta",
+            "latitude": 41.89332460000001,
+            "longitude": 12.489191,
+            "orderIndex": 4,
+            "duration": 75,
+            "mealType": "lunch",
+            "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "gp-new-ChIJ5Ubf5LNhLxMRu4MpdTIaulA",
+              "name": "La Nuova Piazzetta",
+              "address": "Vicolo del Buon Consiglio, 23/a, Roma",
+              "latitude": 41.89332460000001,
+              "longitude": 12.489191,
+              "rating": 4.8,
+              "reviewCount": 47502,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "italian"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Pâtes, pizzas et autres plats classiques accompagnés de vin servis dans un restaurant sobre aux murs en briques et avec terrasse."
+              ],
+              "description": "Pâtes, pizzas et autres plats classiques accompagnés de vin servis dans un restaurant sobre aux murs en briques et avec terrasse.",
+              "phoneNumber": "351 940 4029",
+              "googleMapsUrl": "https://maps.google.com/?cid=5816990672718758843&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUirvah5UF0Za1Z2orPps5ZYoxTjtPEcG4iJsdVtSv7vYNu-IhGzyl6BltsXBZicq24gI3UJtJhLu-GPocfhxn9dSajOSmNefa6Pt0Qm6XFp5jvEkxXbWN_Jkj-KYh9NStxy3v1Tsul_Lc-5m1Ntbo-W3hP9aOKJwMcbsvC13NtHDcSx3snZ4YHYX9O8XRGSZvGH3wlG93YEu2msIUgiZDJCbDeHleScuRj1jwMqZHgYu0BaE_nkOH8TgfYOR5dFL6_lVhzOMKDHkO4AXSzX666cCjK-k4-DQgGR4vikRzkWw&maxwidth=400"
+              ],
+              "googlePlaceId": "ChIJ5Ubf5LNhLxMRu4MpdTIaulA",
+              "openingHours": {
+                "sunday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                },
+                "monday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                },
+                "tuesday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                },
+                "wednesday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                },
+                "thursday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                },
+                "friday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                },
+                "saturday": {
+                  "open": "11:30",
+                  "close": "22:30"
+                }
+              },
+              "distance": 0.5097823376607106,
+              "walkingTime": 6,
+              "dataReliability": "verified"
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "gp-new-ChIJQdzerLZhLxMRUD0OryD6mtY",
+                "name": "Iari The Vino",
+                "address": "Via Frangipane, 27, Roma",
+                "latitude": 41.892966699999995,
+                "longitude": 12.489398,
+                "rating": 4.7,
+                "reviewCount": 9722,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant intimiste avec terrasse proposant plats italiens traditionnels et pizzas."
+                ],
+                "description": "Restaurant intimiste avec terrasse proposant plats italiens traditionnels et pizzas.",
+                "phoneNumber": "06 6919 1069",
+                "website": "https://iarithevino.eatbu.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=15463947288812862800&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWc9ebV-kGvmIRN3QVa5CnM5kiPqowmkYtIpkm046Stna5eJvpu4BydiD8iOkJ3tL5qGwt-PLoBpnhDZlK8crfg-8Xz6GkNQCC43ECHihokRUJMDlKi_Z3aZAUvTAkrGs9GDJkZLFFEFqRJ9escc4usRpI_lRmJMFxcfllowoiCsJouAPyA2zJ5k3ewHzzz5fqGVQn3qLvKIfkyfThrt60bKrmvQQfUYWvecQ7hRWkUrthn6uDipbL1WIkOVm16UDAnPpl8DbUqpTRh07tkd-qvfQ5z2Ai_UL9iP81it46Kg5BvbJm36IF8VyJHdWcVwwZET9-Cs3l9eLXF6CG6EQvnkcVWg1tOEzGz4CYd4h0wi1Lq7Afpv3EBCS9oVpAioOxeHUsDeyM2jtZKDn0AVbRtnRLBSIOFHKUNBXeSiTH9KvabgDr2XiEPS6RaeEcD&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJQdzerLZhLxMRUD0OryD6mtY",
+                "openingHours": {
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "friday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.6358478121982859,
+                "walkingTime": 8,
+                "dataReliability": "verified"
+              },
+              {
+                "id": "gp-new-ChIJNfvaqE1gLxMRlswHIiAOnUA",
+                "name": "Scholars Lounge Irish Pub",
+                "address": "Via del Plebiscito, 101B, Roma",
+                "latitude": 41.8962487,
+                "longitude": 12.4799183,
+                "rating": 4.2,
+                "reviewCount": 8701,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "bar"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Plats de bar, whisky et bières proposés dans un pub simple organisant des concerts et des soirées quiz."
+                ],
+                "description": "Plats de bar, whisky et bières proposés dans un pub simple organisant des concerts et des soirées quiz.",
+                "phoneNumber": "06 6920 2208",
+                "website": "http://www.scholarsloungerome.com/",
+                "googleMapsUrl": "https://maps.google.com/?cid=4655893120943639702&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVKObWnJrU9j_0uVslmjIybuqQ_YEyFzYTlCmJb1_qy_PizV-XjBwbS0teVQVso04zqGZ4CLVF-Bb5DSzmIGlPOroGJhmgE5cgfThijXQzUf_vbYb4c6uVs7yxIjgx3aE3EggXNCw6eRi0ub_dcWYPoDyAPylZS2mwaEUDdJwGmABl1cICcs4YbEgrkOTMnE4nAjGm9SFT3sGHl_ZN8rFr7A-oVkGXG3iT5OaAlz16VFk6OfJv0NcNDRhgxg53aMKErzJX1Jx-QtfcgqVMfuSzPBNcDHZDUODQvxeOCd4EFnFPkHLTpRXnp2l_4QBbEjgo7nY6LQNpWlNzZdMP1JKhPh33smKtSEzs-endPGJpFjMCuk2j57DIqqWKIbvGXNJvwaIvpsB9gGZCEwiTevwpP6NxFrCgQ8phcQvz8cdMmDV4&maxwidth=400"
+                ],
+                "googlePlaceId": "ChIJNfvaqE1gLxMRlswHIiAOnUA",
+                "openingHours": {
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "03:30"
+                  },
+                  "monday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "tuesday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "wednesday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "thursday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "friday": {
+                    "open": "11:00",
+                    "close": "03:30"
+                  },
+                  "saturday": {
+                    "open": "10:00",
+                    "close": "03:30"
+                  }
+                },
+                "distance": 0.3484327163705279,
+                "walkingTime": 4,
+                "dataReliability": "verified"
+              }
+            ],
+            "rating": 4.8,
+            "estimatedCost": 30,
+            "bookingUrl": "https://maps.google.com/?cid=5816990672718758843&g_mp=Cilnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaE5lYXJieRACGAQgAA",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/place/?q=place_id:ChIJ5Ubf5LNhLxMRu4MpdTIaulA",
+            "openingHoursByDay": {
+              "sunday": {
+                "open": "11:30",
+                "close": "22:30"
+              },
+              "monday": {
+                "open": "11:30",
+                "close": "22:30"
+              },
+              "tuesday": {
+                "open": "11:30",
+                "close": "22:30"
+              },
+              "wednesday": {
+                "open": "11:30",
+                "close": "22:30"
+              },
+              "thursday": {
+                "open": "11:30",
+                "close": "22:30"
+              },
+              "friday": {
+                "open": "11:30",
+                "close": "22:30"
+              },
+              "saturday": {
+                "open": "11:30",
+                "close": "22:30"
+              }
+            }
+          },
+          {
+            "id": "free-time-3-3",
+            "dayNumber": 3,
+            "startTime": "14:35",
+            "endTime": "18:50",
+            "type": "free_time",
+            "title": "Temps libre — Exploration du quartier",
+            "description": "Profitez de ce temps libre pour flâner dans le quartier, faire du shopping ou prendre un café",
+            "locationName": "",
+            "latitude": 41.8755184,
+            "longitude": 12.6855406,
+            "orderIndex": 5,
+            "duration": 255,
+            "imageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "meal-self-3-dinner",
+            "dayNumber": 3,
+            "startTime": "19:00",
+            "endTime": "20:30",
+            "type": "restaurant",
+            "title": "Dîner — Repas libre",
+            "description": "Pique-nique / courses / repas maison",
+            "locationName": "Repas libre",
+            "latitude": 41.8026541,
+            "longitude": 12.5972869,
+            "orderIndex": 6,
+            "duration": 90,
+            "mealType": "dinner",
+            "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+            "estimatedCost": 0,
+            "qualityFlags": [
+              "self_meal_fallback"
+            ]
+          }
+        ],
+        "theme": "Exploration du quartier",
+        "dayNarrative": "Journée centrée sur Rome : Séance de photos privée au Colisée avec un."
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-05-09T09:00:00.000Z",
+        "items": [
+          {
+            "id": "meal-4-breakfast",
+            "dayNumber": 4,
+            "startTime": "08:30",
+            "endTime": "09:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Rome Ciampino Smart Hotel",
+            "description": "Petit-déjeuner à Rome Ciampino Smart Hotel",
+            "locationName": "Rome Ciampino Smart Hotel",
+            "latitude": 41.8026541,
+            "longitude": 12.5972869,
+            "orderIndex": 0,
+            "duration": 45,
+            "mealType": "breakfast",
+            "imageUrl": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop",
+            "restaurant": {
+              "id": "hotel-breakfast-rome-ciampino-smart-hotel",
+              "name": "Rome Ciampino Smart Hotel",
+              "address": "Rome Ciampino Smart Hotel",
+              "latitude": 41.8026541,
+              "longitude": 12.5972869,
+              "rating": 4,
+              "reviewCount": 0,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "breakfast",
+                "hotel"
+              ],
+              "dietaryOptions": [],
+              "openingHours": {},
+              "description": "Petit-déjeuner servi à Rome Ciampino Smart Hotel"
+            },
+            "restaurantAlternatives": [],
+            "rating": 4,
+            "estimatedCost": 15,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rome%20Ciampino%20Smart%20Hotel",
+            "openingHoursByDay": {}
+          },
+          {
+            "id": "checkout-4",
+            "dayNumber": 4,
+            "startTime": "09:45",
+            "endTime": "10:15",
+            "type": "checkout",
+            "title": "Check-out — Rome Ciampino Smart Hotel",
+            "description": "Libérer la chambre avant 10:15",
+            "locationName": "Rome Ciampino Smart Hotel",
+            "latitude": 41.8026541,
+            "longitude": 12.5972869,
+            "orderIndex": 1,
+            "duration": 30,
+            "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop",
+            "estimatedCost": 0
+          },
+          {
+            "id": "9c072e0f-f2af-44c5-8a6f-35dcfc027593",
+            "dayNumber": 4,
+            "startTime": "13:00",
+            "endTime": "15:10",
+            "type": "flight",
+            "title": "FCO → ORY",
+            "description": "Vol TO TO 3917",
+            "locationName": "Aéroport Léonard-de-Vinci de Rome Fiumicino",
+            "latitude": 41.8003,
+            "longitude": 12.2389,
+            "orderIndex": 2,
+            "duration": 130,
+            "flight": {
+              "id": "serp-TO 3917-2026-05-09",
+              "airline": "TO",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+              "flightNumber": "TO 3917",
+              "departureAirport": "Aéroport Léonard-de-Vinci de Rome Fiumicino",
+              "departureAirportCode": "FCO",
+              "departureCity": "FCO",
+              "departureTime": "2026-05-09T11:00:00.000Z",
+              "departureTimeDisplay": "13:00",
+              "arrivalAirport": "Aéroport de Paris-Orly",
+              "arrivalAirportCode": "ORY",
+              "arrivalCity": "ORY",
+              "arrivalTime": "2026-05-09T13:10:00.000Z",
+              "arrivalTimeDisplay": "15:10",
+              "duration": 130,
+              "stops": 0,
+              "price": 258,
+              "pricePerPerson": 129,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/FCO0905ORY2?currency=eur&locale=fr"
+            },
+            "flightAlternatives": [],
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop",
+            "estimatedCost": 258,
+            "bookingUrl": "https://www.aviasales.com/search/FCO0905ORY2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/FCO0905ORY2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/fco/ory?departure_date=2026-05-09&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "theme": "Journée de détente",
+        "dayNarrative": ""
+      }
+    ],
+    "accommodation": {
+      "id": "serp-hotel-ChoI7bSYnPHBzI_QARoNL2cvMTFsZDJyXzhrbBAB",
+      "name": "Rome Ciampino Smart Hotel",
+      "type": "hotel",
+      "address": "Via S. Francesco D'Assisi, 58, 00043 Ciampino RM, Italy",
+      "latitude": 41.8026541,
+      "longitude": 12.5972869,
+      "rating": 9.4,
+      "reviewCount": 305,
+      "pricePerNight": 103,
+      "currency": "EUR",
+      "amenities": [
+        "Free breakfast",
+        "Free Wi-Fi",
+        "Air conditioning",
+        "Pet-friendly",
+        "Restaurant",
+        "Airport shuttle",
+        "Accessible"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://romeciampinosmarthotel.com/?utm_source=google_maps&utm_medium=organic&utm_campaign=mybusiness",
+      "breakfastIncluded": true
+    },
+    "accommodationOptions": [
+      {
+        "id": "serp-hotel-ChoI7bSYnPHBzI_QARoNL2cvMTFsZDJyXzhrbBAB",
+        "name": "Rome Ciampino Smart Hotel",
+        "type": "hotel",
+        "address": "Via S. Francesco D'Assisi, 58, 00043 Ciampino RM, Italy",
+        "latitude": 41.8026541,
+        "longitude": 12.5972869,
+        "rating": 9.4,
+        "reviewCount": 305,
+        "pricePerNight": 103,
+        "currency": "EUR",
+        "amenities": [
+          "Free breakfast",
+          "Free Wi-Fi",
+          "Air conditioning",
+          "Pet-friendly",
+          "Restaurant",
+          "Airport shuttle",
+          "Accessible"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://romeciampinosmarthotel.com/?utm_source=google_maps&utm_medium=organic&utm_campaign=mybusiness",
+        "breakfastIncluded": true
+      },
+      {
+        "id": "serp-hotel-ChgI1JChr4rMxBIaDS9nLzExZjA0ZHZ3M3QQAQ",
+        "name": "B&B Jonio Roma",
+        "type": "hotel",
+        "address": "Adresse non disponible",
+        "latitude": 41.947581899999996,
+        "longitude": 12.5251957,
+        "rating": 9.4,
+        "reviewCount": 184,
+        "pricePerNight": 137,
+        "currency": "EUR",
+        "amenities": [
+          "Free breakfast",
+          "Free Wi-Fi",
+          "Parking ($)",
+          "Air conditioning",
+          "Airport shuttle",
+          "Accessible",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "http://www.jonioroma.it/",
+        "breakfastIncluded": true
+      },
+      {
+        "id": "serp-hotel-ChgIr_iU-bbSifPoARoLL2cvMXRmODk2d2wQAQ",
+        "name": "Aurelius Art Gallery Smart Hotel Rome",
+        "type": "hotel",
+        "address": "Via Aurelia, 458, 00165 Roma RM, Italy",
+        "latitude": 41.8987212,
+        "longitude": 12.425634599999999,
+        "rating": 8.8,
+        "reviewCount": 589,
+        "pricePerNight": 153,
+        "currency": "EUR",
+        "amenities": [
+          "Free breakfast",
+          "Free Wi-Fi",
+          "Parking",
+          "Air conditioning",
+          "Pet-friendly",
+          "Restaurant",
+          "Airport shuttle",
+          "Business center",
+          "Kid-friendly",
+          "Smoke-free property"
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "http://www.hotelaurelius.com/",
+        "breakfastIncluded": true
+      }
+    ],
+    "outboundFlight": {
+      "id": "serp-TO 3918-2026-05-06",
+      "airline": "TO",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+      "flightNumber": "TO 3918",
+      "departureAirport": "Aéroport de Paris-Orly",
+      "departureAirportCode": "ORY",
+      "departureCity": "ORY",
+      "departureTime": "2026-05-06T12:55:00.000Z",
+      "departureTimeDisplay": "14:55",
+      "arrivalAirport": "Aéroport Léonard-de-Vinci de Rome Fiumicino",
+      "arrivalAirportCode": "FCO",
+      "arrivalCity": "FCO",
+      "arrivalTime": "2026-05-06T15:00:00.000Z",
+      "arrivalTimeDisplay": "17:00",
+      "duration": 125,
+      "stops": 0,
+      "price": 222,
+      "pricePerPerson": 111,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/ORY0605FCO2?currency=eur&locale=fr"
+    },
+    "returnFlight": {
+      "id": "serp-TO 3917-2026-05-09",
+      "airline": "TO",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/TO.png",
+      "flightNumber": "TO 3917",
+      "departureAirport": "Aéroport Léonard-de-Vinci de Rome Fiumicino",
+      "departureAirportCode": "FCO",
+      "departureCity": "FCO",
+      "departureTime": "2026-05-09T11:00:00.000Z",
+      "departureTimeDisplay": "13:00",
+      "arrivalAirport": "Aéroport de Paris-Orly",
+      "arrivalAirportCode": "ORY",
+      "arrivalCity": "ORY",
+      "arrivalTime": "2026-05-09T13:10:00.000Z",
+      "arrivalTimeDisplay": "15:10",
+      "duration": 130,
+      "stops": 0,
+      "price": 258,
+      "pricePerPerson": 129,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/FCO0905ORY2?currency=eur&locale=fr"
+    },
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Rome",
+            "duration": 68,
+            "price": 91,
+            "co2": 177
+          }
+        ],
+        "totalDuration": 356,
+        "totalPrice": 115,
+        "totalCO2": 178,
+        "score": 8.8,
+        "scoreDetails": {
+          "priceScore": 8.3,
+          "timeScore": 10,
+          "co2Score": 8
+        },
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide, écologique"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 83,
+            "price": 111,
+            "co2": 216,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/CDG0605FCO2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 373,
+        "totalPrice": 111,
+        "totalCO2": 216,
+        "score": 8.5,
+        "scoreDetails": {
+          "priceScore": 8.4,
+          "timeScore": 9.7,
+          "co2Score": 7.5
+        },
+        "bookingUrl": "https://www.aviasales.com/search/CDG0605FCO2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/rome?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 829,
+            "price": 44,
+            "co2": 30,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/paris/rome?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult"
+          }
+        ],
+        "totalDuration": 884,
+        "totalPrice": 44,
+        "totalCO2": 30,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/bus/paris/rome?departure_date=2026-05-06&passengers%5B%5D=adult&passengers%5B%5D=adult",
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Paris",
+            "to": "Rome",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 41.9028,
+              "lng": 12.4964
+            },
+            "duration": 663,
+            "price": 238,
+            "co2": 57,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Paris/Rome"
+          }
+        ],
+        "totalDuration": 753,
+        "totalPrice": 238,
+        "totalCO2": 57,
+        "score": 5.9,
+        "scoreDetails": {
+          "priceScore": 5.3,
+          "timeScore": 2.5,
+          "co2Score": 9.6
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Paris/Rome",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "train+plane-via-lyon",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Lyon",
+            "duration": 180,
+            "price": 90,
+            "co2": 3,
+            "operator": "SNCF",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Paris&arrival=Lyon&outwardDate=2026-05-06&passengers=2"
+          },
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Rome",
+            "duration": 300,
+            "price": 370,
+            "co2": 780,
+            "operator": "VY",
+            "bookingUrl": "https://www.aviasales.com/search/LYS0605FCO2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 600,
+        "totalPrice": 460,
+        "totalCO2": 783,
+        "score": 1.8,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 5.4,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Paris&arrival=Lyon&outwardDate=2026-05-06&passengers=2"
+      }
+    ],
+    "attractionPool": [
+      {
+        "id": "viator-5499038P2",
+        "name": "Rome : Séance de photos privée au Colisée avec un photographe local",
+        "type": "culture",
+        "description": "Profitez d'une séance photo privée avec Eidos Photography au Colisée et ses points de vue les plus photogéniques, dirigée par un photographe local axé sur la pose naturelle et un flux fluide et détendu. Choisissez votre itinéraire préféré (Colisée uniquement, Colisée + Colline Capitoline, ou Colisée + Forum Romain) et nous adapterons la session à votre style, votre rythme et vos plans de voyage. Idéal pour les couples, les voyageurs en solo, les familles et les propositions. Vous recevrez une galerie organisée de photos magnifiquement retouchées livrées dans les 48 heures, afin de revivre votre expérience à Rome immédiatement.",
+        "duration": 90,
+        "estimatedCost": 45,
+        "latitude": 41.8916325,
+        "longitude": 12.4909123,
+        "rating": 5,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Private-Photoshoot-in-Rome-at-Colosseum-and-Surroundings/d511-5499038P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/e7/d6/28.jpg",
+        "providerName": "Viator",
+        "reviewCount": 102,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 124.06702293929843,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "trevi-fountain",
+        "name": "Fontaine de Trevi",
+        "type": "culture",
+        "description": "Fontaine baroque monumentale",
+        "duration": 30,
+        "estimatedCost": 0,
+        "latitude": 41.9009,
+        "longitude": 12.4833,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 106.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Trevi%20Fountain%20Underground%20Rome%20Tour",
+        "coordinateConfidenceScore": 0.5566666666666666,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "pantheon",
+        "name": "Panthéon",
+        "type": "culture",
+        "description": "Temple romain antique avec dôme impressionnant",
+        "duration": 45,
+        "estimatedCost": 5,
+        "latitude": 41.8986,
+        "longitude": 12.4769,
+        "rating": 4.8,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 102.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "roman-forum",
+        "name": "Forum Romain & Palatin",
+        "type": "culture",
+        "description": "Centre politique de la Rome antique et colline du Palatin",
+        "duration": 90,
+        "estimatedCost": 18,
+        "latitude": 41.8925,
+        "longitude": 12.4853,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.coopculture.it/en/colosseo-e-shop.cfm",
+        "openingHours": {
+          "open": "09:00",
+          "close": "19:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 102.92659197224948,
+        "source": "mustsee",
+        "reviewCount": 0,
+        "coordinateConfidenceScore": 0.7066666666666667,
+        "coordinateConfidence": "high",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "osm-Q12512",
+        "name": "basilique Saint-Pierre",
+        "type": "culture",
+        "description": "basilique catholique de la Cité du Vatican",
+        "duration": 60,
+        "estimatedCost": 0,
+        "latitude": 41.9021616,
+        "longitude": 12.4537132,
+        "rating": 4.616244071283537,
+        "mustSee": true,
+        "bookingRequired": false,
+        "bookingUrl": "https://www.basilicasanpietro.va/",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=basilique%20Saint-Pierre",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/400px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+        "providerName": "OpenStreetMap + Wikidata",
+        "reviewCount": 128,
+        "isOutdoor": false,
+        "score": 67.66649038135324,
+        "source": "overpass",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0,
+        "protectedReason": "must_see"
+      },
+      {
+        "id": "osm-Q182955",
+        "name": "musées du Vatican",
+        "type": "culture",
+        "description": "ensemble de musées dans la Cité du Vatican",
+        "duration": 180,
+        "estimatedCost": 17,
+        "latitude": 41.9062675,
+        "longitude": 12.4527441,
+        "rating": 4.1338934190276815,
+        "mustSee": true,
+        "bookingRequired": false,
+        "bookingUrl": "http://www.museivaticani.va",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=mus%C3%A9es%20du%20Vatican",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Mura_vaticane_-_ingresso_ai_Musei_00410.JPG/400px-Mura_vaticane_-_ingresso_ai_Musei_00410.JPG",
+        "providerName": "OpenStreetMap + Wikidata",
+        "reviewCount": 63,
+        "isOutdoor": false,
+        "score": 66.99502959312638,
+        "source": "overpass",
+        "protectedReason": "must_see",
+        "coordinateConfidenceScore": 0.64,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "low",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-296635P1",
+        "name": "Repas fait maison privé avec un chef privé à Rome",
+        "type": "culture",
+        "description": "Bien que je ne connaissais pas bien l'anglais (comme la plupart des italiens), je me suis fait comprendre et apprécier, comme vous pouvez le voir sur les commentaires et je vais vous en dire plus j'ai également été inclus sur Tripadvisor parmi les meilleures expériences gastronomiques \"mondiales\" et je suis le quatrième au monde. Lors de mes expériences, on m’a souvent demandé de partager les recettes des plats que je préparais. C’est ainsi qu’est née l’idée de les inclure dans mon premier roman, où histoires de famille, anecdotes historiques et saveurs se côtoient dans une série de récits. Si vous le souhaitez, vous pouvez simplement me demander le lien pour l’acheter et je vous l’enverrai. Quand nous nous rencontrerons, je serai heureux d’écrire une dédicace personnelle, ou, si vous préférez, je peux apporter une copie moi-même, tout comme je peux apporter, sur demande, une bouteille de vin accompagnée de votre menu. Un souvenir qui, je l’espère, restera dans votre cœur, tout comme l’expérience que nous partagerons.",
+        "duration": 150,
+        "estimatedCost": 70,
+        "latitude": 41.8981868,
+        "longitude": 12.456162899999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Homemade-Meal-with-a-Private-Chef/d511-296635P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0b/95/a8/c3.jpg",
+        "providerName": "Viator",
+        "reviewCount": 135,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 33.59119914356111,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-402815P2",
+        "name": " Excursion d'une journée à Rome en voiture Tivoli Unesco Villa D'Este et Villa d'Hadrien",
+        "type": "culture",
+        "description": "Ciao soyez curieux de nos destinations, notre IG : scoot_around_rome Tivoli est une petite ville non loin de Rome (50 km), pleine d'histoire et de points forts La prise en charge et le retour se font à la station de métro Cinecittà. Prise en charge/retour OPTIONNEL à votre hôtel (frais supplémentaires, contactez-nous à l'avance, fournissez le nom et l'adresse de l'hôtel pour confirmer sa viabilité) 2 sites UNESCO : Villa Adriana et Villa D'este ! Découvrez ces deux endroits, profitez d'un bon déjeuner et de la vue sur l'incroyable cascade de Tivoli. Je serai votre chauffeur privé. Dans 50 minutes, nous atteignons la Villa Adriana (la villa d'Hadrien). La visite de ce site antique prendra environ 3 heures. Après cela, nous nous dirigerons vers le centre-ville de Tivoli où se trouve la Villa D'Este, à environ 15 minutes de la villa d'Hadrien ! Avant la visite de la Villa D'Este, vous pouvez prendre une pause déjeuner. La Villa D'Este, célèbre pour ses fontaines et ses jardins, la durée de la visite est d'environ 10 minutes. 1h30 - 2 heures ! A la fin de la visite nous irons voir la GRANDE Cascata de Tivoli, une vue imprenable sur la cascade de Tivoli.",
+        "duration": 180,
+        "estimatedCost": 89,
+        "latitude": 41.946135299999995,
+        "longitude": 12.772902199999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Day-trip-Rome-car-Tivoli-Unesco-Villa-Deste-and-Hadrian-Villa/d511-402815P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/12/78/50/54.jpg",
+        "providerName": "Viator",
+        "reviewCount": 85,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 24.085206200647875,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-476313P2",
+        "name": "Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu",
+        "type": "culture",
+        "description": "Le cours Master Pasta Fettuccine, Ravioli et Tiramisu propose un voyage culinaire pratique à travers les saveurs authentiques de l'Italie. Vous apprendrez à préparer des pâtes fraîches à partir de zéro, à façonner des fettuccine et des raviolis et à confectionner un tiramisu classique avec du mascarpone riche et un expresso audacieux. Guidé par un chef expert, vous acquerrez non seulement des techniques, mais aussi un aperçu des histoires culturelles derrière chaque plat. L'atmosphère chaleureuse et engageante vous encourage à expérimenter et à perfectionner vos compétences. À la fin du cours, vous aurez créé un délicieux repas italien et acquis une appréciation plus profonde de ces traditions culinaires bien-aimées.",
+        "duration": 180,
+        "estimatedCost": 59,
+        "latitude": 41.8989747,
+        "longitude": 12.4958267,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pasta-Fettuccine-Ravioli-and-Tiramisu-Class/d511-476313P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/r/32/6f/29/d4/caption.jpg",
+        "providerName": "Viator",
+        "reviewCount": 219,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 22.715019948899872,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-5487240P2",
+        "name": "Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome",
+        "type": "culture",
+        "description": "La classe de maître complète comprend un guide étape par étape sur la façon de faire de la pâte à pâtes faite à la main, combiner les ingrédients, créer la garniture parfaite et terminer avec une sauce délicieuse et gourmande. Grâce aux conseils avisés de chefs romains expérimentés, les participants pourront rouler, couper et remplir leurs raviolis à la perfection. Pour compléter les pâtes, l’activité comprend également du vin sans fond, savamment sélectionné pour s’accorder parfaitement avec les délicieux raviolis. Avec une large sélection de vins de haute qualité, les participants peuvent choisir leur accord préféré et profiter pleinement de l'expérience culinaire. Enfin, la classe de fabrication des pâtes: Ravioli & Tiramisu by the Colosseum se déroule à proximité d'un endroit qui offre une toile de fond magnifique pour l'événement. Le Colisée est l'un des monuments les plus emblématiques de Rome, et les participants auront l'occasion de profiter de la beauté du célèbre monument antique tout en s'adonnant à une expérience culinaire authentique.",
+        "duration": 180,
+        "estimatedCost": 99,
+        "latitude": 41.8980142,
+        "longitude": 12.471566,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pasta-and-Tiramisu-Making-Experience-with-Fine-Italian-Wine/d511-5487240P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/c6/df/de.jpg",
+        "providerName": "Viator",
+        "reviewCount": 102,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 18.067022939298433,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-323442P1",
+        "name": "Visite des jeux et des chasses aux trésors à Rome",
+        "type": "culture",
+        "description": "Profitez de notre visite amusante de 2 heures à Rome! Nous découvrirons les points forts du centre-ville tout en jouant à un jeu familial : votre guide vous demandera de résoudre des quiz et des questions pour des points et des prix. Vous et les enfants serez divertis et engagés tout au long de l'expérience.",
+        "duration": 120,
+        "estimatedCost": 87,
+        "latitude": 41.892090599999996,
+        "longitude": 12.4864378,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Games-and-Treasures-Hunts-in-Rome-for-Kids/d511-323442P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0b/fe/be/35.jpg",
+        "providerName": "Viator",
+        "reviewCount": 109,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 17.426885409278803,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6666666666666666,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-131178P1",
+        "name": "Expérience professionnelle de pâtes au laboratoire",
+        "type": "culture",
+        "description": "En 4 ans d'activité dans mon magasin de pâtes, j'ai reçu de nombreuses nominations: dans le prestigieux guide \"Gambero Rosso\" à partir de 2017 et comme la meilleure parmi 10 usines de pâtes à Rome. En Italie, la \"fabrique de pâtes\" est un lieu où des pâtes fraîches sont produites et vendues à ceux qui veulent les cuisiner à la maison. J'ai été inspiré par les pâtes que ma grand-mère préparait quand j'étais enfant. C’était des pâtes très spéciales et aujourd’hui, j’ai réalisé mon rêve parce que je suis fier d’enseigner, au sein de ma \"fabrique de pâtes\", l’ancienne méthode italienne de fabrication des pâtes pour des centaines de personnes désireuses Tradition italienne transmettant tout l'amour et la passion de ma famille. Aujourd'hui, je me consacre à l'organisation de cours de cuisine de grande valeur pour apprendre à préparer des pâtes artisanales fraîches de manière simple et efficace, en réalisant ainsi toutes les recettes de la leçon à la maison.",
+        "duration": 180,
+        "estimatedCost": 64,
+        "latitude": 41.8972462,
+        "longitude": 12.513381800000001,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Professional-Lab-Pasta-Experience/d511-131178P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/07/37/9b/1a.jpg",
+        "providerName": "Viator",
+        "reviewCount": 100,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "includesMeal": true,
+        "score": 16.459866189395466,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-5487240P1",
+        "name": "Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome",
+        "type": "culture",
+        "description": "Laissez-vous tenter par une aventure inoubliable avec notre Masterclass Pizza & Gelato, où vous plongerez dans l'art de la cuisine italienne. Dirigée par des chefs experts, cette expérience pratique vous mènera à travers le processus de fabrication de pizzas traditionnelles napolitaines, de gelato crémeux et d'un supplément romain emblématique, accompagné de vins italiens fins à volonté. Commencez votre voyage en apprenant les secrets de la fabrication de la pâte à pizza parfaite, du pétrissage au lancer comme un pro. Explorez une variété de garnitures et de sauces, maîtrisant l'art de créer des saveurs qui dansent sur vos papilles. Ensuite, plongez dans le monde des gelatos, en découvrant l'équilibre délicat des ingrédients et des techniques nécessaires pour atteindre sa perfection crémeuse. Des saveurs classiques aux combinaisons innovantes, percez les secrets pour créer des délices glacés irrésistibles. En savourant vos créations, laissez-vous tenter par le délice savoureux d'un supplì romain, croustillant de boules de risotto suintant à la mozzarella.",
+        "duration": 180,
+        "estimatedCost": 99,
+        "latitude": 41.900492899999996,
+        "longitude": 12.482597,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Pizza-and-Gelato-Making-Experience-with-Fine-Italian-Wine/d511-5487240P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/13/c6/cb/fa.jpg",
+        "providerName": "Viator",
+        "reviewCount": 95,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 13.682826740616473,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6666666666666666,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      },
+      {
+        "id": "viator-7377P9",
+        "name": "Tour de Rome en Segway avec Guide Local",
+        "type": "culture",
+        "description": "Cette visite est absolument parfaite si vous souhaitez connaître rapidement le centre historique de Rome avec ses belles places et ses fontaines. Nous glissons à travers de belles rues, des églises, des marchés de fontaines et de nombreuses autres attractions. Parfait pour un premier jour à Rome et à tous ceux qui voudraient obtenir de belles histoires sur les sites!",
+        "duration": 45,
+        "estimatedCost": 90,
+        "latitude": 41.9016908,
+        "longitude": 12.472364800000001,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Rome/Rome-Highlights-by-Segway-Tour-with-Local-Guide/d511-7377P9?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/06/75/42/20.jpg",
+        "providerName": "Viator",
+        "reviewCount": 80,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 8.761647498137606,
+        "source": "viator",
+        "coordinateConfidenceScore": 0.6,
+        "coordinateConfidence": "medium",
+        "durationConfidence": "high",
+        "dayTripAffinity": 0
+      }
+    ],
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 70,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 32,
+      "transportTips": "Achetez un pass Roma 48h (28€/personne) pour les 2 premiers jours, puis tickets unitaires à 1€50. Le reste à pied - le centre historique est très compact.",
+      "reasoning": "Avec 125€/personne/jour, le budget est serré mais viable. Stratégie: logement Airbnb avec cuisine (70€/nuit économise vs hôtel), petit-déjeuner self-catered à domicile (~5€), déjeuner mixte (alternance street food/petits restos 8-12€), dîner au restaurant (15€, culture gastronomique prioritaire). Transport optimisé avec pass 48h. Activités culturelles: 32€/jour/personne permet 2 musées majeurs répartis sur 4 jours (Colosseo, Vatican, Galerie Borghèse) en alternant avec sites gratuits (Forums, Panthéon, Trevi). Cuisine maison pour petit-déj et courses locales pour déj permet de redéployer budget sur gastronomie du soir et culture.",
+      "maxPricePerActivity": 50
+    },
+    "pipelineVersion": "v3",
+    "stageDurationsMs": {
+      "fetch": 160214,
+      "score": 29,
+      "anchor-transport": 0,
+      "cluster": 4,
+      "hotel": 0,
+      "travel-times": 17884,
+      "restaurants": 4815,
+      "schedule": 20,
+      "contracts": 1,
+      "decorate": 1
+    },
+    "qualityMetrics": {
+      "score": 74,
+      "invariantsPassed": false,
+      "violations": [
+        "P0.8: Must-see ID \"pantheon\" not found in final plan",
+        "P0.8: Must-see ID \"roman-forum\" not found in final plan"
+      ]
+    },
+    "qualityWarnings": [],
+    "contractViolations": [
+      "P0.8: Must-see ID \"pantheon\" not found in final plan",
+      "P0.8: Must-see ID \"roman-forum\" not found in final plan"
+    ],
+    "plannerDiagnostics": {
+      "plannerVersion": "v3.0",
+      "beamUsed": false,
+      "beamFallbackUsed": false,
+      "dayTripPackCount": 0,
+      "repairRejectedCount": 0,
+      "zigzagTurnsTotal": 0,
+      "routeInefficiencyTotal": 0,
+      "criticalGeoCount": 0,
+      "contractsPassed": false,
+      "rescueStage": 0,
+      "protectedBreakCount": 0,
+      "lateMealReplacementCount": 0,
+      "dayNumberMismatchCount": 0,
+      "dayTripEvictionCount": 0,
+      "finalIntegrityFailures": 0,
+      "orphanTransportCount": 0,
+      "teleportLegCount": 0,
+      "staleNarrativeCount": 0,
+      "freeTimeOverBudgetCount": 0,
+      "mealFallbackCount": 0,
+      "routeRebuildCount": 0,
+      "restaurantRefetchMissCount": 0,
+      "missingProtectedMustSeeCount": 2,
+      "dayTripAtomicityBreakCount": 0,
+      "arrivalFatigueViolationCount": 1,
+      "temporalImpossibleItemCount": 0,
+      "sparseFullCityDayCount": 3,
+      "dayTripDestinationMismatchCount": 0,
+      "sameFamilyOverloadCount": 0
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: paris-rome-4d",
+    "   Paris → Rome (4j)",
+    "   couple (2p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V3] Using V3 pipeline (deterministic 12-step), planner=v3.0, shadow=off",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[Pipeline V2] Phase 0b: 1 day trip(s) suggested: Ostia Antica",
+    "[Cache L2] TIMEOUT places-text-search-legacy",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Google Places New] Text search \"Colisée Rome\": 0 results",
+    "[Google Places New] Text search \"food markets street food districts local cuisine Rome\": 0 results",
+    "[Google Places New] Text search \"famous viewpoints markets food streets Rome\": 0 results",
+    "[Google Places New] Text search \"best museums art galleries historical sites Rome\": 0 results",
+    "[Google Places New] Text search \"top tourist attractions must see landmarks Rome\": 0 results",
+    "[Google Places New] Text search \"famous temples shrines churches monuments Rome\": 0 results",
+    "[Google Places New] Found 0 attractions for \"Rome\"",
+    "[Places Wrapper] ⚠️ Falling back to SerpAPI for attractions \"Rome\"",
+    "[Google Places New] Text search \"meilleur restaurant Rome\": 0 results",
+    "[Google Places New] Found 0 restaurants for \"Rome\" (any)",
+    "[Places Wrapper] ⚠️ Falling back to SerpAPI for restaurants \"Rome\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Rome\", ll=\"@41.9028,12.4964,14z\", gl=\"it\"",
+    "[Google Places New] Text search \"Vatican Rome\": 0 results",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Google Places New] Text search \"Colisée attraction Rome\": 0 results",
+    "[Google Places New] Text search \"Vatican attraction Rome\": 0 results",
+    "[Google Places New] Found 0/2 must-see attractions",
+    "[Places Wrapper] ⚠️ Falling back to SerpAPI for must-see attractions",
+    "[Hotels] Disponibilité live: 6/15 hôtels confirmés",
+    "[Pipeline V2] Resolving GPS for 10 Viator activities...",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT text-search",
+    "[Google Places New] Text search \"Repas fait maison privé avec un chef privé à Rome, Rome Rome\": 0 results",
+    "[Cache L2] HIT text-search",
+    "[Google Places New] Text search \"Tour de Rome en Segway avec Guide Local, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome, Rome Rome\": 3 results",
+    "[Cache L2] HIT text-search",
+    "[Google Places New] Text search \"Cours de cuisine pizza, gelato et suppli par Colisée, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Visite des jeux et des chasses aux trésors à Rome, Rome Rome\": 3 results",
+    "[Google Places New] Text search \"Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome, Rome Rome\": 3 results",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] HIT text-search",
+    "[Google Places New] Text search \"Rome : Séance de photos  au Colisée avec un photographe local, Rome Rome\": 3 results",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/10 activities",
+    "[Pipeline V2] Fetching data for 1 day trip destination(s)...",
+    "[Cache L2] HIT places-text-search-legacy",
+    "[Cache L2] TIMEOUT text-search",
+    "[Cache L2] TIMEOUT places-text-search-legacy",
+    "[Google Places New] Text search \"meilleur restaurant Ostia Antica\": 13 results",
+    "[Google Places New] Found 8 restaurants for \"Ostia Antica\" (any)",
+    "[Places Wrapper] ✅ Google Places returned 8 restaurants for \"Ostia Antica\"",
+    "[Pipeline V2] Day trip \"Ostia Antica\": 0 activities, 8 restaurants",
+    "[Pipeline V2] Injected 6 curated must-see attractions for \"Rome\" from local database",
+    "[Pipeline V2]   → Colisée, Musées du Vatican & Chapelle Sixtine, Fontaine de Trevi, Panthéon, Quartier du Trastevere, Forum Romain & Palatin, Basilique Saint-Pierre, Place d'Espagne",
+    "[Flights] Airport search scope: full (2 airport pairs)",
+    "[Pipeline V2] Flights found in 17793ms",
+    "[Pipeline V2] Step 1: All data fetched in 160213ms",
+    "[Pipeline V2]   Activities: 0 Google + 0 Places/SerpAPI + 13 Overpass + 12 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 0 Places/SerpAPI",
+    "[Pipeline V2]   Hotels: 6 | Transport options: 5",
+    "[Pipeline V2] Stripped mustSee from \"Place d'Espagne\" — matches excluded keyword (source=mustsee)",
+    "[Pipeline V2] Excluded 2 Viator activities with unreliable GPS (city-center fallback)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [124.1] ⭐ \"Rome : Séance de photos privée au Colisée avec un photographe local\" (src=viator, reviews=102, rating=5, tags=deep_culture)",
+    "[Pipeline V2]   #2 [106.9] ⭐ \"Fontaine de Trevi\" (src=mustsee, reviews=0, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #3 [102.9] ⭐ \"Panthéon\" (src=mustsee, reviews=0, rating=4.8, tags=none)",
+    "[Pipeline V2]   #4 [102.9] ⭐ \"Forum Romain & Palatin\" (src=mustsee, reviews=0, rating=4.7, tags=none)",
+    "[Pipeline V2]   #5 [67.7] ⭐ \"basilique Saint-Pierre\" (src=overpass, reviews=128, rating=4.616244071283537, tags=none)",
+    "[Pipeline V2]   #6 [67.0] ⭐ \"musées du Vatican\" (src=overpass, reviews=63, rating=4.1338934190276815, tags=deep_culture)",
+    "[Pipeline V2]   #7 [33.6]    \"Repas fait maison privé avec un chef privé à Rome\" (src=viator, reviews=135, rating=5, tags=foodie)",
+    "[Pipeline V2]   #8 [24.1]    \" Excursion d'une journée à Rome en voiture Tivoli Unesco Villa D'Este et Villa d'Hadrien\" (src=viator, reviews=85, rating=5, tags=relaxing)",
+    "[Pipeline V2]   #9 [22.7]    \"Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu\" (src=viator, reviews=219, rating=5, tags=none)",
+    "[Pipeline V2]   #10 [18.1]    \"Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome\" (src=viator, reviews=102, rating=5, tags=deep_culture)",
+    "[Pipeline V2]   #11 [17.4]    \"Visite des jeux et des chasses aux trésors à Rome\" (src=viator, reviews=109, rating=5, tags=none)",
+    "[Pipeline V2]   #12 [16.6]    \"château Saint-Ange\" (src=overpass, reviews=58, rating=4.087967586551986, tags=deep_culture)",
+    "[Pipeline V2]   #13 [16.5]    \"Expérience professionnelle de pâtes au laboratoire\" (src=viator, reviews=100, rating=5, tags=kid_friendly)",
+    "[Pipeline V2]   #14 [15.6]    \"Galerie Borghèse\" (src=overpass, reviews=46, rating=3.9689042833036097, tags=deep_culture)",
+    "[Pipeline V2]   #15 [15.1]    \"escalier de la Trinité-des-Monts\" (src=overpass, reviews=40, rating=3.9035079029052513, tags=deep_culture)",
+    "[Pipeline V2]   #16 [15.1]    \"autel de la paix d'Auguste\" (src=overpass, reviews=40, rating=3.9035079029052513, tags=deep_culture)",
+    "[Pipeline V2]   #17 [13.7]    \"Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome\" (src=viator, reviews=95, rating=5, tags=none)",
+    "[Pipeline V2]   #18 [13.4]    \"chapelle Sixtine\" (src=overpass, reviews=88, rating=4.34011878852098, tags=none)",
+    "[Pipeline V2]   #19 [12.9]    \"mont Palatin\" (src=overpass, reviews=62, rating=4.1248582677159735, tags=none)",
+    "[Pipeline V2]   #20 [11.9]    \"arc de Constantin\" (src=overpass, reviews=49, rating=4, tags=none)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 10/18",
+    "[Pipeline V3] Step 2: 14 activities selected",
+    "[Trust Layer] 14 activities enriched in 0ms — coords: 1H/13M/0L, protected: 6, dayTripAffinity: 0",
+    "[Anchor Transport] Generated time windows for 4 days:",
+    "  Day 1: 18:00 → 22:00 (arrival)",
+    "  Day 2: 08:30 → 22:00",
+    "  Day 3: 08:30 → 22:00",
+    "  Day 4: 08:30 → 10:30 (departure)",
+    "[Pipeline V3] Step 2c: Time windows anchored",
+    "[Pipeline V2] City density profile: category=medium, p75=3.28km, median=1.96km, maxClusterRadius=0.82km, hardRadiusCap=5.00km",
+    "[Pipeline V2] Radius-constrained clustering produced 5 clusters (target 4), running soft pass with 1.23km",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu\" from cluster with 9 → 8 activities to cluster with 2 activities",
+    "[Pipeline V2] balanceClusterSizes forced redistribution: moved \"Tour de Rome en Segway avec Guide Local\" from cluster with 8 → 7 activities to cluster with 2 activities",
+    "[Pipeline V2] enforceMinimumClusterSize: moved \"Visite des jeux et des chasses aux trésors à Rome\" from Day 1 (6 left) → Day 3 (3 now), dist=12.70km",
+    "[Pipeline V2] Boundary cap: moved \"Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome\" from boundary Day 1 → Day 2",
+    "[Pipeline V2] Boundary cap: moved \"Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome\" from boundary Day 1 → Day 3",
+    "[Pipeline V3] Time rebalance: moved \"Tour de Rome en Segway avec Guide Local\" from Day 4 (1 acts, 0min) → Day 2 (5 acts, 615min)",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (41.8959, 12.4841), Day 2: centroid (41.9018, 12.4635), Day 3: centroid (41.8972, 12.5134), Day 4: centroid (41.9088, 12.5567)",
+    "[Cluster] Inter-cluster swap: 2 improvements",
+    "[Pipeline V2] Cluster Day 1: 4 activities, radius=0.74km, intraDistance=2.03km",
+    "[Pipeline V2] Cluster Day 2: 5 activities, radius=0.92km, intraDistance=5.23km",
+    "[Pipeline V2] Cluster Day 3: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Cluster Day 4: 4 activities, radius=1.56km, intraDistance=26.92km",
+    "[Pipeline V3] Step 3: 4 clusters created (0 day trip packs, planner=v3.0)",
+    "[Pipeline V3] Step 4: Hotel selected: Rome Ciampino Smart Hotel",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Directions] Transit failed, driving fallback succeeded for 41.8026541,12.5972869 → 41.946135299999995,12.772902199999999",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Directions] Transit failed, driving fallback succeeded for 41.946135299999995,12.772902199999999 → 41.8026541,12.5972869",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Cache L2] MISS directions",
+    "[Travel Times] Computed travel times for 4 days (12 API calls)",
+    "[Pipeline V3] Step 6: Travel times computed (selective mode)",
+    "[Cache L2] MISS nearby-search",
+    "[Cache L2] MISS nearby-search",
+    "[Cache L2] TIMEOUT nearby-search",
+    "[Cache L2] TIMEOUT nearby-search",
+    "[Google Places New] Nearby search @41.946,12.773: 12 results",
+    "[Google Places New] Found 7 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 7 nearby restaurants",
+    "[Google Places New] Nearby search @41.896,12.484: 20 results",
+    "[Google Places New] Found 16 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Google Places New] Nearby search @41.897,12.495: 20 results",
+    "[Google Places New] Found 17 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[Google Places New] Nearby search @41.901,12.461: 20 results",
+    "[Google Places New] Found 19 nearby restaurants (lunch)",
+    "[Places Wrapper] ✅ Google Places returned 10 nearby restaurants",
+    "[enrichRestaurantPool] Enriched pool: 30 → 65 restaurants (35 added from cluster searches)",
+    "[Pipeline V3] Step 7: Restaurant pool enriched (65 restaurants)",
+    "[Unified] Day 1: constrained window (18:00–22:00) — breakfast:false lunch:false dinner:true",
+    "[Unified] Day 2: skipping \"Repas fait maison privé avec un chef privé à Rome\" (ends past close 18:00)",
+    "[Unified] Day 2: skipping \"Tour de Rome en Segway avec Guide Local\" (ends past close 18:00)",
+    "[Unified] Day 3: remote cluster — dinner will anchor near hotel",
+    "[Unified] Day 4: constrained window (08:30–10:30) — breakfast:true lunch:false dinner:false",
+    "[Unified] Day 4: capping checkout to 10:15 (departure constraint)",
+    "[Unified] Day 4: skipping \"Expérience professionnelle de pâtes au laboratoire\" (ends 13:10 past departure 10:30)",
+    "[Unified] Day 4: skipping \"Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome\" (ends 13:15 past departure 10:30)",
+    "[Unified] Day 4: skipping \"Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu\" (ends 12:50 past departure 10:30)",
+    "[Unified] Day 4: skipping \"Visite des jeux et des chasses aux trésors à Rome\" (ends 11:45 past departure 10:30)",
+    "[Unified] Removing orphan transport \"Hotel → Rome : Séance de photos privée au Colisée avec un photographe local\" on Day 1",
+    "[Unified] Removing orphan transport \"Rome : Séance de photos privée au Colisée avec un photographe local → Forum Romain & Palatin\" on Day 1",
+    "[Unified] Removing orphan transport \"Forum Romain & Palatin → Panthéon\" on Day 1",
+    "[Repair] Inserted must-see \"Panthéon\" at 10:15 on Day 4 (last-resort injection)",
+    "[Repair] Inserted must-see \"Forum Romain & Palatin\" at 11:00 on Day 4 (last-resort injection)",
+    "[Unified P0.2] Day 2: found closer restaurant \"Ristorante Pizzeria Castello\" (397m)",
+    "[Unified P0.2] Day 3: found closer restaurant \"La Nuova Piazzetta\" (236m)",
+    "[Unified] Departure sweep: dropping \"Panthéon\" on Day 4 (ends 11:00 past 10:30)",
+    "[Unified] Departure sweep: dropping \"Forum Romain & Palatin\" on Day 4 (starts 11:00 past 10:30)",
+    "[Unified] Post-repair orphan transport: removing \"basilique Saint-Pierre → Osteria da Fortunata - Pantheon\" on Day 2",
+    "[Unified] 3 repairs performed, 0 unresolved",
+    "  [replacement] Day 3: \"Rome : Séance de photos privée au Colisée avec un photographe local\" — Injected must-see \"Rome : Séance de photos privée au Colisée avec un photographe local\", evicted \"Excursion d'une journée à Rome en voiture Tivoli Unesco\" (lower rated)",
+    "  [replacement] Day 4: \"Panthéon\" — Inserted must-see \"Panthéon\" at 10:15 on Day 4 (no eviction needed)",
+    "  [replacement] Day 4: \"Forum Romain & Palatin\" — Inserted must-see \"Forum Romain & Palatin\" at 11:00 on Day 4 (no eviction needed)",
+    "[Pipeline V3] Step 8: Unified schedule built with 4 days, 3 repairs",
+    "[Pipeline V3] Step 11b: Transport items injected (mode: combined)",
+    "[Pipeline V3] Post-injection sweep: removed 1 pre-arrival items on Day 1",
+    "[Contracts] Score: 74/100, Invariants: FAILED",
+    "  Activities: 4, Restaurants: 8",
+    "  Must-sees: 4/6",
+    "  Distribution: imbalance=0.5, empty=1, overloaded=0",
+    "  Routing: travel=89min, longLegs=3, zigzag=3",
+    "  Meals: fallbacks=1",
+    "  Violations (2):",
+    "    - P0.8: Must-see ID \"pantheon\" not found in final plan",
+    "    - P0.8: Must-see ID \"roman-forum\" not found in final plan",
+    "[Pipeline V3] Step 10: Quality score 74/100, Invariants: FAILED",
+    "[Pipeline V3] Step 11: Decoration complete (LLM: false)",
+    "[Pipeline V3] Trip generated in 182973ms",
+    "  Stage times: fetch=160214ms, score=29ms, anchor-transport=0ms, cluster=4ms, hotel=0ms, travel-times=17884ms, restaurants=4815ms, schedule=20ms, contracts=1ms, decorate=1ms",
+    "  Quality: 74/100, Invariants: FAILED",
+    "  API cost: €0.84 / €5.00 — {\"places-text-search-legacy\":2,\"places-text-search\":18,\"directions\":14,\"places-nearby-search\":4}"
+  ],
+  "warnings": [
+    "[Weather] Fetch failed (non-critical): The operation was aborted due to timeout",
+    "[Google Transit] Timeout for Paris → Rome",
+    "[Google Places] Error: The operation was aborted due to timeout",
+    "[Transitous] Timeout for Paris → Rome",
+    "[Hotels] Check-in 12:00 invalide (avant 14h), corrigé à 14:00",
+    "[Google Transit] Timeout for Paris → Lyon",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[RapidAPI Booking] Erreur enrichissement Google Places: TypeError: fetch failed",
+    "[Transitous] Timeout for Paris → Lyon",
+    "[SerpAPI] Vols filtrés LYS→FCO 2026-05-06: escale_longue=3 (Aéroport international de Barcelone-El Prat×1, Brussels Airport×1, Aéroport de Vienne×1)",
+    "[TravelPlaces] Error resolving \"Cours de cuisine pizza, gelato et suppli par Colisée, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Repas fait maison privé avec un chef privé à Rome, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Expérience professionnelle de pâtes au laboratoire, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Cours de préparation de pâtes et de tiramisu avec vin italien raffiné à Rome, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Visite des jeux et des chasses aux trésors à Rome, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Rome: Cours pratique de cuisine Fettuccine, Ravioli et Tiramisu, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Excursion d'une journée à Rome en voiture Tivoli Unesco Villa D'Este et Villa d'Hadrien, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[TravelPlaces] Error resolving \"Rome : Séance de photos  au Colisée avec un photographe local, Rome\": TimeoutError: The operation was aborted due to timeout",
+    "[Gemini Geocode] Error for \"Expérience de fabrication de pizzas et de gelatos avec du vin italien raffiné à Rome, Rome\": TypeError: fetch failed",
+    "[Google Places] Error: The operation was aborted due to timeout",
+    "[SerpAPI] Vols filtrés ORY→FCO 2026-05-06: escale_longue=1 (Aéroport international de Barcelone-El Prat×1)",
+    "[SerpAPI] Vols filtrés FCO→ORY 2026-05-09: escale_longue=1 (Aéroport international de Malte×1)",
+    "[FlightValidator] Code compagnie inconnu: W4",
+    "[FlightValidator] Code compagnie inconnu: W4",
+    "[SerpAPI] Vols filtrés FCO→CDG 2026-05-09: escale_longue=2 (Aéroport de Francfort×1, Aéroport Franz-Josef-Strauss de Munich×1)",
+    "[FlightValidator] Code compagnie inconnu: DE",
+    "[FlightValidator] Code compagnie inconnu: DE",
+    "[Unified] Day 1: must-see \"Rome : Séance de photos privée au Colisée avec un photographe local\" placed at 18:00 (truncated, must-see priority)",
+    "[Unified] Day 1: skipping \"Rome : Séance de photos privée au Colisée avec un photographe local\" — too late for close 18:00",
+    "[Unified] Day 1: must-see \"Forum Romain & Palatin\" placed at 18:00 (truncated, must-see priority)",
+    "[Unified] Day 1: skipping \"Forum Romain & Palatin\" — too late for close 19:00",
+    "[Unified] Day 1: must-see \"Panthéon\" shifted to 18:15 to fit before close 19:00",
+    "[Unified] Day 1: skipping \"Panthéon\" — too late for close 19:00",
+    "[Unified] Day 2: must-see \"basilique Saint-Pierre\" shifted to 17:00 to fit before close 18:00",
+    "[Unified] Day 2: skipping \"basilique Saint-Pierre\" — too late for close 18:00",
+    "[Unified] Day 2: must-see \"basilique Saint-Pierre\" forced — evicting \"Cours de préparation de pâtes et de tiramisu avec vin\"",
+    "[Schedule Safety] Day 2: keeping \"Dîner — Osteria da Fortunata - Pantheon\" despite validation issue (no better alternative found)",
+    "[Unified P0.2] Day 2: \"Dîner — Osteria da Fortunata - Pantheon\" is 1909m from nearest activity — searching closer restaurant",
+    "[Unified P0.2] Day 3: \"Déjeuner — Pizzeria La Pergola\" is 24241m from nearest activity — searching closer restaurant"
+  ],
+  "errors": [
+    "[RapidAPI Booking] Erreur recherche destination: TypeError: fetch failed",
+    "[RapidAPI Booking] Ville non trouvée: Rome",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[TripAdvisor] Hotel search error: TypeError: fetch failed",
+    "[SerpAPI Attractions Multi] Erreur pour \"best museums art galleries historical sites\": TypeError: fetch failed",
+    "[SerpAPI Attractions Multi] Erreur pour \"top tourist attractions must see landmarks\": TypeError: fetch failed",
+    "[SerpAPI Attractions Multi] Erreur pour \"famous viewpoints markets food streets\": TypeError: fetch failed",
+    "[SerpAPI Places] Erreur: TypeError: fetch failed",
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5955 (line 164 column 8)",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed",
+    "[Gemini] Erreur recherche péages: TypeError: fetch failed",
+    "[Google Places New] Fetch error: TypeError: fetch failed"
+  ],
+  "durationMs": 182975,
+  "generatedAt": "2026-03-19T09:19:51.569Z",
+  "success": true,
+  "_campaign": {
+    "campaignId": "post-p02-fix",
+    "runId": "S01-paris-rome-4d",
+    "runKind": "scenario",
+    "seed": 424242,
+    "startedAt": "2026-03-19T09:19:51.569Z",
+    "durationMs": 182975
+  }
+}

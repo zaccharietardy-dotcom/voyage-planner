@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
           const alreadyCredited = customerMetadata.last_one_time_session_id === session.id;
 
           if (alreadyCredited) {
-            console.log(`[Stripe] Session ${session.id} déjà créditée, skip`);
+            console.debug(`[Stripe] Session ${session.id} déjà créditée, skip`);
             break;
           }
 

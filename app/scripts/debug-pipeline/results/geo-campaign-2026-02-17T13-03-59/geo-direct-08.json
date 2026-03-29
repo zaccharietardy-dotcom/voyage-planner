@@ -1,0 +1,3361 @@
+{
+  "scenarioId": "geo-direct-08",
+  "preferences": {
+    "origin": "Toulouse",
+    "destination": "Amsterdam",
+    "startDate": "2026-04-02T13:13:37.888Z",
+    "durationDays": 4,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 4,
+    "groupType": "friends",
+    "budgetLevel": "moderate",
+    "activities": [
+      "shopping",
+      "nightlife"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Amsterdam",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "ed30d7f5-1a14-4b73-922a-1b9ddf92c86e",
+    "createdAt": "2026-02-17T13:15:42.849Z",
+    "updatedAt": "2026-02-17T13:15:42.849Z",
+    "preferences": {
+      "origin": "Toulouse",
+      "destination": "Amsterdam",
+      "startDate": "2026-04-02T13:13:37.888Z",
+      "durationDays": 4,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 4,
+      "groupType": "friends",
+      "budgetLevel": "moderate",
+      "activities": [
+        "shopping",
+        "nightlife"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Amsterdam",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-02T13:13:37.888Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "07:40",
+            "endTime": "08:00",
+            "type": "transport",
+            "title": "🧭 Départ depuis Toulouse",
+            "description": "Départ depuis Toulouse",
+            "locationName": "Toulouse",
+            "latitude": 43.6047,
+            "longitude": 1.4442,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 20,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Toulouse%2C%20Amsterdam",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "13:49",
+            "type": "transport",
+            "title": "🔄 Transport → Amsterdam",
+            "description": "Toulouse → Paris | Paris → Amsterdam",
+            "locationName": "Toulouse → Amsterdam",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 1,
+            "estimatedCost": 105,
+            "duration": 349,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%94%84%20Transport%20%E2%86%92%20Amsterdam%2C%20Amsterdam",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:30",
+            "type": "checkin",
+            "title": "Check-in 1. Met Hotel Amsterdam",
+            "description": "",
+            "locationName": "Amsterdam",
+            "latitude": 52.37,
+            "longitude": 4.89,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.7,
+            "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Vio&src=241167450&geo=21139150&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=47458&bucket=997780&nrank=5&crank=5&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=iMPZHQIv_KEuMYt6DCc8CVKUsNKqD-r9TqLNw7tYqPOssJV43sPjH6av9PXVgBSLGWkJpWlxJRPq9NLIe5Spuy7_ycqs79IzGREfrYPQbLwsWsdcuftUww3h6gJYB69PWfYYkzFUy3v4FC1NeSIVgnAufc2MB_vUFssgYkjBSXo-Q4G7_Ygw4m-un5V6TtJc5GjrHHS8568TZVqErWDGGFcl8qZGpeJl6c_Wuu7SmWB1kZJuOSiWEhllBv8V_6zMODlpHcG9U6Sr_nPjxjZtfArJZ7Oa5XcU5DSNpYp9KdStZqX51666ArPvKEqLGdRs&priceShown=568&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=425.36&taxesRate=142.4800&feesRate=0.0000&fees=142.4800&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_3ad406beb1a60a7d044a0f2e73a20d96&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=1b186041-996c-4da7-a5d3-ed316a653fc9&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1728da1a283d62a59812508b052604509&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0186975cebe7408caf3ba1ba6ff93217&tp=APS-Hotels&pageLocId=188590",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=1.%20Met%20Hotel%20Amsterdam%2C%20Amsterdam",
+            "accommodation": {
+              "id": "ta-hotel-21139150",
+              "name": "1. Met Hotel Amsterdam",
+              "type": "hotel",
+              "address": "Amsterdam",
+              "latitude": 52.37,
+              "longitude": 4.89,
+              "rating": 4.7,
+              "reviewCount": 406,
+              "pricePerNight": 0,
+              "totalPrice": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/d1/8b/b8/met-hotel.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Vio&src=241167450&geo=21139150&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=47458&bucket=997780&nrank=5&crank=5&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=iMPZHQIv_KEuMYt6DCc8CVKUsNKqD-r9TqLNw7tYqPOssJV43sPjH6av9PXVgBSLGWkJpWlxJRPq9NLIe5Spuy7_ycqs79IzGREfrYPQbLwsWsdcuftUww3h6gJYB69PWfYYkzFUy3v4FC1NeSIVgnAufc2MB_vUFssgYkjBSXo-Q4G7_Ygw4m-un5V6TtJc5GjrHHS8568TZVqErWDGGFcl8qZGpeJl6c_Wuu7SmWB1kZJuOSiWEhllBv8V_6zMODlpHcG9U6Sr_nPjxjZtfArJZ7Oa5XcU5DSNpYp9KdStZqX51666ArPvKEqLGdRs&priceShown=568&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=425.36&taxesRate=142.4800&feesRate=0.0000&fees=142.4800&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_3ad406beb1a60a7d044a0f2e73a20d96&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=1b186041-996c-4da7-a5d3-ed316a653fc9&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1728da1a283d62a59812508b052604509&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0186975cebe7408caf3ba1ba6ff93217&tp=APS-Hotels&pageLocId=188590",
+              "description": "Slotervaart • Prix via Vio.com • Disponibilité confirmée",
+              "qualityFlags": [
+                "self_catering_disabled_no_kitchen"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "self_catering_disabled_no_kitchen"
+            ],
+            "imageUrl": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/d1/8b/b8/met-hotel.jpg?w=600&h=400&s=1"
+          },
+          {
+            "id": "gp-ChIJNR35jYUJxkcRALmB_1MbY54",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Rembrandt House Museum",
+            "description": "Rembrandt Harmenszoon van Rijn was een Nederlandse kunstschilder, etser en tekenaar. Hij geldt algemeen als een van de grootste schilders en etsers in de Europese kunst, en als de belangrijkste Hollandse meester van de 17e eeuw.",
+            "locationName": "Rembrandt House Museum",
+            "latitude": 52.369369,
+            "longitude": 4.9012349,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rembrandt%20House%20Museum%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUdBaXpS7drd8InlC8LAjUCRK4SXKw0SvhANPTLutSWDDoTT2kbaMtUkOXbnPjHDiBWr-bo3EV1nIB12P96kW-papLkm_OK4HDcjgbiVFQXAIN9oYAfapCFGtK2FaFa2VZhaiQnNu4LPKdYrRtTSYZWQ-w7gAeDg1nlXlmO10vfzYVTpb8lE71fwYHFrfXoJ_NvpGbPcD3Z4joymmcLHGvUdK1I8dwzyTk4KYMNYCUVKrsh8hUlfqQ41Ix3yQmPqvDcsEPYBaQx6jn1DIjGG03tesopadrgpb1oD74ZwknAGAC3lMZDOJG5zW24bHj8oJbY8qygbYIXHQwt6_OOCuNia7TrZmsOG5vk43VUVDtPbN-M7AE5R3UAZoVjjTKkzxD6N3MyIDZo4WGYPNkbo0bFoMkbJWvcrn4cdH2bCLc8eBtQA4hOj_o6kBlO1P5tuw8f-2BQ8F_wKeghJBByZqDU9Zij_vzvMD8KFLc_p2J3Z-ZiKGzSiHVaEMOZdcBN-bGl861wOHRIuZLOIkGuW255M8FM1UVp0du_GjEi-QG6tvpTtOxNgg0RKkdK7z37StZYnsnw&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.77,
+            "timeFromPrevious": 17,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJU-SBHbkJxkcRSSxkfBFf3hw",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "20:00",
+            "type": "activity",
+            "title": "Red Light Secrets Museum",
+            "description": "De lijst met de best bezochte musea van Nederland toont de musea met de hoogste bezoekersaantallen in Nederland. Alle musea op de lijst hadden minimaal 250.",
+            "locationName": "Red Light Secrets Museum",
+            "latitude": 52.3736815,
+            "longitude": 4.8990206,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.2,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Red%20Light%20Secrets%20Museum%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUKXXDXA-XRRxZeacC1ZkLS5ag4taOdwI6Psx_DuWhoktj_wiryLoAKezktxMzrVWej8UZBUDid-OZwjEClw-3JTy65-_K03D-IYF8jN4TdQhJJ8KnRObki8uj_NC-hHn_q0t_5AQ7oHdJOEP4nMLBNuucUAX9IFfuc8LvtZxPHY6VjVjHCycSbfQoaIV0IEDm_N1DzPVPAAPv_TO8w4RDxgNXhCnFTaYjpU6swdg3cR_4MmABAad-x_PWlPkJMy7pXtooXEEzTRVs-Td61KfCDX2H7mNqj91I9QPM3XvjeIoIJ_yb_nc3CZk9Z-4H2U_mLEzGxi7gA_luhIZncERrS2i2x2rE3o69ExQy6W-Dym_IsX5sJG2PBD0ti6r3HpYijKUptv2qV-fQTbDu0UsiJDFD9_XPAaYytoXKtRjjfsFuSIA2s75l8tBDdyMD4vDzVs6ju9VMhuMHEtzN9wX0BWMtI58vZ80rJHxH5FXr3WkSJS1qDM8PnUGY_lBWhxNUnSnPeHQJC4ZEDZ6lAKU9f_XhtOStOVLjmEGq7uXrefcdW39z_KQzI60ch9TW2lcliJQPF&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.5,
+            "timeFromPrevious": 8,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJSRE-IcUJxkcRCltjPmVdmtQ",
+            "dayNumber": 1,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "activity",
+            "title": "Maison Anne Frank",
+            "description": "Anna (Ans) van Dijk was een Nederlandse collaborateur tijdens de Tweede Wereldoorlog. In totaal verraadde zij 145 mensen, voor het merendeel Joodse onderduikers, aan de Duitse bezetters.",
+            "locationName": "Maison Anne Frank",
+            "latitude": 52.3752182,
+            "longitude": 4.8839765,
+            "orderIndex": 5,
+            "estimatedCost": 16,
+            "duration": 75,
+            "rating": 4.5,
+            "bookingUrl": "https://www.viator.com/searchResults/all?text=Anne%20Frank%20Walking%20Tour%20Amsterdam",
+            "viatorUrl": "https://www.viator.com/searchResults/all?text=Anne%20Frank%20Walking%20Tour%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20Anne%20Frank%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1RWZ6eVl6piPSfwh2IlE1hmbqvcmNYKnd5xCIHBoahnFAt-dDd7uweN0pXeH1pipLO1oFbUw6le0mFGZVWdFYrfCmyAt25d2SVFLpZ1u3ryh7xXBZVfTGjiNG9lYgopZoOfKrJnRsKIEBh4mNJMyiLoXi9TK9ABHSeI7aDnscH80nf582mgPdi3etskz8Lf_Yys0XgXV13laR_H-itdK6757O6vz7sOip4NZ4UI4F4x_cKME83IAR1nlW7sJl0VoyVjNt8hCikRo_-LBh-5rXoLOrIqd9bZtaGGjJphV6WIugxbpE_l-eN0_cLfyXvyeotxEh2ckeoHYSBz5qXdNcLlTMf8Rm6PEqiYn1dncEbtvbiueqZaEWWgs1c_xqK0Z7hJUuukliKMRvELIRDDU8ppDs6-g_zukJwHYTJogckdl6N1C7x5SQF1Sel3CPDZ_oAMaTbJAZbljSRNpGrcAbXSJ_hkugqiAppcgq2Qnyzp3EDb1gxPcbUZ5JZtjZPZG2oLCYtJPlvc8tyrzdhoa92pyO_EOL6xUv75xbCMwsS298zHXQkRQxjipU9nBNUyERiSrd&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 1.04,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.3736815,4.8990206&destination=52.3752182,4.8839765&travelmode=transit"
+          }
+        ],
+        "theme": "Maison Anne Frank et The 9 Streets",
+        "dayNarrative": "Journée consacrée à Maison Anne Frank, The 9 Streets, Béguinage. 3 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Partiellement nuageux",
+          "tempMin": 6,
+          "tempMax": 16,
+          "icon": "⛅"
+        },
+        "dailyBudget": {
+          "activities": 16,
+          "food": 0,
+          "transport": 105,
+          "total": 121
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 71,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.04,
+          "p95LegKm": 0.5,
+          "totalTravelMin": 20,
+          "totalLegKm": 1.54,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 1.54
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-03T13:13:37.888Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Coffee & Cakes.",
+            "description": "Repas sur place",
+            "locationName": "Sint Luciënsteeg 21, 1012 PM Amsterdam",
+            "latitude": 52.370651,
+            "longitude": 4.891004,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.400000095367432,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes.%2C%20Sint%20Luci%C3%ABnsteeg%2021%2C%201012%20PM%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes.%2C%20Amsterdam",
+            "restaurant": {
+              "id": "serp-12887066011726907892",
+              "name": "Coffee & Cakes.",
+              "address": "Sint Luciënsteeg 21, 1012 PM Amsterdam",
+              "latitude": 52.370651,
+              "longitude": 4.891004,
+              "rating": 4.400000095367432,
+              "reviewCount": 1004,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "Ajouter n° tél.",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes.%2C%20Sint%20Luci%C3%ABnsteeg%2021%2C%201012%20PM%20Amsterdam",
+              "googlePlaceId": "12887066011726907892",
+              "openingHours": {},
+              "distance": 0.09942885401216832,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-5381326711072291450",
+                  "name": "Pancake Company Amsterdam",
+                  "address": "Singel 492A, 1017 AW Amsterdam",
+                  "latitude": 52.366874,
+                  "longitude": 4.890037,
+                  "rating": 4.599999904632568,
+                  "reviewCount": 4227,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant brunch"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "020 625 5094",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pancake%20Company%20Amsterdam%2C%20Singel%20492A%2C%201017%20AW%20Amsterdam",
+                  "googlePlaceId": "5381326711072291450",
+                  "openingHours": {},
+                  "distance": 0.3476044178734969,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXIr47WvxsM4RIm7yiOGbUKt97AMwyM4EqkyTkldctDEt6YXKyr_VBINYOguszcfOV5Ky4cGy3rXEQZRe279eLIkQUplqLLrUT9FdpVFW6LPs-Z22fQqefCkUPdzwmv6TtEpvxyCrzCZdRZWEIYhsfHscLXjcsAR6ivpTbwwAqeA_rWswwOpPHcHzjIMTcwsBirQu6Nm_cRKgBhCRn8xMDZ908_0H2NXALSfFky4qJpZkabyulpuMCKXPLFH94nf5gAZ4WEKoQJ8zAmk5atijWdDMwkk0xJlSnVl9lYUyTlAM5BEoY&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-12394869828099044231",
+                  "name": "Blin Queen. Specialty pancakes, coffee & wine",
+                  "address": "Amstel 102, 1017 AD Amsterdam",
+                  "latitude": 52.366924,
+                  "longitude": 4.89685,
+                  "rating": 4.800000190734863,
+                  "reviewCount": 2145,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant brunch"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "Ajouter n° tél.",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Blin%20Queen.%20Specialty%20pancakes%2C%20coffee%20%26%20wine%2C%20Amstel%20102%2C%201017%20AD%20Amsterdam",
+                  "googlePlaceId": "12394869828099044231",
+                  "openingHours": {},
+                  "distance": 0.5773032849142246,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUQ9eM_R7YBnihMIqL-p_4pH5XL1FNuI2LjXPsD6gtkdO3CG8Yd2w1nAYgTJ44FSvFehBawtQPaLNESFbbl9Wyf31oUJU1GGXY2KQWSFk4sQob9JwnzODWYmqyf30rB52TGUQK74Hn_ZavR1y8GkD4JMc-1PDhgVu7K2grbBkgxkHlROmZKfQeSoq1lY6Smbvw7KA4yovJkOSR3cWekLQmlk1bekzRSGkLLSYVV19qSB67gBusU8snjq7QQUj3VnjrQqlK8SvpjJrvw_nKQXBmoKYHI3BgFsVd3JRw_-2uVJdHAHH3mAvoCTyXg5nBJBdt-k5AgOU-0XqT2W6lY31qqmPs0OJETTPgSyXMXUWbZSTM2dqHsoRjtWOrZzc4kgMfA-nQyFLgZkMJJMa11RSj4RFWGyL7qVEzC42AucBoECbqUHE6IT99WitgKuY82pW7GB8Db2vexDdm64IhtD-hnHBxOFkVyH0t8gTL25BEscTTczskczrCOZyIXf8hSt_WXwI0APEQfF7C3vPjX5sHOvlkx4b5SwNoLFSgEXGPEegikCnxjnGVraiWyjqELYEVG_BDmi6MP2w&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfW32yDPDqZBD6kv6caD46uOoJ-ZOwSUzbJz0-OH-xK9SOA-FbM2GrW-tumUI07tS3goDCUkeDceYUugy7LE-asaJA5xPiQyQ5nU1OMjmi8YJbvQyUEmquz840bisYWsQHtfOX1lL7MXygQ4Bix6vUwMqau-fAU9ZbauoIgmzbbkGX2gJEcNRVe7Gd4CmgzXvQE779OvpONIsOuyPVeV7jrp9HS-KtAiPhyLQtcNVGECppwKGDb_OrswiufaEtdcf1jaoD7XQabX9WgE4iqVIKFQgtlwYcbqy8_UlY-A9uZ1TIpeI1o&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5381326711072291450",
+                "name": "Pancake Company Amsterdam",
+                "address": "Singel 492A, 1017 AW Amsterdam",
+                "latitude": 52.366874,
+                "longitude": 4.890037,
+                "rating": 4.599999904632568,
+                "reviewCount": 4227,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant brunch"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 625 5094",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Pancake%20Company%20Amsterdam%2C%20Singel%20492A%2C%201017%20AW%20Amsterdam",
+                "googlePlaceId": "5381326711072291450",
+                "openingHours": {},
+                "distance": 0.3476044178734969,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXIr47WvxsM4RIm7yiOGbUKt97AMwyM4EqkyTkldctDEt6YXKyr_VBINYOguszcfOV5Ky4cGy3rXEQZRe279eLIkQUplqLLrUT9FdpVFW6LPs-Z22fQqefCkUPdzwmv6TtEpvxyCrzCZdRZWEIYhsfHscLXjcsAR6ivpTbwwAqeA_rWswwOpPHcHzjIMTcwsBirQu6Nm_cRKgBhCRn8xMDZ908_0H2NXALSfFky4qJpZkabyulpuMCKXPLFH94nf5gAZ4WEKoQJ8zAmk5atijWdDMwkk0xJlSnVl9lYUyTlAM5BEoY&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-12394869828099044231",
+                "name": "Blin Queen. Specialty pancakes, coffee & wine",
+                "address": "Amstel 102, 1017 AD Amsterdam",
+                "latitude": 52.366924,
+                "longitude": 4.89685,
+                "rating": 4.800000190734863,
+                "reviewCount": 2145,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant brunch"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "Ajouter n° tél.",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Blin%20Queen.%20Specialty%20pancakes%2C%20coffee%20%26%20wine%2C%20Amstel%20102%2C%201017%20AD%20Amsterdam",
+                "googlePlaceId": "12394869828099044231",
+                "openingHours": {},
+                "distance": 0.5773032849142246,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUQ9eM_R7YBnihMIqL-p_4pH5XL1FNuI2LjXPsD6gtkdO3CG8Yd2w1nAYgTJ44FSvFehBawtQPaLNESFbbl9Wyf31oUJU1GGXY2KQWSFk4sQob9JwnzODWYmqyf30rB52TGUQK74Hn_ZavR1y8GkD4JMc-1PDhgVu7K2grbBkgxkHlROmZKfQeSoq1lY6Smbvw7KA4yovJkOSR3cWekLQmlk1bekzRSGkLLSYVV19qSB67gBusU8snjq7QQUj3VnjrQqlK8SvpjJrvw_nKQXBmoKYHI3BgFsVd3JRw_-2uVJdHAHH3mAvoCTyXg5nBJBdt-k5AgOU-0XqT2W6lY31qqmPs0OJETTPgSyXMXUWbZSTM2dqHsoRjtWOrZzc4kgMfA-nQyFLgZkMJJMa11RSj4RFWGyL7qVEzC42AucBoECbqUHE6IT99WitgKuY82pW7GB8Db2vexDdm64IhtD-hnHBxOFkVyH0t8gTL25BEscTTczskczrCOZyIXf8hSt_WXwI0APEQfF7C3vPjX5sHOvlkx4b5SwNoLFSgEXGPEegikCnxjnGVraiWyjqELYEVG_BDmi6MP2w&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW32yDPDqZBD6kv6caD46uOoJ-ZOwSUzbJz0-OH-xK9SOA-FbM2GrW-tumUI07tS3goDCUkeDceYUugy7LE-asaJA5xPiQyQ5nU1OMjmi8YJbvQyUEmquz840bisYWsQHtfOX1lL7MXygQ4Bix6vUwMqau-fAU9ZbauoIgmzbbkGX2gJEcNRVe7Gd4CmgzXvQE779OvpONIsOuyPVeV7jrp9HS-KtAiPhyLQtcNVGECppwKGDb_OrswiufaEtdcf1jaoD7XQabX9WgE4iqVIKFQgtlwYcbqy8_UlY-A9uZ1TIpeI1o&maxwidth=800",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJ5Ra7we4JxkcRhYVAaq5zQ9U",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Rijksmuseum Amsterdam",
+            "description": "",
+            "locationName": "Rijksmuseum Amsterdam",
+            "latitude": 52.3599976,
+            "longitude": 4.8852188,
+            "orderIndex": 1,
+            "estimatedCost": 22,
+            "duration": 150,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Rijksmuseum%20Amsterdam%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "viator_filtered_low_plus_value"
+            ],
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Rijksmuseum_in_Amsterdam.jpg/400px-Rijksmuseum_in_Amsterdam.jpg",
+            "mustSee": true,
+            "distanceFromPrevious": 1.25,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.370651,4.891004&destination=52.3599976,4.8852188&travelmode=transit"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Cannibale Royale Handboogstraat",
+            "description": "Repas sur place",
+            "locationName": "Handboogstraat 17a, 1012 XM Amsterdam",
+            "latitude": 52.368045,
+            "longitude": 4.890342,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.5,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Cannibale%20Royale%20Handboogstraat%2C%20Handboogstraat%2017a%2C%201012%20XM%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Cannibale%20Royale%20Handboogstraat%2C%20Amsterdam",
+            "restaurant": {
+              "id": "serp-16718953429362947787",
+              "name": "Cannibale Royale Handboogstraat",
+              "address": "Handboogstraat 17a, 1012 XM Amsterdam",
+              "latitude": 52.368045,
+              "longitude": 4.890342,
+              "rating": 4.5,
+              "reviewCount": 6645,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "020 233 7160",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cannibale%20Royale%20Handboogstraat%2C%20Handboogstraat%2017a%2C%201012%20XM%20Amsterdam",
+              "googlePlaceId": "16718953429362947787",
+              "openingHours": {},
+              "distance": 0.9600689240038813,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "ta-Restaurant_Review-g188590-d32999666-Reviews-Specht_Bar_Lounge-Amsterdam_North_Holland_Province",
+                  "name": "Specht Bar & Lounge",
+                  "address": "Adresse non disponible",
+                  "latitude": 52.37,
+                  "longitude": 4.89,
+                  "rating": 5,
+                  "reviewCount": 91,
+                  "priceLevel": 3,
+                  "cuisineTypes": [
+                    "Bar",
+                    "International",
+                    "Pub",
+                    "Dining bars"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "openingHours": {},
+                  "isOpenNow": true,
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Specht%20Bar%20%26%20Lounge%2C%20Amsterdam",
+                  "distance": 1.1586261493221057,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfU59AXjir4Npu6wBqX6FXZccADnMTO8UCQNBP9XrcT-WbqFdmWY_PcztMGMjOuhsMjIhjN3IE6H0u65-DgJRnKJ8d2W7DMyjp66lyIAJcPvXkQ2v5xl8nikgZ3qmcmc8kHUGb-ls1b2P4Z3IkS2zsQ2dCkq8S02M1JnOOWTIck_Oza5Y2HSUWqQtPgXLjMSFljRJJba1V2DkSCoiyHnDvMYjXuW8i9nvCCl0jbU9r1eSMmIY4fTPIuaAnP6Ty6AqQWwPoFgzbZWp3mJQDv9JCowyjUlWZ5GEQPXno_Vk9sREoVpziAsr5SpUCtDDKEDa2n2aj7u5cURarPzwbfK96-LJ7ft8TaOtCJb-7LWWLN306M-bcr-Qc5tlYhLxr9aKC-zxPE60tWeiqeHATWvpQxSS1dx49fy5ANofgGNzpVn01rG2PjJeUTAWGzqZpPMuzyr03IuttvxnOVk5Xw3JQgFPwZKpZugXwzNTtbN_j8XQ1rh8x5IzqpGSrbu0nxCQN7MbpdZaRV82Sb2QhQZwNKkk02M-djwWpE6elCvbUi1ejBB4ySdhEmG9B2mbdG8fPAaqe-b5IbrM7vlRt9h-7zgs0U&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "ta-Restaurant_Review-g188590-d19284363-Reviews-The_Yeti_Nepali_Indian_Restaurant-Amsterdam_North_Holland_Province",
+                  "name": "The Yeti - Nepali & Indian Restaurant",
+                  "address": "Adresse non disponible",
+                  "latitude": 52.37,
+                  "longitude": 4.89,
+                  "rating": 4.8,
+                  "reviewCount": 780,
+                  "priceLevel": 3,
+                  "cuisineTypes": [
+                    "Indian",
+                    "Asian",
+                    "Healthy",
+                    "Nepali"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "openingHours": {},
+                  "isOpenNow": false,
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Yeti%20-%20Nepali%20%26%20Indian%20Restaurant%2C%20Amsterdam",
+                  "distance": 1.1586261493221057,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfU9FFGmueIRtJKgDgyxC-HT61oQqfiR_XpVqk5yuZ9usV7SDhk8gQ7j5-buOqbTRi_clkefKAQE2hLpne09fitQhry-LbdJOe-c1Tl-Kw6PeVvGWQxnFJzhlo3U-SRLeol8HSV0YX23n3hfkykmZwVyFGmKxM9H8MLOn68o7Y6-A3j-ZFdVmT4GsIxDKToxE3YwPTh_hmzo_johdo5b3J3jPIVYmvrTv-lUwp8VLh5lXKdrvPVBVEoBVqgt7xFVAMce4hTHDSo037y8fQih8BOOVSCUBBMqQiRYw_rIA3D93zEvl-g&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWtHsxXFbpeilXcBt11v4gpCQe2w9BA90myAn4xCmX2fQSiqn6iqKMt_1JIxpxukg5UVD4Luxtims1YkZ7TaH5qkgGApBA5-GAE3J5bLYlz6XeQ2Dv-j0thuNV6Mw3XBIK7ECYzRRAhD2VfBTXimzjd1Qa_zqW7eL1F7BepVplfsbMddZVOj3jZ9aFMuYyWP9rtgLdpFPDBMwGPoLofsB_lAVJghC0MitXucHVfr99Nze8QFyGBlclHf6pTGbMr2lH2ETLLRNCBk8RaTCXaCUpXCpVIJGyh6CccE3g1ImwZbskYfNI&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "ta-Restaurant_Review-g188590-d32999666-Reviews-Specht_Bar_Lounge-Amsterdam_North_Holland_Province",
+                "name": "Specht Bar & Lounge",
+                "address": "Adresse non disponible",
+                "latitude": 52.37,
+                "longitude": 4.89,
+                "rating": 5,
+                "reviewCount": 91,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Bar",
+                  "International",
+                  "Pub",
+                  "Dining bars"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": true,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Specht%20Bar%20%26%20Lounge%2C%20Amsterdam",
+                "distance": 1.1586261493221057,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU59AXjir4Npu6wBqX6FXZccADnMTO8UCQNBP9XrcT-WbqFdmWY_PcztMGMjOuhsMjIhjN3IE6H0u65-DgJRnKJ8d2W7DMyjp66lyIAJcPvXkQ2v5xl8nikgZ3qmcmc8kHUGb-ls1b2P4Z3IkS2zsQ2dCkq8S02M1JnOOWTIck_Oza5Y2HSUWqQtPgXLjMSFljRJJba1V2DkSCoiyHnDvMYjXuW8i9nvCCl0jbU9r1eSMmIY4fTPIuaAnP6Ty6AqQWwPoFgzbZWp3mJQDv9JCowyjUlWZ5GEQPXno_Vk9sREoVpziAsr5SpUCtDDKEDa2n2aj7u5cURarPzwbfK96-LJ7ft8TaOtCJb-7LWWLN306M-bcr-Qc5tlYhLxr9aKC-zxPE60tWeiqeHATWvpQxSS1dx49fy5ANofgGNzpVn01rG2PjJeUTAWGzqZpPMuzyr03IuttvxnOVk5Xw3JQgFPwZKpZugXwzNTtbN_j8XQ1rh8x5IzqpGSrbu0nxCQN7MbpdZaRV82Sb2QhQZwNKkk02M-djwWpE6elCvbUi1ejBB4ySdhEmG9B2mbdG8fPAaqe-b5IbrM7vlRt9h-7zgs0U&maxwidth=800"
+                ]
+              },
+              {
+                "id": "ta-Restaurant_Review-g188590-d19284363-Reviews-The_Yeti_Nepali_Indian_Restaurant-Amsterdam_North_Holland_Province",
+                "name": "The Yeti - Nepali & Indian Restaurant",
+                "address": "Adresse non disponible",
+                "latitude": 52.37,
+                "longitude": 4.89,
+                "rating": 4.8,
+                "reviewCount": 780,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Indian",
+                  "Asian",
+                  "Healthy",
+                  "Nepali"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": false,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Yeti%20-%20Nepali%20%26%20Indian%20Restaurant%2C%20Amsterdam",
+                "distance": 1.1586261493221057,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU9FFGmueIRtJKgDgyxC-HT61oQqfiR_XpVqk5yuZ9usV7SDhk8gQ7j5-buOqbTRi_clkefKAQE2hLpne09fitQhry-LbdJOe-c1Tl-Kw6PeVvGWQxnFJzhlo3U-SRLeol8HSV0YX23n3hfkykmZwVyFGmKxM9H8MLOn68o7Y6-A3j-ZFdVmT4GsIxDKToxE3YwPTh_hmzo_johdo5b3J3jPIVYmvrTv-lUwp8VLh5lXKdrvPVBVEoBVqgt7xFVAMce4hTHDSo037y8fQih8BOOVSCUBBMqQiRYw_rIA3D93zEvl-g&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWtHsxXFbpeilXcBt11v4gpCQe2w9BA90myAn4xCmX2fQSiqn6iqKMt_1JIxpxukg5UVD4Luxtims1YkZ7TaH5qkgGApBA5-GAE3J5bLYlz6XeQ2Dv-j0thuNV6Mw3XBIK7ECYzRRAhD2VfBTXimzjd1Qa_zqW7eL1F7BepVplfsbMddZVOj3jZ9aFMuYyWP9rtgLdpFPDBMwGPoLofsB_lAVJghC0MitXucHVfr99Nze8QFyGBlclHf6pTGbMr2lH2ETLLRNCBk8RaTCXaCUpXCpVIJGyh6CccE3g1ImwZbskYfNI&maxwidth=800",
+            "distanceFromPrevious": 0.96,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJX1rTlu8JxkcRGsV8-a4oKMI",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:30",
+            "type": "activity",
+            "title": "Musée van Gogh",
+            "description": "Vincent Willem van Gogh was een Nederlands kunstschilder. Zijn werk valt onder het postimpressionisme, een kunststroming die het negentiende-eeuwse impressionisme opvolgde.",
+            "locationName": "Musée van Gogh",
+            "latitude": 52.3580757,
+            "longitude": 4.8812053,
+            "orderIndex": 3,
+            "estimatedCost": 20,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20van%20Gogh%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "viator_filtered_low_plus_value"
+            ],
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUDKJ_kDcy34TvE3OW0rDmO0Z5372d8Ew3nZTObEEUYcosJlVbJOvPUwVM8IMQcgwBMX7EuzPUNe76kkcV4ZyLF7ZFr4yrRJdOlDPBDJEvfC4AgeBu9tmd0ByT0B-OdHG1rcYlcdqnyt5BDAivLD9cYZkjawTlOoITxZkfIqkNkjq4-Ivv8nd58G4mrgqMAuflNhrlL6WsJ4tQIqRskU84wOUCmzTPc7XfX_TkWxK5A619WdNaH34bScByN71wzgftibv2dBEXD2gpyqlCQLAp0aGNTB4IdrkejGr7NwwoVILxADQKnAgKLgifYT5vo-_Gd0yH7cntMCVwfYuZq8XrULdIakVk0i-ukr8NJlLertyzmDPyphv7tnlSn2kq17chaC3H42l7tl-vZDZCdNVv0KKu7d_tNqx0SnE8Nmmsy9PYLNeSs2qg8KdKgG36CrEgnoocggY63KSvIoduvz6CqvIJyXmMGO2Qdh115PakVECGDb3XVM-2o19FriuSZcjO0spXDGeLoZCxkrcTku1qK0N2XwbfImP6U8tDg9_Pj96pcSFmFMBV4G13_shY9YLUicFFn&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 1.27,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.368045,4.890342&destination=52.3580757,4.8812053&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJz3y0xeIJxkcRNcogBVV41Gw",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "16:00",
+            "type": "activity",
+            "title": "Vondelpark",
+            "description": "",
+            "locationName": "Vondelpark",
+            "latitude": 52.3579946,
+            "longitude": 4.8686484,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vondelpark%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXSqVkDk9S70ZqzAb3Zrntgn5bbjq3Py8FeWtgQRXOD5kE-LH6Ix1H-FZoukQqtChFr7jX1-NvLCYYDSDcVz_2B5O-NBMtxPJ4IS0cLxOQwODT3C0Hz5yZcEFNg31zydQswlvfFX-yd_14ajQhS9JknJvU9tGKRcDSs8RF2FsjtGmlJVPaWc3PHxBUTnu8Gc4HQFzeZmAzJSsXU1Azy25oQDYRN7btEgMSsZ15dEAHx1avEZw4M-S7-wDKJ0Vm4hgIJYkjTmoQahikjxcZXTnSr8zz1xSXy9vZKRHR9c7b79hUosrCaOflfv7bPuAHK1gkLtUcQJ-N7RMejY94dHMlTKP2boCuNREd0VtIuu-TLX49KbguP6OUEYhJAsXSX1pkudX_VY9OIQMiqmHmWjcATS0_VkkRmFrxJTno-2Ktl3iYKyLIZ839IfdVq8VhnhwPheZUffxfdE5L-yqyE0wXB14bFKrxHQoxsRKhe76V2R65GNF3FUYyMErvinCVArsLUCzLOsu_HcBqc5oc4T9MO2X4yvf2AsIoaGb2UuKgRcCYpuHrxkB3NFnxzuM5oqVGFSuHl&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 0.85,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "16:15",
+            "endTime": "17:30",
+            "type": "restaurant",
+            "title": "Dîner — Eetcafé Schotsheuvel",
+            "description": "Repas sur place",
+            "locationName": "Banstraat 14, 1071 JZ Amsterdam",
+            "latitude": 52.3555652,
+            "longitude": 4.8735425999999995,
+            "orderIndex": 5,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Eetcaf%C3%A9%20Schotsheuvel%2C%20Banstraat%2014%2C%201071%20JZ%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Eetcaf%C3%A9%20Schotsheuvel%2C%20Banstraat%2014%2C%201071%20JZ%20Amsterdam",
+            "restaurant": {
+              "id": "serp-nearby-ChIJVRCshIYJxkcRu7lAXi8YchY",
+              "name": "Eetcafé Schotsheuvel",
+              "address": "Banstraat 14, 1071 JZ Amsterdam",
+              "latitude": 52.3555652,
+              "longitude": 4.8735425999999995,
+              "rating": 4.7,
+              "reviewCount": 198,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "020 235 8882",
+              "website": "http://www.schotsheuvel.nl/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Eetcaf%C3%A9%20Schotsheuvel%2C%20Banstraat%2014%2C%201071%20JZ%20Amsterdam",
+              "googlePlaceId": "ChIJVRCshIYJxkcRu7lAXi8YchY",
+              "openingHours": {
+                "tuesday": {
+                  "open": "17:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "17:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "17:00",
+                  "close": "23:00"
+                },
+                "friday": {
+                  "open": "17:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "16:00",
+                  "close": "00:00"
+                },
+                "sunday": null,
+                "monday": null
+              },
+              "distance": 0.4283052341655234,
+              "walkingTime": 5
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12964456212050381317",
+                "name": "The Seafood Bar",
+                "address": "Spui 15, 1012 WX Amsterdam",
+                "latitude": 52.368696,
+                "longitude": 4.890612,
+                "rating": 4.699999809265137,
+                "reviewCount": 16393,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "restaurant de fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "020 233 7452",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Seafood%20Bar%2C%20Spui%2015%2C%201012%20WX%20Amsterdam",
+                "googlePlaceId": "12964456212050381317",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW7ylJBMcViB53CsZiCrDAdr9XJHEE-xmYLnoeLnrljA2TPF_BH84sHIhtTPHIUrF223R6bqZ5GKCVkBuh_2aELvN-sc_uAvPlj9VF5iirwMHs4S684rQ9F_8tPsPkXFAyjuz1xV-pVHTy4SS_6wwjvm9v-Yc8kLjx9fz-hxboqlpn1xRTf1Ps9OfXxiiijxos9foLW3fMm29kIe0OfSgYmXGKzIMe0Y2W19-pA_eXGRzEwd85hwfYBOmrJG8LXY8fvDOCzS4CZjenYZ0lvHUePY-a4p9mvQDKLeWZwjVS0nMcZPCg&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-16434772265827695728",
+                "name": "Portugalia Tasca",
+                "address": "Bakkersstraat 12, 1017 CW Amsterdam",
+                "latitude": 52.366809,
+                "longitude": 4.89724,
+                "rating": 4.599999904632568,
+                "reviewCount": 2163,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant portugais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "06 43705806",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Portugalia%20Tasca%2C%20Bakkersstraat%2012%2C%201017%20CW%20Amsterdam",
+                "googlePlaceId": "16434772265827695728",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX3nTxzCEya9i5xbomzWvFFdBQ-fVu7qFXuYHxJfqnyA-uNd4jSThgDFECuKK7nfK6yeSHDwvitJa7YpbkDConeLege5_vSeCYGBpZzfGRFjGr7Bg4KFBO_Do139v678mFNJ7tEePh3ppVkBDoO0SLd-fe_GYX36-5iYAL2NWUCJTEPQn0BZjPJD_VpYz-3IKau9jIFG2WixdlkIi___AnHlWbj5z9K5gcFKvC5VYPq3i8gt8sOVFXGCNKsVTDV5TSFvDOxnAYDqb54OLhFNfHj9fV0wzzVDVFxvHqUL6jBwXORS2k&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.43,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.3579946,4.8686484&destination=52.364278,4.883984&travelmode=transit",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Musées et art à Museumplein",
+        "dayNarrative": "Journée dédiée aux chefs-d'œuvre artistiques avec le Rijksmuseum et le Musée van Gogh, suivie d'une détente au Vondelpark sous le beau temps.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Principalement dégagé",
+          "tempMin": 8,
+          "tempMax": 19,
+          "icon": "🌤️"
+        },
+        "dailyBudget": {
+          "activities": 42,
+          "food": 45,
+          "transport": 0,
+          "total": 87
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.27,
+          "p95LegKm": 1.25,
+          "totalTravelMin": 66,
+          "totalLegKm": 4.76,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.82,
+          "mstLowerBoundKm": 2.62
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-04T13:13:37.888Z",
+        "items": [
+          {
+            "id": "meal-3-breakfast",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Coffee & Cakes.",
+            "description": "Repas sur place",
+            "locationName": "Sint Luciënsteeg 21, 1012 PM Amsterdam",
+            "latitude": 52.370651,
+            "longitude": 4.891004,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.400000095367432,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes.%2C%20Sint%20Luci%C3%ABnsteeg%2021%2C%201012%20PM%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes.%2C%20Amsterdam",
+            "restaurant": {
+              "id": "serp-12887066011726907892",
+              "name": "Coffee & Cakes.",
+              "address": "Sint Luciënsteeg 21, 1012 PM Amsterdam",
+              "latitude": 52.370651,
+              "longitude": 4.891004,
+              "rating": 4.400000095367432,
+              "reviewCount": 1004,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "Ajouter n° tél.",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes.%2C%20Sint%20Luci%C3%ABnsteeg%2021%2C%201012%20PM%20Amsterdam",
+              "googlePlaceId": "12887066011726907892",
+              "openingHours": {},
+              "distance": 0.09942885401216832,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-12394869828099044231",
+                  "name": "Blin Queen. Specialty pancakes, coffee & wine",
+                  "address": "Amstel 102, 1017 AD Amsterdam",
+                  "latitude": 52.366924,
+                  "longitude": 4.89685,
+                  "rating": 4.800000190734863,
+                  "reviewCount": 2145,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant brunch"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "Ajouter n° tél.",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Blin%20Queen.%20Specialty%20pancakes%2C%20coffee%20%26%20wine%2C%20Amstel%20102%2C%201017%20AD%20Amsterdam",
+                  "googlePlaceId": "12394869828099044231",
+                  "openingHours": {},
+                  "distance": 0.5773032849142246,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUQ9eM_R7YBnihMIqL-p_4pH5XL1FNuI2LjXPsD6gtkdO3CG8Yd2w1nAYgTJ44FSvFehBawtQPaLNESFbbl9Wyf31oUJU1GGXY2KQWSFk4sQob9JwnzODWYmqyf30rB52TGUQK74Hn_ZavR1y8GkD4JMc-1PDhgVu7K2grbBkgxkHlROmZKfQeSoq1lY6Smbvw7KA4yovJkOSR3cWekLQmlk1bekzRSGkLLSYVV19qSB67gBusU8snjq7QQUj3VnjrQqlK8SvpjJrvw_nKQXBmoKYHI3BgFsVd3JRw_-2uVJdHAHH3mAvoCTyXg5nBJBdt-k5AgOU-0XqT2W6lY31qqmPs0OJETTPgSyXMXUWbZSTM2dqHsoRjtWOrZzc4kgMfA-nQyFLgZkMJJMa11RSj4RFWGyL7qVEzC42AucBoECbqUHE6IT99WitgKuY82pW7GB8Db2vexDdm64IhtD-hnHBxOFkVyH0t8gTL25BEscTTczskczrCOZyIXf8hSt_WXwI0APEQfF7C3vPjX5sHOvlkx4b5SwNoLFSgEXGPEegikCnxjnGVraiWyjqELYEVG_BDmi6MP2w&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-9808674227877766445",
+                  "name": "Coffee & Cakes",
+                  "address": "Warmoesstraat 133, 1012 JB Amsterdam",
+                  "latitude": 52.373863,
+                  "longitude": 4.896121,
+                  "rating": 4.599999904632568,
+                  "reviewCount": 1207,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "café"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "06 85535291",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes%2C%20Warmoesstraat%20133%2C%201012%20JB%20Amsterdam",
+                  "googlePlaceId": "9808674227877766445",
+                  "openingHours": {},
+                  "distance": 0.5976506465770108,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUfk_YmWuoCG8MHsTa5wQV3Gy0U0PI2unBbQTQt1NcGw2nRZliAWE2UGt8cmGC7myWXzl133aCbe7DHcS4EAjDzSM6lgjhFTqU7WuZ_N0N8hEwAlOfiSgDrZDE6031JzLf2fMJH52cDjZMImJeuh3A0FfhOuFGhjULECN-1ZRhFXQBNlLxEn2hXZatGAQSzb3qCT2KPHwhm3ljl90bYP3LS_NR0ODSe56moQ2i6TjqsHLn4w7bAexB-nctiMtIgykz2bszKhbTovHJQm96_hJEnX35oDyz-Tp9PMwEc3RUAwz0EuH8&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfW32yDPDqZBD6kv6caD46uOoJ-ZOwSUzbJz0-OH-xK9SOA-FbM2GrW-tumUI07tS3goDCUkeDceYUugy7LE-asaJA5xPiQyQ5nU1OMjmi8YJbvQyUEmquz840bisYWsQHtfOX1lL7MXygQ4Bix6vUwMqau-fAU9ZbauoIgmzbbkGX2gJEcNRVe7Gd4CmgzXvQE779OvpONIsOuyPVeV7jrp9HS-KtAiPhyLQtcNVGECppwKGDb_OrswiufaEtdcf1jaoD7XQabX9WgE4iqVIKFQgtlwYcbqy8_UlY-A9uZ1TIpeI1o&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12394869828099044231",
+                "name": "Blin Queen. Specialty pancakes, coffee & wine",
+                "address": "Amstel 102, 1017 AD Amsterdam",
+                "latitude": 52.366924,
+                "longitude": 4.89685,
+                "rating": 4.800000190734863,
+                "reviewCount": 2145,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant brunch"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "Ajouter n° tél.",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Blin%20Queen.%20Specialty%20pancakes%2C%20coffee%20%26%20wine%2C%20Amstel%20102%2C%201017%20AD%20Amsterdam",
+                "googlePlaceId": "12394869828099044231",
+                "openingHours": {},
+                "distance": 0.5773032849142246,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUQ9eM_R7YBnihMIqL-p_4pH5XL1FNuI2LjXPsD6gtkdO3CG8Yd2w1nAYgTJ44FSvFehBawtQPaLNESFbbl9Wyf31oUJU1GGXY2KQWSFk4sQob9JwnzODWYmqyf30rB52TGUQK74Hn_ZavR1y8GkD4JMc-1PDhgVu7K2grbBkgxkHlROmZKfQeSoq1lY6Smbvw7KA4yovJkOSR3cWekLQmlk1bekzRSGkLLSYVV19qSB67gBusU8snjq7QQUj3VnjrQqlK8SvpjJrvw_nKQXBmoKYHI3BgFsVd3JRw_-2uVJdHAHH3mAvoCTyXg5nBJBdt-k5AgOU-0XqT2W6lY31qqmPs0OJETTPgSyXMXUWbZSTM2dqHsoRjtWOrZzc4kgMfA-nQyFLgZkMJJMa11RSj4RFWGyL7qVEzC42AucBoECbqUHE6IT99WitgKuY82pW7GB8Db2vexDdm64IhtD-hnHBxOFkVyH0t8gTL25BEscTTczskczrCOZyIXf8hSt_WXwI0APEQfF7C3vPjX5sHOvlkx4b5SwNoLFSgEXGPEegikCnxjnGVraiWyjqELYEVG_BDmi6MP2w&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-9808674227877766445",
+                "name": "Coffee & Cakes",
+                "address": "Warmoesstraat 133, 1012 JB Amsterdam",
+                "latitude": 52.373863,
+                "longitude": 4.896121,
+                "rating": 4.599999904632568,
+                "reviewCount": 1207,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "06 85535291",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Coffee%20%26%20Cakes%2C%20Warmoesstraat%20133%2C%201012%20JB%20Amsterdam",
+                "googlePlaceId": "9808674227877766445",
+                "openingHours": {},
+                "distance": 0.5976506465770108,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUfk_YmWuoCG8MHsTa5wQV3Gy0U0PI2unBbQTQt1NcGw2nRZliAWE2UGt8cmGC7myWXzl133aCbe7DHcS4EAjDzSM6lgjhFTqU7WuZ_N0N8hEwAlOfiSgDrZDE6031JzLf2fMJH52cDjZMImJeuh3A0FfhOuFGhjULECN-1ZRhFXQBNlLxEn2hXZatGAQSzb3qCT2KPHwhm3ljl90bYP3LS_NR0ODSe56moQ2i6TjqsHLn4w7bAexB-nctiMtIgykz2bszKhbTovHJQm96_hJEnX35oDyz-Tp9PMwEc3RUAwz0EuH8&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW32yDPDqZBD6kv6caD46uOoJ-ZOwSUzbJz0-OH-xK9SOA-FbM2GrW-tumUI07tS3goDCUkeDceYUugy7LE-asaJA5xPiQyQ5nU1OMjmi8YJbvQyUEmquz840bisYWsQHtfOX1lL7MXygQ4Bix6vUwMqau-fAU9ZbauoIgmzbbkGX2gJEcNRVe7Gd4CmgzXvQE779OvpONIsOuyPVeV7jrp9HS-KtAiPhyLQtcNVGECppwKGDb_OrswiufaEtdcf1jaoD7XQabX9WgE4iqVIKFQgtlwYcbqy8_UlY-A9uZ1TIpeI1o&maxwidth=800",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "canals-cruise",
+            "dayNumber": 3,
+            "startTime": "10:00",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Croisière sur les canaux",
+            "description": "Découverte de la ville par les canaux UNESCO",
+            "locationName": "Croisière sur les canaux",
+            "latitude": 52.3676,
+            "longitude": 4.9041,
+            "orderIndex": 1,
+            "estimatedCost": 18,
+            "duration": 75,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Croisi%C3%A8re%20sur%20les%20canaux%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Amsterdam_Noordzeekanaal_Afrikahaven_Amerikahaven_Westhaven_luchtfoto.JPG/500px-Amsterdam_Noordzeekanaal_Afrikahaven_Amerikahaven_Westhaven_luchtfoto.JPG",
+            "mustSee": true,
+            "distanceFromPrevious": 0.95,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "serp-attr-ChIJU-1ArbkJxkcR_EdFqWrlInA",
+            "dayNumber": 3,
+            "startTime": "12:00",
+            "endTime": "14:00",
+            "type": "activity",
+            "title": "Ons' Lieve Heer op Solder",
+            "description": "Maison du XVIIe siècle avec église cachée. Visites audio d'une maison mystérieuse du XVIIe siècle avec une église catholique richement décorée cachée au dernier étage.",
+            "locationName": "Ons' Lieve Heer op Solder",
+            "latitude": 52.3751438,
+            "longitude": 4.8994358,
+            "orderIndex": 2,
+            "estimatedCost": 17,
+            "duration": 120,
+            "rating": 4.7,
+            "bookingUrl": "https://www.opsolder.nl/",
+            "officialBookingUrl": "https://www.opsolder.nl/",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ons'%20Lieve%20Heer%20op%20Solder%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUcQoXsNT1NX1wuHGq_JnLToucHJ1J23uLbYiujjv9FKN7_eoi48xFjdgR9NQgU7X-HGJQQHWYytzEOOOVzdlXezXOBYN01In9bTE20ZPUvQz_LfQC0CIz2INHBHVsDQWlPUVU9zpozKUVs7YT581KAglY6pWWmZ9nWqsyoBMqBWCD9A9tiFmpqrh7-ijbqPaHNL0yUwwOk5hdmhL868_dpt-sifjMFhz9nD9WEZh67I-rf_V_fUE3Q5sLwiWtiECctJgLjlnCklt3L_33qU99cABgzUHcdCwf1OLO7Kj59iVk4_bzDElCTKf1-N7MJGjnPukqWNMSA6rGiFAl-GUit7xMMekb1aWDrMJq9HMqajM5dXgSTS4WIBoqs6RzkWpY0TVKwcvmWiDKeZIV-AIem9F6ehgFtAhfxvIThL3RVwLnJLh0y8P9awwFTKsZnzf7etK-19c2FBTC72_5dR4OvFVkiTw6YBzhfRYmpOfvDsM-44PSI7yYCyYI1E5NTEiUHr7GZiaZkX6TlSnlae-TzQDnuPUVNL15VzUiGdSdP_eiX7hbEyXYsMugIIfC5Ojlg1tia&maxwidth=800",
+            "mustSee": true,
+            "distanceFromPrevious": 0.9,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "14:00",
+            "endTime": "14:30",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant Olijfje",
+            "description": "Cuisine méditerranéenne, ambiance détendue",
+            "locationName": "Valkenburgerstraat 223D, 1011 MJ Amsterdam",
+            "latitude": 52.368777,
+            "longitude": 4.905456,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 30,
+            "rating": 4.699999809265137,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Olijfje%2C%20Valkenburgerstraat%20223D%2C%201011%20MJ%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Olijfje%2C%20Amsterdam",
+            "restaurant": {
+              "id": "serp-13111207457298163189",
+              "name": "Restaurant Olijfje",
+              "address": "Valkenburgerstraat 223D, 1011 MJ Amsterdam",
+              "latitude": 52.368777,
+              "longitude": 4.905456,
+              "rating": 4.699999809265137,
+              "reviewCount": 4078,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant méditerranéen"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Cuisine méditerranéenne, ambiance détendue"
+              ],
+              "description": "Cuisine méditerranéenne, ambiance détendue",
+              "phoneNumber": "020 330 4444",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Olijfje%2C%20Valkenburgerstraat%20223D%2C%201011%20MJ%20Amsterdam",
+              "googlePlaceId": "13111207457298163189",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-12964456212050381317",
+                  "name": "The Seafood Bar",
+                  "address": "Spui 15, 1012 WX Amsterdam",
+                  "latitude": 52.368696,
+                  "longitude": 4.890612,
+                  "rating": 4.699999809265137,
+                  "reviewCount": 16393,
+                  "priceLevel": 3,
+                  "cuisineTypes": [
+                    "restaurant de fruits de mer"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "020 233 7452",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Seafood%20Bar%2C%20Spui%2015%2C%201012%20WX%20Amsterdam",
+                  "googlePlaceId": "12964456212050381317",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfW7ylJBMcViB53CsZiCrDAdr9XJHEE-xmYLnoeLnrljA2TPF_BH84sHIhtTPHIUrF223R6bqZ5GKCVkBuh_2aELvN-sc_uAvPlj9VF5iirwMHs4S684rQ9F_8tPsPkXFAyjuz1xV-pVHTy4SS_6wwjvm9v-Yc8kLjx9fz-hxboqlpn1xRTf1Ps9OfXxiiijxos9foLW3fMm29kIe0OfSgYmXGKzIMe0Y2W19-pA_eXGRzEwd85hwfYBOmrJG8LXY8fvDOCzS4CZjenYZ0lvHUePY-a4p9mvQDKLeWZwjVS0nMcZPCg&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-16434772265827695728",
+                  "name": "Portugalia Tasca",
+                  "address": "Bakkersstraat 12, 1017 CW Amsterdam",
+                  "latitude": 52.366809,
+                  "longitude": 4.89724,
+                  "rating": 4.599999904632568,
+                  "reviewCount": 2163,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant portugais"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "06 43705806",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Portugalia%20Tasca%2C%20Bakkersstraat%2012%2C%201017%20CW%20Amsterdam",
+                  "googlePlaceId": "16434772265827695728",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfX3nTxzCEya9i5xbomzWvFFdBQ-fVu7qFXuYHxJfqnyA-uNd4jSThgDFECuKK7nfK6yeSHDwvitJa7YpbkDConeLege5_vSeCYGBpZzfGRFjGr7Bg4KFBO_Do139v678mFNJ7tEePh3ppVkBDoO0SLd-fe_GYX36-5iYAL2NWUCJTEPQn0BZjPJD_VpYz-3IKau9jIFG2WixdlkIi___AnHlWbj5z9K5gcFKvC5VYPq3i8gt8sOVFXGCNKsVTDV5TSFvDOxnAYDqb54OLhFNfHj9fV0wzzVDVFxvHqUL6jBwXORS2k&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfU0rjklz3ymozMQVgjjnqMkOdrAhKxWjg8Jk-0rTWDv9IU-QcYhY-NFHgYfTI6ncJKFqh4Snp6_QIXN2wCQJ_Qccao77F9kNEO8cmP2cGXDl6urHtzjYpiV98e6nvrw12LDEKIWVxEq1qlNNiC7OeKe0F8_IAh6Vcf9O8G6sNvosTsN0SBwWmFLKWuVcAUt3jJzoHhNBgccdSZtoTLZMH3KGohVChthFHxtxQGZ9o8HJD64N8IkxF0XJxaU_so3hRK7EjtaCUf4DcRYqDqqYwLMBzsDOXdY6dcnHTMI8LmmtrqvFsE&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12964456212050381317",
+                "name": "The Seafood Bar",
+                "address": "Spui 15, 1012 WX Amsterdam",
+                "latitude": 52.368696,
+                "longitude": 4.890612,
+                "rating": 4.699999809265137,
+                "reviewCount": 16393,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "restaurant de fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "020 233 7452",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Seafood%20Bar%2C%20Spui%2015%2C%201012%20WX%20Amsterdam",
+                "googlePlaceId": "12964456212050381317",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW7ylJBMcViB53CsZiCrDAdr9XJHEE-xmYLnoeLnrljA2TPF_BH84sHIhtTPHIUrF223R6bqZ5GKCVkBuh_2aELvN-sc_uAvPlj9VF5iirwMHs4S684rQ9F_8tPsPkXFAyjuz1xV-pVHTy4SS_6wwjvm9v-Yc8kLjx9fz-hxboqlpn1xRTf1Ps9OfXxiiijxos9foLW3fMm29kIe0OfSgYmXGKzIMe0Y2W19-pA_eXGRzEwd85hwfYBOmrJG8LXY8fvDOCzS4CZjenYZ0lvHUePY-a4p9mvQDKLeWZwjVS0nMcZPCg&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-16434772265827695728",
+                "name": "Portugalia Tasca",
+                "address": "Bakkersstraat 12, 1017 CW Amsterdam",
+                "latitude": 52.366809,
+                "longitude": 4.89724,
+                "rating": 4.599999904632568,
+                "reviewCount": 2163,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant portugais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "06 43705806",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Portugalia%20Tasca%2C%20Bakkersstraat%2012%2C%201017%20CW%20Amsterdam",
+                "googlePlaceId": "16434772265827695728",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX3nTxzCEya9i5xbomzWvFFdBQ-fVu7qFXuYHxJfqnyA-uNd4jSThgDFECuKK7nfK6yeSHDwvitJa7YpbkDConeLege5_vSeCYGBpZzfGRFjGr7Bg4KFBO_Do139v678mFNJ7tEePh3ppVkBDoO0SLd-fe_GYX36-5iYAL2NWUCJTEPQn0BZjPJD_VpYz-3IKau9jIFG2WixdlkIi___AnHlWbj5z9K5gcFKvC5VYPq3i8gt8sOVFXGCNKsVTDV5TSFvDOxnAYDqb54OLhFNfHj9fV0wzzVDVFxvHqUL6jBwXORS2k&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU0rjklz3ymozMQVgjjnqMkOdrAhKxWjg8Jk-0rTWDv9IU-QcYhY-NFHgYfTI6ncJKFqh4Snp6_QIXN2wCQJ_Qccao77F9kNEO8cmP2cGXDl6urHtzjYpiV98e6nvrw12LDEKIWVxEq1qlNNiC7OeKe0F8_IAh6Vcf9O8G6sNvosTsN0SBwWmFLKWuVcAUt3jJzoHhNBgccdSZtoTLZMH3KGohVChthFHxtxQGZ9o8HJD64N8IkxF0XJxaU_so3hRK7EjtaCUf4DcRYqDqqYwLMBzsDOXdY6dcnHTMI8LmmtrqvFsE&maxwidth=800",
+            "distanceFromPrevious": 0.82,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJX-2rTqEJxkcRhjlIZp4bqFk",
+            "dayNumber": 3,
+            "startTime": "15:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Musée Maritime",
+            "description": "Het Musée maritime fluvial et portuaire de Rouen is een museum in de Franse havenstad Rouen. Het maritiem museum behandelt de geschiedenis van de scheepvaart en de lokale haven.",
+            "locationName": "Musée Maritime",
+            "latitude": 52.3715579,
+            "longitude": 4.9143762,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20Maritime%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWu9-QLnOmFi0wD5hiO7-ZHMbbCgQnUW5c5wkWYYbu79wg2AGPR68PpUHRby1yvqTKtCwUvVgul6XvjzNTJqXlC65t3q071c6GAqak56Y7oXoTvTaXu4oyvrpwqJdrFVq3haR5k2-nWdxKTPSc93BFFJh55qjIMgaZtsSqncHQRw5owLxIMys5QGSc9FeXvWoB_LWx2P1Fu6InmAvc40PX7XHmbDrH--NHsWK9AtZroahlkDb5yvyoAM78AdLGRfbB1F4-bmkIWQZwAe2KLdfk2ny94RGKFnmdmccv3gvCDr72n-bqHzSm8id2eSqsBX39zVQV8EafKpFMg19y-jOZEfZLPHukf8CF4eYvXtpf0Zsl5S5evqaQ3gpKZIEKCA3AC1zxRLKkblNpdfh3SSeyyJ5UPxYOT6drLDB1D2v8BRlb4KTdpa26huamzomIVEy5N4iIue9dMCFhwAJLtACiAlzei2BRGCUCPADzb55tVuquf02Pb0Tz43CtKTLWfJzPpQjG9K7Ddu6OJB-RpSCcR9K2jtsv1ySqKVBgC2aGLn_clRKPROz_aJVCwBAZNpSdmuzUW&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.68,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJu0txQLQJxkcR9gp6-ShcF6Y",
+            "dayNumber": 3,
+            "startTime": "18:00",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "A'DAM Lookout",
+            "description": "De A’DAM Toren is een toren van honderd meter hoog aan de IJ-oever in Amsterdam-Noord. De toren werd oorspronkelijk in 1966 als Toren Overhoeks ontworpen door de Nederlandse architect Arthur Staal voor Koninklijke Shell. De toren stond daarom ook...",
+            "locationName": "A'DAM Lookout",
+            "latitude": 52.3839541,
+            "longitude": 4.902064999999999,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=A'DAM%20Lookout%2C%20Amsterdam",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXc8ihZP2B9VSGW0A3t6yR6Trjabtb8WqySauk-0ve3mcndOJgv-KuzbZEBT17AzguObmYLI4PGIbAXjq-IchCccL00rkQ0k80nNtQELSDTgHs6pajEzANhoKKQKr73W8VZviXdwtds9VBzWgbQUhMLvHjBz04OqZOTaCyBm9zzEoVD-p0NsyZpwPhzR5NIww9wORfJUxG44BPz2msh4QR4qUQcda52AKhhm6rjCEG2iR1PaCd1cVB-OKtbSj4AqxrgZfJOegdXxGRlofVMF0oxqNuKsg2MQGuT00lhGJvg_fyUX9IJECEPl7wprJbZeZ4OAapmLC9cDqfki6lErl7lFTc7JIr8E9ZcrVrYaBsGnSry1kmT3_leRcRKOHO3hOxWKEpiih-VBpWoiHUgeINFQPMeeyoONx0q_ne0tVgjmoAJ_GENpr1GX2T4V0HiLpQlUnE4-ST_mHfH9UOPhdsSEDyLoycNEuUGAVTim4jHpxUjcQyc6gZj8Qyn9t2kxGNgjTqrC_8xuCDhl8F4jqhz5bHKUH8OY98KWpXFuZBkmMIKjZ3FLpNRhcDK4xtlRFuhEhd7&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.61,
+            "timeFromPrevious": 31,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-3-dinner",
+            "dayNumber": 3,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — THE BUTCHER Social Club",
+            "description": "Repas sur place",
+            "locationName": "Overhoeksplein 1, 1031 KS Amsterdam",
+            "latitude": 52.383627,
+            "longitude": 4.9022672,
+            "orderIndex": 6,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.2,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=THE%20BUTCHER%20Social%20Club%2C%20Overhoeksplein%201%2C%201031%20KS%20Amsterdam",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=THE%20BUTCHER%20Social%20Club%2C%20Overhoeksplein%201%2C%201031%20KS%20Amsterdam",
+            "restaurant": {
+              "id": "serp-nearby-ChIJceJzabQJxkcRHOWQSbwWG3A",
+              "name": "THE BUTCHER Social Club",
+              "address": "Overhoeksplein 1, 1031 KS Amsterdam",
+              "latitude": 52.383627,
+              "longitude": 4.9022672,
+              "rating": 4.2,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant de hamburgers",
+                "restaurant de hamburgers",
+                "bar à cocktails"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "020 215 9515",
+              "website": "http://the-butcher.com/socialclub",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=THE%20BUTCHER%20Social%20Club%2C%20Overhoeksplein%201%2C%201031%20KS%20Amsterdam",
+              "googlePlaceId": "ChIJceJzabQJxkcRHOWQSbwWG3A",
+              "openingHours": {
+                "tuesday": {
+                  "open": "12:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.038874688491685065,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12964456212050381317",
+                "name": "The Seafood Bar",
+                "address": "Spui 15, 1012 WX Amsterdam",
+                "latitude": 52.368696,
+                "longitude": 4.890612,
+                "rating": 4.699999809265137,
+                "reviewCount": 16393,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "restaurant de fruits de mer"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "020 233 7452",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Seafood%20Bar%2C%20Spui%2015%2C%201012%20WX%20Amsterdam",
+                "googlePlaceId": "12964456212050381317",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW7ylJBMcViB53CsZiCrDAdr9XJHEE-xmYLnoeLnrljA2TPF_BH84sHIhtTPHIUrF223R6bqZ5GKCVkBuh_2aELvN-sc_uAvPlj9VF5iirwMHs4S684rQ9F_8tPsPkXFAyjuz1xV-pVHTy4SS_6wwjvm9v-Yc8kLjx9fz-hxboqlpn1xRTf1Ps9OfXxiiijxos9foLW3fMm29kIe0OfSgYmXGKzIMe0Y2W19-pA_eXGRzEwd85hwfYBOmrJG8LXY8fvDOCzS4CZjenYZ0lvHUePY-a4p9mvQDKLeWZwjVS0nMcZPCg&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-16434772265827695728",
+                "name": "Portugalia Tasca",
+                "address": "Bakkersstraat 12, 1017 CW Amsterdam",
+                "latitude": 52.366809,
+                "longitude": 4.89724,
+                "rating": 4.599999904632568,
+                "reviewCount": 2163,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant portugais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "06 43705806",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Portugalia%20Tasca%2C%20Bakkersstraat%2012%2C%201017%20CW%20Amsterdam",
+                "googlePlaceId": "16434772265827695728",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX3nTxzCEya9i5xbomzWvFFdBQ-fVu7qFXuYHxJfqnyA-uNd4jSThgDFECuKK7nfK6yeSHDwvitJa7YpbkDConeLege5_vSeCYGBpZzfGRFjGr7Bg4KFBO_Do139v678mFNJ7tEePh3ppVkBDoO0SLd-fe_GYX36-5iYAL2NWUCJTEPQn0BZjPJD_VpYz-3IKau9jIFG2WixdlkIi___AnHlWbj5z9K5gcFKvC5VYPq3i8gt8sOVFXGCNKsVTDV5TSFvDOxnAYDqb54OLhFNfHj9fV0wzzVDVFxvHqUL6jBwXORS2k&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.04,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.3839541,4.902064999999999&destination=52.373863,4.896121&travelmode=transit",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Canaux et panorama A'DAM",
+        "dayNarrative": "Exploration maritime avec le Musée Maritime et une croisière sur les canaux, couronnée par les vues spectaculaires depuis A'DAM Lookout par temps clair.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": 7,
+          "tempMax": 20,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 35,
+          "food": 45,
+          "transport": 0,
+          "total": 80
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 75,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.61,
+          "p95LegKm": 0.95,
+          "totalTravelMin": 95,
+          "totalLegKm": 5,
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.46,
+          "mstLowerBoundKm": 3.42
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-04-05T13:13:37.888Z",
+        "items": [
+          {
+            "id": "checkout-4",
+            "dayNumber": 4,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out 1. Met Hotel Amsterdam",
+            "description": "",
+            "locationName": "Amsterdam",
+            "latitude": 52.37,
+            "longitude": 4.89,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 4.7,
+            "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Vio&src=241167450&geo=21139150&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=47458&bucket=997780&nrank=5&crank=5&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=iMPZHQIv_KEuMYt6DCc8CVKUsNKqD-r9TqLNw7tYqPOssJV43sPjH6av9PXVgBSLGWkJpWlxJRPq9NLIe5Spuy7_ycqs79IzGREfrYPQbLwsWsdcuftUww3h6gJYB69PWfYYkzFUy3v4FC1NeSIVgnAufc2MB_vUFssgYkjBSXo-Q4G7_Ygw4m-un5V6TtJc5GjrHHS8568TZVqErWDGGFcl8qZGpeJl6c_Wuu7SmWB1kZJuOSiWEhllBv8V_6zMODlpHcG9U6Sr_nPjxjZtfArJZ7Oa5XcU5DSNpYp9KdStZqX51666ArPvKEqLGdRs&priceShown=568&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=425.36&taxesRate=142.4800&feesRate=0.0000&fees=142.4800&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_3ad406beb1a60a7d044a0f2e73a20d96&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=1b186041-996c-4da7-a5d3-ed316a653fc9&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1728da1a283d62a59812508b052604509&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0186975cebe7408caf3ba1ba6ff93217&tp=APS-Hotels&pageLocId=188590",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=1.%20Met%20Hotel%20Amsterdam%2C%20Amsterdam",
+            "accommodation": {
+              "id": "ta-hotel-21139150",
+              "name": "1. Met Hotel Amsterdam",
+              "type": "hotel",
+              "address": "Amsterdam",
+              "latitude": 52.37,
+              "longitude": 4.89,
+              "rating": 4.7,
+              "reviewCount": 406,
+              "pricePerNight": 0,
+              "totalPrice": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/d1/8b/b8/met-hotel.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Vio&src=241167450&geo=21139150&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=47458&bucket=997780&nrank=5&crank=5&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=iMPZHQIv_KEuMYt6DCc8CVKUsNKqD-r9TqLNw7tYqPOssJV43sPjH6av9PXVgBSLGWkJpWlxJRPq9NLIe5Spuy7_ycqs79IzGREfrYPQbLwsWsdcuftUww3h6gJYB69PWfYYkzFUy3v4FC1NeSIVgnAufc2MB_vUFssgYkjBSXo-Q4G7_Ygw4m-un5V6TtJc5GjrHHS8568TZVqErWDGGFcl8qZGpeJl6c_Wuu7SmWB1kZJuOSiWEhllBv8V_6zMODlpHcG9U6Sr_nPjxjZtfArJZ7Oa5XcU5DSNpYp9KdStZqX51666ArPvKEqLGdRs&priceShown=568&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=425.36&taxesRate=142.4800&feesRate=0.0000&fees=142.4800&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_3ad406beb1a60a7d044a0f2e73a20d96&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=1b186041-996c-4da7-a5d3-ed316a653fc9&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1728da1a283d62a59812508b052604509&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0186975cebe7408caf3ba1ba6ff93217&tp=APS-Hotels&pageLocId=188590",
+              "description": "Slotervaart • Prix via Vio.com • Disponibilité confirmée",
+              "qualityFlags": [
+                "self_catering_disabled_no_kitchen"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "self_catering_disabled_no_kitchen"
+            ],
+            "imageUrl": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/d1/8b/b8/met-hotel.jpg?w=600&h=400&s=1"
+          },
+          {
+            "id": "viator-208304P1",
+            "dayNumber": 4,
+            "startTime": "09:00",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF",
+            "description": "Ce n’est pas seulement une visite touristique – c’est l’expérience combo ultime d’Amsterdam ! En une promenade inspirante, vous explorerez des sites emblématiques, découvrirez des endroits cachés que",
+            "locationName": "Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF",
+            "latitude": 52.353634899999996,
+            "longitude": 4.9408767,
+            "orderIndex": 1,
+            "estimatedCost": 25,
+            "duration": 150,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Amsterdam/Your-Own-Amsterdam-A-Group-Sightseeing-Tour/d525-208304P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "viatorUrl": "https://www.viator.com/fr-FR/tours/Amsterdam/Your-Own-Amsterdam-A-Group-Sightseeing-Tour/d525-208304P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Visite%20guid%C3%A9e%20d'Amsterdam%20%2B%20pierres%20pr%C3%A9cieuses%20cach%C3%A9es%20%2B%20d%C3%A9gustations%20%2B%20guide%20PDF%2C%20Amsterdam",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/88/1c/c6.jpg",
+            "mustSee": false,
+            "distanceFromPrevious": 3.9,
+            "timeFromPrevious": 37,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "transport-ret-4",
+            "dayNumber": 4,
+            "startTime": "14:00",
+            "endTime": "19:49",
+            "type": "transport",
+            "title": "🔄 Transport → Toulouse",
+            "description": "Paris → Toulouse | Amsterdam → Paris",
+            "locationName": "Amsterdam → Toulouse",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 2,
+            "estimatedCost": 105,
+            "duration": 349,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%94%84%20Transport%20%E2%86%92%20Toulouse%2C%20Amsterdam",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "/images/transport/train-sncf-duplex.jpg"
+          }
+        ],
+        "theme": "Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF",
+        "dayNarrative": "Journée consacrée à Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF. 1 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Partiellement nuageux",
+          "tempMin": 6,
+          "tempMax": 13,
+          "icon": "⛅"
+        },
+        "dailyBudget": {
+          "activities": 25,
+          "food": 0,
+          "transport": 105,
+          "total": 130
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 150,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Toulouse",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Amsterdam",
+            "duration": 61,
+            "price": 81,
+            "co2": 157
+          }
+        ],
+        "totalDuration": 349,
+        "totalPrice": 105,
+        "totalCO2": 158,
+        "score": 8.5,
+        "scoreDetails": {
+          "priceScore": 9.4,
+          "timeScore": 10,
+          "co2Score": 6.2
+        },
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Toulouse",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 43.6047,
+              "lng": 1.4442
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 76,
+            "price": 101,
+            "co2": 196,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/TOULOUSE0204AMSTERDAM4?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 366,
+        "totalPrice": 101,
+        "totalCO2": 196,
+        "score": 8.1,
+        "scoreDetails": {
+          "priceScore": 9.5,
+          "timeScore": 9.7,
+          "co2Score": 5.2
+        },
+        "bookingUrl": "https://www.aviasales.com/search/TOULOUSE0204AMSTERDAM4?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/toulouse/amsterdam?departure_date=2026-04-02"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Toulouse",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 43.6047,
+              "lng": 1.4442
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 605,
+            "price": 166,
+            "co2": 26,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Toulouse/Amsterdam"
+          }
+        ],
+        "totalDuration": 695,
+        "totalPrice": 166,
+        "totalCO2": 26,
+        "score": 7.8,
+        "scoreDetails": {
+          "priceScore": 9.1,
+          "timeScore": 4.6,
+          "co2Score": 9.7
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Toulouse/Amsterdam",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Toulouse",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 43.6047,
+              "lng": 1.4442
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 756,
+            "price": 40,
+            "co2": 27,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/toulouse/amsterdam?departure_date=2026-04-02"
+          }
+        ],
+        "totalDuration": 811,
+        "totalPrice": 40,
+        "totalCO2": 27,
+        "score": 7.4,
+        "scoreDetails": {
+          "priceScore": 9.8,
+          "timeScore": 2.7,
+          "co2Score": 9.7
+        },
+        "bookingUrl": "https://www.omio.fr/bus/toulouse/amsterdam?departure_date=2026-04-02"
+      },
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Toulouse",
+            "to": "Amsterdam",
+            "fromCoords": {
+              "lat": 43.6047,
+              "lng": 1.4442
+            },
+            "toCoords": {
+              "lat": 52.3676,
+              "lng": 4.9041
+            },
+            "duration": 945,
+            "price": 0,
+            "co2": 14,
+            "operator": "OUIGO GV",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/toulouse/amsterdam?departure_date=2026-04-02"
+          }
+        ],
+        "totalDuration": 985,
+        "totalPrice": 0,
+        "totalCO2": 14,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/toulouse/amsterdam?departure_date=2026-04-02",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Toulouse Matabiau",
+            "to": "Bordeaux Saint-Jean",
+            "departure": "2026-04-02T16:10:00.000Z",
+            "arrival": "2026-04-02T18:40:00.000Z",
+            "duration": 150,
+            "line": "OUIGO GV"
+          },
+          {
+            "mode": "train",
+            "from": "Bordeaux Saint-Jean",
+            "to": "Gare Montparnasse",
+            "departure": "2026-04-02T18:50:00.000Z",
+            "arrival": "2026-04-02T21:04:00.000Z",
+            "duration": 134,
+            "line": "OUIGO GV"
+          },
+          {
+            "mode": "train",
+            "from": "Gare du Nord",
+            "to": "Gare d'Amsterdam-Central",
+            "departure": "2026-04-03T04:17:00.000Z",
+            "arrival": "2026-04-03T07:55:00.000Z",
+            "duration": 218,
+            "line": "Eurostar"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "train+plane-via-lyon",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Toulouse",
+            "to": "Lyon",
+            "duration": 246,
+            "price": 0,
+            "co2": 4.1,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Toulouse&arrival=Lyon&outwardDate=2026-04-02&passengers=4"
+          },
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Amsterdam",
+            "duration": 95,
+            "price": 1856,
+            "co2": 247,
+            "operator": "KL",
+            "bookingUrl": "https://www.aviasales.com/search/LYS0204AMS4?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 461,
+        "totalPrice": 1856,
+        "totalCO2": 251.1,
+        "score": 4.1,
+        "scoreDetails": {
+          "priceScore": 0.2,
+          "timeScore": 8.2,
+          "co2Score": 3.8
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Toulouse&arrival=Lyon&outwardDate=2026-04-02&passengers=4"
+      },
+      {
+        "id": "train+plane-via-barcelona",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Toulouse",
+            "to": "Barcelona",
+            "duration": 251,
+            "price": 0,
+            "co2": 4.2,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Toulouse&arrival=Barcelona&outwardDate=2026-04-02&passengers=4"
+          },
+          {
+            "mode": "plane",
+            "from": "Barcelona",
+            "to": "Amsterdam",
+            "duration": 150,
+            "price": 1888,
+            "co2": 390,
+            "operator": "VY",
+            "bookingUrl": "https://www.aviasales.com/search/BCN0204AMS4?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 521,
+        "totalPrice": 1888,
+        "totalCO2": 394.2,
+        "score": 2.4,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 7.3,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Toulouse&arrival=Barcelona&outwardDate=2026-04-02&passengers=4"
+      }
+    ],
+    "selectedTransport": {
+      "id": "combined_train_plane",
+      "mode": "combined",
+      "segments": [
+        {
+          "mode": "train",
+          "from": "Toulouse",
+          "to": "Paris",
+          "duration": 48,
+          "price": 24,
+          "co2": 1,
+          "operator": "Train grande vitesse"
+        },
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Amsterdam",
+          "duration": 61,
+          "price": 81,
+          "co2": 157
+        }
+      ],
+      "totalDuration": 349,
+      "totalPrice": 105,
+      "totalCO2": 158,
+      "score": 8.5,
+      "scoreDetails": {
+        "priceScore": 9.4,
+        "timeScore": 10,
+        "co2Score": 6.2
+      },
+      "recommended": true,
+      "recommendationReason": "Option économique, rapide"
+    },
+    "accommodation": {
+      "id": "ta-hotel-21139150",
+      "name": "1. Met Hotel Amsterdam",
+      "type": "hotel",
+      "address": "Amsterdam",
+      "latitude": 52.37,
+      "longitude": 4.89,
+      "rating": 4.7,
+      "reviewCount": 406,
+      "pricePerNight": 0,
+      "totalPrice": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/d1/8b/b8/met-hotel.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Vio&src=241167450&geo=21139150&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=47458&bucket=997780&nrank=5&crank=5&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=iMPZHQIv_KEuMYt6DCc8CVKUsNKqD-r9TqLNw7tYqPOssJV43sPjH6av9PXVgBSLGWkJpWlxJRPq9NLIe5Spuy7_ycqs79IzGREfrYPQbLwsWsdcuftUww3h6gJYB69PWfYYkzFUy3v4FC1NeSIVgnAufc2MB_vUFssgYkjBSXo-Q4G7_Ygw4m-un5V6TtJc5GjrHHS8568TZVqErWDGGFcl8qZGpeJl6c_Wuu7SmWB1kZJuOSiWEhllBv8V_6zMODlpHcG9U6Sr_nPjxjZtfArJZ7Oa5XcU5DSNpYp9KdStZqX51666ArPvKEqLGdRs&priceShown=568&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=425.36&taxesRate=142.4800&feesRate=0.0000&fees=142.4800&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_3ad406beb1a60a7d044a0f2e73a20d96&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=1b186041-996c-4da7-a5d3-ed316a653fc9&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1728da1a283d62a59812508b052604509&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0186975cebe7408caf3ba1ba6ff93217&tp=APS-Hotels&pageLocId=188590",
+      "description": "Slotervaart • Prix via Vio.com • Disponibilité confirmée",
+      "qualityFlags": [
+        "self_catering_disabled_no_kitchen"
+      ]
+    },
+    "accommodationOptions": [
+      {
+        "id": "ta-hotel-21139150",
+        "name": "1. Met Hotel Amsterdam",
+        "type": "hotel",
+        "address": "Amsterdam",
+        "latitude": 52.37,
+        "longitude": 4.89,
+        "rating": 4.7,
+        "reviewCount": 406,
+        "pricePerNight": 0,
+        "totalPrice": 0,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/d1/8b/b8/met-hotel.jpg?w=600&h=400&s=1"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Vio&src=241167450&geo=21139150&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=6&silo=47458&bucket=997780&nrank=5&crank=5&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=iMPZHQIv_KEuMYt6DCc8CVKUsNKqD-r9TqLNw7tYqPOssJV43sPjH6av9PXVgBSLGWkJpWlxJRPq9NLIe5Spuy7_ycqs79IzGREfrYPQbLwsWsdcuftUww3h6gJYB69PWfYYkzFUy3v4FC1NeSIVgnAufc2MB_vUFssgYkjBSXo-Q4G7_Ygw4m-un5V6TtJc5GjrHHS8568TZVqErWDGGFcl8qZGpeJl6c_Wuu7SmWB1kZJuOSiWEhllBv8V_6zMODlpHcG9U6Sr_nPjxjZtfArJZ7Oa5XcU5DSNpYp9KdStZqX51666ArPvKEqLGdRs&priceShown=568&pm=AI&hac=AVAILABLE&mbl=BEAT&mbldelta=0&rq=P&rate=425.36&taxesRate=142.4800&feesRate=0.0000&fees=142.4800&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_3ad406beb1a60a7d044a0f2e73a20d96&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=1b186041-996c-4da7-a5d3-ed316a653fc9&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1728da1a283d62a59812508b052604509&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0186975cebe7408caf3ba1ba6ff93217&tp=APS-Hotels&pageLocId=188590",
+        "description": "Slotervaart • Prix via Vio.com • Disponibilité confirmée"
+      },
+      {
+        "id": "ta-hotel-21300281",
+        "name": "2. INNSiDE by Meliá Amsterdam",
+        "type": "hotel",
+        "address": "Amsterdam",
+        "latitude": 52.37,
+        "longitude": 4.89,
+        "rating": 4.2,
+        "reviewCount": 217,
+        "pricePerNight": 0,
+        "totalPrice": 0,
+        "currency": "EUR",
+        "amenities": [
+          "breakfast"
+        ],
+        "photos": [
+          "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/31/da/13/f1/caption.jpg?w=600&h=400&s=1"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Agoda&src=194996332&geo=21300281&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=8&silo=5094&bucket=907535&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=-0eyWGpvW2cmH-Pi-pdBT21OxKsXbHd6eWwTCbG0-WPP7CmIICmHRiLQjWPwKjbN3YLD9-s8xeSRPk2W93wD0y4_jyel-N46mVg9MLa-XowRN3wT-h1WxS9u1UjRvydKiQ6bSUyMO5MLvdlcW7BthugOywudfOUzmRPWTF1xZmquTKZYxgTwGMvCuOVoeux7D5Ff0A3WCOdqtPcVMWfGNnWRkm45KJYSGWUG_xX_rMw4OWkdwb1TpKv-c-PGNm18Cslns5rldxTkNI2lin0p1K1mpfnXrroCs-8oSosZ1Gw&priceShown=645&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=8538&rq=P&rate=482.97&taxesRate=161.8000&feesRate=0&fees=161.8000&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_2c0b747a4f60abee8988f330b38ba04b&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=09361d96-5877-42b5-a2c9-448066415c76&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1e444919e8a390b62616c5b77a3e0c49b&ik=369354499b8c48fab8e0c957b64d4cc3&aok=c96eb1ac75624356a93ff7d7fbeec73e&tp=APS-Hotels&pageLocId=188590",
+        "description": "Free breakfast available • Zuidas • Prix via Agoda.com • Disponibilité confirmée"
+      },
+      {
+        "id": "ta-hotel-231323",
+        "name": "3. Ibis Amsterdam Centre",
+        "type": "hotel",
+        "address": "Amsterdam",
+        "latitude": 52.37,
+        "longitude": 4.89,
+        "rating": 3.6,
+        "reviewCount": 1142,
+        "pricePerNight": 0,
+        "totalPrice": 0,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/01/16/fe/lobby.jpg?w=600&h=400&s=1"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Agoda&src=35835933&geo=231323&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=8&silo=5094&bucket=907535&nrank=6&crank=6&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=_dNHSPoQF94MBUMhG8oUj21OxKsXbHd6eWwTCbG0-WPhqKICbBaOS66lLn_A2kpH3YLD9-s8xeSRPk2W93wD0y4_jyel-N46mVg9MLa-XowRN3wT-h1WxS9u1UjRvydKj9OElDs77b8n3NPEA6NSI0FKYU7bXfmmE5cZsvRabXzHY96zIrcRKj_NcaEbrCk7u9YGjbz-yWAcJz9NL6CDfHMFP3ReCQSzXr8NLBUilltuC5y1irtr8mGV1o_SMJ4m0yok0qAU7W54pM75m6Q1WhFNkU1f_Kdjp8PQy3eWS7c&priceShown=661&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=11859&rq=P&rate=495.33&taxesRate=165.9400&feesRate=0&fees=165.9400&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_5a2c892db52d5745e4845a9ab1040c39&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=b9c7e38e-62c7-4655-a32d-38f7a85b0385&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1a878d9ac190ad1261ff16a7aae18e3b0&ik=369354499b8c48fab8e0c957b64d4cc3&aok=2027587efeb8414fb23b40d30282e611&tp=APS-Hotels&pageLocId=188590",
+        "description": "Centrum • Prix via Agoda.com • Disponibilité confirmée"
+      },
+      {
+        "id": "ta-hotel-20366008",
+        "name": "4. Krisotel Amsterdam",
+        "type": "hotel",
+        "address": "Amsterdam",
+        "latitude": 52.37,
+        "longitude": 4.89,
+        "rating": 4.5,
+        "reviewCount": 486,
+        "pricePerNight": 0,
+        "totalPrice": 0,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/af/a2/dc/exterior-krisotel.jpg?w=600&h=400&s=1"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.tripadvisor.in/Commerce?p=Agoda&src=264329334&geo=20366008&from=HotelDateSearch_Hotels&slot=1&matchID=1&oos=0&cnt=7&silo=5094&bucket=907535&nrank=2&crank=2&clt=M&ttype=MobileCR&tm=351245677&managed=false&capped=false&gosox=sSZlOaW9I84MPm01tnSWNW1OxKsXbHd6eWwTCbG0-WNZT5SivGhkLnse5_rroisX3YLD9-s8xeSRPk2W93wD0y4_jyel-N46mVg9MLa-XowRN3wT-h1WxS9u1UjRvydKj3SLin9QmNM4D38Yc_Oc2g_yuEe7dXp7PwfBPYCa33auTKZYxgTwGMvCuOVoeux7yTt1w-8MC7EFXr_9bDS8bXMFP3ReCQSzXr8NLBUilltuC5y1irtr8mGV1o_SMJ4m0yok0qAU7W54pM75m6Q1WhFNkU1f_Kdjp8PQy3eWS7c&priceShown=665&pm=AI&hac=AVAILABLE&mbl=LOSE&mbldelta=7234&rq=P&rate=498.49&taxesRate=167.0000&feesRate=0&fees=167.0000&cur=EUR&adults=4&child_rm_ages=&inDay=2&outDay=5&rdex=RDEX_7b10cdc07e9325bc1518d7321432ea64&rooms=1&inMonth=4&inYear=2026&outMonth=4&outYear=2026&auid=7b8a3567-f8d5-48c4-a911-33366423adb5&def_d=true&bld=L_3,D_44,G_4,W_4,U_1,C_260402,T_8&bh=true&cs=1d8360cd6b99776b482daf6058e802b15&ik=369354499b8c48fab8e0c957b64d4cc3&aok=0aa4429bc1ad4793bb83b5ea36a6779c&tp=APS-Hotels&pageLocId=188590",
+        "description": "Centrum • Prix via Agoda.com • Disponibilité confirmée"
+      },
+      {
+        "id": "ta-hotel-12967879",
+        "name": "5. Monet Garden Hotel Amsterdam",
+        "type": "hotel",
+        "address": "Amsterdam",
+        "latitude": 52.37,
+        "longitude": 4.89,
+        "rating": 4.7,
+        "reviewCount": 1683,
+        "pricePerNight": 0,
+        "totalPrice": 0,
+        "currency": "EUR",
+        "amenities": [
+          "breakfast"
+        ],
+        "photos": [
+          "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/28/5c/10/hotel-exterior.jpg?w=600&h=400&s=1"
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=5.+Monet+Garden+Hotel+Amsterdam+Amsterdam&checkin=2026-04-02&checkout=2026-04-05&group_adults=4&group_children=0&no_rooms=1",
+        "description": "Free breakfast available • Centrum • Prix via MakeMyTrip • Disponibilité confirmée"
+      }
+    ],
+    "totalEstimatedCost": 448,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 0,
+      "food": 120,
+      "activities": 118,
+      "transport": 210,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Néerlandais",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Goedemorgen",
+            "phonetic": "Khoe-duh-mor-khen",
+            "context": "Salutation matinale"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Dank je wel",
+            "phonetic": "Dank yeh vel",
+            "context": "Remerciement poli"
+          },
+          {
+            "original": "Je voudrais une table pour deux",
+            "translation": "Ik wil een tafel voor twee",
+            "phonetic": "Ik vil ehn tah-fel voor tveh",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Waar zijn de toiletten?",
+            "phonetic": "Vahr zijn duh twa-let-ten",
+            "context": "Demander les toilettes"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "Spreekt u Frans?",
+            "phonetic": "Sprehkt oe Frans",
+            "context": "Communication linguistique"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "Ik begrijp het niet",
+            "phonetic": "Ik beh-khrайp het neet",
+            "context": "Incompréhension"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "Hoeveel kost dat?",
+            "phonetic": "Hoo-vehl kost dat",
+            "context": "Prix d'un article"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Help!",
+            "phonetic": "Help",
+            "context": "Urgence"
+          },
+          {
+            "original": "Un café s'il vous plaît",
+            "translation": "Een koffie alstublieft",
+            "phonetic": "Ehn kof-fie als-toe-bleeft",
+            "context": "Commander au café"
+          },
+          {
+            "original": "Pouvez-vous m'aider ?",
+            "translation": "Kunt u mij helpen?",
+            "phonetic": "Kunt oe mай hel-pen",
+            "context": "Demander de l'aide"
+          },
+          {
+            "original": "Je suis désolé",
+            "translation": "Het spijt me",
+            "phonetic": "Het spайt meh",
+            "context": "S'excuser poliment"
+          },
+          {
+            "original": "À droite / À gauche",
+            "translation": "Rechts / Links",
+            "phonetic": "Rehkts / Links",
+            "context": "Demander une direction"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Veste imperméable légère",
+            "reason": "Climat changeant et pluies fréquentes en avril"
+          },
+          {
+            "item": "Pull en laine ou polaire",
+            "reason": "Températures fraîches, entre 8-15°C"
+          },
+          {
+            "item": "Adaptateur électrique type C/F",
+            "reason": "Prises européennes différentes de la France"
+          },
+          {
+            "item": "Chaussures confortables de marche",
+            "reason": "Beaucoup de déplacements à pied/vélo"
+          },
+          {
+            "item": "Parapluie compact",
+            "reason": "Risques de pluie à Amsterdam"
+          },
+          {
+            "item": "Cache-cou léger",
+            "reason": "Protection contre le vent des canaux"
+          }
+        ],
+        "plugType": "C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Pas de visa requis pour un séjour touristique de moins de 90 jours. Passeport ou carte d'identité valide obligatoire."
+          }
+        ],
+        "importantLaws": [
+          "Respect strict des règles de circulation des vélos",
+          "Interdiction de fumer dans les lieux publics fermés",
+          "Consommation d'alcool réglementée dans certains espaces publics"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "112",
+        "fire": "112",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Ambassade de France aux Pays-Bas",
+            "number": "+31 (0)70 310 6100"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 80,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "mixed",
+        "dinner": "mixed"
+      },
+      "groceryShoppingNeeded": true,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 25,
+      "transportTips": "Acheter un pass vélo/transport 4 jours",
+      "reasoning": "Budget Amsterdam serré. Airbnb permet économies logement+cuisine. Mix repas courses/restaurants pour flexibilité. Activités variées sans dépenses premium. Vélo optimal pour déplacements économiques et expérience locale.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJ5Ra7we4JxkcRhYVAaq5zQ9U",
+        "name": "Rijksmuseum Amsterdam",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3599976,
+        "longitude": 4.8852188,
+        "rating": 4.7,
+        "reviewCount": 109702,
+        "duration": 150,
+        "estimatedCost": 22,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Rijksmuseum_in_Amsterdam.jpg/400px-Rijksmuseum_in_Amsterdam.jpg",
+        "googlePlaceId": "ChIJ5Ra7we4JxkcRhYVAaq5zQ9U",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 674 7000",
+        "website": "https://www.rijksmuseum.nl/nl",
+        "isOutdoor": false,
+        "score": 120.48042909072001,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Rijksmuseum%20Amsterdam%20Guided%20Tour"
+      },
+      {
+        "id": "gp-ChIJX1rTlu8JxkcRGsV8-a4oKMI",
+        "name": "Musée van Gogh",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3580757,
+        "longitude": 4.8812053,
+        "rating": 4.6,
+        "reviewCount": 103065,
+        "duration": 90,
+        "estimatedCost": 20,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUDKJ_kDcy34TvE3OW0rDmO0Z5372d8Ew3nZTObEEUYcosJlVbJOvPUwVM8IMQcgwBMX7EuzPUNe76kkcV4ZyLF7ZFr4yrRJdOlDPBDJEvfC4AgeBu9tmd0ByT0B-OdHG1rcYlcdqnyt5BDAivLD9cYZkjawTlOoITxZkfIqkNkjq4-Ivv8nd58G4mrgqMAuflNhrlL6WsJ4tQIqRskU84wOUCmzTPc7XfX_TkWxK5A619WdNaH34bScByN71wzgftibv2dBEXD2gpyqlCQLAp0aGNTB4IdrkejGr7NwwoVILxADQKnAgKLgifYT5vo-_Gd0yH7cntMCVwfYuZq8XrULdIakVk0i-ukr8NJlLertyzmDPyphv7tnlSn2kq17chaC3H42l7tl-vZDZCdNVv0KKu7d_tNqx0SnE8Nmmsy9PYLNeSs2qg8KdKgG36CrEgnoocggY63KSvIoduvz6CqvIJyXmMGO2Qdh115PakVECGDb3XVM-2o19FriuSZcjO0spXDGeLoZCxkrcTku1qK0N2XwbfImP6U8tDg9_Pj96pcSFmFMBV4G13_shY9YLUicFFn&maxwidth=400",
+        "googlePlaceId": "ChIJX1rTlu8JxkcRGsV8-a4oKMI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 570 5200",
+        "website": "https://www.vangoghmuseum.nl/nl",
+        "isOutdoor": false,
+        "score": 120.22622241519318,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Amsterdam%20Van%20Gogh%20Museum%20Tour"
+      },
+      {
+        "id": "gp-ChIJz3y0xeIJxkcRNcogBVV41Gw",
+        "name": "Vondelpark",
+        "type": "park",
+        "description": "",
+        "latitude": 52.3579946,
+        "longitude": 4.8686484,
+        "rating": 4.7,
+        "reviewCount": 58469,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXSqVkDk9S70ZqzAb3Zrntgn5bbjq3Py8FeWtgQRXOD5kE-LH6Ix1H-FZoukQqtChFr7jX1-NvLCYYDSDcVz_2B5O-NBMtxPJ4IS0cLxOQwODT3C0Hz5yZcEFNg31zydQswlvfFX-yd_14ajQhS9JknJvU9tGKRcDSs8RF2FsjtGmlJVPaWc3PHxBUTnu8Gc4HQFzeZmAzJSsXU1Azy25oQDYRN7btEgMSsZ15dEAHx1avEZw4M-S7-wDKJ0Vm4hgIJYkjTmoQahikjxcZXTnSr8zz1xSXy9vZKRHR9c7b79hUosrCaOflfv7bPuAHK1gkLtUcQJ-N7RMejY94dHMlTKP2boCuNREd0VtIuu-TLX49KbguP6OUEYhJAsXSX1pkudX_VY9OIQMiqmHmWjcATS0_VkkRmFrxJTno-2Ktl3iYKyLIZ839IfdVq8VhnhwPheZUffxfdE5L-yqyE0wXB14bFKrxHQoxsRKhe76V2R65GNF3FUYyMErvinCVArsLUCzLOsu_HcBqc5oc4T9MO2X4yvf2AsIoaGb2UuKgRcCYpuHrxkB3NFnxzuM5oqVGFSuHl&maxwidth=400",
+        "googlePlaceId": "ChIJz3y0xeIJxkcRNcogBVV41Gw",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.hetvondelpark.net/",
+        "isOutdoor": true,
+        "score": 119.93385133225485,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJSRE-IcUJxkcRCltjPmVdmtQ",
+        "name": "Maison Anne Frank",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3752182,
+        "longitude": 4.8839765,
+        "rating": 4.5,
+        "reviewCount": 74056,
+        "duration": 75,
+        "estimatedCost": 16,
+        "openingHours": {
+          "open": "09:00",
+          "close": "22:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1RWZ6eVl6piPSfwh2IlE1hmbqvcmNYKnd5xCIHBoahnFAt-dDd7uweN0pXeH1pipLO1oFbUw6le0mFGZVWdFYrfCmyAt25d2SVFLpZ1u3ryh7xXBZVfTGjiNG9lYgopZoOfKrJnRsKIEBh4mNJMyiLoXi9TK9ABHSeI7aDnscH80nf582mgPdi3etskz8Lf_Yys0XgXV13laR_H-itdK6757O6vz7sOip4NZ4UI4F4x_cKME83IAR1nlW7sJl0VoyVjNt8hCikRo_-LBh-5rXoLOrIqd9bZtaGGjJphV6WIugxbpE_l-eN0_cLfyXvyeotxEh2ckeoHYSBz5qXdNcLlTMf8Rm6PEqiYn1dncEbtvbiueqZaEWWgs1c_xqK0Z7hJUuukliKMRvELIRDDU8ppDs6-g_zukJwHYTJogckdl6N1C7x5SQF1Sel3CPDZ_oAMaTbJAZbljSRNpGrcAbXSJ_hkugqiAppcgq2Qnyzp3EDb1gxPcbUZ5JZtjZPZG2oLCYtJPlvc8tyrzdhoa92pyO_EOL6xUv75xbCMwsS298zHXQkRQxjipU9nBNUyERiSrd&maxwidth=400",
+        "googlePlaceId": "ChIJSRE-IcUJxkcRCltjPmVdmtQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 556 7105",
+        "website": "https://www.annefrank.org/nl/",
+        "isOutdoor": false,
+        "score": 119.73912050144246,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Anne%20Frank%20Walking%20Tour%20Amsterdam"
+      },
+      {
+        "id": "canals-cruise",
+        "name": "Croisière sur les canaux",
+        "type": "nature",
+        "description": "Découverte de la ville par les canaux UNESCO",
+        "duration": 75,
+        "estimatedCost": 18,
+        "latitude": 52.3676,
+        "longitude": 4.9041,
+        "rating": 4.5,
+        "reviewCount": 25000,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "21:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": true,
+        "score": 116.79588001734407,
+        "source": "mustsee"
+      },
+      {
+        "id": "serp-attr-ChIJU-1ArbkJxkcR_EdFqWrlInA",
+        "name": "Ons' Lieve Heer op Solder",
+        "type": "culture",
+        "description": "Maison du XVIIe siècle avec église cachée. Visites audio d'une maison mystérieuse du XVIIe siècle avec une église catholique richement décorée cachée au dernier étage.",
+        "duration": 120,
+        "estimatedCost": 17,
+        "latitude": 52.3751438,
+        "longitude": 4.8994358,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "tips": "Maison du XVIIe siècle avec église cachée. Visites audio d'une maison mystérieuse du XVIIe siècle avec une église catholique richement décorée cachée au dernier étage.",
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.opsolder.nl/",
+        "isOutdoor": false,
+        "score": 110.4,
+        "source": "serpapi",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJU-SBHbkJxkcRSSxkfBFf3hw",
+        "name": "Red Light Secrets Museum",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3736815,
+        "longitude": 4.8990206,
+        "rating": 4.2,
+        "reviewCount": 20623,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "11:00",
+          "close": "23:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUKXXDXA-XRRxZeacC1ZkLS5ag4taOdwI6Psx_DuWhoktj_wiryLoAKezktxMzrVWej8UZBUDid-OZwjEClw-3JTy65-_K03D-IYF8jN4TdQhJJ8KnRObki8uj_NC-hHn_q0t_5AQ7oHdJOEP4nMLBNuucUAX9IFfuc8LvtZxPHY6VjVjHCycSbfQoaIV0IEDm_N1DzPVPAAPv_TO8w4RDxgNXhCnFTaYjpU6swdg3cR_4MmABAad-x_PWlPkJMy7pXtooXEEzTRVs-Td61KfCDX2H7mNqj91I9QPM3XvjeIoIJ_yb_nc3CZk9Z-4H2U_mLEzGxi7gA_luhIZncERrS2i2x2rE3o69ExQy6W-Dym_IsX5sJG2PBD0ti6r3HpYijKUptv2qV-fQTbDu0UsiJDFD9_XPAaYytoXKtRjjfsFuSIA2s75l8tBDdyMD4vDzVs6ju9VMhuMHEtzN9wX0BWMtI58vZ80rJHxH5FXr3WkSJS1qDM8PnUGY_lBWhxNUnSnPeHQJC4ZEDZ6lAKU9f_XhtOStOVLjmEGq7uXrefcdW39z_KQzI60ch9TW2lcliJQPF&maxwidth=400",
+        "googlePlaceId": "ChIJU-SBHbkJxkcRSSxkfBFf3hw",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "11:00",
+            "close": "23:30"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "22:30"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "22:30"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "22:30"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "22:30"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "22:30"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "23:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 846 7020",
+        "website": "https://www.redlightsecrets.com/",
+        "isOutdoor": false,
+        "score": 20.028703683551328,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJq-ry-tkJxkcR8i94uYaBUig",
+        "name": "Dam Square",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3731006,
+        "longitude": 4.8924274,
+        "rating": 4.5,
+        "reviewCount": 45492,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWh0p2cABnOm4yd8dwt8p__VaSa2sIbJLBqXVcvnHb-6QrxKhUiOqjOhiaAmP106Z8btFAjsaL5AJc2InPSnh58iqGjVgR4THXSfnEbZRaWOf9fwuMw7vCpNkVBRRb58sEPXYAfzzcO9lnWI_EoKy35fzZwU0aC00cDSMALXL56LabjgCi8-pH2cePMXjeq25zVijViu7ZQbUUg-BkiaVwWwUnSwa0RTXcD3wKNFqSZEuoZ4cr5VGqux37noehKD-pdOaf-EjCyej_m-BklVC_wmv7EFv-L-rk-2ZfoMmUQ52X8zr8KksFwbIOpauDNbak45lmFP3ZnaWHIFNbZyg2jY9XUlPsyIHPPGnVk4xa7RAJRbAd1wZKx_MnOaBvJw86hjdROn8Tq6O43SWu0iU28bFCUnn3Zkz_v_CgG6ctdShkOqmuaI9PnToYjqwwFygT-Z7jRZhHYPCzFFK2HfQuK1vTtc55aVZjosc9vfYrGL9Dl1vN6ZFT-vwPO2EuZjaWE8Q2QI79GHy-UOP18ypqSSv6zRXVPmlTRgPeFn4wG5fUvE5y1PZ1VbaA2M1V6P-opahq3XXsdxQ&maxwidth=400",
+        "googlePlaceId": "ChIJq-ry-tkJxkcR8i94uYaBUig",
+        "isOutdoor": true,
+        "score": 19.315870060948118,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJu0txQLQJxkcR9gp6-ShcF6Y",
+        "name": "A'DAM Lookout",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3839541,
+        "longitude": 4.902064999999999,
+        "rating": 4.6,
+        "reviewCount": 28619,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "11:00",
+          "close": "21:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXc8ihZP2B9VSGW0A3t6yR6Trjabtb8WqySauk-0ve3mcndOJgv-KuzbZEBT17AzguObmYLI4PGIbAXjq-IchCccL00rkQ0k80nNtQELSDTgHs6pajEzANhoKKQKr73W8VZviXdwtds9VBzWgbQUhMLvHjBz04OqZOTaCyBm9zzEoVD-p0NsyZpwPhzR5NIww9wORfJUxG44BPz2msh4QR4qUQcda52AKhhm6rjCEG2iR1PaCd1cVB-OKtbSj4AqxrgZfJOegdXxGRlofVMF0oxqNuKsg2MQGuT00lhGJvg_fyUX9IJECEPl7wprJbZeZ4OAapmLC9cDqfki6lErl7lFTc7JIr8E9ZcrVrYaBsGnSry1kmT3_leRcRKOHO3hOxWKEpiih-VBpWoiHUgeINFQPMeeyoONx0q_ne0tVgjmoAJ_GENpr1GX2T4V0HiLpQlUnE4-ST_mHfH9UOPhdsSEDyLoycNEuUGAVTim4jHpxUjcQyc6gZj8Qyn9t2kxGNgjTqrC_8xuCDhl8F4jqhz5bHKUH8OY98KWpXFuZBkmMIKjZ3FLpNRhcDK4xtlRFuhEhd7&maxwidth=400",
+        "googlePlaceId": "ChIJu0txQLQJxkcR9gp6-ShcF6Y",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "11:00",
+            "close": "21:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 242 0100",
+        "website": "https://www.adamlookout.com/",
+        "score": 19.113308909296897,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJFQ6IwMYJxkcRis8dtZlOkTk",
+        "name": "Paleis op de Dam",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3731835,
+        "longitude": 4.8913758,
+        "rating": 4.6,
+        "reviewCount": 25863,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXHZ9pKNvFZxkBtvay1kyXyqMPgNbfihyXB5fZeKENwjkxFhBIQ4ZDmmIkFS-90zMpRw4LLKeI7z4LSUEGn8fKDFvBdJtR9f9goh3J-1OfqwoeWcG_Yl6dkOREjSgqUfVYRWl9JTccBJ5G-G9A0iH2qvDSfRXoVIzKNbc9lzW_wpS0u1sX2UUqYnsMbSx8uAfYyQwHUIVi3jh64sldwE7Vw8COOayy6ibM54ucby7NcGK4pLcKH3yGnrLCSUHKexZhnncT_omx0gC6R4SL_r85BuPgeqRpp7xgYIAiY5N9NL_EQKkcKapSMqmvloFhXf30MXoFQqFu1zIgctxuUybCTgcXqEsVlxgT7vxGzwbWME09wZBQaSgXgq_56oxEjpgM0CKQJFzp0CJ03iZgr5wZIKNNNPtdwBbZrThpxsfoGk3865HSoR8dBfo7O5YApeRwI3dWxkQLPf9HE3dl72iX3BmhNMcJ84IhTGv8MVwcTzl78Cpp-4eYA5vnCFP0LQ13O3L1EB7sqlAXp-NNTTzXFDz2qvWdw3lo1Y02hCElKyn65U0vg6tk3fUUSVBtToXvJrMs7&maxwidth=400",
+        "googlePlaceId": "ChIJFQ6IwMYJxkcRis8dtZlOkTk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 522 6161",
+        "website": "https://www.paleisamsterdam.nl/",
+        "isOutdoor": false,
+        "score": 19.025357799625354,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJLQN6abQJxkcRxdcMtKwAP6w",
+        "name": "This is Holland",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3841865,
+        "longitude": 4.9021959,
+        "rating": 4.7,
+        "reviewCount": 11487,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXszeP_f7SNxDGk73woN493MhQkVrIqtdcqt8RdOyfPK-LxbXKVIx7p7FtXu2WxF-JTi3cJstc6JzqYgC_uJQAN5rR3NvIJjlYArzTfMoRKCytnQAxMHZbc5D1Z0-OsxUaqMNJkHvWv3istFbxqRNLgtwsbFejnJeN0hv3SBsXw5J7gJq5FVvWAAeud770ZqlALRlHF9-fK07YK3rW2UKzr_tF00fnD1ZjVYfW--hBmNFabkbmeCoNyblnUKuIJbDy9H-5ckfTXX16YdeHKVOr7VdsjVfqGYtMr9gG7o5VUF8fU6OUHKmSTO75Cc-QpFBHnQ_THtINdCwW2Ry4I1g3RnDDZvPwBMkvFLVNWZ4v0A7JSBlMN5N4mzFeRDUm2wdpewBpsD3EFRfDrYcIbkrq0Mqc925E17rnvql8zPmVrypQzA7Gyd-DmM9VeNkMVRsxtodprgovBpbnE8X2-ucWnVIYJz0MhLwt_GWDrgD-yCI6YEfFaF40FjPfcD7zVmrzVuy6qjdjhEfqKRjkI15thVF16us13krm40GNgRa8aqXY4h1qN57CqNgpQ2nQvwP60wL7eu2zy8g&maxwidth=400",
+        "googlePlaceId": "ChIJLQN6abQJxkcRxdcMtKwAP6w",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 215 3008",
+        "website": "http://www.thisisholland.com/",
+        "score": 18.5204132421347,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJD7P9IsMJxkcRMrf54OxoZSg",
+        "name": "The 9 Streets",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3702625,
+        "longitude": 4.8860546,
+        "rating": 4.5,
+        "reviewCount": 15048,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX6ou0lZ8EIfDTSOBsoOYaVOKa9ds9JdgRLdxTaogE-XDlCwmAcB-O988b3JV6EsRfpzJEgRJQZK8rnnaJczvGEIZS-ziqX8LTJxkTmxtk7eiQEkKec9QrrR9zzGcGqDP3VMRR7n6SZwoSgR8les2K8Qo12PPPhYc3l7gf5LYpynCgqWfvUK_W6OeuMoAMZEJ7Tr_6Tbyj9h2v4-r1qiOAVxqYCmFFjKO3I1QB89qGqMTuMjYEIYe6wpT8HmBri5diBgFoFyvBiw_jcUrp84PMPaaCBvw8bJk9U_9Fgb5jB9ezCrzej6O_MjEDtV7sJffjKbofyLNGjg1EYANCCEM9ggqy_Iwyc0zrM-k19H77CpasSVMOeTyAK-s-O87SOABSSIAMZpW4zoO0wzW73larg1jj5SC7kQyLodmhTjmtO4dr6KjxYJeNgt-pFwKMtUTT8tPZuYQZ9XWvw4J8rHbjTXmHJoUGhL8DRMGLTx-IQj9PHUXq-uChdxMeQuKTJTafdbqS0LV1wHqO3LJj1XRps8XtjROwd-b8sXkCjjcCFDJuKIJ14qnAFXxDY6oa2sd3yBi-G&maxwidth=400",
+        "googlePlaceId": "ChIJD7P9IsMJxkcRMrf54OxoZSg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.de9straatjes.nl/",
+        "score": 18.354957565084646,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJNR35jYUJxkcRALmB_1MbY54",
+        "name": "Rembrandt House Museum",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.369369,
+        "longitude": 4.9012349,
+        "rating": 4.5,
+        "reviewCount": 14596,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUdBaXpS7drd8InlC8LAjUCRK4SXKw0SvhANPTLutSWDDoTT2kbaMtUkOXbnPjHDiBWr-bo3EV1nIB12P96kW-papLkm_OK4HDcjgbiVFQXAIN9oYAfapCFGtK2FaFa2VZhaiQnNu4LPKdYrRtTSYZWQ-w7gAeDg1nlXlmO10vfzYVTpb8lE71fwYHFrfXoJ_NvpGbPcD3Z4joymmcLHGvUdK1I8dwzyTk4KYMNYCUVKrsh8hUlfqQ41Ix3yQmPqvDcsEPYBaQx6jn1DIjGG03tesopadrgpb1oD74ZwknAGAC3lMZDOJG5zW24bHj8oJbY8qygbYIXHQwt6_OOCuNia7TrZmsOG5vk43VUVDtPbN-M7AE5R3UAZoVjjTKkzxD6N3MyIDZo4WGYPNkbo0bFoMkbJWvcrn4cdH2bCLc8eBtQA4hOj_o6kBlO1P5tuw8f-2BQ8F_wKeghJBByZqDU9Zij_vzvMD8KFLc_p2J3Z-ZiKGzSiHVaEMOZdcBN-bGl861wOHRIuZLOIkGuW255M8FM1UVp0du_GjEi-QG6tvpTtOxNgg0RKkdK7z37StZYnsnw&maxwidth=400",
+        "googlePlaceId": "ChIJNR35jYUJxkcRALmB_1MbY54",
+        "isOutdoor": false,
+        "score": 18.328467709385222,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJC7Uw48AJxkcR28umcgx0C6k",
+        "name": "Le Donjon d'Amsterdam",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3701599,
+        "longitude": 4.8921108,
+        "rating": 4.5,
+        "reviewCount": 13779,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU_yNhUHjWAcsEtnQSwrOrik-eWZl_UxTHqJ23X2sa3G1gN1xqslD98iGsOyYlBCuOg8ls4rST-x8xqTfIbhlS-GPSaptGjevPWI1INIHLEkI2FWS5epZreXZdF3qEVv1cbL79xxM_G6Xuas2shXDJXSf2_YktQJfgr90JRFQ8hN2r0cQxmihawENz36w4ayKPs1RvnArXuo3XhvqJGyjORbTAStIDDOGbuHLI6uix71hPmfAQaZBKVzZViAyjHUUmiqLTo266R1WOu6piCacIXm8kfbZqwu0B9-IzBIdDK6Nfh2_yrlPLl8J-LzhMpeKwiUVK-jHu01RS_AtiTYP2zBHJk6Iw1Vz4dW4_VhzVm3ItfVoudFptS9kO1r3ZPN9pjIe3oT6RjhC_t70q1UwXuALEB-s3HXB-p-q_u28jWBgzorCLg--BVeTzFkPF3ut9JDAv4JpYwqhQT63B5w76_GxyyjJOevbX_uUm62azCoy1vwC-F7NYISVfnTTTxbfnAoqLfMFQIL-QAwljLXPjFZNGBAXZGoOwjXWlS49x0wmmx65_OU6WrOALIneQPM3l-l8WbVX37lg&maxwidth=400",
+        "googlePlaceId": "ChIJC7Uw48AJxkcR28umcgx0C6k",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 530 8500",
+        "website": "https://www.thedungeons.com/amsterdam/nl",
+        "score": 18.27843540027517,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJX-2rTqEJxkcRhjlIZp4bqFk",
+        "name": "Musée Maritime",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3715579,
+        "longitude": 4.9143762,
+        "rating": 4.5,
+        "reviewCount": 12941,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWu9-QLnOmFi0wD5hiO7-ZHMbbCgQnUW5c5wkWYYbu79wg2AGPR68PpUHRby1yvqTKtCwUvVgul6XvjzNTJqXlC65t3q071c6GAqak56Y7oXoTvTaXu4oyvrpwqJdrFVq3haR5k2-nWdxKTPSc93BFFJh55qjIMgaZtsSqncHQRw5owLxIMys5QGSc9FeXvWoB_LWx2P1Fu6InmAvc40PX7XHmbDrH--NHsWK9AtZroahlkDb5yvyoAM78AdLGRfbB1F4-bmkIWQZwAe2KLdfk2ny94RGKFnmdmccv3gvCDr72n-bqHzSm8id2eSqsBX39zVQV8EafKpFMg19y-jOZEfZLPHukf8CF4eYvXtpf0Zsl5S5evqaQ3gpKZIEKCA3AC1zxRLKkblNpdfh3SSeyyJ5UPxYOT6drLDB1D2v8BRlb4KTdpa26huamzomIVEy5N4iIue9dMCFhwAJLtACiAlzei2BRGCUCPADzb55tVuquf02Pb0Tz43CtKTLWfJzPpQjG9K7Ddu6OJB-RpSCcR9K2jtsv1ySqKVBgC2aGLn_clRKPROz_aJVCwBAZNpSdmuzUW&maxwidth=400",
+        "googlePlaceId": "ChIJX-2rTqEJxkcRhjlIZp4bqFk",
+        "isOutdoor": false,
+        "score": 18.223935674412147,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJeSe5CsEJxkcRdRlM21_MA9s",
+        "name": "Béguinage",
+        "type": "religious",
+        "description": "",
+        "latitude": 52.3694585,
+        "longitude": 4.8903539,
+        "rating": 4.5,
+        "reviewCount": 9805,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXO5nyUymnSCY9jYi4YaujJzW1zvLVzLSop9NCwLQON_mWgEloRBQnDTV2OKx4nsVdBpQjfdI5CuJC4a6Rkb8gdWAwukI4wFP2II8kj_FK0umYQtNPhIal9kErNXJQgfWWZd6JMADC6P6-SJOQgoHdWXVYh_nwB2elFJGF9TR0blJ4-WxKj_FzuWMqPmfn3iv0QMwn7mEePueXrsHD6jJA6TepiB5bE9CbjMHUYf6Qzq2lQ2PL9t35--oibw-Pfx2VeQJaLcCHvQ-egRFBkywJLrjzXdB_oWjYK2qrRugsW92vQXlu9q88xpUn_bR0sK_Fwn9yO4GdDbK-3QONcg7n7AvGrEZiTMDvbP2vpHJ4qi-pOG-0z0msAPD682GOjLc8x7DCLiv-aJB0tSu9bKTtiXHuaswU879W0WjVD6LVOgl9ekVXhs4RhO93GYmyQ1hPAvSVZG8KNCnRRT8zau9daRwYoMMKNJJyN4rw-OaTVX9Cl0n7LBl4amEZUNJUM5b9qUKHX5z23DHFDdWdQwPZBey1DlFxCqk7Jkl20BxMFd3HSgKs6dFULfPNXqwDxz02XaNfG&maxwidth=400",
+        "googlePlaceId": "ChIJeSe5CsEJxkcRdRlM21_MA9s",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 622 1918",
+        "website": "https://begijnhofkapelamsterdam.nl/",
+        "score": 17.982895196007604,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-208304P1",
+        "name": "Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF",
+        "type": "culture",
+        "description": "Ce n’est pas seulement une visite touristique – c’est l’expérience combo ultime d’Amsterdam ! En une promenade inspirante, vous explorerez des sites emblématiques, découvrirez des endroits cachés que ",
+        "duration": 150,
+        "estimatedCost": 25,
+        "latitude": 52.353634899999996,
+        "longitude": 4.9408767,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Amsterdam/Your-Own-Amsterdam-A-Group-Sightseeing-Tour/d525-208304P1?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/88/1c/c6.jpg",
+        "providerName": "Viator",
+        "reviewCount": 35,
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "isOutdoor": true,
+        "includesMeal": true,
+        "score": 15.088136088700551,
+        "source": "viator"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJq-ry-tkJxkcR8i94uYaBUig",
+        "name": "Dam Square",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3731006,
+        "longitude": 4.8924274,
+        "rating": 4.5,
+        "reviewCount": 45492,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWh0p2cABnOm4yd8dwt8p__VaSa2sIbJLBqXVcvnHb-6QrxKhUiOqjOhiaAmP106Z8btFAjsaL5AJc2InPSnh58iqGjVgR4THXSfnEbZRaWOf9fwuMw7vCpNkVBRRb58sEPXYAfzzcO9lnWI_EoKy35fzZwU0aC00cDSMALXL56LabjgCi8-pH2cePMXjeq25zVijViu7ZQbUUg-BkiaVwWwUnSwa0RTXcD3wKNFqSZEuoZ4cr5VGqux37noehKD-pdOaf-EjCyej_m-BklVC_wmv7EFv-L-rk-2ZfoMmUQ52X8zr8KksFwbIOpauDNbak45lmFP3ZnaWHIFNbZyg2jY9XUlPsyIHPPGnVk4xa7RAJRbAd1wZKx_MnOaBvJw86hjdROn8Tq6O43SWu0iU28bFCUnn3Zkz_v_CgG6ctdShkOqmuaI9PnToYjqwwFygT-Z7jRZhHYPCzFFK2HfQuK1vTtc55aVZjosc9vfYrGL9Dl1vN6ZFT-vwPO2EuZjaWE8Q2QI79GHy-UOP18ypqSSv6zRXVPmlTRgPeFn4wG5fUvE5y1PZ1VbaA2M1V6P-opahq3XXsdxQ&maxwidth=400",
+        "googlePlaceId": "ChIJq-ry-tkJxkcR8i94uYaBUig",
+        "isOutdoor": true,
+        "score": 19.315870060948118,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJFQ6IwMYJxkcRis8dtZlOkTk",
+        "name": "Paleis op de Dam",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.3731835,
+        "longitude": 4.8913758,
+        "rating": 4.6,
+        "reviewCount": 25863,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXHZ9pKNvFZxkBtvay1kyXyqMPgNbfihyXB5fZeKENwjkxFhBIQ4ZDmmIkFS-90zMpRw4LLKeI7z4LSUEGn8fKDFvBdJtR9f9goh3J-1OfqwoeWcG_Yl6dkOREjSgqUfVYRWl9JTccBJ5G-G9A0iH2qvDSfRXoVIzKNbc9lzW_wpS0u1sX2UUqYnsMbSx8uAfYyQwHUIVi3jh64sldwE7Vw8COOayy6ibM54ucby7NcGK4pLcKH3yGnrLCSUHKexZhnncT_omx0gC6R4SL_r85BuPgeqRpp7xgYIAiY5N9NL_EQKkcKapSMqmvloFhXf30MXoFQqFu1zIgctxuUybCTgcXqEsVlxgT7vxGzwbWME09wZBQaSgXgq_56oxEjpgM0CKQJFzp0CJ03iZgr5wZIKNNNPtdwBbZrThpxsfoGk3865HSoR8dBfo7O5YApeRwI3dWxkQLPf9HE3dl72iX3BmhNMcJ84IhTGv8MVwcTzl78Cpp-4eYA5vnCFP0LQ13O3L1EB7sqlAXp-NNTTzXFDz2qvWdw3lo1Y02hCElKyn65U0vg6tk3fUUSVBtToXvJrMs7&maxwidth=400",
+        "googlePlaceId": "ChIJFQ6IwMYJxkcRis8dtZlOkTk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 522 6161",
+        "website": "https://www.paleisamsterdam.nl/",
+        "isOutdoor": false,
+        "score": 19.025357799625354,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJLQN6abQJxkcRxdcMtKwAP6w",
+        "name": "This is Holland",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3841865,
+        "longitude": 4.9021959,
+        "rating": 4.7,
+        "reviewCount": 11487,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXszeP_f7SNxDGk73woN493MhQkVrIqtdcqt8RdOyfPK-LxbXKVIx7p7FtXu2WxF-JTi3cJstc6JzqYgC_uJQAN5rR3NvIJjlYArzTfMoRKCytnQAxMHZbc5D1Z0-OsxUaqMNJkHvWv3istFbxqRNLgtwsbFejnJeN0hv3SBsXw5J7gJq5FVvWAAeud770ZqlALRlHF9-fK07YK3rW2UKzr_tF00fnD1ZjVYfW--hBmNFabkbmeCoNyblnUKuIJbDy9H-5ckfTXX16YdeHKVOr7VdsjVfqGYtMr9gG7o5VUF8fU6OUHKmSTO75Cc-QpFBHnQ_THtINdCwW2Ry4I1g3RnDDZvPwBMkvFLVNWZ4v0A7JSBlMN5N4mzFeRDUm2wdpewBpsD3EFRfDrYcIbkrq0Mqc925E17rnvql8zPmVrypQzA7Gyd-DmM9VeNkMVRsxtodprgovBpbnE8X2-ucWnVIYJz0MhLwt_GWDrgD-yCI6YEfFaF40FjPfcD7zVmrzVuy6qjdjhEfqKRjkI15thVF16us13krm40GNgRa8aqXY4h1qN57CqNgpQ2nQvwP60wL7eu2zy8g&maxwidth=400",
+        "googlePlaceId": "ChIJLQN6abQJxkcRxdcMtKwAP6w",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 215 3008",
+        "website": "http://www.thisisholland.com/",
+        "score": 18.5204132421347,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJD7P9IsMJxkcRMrf54OxoZSg",
+        "name": "The 9 Streets",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3702625,
+        "longitude": 4.8860546,
+        "rating": 4.5,
+        "reviewCount": 15048,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX6ou0lZ8EIfDTSOBsoOYaVOKa9ds9JdgRLdxTaogE-XDlCwmAcB-O988b3JV6EsRfpzJEgRJQZK8rnnaJczvGEIZS-ziqX8LTJxkTmxtk7eiQEkKec9QrrR9zzGcGqDP3VMRR7n6SZwoSgR8les2K8Qo12PPPhYc3l7gf5LYpynCgqWfvUK_W6OeuMoAMZEJ7Tr_6Tbyj9h2v4-r1qiOAVxqYCmFFjKO3I1QB89qGqMTuMjYEIYe6wpT8HmBri5diBgFoFyvBiw_jcUrp84PMPaaCBvw8bJk9U_9Fgb5jB9ezCrzej6O_MjEDtV7sJffjKbofyLNGjg1EYANCCEM9ggqy_Iwyc0zrM-k19H77CpasSVMOeTyAK-s-O87SOABSSIAMZpW4zoO0wzW73larg1jj5SC7kQyLodmhTjmtO4dr6KjxYJeNgt-pFwKMtUTT8tPZuYQZ9XWvw4J8rHbjTXmHJoUGhL8DRMGLTx-IQj9PHUXq-uChdxMeQuKTJTafdbqS0LV1wHqO3LJj1XRps8XtjROwd-b8sXkCjjcCFDJuKIJ14qnAFXxDY6oa2sd3yBi-G&maxwidth=400",
+        "googlePlaceId": "ChIJD7P9IsMJxkcRMrf54OxoZSg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.de9straatjes.nl/",
+        "score": 18.354957565084646,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJC7Uw48AJxkcR28umcgx0C6k",
+        "name": "Le Donjon d'Amsterdam",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.3701599,
+        "longitude": 4.8921108,
+        "rating": 4.5,
+        "reviewCount": 13779,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU_yNhUHjWAcsEtnQSwrOrik-eWZl_UxTHqJ23X2sa3G1gN1xqslD98iGsOyYlBCuOg8ls4rST-x8xqTfIbhlS-GPSaptGjevPWI1INIHLEkI2FWS5epZreXZdF3qEVv1cbL79xxM_G6Xuas2shXDJXSf2_YktQJfgr90JRFQ8hN2r0cQxmihawENz36w4ayKPs1RvnArXuo3XhvqJGyjORbTAStIDDOGbuHLI6uix71hPmfAQaZBKVzZViAyjHUUmiqLTo266R1WOu6piCacIXm8kfbZqwu0B9-IzBIdDK6Nfh2_yrlPLl8J-LzhMpeKwiUVK-jHu01RS_AtiTYP2zBHJk6Iw1Vz4dW4_VhzVm3ItfVoudFptS9kO1r3ZPN9pjIe3oT6RjhC_t70q1UwXuALEB-s3HXB-p-q_u28jWBgzorCLg--BVeTzFkPF3ut9JDAv4JpYwqhQT63B5w76_GxyyjJOevbX_uUm62azCoy1vwC-F7NYISVfnTTTxbfnAoqLfMFQIL-QAwljLXPjFZNGBAXZGoOwjXWlS49x0wmmx65_OU6WrOALIneQPM3l-l8WbVX37lg&maxwidth=400",
+        "googlePlaceId": "ChIJC7Uw48AJxkcR28umcgx0C6k",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 530 8500",
+        "website": "https://www.thedungeons.com/amsterdam/nl",
+        "score": 18.27843540027517,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJeSe5CsEJxkcRdRlM21_MA9s",
+        "name": "Béguinage",
+        "type": "religious",
+        "description": "",
+        "latitude": 52.3694585,
+        "longitude": 4.8903539,
+        "rating": 4.5,
+        "reviewCount": 9805,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXO5nyUymnSCY9jYi4YaujJzW1zvLVzLSop9NCwLQON_mWgEloRBQnDTV2OKx4nsVdBpQjfdI5CuJC4a6Rkb8gdWAwukI4wFP2II8kj_FK0umYQtNPhIal9kErNXJQgfWWZd6JMADC6P6-SJOQgoHdWXVYh_nwB2elFJGF9TR0blJ4-WxKj_FzuWMqPmfn3iv0QMwn7mEePueXrsHD6jJA6TepiB5bE9CbjMHUYf6Qzq2lQ2PL9t35--oibw-Pfx2VeQJaLcCHvQ-egRFBkywJLrjzXdB_oWjYK2qrRugsW92vQXlu9q88xpUn_bR0sK_Fwn9yO4GdDbK-3QONcg7n7AvGrEZiTMDvbP2vpHJ4qi-pOG-0z0msAPD682GOjLc8x7DCLiv-aJB0tSu9bKTtiXHuaswU879W0WjVD6LVOgl9ekVXhs4RhO93GYmyQ1hPAvSVZG8KNCnRRT8zau9daRwYoMMKNJJyN4rw-OaTVX9Cl0n7LBl4amEZUNJUM5b9qUKHX5z23DHFDdWdQwPZBey1DlFxCqk7Jkl20BxMFd3HSgKs6dFULfPNXqwDxz02XaNfG&maxwidth=400",
+        "googlePlaceId": "ChIJeSe5CsEJxkcRdRlM21_MA9s",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "020 622 1918",
+        "website": "https://begijnhofkapelamsterdam.nl/",
+        "score": 17.982895196007604,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 27,
+        "byEngine": {
+          "google_maps": 18,
+          "google_local": 5,
+          "google_flights": 2,
+          "google_hotels": 2
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-direct-08",
+    "   Toulouse → Amsterdam (4j)",
+    "   friends (4p) | moderate | shopping, nightlife",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Amsterdam\", ll=\"@52.3676,4.9041,14z\", gl=\"nl\"",
+    "[Weather] 4 days fetched for 2026-04-02 → 2026-04-05",
+    "[Google Places] ✅ 25 attractions found for Amsterdam",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Hotels] Disponibilité live: 13/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (272ms)",
+    "[Pipeline V2] Resolving GPS for 17 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 2/17 activities",
+    "[Pipeline V2] Injected 5 curated must-see attractions for \"Amsterdam\" from local database",
+    "[Pipeline V2]   → Rijksmuseum, Maison d'Anne Frank, Musée Van Gogh, Quartier du Jordaan, Croisière sur les canaux",
+    "[Pipeline V2] Step 1: All data fetched in 86559ms",
+    "[Pipeline V2]   Activities: 25 Google + 25 SerpAPI + 1 Overpass + 17 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 13 | Transport options: 7",
+    "[Pipeline V2] Step 1 done in 86559ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Same-location-type dedup: \"Ripley's Believe It or Not!\" merged with \"Paleis op de Dam\" (type=museum)",
+    "[Pipeline V2] Same-location-type dedup: \"Vieille église d'Amsterdam\" merged with \"Red Light Secrets Museum\" (type=museum)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [120.5] ⭐ \"Rijksmuseum Amsterdam\" (src=google_places, reviews=109702, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #2 [120.2] ⭐ \"Musée van Gogh\" (src=google_places, reviews=103065, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #3 [119.9] ⭐ \"Vondelpark\" (src=google_places, reviews=58469, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #4 [119.7] ⭐ \"Maison Anne Frank\" (src=google_places, reviews=74056, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #5 [116.8] ⭐ \"Croisière sur les canaux\" (src=mustsee, reviews=25000, rating=4.5, tags=romantic)",
+    "[Pipeline V2]   #6 [110.4] ⭐ \"Ons' Lieve Heer op Solder\" (src=serpapi, reviews=0, rating=4.7, tags=none)",
+    "[Pipeline V2]   #7 [20.0]    \"Red Light Secrets Museum\" (src=google_places, reviews=20623, rating=4.2, tags=adult_only,deep_culture)",
+    "[Pipeline V2]   #8 [19.3]    \"Dam Square\" (src=google_places, reviews=45492, rating=4.5, tags=none)",
+    "[Pipeline V2]   #9 [19.1]    \"A'DAM Lookout\" (src=google_places, reviews=28619, rating=4.6, tags=none)",
+    "[Pipeline V2]   #10 [19.0]    \"Paleis op de Dam\" (src=google_places, reviews=25863, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #11 [18.5]    \"This is Holland\" (src=google_places, reviews=11487, rating=4.7, tags=none)",
+    "[Pipeline V2]   #12 [18.4]    \"The 9 Streets\" (src=google_places, reviews=15048, rating=4.5, tags=none)",
+    "[Pipeline V2]   #13 [18.3]    \"Rembrandt House Museum\" (src=google_places, reviews=14596, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #14 [18.3]    \"Le Donjon d'Amsterdam\" (src=google_places, reviews=13779, rating=4.5, tags=none)",
+    "[Pipeline V2]   #15 [18.2]    \"Musée Maritime\" (src=google_places, reviews=12941, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #16 [18.0]    \"Béguinage\" (src=google_places, reviews=9805, rating=4.5, tags=none)",
+    "[Pipeline V2]   #17 [18.0]    \"Jardin botanique d'Amsterdam\" (src=google_places, reviews=11998, rating=4.4, tags=relaxing)",
+    "[Pipeline V2]   #18 [17.6]    \"Heineken Experience\" (src=google_places, reviews=12961, rating=4.2, tags=none)",
+    "[Pipeline V2]   #19 [17.3]    \"Musée de la Résistance\" (src=google_places, reviews=3386, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #20 [17.2]    \"National Monument\" (src=google_places, reviews=4805, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 2/43",
+    "[Pipeline V2] Added guaranteed experiential: \"Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF\"",
+    "[Pipeline V2] Step 2: 17 activities selected (6 must-sees) from 68 total",
+    "[Pipeline V2] Must-sees: \"Rijksmuseum Amsterdam\" (120.5), \"Musée van Gogh\" (120.2), \"Vondelpark\" (119.9), \"Maison Anne Frank\" (119.7), \"Croisière sur les canaux\" (116.8), \"Ons' Lieve Heer op Solder\" (110.4)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=2.12km, median=1.52km, maxClusterRadius=0.53km",
+    "[Pipeline V2] Radius-constrained clustering produced 7 clusters (target 4), running soft pass with 0.79km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (52.3717, 4.8959), Day 2: centroid (52.3841, 4.9021), Day 3: centroid (52.3587, 4.8784), Day 4: centroid (52.3536, 4.9409)",
+    "[Pipeline V2] Cluster Day 1: 11 activities, radius=1.26km, intraDistance=4.85km",
+    "[Pipeline V2] Cluster Day 2: 2 activities, radius=0.01km, intraDistance=0.03km",
+    "[Pipeline V2] Cluster Day 3: 3 activities, radius=0.66km, intraDistance=1.20km",
+    "[Pipeline V2] Cluster Day 4: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Must-see audit: moved \"Ons' Lieve Heer op Solder\" (120min) from Day 1 → Day 2",
+    "[Pipeline V2] Phase 2c: moved outdoor must-see \"Croisière sur les canaux\" from Day 1 (starts 15h) → Day 2 (starts 9h)",
+    "[Pipeline V2] Phase 4: moved non-must-see \"Musée Maritime\" from overloaded Day 1 → Day 2 to protect must-sees",
+    "[Pipeline V2] Phase 8c: reordered middle days by city-zone angle",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 8 activities [1 must-sees] (7.0h avail, max 3), Day 2: 3 activities [3 must-sees] (12.0h avail, max 7), Day 3: 5 activities [2 must-sees] (12.0h avail, max 4), Day 4: 1 activities [0 must-sees] (6.0h avail, max 1)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Maison Anne Frank\" (score=119.7), \"Rijksmuseum Amsterdam\" (score=120.5), \"Musée van Gogh\" (score=120.2), \"Vondelpark\" (score=119.9), \"Ons' Lieve Heer op Solder\" (score=110.4), \"Croisière sur les canaux\" (score=116.8)",
+    "[Pipeline V2]   Day 1: Maison Anne Frank",
+    "[Pipeline V2]   Day 2: Rijksmuseum Amsterdam, Musée van Gogh, Vondelpark",
+    "[Pipeline V2]   Day 3: Ons' Lieve Heer op Solder, Croisière sur les canaux",
+    "[Pipeline V2] Step 3: 4 clusters created",
+    "[Pipeline V2]   Day 1: Maison Anne Frank, The 9 Streets, Béguinage, Le Donjon d'Amsterdam, Rembrandt House Museum, Red Light Secrets Museum, Dam Square, Paleis op de Dam (2.7km intra)",
+    "[Pipeline V2]   Day 2: Rijksmuseum Amsterdam, Musée van Gogh, Vondelpark (1.2km intra)",
+    "[Pipeline V2]   Day 3: A'DAM Lookout, This is Holland, Ons' Lieve Heer op Solder, Croisière sur les canaux, Musée Maritime (2.8km intra)",
+    "[Pipeline V2]   Day 4: Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF (0.0km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"1. Met Hotel Amsterdam\" (1.16 score, 0.43km center, 1.65km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] Self-catered meals disabled: selected accommodation has no kitchen",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Restaurants pool: total=40, budgetFiltered=32, geo=32",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=4, targets=4",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Amsterdam\", ll=\"@52.3841865,4.9021959,14z\", gl=\"nl\"",
+    "[SerpAPI Places] Requête: q=\"breakfast brunch café bakery\", location=\"Amsterdam\", ll=\"@52.37,4.89,14z\", gl=\"nl\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Amsterdam\", ll=\"@52.353634899999996,4.9408767,14z\", gl=\"nl\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Amsterdam\", ll=\"@52.35690792,4.93070136,14z\", gl=\"nl\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=50, budgetFiltered=42, geo=42",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=20, missing meals 4 -> 4",
+    "[Pipeline V2] Step 4: 8/12 meals assigned restaurants (pool=42)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 1: \"Arrivée et centre historique\" → \"Maison Anne Frank et The 9 Streets\"",
+    "[Pipeline V2] Theme mismatch fixed for day 4: \"Histoire et départ\" → \"Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF\"",
+    "[Pipeline V2] Step 6 done in 11491ms — \"Progression logique de l'arrivée tranquille vers les grands musées par beau temps, puis journée complète maritime et panoramique, terminant par les sites historiques majeurs avant le départ.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 14/17 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 21 pairs...",
+    "[Pipeline V2] Directions cache: 21/21 pairs fetched",
+    "[Pipeline V2] Day 3 re-optimized with real times: Croisière sur les canaux → Ons' Lieve Heer op Solder → Musée Maritime → A'DAM Lookout → This is Holland",
+    "[Pipeline V2] 2-opt re-optimization: 1/4 days changed with real times",
+    "[Pipeline V2] Day 1: 8 activities to schedule (1 must-sees), dayStart=15:00, dayEnd=22:00, window=7.0h, cursor=15:00",
+    "[Pipeline V2]   → \"Rembrandt House Museum\" (120min, score=18.3, mustSee=false)",
+    "[Pipeline V2]   → \"Red Light Secrets Museum\" (120min, score=20.0, mustSee=false)",
+    "[Pipeline V2]   → \"Dam Square\" (30min, score=19.3, mustSee=false)",
+    "[Pipeline V2]   → \"Paleis op de Dam\" (120min, score=19.0, mustSee=false)",
+    "[Pipeline V2]   → \"Le Donjon d'Amsterdam\" (60min, score=18.3, mustSee=false)",
+    "[Pipeline V2]   → \"Béguinage\" (30min, score=18.0, mustSee=false)",
+    "[Pipeline V2]   → \"The 9 Streets\" (60min, score=18.4, mustSee=false)",
+    "[Pipeline V2]   → \"Maison Anne Frank\" (75min, score=119.7, mustSee=true)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 1 lunch: \"Sherpa Restaurant\" (0.4km) → \"Café restaurant van Kerkwijk\" (0.2km)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 1 dinner: \"Demetra - Italian Kitchen And Pizza\" (0.4km) → \"Bakkerij Wolf - Wolvenstraat\" (0.3km)",
+    "[Pipeline V2] Day 1: Skipping \"The 9 Streets\" — closed on thursday",
+    "[Pipeline V2] Day 2: 3 activities to schedule (3 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Rijksmuseum Amsterdam\" (150min, score=120.5, mustSee=true)",
+    "[Pipeline V2]   → \"Musée van Gogh\" (90min, score=120.2, mustSee=true)",
+    "[Pipeline V2]   → \"Vondelpark\" (60min, score=119.9, mustSee=true)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 breakfast: \"Pancake Company Amsterdam\" (0.3km) → \"Coffee & Cakes.\" (0.1km)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 lunch: \"Specht Bar & Lounge\" (1.2km) → \"Cannibale Royale Handboogstraat\" (1.0km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Vondelpark\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"Stoop & Stoop eetcafé\" (0.49km from Vondelpark)",
+    "[Pipeline V2] Day 3: 5 activities to schedule (2 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Croisière sur les canaux\" (75min, score=116.8, mustSee=true)",
+    "[Pipeline V2]   → \"Ons' Lieve Heer op Solder\" (120min, score=110.4, mustSee=true)",
+    "[Pipeline V2]   → \"Musée Maritime\" (120min, score=18.2, mustSee=false)",
+    "[Pipeline V2]   → \"A'DAM Lookout\" (45min, score=19.1, mustSee=false)",
+    "[Pipeline V2]   → \"This is Holland\" (60min, score=18.5, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 lunch, searching pool + API near \"Ons' Lieve Heer op Solder\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 lunch: found \"Restaurant Olijfje\" (0.82km from Ons' Lieve Heer op Solder)",
+    "[Pipeline V2] Day 4: 1 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=13:00, window=5.0h, cursor=08:15",
+    "[Pipeline V2]   → \"Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF\" (150min, score=15.1, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 4 lunch, searching pool + API near \"Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 4 lunch: found \"Stoop Eten en Drinken\" (0.26km from Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 4 dinner, searching pool + API near \"Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 4 dinner: found \"Box Sociaal\" (0.89km from Visite guidée d'Amsterdam + pierres précieuses cachées + dégustations + guide PDF)",
+    "[Pipeline V2] Day 4: meal-inclusive activity found — skipLunch=true, skipDinner=false",
+    "[Pipeline V2] Fetching images for 2 items without photos...",
+    "[Pipeline V2] ✅ Place images: 2/2 enriched (restaurants handled in dedicated Google photo pass)",
+    "[Pipeline V2] 📸 Enriching 17 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 17/17 enriched with Google Places photos",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 1 restaurant(s) (0 API calls)",
+    "[Pipeline V2] All restaurants already have good photos — skipping",
+    "[Pipeline V2] Section 13d: Opening hours validated 11 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 1 large intra-day gap segment(s)",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=2, fallback-flagged=0",
+    "[Pipeline V2] Step 7: 6 alternatives, pool trimmed to 17/17",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 83/100",
+    "  ⚠️ Day 2: zigzag route detected (3 turnbacks)",
+    "  ⚠️ Day 2: route inefficiency is high (1.82x vs MST lower bound)",
+    "  ⚠️ Day 3: zigzag route detected (4 turnbacks)",
+    "  ⚠️ Day 3: day load is high (605min planned incl. travel)",
+    "  ⚠️ Day 3: first activity starts late (10:00)",
+    "  🔧 Day 1: Fixed activity count in narrative (8 → 3)",
+    "[Pipeline V2] Step 8: Quality score 83/100 (5 warnings, 1 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 27 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 125133ms (125.1s)",
+    "[Pipeline V2]   4 days, 22 items total",
+    "[Pipeline V2] ✅ All 6 must-sees are in the schedule"
+  ],
+  "warnings": [
+    "[Pipeline V2] ⚠️ Image enrichment timeout (10s) — continuing",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Restaurant photo enrichment timeout (10s) — continuing",
+    "[Pipeline V2] Directions prefetch timeout (15s) — using partial cache",
+    "[Pipeline V2] ⚠️ Restaurant photo enrichment timeout (10s) — continuing",
+    "[SerpAPI] Vols filtrés LYS→AMS 2026-04-02: escale_nuit=1 (Aéroport international de Malte×1)",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite de la campagne d'Amsterdam en voiture, Amsterdam\": 5334.3km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Amsterdam City Center  à pied Semi-privé 12ppl Max, Amsterdam\": 850.4km de la destination (max 30km)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Dam Square\" (duration=30min, travel=10min, cursor=20:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Paleis op de Dam\" (duration=120min, travel=10min, cursor=20:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Le Donjon d'Amsterdam\" (duration=60min, travel=10min, cursor=20:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Béguinage\" (duration=30min, travel=15min, cursor=20:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 3: REJECTED activity \"This is Holland\" (duration=60min, travel=0min, cursor=20:15, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Blin Queen. Specialty pancakes, coffee & wine\" overlaps with \"Check-out 1. Met Hotel Amsterdam\""
+  ],
+  "errors": [
+    "[SerpAPI Hotels] Erreur: Google Hotels hasn't returned any results for this query."
+  ],
+  "durationMs": 125133,
+  "generatedAt": "2026-02-17T13:13:37.888Z",
+  "success": true,
+  "runType": "direct"
+}

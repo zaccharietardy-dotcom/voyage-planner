@@ -6,7 +6,10 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const query = request.nextUrl.searchParams.get('q');
-  if (!query || query.length < 2) {
+  if (!query || query.length > 100) {
+    return NextResponse.json({ error: 'Invalid query' }, { status: 400 });
+  }
+  if (query.length < 2) {
     return NextResponse.json([]);
   }
 

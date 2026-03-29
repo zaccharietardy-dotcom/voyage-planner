@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log to server console for now — in production, this would go to a DB or analytics service
-    console.log(`[Analytics] Received ${events.length} events:`,
+    console.debug(`[Analytics] Received ${events.length} events:`,
       events.map((e: any) => `${e.name} (${e.path})`).join(', ')
     );
 

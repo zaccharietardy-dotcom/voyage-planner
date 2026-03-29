@@ -1,0 +1,3176 @@
+{
+  "scenarioId": "geo-suggest-02-escapade-gourmande-a-prague",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Prague",
+    "startDate": "2026-04-07T22:12:19.111Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "moderate",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Prague",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "e95224df-0cf4-4f2f-9a11-87422f2c6191",
+    "createdAt": "2026-02-18T22:13:42.807Z",
+    "updatedAt": "2026-02-18T22:13:42.807Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Prague",
+      "startDate": "2026-04-07T22:12:19.111Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "moderate",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Prague",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-04-07T22:12:19.111Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "07:39",
+            "endTime": "08:00",
+            "type": "transport",
+            "title": "🧭 Départ depuis Lyon",
+            "description": "Départ depuis Lyon",
+            "locationName": "Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 21,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Lyon%2C%20Prague",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "19:40",
+            "type": "transport",
+            "title": "🚌 Bus → Prague",
+            "description": "Lyon → Prague",
+            "locationName": "Lyon → Prague",
+            "latitude": 50.0755,
+            "longitude": 14.4378,
+            "orderIndex": 1,
+            "estimatedCost": 34,
+            "duration": 700,
+            "bookingUrl": "https://www.omio.fr/bus/lyon/prague?departure_date=2026-04-08",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%8C%20Bus%20%E2%86%92%20Prague%2C%20Prague",
+            "transportMode": "bus",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "20:30",
+            "endTime": "21:00",
+            "type": "checkin",
+            "title": "Check-in Prague Dream Hostel",
+            "description": "Disponibilité confirmée",
+            "locationName": "Ve Smečkách 23, 110 00 Nové Město, Czechia",
+            "latitude": 50.079211,
+            "longitude": 14.427165,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 8.6,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Prague+Dream+Hostel+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Prague%20Dream%20Hostel%2C%20Prague",
+            "accommodation": {
+              "id": "booking-3582830",
+              "name": "Prague Dream Hostel",
+              "type": "hotel",
+              "address": "Ve Smečkách 23, 110 00 Nové Město, Czechia",
+              "latitude": 50.079211,
+              "longitude": 14.427165,
+              "rating": 8.6,
+              "reviewCount": 4951,
+              "stars": 4,
+              "pricePerNight": 40,
+              "totalPrice": 80,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/627730807.jpg?k=3bb96d583171b9477b0e58648686838c5330ca9c7a7cb859bbfdf79a0ab277e8&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Prague+Dream+Hostel+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/627730807.jpg?k=3bb96d583171b9477b0e58648686838c5330ca9c7a7cb859bbfdf79a0ab277e8&o="
+          }
+        ],
+        "theme": "Arrivée et installation",
+        "dayNarrative": "Premier jour d'exploration avec les monuments emblématiques de Prague : l'Horloge astronomique, la Place de la Vieille Ville et le Pont Charles.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Bruine légère",
+          "tempMin": 0,
+          "tempMax": 9,
+          "icon": "🌦️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 0,
+          "transport": 34,
+          "total": 34
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 50,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-08T22:12:19.111Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Café Purkyně",
+            "description": "café",
+            "locationName": "New Town, Tchéquie",
+            "latitude": 50.075024,
+            "longitude": 14.428874,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.3,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Purkyn%C4%9B%2C%20New%20Town%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Purkyn%C4%9B%2C%20Prague",
+            "restaurant": {
+              "id": "serp-15277280412261125547",
+              "name": "Café Purkyně",
+              "address": "New Town, Tchéquie",
+              "latitude": 50.075024,
+              "longitude": 14.428874,
+              "rating": 4.3,
+              "reviewCount": 423,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Purkyn%C4%9B%2C%20New%20Town%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "15277280412261125547",
+              "openingHours": {},
+              "distance": 0.4812807965586702,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-1440632250543157262",
+                  "name": "IPPA Café Tylovo Náměstí",
+                  "address": "Tylovo Nám. 2",
+                  "latitude": 50.07443,
+                  "longitude": 14.432083,
+                  "rating": 4.5,
+                  "reviewCount": 2600,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "café"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=IPPA%20Caf%C3%A9%20Tylovo%20N%C3%A1m%C4%9Bst%C3%AD%2C%20Tylovo%20N%C3%A1m.%202",
+                  "googlePlaceId": "1440632250543157262",
+                  "openingHours": {},
+                  "distance": 0.6370159671921022,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfX1avsE-pDJrx08QzBmCO6-EPKmjZ2TwOt80-tmMI2uc1oEss5BT34lFpP8kYR8gqtFecgQ3pmJwIKJbUJbJ9fcQ_C8Bm7UraVc-YxRlEkVRtO5dKtvgJYllHLpNfJqdc10mYaDTAw2dfkSsA428WGvHNhkzrN64UjoIxJCNj_14JJpQbHRPNXcgUh4XoUhCljMs_xJBngcM_nCmT_N8SgJRqLFcjJShQSWmhDYHnvHv6EZy33rMWyjA2ZFe0lhvsX5TlanpmpHrokSmoXrPYMqU_MjfUcYJaW-Pp4pfmad82AHKF95xOPcbzIYrwIUuW_avu5-1MynoSN__HSwQeK69X545ilsS2Resz5ZhAUclLfme6Qjh8s1j32vs0FiVndsaMjTyYRjDwxScHKK8Bbfz5Sz63iGwaBOFgIXNflXNrr-_PLtZwx6jhshqeXMKfGXXtESiOE6uQoYYd3aZpkK3UOcCRqDgeS526WAIPtfneMB9K4r-zLKs8ero5rXWqJq6xqEMbRm32JEQHJBuy256dhFdkEgP6G84_TWOlqfZUywmc8_fADU_u8Lv1zjN4AUwMHd&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-553596822542069570",
+                  "name": "Café Café",
+                  "address": "Rytířská 10",
+                  "latitude": 50.0845,
+                  "longitude": 14.421765,
+                  "rating": 4.2,
+                  "reviewCount": 4400,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "petit-déjeuner"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Café original avec pâtisseries et collations"
+                  ],
+                  "description": "Café original avec pâtisseries et collations",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Caf%C3%A9%2C%20Ryt%C3%AD%C5%99sk%C3%A1%2010",
+                  "googlePlaceId": "553596822542069570",
+                  "openingHours": {},
+                  "distance": 0.7030889102480719,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXWuuA2DHMx8Sh4v0M8-O5mUXsOh2RSCt6Vvz9FolGLEnKGT1WDXEqgq_MUGNaNZO6f6EvZ6uiNX1g_eumc6psnkVP_nWKCd8kkJYao25ffunNiM1iijFt2HjebqQnZYjfnROpJY4H1lSrHqnpRG-Ty07RdJuDWYhXb6WODEpVnpppqBBqqpLXhLuGyCy3gygogmDS6J90JtNBEuzYuxbsjO6aXcDxqPrh0yDpArmkX1wmtu-ydiRowsQPRvptf87wDFpuVEQNQdSzSCz-Ps8m3udHTuq9sKaqhifueQmXnMPcZrK0&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXdNy-0nAJ3L24aX6eC-HpBvTnZDaiaP-x2rBZBXcejFywj1Yok41sIxmoMoklTakItcnHu9aEZP7RV-ZR7Db_pt0mqcY9ywCrnq8elkOO0NjNz1y2BVeF7-pmLaNjXd_e73LvXN7VKwTkGE5jEdDBAf2V-kIXyFTbAMJ_GKXnmNaJc9J__s6F_q5BZvY4-onIUkdc1q9O4c_sd6nii59JdCthNfm838YtHCKublGdtM5l-paM1k6aPDV6je9C8zoBCGrtWVOME4WWxNIcKnwABM_Hayd230t38ThEpD3v2oHLi4n1tPbKqVywHa9VE7IRLj5zhGoGXs7RW_Tbvu2MdR5hzCkioROiouBh0U9PDnAPUAIHLUM0cav0iMJJ2PtcCYsDakoiJFXrhUXRKrmro1xrcRB00BcLHCERSyl0nDh_Uvlv62wNU-0ZmRjp1cEO0NNKaifEjZK8WZ385IFKJfM_-k-93x6MK80kx1dxk4deA_kN3L3uLtqGVgir8MK0ZIrvqwB72EIYriU4o4EuTTGMmYA-IhMpyVZE7ulHqbacq6krrnog08SpxT4XlJxWn4shPGbDd_bVtDRpeyBMAzsorcQ&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-1440632250543157262",
+                "name": "IPPA Café Tylovo Náměstí",
+                "address": "Tylovo Nám. 2",
+                "latitude": 50.07443,
+                "longitude": 14.432083,
+                "rating": 4.5,
+                "reviewCount": 2600,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=IPPA%20Caf%C3%A9%20Tylovo%20N%C3%A1m%C4%9Bst%C3%AD%2C%20Tylovo%20N%C3%A1m.%202",
+                "googlePlaceId": "1440632250543157262",
+                "openingHours": {},
+                "distance": 0.6370159671921022,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX1avsE-pDJrx08QzBmCO6-EPKmjZ2TwOt80-tmMI2uc1oEss5BT34lFpP8kYR8gqtFecgQ3pmJwIKJbUJbJ9fcQ_C8Bm7UraVc-YxRlEkVRtO5dKtvgJYllHLpNfJqdc10mYaDTAw2dfkSsA428WGvHNhkzrN64UjoIxJCNj_14JJpQbHRPNXcgUh4XoUhCljMs_xJBngcM_nCmT_N8SgJRqLFcjJShQSWmhDYHnvHv6EZy33rMWyjA2ZFe0lhvsX5TlanpmpHrokSmoXrPYMqU_MjfUcYJaW-Pp4pfmad82AHKF95xOPcbzIYrwIUuW_avu5-1MynoSN__HSwQeK69X545ilsS2Resz5ZhAUclLfme6Qjh8s1j32vs0FiVndsaMjTyYRjDwxScHKK8Bbfz5Sz63iGwaBOFgIXNflXNrr-_PLtZwx6jhshqeXMKfGXXtESiOE6uQoYYd3aZpkK3UOcCRqDgeS526WAIPtfneMB9K4r-zLKs8ero5rXWqJq6xqEMbRm32JEQHJBuy256dhFdkEgP6G84_TWOlqfZUywmc8_fADU_u8Lv1zjN4AUwMHd&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-553596822542069570",
+                "name": "Café Café",
+                "address": "Rytířská 10",
+                "latitude": 50.0845,
+                "longitude": 14.421765,
+                "rating": 4.2,
+                "reviewCount": 4400,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "petit-déjeuner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café original avec pâtisseries et collations"
+                ],
+                "description": "Café original avec pâtisseries et collations",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Caf%C3%A9%2C%20Ryt%C3%AD%C5%99sk%C3%A1%2010",
+                "googlePlaceId": "553596822542069570",
+                "openingHours": {},
+                "distance": 0.7030889102480719,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXWuuA2DHMx8Sh4v0M8-O5mUXsOh2RSCt6Vvz9FolGLEnKGT1WDXEqgq_MUGNaNZO6f6EvZ6uiNX1g_eumc6psnkVP_nWKCd8kkJYao25ffunNiM1iijFt2HjebqQnZYjfnROpJY4H1lSrHqnpRG-Ty07RdJuDWYhXb6WODEpVnpppqBBqqpLXhLuGyCy3gygogmDS6J90JtNBEuzYuxbsjO6aXcDxqPrh0yDpArmkX1wmtu-ydiRowsQPRvptf87wDFpuVEQNQdSzSCz-Ps8m3udHTuq9sKaqhifueQmXnMPcZrK0&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXdNy-0nAJ3L24aX6eC-HpBvTnZDaiaP-x2rBZBXcejFywj1Yok41sIxmoMoklTakItcnHu9aEZP7RV-ZR7Db_pt0mqcY9ywCrnq8elkOO0NjNz1y2BVeF7-pmLaNjXd_e73LvXN7VKwTkGE5jEdDBAf2V-kIXyFTbAMJ_GKXnmNaJc9J__s6F_q5BZvY4-onIUkdc1q9O4c_sd6nii59JdCthNfm838YtHCKublGdtM5l-paM1k6aPDV6je9C8zoBCGrtWVOME4WWxNIcKnwABM_Hayd230t38ThEpD3v2oHLi4n1tPbKqVywHa9VE7IRLj5zhGoGXs7RW_Tbvu2MdR5hzCkioROiouBh0U9PDnAPUAIHLUM0cav0iMJJ2PtcCYsDakoiJFXrhUXRKrmro1xrcRB00BcLHCERSyl0nDh_Uvlv62wNU-0ZmRjp1cEO0NNKaifEjZK8WZ385IFKJfM_-k-93x6MK80kx1dxk4deA_kN3L3uLtqGVgir8MK0ZIrvqwB72EIYriU4o4EuTTGMmYA-IhMpyVZE7ulHqbacq6krrnog08SpxT4XlJxWn4shPGbDd_bVtDRpeyBMAzsorcQ&maxwidth=800",
+            "distanceFromPrevious": 0.48,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJSS_AOemUC0cRlgaiWrJEe_E",
+            "dayNumber": 2,
+            "type": "activity",
+            "title": "Horloge astronomique de Prague",
+            "description": "Horloge astronomique de Prague",
+            "locationName": "Horloge astronomique de Prague",
+            "latitude": 50.0870215,
+            "longitude": 14.4207065,
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "duration": 60,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "mustSee": true,
+            "rating": 4.7,
+            "reviewCount": 92246,
+            "dataReliability": "verified"
+          },
+          {
+            "id": "gp-ChIJT-xQfI2UC0cR0IsM7hl2QjA",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "11:45",
+            "type": "activity",
+            "title": "Statue équestre de saint Venceslas",
+            "description": "Horse symbolism is the study of the representation of the horse in mythology, religion, folklore, art, literature and psychoanalysis as a symbol, in its capacity to designate, to signify an abstract concept, beyond the physical reality of the quad...",
+            "locationName": "Statue équestre de saint Venceslas",
+            "latitude": 50.0797799,
+            "longitude": 14.4297318,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Statue%20%C3%A9questre%20de%20saint%20Venceslas%2C%20Prague",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXYfv-C7q8-D4N1LP8Ng-GCweS6acPrD1n8BdjC9AFIU7NHErmxZO_8508tEhC4_CL8k4OlZAe5nkT10vkd60u5JiXwqftQZkB0O-U-odrdMdd-b9y6xH86f7fdj--_ZrQs6RrZZggFuvDNvn-rXCsqkXfEdGp1CJRy8ZJ_kUO3BGXqIISG05tRiWTlj9Knl10KP8fzYgx77K1REUqCzKvNNDya__Se_6u4jEafEmzaIB4v9DfyhK_mWOsU73sYL_T-ph_LtzjjvZ061cTMHIsMYfJ2uELXxro5N52KOE7KTu1XMyie9LOCMn7pQs85zxkwfSFBScRMj61a63nC-OPyYwBA2_PK-Q4RF2OqPK5GR59ff-sz8UPQvr9oyFbLuUBArDUb95LeCUTmZYH3LwiitMCouCbz7GsZtQQUr135YxtI6rnaMHwYOz1zBZtgcsmza626Fv-vZKH0RmUVyo-x2VmKMeWD2BQrJ9Fa-25CZ8uxd2A5NQHGNCYvQH2MBSroGoobo4-1QE_z9ZhqBnDUPzZpUPubfJ3qlTffztosWZ5ccpx5et-x1qFcsjLroRss8hOI&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.12,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJW08COB6VC0cRoonZ8lA4rWk",
+            "dayNumber": 2,
+            "type": "activity",
+            "title": "Cathédrale Saint-Guy",
+            "description": "Cathédrale Saint-Guy",
+            "locationName": "Cathédrale Saint-Guy",
+            "latitude": 50.09089179999999,
+            "longitude": 14.4005114,
+            "startTime": "11:55",
+            "endTime": "12:25",
+            "duration": 30,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "mustSee": true,
+            "rating": 4.8,
+            "reviewCount": 92496,
+            "dataReliability": "verified"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant Mlýnec",
+            "description": "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\"",
+            "locationName": "Novotného lávka 9",
+            "latitude": 50.085407,
+            "longitude": 14.413599,
+            "orderIndex": 4,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Novotn%C3%A9ho%20l%C3%A1vka%209",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Prague",
+            "restaurant": {
+              "id": "serp-14868495288080310998",
+              "name": "Restaurant Mlýnec",
+              "address": "Novotného lávka 9",
+              "latitude": 50.085407,
+              "longitude": 14.413599,
+              "rating": 4.7,
+              "reviewCount": 4900,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\""
+              ],
+              "description": "\"Superbe restaurant tant au niveau du cadre du service et de la cuisine.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Ml%C3%BDnec%2C%20Novotn%C3%A9ho%20l%C3%A1vka%209",
+              "googlePlaceId": "14868495288080310998",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-7993535770563824745",
+                  "name": "Breakfast",
+                  "address": "Anenská 185",
+                  "latitude": 50.085484,
+                  "longitude": 14.415335,
+                  "rating": 4.1,
+                  "reviewCount": 51,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Breakfast%2C%20Anensk%C3%A1%20185",
+                  "googlePlaceId": "7993535770563824745",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUZbmR2XwyqKPWmWZwcu4wLpLDPMfeJfWy8To9tpIavyPJObcQtpfBnhJ14-vSnXoV3bvQ8Er9WD1cJ8_EKzLbdYVdvMsdrdwuUUOEsy0eNMHbU0e012-6eUsVDNMTMvgh4SwoLNSDvVAJRtT48fmuRinrvOKhmXeWeXG3pIkdQD4sFUomHC-8QXkpXL0wPL0ZyPXb6xGbFP3s0rBPWoA7hPeMXuylgm9A4wZU6JHT2tufblmPMe8AbI03REHRn7kn-DWGsUX8LOI7k3EvtyxGYa2naylIw8XssGpDL7S4xaC1s-RE4W9Ne6ooVfK3KLy5EQ7A-bMqBY_3i6tDCtz_YVYBVuU6wWK679A08Cx7xgeRBPulW76rt4BM_x4iZrT8TPGrWb8RBbuxn3rygleeUFBggS5q4WEKJNKFq94y0QMcyfLY_pWnX9UP_UzuJzXzWHtVkWXWWIN_evUQi6XYmvM5pV8FmAvnA9vKOvLmuF0ajRkdM4ulJecyjDiM7PVludz3wb3QzunZvNGPTD3X7qsmVrHSKZWFoeZBfA1eXgbXDXVt21qb60-vU32TnNlk&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-11336515721673718864",
+                  "name": "Czech Slovak Restaurant",
+                  "address": "Malá Strana, Prague 1, Tchéquie",
+                  "latitude": 50.08177,
+                  "longitude": 14.404632,
+                  "rating": 4.7,
+                  "reviewCount": 2200,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "tchèque"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Repas top top qualité prix top top génial bonne expérience\""
+                  ],
+                  "description": "\"Repas top top qualité prix top top génial bonne expérience\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Czech%20Slovak%20Restaurant%2C%20Mal%C3%A1%20Strana%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                  "googlePlaceId": "11336515721673718864",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVLT8PZ8Y68lp9Tk4HVupFrgqXGSyOd9eL0M4K5cedMGfylsis6y5E8ep06HDv7N1ERP3ZixW_ik7sYx6YbQan_zsDn_K8gwnwnAteoMkHWBOOY_ffqzLB2PwbXu0aic1nvRhUXWUkENEEdSq1HB56ArCjokpEOMrgzAIWJkeWAGGpsSxnyzhb9KkMGeWzDNSXWQKDIRebI7ZXZZTuhbyigs4mVar5gpfX4KqDcKw0Y1YqYe-ZGyG17Cdg3E_6SxqDZONintiFUpqYg9X4HyycFceyv-YvuoyYWKRhAoLM3m7uW4uY&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXf0j2dFgiSiuisE3XJp_n354CdVgjEgMYAGC4b3-EhXpu0GgTdqxd9GaRit2uBCYcpKDzvmAYeWZUud9hycXzLqEh1jTaBGo15SbjfR3NNB9fe52mLn2Py9HRB6xaOst0DuPtTfhannfVRdZMaDcN0J0JsrKVN-q7-dVShKiBiB-iVuAsFzT1WkNOqTd_ELjqibtSg20O05TjV8T3D3ZQvHHZ_5i03arAsqOoODxR7bFapxs-zTRYwlKgzjPJe6uORF7lzjJOqmSnUsSpfJUr0HyEWPN1dLliJwkOzgP-PXAAzETE&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-7993535770563824745",
+                "name": "Breakfast",
+                "address": "Anenská 185",
+                "latitude": 50.085484,
+                "longitude": 14.415335,
+                "rating": 4.1,
+                "reviewCount": 51,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Breakfast%2C%20Anensk%C3%A1%20185",
+                "googlePlaceId": "7993535770563824745",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUZbmR2XwyqKPWmWZwcu4wLpLDPMfeJfWy8To9tpIavyPJObcQtpfBnhJ14-vSnXoV3bvQ8Er9WD1cJ8_EKzLbdYVdvMsdrdwuUUOEsy0eNMHbU0e012-6eUsVDNMTMvgh4SwoLNSDvVAJRtT48fmuRinrvOKhmXeWeXG3pIkdQD4sFUomHC-8QXkpXL0wPL0ZyPXb6xGbFP3s0rBPWoA7hPeMXuylgm9A4wZU6JHT2tufblmPMe8AbI03REHRn7kn-DWGsUX8LOI7k3EvtyxGYa2naylIw8XssGpDL7S4xaC1s-RE4W9Ne6ooVfK3KLy5EQ7A-bMqBY_3i6tDCtz_YVYBVuU6wWK679A08Cx7xgeRBPulW76rt4BM_x4iZrT8TPGrWb8RBbuxn3rygleeUFBggS5q4WEKJNKFq94y0QMcyfLY_pWnX9UP_UzuJzXzWHtVkWXWWIN_evUQi6XYmvM5pV8FmAvnA9vKOvLmuF0ajRkdM4ulJecyjDiM7PVludz3wb3QzunZvNGPTD3X7qsmVrHSKZWFoeZBfA1eXgbXDXVt21qb60-vU32TnNlk&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-11336515721673718864",
+                "name": "Czech Slovak Restaurant",
+                "address": "Malá Strana, Prague 1, Tchéquie",
+                "latitude": 50.08177,
+                "longitude": 14.404632,
+                "rating": 4.7,
+                "reviewCount": 2200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "tchèque"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Repas top top qualité prix top top génial bonne expérience\""
+                ],
+                "description": "\"Repas top top qualité prix top top génial bonne expérience\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Czech%20Slovak%20Restaurant%2C%20Mal%C3%A1%20Strana%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                "googlePlaceId": "11336515721673718864",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVLT8PZ8Y68lp9Tk4HVupFrgqXGSyOd9eL0M4K5cedMGfylsis6y5E8ep06HDv7N1ERP3ZixW_ik7sYx6YbQan_zsDn_K8gwnwnAteoMkHWBOOY_ffqzLB2PwbXu0aic1nvRhUXWUkENEEdSq1HB56ArCjokpEOMrgzAIWJkeWAGGpsSxnyzhb9KkMGeWzDNSXWQKDIRebI7ZXZZTuhbyigs4mVar5gpfX4KqDcKw0Y1YqYe-ZGyG17Cdg3E_6SxqDZONintiFUpqYg9X4HyycFceyv-YvuoyYWKRhAoLM3m7uW4uY&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXf0j2dFgiSiuisE3XJp_n354CdVgjEgMYAGC4b3-EhXpu0GgTdqxd9GaRit2uBCYcpKDzvmAYeWZUud9hycXzLqEh1jTaBGo15SbjfR3NNB9fe52mLn2Py9HRB6xaOst0DuPtTfhannfVRdZMaDcN0J0JsrKVN-q7-dVShKiBiB-iVuAsFzT1WkNOqTd_ELjqibtSg20O05TjV8T3D3ZQvHHZ_5i03arAsqOoODxR7bFapxs-zTRYwlKgzjPJe6uORF7lzjJOqmSnUsSpfJUr0HyEWPN1dLliJwkOzgP-PXAAzETE&maxwidth=800",
+            "distanceFromPrevious": 0.66,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=50.0797799,14.4297318&destination=50.085407,14.413599&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJMbJV6eWUC0cRZM00zzxyBhA",
+            "dayNumber": 2,
+            "startTime": "15:00",
+            "endTime": "15:45",
+            "type": "activity",
+            "title": "Tour du pont de la Vieille Ville",
+            "description": "The communal section is the smallest administrative division in Haiti. The 144 communes are further divided into 571 communal sections.",
+            "locationName": "Tour du pont de la Vieille Ville",
+            "latitude": 50.0862306,
+            "longitude": 14.4136141,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tour%20du%20pont%20de%20la%20Vieille%20Ville%2C%20Prague",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUM-aNYabnyqI5V1NNw5Lv5EzSj1ccizxUiaM7oKORdcjsTjvt_0Y4Y8b_43uxJBQDmVSHwewT_A9SHGOYfTcWL3fJ7xalXcSa-NyD0_cLtNe8jyod2IS5FBorCb-n9-r_KiAY8qUVNQg1rP43uisiynBDmnaCZv18QPYz2h9H08Ggx73Kv_csRGHjgUGYFYeuJrGWyvR3Cj0RFRT9BTHUG2hihk2refIU9R0-D6_hFiDV8kBG3WbLQAhr1k7sr-zCl9OwLZRu7-TjrnJku8bBAVmJHA5OFRb7WnBXxZJN_LNbTUb2NF9Efw_zcMyvp4vTfdBiYDnUomW61DfgNtQyXviStXyoJnzhLTTJNrxWIo80skdcpopWCZSoCtvCNmZDfotRHNTKz0Pfbj26HRkJJoyCCnoOhfsZi0xO3G3n5GHSJwzivx1LFdaOV3g3Rb2bpVE3e_fHAZB7fLAJOPQ4arqHgBJ0kRBPbBlSfTkjICkTlPJmz7tp_DubtDlfpekDznRdebYCsUyZXPRh3Q7TSS_Y8PNts8FYn8Nr316A19slJdMrFFzL_iCd-ZqC2OQ5lBnsgRGKG8A&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.09,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJIfpRNOmUC0cRxHIewgck75c",
+            "dayNumber": 2,
+            "startTime": "16:00",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Place de la Vieille Ville",
+            "description": "Ville Vieille - Léopold is an administrative region containing the oldest part of the city of Nancy, France.",
+            "locationName": "Place de la Vieille Ville",
+            "latitude": 50.0875692,
+            "longitude": 14.4211875,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Place%20de%20la%20Vieille%20Ville%2C%20Prague",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW3PMfd0Xk4c7qKXwtk6XajTiYQ7hd_8FAdguO2PvRcTvTOtoV0QInydUoRiYDvLkVxogqTwpFY6V6uwKJswyaEUpXaPnBqjGN-I3cB1ubgxIJOAkp8Ne9If53KPvcDcqYoNQs1jEyKmPz8KmPId44JCN090FWqusqFds04f4sQpL0z5_txxRKBbT_j_ldmP99arTF4kVZSKnQc5ZR-FYPf5OkxXDg_g_0Th4_7qs4rmCv85NFGA0mULkmjTnMuiVmch3SiyTpW2DJls868ntAZb5AqeurPhZ27A3h11Yqm2rMQtLDZoEE0F0IvU7I2fau5cvJZletSWUzMRqYXPsbbj3WJg6WV1CvEz271DBpTa3NVzW8919HnGVVvXB-l4mlJn4FbYQaL6JvJPPhWnK0JkfH0vTnvTj47w7Jn_NZmU8iLbzvlk0sTQfha6mu2ueXziyLmoAi1zD6XWWWkzlTXUwuZ5D6KR1Wa_oCTeuk_EXnE5xNe4NSh1DCEff2Ws2Fm1gDhv6BQWMULLiMiIM79UAfxC4FMlevPhZuXE4LLTiUpBM8g9MYGPgRgoCGECuOOEI8O&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 0.56,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJH3y4L-CUC0cRxLvVqnWQK2Q",
+            "dayNumber": 2,
+            "startTime": "17:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Palais Lobkowicz",
+            "description": "The House of Lobkowicz is an important Bohemian noble family that dates back to the 14th century and is one of the oldest noble families of the region. Over the centuries, the family expanded their possessions through marriage with the most powerf...",
+            "locationName": "Palais Lobkowicz",
+            "latitude": 50.0916483,
+            "longitude": 14.4049502,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20Lobkowicz%2C%20Prague",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX9Rli6asA18Fv8fvndKX4PKOj76fx_M8xk2VMthUjbydPE0Eg9YDEpyEWnkfgoAPDvxU7S-yoLcWjplr3PrXFvcx_kDgiEaHCHLeIKehhLukuvgOs9HQ47UnBxD5F0atBiPhwJ-mf-J0Va2ZQYrMtaFsrH6FiHfCzOsT9I4xtDnHXc2P10_5336XDc976L8kXG5spS1sIuzdM6VnAX9li-W926OqluNv-F0zt35bLa7EI2Bv_KGDOIJ1RD8z59KZ_0tNdQ14MkiizTRtm-G8BDwXjg8dPjYb8lP6A_iIn58DJ1DxeMAJBfmoi-GZh7SrtwSRLS0lDLNNP4op4aT50zvvbhCOGNeZyr47fesF4aNt4ykkAQmRA--vpzdXfd5U26X1UHq9AlGYsUFMBZ1S6To4FVoL49W1AEs6NvL8N5SvNe1GpMXM9CGsDZPEvwItudBjTYplssmZlHgKHDUTYL9meDeUzznHtNcrr0MkHzY3jQ8gT0U8mMWa00YtwLeQ04CFtqhz779DKTV40HVbcTRWO9MyeMRkiTH1FDicsRbq_yf1LEowjAcVSS_FYyBHgHVvjF9FBGUQ&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.24,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=50.0875692,14.4211875&destination=50.0916483,14.4049502&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJw7ckbB6VC0cRnyUSr4g8zyo",
+            "dayNumber": 2,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Château de Prague",
+            "description": "",
+            "locationName": "Château de Prague",
+            "latitude": 50.0910966,
+            "longitude": 14.4016165,
+            "orderIndex": 8,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20de%20Prague%2C%20Prague",
+            "dataReliability": "verified",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Castillo_de_Praga%2C_Praga%2C_Rep%C3%BAblica_Checa%2C_2022-07-02%2C_DD_209.jpg/400px-Castillo_de_Praga%2C_Praga%2C_Rep%C3%BAblica_Checa%2C_2022-07-02%2C_DD_209.jpg",
+            "mustSee": true,
+            "distanceFromPrevious": 0.25,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — Lore Malastrana",
+            "description": "\"Service impeccable, personnel très gentil, nourriture excellente !\"",
+            "locationName": "Thunovská 181/16, 118 00 Malá Strana, Tchéquie",
+            "latitude": 50.089174,
+            "longitude": 14.402206399999999,
+            "orderIndex": 9,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Lore%20Malastrana%2C%20Thunovsk%C3%A1%20181%2F16%2C%20118%2000%20Mal%C3%A1%20Strana%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Lore%20Malastrana%2C%20Thunovsk%C3%A1%20181%2F16%2C%20118%2000%20Mal%C3%A1%20Strana%2C%20Tch%C3%A9quie",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ0f8MBiOVC0cRw2bqcKs2P-Q",
+              "name": "Lore Malastrana",
+              "address": "Thunovská 181/16, 118 00 Malá Strana, Tchéquie",
+              "latitude": 50.089174,
+              "longitude": 14.402206399999999,
+              "rating": 4.8,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+420 730 542 040",
+              "website": "http://www.loremalastrana.cz/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Lore%20Malastrana%2C%20Thunovsk%C3%A1%20181%2F16%2C%20118%2000%20Mal%C3%A1%20Strana%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "ChIJ0f8MBiOVC0cRw2bqcKs2P-Q",
+              "openingHours": {
+                "wednesday": {
+                  "open": "10:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.2178861560314654,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-8752560307184670079",
+                "name": "Le Grill Restaurant",
+                "address": "New Town, Prague 1, Tchéquie",
+                "latitude": 50.08708,
+                "longitude": 14.431378,
+                "rating": 4.6,
+                "reviewCount": 1000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Superbe lieu, cuisine gastronomique excellente et service impeccable !\""
+                ],
+                "description": "\"Superbe lieu, cuisine gastronomique excellente et service impeccable !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Le%20Grill%20Restaurant%2C%20New%20Town%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                "googlePlaceId": "8752560307184670079",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU73nnd458zpqxnp8Tb-y4bIR9u2ziNwlXro6_nBlASBTZEnrZmKfy3TchgH0VGm53kc8dyqfscho1b1mki9twMoRCRdOn436HQxfE7RzgVu8JUJ5Ldrg1xteLJcvLJpW_mxNT1guLgHzlJ95r8mAD4cw3BHMzuXmcMHqFtOyRLw-y7b-TLc8cJNUUF_ww5Xr06uha3CIYJr5_dVd6CXvyYMU3ei9ePrgtmx3ItGy3ORR8ogPnMBBVaffNHETucUCkERMscI-pgOAdJFH7u-cDO-vbzeIbfjAn_b7C_J7-iWuSG&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-6707465867377608907",
+                "name": "FAT CAT Downtown",
+                "address": "New Town, Prague 1, Tchéquie",
+                "latitude": 50.081173,
+                "longitude": 14.428443,
+                "rating": 4.7,
+                "reviewCount": 3200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "hamburger"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bonne cuisine, super ambiance, endroit très chaleureux.\""
+                ],
+                "description": "\"Très bonne cuisine, super ambiance, endroit très chaleureux.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=FAT%20CAT%20Downtown%2C%20New%20Town%2C%20Prague%201%2C%20Tch%C3%A9quie",
+                "googlePlaceId": "6707465867377608907",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWGFy_8myUEkqnXPCDToD0K6e3KJQN5KSwUpovJ6v405t3DrHAop_RzLY1HpFhqFP9hloK0t-GMyOp6uatQ8YUwVvZ3JG-EA3W3tDlcGKt9xxVbwgvadRN07YZXHeNMmucU2NPPx2KY-Iuoi2cZJ6PC8P_nK6vrB9TMU2F_lCRfRyyAV-hfE6sZvUFx81vVQepdzC3PdotxSKfQq-nwpTuaC2Qhuteg-YsuX9AN_FcSCOsAUAhBxxtXQA2GRHqfl2RO7-ZPL_DGvbg53R7yekFYlWVpEcHpitUf01Fykw3ilesd&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.22,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=50.0910966,14.4016165&destination=50.086067,14.418764&travelmode=transit",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Château et colline de Petřín",
+        "dayNarrative": "Journée consacrée au Château de Prague, à la Cathédrale Saint-Guy et aux sites de la colline de Petřín, avec exploration des musées alchimiques.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Bruine légère",
+          "tempMin": 3,
+          "tempMax": 11,
+          "icon": "🌦️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 60,
+          "transport": 0,
+          "total": 60
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": true,
+          "geoPrunedActivitiesCount": 1
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.24,
+          "p95LegKm": 0.67,
+          "totalTravelMin": 85,
+          "totalLegKm": 4.27,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.1,
+          "mstLowerBoundKm": 3.89
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-09T22:12:19.111Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out Prague Dream Hostel",
+            "description": "Disponibilité confirmée",
+            "locationName": "Ve Smečkách 23, 110 00 Nové Město, Czechia",
+            "latitude": 50.079211,
+            "longitude": 14.427165,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 8.6,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Prague+Dream+Hostel+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Prague%20Dream%20Hostel%2C%20Prague",
+            "accommodation": {
+              "id": "booking-3582830",
+              "name": "Prague Dream Hostel",
+              "type": "hotel",
+              "address": "Ve Smečkách 23, 110 00 Nové Město, Czechia",
+              "latitude": 50.079211,
+              "longitude": 14.427165,
+              "rating": 8.6,
+              "reviewCount": 4951,
+              "stars": 4,
+              "pricePerNight": 40,
+              "totalPrice": 80,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/627730807.jpg?k=3bb96d583171b9477b0e58648686838c5330ca9c7a7cb859bbfdf79a0ab277e8&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Prague+Dream+Hostel+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/627730807.jpg?k=3bb96d583171b9477b0e58648686838c5330ca9c7a7cb859bbfdf79a0ab277e8&o="
+          },
+          {
+            "id": "gp-ChIJFz83wvaUC0cRRDMLBTdlAZM",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Maison dansante",
+            "description": "",
+            "locationName": "Maison dansante",
+            "latitude": 50.0754031,
+            "longitude": 14.4141787,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.3,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Maison%20dansante%2C%20Prague",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWv7zPYAyA6ERFlq0JhwhNkt5Lox350jQ3kXedLmfnf-JyjDpySOiUV7oRIDMcO20-r5GXBAatpzYAKzQRHHRi0tTqJngKGQUhpValKYC4LE1xxrb7EkivhQ1BeLmGk9BKAL6kE06gHMZ1fu_j_02sRRg6TDz6_7SL7-SM8E_Lu41Wp17F2yT4RLMN6VxtNgoAiIfzqKXnotq0xTKKU2C9PIzHOQ8GJTuixgyyw_PB4RXs2G_R4kmIXfOPeQ_eVjhFO74nKGkHkbaBfGsVeTZ48owYVkuX2pFNvn17BPAmKdeo_wDGex5k_QfobIca6zwf_WDieVww9zA_sVcSidVg6bmbJLPEhrlAZ2hcemVn0OJFKHyl3Z9plPlzWFifekm0P5h7pJ4JOcW3OqslAPB0pRaVBlNTcN9YfJLjypPCNVscVaIyIS16eQXdg2VQCEJI1mo3M_qy-b8rJWm84gak80BGjx5g4_VSIahqoSUoAIeDFL8ATq-oYgtw8KmIw60LfISKP5NaRr6ifx0o5cMBrw3BBONnVwS_Cb42-_uy9VZO_liz2p6nx8ndxaUHOZH6hDVeZ&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.02,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=50.079211,14.427165&destination=50.0754031,14.4141787&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJn7WO5eWUC0cRJrHT0TiXIHU",
+            "dayNumber": 3,
+            "startTime": "11:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Pont Charles",
+            "description": "Pont Charles",
+            "locationName": "Pont Charles",
+            "latitude": 50.0864771,
+            "longitude": 14.4114366,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.8,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pont%20Charles%2C%20Prague",
+            "dataReliability": "verified",
+            "mustSee": true,
+            "qualityFlags": [
+              "gap_fill_activity"
+            ],
+            "distanceFromPrevious": 1.25,
+            "timeFromPrevious": 14,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Seifert’s Brunch",
+            "description": "\"Restaurant charmant, cuisine savoureuse, service rapide et prifessionnel\"",
+            "locationName": "Seifert’s Brunch",
+            "latitude": 50.08724,
+            "longitude": 14.454223,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.9,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Seifert%E2%80%99s%20Brunch%2C%20%C5%BDi%C5%BEkov%2C%20Prague%203%2C%20Tch%C3%A9quie",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Seifert%E2%80%99s%20Brunch%2C%20%C5%BDi%C5%BEkov%2C%20Prague%203%2C%20Tch%C3%A9quie",
+            "restaurant": {
+              "id": "serp-8360913489921809532",
+              "name": "Seifert’s Brunch",
+              "address": "Žižkov, Prague 3, Tchéquie",
+              "latitude": 50.08724,
+              "longitude": 14.454223,
+              "rating": 4.9,
+              "reviewCount": 273,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "brunch"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Seifert%E2%80%99s%20Brunch%2C%20%C5%BDi%C5%BEkov%2C%20Prague%203%2C%20Tch%C3%A9quie",
+              "googlePlaceId": "8360913489921809532",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVRApKsQNkcxfOSAM8w-D5kmu8rwE3m9WfPfVZFMQ84qMT3Lz2vHJau7uVmTO7o8avFjOU5msYwCVKo_xp6jXVtm84ZSDg7p7jRo2gWkiOsJTipH_62HvZZgiO8UmPHlHEQ_yCzZOtXCAd-YHPuRiwM8TtCOmu-Dm0S5Qq_XR_rCjnB8DhoWyvjGm52F2JsRyFLCGBHeUit_kLH6TXpI5lm4_t5qL1V9PJhXSaFqGXQCl5k2mKUCyG_GnAuUw4sihiTSnRIz97IrXOmkGtlm0mkkVlW3XoX6v9P6gzf97mnCWeCyX8&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-607592543148614994",
+                "name": "Sumi Garden",
+                "address": "Slavíkova 18",
+                "latitude": 50.079956,
+                "longitude": 14.447612,
+                "rating": 4.8,
+                "reviewCount": 1400,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "japonaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le meilleur restaurant de sushi à Prague.\""
+                ],
+                "description": "\"Le meilleur restaurant de sushi à Prague.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sumi%20Garden%2C%20Slav%C3%ADkova%2018",
+                "googlePlaceId": "607592543148614994",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUeYU6QfQ3ZvfiGHiL5flj0Jzy-y0gb3C8v6j15lKL2KNVuittLrNp8CZua1HKJpafmhhmTNHKuKaii64sGV-N3byh4MYJwF3coIMGLXPwhwbmdFs6II9SJyYI_WzjsAzUQ5BngWJDZozt_tCqP6T1o3XEYf6CHzFm9_2E-EswKiXxcynxcwotf_0dmXe9NMuMsv_UUgPJ6UpZ6fZO5y-p6HZLVN8IJJbs7uXlWleKYfjhLM1ort5N1eIEP2XcCvN6Qxg9IxiOt3CD64g8nflwObTQdacRqXv2sYWdxZhcgDF5l7jE&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-10904853971700894096",
+                "name": "TISSE Bakery",
+                "address": "Vinohrady, Tchéquie",
+                "latitude": 50.079865,
+                "longitude": 14.446811,
+                "rating": 4.4,
+                "reviewCount": 923,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=TISSE%20Bakery%2C%20Vinohrady%2C%20Tch%C3%A9quie",
+                "googlePlaceId": "10904853971700894096",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXoCESXL4GDodtNtt6FsVME-8X_x6v0Wfpy4Ai7v3GIS8V2jLvrFuzpeTPVVvc0WknwkWAx7kQpAkizEm28hIDC_zUNcOJbE2zG2O7a1JTS_urTHWOQ21ccrSvXFXMMrs6h1NKaViCLxjCLhf05Hdvn_ETEOUmVP0MSKqSNnK7vfppsPcD1Nz9fz4YIe5n34U2Zt6D_yu2Z9wIAQbkSP9lY4vgMn2dneFtkzD9E_-mzd5f-BCYFFmRFrrzMFkrRnwHKwMAlNWqZgCNr9c5zDucLgqJDBCza8hNhD14gbiW66Dz0kjHRqlpOWde2PFT9SURRQg2oixoWJ2yk6IEPVgeh7O6LxYdrW3zTSpfWhLAWkXZOSNCDoaTTTLGj0rbOnJBJLKeLN9m8p7BCQiUIDwgRqcL8rt1do5if0g3wxzxI4phH1I_4TbFcOGvF_z-AkrKuXDmfRfL9fAz528qeyXvft0CK3OIERASp1OH8-TKQ6pqv9WG4V_i57Nqit2uqZZwaCWPuyebc9PXKVn9ye0Ine366o486suR2LbW29v85LyCjdtI4V6HZkHPo83thbNXPjx8kYJ6qhQ&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVRApKsQNkcxfOSAM8w-D5kmu8rwE3m9WfPfVZFMQ84qMT3Lz2vHJau7uVmTO7o8avFjOU5msYwCVKo_xp6jXVtm84ZSDg7p7jRo2gWkiOsJTipH_62HvZZgiO8UmPHlHEQ_yCzZOtXCAd-YHPuRiwM8TtCOmu-Dm0S5Qq_XR_rCjnB8DhoWyvjGm52F2JsRyFLCGBHeUit_kLH6TXpI5lm4_t5qL1V9PJhXSaFqGXQCl5k2mKUCyG_GnAuUw4sihiTSnRIz97IrXOmkGtlm0mkkVlW3XoX6v9P6gzf97mnCWeCyX8&maxwidth=800",
+            "distanceFromPrevious": 3.05,
+            "timeFromPrevious": 17,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=50.0883569,14.449522&destination=50.066612,14.417964&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3",
+            "dayNumber": 3,
+            "startTime": "14:00",
+            "endTime": "01:40",
+            "type": "transport",
+            "title": "🚌 Bus → Lyon",
+            "description": "Prague → Lyon",
+            "locationName": "Prague → Lyon",
+            "latitude": 50.0755,
+            "longitude": 14.4378,
+            "orderIndex": 4,
+            "estimatedCost": 34,
+            "duration": 700,
+            "bookingUrl": "https://www.omio.fr/bus/prague/lyon?departure_date=2026-04-10",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%8C%20Bus%20%E2%86%92%20Lyon%2C%20Prague",
+            "transportMode": "bus",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop",
+            "distanceFromPrevious": 2.862,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=50.066612,14.417964&destination=50.0755,14.4378&travelmode=transit"
+          }
+        ],
+        "theme": "Maison dansante et Pont Charles",
+        "dayNarrative": "Journée consacrée à Vyšehrad et Mémorial national de Vítkov. 2 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 3,
+          "tempMax": 12,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 30,
+          "transport": 34,
+          "total": 64
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 3.05,
+          "p95LegKm": 1.25,
+          "totalTravelMin": 31,
+          "totalLegKm": 4.3,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 4.3
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 645,
+            "price": 34,
+            "co2": 23,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/prague?departure_date=2026-04-08"
+          }
+        ],
+        "totalDuration": 700,
+        "totalPrice": 34,
+        "totalCO2": 23,
+        "score": 8.1,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 4.4,
+          "co2Score": 9.9
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/prague?departure_date=2026-04-08",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Prague",
+            "duration": 50,
+            "price": 66,
+            "co2": 129
+          }
+        ],
+        "totalDuration": 338,
+        "totalPrice": 90,
+        "totalCO2": 130,
+        "score": 7.8,
+        "scoreDetails": {
+          "priceScore": 5,
+          "timeScore": 10,
+          "co2Score": 8.5
+        }
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 65,
+            "price": 86,
+            "co2": 219,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON0704PRAGUE1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 355,
+        "totalPrice": 86,
+        "totalCO2": 219,
+        "score": 7.5,
+        "scoreDetails": {
+          "priceScore": 5.4,
+          "timeScore": 9.7,
+          "co2Score": 7.3
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON0704PRAGUE1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/prague?departure_date=2026-04-07"
+      },
+      {
+        "id": "train+plane-via-marseille",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Marseille",
+            "duration": 122,
+            "price": 0,
+            "co2": 2,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Marseille&outwardDate=2026-04-07&passengers=1"
+          },
+          {
+            "mode": "plane",
+            "from": "Marseille",
+            "to": "Prague",
+            "duration": 115,
+            "price": 71,
+            "co2": 299,
+            "operator": "FR",
+            "bookingUrl": "https://www.aviasales.com/search/MRS0704PRG1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 357,
+        "totalPrice": 71,
+        "totalCO2": 301,
+        "score": 7.5,
+        "scoreDetails": {
+          "priceScore": 6.7,
+          "timeScore": 9.7,
+          "co2Score": 6.2
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Marseille&outwardDate=2026-04-07&passengers=1"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 940,
+            "price": 69,
+            "co2": 12,
+            "operator": "TGV INOUI",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/prague?departure_date=2026-04-08"
+          }
+        ],
+        "totalDuration": 980,
+        "totalPrice": 69,
+        "totalCO2": 12,
+        "score": 5.7,
+        "scoreDetails": {
+          "priceScore": 6.9,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/prague?departure_date=2026-04-08",
+        "dataSource": "estimated",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lyon-Perrache",
+            "to": "Bruxelles-Midi",
+            "departure": "2026-04-08T03:35:00.000Z",
+            "arrival": "2026-04-08T07:43:00.000Z",
+            "duration": 248,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "train",
+            "from": "Bruxelles-Midi",
+            "to": "Köln Hauptbahnhof",
+            "departure": "2026-04-08T08:25:00.000Z",
+            "arrival": "2026-04-08T10:15:00.000Z",
+            "duration": 110,
+            "line": "ICE 15"
+          },
+          {
+            "mode": "train",
+            "from": "Köln Hauptbahnhof",
+            "to": "Gare centrale de Berlin",
+            "departure": "2026-04-08T10:26:00.000Z",
+            "arrival": "2026-04-08T15:16:00.000Z",
+            "duration": 290,
+            "line": "ICE 549"
+          },
+          {
+            "mode": "train",
+            "from": "Gare centrale de Berlin",
+            "to": "Prague-Holesovice",
+            "departure": "2026-04-08T15:28:00.000Z",
+            "arrival": "2026-04-08T19:15:00.000Z",
+            "duration": 227,
+            "line": "RJ 385"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Prague",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 50.0755,
+              "lng": 14.4378
+            },
+            "duration": 516,
+            "price": 146,
+            "co2": 45,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Prague"
+          }
+        ],
+        "totalDuration": 591,
+        "totalPrice": 146,
+        "totalCO2": 45,
+        "score": 5.3,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 6.1,
+          "co2Score": 9.6
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Prague",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "train+plane-via-paris",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Paris",
+            "duration": 154,
+            "price": 0,
+            "co2": 2.6,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Paris&outwardDate=2026-04-07&passengers=1"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Prague",
+            "duration": 300,
+            "price": 113,
+            "co2": 780,
+            "operator": "LO",
+            "bookingUrl": "https://www.aviasales.com/search/CDG0704PRG1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 574,
+        "totalPrice": 113,
+        "totalCO2": 782.6,
+        "score": 3.1,
+        "scoreDetails": {
+          "priceScore": 2.9,
+          "timeScore": 6.3,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Paris&outwardDate=2026-04-07&passengers=1"
+      }
+    ],
+    "selectedTransport": {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Lyon",
+          "to": "Prague",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 50.0755,
+            "lng": 14.4378
+          },
+          "duration": 645,
+          "price": 34,
+          "co2": 23,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/lyon/prague?departure_date=2026-04-08"
+        }
+      ],
+      "totalDuration": 700,
+      "totalPrice": 34,
+      "totalCO2": 23,
+      "score": 8.1,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 4.4,
+        "co2Score": 9.9
+      },
+      "bookingUrl": "https://www.omio.fr/bus/lyon/prague?departure_date=2026-04-08",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "booking-3582830",
+      "name": "Prague Dream Hostel",
+      "type": "hotel",
+      "address": "Ve Smečkách 23, 110 00 Nové Město, Czechia",
+      "latitude": 50.079211,
+      "longitude": 14.427165,
+      "rating": 8.6,
+      "reviewCount": 4951,
+      "stars": 4,
+      "pricePerNight": 40,
+      "totalPrice": 80,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/627730807.jpg?k=3bb96d583171b9477b0e58648686838c5330ca9c7a7cb859bbfdf79a0ab277e8&o="
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Prague+Dream+Hostel+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-3582830",
+        "name": "Prague Dream Hostel",
+        "type": "hotel",
+        "address": "Ve Smečkách 23, 110 00 Nové Město, Czechia",
+        "latitude": 50.079211,
+        "longitude": 14.427165,
+        "rating": 8.6,
+        "reviewCount": 4951,
+        "stars": 4,
+        "pricePerNight": 40,
+        "totalPrice": 80,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/627730807.jpg?k=3bb96d583171b9477b0e58648686838c5330ca9c7a7cb859bbfdf79a0ab277e8&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Prague+Dream+Hostel+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-4437184",
+        "name": "Wellness Rooms Central",
+        "type": "hotel",
+        "address": "Ve Smečkách 1593/19, 110 00 Nové Město, Czechia",
+        "latitude": 50.079085,
+        "longitude": 14.426961,
+        "rating": 7.2,
+        "reviewCount": 2419,
+        "stars": 3,
+        "pricePerNight": 65,
+        "totalPrice": 130,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/665716674.jpg?k=d37e4c32be5737c1cf8a7528651748916736e2a3684c9a3746d9e6f04eed3f09&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Wellness+Rooms+Central+Prague&checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-11040352",
+        "name": "A1 Royal Plaza",
+        "type": "hotel",
+        "address": "Římská 71/4/120 00, 120 00 Vinohrady, Czechia",
+        "latitude": 50.0781068,
+        "longitude": 14.4321315,
+        "rating": 8.9,
+        "reviewCount": 3715,
+        "stars": 3,
+        "pricePerNight": 73,
+        "totalPrice": 146,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/668047259.jpg?k=23e821a97aed588a55e1ae3f63cbf489a09847772c16ff9ce0819018c5da27b5&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:30",
+        "bookingUrl": "https://www.booking.com/hotel/cz/royal-hlavni-mesto-praha.html?checkin=2026-04-07&checkout=2026-04-09&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 223,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 80,
+      "food": 75,
+      "activities": 0,
+      "transport": 68,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Tchèque",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Dobrý den",
+            "phonetic": "dobri den",
+            "context": "Salutation formelle"
+          },
+          {
+            "original": "Merci",
+            "translation": "Děkuji",
+            "phonetic": "dyekouyi",
+            "context": "Remerciement général"
+          },
+          {
+            "original": "S'il vous plaît",
+            "translation": "Prosím",
+            "phonetic": "prosim",
+            "context": "Demande polie"
+          },
+          {
+            "original": "Je voudrais un café",
+            "translation": "Chtěl bych kávu",
+            "phonetic": "khtyel bikh kafou",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Kde jsou toalety?",
+            "phonetic": "kde jsou toalety",
+            "context": "Demande de direction"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "Kolik to stojí?",
+            "phonetic": "kolik to stoyi",
+            "context": "Prix d'un article"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "Nerozumím",
+            "phonetic": "nerozumim",
+            "context": "En cas d'incompréhension"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "Mluvíte francouzsky?",
+            "phonetic": "mlouvite frantsouzski",
+            "context": "Recherche de communication"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Pomoc!",
+            "phonetic": "pomots",
+            "context": "Situation d'urgence"
+          },
+          {
+            "original": "Je suis perdu",
+            "translation": "Ztratil jsem se",
+            "phonetic": "ztratil ysem se",
+            "context": "Demande d'aide"
+          },
+          {
+            "original": "Un verre d'eau",
+            "translation": "Sklenice vody",
+            "phonetic": "sklenyitse vody",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "Bonne journée",
+            "translation": "Hezký den",
+            "phonetic": "hezki den",
+            "context": "Salutation de fin"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Adaptateur électrique",
+            "reason": "Prises différentes de la France"
+          },
+          {
+            "item": "Pull léger",
+            "reason": "Températures fraîches d'avril"
+          },
+          {
+            "item": "Imperméable compact",
+            "reason": "Risques de pluie au printemps"
+          },
+          {
+            "item": "Chaussures de marche confortables",
+            "reason": "Ville avec beaucoup de pavés"
+          },
+          {
+            "item": "Anti-moustiques",
+            "reason": "Début de saison humide"
+          },
+          {
+            "item": "Photocopie passeport",
+            "reason": "Sécurité et formalités"
+          },
+          {
+            "item": "Mini pharmacie",
+            "reason": "Médicaments personnels"
+          }
+        ],
+        "plugType": "Type C/E",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Carte nationale d'identité ou passeport valide suffisante (zone Schengen)"
+          }
+        ],
+        "importantLaws": [
+          "Possession de drogue strictement interdite",
+          "Traverser la rue hors des passages piétons est verbalisable",
+          "Consommation d'alcool sur la voie publique réglementée",
+          "Port de la ceinture de sécurité obligatoire"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "158",
+        "ambulance": "155",
+        "fire": "150",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Ambassade de France à Prague",
+            "number": "+420 234 634 100"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 55,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 50,
+      "transportTips": "Acheter pass 3 jours transport en commun",
+      "reasoning": "À Prague, optimisation budget en combinant logement avec cuisine, petits-déjeuners économiques, repas variés, et activités culturelles abordables. Le budget permet des restaurants le soir tout en faisant des économies le midi et matin.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJw7ckbB6VC0cRnyUSr4g8zyo",
+        "name": "Château de Prague",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0910966,
+        "longitude": 14.4016165,
+        "rating": 4.7,
+        "reviewCount": 192983,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "06:00",
+          "close": "22:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Castillo_de_Praga%2C_Praga%2C_Rep%C3%BAblica_Checa%2C_2022-07-02%2C_DD_209.jpg/400px-Castillo_de_Praga%2C_Praga%2C_Rep%C3%BAblica_Checa%2C_2022-07-02%2C_DD_209.jpg",
+        "googlePlaceId": "ChIJw7ckbB6VC0cRnyUSr4g8zyo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "06:00",
+            "close": "22:00"
+          },
+          "monday": {
+            "open": "06:00",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "06:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "06:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "06:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "06:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "06:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "224 372 423",
+        "website": "https://www.hrad.cz/",
+        "isOutdoor": false,
+        "score": 152.6992629127621,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJn7WO5eWUC0cRJrHT0TiXIHU",
+        "name": "Pont Charles",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0864771,
+        "longitude": 14.4114366,
+        "rating": 4.8,
+        "reviewCount": 189285,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWdc4RwqxnYU2WWF0jcfREJzcJVfle7zfhrpz-07XrJ273xcM-yQEPmTFh9pglPffHbn-Tp9dMXEnVGCOL33ob7CtRR2Nbz8K0Zsd7UdUurFovRMdQ-3m0niOOMTbCOfM5MFG2uOP9uGXcnJGLKmCtnih9XCZWAIho2Nv8OaFm4FYmFgFSo3SCwo4uaB1dSYaKKj5TB8lRiEZu5VlC_veFg5dTXcw35vodHkzN3VCKHcaS9OXwAtg7vEpihMZTlfyphiGFoGJCsjX2omRMROIgq2sjuSlvkOY1YAgKEPJ64GvLsjA-JkIIRsN7c1B0Jk0ZmFq1CRPF3bpDmcXZxiYiy4-WPW_4UJ-_0J-Hj-p5YfRmIl93-5sUFUrIYGQhit23kKLON_VrESLWYvawF9yfGBLRZUhlNusI0BTzMPkRnguYfyzulLsTlmOu0XwZEKl01_EpdMevPawtEtxF0BkRVVXaRWQ9F1FFmtQ_sJr87mbJTh1IW07iF0W7zMZ3Rtji8nE_z3I2LSU-Zoz79bGyoE9dvkVOJRwPd0fBtqR_FlqiZ9A_7fPyvPXuRT-uVB2TFLu-F&maxwidth=400",
+        "googlePlaceId": "ChIJn7WO5eWUC0cRJrHT0TiXIHU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://prague.eu/cs/objevujte/karluv-most-2",
+        "score": 149.62964301544707,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJIfpRNOmUC0cRxHIewgck75c",
+        "name": "Place de la Vieille Ville",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0875692,
+        "longitude": 14.4211875,
+        "rating": 4.8,
+        "reviewCount": 118307,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW3PMfd0Xk4c7qKXwtk6XajTiYQ7hd_8FAdguO2PvRcTvTOtoV0QInydUoRiYDvLkVxogqTwpFY6V6uwKJswyaEUpXaPnBqjGN-I3cB1ubgxIJOAkp8Ne9If53KPvcDcqYoNQs1jEyKmPz8KmPId44JCN090FWqusqFds04f4sQpL0z5_txxRKBbT_j_ldmP99arTF4kVZSKnQc5ZR-FYPf5OkxXDg_g_0Th4_7qs4rmCv85NFGA0mULkmjTnMuiVmch3SiyTpW2DJls868ntAZb5AqeurPhZ27A3h11Yqm2rMQtLDZoEE0F0IvU7I2fau5cvJZletSWUzMRqYXPsbbj3WJg6WV1CvEz271DBpTa3NVzW8919HnGVVvXB-l4mlJn4FbYQaL6JvJPPhWnK0JkfH0vTnvTj47w7Jn_NZmU8iLbzvlk0sTQfha6mu2ueXziyLmoAi1zD6XWWWkzlTXUwuZ5D6KR1Wa_oCTeuk_EXnE5xNe4NSh1DCEff2Ws2Fm1gDhv6BQWMULLiMiIM79UAfxC4FMlevPhZuXE4LLTiUpBM8g9MYGPgRgoCGECuOOEI8O&maxwidth=400",
+        "googlePlaceId": "ChIJIfpRNOmUC0cRxHIewgck75c",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://prague.eu/cs/objevujte/staromestske-namesti",
+        "isOutdoor": true,
+        "score": 147.74631469555956,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJW08COB6VC0cRoonZ8lA4rWk",
+        "name": "Cathédrale Saint-Guy",
+        "type": "religious",
+        "description": "",
+        "latitude": 50.09089179999999,
+        "longitude": 14.4005114,
+        "rating": 4.8,
+        "reviewCount": 92496,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXBpaBrEUdLTKEQXeV3nIqacLOT3UcTr7BvPuB2aPjr1JcZmj4ijhh29dZtKBRxY2XjMMZjQBRNJzjM-tveprcbRuVw0moPL8IAZSjCFBa-glEYJ-D9p5x2Ce0-x2q4CCZUlO4_9XB-8SeYGIj3mwQg0Evjr81KlABN1wME9tO3Yh_4sfDX6z_i28EFZQcABRpONw-pLuyqvbPPaA4Wn3CKjMnea--23v1nnYyZlB3lZNGBYvRroaoDNmYgVKzNLVEtuir6w7XuQ2A7PXt-Pe8sPSOIvcCLKoVHrtQKp9iFBxZ6fmKvbO6T7zk2OEvZe1Qf2BvG8apJ8yQcMA128pUbdeqbxyGsenLtsIWDI2PCJ7SMEExcpmDNXz6sQhtxuhpudBD6PcsAJj2B8lGnQVwlnfl-ZMzZZhtyLW95m_Wh7nUpMDQNG_QycjNqui05xHcv_tiXTh0mopbDJYv7lDPOqn_YUVU9nwKo-GDOPzDdq8P-hczVtpQ0o7pJDeJn5FNd9KbqN5OQAxUyhDBVGihMrF0UM1v6K_BefmLo0qMa3jaokgJ_wnFYAnERC_aT75kjKw&maxwidth=400",
+        "googlePlaceId": "ChIJW08COB6VC0cRoonZ8lA4rWk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "12:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "224 372 434",
+        "website": "https://www.katedralasvatehovita.cz/cs",
+        "isOutdoor": false,
+        "score": 146.75959041107805,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJSS_AOemUC0cRlgaiWrJEe_E",
+        "name": "Horloge astronomique de Prague",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0870215,
+        "longitude": 14.4207065,
+        "rating": 4.7,
+        "reviewCount": 92246,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "20:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Prague_Clock_Tower.jpg/400px-Prague_Clock_Tower.jpg",
+        "googlePlaceId": "ChIJSS_AOemUC0cRlgaiWrJEe_E",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "775 400 052",
+        "website": "https://prague.eu/cs/objevujte/staromestska-radnice-s-orlojem",
+        "score": 144.86323911359426,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJua9Ogo2UC0cRpkk9dANajkI",
+        "name": "Musée national de Prague",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.0789704,
+        "longitude": 14.4309369,
+        "rating": 4.6,
+        "reviewCount": 45701,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWBWc-yTuyhAw2KjOAIyc4dYvPwjhdVdpunuJ4yI7JAZCZvtuy3WLNbjEiIccGOzR8OH2ENmWHKK6l7pRbFtMBEkr0-69DoOWIosgwbL3sycugSMU_2-_TPxxsey22OUs5HzYVdyajOe3L9RtrYc9WWN8jeXYxVtH8j4v029ks2DvnjRImd-BxzlR_7yEa6Ly1wNLvunbUOGmenMFfsMoGhepZOCbSZqRN7TSRvM6ie2lXxUvU_e3jqhy87Icrg9f6FcbdqQGt8ByMOqImEsFjC2K2LEjBJYHjSKpknT4V_09VMqX5Li8ug7IdAgFXufxMOwGg4lzc9SituicYZePXmuqiRSWOTizSC0Y3rmAENXXWZW1Qv_DgYZ1E_k4vC_5IN_fqrABM1sQkgOTK11quwIuVaPg-H6cCt9v3e_D--AqeDW5r35vF4ZskUHd66FlSd0pcfVqBkZwjuBk0mmi3FVEox70RbKuAq7sqgTVY_ZD_8fNA4l1gx91MhKQm2poXcnISZvRlNOI2sKveYk-kiPln1h54ogRFRhxU4itzXNGKBRxi7fz-fJGSn3qClChzF_S0xZ8cRHw&maxwidth=400",
+        "googlePlaceId": "ChIJua9Ogo2UC0cRpkk9dANajkI",
+        "isOutdoor": false,
+        "score": 48.43044767223574,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJCd13PWeUC0cRZihTX2RPn0w",
+        "name": "Vyšehrad",
+        "type": "park",
+        "description": "",
+        "latitude": 50.06419409999999,
+        "longitude": 14.4188977,
+        "rating": 4.8,
+        "reviewCount": 51502,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX9SgSrDrQvjvDKmrRTy_DVcVeSLWWKT0igpwtxT1T_kSuz-0ctRWvHPG20vOGvO7iDcOuziceuIGXydokI2reckvq4koAa_gtT6wMCbRNRRVH2hRAuj-scgPrH12lL6bdBK2kobc7whxeMmBGl5G8pPFSpHoh4NO8-b7j2FgJNiJaxQJ5DMkQuJ7UWCBilNFe0vwK8bSmlKDMxd_XzKOMR1Vfjeh1q_pyXfuJ5Nxe2NyNEnVEQiKrZDErAb0zaHqMIEpqY-ErbR4S-R43kPeG1VgRn_eoCYJS3XYYK9k4URvxbohXJUiHnUEOEPm4U7qzSbVX6iPUrypgjS-qd6KdmL9lvIZNXEN__bL60F_2NHg8EM1HMIkLcszEiiuqT9sDgk1LV0pRDZn5eWPKJgcXDFhzdOsxJQRIeBqGNjhloa44hPK9-smq86aw6ZAVypVszIu7ryaB3GJRj-KWpWVEqpPZPGfZDS5G6W31RicJ3WEvksFSfqLACl_jVQrGyhoqDQB0WWRrp-8O_OhoefqH3HTE-SQCi0KRRf6udsiOepy0B_56Z9_6pQ2SYt9PeHed5sKDC&maxwidth=400",
+        "googlePlaceId": "ChIJCd13PWeUC0cRZihTX2RPn0w",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "778 495 859",
+        "website": "https://www.praha-vysehrad.cz/cs",
+        "isOutdoor": true,
+        "score": 46.41021072404078,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJbSZndNuUC0cR2lgM9o_zW5Q",
+        "name": "Parc Letna",
+        "type": "park",
+        "description": "",
+        "latitude": 50.0959864,
+        "longitude": 14.4152831,
+        "rating": 4.7,
+        "reviewCount": 28481,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX2FZYvnq2bD5F6lQVEBQWFNiig_ggSMxL4QFr1RasPsGPlY0ELnX9q33KLkGkfco96uUmiTLyvnMZrP_Xf-vuZD5VS1Qs_tJLkxChgQV7c17KH59oMGImQiptrCwIcywjniHc3aAH8rKIgLk3U5ZejA7Oz5hP-E2m93wSq6yuqUMlC7vy7_f7xhwEYRInAq-KeLdcSXC7kH5CB7g5l4bs2aAa5DAbun4_CAfigAXSDtWWwL_2cUdyr_l7q35dwzwJKaw6ygRWvxuoQelWdCcERsdY4A5P0OE7vmT42cGVphjlSgbtmCHqwrVBLL-kHXFSYmkTh2H4_L2fcaHdBwwjh6fAKxFrO7gVdSQkot5dpWV_rS17Q5i-v5qVYG6oAXomBnPlTS7NS_aryqsxWrN9A7nqAiGedlt9aGDUz1flFlu31V5330NUnSWERanPF2C7ELZeN_r-wMEbcnDxxlGbvBV8bH9o8r-UNIFgTTROd3aL7aGkxRBUt5hPxog3WblNF0pTbwFmXKrQG_b6ZDgxnhU3Pg-tgXLStfejSVYySAlyBdC0fqbpObePNd8PYxssto53A&maxwidth=400",
+        "googlePlaceId": "ChIJbSZndNuUC0cR2lgM9o_zW5Q",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "isOutdoor": true,
+        "score": 42.34004063589385,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJH3y4L-CUC0cRxLvVqnWQK2Q",
+        "name": "Palais Lobkowicz",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.0916483,
+        "longitude": 14.4049502,
+        "rating": 4.6,
+        "reviewCount": 6674,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX9Rli6asA18Fv8fvndKX4PKOj76fx_M8xk2VMthUjbydPE0Eg9YDEpyEWnkfgoAPDvxU7S-yoLcWjplr3PrXFvcx_kDgiEaHCHLeIKehhLukuvgOs9HQ47UnBxD5F0atBiPhwJ-mf-J0Va2ZQYrMtaFsrH6FiHfCzOsT9I4xtDnHXc2P10_5336XDc976L8kXG5spS1sIuzdM6VnAX9li-W926OqluNv-F0zt35bLa7EI2Bv_KGDOIJ1RD8z59KZ_0tNdQ14MkiizTRtm-G8BDwXjg8dPjYb8lP6A_iIn58DJ1DxeMAJBfmoi-GZh7SrtwSRLS0lDLNNP4op4aT50zvvbhCOGNeZyr47fesF4aNt4ykkAQmRA--vpzdXfd5U26X1UHq9AlGYsUFMBZ1S6To4FVoL49W1AEs6NvL8N5SvNe1GpMXM9CGsDZPEvwItudBjTYplssmZlHgKHDUTYL9meDeUzznHtNcrr0MkHzY3jQ8gT0U8mMWa00YtwLeQ04CFtqhz779DKTV40HVbcTRWO9MyeMRkiTH1FDicsRbq_yf1LEowjAcVSS_FYyBHgHVvjF9FBGUQ&maxwidth=400",
+        "googlePlaceId": "ChIJH3y4L-CUC0cRxLvVqnWQK2Q",
+        "isOutdoor": false,
+        "score": 41.30739310747587,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJBfIPBeuUC0cRphNG7F-4SZM",
+        "name": "Tour Poudrière de Prague",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.087273,
+        "longitude": 14.4277887,
+        "rating": 4.6,
+        "reviewCount": 47256,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU-EKbe5ZJb5x8ixH78Orm5dcSwceeATM8R2-Oa73Hf2ecxWNyL9hWqRXRQ9-93J7tUIdKl0gDAs_McKHfMlRal5w0vp-tPwJH2fwGosNLVnrbJezh0ATelOLd9CllDH0Lmc_1Xnx5PLrMuWjMVsyMOfIbc-FpcPY3Bm-dQmr0FkASBU4TZXPi-yGOkvGCv1cnvomZQIWYw3fWkfyBnpy283rBHpPdfRVfO0hT6h5zpIvLZlEocSeord-vQ25wLbDUQSdnk1pxhHy1bHnpa9-3wXXBfBc9bi4PAx2JkpsM-a0jJPg0&maxwidth=400",
+        "googlePlaceId": "ChIJBfIPBeuUC0cRphNG7F-4SZM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "221 714 714",
+        "website": "https://www.prague.eu/cs/objekt/mista/102/prasna-brana?back=1",
+        "score": 40.55377323059987,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJC5zY0RuVC0cRUQlKCL3UIoI",
+        "name": "Sanctuaire Notre-Dame-de-Lorette, Prague",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.089239,
+        "longitude": 14.39151,
+        "rating": 4.6,
+        "reviewCount": 5018,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXlUbUgcZkcMgFtzdqwIWSy2x6EBY5DRLmAxyrdBVZSUwHpIbNhVdSoyKno7WxpAJOdY9ftf1uvTDAEfPJvTz_RhesvQ_kxY2Gzv5d1fQzXsCa9o9tUajMwGRSrbQ10jDY9qB7MC1p2nvCPu-Vaehf9P5DHJ9PNKCd9WQtHCoXWl6B3ZWCynBTb_LY_270nbaXH1mUDqNYK8nM-YsEoiJDjf4vDeTuzWmWIJ4mCLlJXUMtQHY0eI08IwZ0ze-9XqpiiYMO97imwAxSAZbZWj3D5_U1PznMJqrd27Yoy8vn9VEjQtaEMBtv_aPGmPNFCWQkdpgE5xWGd3tp7uxME-l2MJAF4aJTk3VxxPqki_GAY06fJQo9enUaOqokLuR3irPnvIecVHtemtDZGOZGKmVNvZhbY0ZBBJ5r0CsjKyQ1yyK8gbn-CIWCezCSHZ_q5v8tlXrG_4Uoa7nVb0zxvKxvkQAHEXK8iuQHUTLUG-J7ZucWG7eo_wBB-5JK4TQTYNHrTW0WFzwIIrB7GcGDRLIIJtplI3PxoRdfMtsE0F6zQlO1H-CcEZIWDA7jCs0Ot4L01ClMz&maxwidth=400",
+        "googlePlaceId": "ChIJC5zY0RuVC0cRUQlKCL3UIoI",
+        "isOutdoor": false,
+        "score": 40.24146252574677,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "gp-ChIJMbJV6eWUC0cRZM00zzxyBhA",
+        "name": "Tour du pont de la Vieille Ville",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0862306,
+        "longitude": 14.4136141,
+        "rating": 4.8,
+        "reviewCount": 16006,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUM-aNYabnyqI5V1NNw5Lv5EzSj1ccizxUiaM7oKORdcjsTjvt_0Y4Y8b_43uxJBQDmVSHwewT_A9SHGOYfTcWL3fJ7xalXcSa-NyD0_cLtNe8jyod2IS5FBorCb-n9-r_KiAY8qUVNQg1rP43uisiynBDmnaCZv18QPYz2h9H08Ggx73Kv_csRGHjgUGYFYeuJrGWyvR3Cj0RFRT9BTHUG2hihk2refIU9R0-D6_hFiDV8kBG3WbLQAhr1k7sr-zCl9OwLZRu7-TjrnJku8bBAVmJHA5OFRb7WnBXxZJN_LNbTUb2NF9Efw_zcMyvp4vTfdBiYDnUomW61DfgNtQyXviStXyoJnzhLTTJNrxWIo80skdcpopWCZSoCtvCNmZDfotRHNTKz0Pfbj26HRkJJoyCCnoOhfsZi0xO3G3n5GHSJwzivx1LFdaOV3g3Rb2bpVE3e_fHAZB7fLAJOPQ4arqHgBJ0kRBPbBlSfTkjICkTlPJmz7tp_DubtDlfpekDznRdebYCsUyZXPRh3Q7TSS_Y8PNts8FYn8Nr316A19slJdMrFFzL_iCd-ZqC2OQ5lBnsgRGKG8A&maxwidth=400",
+        "googlePlaceId": "ChIJMbJV6eWUC0cRZM00zzxyBhA",
+        "score": 39.706710286796245,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJZ5ERZaKUC0cRry0Q82U8Sr0",
+        "name": "Mémorial national de Vítkov",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.0883569,
+        "longitude": 14.449522,
+        "rating": 4.7,
+        "reviewCount": 3124,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV7hMTE8ZxN_f0F7DLkKoHG7RM669vmwJlKoVqf45nogpNUnEu6VL5CZyHno-QcO367-80nmZbFLINIqbW7OvD8iH-0wVAZNaEXaHt9lz69bcME5WakNrMm3aqrjXyVFBoZs_SmzvRIpOpAWKzF8YlrnSjYYOKBL5Kd-hLECcmeYJGcxYctYkcsqqcypjwFKW9YXBNBntwgxZdBeMmdeSTllkFyyTF-DosCzsJt1lHTV4mt9T9SJ6uQHfZJAVM-L0b0DZw1Z7UovNJ4LLeq9jIo6IBoNpWx4CcINb1HlaLgp9tI96Hj5zF8Clgb57VVallPOoNzD4u7e4H7chNaO-oMKpavVaWMnfVQoldznNFmtEEYU8uqqR0JoitLu7Hdz4jhc4YDnEZoiapFkCUODtR61rcJ9oFN0-FUfdDYooCUhzyOdRH8Jh029LqIlcD55HcJWH82Ba2WGEfGUJlysm-XRm2VATBWSs9lXbN-eHj15evnPXE_0KlAEWDK-yTdcB3BWAXpPXbq9bwH-UJhVga5z0ERJxHlUS8XkZrCNxlHgkjl6n6d_HxcGpIYWfbI3UG3P7z2kJiMeg&maxwidth=400",
+        "googlePlaceId": "ChIJZ5ERZaKUC0cRry0Q82U8Sr0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "605 961 973",
+        "website": "https://www.vhu.cz/",
+        "isOutdoor": false,
+        "score": 38.23576173225811,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJSfv87u2UC0cRMLvFpMvuPNY",
+        "name": "Franz Kafka - Tête Pivotante",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0816514,
+        "longitude": 14.420821,
+        "rating": 4.5,
+        "reviewCount": 38818,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUAoK2Q8Yme3l_TPtViFE94buM7Z7ia895nzA9llCdey49Rw4t-nMntzZcR9LYt53g2WS6KUSy04TuyLNJEF7SZNcPH21qNIUqtiZT3jKmlj9KlRkEJzK_bo7pC2Ya7RO4S5_5eil_TImKi8KKxKVoaB2Nl-eiZ8VWGIG2pwgFiQc8sWcx6JgRQEdrgLnfq4f-Cdso96dc6psYXyxfd7sCqEbshDx4MVdsR0N2zK4P3A1LqbKt3xxWhSiZmhVWqI5mdbbuwCrXKZLB4BYf_6H_eoObhGhl1p-Emdrq0CRP3-QB0qAGwVYk0X4qgckExfVrAZZJkytAWCL7O325tJVmP8PJlna8m0ZZJEyi-Mh105c-5N7tUvpu8esVxOAmE-6ply9UmRa5GMWqB58Y4cJK8WVQLIQ6elCFidEinzutmGONp9oUXvlei-1r1Sp169EuzaCyAaBXhzZI5RG-XXAGX4ob6z92NJXcJHghkmlgTb2bkWlUxHR-7LRiQ4Gok086MH1qBgMqxSz3DL9Q16Cyx0Sk8U-WHE_AjF5CYrWk8TurVQQKxOsRr9kmIypZGMWHEW3cK&maxwidth=400",
+        "googlePlaceId": "ChIJSfv87u2UC0cRMLvFpMvuPNY",
+        "score": 38.16063387442743,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJd71LDf2UC0cRkcGvwf8x33E",
+        "name": "Tour de Petřín",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.083527,
+        "longitude": 14.3950836,
+        "rating": 4.5,
+        "reviewCount": 34527,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUOdFQeFc53eN1caGpcvhAKSglbd3iVFmwEnLYvG9R0qjhVlGVLr8RF9EL5STeC8tr1f5ViSF_3S3s6x2622c98N93IeEYOx0IYmbV7KTZ0CB1sWUHRe0uw2Z84TAI2bbNLWwezkuOI_Prw5RiPWXWL_jJZnsmuCRRAUUdPG35OfJtjQhPqixZoQb1-RQv06dVE0SpmnVrpzJquEtpXM9lhhO0Cy6VQguAAFQrVYON5SwJeQEY99EgJyX3V7iymDO6fqQTwdUX0JK-VNQoXiVmFm332_I55CxXfL89BgJ1YbRqJD3iQ_abeVTZ7r6bQNIZxvklv4jt-4__hNF9lcCvF590RNYPQnqNI1dhEn385E9EJTLTGvnvAoSh5_P0GImagJqyyVu1GeairRbwUkxKenH2eKm2p1z6o5711m2WtbznCiVmHTBiBLWEClI37z2FE6Vm05oTHgVrQDlqTirPthTuoitY6OV59eI8QQwisZWCZEQiW5tZCfLzFQIZadx4SJibXX8qu8DfTUUQ-FYXHUvOX4OsKiUTX0medyZb2yoPVgBI6nylRfpLj6fM6KKIF7OQo&maxwidth=400",
+        "googlePlaceId": "ChIJd71LDf2UC0cRkcGvwf8x33E",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "221 714 714",
+        "website": "https://prague.eu/cs/objevujte/petrinska-rozhledna?back=1",
+        "score": 37.74737713100215,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxc8K3OmUC0cRCIoTOka69gs",
+        "name": "Speculum Alchemiae",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.0908333,
+        "longitude": 14.4225,
+        "rating": 4.5,
+        "reviewCount": 2803,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWR6x9EkIvB5SDKSsTroe1iwBF9EMyKd-wFmjd59VCFvF6bPXEZ60CRpC6hTie6cASwpx1VlW_JyJS6m5EWdGXZAO5aQdv8O9Z3sP182YQsmtxIQBsA2UsyL4jo-sSW1pnzun4MoZqimVe95sXzIhEuCUZbnJMHMdz05egvZPVy0wlZV7H15-3wjCrhvJzCO0wqQ0fgJPeQGKswWEdjtc36W98MRAOLKnPapJS6Khv_cTPV3iEN7Za4KHR0tDht5RiHhxVQA90HvuVVRy5102CLw1IwPikzqvRqInSL7-dznQlnPAXGTB1B1fX9vIqSYAjEcR6r_FZpkdzuQolq0dw70s9lpPnhI6yxYkdUqcTc_2P4EwhtKzjXplPPhrLwJr7IZWnVRH_MJccOQpq9OW4RJBomMR-N5-nHfgEiUckoIr0tgej9qLQZ6aXpHWap2sSsxfR6-_aBpLcQ3jIX0S0hK9gYitMnW66tNQ7d1UeQfGcYMx5ps7lB-4hqpVd5SK9FLoCLz_HboAEO34YLoaN3fQXgFcqJH-yI8I3cAyDMpQenu_bO5Ht-sBccC9YPDYFy3ydEIBmaPw&maxwidth=400",
+        "googlePlaceId": "ChIJxc8K3OmUC0cRCIoTOka69gs",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "773 645 234",
+        "website": "http://alchemiae.cz/cs",
+        "isOutdoor": false,
+        "score": 36.81834505713408,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJT-xQfI2UC0cR0IsM7hl2QjA",
+        "name": "Statue équestre de saint Venceslas",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0797799,
+        "longitude": 14.4297318,
+        "rating": 4.7,
+        "reviewCount": 11341,
+        "duration": 45,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXYfv-C7q8-D4N1LP8Ng-GCweS6acPrD1n8BdjC9AFIU7NHErmxZO_8508tEhC4_CL8k4OlZAe5nkT10vkd60u5JiXwqftQZkB0O-U-odrdMdd-b9y6xH86f7fdj--_ZrQs6RrZZggFuvDNvn-rXCsqkXfEdGp1CJRy8ZJ_kUO3BGXqIISG05tRiWTlj9Knl10KP8fzYgx77K1REUqCzKvNNDya__Se_6u4jEafEmzaIB4v9DfyhK_mWOsU73sYL_T-ph_LtzjjvZ061cTMHIsMYfJ2uELXxro5N52KOE7KTu1XMyie9LOCMn7pQs85zxkwfSFBScRMj61a63nC-OPyYwBA2_PK-Q4RF2OqPK5GR59ff-sz8UPQvr9oyFbLuUBArDUb95LeCUTmZYH3LwiitMCouCbz7GsZtQQUr135YxtI6rnaMHwYOz1zBZtgcsmza626Fv-vZKH0RmUVyo-x2VmKMeWD2BQrJ9Fa-25CZ8uxd2A5NQHGNCYvQH2MBSroGoobo4-1QE_z9ZhqBnDUPzZpUPubfJ3qlTffztosWZ5ccpx5et-x1qFcsjLroRss8hOI&maxwidth=400",
+        "googlePlaceId": "ChIJT-xQfI2UC0cR0IsM7hl2QjA",
+        "score": 36.780409246971196,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJFz83wvaUC0cRRDMLBTdlAZM",
+        "name": "Maison dansante",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0754031,
+        "longitude": 14.4141787,
+        "rating": 4.3,
+        "reviewCount": 66599,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWv7zPYAyA6ERFlq0JhwhNkt5Lox350jQ3kXedLmfnf-JyjDpySOiUV7oRIDMcO20-r5GXBAatpzYAKzQRHHRi0tTqJngKGQUhpValKYC4LE1xxrb7EkivhQ1BeLmGk9BKAL6kE06gHMZ1fu_j_02sRRg6TDz6_7SL7-SM8E_Lu41Wp17F2yT4RLMN6VxtNgoAiIfzqKXnotq0xTKKU2C9PIzHOQ8GJTuixgyyw_PB4RXs2G_R4kmIXfOPeQ_eVjhFO74nKGkHkbaBfGsVeTZ48owYVkuX2pFNvn17BPAmKdeo_wDGex5k_QfobIca6zwf_WDieVww9zA_sVcSidVg6bmbJLPEhrlAZ2hcemVn0OJFKHyl3Z9plPlzWFifekm0P5h7pJ4JOcW3OqslAPB0pRaVBlNTcN9YfJLjypPCNVscVaIyIS16eQXdg2VQCEJI1mo3M_qy-b8rJWm84gak80BGjx5g4_VSIahqoSUoAIeDFL8ATq-oYgtw8KmIw60LfISKP5NaRr6ifx0o5cMBrw3BBONnVwS_Cb42-_uy9VZO_liz2p6nx8ndxaUHOZH6hDVeZ&maxwidth=400",
+        "googlePlaceId": "ChIJFz83wvaUC0cRRDMLBTdlAZM",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.tancici-dum.cz/",
+        "score": 36.67068113801226,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJNUIyNe-UC0cRnw1-EJKuNLI",
+        "name": "Clementinum",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0865979,
+        "longitude": 14.4160186,
+        "rating": 4.5,
+        "reviewCount": 22155,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "20:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9H7l4f5bd1JG9kMYXkuIWj6J7qYa2levv4HSFfob6u4QR_0hQrOY6rqjfqd4QCaoRaYk8rLaca4VPqx7CJyDGF2-AAQO-AwGF2xtvK_xSFpoBFizRFtOmflzYi_iu1YPv-IwRzGKXSkb8BeaStaM-YYhJRynHrryC9Ikb-806Qqn-2CkFwJ8WwJEAuRq9rcArZSb3Z964W_Knz5L-sc3YrhkImQdSKwN49Ft0IjHHGVkmszPWqymXpflnUq9KtSA0ySdXszYp6VScxywqM2Mv2orVabcBmQFUWRH2JJndTFJJt85a63pKuxMUnh55iSO0Lj913OK9PXrgF-dRAMxL38I-ZLFcYaagwcsAQYhkxRjyaqOTpy32_eO4J-8W4JdxMANKwEStVRv1Kc_VFxcs98Z_Bc2ly6eWNT5-LV_YbeLxfLm3Ft-CoiWVl6q2ea-dYGLhQrp8g7NdXGEEJhnEtdPpuWAdVtHBfuQPkIHslty-JJ01dGIqYSCOD0zdFdz3iPDMNFSi4EsLSoYGDBCIZBoAg7Yhp9st3NBG-oPBu_-i78puPAaBIPLynb19OCK1ljzoRtwrfQ&maxwidth=400",
+        "googlePlaceId": "ChIJNUIyNe-UC0cRnw1-EJKuNLI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://prague.eu/en/objevujte/the-clementinum-astronomical-tower-and-baroque-library/",
+        "score": 36.180869300779996,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-73335P5",
+        "name": "Les temps forts de Prague en vélo électrique ou scooter électrique ",
+        "type": "culture",
+        "description": "❤️Les temps forts de Prague sur eBike ou eScooter❤️ ✅ La taille maximale du groupe est de 10 vélos par guide ✅ Un permis de conduire n'est pas nécessaire! Une visite unique avec des vélos électriques (vélos électriques, tricycles et trottinettes électriques) rend confortable et rapide d'accès aux collines, le monastère le plus élevé de Prague et la vue sur le château et bien plus encore. Vous pouvez faire une promenade tranquille le long des rives de la Vltava et explorer le quartier du château et la petite ville de manière amusante. Les options de visites privées vous permettent également de visiter le quartier juif et la vieille et la nouvelle ville. Si dans votre fête plus de 10 personnes, vous serez accompagné de 2 guides.",
+        "duration": 15,
+        "estimatedCost": 65,
+        "latitude": 50.0869362,
+        "longitude": 14.406625499999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Prague/The-highlights-of-Prague-on-eBike-or-eScooter/d462-73335P5?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/28/52/f8.jpg",
+        "providerName": "Viator",
+        "reviewCount": 65,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "isOutdoor": true,
+        "score": 23.168598782116522,
+        "source": "viator"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJW08COB6VC0cRoonZ8lA4rWk",
+        "name": "Cathédrale Saint-Guy",
+        "type": "religious",
+        "description": "",
+        "latitude": 50.09089179999999,
+        "longitude": 14.4005114,
+        "rating": 4.8,
+        "reviewCount": 92496,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXBpaBrEUdLTKEQXeV3nIqacLOT3UcTr7BvPuB2aPjr1JcZmj4ijhh29dZtKBRxY2XjMMZjQBRNJzjM-tveprcbRuVw0moPL8IAZSjCFBa-glEYJ-D9p5x2Ce0-x2q4CCZUlO4_9XB-8SeYGIj3mwQg0Evjr81KlABN1wME9tO3Yh_4sfDX6z_i28EFZQcABRpONw-pLuyqvbPPaA4Wn3CKjMnea--23v1nnYyZlB3lZNGBYvRroaoDNmYgVKzNLVEtuir6w7XuQ2A7PXt-Pe8sPSOIvcCLKoVHrtQKp9iFBxZ6fmKvbO6T7zk2OEvZe1Qf2BvG8apJ8yQcMA128pUbdeqbxyGsenLtsIWDI2PCJ7SMEExcpmDNXz6sQhtxuhpudBD6PcsAJj2B8lGnQVwlnfl-ZMzZZhtyLW95m_Wh7nUpMDQNG_QycjNqui05xHcv_tiXTh0mopbDJYv7lDPOqn_YUVU9nwKo-GDOPzDdq8P-hczVtpQ0o7pJDeJn5FNd9KbqN5OQAxUyhDBVGihMrF0UM1v6K_BefmLo0qMa3jaokgJ_wnFYAnERC_aT75kjKw&maxwidth=400",
+        "googlePlaceId": "ChIJW08COB6VC0cRoonZ8lA4rWk",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "12:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "224 372 434",
+        "website": "https://www.katedralasvatehovita.cz/cs",
+        "isOutdoor": false,
+        "score": 146.75959041107805,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJSS_AOemUC0cRlgaiWrJEe_E",
+        "name": "Horloge astronomique de Prague",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0870215,
+        "longitude": 14.4207065,
+        "rating": 4.7,
+        "reviewCount": 92246,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "20:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Prague_Clock_Tower.jpg/400px-Prague_Clock_Tower.jpg",
+        "googlePlaceId": "ChIJSS_AOemUC0cRlgaiWrJEe_E",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "775 400 052",
+        "website": "https://prague.eu/cs/objevujte/staromestska-radnice-s-orlojem",
+        "score": 144.86323911359426,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJCd13PWeUC0cRZihTX2RPn0w",
+        "name": "Vyšehrad",
+        "type": "park",
+        "description": "",
+        "latitude": 50.06419409999999,
+        "longitude": 14.4188977,
+        "rating": 4.8,
+        "reviewCount": 51502,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX9SgSrDrQvjvDKmrRTy_DVcVeSLWWKT0igpwtxT1T_kSuz-0ctRWvHPG20vOGvO7iDcOuziceuIGXydokI2reckvq4koAa_gtT6wMCbRNRRVH2hRAuj-scgPrH12lL6bdBK2kobc7whxeMmBGl5G8pPFSpHoh4NO8-b7j2FgJNiJaxQJ5DMkQuJ7UWCBilNFe0vwK8bSmlKDMxd_XzKOMR1Vfjeh1q_pyXfuJ5Nxe2NyNEnVEQiKrZDErAb0zaHqMIEpqY-ErbR4S-R43kPeG1VgRn_eoCYJS3XYYK9k4URvxbohXJUiHnUEOEPm4U7qzSbVX6iPUrypgjS-qd6KdmL9lvIZNXEN__bL60F_2NHg8EM1HMIkLcszEiiuqT9sDgk1LV0pRDZn5eWPKJgcXDFhzdOsxJQRIeBqGNjhloa44hPK9-smq86aw6ZAVypVszIu7ryaB3GJRj-KWpWVEqpPZPGfZDS5G6W31RicJ3WEvksFSfqLACl_jVQrGyhoqDQB0WWRrp-8O_OhoefqH3HTE-SQCi0KRRf6udsiOepy0B_56Z9_6pQ2SYt9PeHed5sKDC&maxwidth=400",
+        "googlePlaceId": "ChIJCd13PWeUC0cRZihTX2RPn0w",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "778 495 859",
+        "website": "https://www.praha-vysehrad.cz/cs",
+        "isOutdoor": true,
+        "score": 46.41021072404078,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJbSZndNuUC0cR2lgM9o_zW5Q",
+        "name": "Parc Letna",
+        "type": "park",
+        "description": "",
+        "latitude": 50.0959864,
+        "longitude": 14.4152831,
+        "rating": 4.7,
+        "reviewCount": 28481,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX2FZYvnq2bD5F6lQVEBQWFNiig_ggSMxL4QFr1RasPsGPlY0ELnX9q33KLkGkfco96uUmiTLyvnMZrP_Xf-vuZD5VS1Qs_tJLkxChgQV7c17KH59oMGImQiptrCwIcywjniHc3aAH8rKIgLk3U5ZejA7Oz5hP-E2m93wSq6yuqUMlC7vy7_f7xhwEYRInAq-KeLdcSXC7kH5CB7g5l4bs2aAa5DAbun4_CAfigAXSDtWWwL_2cUdyr_l7q35dwzwJKaw6ygRWvxuoQelWdCcERsdY4A5P0OE7vmT42cGVphjlSgbtmCHqwrVBLL-kHXFSYmkTh2H4_L2fcaHdBwwjh6fAKxFrO7gVdSQkot5dpWV_rS17Q5i-v5qVYG6oAXomBnPlTS7NS_aryqsxWrN9A7nqAiGedlt9aGDUz1flFlu31V5330NUnSWERanPF2C7ELZeN_r-wMEbcnDxxlGbvBV8bH9o8r-UNIFgTTROd3aL7aGkxRBUt5hPxog3WblNF0pTbwFmXKrQG_b6ZDgxnhU3Pg-tgXLStfejSVYySAlyBdC0fqbpObePNd8PYxssto53A&maxwidth=400",
+        "googlePlaceId": "ChIJbSZndNuUC0cR2lgM9o_zW5Q",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "isOutdoor": true,
+        "score": 42.34004063589385,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJBfIPBeuUC0cRphNG7F-4SZM",
+        "name": "Tour Poudrière de Prague",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.087273,
+        "longitude": 14.4277887,
+        "rating": 4.6,
+        "reviewCount": 47256,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU-EKbe5ZJb5x8ixH78Orm5dcSwceeATM8R2-Oa73Hf2ecxWNyL9hWqRXRQ9-93J7tUIdKl0gDAs_McKHfMlRal5w0vp-tPwJH2fwGosNLVnrbJezh0ATelOLd9CllDH0Lmc_1Xnx5PLrMuWjMVsyMOfIbc-FpcPY3Bm-dQmr0FkASBU4TZXPi-yGOkvGCv1cnvomZQIWYw3fWkfyBnpy283rBHpPdfRVfO0hT6h5zpIvLZlEocSeord-vQ25wLbDUQSdnk1pxhHy1bHnpa9-3wXXBfBc9bi4PAx2JkpsM-a0jJPg0&maxwidth=400",
+        "googlePlaceId": "ChIJBfIPBeuUC0cRphNG7F-4SZM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "221 714 714",
+        "website": "https://www.prague.eu/cs/objekt/mista/102/prasna-brana?back=1",
+        "score": 40.55377323059987,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJC5zY0RuVC0cRUQlKCL3UIoI",
+        "name": "Sanctuaire Notre-Dame-de-Lorette, Prague",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.089239,
+        "longitude": 14.39151,
+        "rating": 4.6,
+        "reviewCount": 5018,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXlUbUgcZkcMgFtzdqwIWSy2x6EBY5DRLmAxyrdBVZSUwHpIbNhVdSoyKno7WxpAJOdY9ftf1uvTDAEfPJvTz_RhesvQ_kxY2Gzv5d1fQzXsCa9o9tUajMwGRSrbQ10jDY9qB7MC1p2nvCPu-Vaehf9P5DHJ9PNKCd9WQtHCoXWl6B3ZWCynBTb_LY_270nbaXH1mUDqNYK8nM-YsEoiJDjf4vDeTuzWmWIJ4mCLlJXUMtQHY0eI08IwZ0ze-9XqpiiYMO97imwAxSAZbZWj3D5_U1PznMJqrd27Yoy8vn9VEjQtaEMBtv_aPGmPNFCWQkdpgE5xWGd3tp7uxME-l2MJAF4aJTk3VxxPqki_GAY06fJQo9enUaOqokLuR3irPnvIecVHtemtDZGOZGKmVNvZhbY0ZBBJ5r0CsjKyQ1yyK8gbn-CIWCezCSHZ_q5v8tlXrG_4Uoa7nVb0zxvKxvkQAHEXK8iuQHUTLUG-J7ZucWG7eo_wBB-5JK4TQTYNHrTW0WFzwIIrB7GcGDRLIIJtplI3PxoRdfMtsE0F6zQlO1H-CcEZIWDA7jCs0Ot4L01ClMz&maxwidth=400",
+        "googlePlaceId": "ChIJC5zY0RuVC0cRUQlKCL3UIoI",
+        "isOutdoor": false,
+        "score": 40.24146252574677,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "gp-ChIJZ5ERZaKUC0cRry0Q82U8Sr0",
+        "name": "Mémorial national de Vítkov",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.0883569,
+        "longitude": 14.449522,
+        "rating": 4.7,
+        "reviewCount": 3124,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV7hMTE8ZxN_f0F7DLkKoHG7RM669vmwJlKoVqf45nogpNUnEu6VL5CZyHno-QcO367-80nmZbFLINIqbW7OvD8iH-0wVAZNaEXaHt9lz69bcME5WakNrMm3aqrjXyVFBoZs_SmzvRIpOpAWKzF8YlrnSjYYOKBL5Kd-hLECcmeYJGcxYctYkcsqqcypjwFKW9YXBNBntwgxZdBeMmdeSTllkFyyTF-DosCzsJt1lHTV4mt9T9SJ6uQHfZJAVM-L0b0DZw1Z7UovNJ4LLeq9jIo6IBoNpWx4CcINb1HlaLgp9tI96Hj5zF8Clgb57VVallPOoNzD4u7e4H7chNaO-oMKpavVaWMnfVQoldznNFmtEEYU8uqqR0JoitLu7Hdz4jhc4YDnEZoiapFkCUODtR61rcJ9oFN0-FUfdDYooCUhzyOdRH8Jh029LqIlcD55HcJWH82Ba2WGEfGUJlysm-XRm2VATBWSs9lXbN-eHj15evnPXE_0KlAEWDK-yTdcB3BWAXpPXbq9bwH-UJhVga5z0ERJxHlUS8XkZrCNxlHgkjl6n6d_HxcGpIYWfbI3UG3P7z2kJiMeg&maxwidth=400",
+        "googlePlaceId": "ChIJZ5ERZaKUC0cRry0Q82U8Sr0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "605 961 973",
+        "website": "https://www.vhu.cz/",
+        "isOutdoor": false,
+        "score": 38.23576173225811,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJd71LDf2UC0cRkcGvwf8x33E",
+        "name": "Tour de Petřín",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.083527,
+        "longitude": 14.3950836,
+        "rating": 4.5,
+        "reviewCount": 34527,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUOdFQeFc53eN1caGpcvhAKSglbd3iVFmwEnLYvG9R0qjhVlGVLr8RF9EL5STeC8tr1f5ViSF_3S3s6x2622c98N93IeEYOx0IYmbV7KTZ0CB1sWUHRe0uw2Z84TAI2bbNLWwezkuOI_Prw5RiPWXWL_jJZnsmuCRRAUUdPG35OfJtjQhPqixZoQb1-RQv06dVE0SpmnVrpzJquEtpXM9lhhO0Cy6VQguAAFQrVYON5SwJeQEY99EgJyX3V7iymDO6fqQTwdUX0JK-VNQoXiVmFm332_I55CxXfL89BgJ1YbRqJD3iQ_abeVTZ7r6bQNIZxvklv4jt-4__hNF9lcCvF590RNYPQnqNI1dhEn385E9EJTLTGvnvAoSh5_P0GImagJqyyVu1GeairRbwUkxKenH2eKm2p1z6o5711m2WtbznCiVmHTBiBLWEClI37z2FE6Vm05oTHgVrQDlqTirPthTuoitY6OV59eI8QQwisZWCZEQiW5tZCfLzFQIZadx4SJibXX8qu8DfTUUQ-FYXHUvOX4OsKiUTX0medyZb2yoPVgBI6nylRfpLj6fM6KKIF7OQo&maxwidth=400",
+        "googlePlaceId": "ChIJd71LDf2UC0cRkcGvwf8x33E",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "221 714 714",
+        "website": "https://prague.eu/cs/objevujte/petrinska-rozhledna?back=1",
+        "score": 37.74737713100215,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxc8K3OmUC0cRCIoTOka69gs",
+        "name": "Speculum Alchemiae",
+        "type": "museum",
+        "description": "",
+        "latitude": 50.0908333,
+        "longitude": 14.4225,
+        "rating": 4.5,
+        "reviewCount": 2803,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWR6x9EkIvB5SDKSsTroe1iwBF9EMyKd-wFmjd59VCFvF6bPXEZ60CRpC6hTie6cASwpx1VlW_JyJS6m5EWdGXZAO5aQdv8O9Z3sP182YQsmtxIQBsA2UsyL4jo-sSW1pnzun4MoZqimVe95sXzIhEuCUZbnJMHMdz05egvZPVy0wlZV7H15-3wjCrhvJzCO0wqQ0fgJPeQGKswWEdjtc36W98MRAOLKnPapJS6Khv_cTPV3iEN7Za4KHR0tDht5RiHhxVQA90HvuVVRy5102CLw1IwPikzqvRqInSL7-dznQlnPAXGTB1B1fX9vIqSYAjEcR6r_FZpkdzuQolq0dw70s9lpPnhI6yxYkdUqcTc_2P4EwhtKzjXplPPhrLwJr7IZWnVRH_MJccOQpq9OW4RJBomMR-N5-nHfgEiUckoIr0tgej9qLQZ6aXpHWap2sSsxfR6-_aBpLcQ3jIX0S0hK9gYitMnW66tNQ7d1UeQfGcYMx5ps7lB-4hqpVd5SK9FLoCLz_HboAEO34YLoaN3fQXgFcqJH-yI8I3cAyDMpQenu_bO5Ht-sBccC9YPDYFy3ydEIBmaPw&maxwidth=400",
+        "googlePlaceId": "ChIJxc8K3OmUC0cRCIoTOka69gs",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "773 645 234",
+        "website": "http://alchemiae.cz/cs",
+        "isOutdoor": false,
+        "score": 36.81834505713408,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJNUIyNe-UC0cRnw1-EJKuNLI",
+        "name": "Clementinum",
+        "type": "attraction",
+        "description": "",
+        "latitude": 50.0865979,
+        "longitude": 14.4160186,
+        "rating": 4.5,
+        "reviewCount": 22155,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "20:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9H7l4f5bd1JG9kMYXkuIWj6J7qYa2levv4HSFfob6u4QR_0hQrOY6rqjfqd4QCaoRaYk8rLaca4VPqx7CJyDGF2-AAQO-AwGF2xtvK_xSFpoBFizRFtOmflzYi_iu1YPv-IwRzGKXSkb8BeaStaM-YYhJRynHrryC9Ikb-806Qqn-2CkFwJ8WwJEAuRq9rcArZSb3Z964W_Knz5L-sc3YrhkImQdSKwN49Ft0IjHHGVkmszPWqymXpflnUq9KtSA0ySdXszYp6VScxywqM2Mv2orVabcBmQFUWRH2JJndTFJJt85a63pKuxMUnh55iSO0Lj913OK9PXrgF-dRAMxL38I-ZLFcYaagwcsAQYhkxRjyaqOTpy32_eO4J-8W4JdxMANKwEStVRv1Kc_VFxcs98Z_Bc2ly6eWNT5-LV_YbeLxfLm3Ft-CoiWVl6q2ea-dYGLhQrp8g7NdXGEEJhnEtdPpuWAdVtHBfuQPkIHslty-JJ01dGIqYSCOD0zdFdz3iPDMNFSi4EsLSoYGDBCIZBoAg7Yhp9st3NBG-oPBu_-i78puPAaBIPLynb19OCK1ljzoRtwrfQ&maxwidth=400",
+        "googlePlaceId": "ChIJNUIyNe-UC0cRnw1-EJKuNLI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://prague.eu/en/objevujte/the-clementinum-astronomical-tower-and-baroque-library/",
+        "score": 36.180869300779996,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-73335P5",
+        "name": "Les temps forts de Prague en vélo électrique ou scooter électrique ",
+        "type": "culture",
+        "description": "❤️Les temps forts de Prague sur eBike ou eScooter❤️ ✅ La taille maximale du groupe est de 10 vélos par guide ✅ Un permis de conduire n'est pas nécessaire! Une visite unique avec des vélos électriques (vélos électriques, tricycles et trottinettes électriques) rend confortable et rapide d'accès aux collines, le monastère le plus élevé de Prague et la vue sur le château et bien plus encore. Vous pouvez faire une promenade tranquille le long des rives de la Vltava et explorer le quartier du château et la petite ville de manière amusante. Les options de visites privées vous permettent également de visiter le quartier juif et la vieille et la nouvelle ville. Si dans votre fête plus de 10 personnes, vous serez accompagné de 2 guides.",
+        "duration": 15,
+        "estimatedCost": 65,
+        "latitude": 50.0869362,
+        "longitude": 14.406625499999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Prague/The-highlights-of-Prague-on-eBike-or-eScooter/d462-73335P5?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/15/28/52/f8.jpg",
+        "providerName": "Viator",
+        "reviewCount": 65,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "isOutdoor": true,
+        "score": 23.168598782116522,
+        "source": "viator"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 23,
+        "byEngine": {
+          "google_local": 4,
+          "google_flights": 2,
+          "google_hotels": 1,
+          "google_maps": 16
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-suggest-02-escapade-gourmande-a-prague",
+    "   Lyon → Prague (3j)",
+    "   solo (1p) | moderate | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Prague\", ll=\"@50.0755,14.4378,14z\", gl=\"us\"",
+    "[Weather] 3 days fetched for 2026-04-07 → 2026-04-09",
+    "[Google Places] ✅ 29 attractions found for Prague",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Hotels] Disponibilité live: 9/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (577ms)",
+    "[Pipeline V2] Resolving GPS for 15 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/15 activities",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Prague\" from local database",
+    "[Pipeline V2]   → Pont Charles, Château de Prague, Place de la Vieille-Ville",
+    "[Pipeline V2] Step 1: All data fetched in 60094ms",
+    "[Pipeline V2]   Activities: 29 Google + 14 SerpAPI + 5 Overpass + 15 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 9 | Transport options: 7",
+    "[Pipeline V2] Step 1 done in 60094ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Auto must-see: \"Cathédrale Saint-Guy\" (pop=45.8, reviews=92496, rating=4.8)",
+    "[Pipeline V2] Auto must-see: \"Horloge astronomique de Prague\" (pop=43.9, reviews=92246, rating=4.7)",
+    "[Pipeline V2] Excluded 3 Viator activities with unreliable GPS (city-center fallback)",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [152.7] ⭐ \"Château de Prague\" (src=google_places, reviews=192983, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #2 [149.6] ⭐ \"Pont Charles\" (src=google_places, reviews=189285, rating=4.8, tags=none)",
+    "[Pipeline V2]   #3 [147.7] ⭐ \"Place de la Vieille Ville\" (src=google_places, reviews=118307, rating=4.8, tags=none)",
+    "[Pipeline V2]   #4 [146.8] ⭐ \"Cathédrale Saint-Guy\" (src=google_places, reviews=92496, rating=4.8, tags=none)",
+    "[Pipeline V2]   #5 [144.9] ⭐ \"Horloge astronomique de Prague\" (src=google_places, reviews=92246, rating=4.7, tags=none)",
+    "[Pipeline V2]   #6 [48.4]    \"Musée national de Prague\" (src=google_places, reviews=45701, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #7 [46.4]    \"Vyšehrad\" (src=google_places, reviews=51502, rating=4.8, tags=relaxing)",
+    "[Pipeline V2]   #8 [42.3]    \"Parc Letna\" (src=google_places, reviews=28481, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #9 [41.3]    \"Palais Lobkowicz\" (src=google_places, reviews=6674, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #10 [40.6]    \"Tour Poudrière de Prague\" (src=google_places, reviews=47256, rating=4.6, tags=none)",
+    "[Pipeline V2]   #11 [40.2]    \"Sanctuaire Notre-Dame-de-Lorette, Prague\" (src=google_places, reviews=5018, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #12 [39.7]    \"Tour du pont de la Vieille Ville\" (src=google_places, reviews=16006, rating=4.8, tags=none)",
+    "[Pipeline V2]   #13 [38.2]    \"Mémorial national de Vítkov\" (src=google_places, reviews=3124, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #14 [38.2]    \"Franz Kafka - Tête Pivotante\" (src=google_places, reviews=38818, rating=4.5, tags=none)",
+    "[Pipeline V2]   #15 [37.7]    \"Tour de Petřín\" (src=google_places, reviews=34527, rating=4.5, tags=none)",
+    "[Pipeline V2]   #16 [36.8]    \"Speculum Alchemiae\" (src=google_places, reviews=2803, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #17 [36.8]    \"Statue équestre de saint Venceslas\" (src=google_places, reviews=11341, rating=4.7, tags=none)",
+    "[Pipeline V2]   #18 [36.7]    \"Maison dansante\" (src=google_places, reviews=66599, rating=4.3, tags=none)",
+    "[Pipeline V2]   #19 [36.2]    \"Clementinum\" (src=google_places, reviews=22155, rating=4.5, tags=none)",
+    "[Pipeline V2]   #20 [35.2]    \"Monastère de Strahov\" (src=google_places, reviews=16624, rating=4.5, tags=none)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 2/40",
+    "[Pipeline V2] Added guaranteed experiential: \"Les temps forts de Prague en vélo électrique ou scooter électrique \"",
+    "[Pipeline V2] Step 2: 20 activities selected (5 must-sees) from 63 total",
+    "[Pipeline V2] Must-sees: \"Château de Prague\" (152.7), \"Pont Charles\" (149.6), \"Place de la Vieille Ville\" (147.7), \"Cathédrale Saint-Guy\" (146.8), \"Horloge astronomique de Prague\" (144.9)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=2.08km, median=1.37km, maxClusterRadius=0.69km",
+    "[Pipeline V2] Radius-constrained clustering produced 7 clusters (target 3), running soft pass with 1.04km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (50.0698, 14.4165), Day 2: centroid (50.0872, 14.4135), Day 3: centroid (50.0884, 14.4495)",
+    "[Pipeline V2] Cluster Day 1: 2 activities, radius=0.65km, intraDistance=1.29km",
+    "[Pipeline V2] Cluster Day 2: 17 activities, radius=1.59km, intraDistance=10.59km",
+    "[Pipeline V2] Cluster Day 3: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 0 activities [0 must-sees] (1.0h avail, max 0), Day 2: 17 activities [5 must-sees] (12.0h avail, max 6), Day 3: 3 activities [0 must-sees] (6.0h avail, max 2)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Château de Prague\" (score=152.7), \"Cathédrale Saint-Guy\" (score=146.8), \"Pont Charles\" (score=149.6), \"Place de la Vieille Ville\" (score=147.7), \"Horloge astronomique de Prague\" (score=144.9)",
+    "[Pipeline V2]   Day 2: Château de Prague, Cathédrale Saint-Guy, Pont Charles, Place de la Vieille Ville, Horloge astronomique de Prague",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1:  (0.0km intra)",
+    "[Pipeline V2]   Day 2: Château de Prague, Cathédrale Saint-Guy, Sanctuaire Notre-Dame-de-Lorette, Prague, Tour de Petřín, Les temps forts de Prague en vélo électrique ou scooter électrique , Pont Charles, Tour du pont de la Vieille Ville, Clementinum, Place de la Vieille Ville, Horloge astronomique de Prague, Franz Kafka - Tête Pivotante, Statue équestre de saint Venceslas, Musée national de Prague, Tour Poudrière de Prague, Speculum Alchemiae, Parc Letna, Palais Lobkowicz (8.0km intra)",
+    "[Pipeline V2]   Day 3: Mémorial national de Vítkov, Maison dansante, Vyšehrad (4.2km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Prague Dream Hostel\" (2.97 score, 1.02km center, 2.00km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Restaurants pool: total=48, budgetFiltered=45, geo=19",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=4, targets=3",
+    "[SerpAPI Places] Requête: q=\"breakfast brunch café bakery\", location=\"Prague\", ll=\"@50.079211,14.427165,14z\", gl=\"us\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Prague\", ll=\"@50.0883569,14.449522,14z\", gl=\"us\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Prague\", ll=\"@50.06719748,14.420551160000002,14z\", gl=\"us\"",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=68, budgetFiltered=65, geo=39",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=40, missing meals 4 -> 4",
+    "[Pipeline V2] Step 4: 5/9 meals assigned restaurants (pool=39)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 3: \"Quartiers modernes et départ\" → \"Vyšehrad & Mémorial national de Vítkov\"",
+    "[Pipeline V2] Step 6 done in 10451ms — \"Progression logique du centre historique vers le château, puis découverte des quartiers plus récents avant le départ, en évitant les lieux fermés certains jours et en privilégiant les activités intérieures pendant la bruine.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 17/20 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 22 pairs...",
+    "[Pipeline V2] Directions cache: 22/22 pairs fetched",
+    "[Pipeline V2] Day 2 re-optimized with real times: Musée national de Prague → Statue équestre de saint Venceslas → Franz Kafka - Tête Pivotante → Tour du pont de la Vieille Ville → Pont Charles → Les temps forts de Prague en vélo électrique ou scooter électrique  → Palais Lobkowicz → Château de Prague → Cathédrale Saint-Guy → Sanctuaire Notre-Dame-de-Lorette, Prague → Tour de Petřín → Clementinum → Place de la Vieille Ville → Horloge astronomique de Prague → Speculum Alchemiae → Tour Poudrière de Prague → Parc Letna",
+    "[Pipeline V2] 2-opt re-optimization: 1/3 days changed with real times",
+    "[Pipeline V2] Cross-day dedup: removed 2 duplicate activity(ies) from Day 2",
+    "[Pipeline V2] Day 1: 0 activities to schedule (0 must-sees), dayStart=21:00, dayEnd=22:00, window=1.0h, cursor=21:00",
+    "[Pipeline V2] Day 2: 15 activities to schedule (3 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Musée national de Prague\" (120min, score=48.4, mustSee=false)",
+    "[Pipeline V2]   → \"Statue équestre de saint Venceslas\" (45min, score=36.8, mustSee=false)",
+    "[Pipeline V2]   → \"Franz Kafka - Tête Pivotante\" (60min, score=38.2, mustSee=false)",
+    "[Pipeline V2]   → \"Tour du pont de la Vieille Ville\" (45min, score=39.7, mustSee=false)",
+    "[Pipeline V2]   → \"Pont Charles\" (45min, score=149.6, mustSee=true)",
+    "[Pipeline V2]   → \"Les temps forts de Prague en vélo électrique ou scooter électrique \" (15min, score=23.2, mustSee=false)",
+    "[Pipeline V2]   → \"Palais Lobkowicz\" (120min, score=41.3, mustSee=false)",
+    "[Pipeline V2]   → \"Château de Prague\" (60min, score=152.7, mustSee=true)",
+    "[Pipeline V2]   → \"Sanctuaire Notre-Dame-de-Lorette, Prague\" (60min, score=40.2, mustSee=false)",
+    "[Pipeline V2]   → \"Tour de Petřín\" (60min, score=37.7, mustSee=false)",
+    "[Pipeline V2]   → \"Clementinum\" (60min, score=36.2, mustSee=false)",
+    "[Pipeline V2]   → \"Place de la Vieille Ville\" (30min, score=147.7, mustSee=true)",
+    "[Pipeline V2]   → \"Speculum Alchemiae\" (120min, score=36.8, mustSee=false)",
+    "[Pipeline V2]   → \"Tour Poudrière de Prague\" (60min, score=40.6, mustSee=false)",
+    "[Pipeline V2]   → \"Parc Letna\" (60min, score=42.3, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 breakfast: \"IPPA Café Tylovo Náměstí\" (0.6km) → \"Café Purkyně\" (0.5km)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 2 lunch: \"Artisan Cafe & Bistrot\" (1.3km) → \"Restaurant Mlýnec\" (0.9km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Parc Letna\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"FAT CAT Old Town\" (0.37km from Parc Letna)",
+    "[Pipeline V2] Day 2: Skipping \"Pont Charles\" — closed on thursday",
+    "[Pipeline V2] Day 2: Must-see \"Place de la Vieille Ville\" rejected at 30min, retrying with 30min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 2: Evicted \"Les temps forts de Prague en vélo électrique ou scooter électrique \" (score=23.168598782116522, slot=16:00-16:30) to make room for must-see \"Place de la Vieille Ville\"",
+    "[Pipeline V2] Day 2: Skipping \"Parc Letna\" — closed on thursday",
+    "[Pipeline V2] Day 3: 3 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=13:00, window=5.0h, cursor=08:15",
+    "[Pipeline V2]   → \"Vyšehrad\" (60min, score=46.4, mustSee=false)",
+    "[Pipeline V2]   → \"Maison dansante\" (60min, score=36.7, mustSee=false)",
+    "[Pipeline V2]   → \"Mémorial national de Vítkov\" (120min, score=38.2, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 3 lunch: \"Seifert’s Brunch\" (3.6km) → \"U Kroka\" (0.3km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 dinner, searching pool + API near \"Mémorial national de Vítkov\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 dinner: found \"Linh - Not Just A Restaurant\" (0.70km from Mémorial national de Vítkov)",
+    "[Pipeline V2] Day 3: Skipping \"Vyšehrad\" — closed on friday",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] 📸 Enriching 11 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 11/11 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule re-opt: Day 3 \"Déjeuner — U Kroka\" (3.3km from neighbor) → \"Seifert’s Brunch\" (0.4km from ref)",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 1 restaurant(s) (0 API calls)",
+    "[Pipeline V2] 📸 Enriching 3 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 3/3 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 9 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=1, fallback-flagged=0",
+    "[Pipeline V2] Geo strict prune: Day 2 removed 1 optional activity(ies)",
+    "[Pipeline V2] Section 13i: pruned 1 optional activity(ies) to reduce intra-day zigzags",
+    "[Pipeline V2] Gap fill: Day 2 inserted \"Franz Kafka - Tête Pivotante\" (55min, detour=0.02km, remainingGap=60min)",
+    "[Pipeline V2] Section 13ha: inserted 1 gap-fill activity(ies)",
+    "[Pipeline V2] Must-see recovery: skipping \"Cathédrale Saint-Guy\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Horloge astronomique de Prague\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Place de la Vieille-Ville\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: skipping \"Château de Prague\" — name-similar to already-scheduled activity",
+    "[Pipeline V2] Must-see recovery: evicted \"Mémorial national de Vítkov\" (score=105.6) and replaced with must-see \"Pont Charles\" on day 3",
+    "[Pipeline V2] Step 7: 11 alternatives, pool trimmed to 20/20",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 93/100",
+    "  ⚠️ Day 2: day load is high (680min planned incl. travel)",
+    "  ⚠️ Day 3: Restaurant \"Déjeuner — Seifert’s Brunch\" is 3.1km from nearest activity",
+    "  🔧 Day 3: Fixed activity count in narrative (3 → 2)",
+    "  🔧 Day 3: Regenerated theme (no match): \"Vyšehrad & Mémorial national de Vítkov\" → \"Maison dansante et Pont Charles\"",
+    "[Pipeline V2] Step 8: Quality score 93/100 (2 warnings, 2 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 23 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 83866ms (83.9s)",
+    "[Pipeline V2]   3 days, 18 items total",
+    "[Pipeline V2]   Day 1: (no activities)",
+    "[Pipeline V2]   Day 2: Horloge astronomique de Prague, Statue équestre de saint Venceslas, Cathédrale Saint-Guy, Tour du pont de la Vieille Ville, Place de la Vieille Ville, Palais Lobkowicz, Château de Prague",
+    "[Pipeline V2]   Day 3: Maison dansante, Pont Charles"
+  ],
+  "warnings": [
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[SerpAPI] Vols filtrés CDG→PRG 2026-04-07: escale_nuit=1 (Aéroport Belgrade-Nikola Tesla×1)",
+    "[FlightValidator] Code compagnie inconnu: QS",
+    "[FlightValidator] Code compagnie inconnu: QS",
+    "[FlightValidator] Code compagnie inconnu: QS",
+    "[SerpAPI] Vols filtrés MRS→PRG 2026-04-07: escale_longue=2 (Brussels Airport×1, Aéroport Franz-Josef-Strauss de Munich×1)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite de la bière artisanale de Prague, Prague\": 1192.1km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Promenade  à Prague avec votre ami local, Prague\": 1363.9km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Visite  à pied: Du pont Charles au château de Prague, Prague\": 958.3km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Prague: Visite  de la vieille ville avec prise en charge à l'hôtel, Prague\": 882.8km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Kutná Hora, église d'Os et village populaire Excursion d'une journée en petit groupe, Prague\": 62.1km de la destination (max 30km)",
+    "[Pipeline V2] Day 2: REJECTED activity \"Sanctuaire Notre-Dame-de-Lorette, Prague\" (duration=60min, travel=15min, cursor=19:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 2: REJECTED activity \"Tour de Petřín\" (duration=60min, travel=15min, cursor=19:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 2: REJECTED activity \"Clementinum\" (duration=60min, travel=15min, cursor=19:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 2: REJECTED activity \"Speculum Alchemiae\" (duration=120min, travel=15min, cursor=16:30, dayEnd=22:00)",
+    "[Pipeline V2] Day 2: REJECTED activity \"Tour Poudrière de Prague\" (duration=60min, travel=20min, cursor=16:30, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Café Purkyně\" overlaps with \"Check-out Prague Dream Hostel\"",
+    "[Pipeline V2] Must-see recovery: 1 must-see(s) missing from schedule — attempting recovery",
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Cathédrale Saint-Guy\", \"Horloge astronomique de Prague\"",
+    "[Pipeline V2] Must-see recovery: evicted \"Franz Kafka - Tête Pivotante\" from Day 2",
+    "[Pipeline V2] Must-see recovery: injected \"Cathédrale Saint-Guy\" into Day 2 at 11:55",
+    "[Pipeline V2] Must-see recovery: evicted \"Musée national de Prague\" from Day 2",
+    "[Pipeline V2] Must-see recovery: injected \"Horloge astronomique de Prague\" into Day 2 at 09:00"
+  ],
+  "errors": [
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Vue imprenable sur la Suisse bohémienne: Porte, Tisa Rocks, Bastei, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Český Krumlov & Holašovice Visite d'une journée en petit groupe du village UNESCO, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite  à pied: Du pont Charles au château de Prague, Prague\" à Prague — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Kutná Hora, église d'Os et village populaire Excursion d'une journée en petit groupe, Prague\" à Prague — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 83866,
+  "generatedAt": "2026-02-18T22:12:19.111Z",
+  "success": true,
+  "runType": "suggestion",
+  "suggestionQuery": "Je veux faire un break de 3 jours en Europe",
+  "suggestionTitle": "Escapade gourmande à Prague"
+}

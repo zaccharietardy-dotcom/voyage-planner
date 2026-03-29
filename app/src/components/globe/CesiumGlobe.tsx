@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Compass, Minus, Plus } from 'lucide-react';
 import { GlobeWaypoint, Traveler, TripArc } from '@/lib/globe/types';
 import type { PhotoCluster } from '@/lib/globe/types';
@@ -222,15 +222,26 @@ function createImageMarkerCanvas(img: HTMLImageElement, isSelected: boolean): HT
   return canvas;
 }
 
-// Cache for loaded images
+// Cache for loaded images (LRU, max 50 entries)
+const MAX_IMAGE_CACHE = 50;
 const imageCache = new Map<string, HTMLImageElement>();
 
 function loadImage(url: string): Promise<HTMLImageElement> {
-  if (imageCache.has(url)) return Promise.resolve(imageCache.get(url)!);
+  if (imageCache.has(url)) {
+    // Move to end (most recently used)
+    const cached = imageCache.get(url)!;
+    imageCache.delete(url);
+    imageCache.set(url, cached);
+    return Promise.resolve(cached);
+  }
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
+      if (imageCache.size >= MAX_IMAGE_CACHE) {
+        const oldest = imageCache.keys().next().value;
+        if (oldest) imageCache.delete(oldest);
+      }
       imageCache.set(url, img);
       resolve(img);
     };
@@ -297,7 +308,7 @@ export interface CesiumGlobeProps {
   onCameraHeightChange?: (height: number) => void;
 }
 
-export function CesiumGlobe({
+function CesiumGlobeInner({
   travelers,
   arcs,
   onTravelerSelect,
@@ -1135,6 +1146,40 @@ export function CesiumGlobe({
         }
       `}</style>
     </div>
+  );
+}
+
+class CesiumGlobeErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.error('[CesiumGlobe] Render error:', error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="flex items-center justify-center h-full bg-slate-900/50 rounded-xl">
+          <p className="text-white/60 text-sm">Globe indisponible</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export function CesiumGlobe(props: CesiumGlobeProps) {
+  return (
+    <CesiumGlobeErrorBoundary>
+      <CesiumGlobeInner {...props} />
+    </CesiumGlobeErrorBoundary>
   );
 }
 

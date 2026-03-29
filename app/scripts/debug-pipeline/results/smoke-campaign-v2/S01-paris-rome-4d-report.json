@@ -1,0 +1,416 @@
+{
+  "tripId": "eb7ddf0c-b55e-492d-a188-03ca42bba61b",
+  "scenarioId": "paris-rome-4d",
+  "generatedAt": "2026-02-14T22:25:47.703Z",
+  "destination": "Rome",
+  "summary": {
+    "totalIssues": 17,
+    "critical": 5,
+    "warning": 5,
+    "info": 7,
+    "score": 89,
+    "weightedScore": 89
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 89,
+      "critical": 1,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 3,
+      "weightedPenalty": 11.4
+    },
+    "geography": {
+      "score": 51,
+      "critical": 3,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 5,
+      "weightedPenalty": 49
+    },
+    "budget": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 98,
+      "critical": 0,
+      "warning": 0,
+      "info": 3,
+      "totalIssues": 3,
+      "weightedPenalty": 2.1
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 2,
+      "weightedPenalty": 1.4
+    },
+    "relevance": {
+      "score": 90,
+      "critical": 1,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 10
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 22,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 3: segment urbain dur 14.4km entre \"Petit-déjeuner à l'hôtel\" et \"Château Saint - Ange\" (> 4km)"
+      ]
+    },
+    {
+      "key": "geography:Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "geography:Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): colisée",
+      "category": "relevance",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): colisée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: \"Départ de l'hôtel\" (fin 17:00) chevauche \"Check-in Annie's Ho",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Départ de l'hôtel\" (fin 17:00) chevauche \"Check-in Annie's Home\" (début 16:00)"
+      ]
+    },
+    {
+      "key": "budget:Jour 3: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ]
+    },
+    {
+      "key": "budget:Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€"
+      ]
+    },
+    {
+      "key": "geography:Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du cen",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre"
+      ]
+    },
+    {
+      "key": "geography:Jour 3: restaurant \"Déjeuner — La Base Ristorante\" est à 16.4km du cen",
+      "category": "geography",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — La Base Ristorante\" est à 16.4km du centre"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Petit-déjeuner — Bono Bottega Nostrana- Street Foo",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Petit-déjeuner — Bono Bottega Nostrana- Street Food\" à 14.2km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 2,
+      "impactScore": 2,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "Jour 3: \"Musées Capitolins\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 1: \"Départ de l'hôtel\" (fin 17:00) chevauche \"Check-in Annie's Home\" (début 16:00)",
+        "dayNumber": 1,
+        "itemTitle": "Départ de l'hôtel",
+        "details": {
+          "currentEnd": "17:00",
+          "nextStart": "16:00",
+          "overlapMinutes": 60
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 1: 6h de vide entre \"Vol U2 4813\" (fin 09:20) et \"Départ de l'hôtel\" (début 15:35)",
+        "dayNumber": 1,
+        "details": {
+          "gapMinutes": 375
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 4: 5h de vide entre \"Check-out Annie's Home\" (fin 10:00) et \"Vol U2 4816\" (début 15:10)",
+        "dayNumber": 4,
+        "details": {
+          "gapMinutes": 310
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: \"Vol U2 4813\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 1,
+        "itemTitle": "Vol U2 4813"
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: restaurant \"Dîner — La locanda del tempio\" est à 15.4km du centre",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — La locanda del tempio",
+        "details": {
+          "distanceKm": 15
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: restaurant \"Déjeuner — La Base Ristorante\" est à 16.4km du centre",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — La Base Ristorante",
+        "details": {
+          "distanceKm": 16
+        }
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 3: segment urbain dur 14.4km entre \"Petit-déjeuner à l'hôtel\" et \"Château Saint - Ange\" (> 4km)",
+        "dayNumber": 3,
+        "details": {
+          "distanceKm": 14.44,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 4: \"Vol U2 4816\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 4,
+        "itemTitle": "Vol U2 4816"
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Jour 3: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+        "dayNumber": 3,
+        "itemTitle": "Petit-déjeuner à l'hôtel"
+      },
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Jour 4: restaurant \"Petit-déjeuner à l'hôtel\" a un coût de 0€",
+        "dayNumber": 4,
+        "itemTitle": "Petit-déjeuner à l'hôtel"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Musées du Vatican\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Musées du Vatican",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Musées Capitolins\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Musées Capitolins",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (2 activités) vs jour 2 (6 activités) — déséquilibre important",
+        "details": {
+          "day1": 2,
+          "day2": 6
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 3 (6 activités) vs jour 4 (1 activités) — déséquilibre important",
+        "details": {
+          "day1": 6,
+          "day2": 1
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "critical",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): colisée",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "colisée"
+          ]
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Petit-déjeuner — Bono Bottega Nostrana- Street Food\" à 14.2km de l'activité précédente (\"Départ de l'hôtel\") avec seulement 0min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Petit-déjeuner — Bono Bottega Nostrana- Street Food",
+        "details": {
+          "distKm": "14.2",
+          "gapMin": 0
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 25,
+    "activitiesCount": 9,
+    "restaurantsCount": 6,
+    "avgItemsPerDay": 6.25,
+    "totalEstimatedCost": 693,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

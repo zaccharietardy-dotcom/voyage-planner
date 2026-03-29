@@ -1,0 +1,489 @@
+{
+  "tripId": "4f3c388e-1f48-4326-a5b7-f853ebf94a5e",
+  "scenarioId": "naples-pompei-3d",
+  "generatedAt": "2026-03-19T10:19:47.450Z",
+  "destination": "Naples",
+  "summary": {
+    "totalIssues": 20,
+    "critical": 3,
+    "warning": 14,
+    "info": 3,
+    "score": 84,
+    "weightedScore": 84
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 13,
+      "critical": 3,
+      "warning": 6,
+      "info": 0,
+      "totalIssues": 9,
+      "weightedPenalty": 87.3
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 95,
+      "critical": 0,
+      "warning": 1,
+      "info": 2,
+      "totalIssues": 3,
+      "weightedPenalty": 4.9
+    },
+    "rhythm": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "relevance": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "realism": {
+      "score": 90,
+      "critical": 0,
+      "warning": 3,
+      "info": 0,
+      "totalIssues": 3,
+      "weightedPenalty": 10.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 3,
+      "impactScore": 60,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: 6.8km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Dîner — Gino e Toto Sorbillo\" avec seulement 5min de battement (besoin ~14min)",
+        "Jour 2: 23.2km entre \"Pompei\" et \"Déjeuner — L'Antica Pizzeria da Michele\" avec seulement 5min de battement (besoin ~28min)",
+        "Jour 2: 6.7km entre \"Temps libre — Exploration du quartier\" et \"Dîner — Leopoldo Cafebar - Senza Glutine\" avec seulement 0min de battement (besoin ~14min)"
+      ]
+    },
+    {
+      "key": "GEO_VERY_LONG_DAY_LEG",
+      "code": "GEO_VERY_LONG_DAY_LEG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/geography",
+      "count": 2,
+      "impactScore": 9.6,
+      "avgFrequencyWeight": 1.2,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" — trajet long",
+        "Jour 2: 23.2km entre \"Pompei\" et \"Déjeuner — L'Antica Pizzeria da Michele\" — trajet long"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (3 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 4 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: efficacité de route faible (2.04x du minimum MST)"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "realism:Jour 1: restaurant \"Dîner — Gino e Toto Sorbillo\" à 6.8km de l'activit",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: restaurant \"Dîner — Gino e Toto Sorbillo\" à 6.8km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 5min de battement"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Déjeuner — L'Antica Pizzeria da Michele\" à 23.2km ",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Déjeuner — L'Antica Pizzeria da Michele\" à 23.2km de l'activité précédente (\"Pompei\") avec seulement 5min de battement"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Dîner — Leopoldo Cafebar - Senza Glutine\" à 6.7km ",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Dîner — Leopoldo Cafebar - Senza Glutine\" à 6.7km de l'activité précédente (\"Temps libre — Exploration du quartier\") avec seulement 0min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): spaccanapoli",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (1/2): spaccanapoli"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: 6.8km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Dîner — Gino e Toto Sorbillo\" avec seulement 5min de battement (besoin ~14min)",
+        "dayNumber": 1,
+        "details": {
+          "distanceKm": "6.8",
+          "gapMinutes": 5,
+          "estimatedTravelMin": 14
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" — trajet long",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 24,
+          "gapMinutes": 45
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: segment long 24.4km entre \"Musée archéologique national de Naples\" et \"Pompei\" (45min de battement)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 24.36,
+          "gapMinutes": 45
+        },
+        "code": "GEO_LONG_LEG_OK",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 0.5
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 23.2km entre \"Pompei\" et \"Déjeuner — L'Antica Pizzeria da Michele\" — trajet long",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 23,
+          "gapMinutes": 5
+        },
+        "code": "GEO_VERY_LONG_DAY_LEG",
+        "component": "pipeline/geography",
+        "frequencyWeight": 1.2
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 23.2km entre \"Pompei\" et \"Déjeuner — L'Antica Pizzeria da Michele\" avec seulement 5min de battement (besoin ~28min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "23.2",
+          "gapMinutes": 5,
+          "estimatedTravelMin": 28
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 6.7km entre \"Temps libre — Exploration du quartier\" et \"Dîner — Leopoldo Cafebar - Senza Glutine\" avec seulement 0min de battement (besoin ~14min)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "6.7",
+          "gapMinutes": 0,
+          "estimatedTravelMin": 14
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 4 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 4,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 2.04,
+          "totalLegKm": 64.05
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (2.04x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 2.04,
+          "threshold": 1.75,
+          "totalLegKm": 64.05,
+          "mstLowerBoundKm": 31.36
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 2: seulement 50min de temps libre — pas de pause",
+        "dayNumber": 2,
+        "details": {
+          "freeMinutes": 50,
+          "occupiedMinutes": 695
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 1 (2 activités) vs jour 2 (6 activités) — déséquilibre important",
+        "details": {
+          "day1": 2,
+          "day2": 6
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Must-see manquants (1/2): spaccanapoli",
+        "details": {
+          "found": 1,
+          "total": 2,
+          "missing": [
+            "spaccanapoli"
+          ]
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 1: restaurant \"Dîner — Gino e Toto Sorbillo\" à 6.8km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 5min de battement",
+        "dayNumber": 1,
+        "itemTitle": "Dîner — Gino e Toto Sorbillo",
+        "details": {
+          "distKm": "6.8",
+          "gapMin": 5
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Déjeuner — L'Antica Pizzeria da Michele\" à 23.2km de l'activité précédente (\"Pompei\") avec seulement 5min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Déjeuner — L'Antica Pizzeria da Michele",
+        "details": {
+          "distKm": "23.2",
+          "gapMin": 5
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Dîner — Leopoldo Cafebar - Senza Glutine\" à 6.7km de l'activité précédente (\"Temps libre — Exploration du quartier\") avec seulement 0min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Leopoldo Cafebar - Senza Glutine",
+        "details": {
+          "distKm": "6.7",
+          "gapMin": 0
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 18,
+    "activitiesCount": 4,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 6,
+    "totalEstimatedCost": null,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

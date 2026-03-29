@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { notifyComment, notifyReply } from '@/lib/services/notifications';
 import { isAcceptedCloseFriend } from '@/lib/server/closeFriends';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 function getServiceClient() {
   return createClient(
@@ -131,6 +132,12 @@ export async function POST(
     const supabase = await createRouteHandlerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+
+    const rateLimitKey = `comments:${user.id}:${tripId}`;
+    const { allowed } = checkRateLimit(rateLimitKey, { windowMs: 3_600_000, maxRequests: 20 });
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    }
 
     const { content, parent_id } = await request.json();
     if (!content?.trim()) return NextResponse.json({ error: 'Contenu requis' }, { status: 400 });

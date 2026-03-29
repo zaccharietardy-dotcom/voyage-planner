@@ -1,0 +1,2541 @@
+{
+  "scenarioId": "geo-direct-07",
+  "preferences": {
+    "origin": "Lille",
+    "destination": "Dublin",
+    "startDate": "2026-03-31T13:12:48.650Z",
+    "durationDays": 3,
+    "transport": "train",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "economic",
+    "activities": [
+      "gastronomy",
+      "nature"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Dublin",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "dd54cf27-cd31-412d-86a4-6c2b400c6847",
+    "createdAt": "2026-02-17T13:13:37.751Z",
+    "updatedAt": "2026-02-17T13:13:37.751Z",
+    "preferences": {
+      "origin": "Lille",
+      "destination": "Dublin",
+      "startDate": "2026-03-31T13:12:48.650Z",
+      "durationDays": 3,
+      "transport": "train",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "economic",
+      "activities": [
+        "gastronomy",
+        "nature"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Dublin",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-31T13:12:48.650Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "07:39",
+            "endTime": "08:00",
+            "type": "transport",
+            "title": "🧭 Départ depuis Lille",
+            "description": "Départ depuis Lille",
+            "locationName": "Lille",
+            "latitude": 50.6292,
+            "longitude": 3.0573,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 21,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Lille%2C%20Dublin",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "17:44",
+            "type": "transport",
+            "title": "🚌 Bus → Dublin",
+            "description": "Lille → Dublin",
+            "locationName": "Lille → Dublin",
+            "latitude": 53.3498,
+            "longitude": -6.2603,
+            "orderIndex": 1,
+            "estimatedCost": 28,
+            "duration": 584,
+            "bookingUrl": "https://www.omio.fr/bus/lille/dublin?departure_date=2026-03-31",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%8C%20Bus%20%E2%86%92%20Dublin%2C%20Dublin",
+            "transportMode": "bus",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "18:30",
+            "endTime": "19:00",
+            "type": "checkin",
+            "title": "Check-in The Dawson Hostel - DUBLIN",
+            "description": "Disponibilité confirmée",
+            "locationName": "35 Dawson St, Dublin 2, D02 CR29, Ireland",
+            "latitude": 53.3403465574376,
+            "longitude": -6.25865310430527,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 7.1,
+            "bookingUrl": "https://www.booking.com/hotel/ie/lastampa.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=The%20Dawson%20Hostel%20-%20DUBLIN%2C%20Dublin",
+            "accommodation": {
+              "id": "booking-231292",
+              "name": "The Dawson Hostel - DUBLIN",
+              "type": "hotel",
+              "address": "35 Dawson St, Dublin 2, D02 CR29, Ireland",
+              "latitude": 53.3403465574376,
+              "longitude": -6.25865310430527,
+              "rating": 7.1,
+              "reviewCount": 2699,
+              "stars": 4,
+              "pricePerNight": 38,
+              "totalPrice": 76,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/661260328.jpg?k=61dcac20b0d01d70e50ee7b80c749e652835e02a199aa7e6b5ecd6e9b45fdb6d&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/ie/lastampa.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "budget_fallback_hotel_suggestion"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "budget_fallback_hotel_suggestion"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/661260328.jpg?k=61dcac20b0d01d70e50ee7b80c749e652835e02a199aa7e6b5ecd6e9b45fdb6d&o="
+          },
+          {
+            "id": "temple-bar",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "21:00",
+            "type": "activity",
+            "title": "Quartier de Temple Bar",
+            "description": "The Latin Quarter of Paris is a district in Paris on the left bank of the Seine, around the Sorbonne. Located in the city's 5th and the 6th arrondissements, it is known for its concentration of universities.",
+            "locationName": "Quartier de Temple Bar",
+            "latitude": 53.3454,
+            "longitude": -6.2643,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Quartier%20de%20Temple%20Bar%2C%20Dublin",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU8UVs0yAPNihs0iNFDSsSDPatM5S_Pwsij42FkvxgPMl1mnDVFSk2ardzyknTMHa-viewyKRBU9NxJWI89_dsMs6PIlVBHldi-haAzesaOitCDxwn9J9uE01fwjjcBf8z6q6tLPi_9Srw1Eh1ICAclAq0Vb0stpwOM1ea5_f6GCKWO2wJ_3hDVnZ-SGPAAo8U8Dfp7DgnCaJEgdEJ357j6WDZjbGvN7GcJPJxIPKw5iZzCiad2wIjXJnFTj2SryAWdCLDlRkiVBVC9TX_siywjsmZMWeRTevLJQS0HPY2pTnMrk2e1an3EWHXeMrr44oqc-4a6JzPMh94smvcFQq11OvbCGOdHqJlZEvUU7okBZ1ErnTIK16TsfS1SCS3YwfBMPrAX31i0SxulEv_NARmVoT5t_b-hsOyEL7S7R1tyqvyFH4WyEoT1oVRacorZ64lbxTZBpbKSg9XOHyQ4UFbD9xBgxpEC4SZMjZi6fAdsbuzLpY-ujT0ojEAT7wHgr-5YcQcv23i6ruHblXuWG-k8gcTwF-ByfJMozXzzUKDYQJHlwCUwlfFfUrIdasr6NmAtxWtMd7Qi7pNVhJlcsJyuX5kEFA&maxwidth=800",
+            "mustSee": true,
+            "distanceFromPrevious": 0.68,
+            "timeFromPrevious": 11,
+            "transportToPrevious": "walk"
+          }
+        ],
+        "theme": "Quartier de Temple Bar",
+        "dayNarrative": "Journée consacrée à Guinness Storehouse, Dublinia, Château de Dublin. 1 activité prévue.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 8,
+          "tempMax": 15,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 0,
+          "transport": 28,
+          "total": 28
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 46,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-04-01T13:12:48.650Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — It's a Trap",
+            "description": "café",
+            "locationName": "Dublin, Irlande",
+            "latitude": 53.34136,
+            "longitude": -6.2656,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=It's%20a%20Trap%2C%20Dublin%2C%20Irlande",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=It's%20a%20Trap%2C%20Dublin",
+            "restaurant": {
+              "id": "serp-5767081215290241577",
+              "name": "It's a Trap",
+              "address": "Dublin, Irlande",
+              "latitude": 53.34136,
+              "longitude": -6.2656,
+              "rating": 4.8,
+              "reviewCount": 661,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=It's%20a%20Trap%2C%20Dublin%2C%20Irlande",
+              "googlePlaceId": "5767081215290241577",
+              "openingHours": {},
+              "distance": 0.47476728308742167,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-11414024294137310147",
+                  "name": "The Stage Door Cafe",
+                  "address": "Dublin 2, Irlande",
+                  "latitude": 53.345207,
+                  "longitude": -6.2659345,
+                  "rating": 4.7,
+                  "reviewCount": 1700,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "café"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Service rapide ,serviable,agréable et des plats delicieux.\""
+                  ],
+                  "description": "\"Service rapide ,serviable,agréable et des plats delicieux.\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Stage%20Door%20Cafe%2C%20Dublin%202%2C%20Irlande",
+                  "googlePlaceId": "11414024294137310147",
+                  "openingHours": {},
+                  "distance": 0.7250891643930995,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXqR92V3rLfdr777SA27LwA5N0125J0fdX9YTFgIcGtfD80OykpbiOnRoqjNjea29r-hfxZNJQoyPsnkVtp2E7TcPM_iU9aeOWZDuqk2-yPrhF_ZOEP31_vZsLg4l2rmGGCri2gKSzHatHXMF-r2xG4bFsn2KDPRJWd4V1DMQYij2di51ga3i5kGD5kAvqwjKUsq88IUbIQXJc9s-0-nYoqyGlbTCSIquaOU5kAcU5vJ8FszFfcIClv3M_DzNF6GdDwsmzi7xc3C87vF0F_f8tFi_u9TReQDW6OI6L0XZm9-pls9p2TkJE9yTr9uGxneLlRH3np4ZZPEOIXLvF4Rapq-ezGTVG7JE3kxmGf5LxAi6_5pRr3o5edS2BZtPQ0iox_4Uq3-zvxH3vp3TksUq82rU0IM4f0lxIolzjYxNyYxp7xRcpSWvpmUd4IvwUJFU_iNx2ao7YoyfAr727aCm4hm_AvsW_Wam7Cdn63PKMupUZGX0ruJzjhnhkRZqx-h_uBpnPoJvJX68snFy2iHRX6OZyO94JbvFxSV7H48m5cZM4aQeXg-TaoyNwOsyX6e3eWNnxBeS4zYA74f7iMZewdb7b_Yg&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-7380806023710334781",
+                  "name": "The Bakehouse Dublin",
+                  "address": "Dublin 1, Irlande",
+                  "latitude": 53.346878,
+                  "longitude": -6.2625766,
+                  "rating": 4.5,
+                  "reviewCount": 845,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "petit-déjeuner"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Bakehouse%20Dublin%2C%20Dublin%201%2C%20Irlande",
+                  "googlePlaceId": "7380806023710334781",
+                  "openingHours": {},
+                  "distance": 0.7715558453972526,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXoE0kvzzHEixhOiXCBWpGaUQiKkKjFrkPyxMrYMOhHacp-7uYKKAiUuoPfHJ_Yo1d0US9gLzbbUSc49viDf_RRI99SbVaEYTjDc0OUje3RiuRfubyqrGw27BlMfawlKe-ZJcY0n6dDf6QGuh74UsDQQp7QyRuA3TiU5rrd47Cv2DORs18q5ARLAnQ--Qfca4meypBjVzJhitAGl96Qf5JdGQRWPb2aXlgnr8bRv_1g2wCPy96Kt4jNBLd_h8g-jT5YcEQC_dbF_3XO8HAB7sW50BoK28qbgv4cHiYWDc4Yhc7A2fjnjOPwgPvM4F4U7ngDjEpglUkAVCJ0xV8c17iqqnqQLioidHinu0Ekl_uZb2Kd31lIGh-muerCAlVZeVmWwHtfeNG8L2XGB9iHnj2V70BM8xFurDdfHtyF9T-4c7DNb4F8cF-sb2qr_W6G7aJZQzcZw4-ZsWjp8lOKrmoH2EmdXIh_xPiEE2x_9LTM4wn7a5cj1ZQ9lLEFaN7SBmIcZVt73Dg0PcFCJjerPwb4ZwQfu_m69fwB73PYv3OUDzw60qe_L3Ss6j8xHu8q4E4iDDBTdBc9HQ&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVFme5IBeo8EqadB4lJ5mU5nIGbgcyS-pMUA5cbQIMRtbR-f74eoA7xuwCM96EGyFDlGdaLhcU90YlSk1pAwFF9e2ynvkelOjZapbhZTSatV4JJ1DxMPd90rO0JXc7FCufLKyT8j1nMfPuzerqj1VO_NXbuwrSAv0hYcrqRYH7C27KqUZA0lwAV-iJtLejxp5tiMIgG8PFt7CuIzJP8FhS05YWwgScwj9-TTVhjklOFwirmCpvnzFzNlKFCyZ3v7c8DF8AO5YSvXbsPiFg07KslX0SKCRutVTTls8vrFGl0SsqlJVA&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11414024294137310147",
+                "name": "The Stage Door Cafe",
+                "address": "Dublin 2, Irlande",
+                "latitude": 53.345207,
+                "longitude": -6.2659345,
+                "rating": 4.7,
+                "reviewCount": 1700,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Service rapide ,serviable,agréable et des plats delicieux.\""
+                ],
+                "description": "\"Service rapide ,serviable,agréable et des plats delicieux.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Stage%20Door%20Cafe%2C%20Dublin%202%2C%20Irlande",
+                "googlePlaceId": "11414024294137310147",
+                "openingHours": {},
+                "distance": 0.7250891643930995,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXqR92V3rLfdr777SA27LwA5N0125J0fdX9YTFgIcGtfD80OykpbiOnRoqjNjea29r-hfxZNJQoyPsnkVtp2E7TcPM_iU9aeOWZDuqk2-yPrhF_ZOEP31_vZsLg4l2rmGGCri2gKSzHatHXMF-r2xG4bFsn2KDPRJWd4V1DMQYij2di51ga3i5kGD5kAvqwjKUsq88IUbIQXJc9s-0-nYoqyGlbTCSIquaOU5kAcU5vJ8FszFfcIClv3M_DzNF6GdDwsmzi7xc3C87vF0F_f8tFi_u9TReQDW6OI6L0XZm9-pls9p2TkJE9yTr9uGxneLlRH3np4ZZPEOIXLvF4Rapq-ezGTVG7JE3kxmGf5LxAi6_5pRr3o5edS2BZtPQ0iox_4Uq3-zvxH3vp3TksUq82rU0IM4f0lxIolzjYxNyYxp7xRcpSWvpmUd4IvwUJFU_iNx2ao7YoyfAr727aCm4hm_AvsW_Wam7Cdn63PKMupUZGX0ruJzjhnhkRZqx-h_uBpnPoJvJX68snFy2iHRX6OZyO94JbvFxSV7H48m5cZM4aQeXg-TaoyNwOsyX6e3eWNnxBeS4zYA74f7iMZewdb7b_Yg&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-7380806023710334781",
+                "name": "The Bakehouse Dublin",
+                "address": "Dublin 1, Irlande",
+                "latitude": 53.346878,
+                "longitude": -6.2625766,
+                "rating": 4.5,
+                "reviewCount": 845,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "petit-déjeuner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Bakehouse%20Dublin%2C%20Dublin%201%2C%20Irlande",
+                "googlePlaceId": "7380806023710334781",
+                "openingHours": {},
+                "distance": 0.7715558453972526,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXoE0kvzzHEixhOiXCBWpGaUQiKkKjFrkPyxMrYMOhHacp-7uYKKAiUuoPfHJ_Yo1d0US9gLzbbUSc49viDf_RRI99SbVaEYTjDc0OUje3RiuRfubyqrGw27BlMfawlKe-ZJcY0n6dDf6QGuh74UsDQQp7QyRuA3TiU5rrd47Cv2DORs18q5ARLAnQ--Qfca4meypBjVzJhitAGl96Qf5JdGQRWPb2aXlgnr8bRv_1g2wCPy96Kt4jNBLd_h8g-jT5YcEQC_dbF_3XO8HAB7sW50BoK28qbgv4cHiYWDc4Yhc7A2fjnjOPwgPvM4F4U7ngDjEpglUkAVCJ0xV8c17iqqnqQLioidHinu0Ekl_uZb2Kd31lIGh-muerCAlVZeVmWwHtfeNG8L2XGB9iHnj2V70BM8xFurDdfHtyF9T-4c7DNb4F8cF-sb2qr_W6G7aJZQzcZw4-ZsWjp8lOKrmoH2EmdXIh_xPiEE2x_9LTM4wn7a5cj1ZQ9lLEFaN7SBmIcZVt73Dg0PcFCJjerPwb4ZwQfu_m69fwB73PYv3OUDzw60qe_L3Ss6j8xHu8q4E4iDDBTdBc9HQ&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVFme5IBeo8EqadB4lJ5mU5nIGbgcyS-pMUA5cbQIMRtbR-f74eoA7xuwCM96EGyFDlGdaLhcU90YlSk1pAwFF9e2ynvkelOjZapbhZTSatV4JJ1DxMPd90rO0JXc7FCufLKyT8j1nMfPuzerqj1VO_NXbuwrSAv0hYcrqRYH7C27KqUZA0lwAV-iJtLejxp5tiMIgG8PFt7CuIzJP8FhS05YWwgScwj9-TTVhjklOFwirmCpvnzFzNlKFCyZ3v7c8DF8AO5YSvXbsPiFg07KslX0SKCRutVTTls8vrFGl0SsqlJVA&maxwidth=800",
+            "distanceFromPrevious": 0.47,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "viator-344886P4",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Visite à pied historique et culturelle de la fierté LGBTQ de Dublin",
+            "description": "Ensemble, nous nous promènerons dans les rues de Dublin et explorerons certaines des figures incroyables de l’histoire queer de l’Irlande. Des révolutionnaires irlandais aux agitateurs des droits civiques, des pionniers de la Marche des fiertés au...",
+            "locationName": "Visite à pied historique et culturelle de la fierté LGBTQ de Dublin",
+            "latitude": 53.3537617,
+            "longitude": -6.2700793,
+            "orderIndex": 1,
+            "estimatedCost": 24,
+            "duration": 120,
+            "rating": 5,
+            "bookingUrl": "https://www.viator.com/fr-FR/tours/Dublin/Queer-Dublin-Walking-Tour/d503-344886P4?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "viatorUrl": "https://www.viator.com/fr-FR/tours/Dublin/Queer-Dublin-Walking-Tour/d503-344886P4?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Visite%20%C3%A0%20pied%20historique%20et%20culturelle%20de%20la%20fiert%C3%A9%20LGBTQ%20de%20Dublin%2C%20Dublin",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/11/8b/89/8b.jpg",
+            "freeCancellation": true,
+            "instantConfirmation": false,
+            "mustSee": false,
+            "distanceFromPrevious": 1.41,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=53.34136,-6.2656&destination=53.3537617,-6.2700793&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJlflkkmMOZ0gRX7SIDoZHE-U",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Croke Park",
+            "description": "Croke Park is a Gaelic games stadium in Dublin, Ireland. Named after Archbishop Thomas Croke, it is referred to as Croker by GAA fans and locals.",
+            "locationName": "Croke Park",
+            "latitude": 53.3607478,
+            "longitude": -6.251134200000001,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Croke%20Park%2C%20Dublin",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1l1wl3vW5Vb4BrJgqTDGWW4Tj1a0pDgBVug8LdH_jwHgP_bEkvjgiPcg8NZcVk0ioOAftrlZ_kg6Wr3nmKZP90k2DHbUNC7W7IM7cIxsQxAGLvrrACij0B3DIAYTHHugeUWnRQoZMLs1sEwcVjB-GZMNORX7V-zYzVBiMBnPvLsJ1XnHaQqu4QubRBLN5-IVK4IP_rqAWVYUvTacrbtp3LXydoJBtmCUglBiiNeGiBHi0Gq-lnwbYIkb5K9FxHKZq2d5OCQB23zZrYIARZf6zBeO2xOnC4IXEY9NSG7FyZu9Tt_bU9xobpsPtDYbio-lYjDe1JQMbW4NdK5Tg0EuI0rZmJsIncai7Lu-z5nMPbBwD_4smCg_AxdRqm4I8aGxyR2pCgk45VqWPL83ouTLwTo8Y22FHm00KBjKvwz3-hwH8hz4ukyqLC2btCbzULUWhPpFgo2ohKYmlTo4qAiPnELOSouooVEIcFHi5g8bDZzqi5VhUMORBcdQRjT7h3vwRFwyUncZw-5ICBwsivNT4MpYd6_G8umzi_JexjKGGbAHo_8iDgibDYm-K1GTEIDkGaiUd0qNC-A&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.48,
+            "timeFromPrevious": 22,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Wallace’s Asti",
+            "description": "\"Très bon restaurant, produits de qualité bien cuisinés.\"",
+            "locationName": "15 Russell St, Drumcondra, Dublin 1, D01 VW02, Irlande",
+            "latitude": 53.358856599999996,
+            "longitude": -6.2546029999999995,
+            "orderIndex": 3,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.6,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Wallace%E2%80%99s%20Asti%2C%2015%20Russell%20St%2C%20Drumcondra%2C%20Dublin%201%2C%20D01%20VW02%2C%20Irlande",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Wallace%E2%80%99s%20Asti%2C%2015%20Russell%20St%2C%20Drumcondra%2C%20Dublin%201%2C%20D01%20VW02%2C%20Irlande",
+            "restaurant": {
+              "id": "serp-nearby-ChIJOeqg-2IOZ0gRAreGjuBGphw",
+              "name": "Wallace’s Asti",
+              "address": "15 Russell St, Drumcondra, Dublin 1, D01 VW02, Irlande",
+              "latitude": 53.358856599999996,
+              "longitude": -6.2546029999999995,
+              "rating": 4.6,
+              "reviewCount": 1517,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant spécialisé dans la cuisine de sardaigne",
+                "restaurant spécialisé dans la cuisine de sardaigne",
+                "restaurant de plats à emporter",
+                "livraison de pizzas",
+                "pizzeria"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+353 1 884 7500",
+              "website": "http://www.wallacewinebars.ie/asti",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Wallace%E2%80%99s%20Asti%2C%2015%20Russell%20St%2C%20Drumcondra%2C%20Dublin%201%2C%20D01%20VW02%2C%20Irlande",
+              "googlePlaceId": "ChIJOeqg-2IOZ0gRAreGjuBGphw",
+              "openingHours": {
+                "tuesday": {
+                  "open": "17:00",
+                  "close": "21:30"
+                },
+                "wednesday": {
+                  "open": "17:00",
+                  "close": "21:30"
+                },
+                "thursday": {
+                  "open": "17:00",
+                  "close": "21:30"
+                },
+                "friday": {
+                  "open": "12:30",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "12:30",
+                  "close": "22:00"
+                },
+                "sunday": {
+                  "open": "12:30",
+                  "close": "21:30"
+                },
+                "monday": null
+              },
+              "distance": 0.3117844922769149,
+              "walkingTime": 4,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUzNu8J7CLVQuTa86dgr5_LmUs194d5UC9pXmdxliuzawb5X3XkSzfh6rQ1uNH7dYdRXTrbV2WfJ0aoRIyRhsmxD0pPGx_G-hRNhgceIFlkAbblFfY_uodGr4M3rnMlvJ0x3_yMGHQ3-os9NMjEm-MUty5EL5R3c11hduY2J_SD8VTH_jl12H2hovaPYAnQ6IqPur3qT2a5a6u2Hrkx5Py3r07nOMyQ2uKJM7OJX1ki3Di0cvv3K-_AfkvRX-oag1Tcs0uGr5n4Bx76ImOt0n-NFOFW70ojFm4KadGjHrE6HQ&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-14084037063185824768",
+                "name": "Panem Café & Restaurant",
+                "address": "Dublin, Irlande",
+                "latitude": 53.34638,
+                "longitude": -6.2654934,
+                "rating": 4.6,
+                "reviewCount": 1000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Panem%20Caf%C3%A9%20%26%20Restaurant%2C%20Dublin%2C%20Irlande",
+                "googlePlaceId": "14084037063185824768",
+                "openingHours": {},
+                "distance": 0.8754300000262318,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUJ3_gq8jnTooEMyju1tqnxIEUwURHaR9WB-0n5TBYx6AOk2T8UayV9VA7A2uSP9qqYbitxn2Bil6w91TqU7OnIWWF2HZKL4rqv-B-YFCEjC3XJw895TKVX_bSHxTJXmOHQ7Qk5i3EgHfhgt0UKuPhGW-4R2yJD6lTiiyFncwabBwxZOxIpZM-JNuLu6zwAo8gBg-iHJ_mPA9PViso0edX9f8_LUsCrSFR1NisQZvBfryAvwJKh9mvXAx7qZ10j3FggE6sXiKIysbC7-ShMk7vzlaGeCJKpJ7IYwRGm-fsEoq8nL0M&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-5220510130908222388",
+                "name": "Bar Italia Ristorante",
+                "address": "Dublin, Irlande",
+                "latitude": 53.346428,
+                "longitude": -6.264897,
+                "rating": 4.5,
+                "reviewCount": 2400,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "italienne"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Le service est impeccable et le personnel est très souriant.\""
+                ],
+                "description": "\"Le service est impeccable et le personnel est très souriant.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Italia%20Ristorante%2C%20Dublin%2C%20Irlande",
+                "googlePlaceId": "5220510130908222388",
+                "openingHours": {},
+                "distance": 0.8850481871935554,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVjVfZNH1glFmY_vvLShJ3lbCZ0IUVRuLdwYzTLMtL-zcfp-caFvJ8uuGyRqPfe0EQH5sdDYgZiV6AlQZcjMJFncXoy330lH9019Ednlg9s7-lmgef9uCq6x-PJoouQId1AXOBO33eAm7xupzhpatEQ4xutkdMAFMiY-qobkk-uFMOOZJnYfJIF9Kz-7nqDEc-OjvlmTqH5FfCRH88BmpLeXPZvORTyByQgXY1UnB-Gs_qVWS58tBpFUzeHbT98rQJZNCVk98QfBU4gFnKTf3kbj2kBiWgnBE28cH6dNVhfn78BinM&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUzNu8J7CLVQuTa86dgr5_LmUs194d5UC9pXmdxliuzawb5X3XkSzfh6rQ1uNH7dYdRXTrbV2WfJ0aoRIyRhsmxD0pPGx_G-hRNhgceIFlkAbblFfY_uodGr4M3rnMlvJ0x3_yMGHQ3-os9NMjEm-MUty5EL5R3c11hduY2J_SD8VTH_jl12H2hovaPYAnQ6IqPur3qT2a5a6u2Hrkx5Py3r07nOMyQ2uKJM7OJX1ki3Di0cvv3K-_AfkvRX-oag1Tcs0uGr5n4Bx76ImOt0n-NFOFW70ojFm4KadGjHrE6HQ&maxwidth=800",
+            "distanceFromPrevious": 0.31,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=53.3607478,-6.251134200000001&destination=53.35297,-6.264891&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "13:15",
+            "endTime": "14:30",
+            "type": "restaurant",
+            "title": "Dîner — Holi Indian Restaurant, Dublin",
+            "description": "\"La cuisine est délicieuse et le service très agréable.\"",
+            "locationName": "18 Drumcondra Rd Lower, Botanic, Dublin 9, D09 VX73, Irlande",
+            "latitude": 53.362403699999994,
+            "longitude": -6.2591396,
+            "orderIndex": 4,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.9,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Holi%20Indian%20Restaurant%2C%20Dublin%2C%2018%20Drumcondra%20Rd%20Lower%2C%20Botanic%2C%20Dublin%209%2C%20D09%20VX73%2C%20Irlande",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Holi%20Indian%20Restaurant%2C%20Dublin%2C%2018%20Drumcondra%20Rd%20Lower%2C%20Botanic%2C%20Dublin%209%2C%20D09%20VX73%2C%20Irlande",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ33AqbncPZ0gRJPEcwvUPLOM",
+              "name": "Holi Indian Restaurant, Dublin",
+              "address": "18 Drumcondra Rd Lower, Botanic, Dublin 9, D09 VX73, Irlande",
+              "latitude": 53.362403699999994,
+              "longitude": -6.2591396,
+              "rating": 4.9,
+              "reviewCount": 294,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant indien",
+                "restaurant indien",
+                "restaurant gastronomique",
+                "restaurant indien à emporter"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+353 1 538 6985",
+              "website": "https://holi.ie/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Holi%20Indian%20Restaurant%2C%20Dublin%2C%2018%20Drumcondra%20Rd%20Lower%2C%20Botanic%2C%20Dublin%209%2C%20D09%20VX73%2C%20Irlande",
+              "googlePlaceId": "ChIJ33AqbncPZ0gRJPEcwvUPLOM",
+              "openingHours": {
+                "tuesday": null,
+                "wednesday": {
+                  "open": "17:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "17:00",
+                  "close": "22:00"
+                },
+                "friday": {
+                  "open": "17:00",
+                  "close": "22:30"
+                },
+                "saturday": {
+                  "open": "15:00",
+                  "close": "22:30"
+                },
+                "sunday": {
+                  "open": "15:00",
+                  "close": "22:30"
+                },
+                "monday": {
+                  "open": "17:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.5622205472872391,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5061310181200724351",
+                "name": "The Vintage Kitchen",
+                "address": "Dublin 2, Irlande",
+                "latitude": 53.346893,
+                "longitude": -6.2556973,
+                "rating": 4.7,
+                "reviewCount": 1500,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "irlandaise"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"La cuisine est délicieuse et le service très agréable.\""
+                ],
+                "description": "\"La cuisine est délicieuse et le service très agréable.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Vintage%20Kitchen%2C%20Dublin%202%2C%20Irlande",
+                "googlePlaceId": "5061310181200724351",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXbiUW2P7Uh1oor23LTw28fCHkmrIMXCLQ-JnoGQ3cCqP42dIMxlui07EySCw1OpfaYCmVxW2WROmq5GNgPUgWxwipDMkIQJvlVpUR7Itj5hUfs3I41WTIqn8CQuoJgQI8nxGp_2uJv3pU7C-AGyOSa6j7qeG7kJX3eT7xmVxAQ8G2Ua7lKf0G6QEJaQ6reDuU3ufBc_Hr2U6Br44N9zqT859Vh8J6r7CaxIK0A6C5YXPCreYVSJqKCtby-G1qpAZBKOZ8Ng-Fg1ZCrvmo9zaL3ebBz4wa2WU75gK8_qLUp7IKnwkTu_3j6it4EfRRd6EH2vapCXSqDzXDQuPdqCfDY6nDslZD1M-3z9f1q0n3T7fQc8UE4G35XFCL1ZUqsv48S43dfv93KEBeyTA7URWMb0p-3ZZBlT7ZvuXiVuS0KuDDMgVNvMo6DRJp4BWmj0NdHQmGY0BmSqKYqbpJhTKifASToLCGX5It3f6FLMnO7pL6Ak_TS-2z2sr6PHBquX3CKaDoRn48u3LOJuY48cxRX7pb8QSbiJPnZZnAVRz5lId7z3pMzurMzJF2F9jkB-s0RwUFh&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-8343609701559239679",
+                "name": "Jay Kays Cafe",
+                "address": "Dublin 1, Irlande",
+                "latitude": 53.347103,
+                "longitude": -6.26523,
+                "rating": 4.7,
+                "reviewCount": 1500,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Délicieux brunch, très copieux et bien présenté!\""
+                ],
+                "description": "\"Délicieux brunch, très copieux et bien présenté!\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Jay%20Kays%20Cafe%2C%20Dublin%201%2C%20Irlande",
+                "googlePlaceId": "8343609701559239679",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXirLCNETYHswmZx0eruPovwHvyobj2BC8FjvUWpBKbuppk4uwjQaBfj1suMMP-J_mvUTh9gRWNJ321qWsGuLoVqpSLCi8v0NSUFb3tn3Cps3SyvhdBaK00eN-em954x31z1-EgnJ4KbU0DSJx66279dOPwZ633amx8pc69OwegaZooI9th4hWZqkESRjAGRSDm7lvE91PACjwtrCTKPpaMe8DOlRvA-gkjA7AzFrsx-6UqAkNi1Ti3wmD3LZcAUcV5aV1HApjEJhd-NG6qrW4AIutinQjm0bLng9iVVhijxUCwaHc&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.5,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Visite à pied historique et culturelle de la fierté LGBTQ de Dublin et Croke Park",
+        "dayNarrative": "Journée consacrée à Visite à pied historique et culturelle de la fierté LGBTQ de Dublin, Croke Park. 2 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 8,
+          "tempMax": 12,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 24,
+          "food": 60,
+          "transport": 0,
+          "total": 84
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.48,
+          "p95LegKm": 1.41,
+          "totalTravelMin": 58,
+          "totalLegKm": 3.7,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.09,
+          "mstLowerBoundKm": 3.39
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-04-02T13:12:48.650Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out The Dawson Hostel - DUBLIN",
+            "description": "Disponibilité confirmée",
+            "locationName": "35 Dawson St, Dublin 2, D02 CR29, Ireland",
+            "latitude": 53.3403465574376,
+            "longitude": -6.25865310430527,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 7.1,
+            "bookingUrl": "https://www.booking.com/hotel/ie/lastampa.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=The%20Dawson%20Hostel%20-%20DUBLIN%2C%20Dublin",
+            "accommodation": {
+              "id": "booking-231292",
+              "name": "The Dawson Hostel - DUBLIN",
+              "type": "hotel",
+              "address": "35 Dawson St, Dublin 2, D02 CR29, Ireland",
+              "latitude": 53.3403465574376,
+              "longitude": -6.25865310430527,
+              "rating": 7.1,
+              "reviewCount": 2699,
+              "stars": 4,
+              "pricePerNight": 38,
+              "totalPrice": 76,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/661260328.jpg?k=61dcac20b0d01d70e50ee7b80c749e652835e02a199aa7e6b5ecd6e9b45fdb6d&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/hotel/ie/lastampa.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "budget_fallback_hotel_suggestion"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "budget_fallback_hotel_suggestion"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/661260328.jpg?k=61dcac20b0d01d70e50ee7b80c749e652835e02a199aa7e6b5ecd6e9b45fdb6d&o="
+          },
+          {
+            "id": "self-lunch-3",
+            "dayNumber": 3,
+            "startTime": "12:00",
+            "endTime": "12:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant à proximité",
+            "description": "Déjeuner",
+            "locationName": "Restaurant à proximité",
+            "latitude": 53.3403465574376,
+            "longitude": -6.25865310430527,
+            "orderIndex": 1,
+            "estimatedCost": 15,
+            "duration": 45,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20Dublin",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20%C3%A0%20proximit%C3%A9%2C%20Dublin",
+            "restaurant": {
+              "name": "Restaurant à proximité",
+              "description": "Déjeuner",
+              "latitude": 53.3403465574376,
+              "longitude": -6.25865310430527,
+              "estimatedCost": 15
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-292084859094641631",
+                "name": "Bewley's Grafton Street",
+                "address": "Dublin, Irlande",
+                "latitude": 53.34172,
+                "longitude": -6.26029,
+                "rating": 4.3,
+                "reviewCount": 5800,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café possédant sa propre boulangerie"
+                ],
+                "description": "Café possédant sa propre boulangerie",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bewley's%20Grafton%20Street%2C%20Dublin%2C%20Irlande",
+                "googlePlaceId": "292084859094641631",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUSMY-FShj9bOMSSMkwbnqly8-2_UIx8Wvf-aKoIuJlEv3M_F0AvoDl7gyaYPnwgzfvIBBPrqLcvaSJsg3sZKJrvqndfqgbc3gPXtsC6pCA8UNSTTpnF9HT5o_S02xmQfr5RVF5wkSUFY6SIOixj3Eu13Ci2eYCNv-sSpjdkVpm6fNpujqFztIxvxaf3gVNnMyGFm1Hf8UXr6OAm5aiQfQxncn9cl8eNIn1mox9pX65_jCzn8HVHc-PDM_RquT0L0Bl12HxBfpG4Uh5W--hdjnfSdDBMcYPSfeiNfRLQ0I8iHV8CAw&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-7868916197187023469",
+                "name": "La Maison",
+                "address": "Dublin 2, Irlande",
+                "latitude": 53.34227,
+                "longitude": -6.262893,
+                "rating": 4.6,
+                "reviewCount": 1100,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "française"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Super restaurant, service impeccable et nourriture de qualité.\""
+                ],
+                "description": "\"Super restaurant, service impeccable et nourriture de qualité.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Maison%2C%20Dublin%202%2C%20Irlande",
+                "googlePlaceId": "7868916197187023469",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVtdSUV0ftTPI-oCfLgdKSqBSrUuduIA4AgPiuIP1Ee4rMtOweLbF-JTllRqu2ollpKnHGWNE8-Ic11fS1C8rvW8_nx4RSCqyR9E2BrsdkV1_cYpW5AVyLEWFxvHY1iT9-ZfHOPl03ovrs0812E72THdOsChD2wG0xJJEfU8Q-vTSkfyJn66TlzNdUGBltOver7Qpegzl1iYpsmczwLwkB0fZhzlDuQfnSBzc0_BgMbcK8_oMSA7Wa2pQkOgt0ratmnb9Fty0IomHWfvzT-hGgpwXzjRO2fuEo9SkaYiiXpN3xNaIs&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3",
+            "dayNumber": 3,
+            "startTime": "14:00",
+            "endTime": "23:44",
+            "type": "transport",
+            "title": "🚌 Bus → Lille",
+            "description": "Dublin → Lille",
+            "locationName": "Dublin → Lille",
+            "latitude": 53.3498,
+            "longitude": -6.2603,
+            "orderIndex": 2,
+            "estimatedCost": 28,
+            "duration": 584,
+            "bookingUrl": "https://www.omio.fr/bus/dublin/lille?departure_date=2026-04-02",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%8C%20Bus%20%E2%86%92%20Lille%2C%20Dublin",
+            "transportMode": "bus",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop",
+            "distanceFromPrevious": 1.22,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=53.3403465574376,-6.25865310430527&destination=53.3498,-6.2603&travelmode=transit"
+          }
+        ],
+        "theme": "Retour",
+        "dayNarrative": "",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Principalement dégagé",
+          "tempMin": 8,
+          "tempMax": 12,
+          "icon": "🌤️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 15,
+          "transport": 28,
+          "total": 43
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 225,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lille",
+            "to": "Dublin",
+            "fromCoords": {
+              "lat": 50.6292,
+              "lng": 3.0573
+            },
+            "toCoords": {
+              "lat": 53.3498,
+              "lng": -6.2603
+            },
+            "duration": 529,
+            "price": 28,
+            "co2": 19,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lille/dublin?departure_date=2026-03-31"
+          }
+        ],
+        "totalDuration": 584,
+        "totalPrice": 28,
+        "totalCO2": 19,
+        "score": 8.6,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 6.4,
+          "co2Score": 9.5
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lille/dublin?departure_date=2026-03-31",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lille",
+            "to": "Dublin",
+            "fromCoords": {
+              "lat": 50.6292,
+              "lng": 3.0573
+            },
+            "toCoords": {
+              "lat": 53.3498,
+              "lng": -6.2603
+            },
+            "duration": 964,
+            "price": 56,
+            "co2": 10,
+            "operator": "Eurostar",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lille/dublin?departure_date=2026-03-31"
+          }
+        ],
+        "totalDuration": 1004,
+        "totalPrice": 56,
+        "totalCO2": 10,
+        "score": 5.9,
+        "scoreDetails": {
+          "priceScore": 7.7,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lille/dublin?departure_date=2026-03-31",
+        "dataSource": "estimated",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lille Europe",
+            "to": "St Pancras International",
+            "departure": "2026-03-31T13:35:00.000Z",
+            "arrival": "2026-03-31T14:57:00.000Z",
+            "duration": 82,
+            "line": "Eurostar"
+          },
+          {
+            "mode": "train",
+            "from": "Euston",
+            "to": "Holyhead",
+            "departure": "2026-03-31T16:02:00.000Z",
+            "arrival": "2026-03-31T19:55:00.000Z",
+            "duration": 233,
+            "line": "Avanti West Coast"
+          },
+          {
+            "mode": "ferry",
+            "from": "Holyhead",
+            "to": "Dublin",
+            "departure": "2026-03-31T21:15:00.000Z",
+            "arrival": "2026-04-01T00:45:00.000Z",
+            "duration": 210,
+            "line": "Holyhead-Dublin"
+          },
+          {
+            "mode": "bus",
+            "from": "East Wall Road",
+            "to": "Eden Quay, stop 301",
+            "departure": "2026-04-01T05:32:00.000Z",
+            "arrival": "2026-04-01T05:39:00.000Z",
+            "duration": 7,
+            "line": "507"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lille",
+            "to": "Dublin",
+            "fromCoords": {
+              "lat": 50.6292,
+              "lng": 3.0573
+            },
+            "toCoords": {
+              "lat": 53.3498,
+              "lng": -6.2603
+            },
+            "duration": 423,
+            "price": 148,
+            "co2": 37,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lille/Dublin"
+          }
+        ],
+        "totalDuration": 483,
+        "totalPrice": 148,
+        "totalCO2": 37,
+        "score": 5.5,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 7.9,
+          "co2Score": 8.4
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lille/Dublin",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lille",
+            "to": "Dublin",
+            "fromCoords": {
+              "lat": 50.6292,
+              "lng": 3.0573
+            },
+            "toCoords": {
+              "lat": 53.3498,
+              "lng": -6.2603
+            },
+            "duration": 53,
+            "price": 71,
+            "co2": 180,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LILLE3103DUBLIN2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 343,
+        "totalPrice": 71,
+        "totalCO2": 180,
+        "score": 5.4,
+        "scoreDetails": {
+          "priceScore": 6.4,
+          "timeScore": 10,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LILLE3103DUBLIN2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lille/dublin?departure_date=2026-03-31"
+      }
+    ],
+    "selectedTransport": {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Lille",
+          "to": "Dublin",
+          "fromCoords": {
+            "lat": 50.6292,
+            "lng": 3.0573
+          },
+          "toCoords": {
+            "lat": 53.3498,
+            "lng": -6.2603
+          },
+          "duration": 529,
+          "price": 28,
+          "co2": 19,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/lille/dublin?departure_date=2026-03-31"
+        }
+      ],
+      "totalDuration": 584,
+      "totalPrice": 28,
+      "totalCO2": 19,
+      "score": 8.6,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 6.4,
+        "co2Score": 9.5
+      },
+      "bookingUrl": "https://www.omio.fr/bus/lille/dublin?departure_date=2026-03-31",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "booking-231292",
+      "name": "The Dawson Hostel - DUBLIN",
+      "type": "hotel",
+      "address": "35 Dawson St, Dublin 2, D02 CR29, Ireland",
+      "latitude": 53.3403465574376,
+      "longitude": -6.25865310430527,
+      "rating": 7.1,
+      "reviewCount": 2699,
+      "stars": 4,
+      "pricePerNight": 38,
+      "totalPrice": 76,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/661260328.jpg?k=61dcac20b0d01d70e50ee7b80c749e652835e02a199aa7e6b5ecd6e9b45fdb6d&o="
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/hotel/ie/lastampa.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified",
+      "qualityFlags": [
+        "budget_fallback_hotel_suggestion"
+      ]
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-231292",
+        "name": "The Dawson Hostel - DUBLIN",
+        "type": "hotel",
+        "address": "35 Dawson St, Dublin 2, D02 CR29, Ireland",
+        "latitude": 53.3403465574376,
+        "longitude": -6.25865310430527,
+        "rating": 7.1,
+        "reviewCount": 2699,
+        "stars": 4,
+        "pricePerNight": 38,
+        "totalPrice": 76,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/661260328.jpg?k=61dcac20b0d01d70e50ee7b80c749e652835e02a199aa7e6b5ecd6e9b45fdb6d&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/ie/lastampa.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-12651883",
+        "name": "Dublin Quayside Hostel",
+        "type": "hotel",
+        "address": "39 Arran Quay, Smithfield, Dublin 7, D07 X76R, Ireland",
+        "latitude": 53.346648,
+        "longitude": -6.2797592,
+        "rating": 7.2,
+        "reviewCount": 598,
+        "stars": 3,
+        "pricePerNight": 39,
+        "totalPrice": 78,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/589584031.jpg?k=be5164ce2218fd91e559883e785a1a0aa3f5aa13077b17988c58fb04308942f9&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Dublin+Quayside+Hostel+Dublin&checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-294538",
+        "name": "Generator Dublin",
+        "type": "hotel",
+        "address": "Smithfield, Dublin, D07 F2VF, Ireland",
+        "latitude": 53.3482745537679,
+        "longitude": -6.27792477607727,
+        "rating": 7.1,
+        "reviewCount": 6714,
+        "stars": 3,
+        "pricePerNight": 42,
+        "totalPrice": 84,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/349076009.jpg?k=44ee1f77214176c32533905f9918883bcfd082e96f9c55a97e177c733bc37e9f&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/ie/generator-hostel.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-179079",
+        "name": "Abbey Court Hostel",
+        "type": "hotel",
+        "address": "29 Bachelors Walk, North City, Dublin, D01 AX90, Ireland",
+        "latitude": 53.3473570889229,
+        "longitude": -6.26029059290886,
+        "rating": 7.9,
+        "reviewCount": 7668,
+        "stars": 4,
+        "pricePerNight": 46,
+        "totalPrice": 92,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/727431433.jpg?k=02f686e9c158446a5e1902fb45c453fe366c9c107f3c994160613e62fa46bfbf&o="
+        ],
+        "checkInTime": "14:30",
+        "checkOutTime": "10:30",
+        "bookingUrl": "https://www.booking.com/hotel/ie/abbey-court-hostel.html?checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-4764317",
+        "name": "KGT House",
+        "type": "hotel",
+        "address": "61 Dorset Street Upper, Rotunda, Dublin, D01 HP65, Ireland",
+        "latitude": 53.3566347461321,
+        "longitude": -6.2645776534729,
+        "rating": 6.8,
+        "reviewCount": 2255,
+        "stars": 3,
+        "pricePerNight": 50,
+        "totalPrice": 100,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/730385084.jpg?k=5e8f386ffebc406454e6763fbf596018293e438f77d3407c31f64cc9b4e68fe8&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=KGT+House+Dublin&checkin=2026-03-31&checkout=2026-04-02&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 231,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 76,
+      "food": 75,
+      "activities": 24,
+      "transport": 56,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Anglais (Irlandais)",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Hello",
+            "phonetic": "hé-lô",
+            "context": "Salutation générale"
+          },
+          {
+            "original": "Merci",
+            "translation": "Thank you",
+            "phonetic": "thènk you",
+            "context": "Remerciement"
+          },
+          {
+            "original": "S'il vous plaît",
+            "translation": "Please",
+            "phonetic": "pliz",
+            "context": "Politesse"
+          },
+          {
+            "original": "Je voudrais un café",
+            "translation": "I would like a coffee",
+            "phonetic": "aï would laïk a kôfi",
+            "context": "Au café"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Where are the toilets?",
+            "phonetic": "ouèr ar thé toïlets",
+            "context": "Demander un lieu"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "Do you speak French?",
+            "phonetic": "dou you spîk frènch",
+            "context": "Communication"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "I don't understand",
+            "phonetic": "aï dont andèrstend",
+            "context": "Incompréhension"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "How much does it cost?",
+            "phonetic": "haou mouch does it kost",
+            "context": "Prix"
+          },
+          {
+            "original": "Pouvez-vous m'aider ?",
+            "translation": "Can you help me?",
+            "phonetic": "kèn you help mi",
+            "context": "Demander de l'aide"
+          },
+          {
+            "original": "Je suis perdu",
+            "translation": "I am lost",
+            "phonetic": "aï am lost",
+            "context": "Orientation"
+          },
+          {
+            "original": "Excusez-moi",
+            "translation": "Excuse me",
+            "phonetic": "èkskiouz mi",
+            "context": "Politesse"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Help!",
+            "phonetic": "hèlp",
+            "context": "Urgence"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Pull en laine",
+            "reason": "Températures fraîches en mars"
+          },
+          {
+            "item": "Imperméable",
+            "reason": "Climat humide irlandais"
+          },
+          {
+            "item": "Chaussures imperméables",
+            "reason": "Terrain potentiellement humide"
+          },
+          {
+            "item": "Adaptateur électrique UK/Irlande",
+            "reason": "Prises différentes"
+          },
+          {
+            "item": "Bonnet et écharpe",
+            "reason": "Protection contre le vent"
+          },
+          {
+            "item": "Parapluie compact",
+            "reason": "Risques de pluie fréquents"
+          },
+          {
+            "item": "Sous-vêtements thermiques",
+            "reason": "Températures basses"
+          }
+        ],
+        "plugType": "G",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Pas de visa requis, passeport ou carte d'identité suffisant pour un séjour touristique jusqu'à 90 jours"
+          }
+        ],
+        "importantLaws": [
+          "Alcool interdit pour les moins de 18 ans",
+          "Conduite à droite obligatoire",
+          "Interdiction de fumer dans les lieux publics",
+          "Port de la ceinture de sécurité obligatoire"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "112",
+        "fire": "112",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Garde côtière",
+            "number": "999"
+          },
+          {
+            "label": "Service médical non urgent",
+            "number": "1850"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 70,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "mixed",
+        "dinner": "mixed"
+      },
+      "groceryShoppingNeeded": true,
+      "activitiesLevel": "mostly_free",
+      "dailyActivityBudget": 15,
+      "transportTips": "Utiliser Dublin Bus day pass à 7€",
+      "reasoning": "Budget serré à Dublin nécessite optimisation. Airbnb avec cuisine permet économies repas, ciblage activités gratuites comme parcs, randonnées, musées gratuits. Stratégie repas mixte permet goûter restaurants locaux sans exploser budget.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJawXFQIQOZ0gRoucFdZIzGbM",
+        "name": "Guinness Storehouse",
+        "type": "attraction",
+        "description": "",
+        "latitude": 53.3416684,
+        "longitude": -6.2867285,
+        "rating": 4.4,
+        "reviewCount": 23910,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUqlBD_SqVVPgJLj2DWmrXrJW1lajm5IJrOjkwU3MaRnSaou4vF7aXTLQd2j7HGtMsd0OfwOW1muvIgxKRnTiiKz9sXnbhNwWTFswYa7XmFyEhkUu_Fiy0h213GobQ_VDpX8oI4sIDn72tqKLsrQKu52Z1-_Ap46a8IKgL1CFB9BCpDtwLxxnPzKcykntD_D6miHkirHxER59bF1Hy9UmlSUewDoqnpsZc0UFkZe6MD1GW4oN9WSTkqY1vByxC2Sl6Ki7onnB0LNBKt9jOfB0Pn5tTyfL5yNcrsZ8VcUEBcH2t8rn4&maxwidth=400",
+        "googlePlaceId": "ChIJawXFQIQOZ0gRoucFdZIzGbM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 408 4800",
+        "website": "https://www.guinness-storehouse.com/en/home?utm_source=Google&utm_medium=Organic&utm_campaign=gsh_google_my_business&utm_id=Google+My+Business+",
+        "score": 118.55715915223155,
+        "source": "google_places"
+      },
+      {
+        "id": "trinity-college",
+        "name": "Trinity College & Book of Kells",
+        "type": "culture",
+        "description": "Université historique abritant le manuscrit enluminé du Book of Kells",
+        "duration": 90,
+        "estimatedCost": 18,
+        "latitude": 53.3439,
+        "longitude": -6.2546,
+        "rating": 4.6,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.tcd.ie/visitors/book-of-kells/",
+        "openingHours": {
+          "open": "09:30",
+          "close": "17:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 110.2,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "temple-bar",
+        "name": "Quartier de Temple Bar",
+        "type": "nightlife",
+        "description": "Quartier culturel animé avec pubs traditionnels et musique live",
+        "duration": 120,
+        "estimatedCost": 0,
+        "latitude": 53.3454,
+        "longitude": -6.2643,
+        "rating": 4.5,
+        "mustSee": true,
+        "bookingRequired": false,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 108,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJq-FUnZ0OZ0gR9_TAnOCOC7o",
+        "name": "Dubh Linn Garden",
+        "type": "park",
+        "description": "",
+        "latitude": 53.3423616,
+        "longitude": -6.266632,
+        "rating": 4.6,
+        "reviewCount": 1452,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "06:30",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVGLWSuZU_TIFYPn7axPPN5pVCqRvF2WhMpITo1P2fofY4aAoPvTmXOZCqwo-r28IJPlWRLY0x4LAZAgqEA-qpJhorOVA_IUgq4owpZEblHkErsRn0peR4SVcHBPkyLtaNMUHcoxwCjbb_aJTD42Lv0LIKFBHJopZPfvrdiadLImMgjjnParTkDzUTzuZuFfK1CXRxKirZuuwZ9kIzbIZnJe3Gqjx1XZJvpBDo4Z7qLp9nnQAd4qoayHuN11-TYVq1DoW1Oh0YWPjsCs_NkwX-yCx31tUaVImfB5q1FmOUHIDT5wwQ5TmsnWbs34uYPBARfhLnS8jqJXdLaIsD7tsiWbZf3Ag59NWSlP5i7D6EhrhIvyzayOqEfJ5h-dXcYWaQ56Id2-Cv16akfeRSbY_wUkKeeQqgohBgh7QOOaLYWkNqf-Ndrh8abVT8z9Aklbg6T537OZBsSEJ0Xyy4FTFEzEyCsznCP624v2qColSF_mS1uVlg0W_UU1IJIN3dZK_Jhqvg6w0_Kh1Ue4Y84PIYqh7wUR6KSXtXieRtIVeNeOXSl9jq03zb7Wwe9_kmO00hf0A&maxwidth=400",
+        "googlePlaceId": "ChIJq-FUnZ0OZ0gR9_TAnOCOC7o",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "06:30",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 645 8813",
+        "website": "https://www.dublincastle.ie/the-castle-gardens/",
+        "isOutdoor": true,
+        "score": 24.523933232728147,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-344886P4",
+        "name": "Visite à pied historique et culturelle de la fierté LGBTQ de Dublin",
+        "type": "culture",
+        "description": "Ensemble, nous nous promènerons dans les rues de Dublin et explorerons certaines des figures incroyables de l’histoire queer de l’Irlande. Des révolutionnaires irlandais aux agitateurs des droits civiques, des pionniers de la Marche des fiertés aux pionniers de l'identité de genre ; le Dublin Queer Tour est une exploration de l’incroyable communauté LGBTQ+ d’Irlande et de la riche histoire de leur histoire. L'Irlande a parcouru un long chemin pour faire progresser l'égalité des droits pour la communauté LGBTQ+, et il y a beaucoup à célébrer, alors rejoignez-nous pour cette tournée Queer Dublin pour en savoir plus sur les luttes et les triomphes. Chiffres de la Poste générale et des révolutionnaires queer L'Abbey Theatre et Panti Bliss « Noble Call » Liberty Hall et la première manifestation de la fierté Dr Lydia Foy et la loi sur la reconnaissance du genre Trinity College et le mouvement de libération sexuelle Le Centre Hirschfeld et le Diceman's Corner Le George et Gay Spar Le château de Dublin et le référendum sur l'égalité du mariage",
+        "duration": 120,
+        "estimatedCost": 24,
+        "latitude": 53.3537617,
+        "longitude": -6.2700793,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Dublin/Queer-Dublin-Walking-Tour/d503-344886P4?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/11/8b/89/8b.jpg",
+        "providerName": "Viator",
+        "reviewCount": 91,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "score": 24.418082784642188,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJlflkkmMOZ0gRX7SIDoZHE-U",
+        "name": "Croke Park",
+        "type": "stadium",
+        "description": "",
+        "latitude": 53.3607478,
+        "longitude": -6.251134200000001,
+        "rating": 4.7,
+        "reviewCount": 20945,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW1l1wl3vW5Vb4BrJgqTDGWW4Tj1a0pDgBVug8LdH_jwHgP_bEkvjgiPcg8NZcVk0ioOAftrlZ_kg6Wr3nmKZP90k2DHbUNC7W7IM7cIxsQxAGLvrrACij0B3DIAYTHHugeUWnRQoZMLs1sEwcVjB-GZMNORX7V-zYzVBiMBnPvLsJ1XnHaQqu4QubRBLN5-IVK4IP_rqAWVYUvTacrbtp3LXydoJBtmCUglBiiNeGiBHi0Gq-lnwbYIkb5K9FxHKZq2d5OCQB23zZrYIARZf6zBeO2xOnC4IXEY9NSG7FyZu9Tt_bU9xobpsPtDYbio-lYjDe1JQMbW4NdK5Tg0EuI0rZmJsIncai7Lu-z5nMPbBwD_4smCg_AxdRqm4I8aGxyR2pCgk45VqWPL83ouTLwTo8Y22FHm00KBjKvwz3-hwH8hz4ukyqLC2btCbzULUWhPpFgo2ohKYmlTo4qAiPnELOSouooVEIcFHi5g8bDZzqi5VhUMORBcdQRjT7h3vwRFwyUncZw-5ICBwsivNT4MpYd6_G8umzi_JexjKGGbAHo_8iDgibDYm-K1GTEIDkGaiUd0qNC-A&maxwidth=400",
+        "googlePlaceId": "ChIJlflkkmMOZ0gRX7SIDoZHE-U",
+        "isOutdoor": true,
+        "score": 24.042160729394475,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJe1F08akNZ0gRa1ndmi3YJqE",
+        "name": "Phoenix Park",
+        "type": "park",
+        "description": "",
+        "latitude": 53.3558823,
+        "longitude": -6.3298133,
+        "rating": 4.7,
+        "reviewCount": 41082,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV8CULoNfwcPPgUWYCYtZ5LEGoVMZgMPAXL-z4Vn2EZJgmoLHKCS_sz8OAlraLQQ_vA49QTdbtUjO9agsolsHPVbXt1SA6m4ClUPbdJh_CdCUfARnPb5nEfY_1XIga9DSztbTL1RNOzCKBLwfuEzDy6_WVFmoJBI6uZjud1NV_meaUxSbplCNOW6KwLhRBMEFH51KNk-W9Ul-T-0nrBogNtWioAyciYq91EuXe0oeLaZQgmXm6pWHzmgw9i377PWxbuMiFRQDDvT_9IcBG-JKYH_0y_wDsk81u8Pzr2ejJRR7mLBWLcWwyYwnibKg8C8T7nVIpVIn7Tag5efcNydGlMEgnhRppfWua5jJjQgRBRg7CSCoFsCT9A0doEy3N6N2EPEEKLUL7FwNFzYihdvtLq7jCLucF3tfA1jvODFakd6qtL7Bk1tlRtPj5yjRiMpnzU40oa4d6b4XagrJNBWe2rsCQg-hk0UKaa_8bFsV5ge_LCByO5jYin6Bl4wwOwqjnrNBZgPdB7v3W92uxEAbGAVSs_TITkXWjVdxJDFhTCnlh18pu7Zs9U94UsVnSxKOFqBxeL&maxwidth=400",
+        "googlePlaceId": "ChIJe1F08akNZ0gRa1ndmi3YJqE",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 820 5800",
+        "website": "https://www.phoenixpark.ie/",
+        "isOutdoor": true,
+        "score": 22.627303156501924,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-318510P2",
+        "name": "Boissons à pied: Visite du pub traditionnel de Dublin ",
+        "type": "culture",
+        "description": "Découvrez les bières locales que les vrais Dublinois apprécient. Apprenez l'histoire irlandaise en sirotant. Entrez dans quatre pubs traditionnels de Dublin hors des sentiers battus. Attention : cette activité ne convient qu'aux personnes de plus de 18 ans. Cette excellente visite de dégustation vous emmène loin du sentier touristique vers des endroits que seuls les habitants connaissent. Vous voyagerez dans le temps en dégustant des boissons irlandaises traditionnelles tout en profitant d'une gamme de pubs typiques de Dublin. Vous apprendrez tout ce qu'il y a à savoir sur la bière irlandaise, le cidre, le whisky et la stout au cœur de la belle ville de Dublin, en étanchant votre soif dans quatre lieux authentiques. Votre guide vous fera des recommandations, mais en fin de compte, c'est à vous de décider ce que vous échantillonnez. Non seulement cela, mais votre guide brillant et compétent vous fera également découvrir un peu d'histoire à boire avec vos boissons. Remarque : lors de cette visite, vous payez vos boissons individuelles. Les clients dépensent en moyenne environ 25 €.",
+        "duration": 180,
+        "estimatedCost": 28,
+        "latitude": 53.3454742,
+        "longitude": -6.2641937,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Dublin/Drinks-on-Foot-Dublin-Walking-Tour-with-a-local/d503-318510P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0e/c6/34/18.jpg",
+        "providerName": "Viator",
+        "reviewCount": 62,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "includesMeal": true,
+        "score": 21.08478337899651,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJif9mNYcOZ0gRhlbhwPbNDwU",
+        "name": "Château de Dublin",
+        "type": "attraction",
+        "description": "",
+        "latitude": 53.34288609999999,
+        "longitude": -6.2674284,
+        "rating": 4.3,
+        "reviewCount": 36497,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:45",
+          "close": "17:15"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU3T46pKNroeIiQdJ18s28p9WWZa_QXwhLnUAfEOiSCjcTYPXxIaFOE2o5fYiFVpKhOTl3ARbB3OHxoxpSQ0vXhLl7Cpzj3HBVCfECCQEFN1Z-eZsGEnb0c7EaP-tEiXO6e3HpCjKp1OZoVeHdppMTxOXwFlUUOSlV-10TZu0Rp7dCAK3WXL0P_tO3BpfOJUnPZvzIOWEG2bi0C582fAF0lZmZABS15eOc1jNvXIMWxnQ-e6PNc9uZzLAX4x3ln8-gMlF2-0RMBiyfUrIidbEIcH55YB3GTSl2oKs_pFW_p6WOMOMtE4mR14LmdQczoygQ-zTvZmekrAZqUQlbUf7Y0yvW3e5-67awKImY-EZ5qQ2MHCvaYn_2SHCmm8fWhYFH2572XJk3CKvqq9Dtfzj3VzDHJg1mv6iY-SP59JYf0Spf1tA2WA86AH2PFceeM9qhdivSRv3P6TY-nnhpXCuw6O8pcbVvJz2mcexWfifiOiC-dpms5Mx-29HpsXGeJEXkJ2sEMj8jETw05c7l0Na0bdZevD0HMBEKl0NpLirDeWlQyc6t-atoaUBzuxRs7XaimkGYS&maxwidth=400",
+        "googlePlaceId": "ChIJif9mNYcOZ0gRhlbhwPbNDwU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "monday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "tuesday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "wednesday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "thursday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "friday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "saturday": {
+            "open": "09:45",
+            "close": "17:15"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(046) 942 2213",
+        "website": "https://dublincastle.ie/",
+        "isOutdoor": false,
+        "score": 20.724514335105177,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJS7Q-vDEMZ0gRWoYY0_5aAVY",
+        "name": "National Museum of Ireland, Kildare Street",
+        "type": "museum",
+        "description": "",
+        "latitude": 53.3402225,
+        "longitude": -6.2549209,
+        "rating": 4.6,
+        "reviewCount": 14581,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUdgHM52nQrMZ5ApI0KNWkAkND1Vyr8fY0rXr0Nl02Hm8Tgg7f4Prf7vxYvpZ19pGcghvsFFVneiLtQHJ9wbgmU-6tDIQMxhoLTenLjYxzqq0dQ7WS1Rd1ZdiMqLnRP0HtZDcevPOuMDmzl6IAJ-UH_8BUfqTZGyVacHkQyKDDpGKKpS7ESx_cuWrlXTs8976RrVMH1dEVU3ZAzL_S8TqsjyH09kZ_f7qWFgrUHJ1b6HQLv8h-UrWoPxlbzZoOnYtZo18nuuy6VuY1mlZwg1duqs7ih0-TXt0tCOfcX7yFuU88aS-WGgAzoJLm0TU59Dic7Kagf7mgKz0gn9mw7y2YLqrsWTbcHHz02dJeQfGo09w1w3dHZvTi3ix-aiCV8E2G_XofTWxNRxc_zbJKTXtZ_ACv6GGAuLoseK8I2FGSArXs2gXf6_JNMy-q8Zn0MuF5bKLb_eTPAjDzs55twtDy-DruflSqV5HIoEabPl9-TDfYGyXy0OA17lhzTU-8ND1X3FUlobjodkKV8Y0LnMDdq7fLGRcWHxTHH02HdOkQiHc3w4ZoXR-TpuOABtXjmf56lhmb5&maxwidth=400",
+        "googlePlaceId": "ChIJS7Q-vDEMZ0gRWoYY0_5aAVY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "13:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "13:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 677 7444",
+        "website": "https://www.museum.ie/Home",
+        "isOutdoor": false,
+        "score": 20.527574619924003,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ6dPJX5sOZ0gRgwlwZ29L4xg",
+        "name": "Irish Whiskey Museum",
+        "type": "museum",
+        "description": "",
+        "latitude": 53.344198,
+        "longitude": -6.259525,
+        "rating": 4.7,
+        "reviewCount": 7617,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "22:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUmzWDwIONBx0fflLuP4_y9UzfOzEhZh1unsY1toJ4RJVagmZnhuElSJng-9_Jc5HmSc4tg31G4QwUWW8eOYL_tQJ8XnfnHOl7ayYUb06i55ZP_ZREKZ35-ELSDSNahjts-cmLKVx8lOZCxYmVc-ADATvVFTAe8cw_4IobB-6L_80HJP8tSXRYUn5IFSgLoABPFh2pRgJIFCUxR2vZlXHzAchYqZQ4YUkwj7HXdDdivRFv32rnWWQejPY-_nPyvbT_CpdbNgFhbSsoVwts4JuVEVVZv6bvme_DUX5lvYqHwJ7sAelY3-ljH0iy7smgIfjTnY_Hh9EcTp5uLponkcKeapPVBFq-t6A07MzVq0Nb7mVbSI5SCdI1HDk0T2sKjKQGOapyRDv3TJs770bvjJxh6AoJHltaBXkUqIe_f3_tBJXCVZ7ZChgxEBkJJTo_0cAMoHZwTspdx3q0odKA8-V1rmDwkSp47K9XQsgyfslWRnkpcD0MCjLmTK1eT1AVDYPRN28quhZ9GaIVR2lLgmalt5JcJtgoopVldNSJCxGkbhNjBg71dSAVfgIJ9Oyb3yPvGGxYi&maxwidth=400",
+        "googlePlaceId": "ChIJ6dPJX5sOZ0gRgwlwZ29L4xg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 525 0970",
+        "website": "https://irishwhiskeymuseum.ie/",
+        "isOutdoor": false,
+        "score": 20.163567911186767,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJGerRTiYMZ0gRuVDCYtqFU50",
+        "name": "Dublinia",
+        "type": "museum",
+        "description": "",
+        "latitude": 53.3430474,
+        "longitude": -6.2721152,
+        "rating": 4.5,
+        "reviewCount": 6984,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXiaIBvOs9cRRx32dSEZnb5Y2-av2sS4fG6X3NijEVSWiAuhvbF6dJs873TvlJcKcUO4stxW27gxq6pZirCSu4_7iUDaUQQHGzyBwKsFGsLI1nKxtzV3SpqcxlXb7VR9tvglzmvxAJLsm-t0RJuSC0mhI2yP6JquV-Z6DuQEcqi-RNGTOkQR2de8hwmO39OT625t7TlbQrgMi12dlEoZRj0gzpFFpIEtFbq69ZS_QKkko8tvtGZz4X8YZFCCelj5ShmlMPc7vT_YYa5v10FGewTFgewpxADF2Z_b0WZG8xUHT1AqbUDQeuvfy96eKN80Hd9cXRzE0wFeXZ0AClmf6MhgiM_6hi8uIZRU-dWrNCqM5_fhYZiq2Z1MluFsXw6fGqGKNu8bJYTT0hQwnkCa8XNU4UV2KRyahrfRlhEbKn5dlvN-YJmgCVeZ2y_EWzWQLGvOF8abVcKQSKeGs4jDHVTfZVItvPvAraY5PF-_65wTQi600GUtp3bxzN7_2Sfm7Va06u649C6mF67FjAwkZwNCTkUemiI2YkPSuLU7vXxxxYSZPbyY41E4shzqlA9AKY-iVb7HsiBGA&maxwidth=400",
+        "googlePlaceId": "ChIJGerRTiYMZ0gRuVDCYtqFU50",
+        "isOutdoor": false,
+        "score": 19.68820846139503,
+        "source": "google_places"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJawXFQIQOZ0gRoucFdZIzGbM",
+        "name": "Guinness Storehouse",
+        "type": "attraction",
+        "description": "",
+        "latitude": 53.3416684,
+        "longitude": -6.2867285,
+        "rating": 4.4,
+        "reviewCount": 23910,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUqlBD_SqVVPgJLj2DWmrXrJW1lajm5IJrOjkwU3MaRnSaou4vF7aXTLQd2j7HGtMsd0OfwOW1muvIgxKRnTiiKz9sXnbhNwWTFswYa7XmFyEhkUu_Fiy0h213GobQ_VDpX8oI4sIDn72tqKLsrQKu52Z1-_Ap46a8IKgL1CFB9BCpDtwLxxnPzKcykntD_D6miHkirHxER59bF1Hy9UmlSUewDoqnpsZc0UFkZe6MD1GW4oN9WSTkqY1vByxC2Sl6Ki7onnB0LNBKt9jOfB0Pn5tTyfL5yNcrsZ8VcUEBcH2t8rn4&maxwidth=400",
+        "googlePlaceId": "ChIJawXFQIQOZ0gRoucFdZIzGbM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 408 4800",
+        "website": "https://www.guinness-storehouse.com/en/home?utm_source=Google&utm_medium=Organic&utm_campaign=gsh_google_my_business&utm_id=Google+My+Business+",
+        "score": 118.55715915223155,
+        "source": "google_places"
+      },
+      {
+        "id": "trinity-college",
+        "name": "Trinity College & Book of Kells",
+        "type": "culture",
+        "description": "Université historique abritant le manuscrit enluminé du Book of Kells",
+        "duration": 90,
+        "estimatedCost": 18,
+        "latitude": 53.3439,
+        "longitude": -6.2546,
+        "rating": 4.6,
+        "mustSee": true,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.tcd.ie/visitors/book-of-kells/",
+        "openingHours": {
+          "open": "09:30",
+          "close": "17:00"
+        },
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 110.2,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJq-FUnZ0OZ0gR9_TAnOCOC7o",
+        "name": "Dubh Linn Garden",
+        "type": "park",
+        "description": "",
+        "latitude": 53.3423616,
+        "longitude": -6.266632,
+        "rating": 4.6,
+        "reviewCount": 1452,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "06:30",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVGLWSuZU_TIFYPn7axPPN5pVCqRvF2WhMpITo1P2fofY4aAoPvTmXOZCqwo-r28IJPlWRLY0x4LAZAgqEA-qpJhorOVA_IUgq4owpZEblHkErsRn0peR4SVcHBPkyLtaNMUHcoxwCjbb_aJTD42Lv0LIKFBHJopZPfvrdiadLImMgjjnParTkDzUTzuZuFfK1CXRxKirZuuwZ9kIzbIZnJe3Gqjx1XZJvpBDo4Z7qLp9nnQAd4qoayHuN11-TYVq1DoW1Oh0YWPjsCs_NkwX-yCx31tUaVImfB5q1FmOUHIDT5wwQ5TmsnWbs34uYPBARfhLnS8jqJXdLaIsD7tsiWbZf3Ag59NWSlP5i7D6EhrhIvyzayOqEfJ5h-dXcYWaQ56Id2-Cv16akfeRSbY_wUkKeeQqgohBgh7QOOaLYWkNqf-Ndrh8abVT8z9Aklbg6T537OZBsSEJ0Xyy4FTFEzEyCsznCP624v2qColSF_mS1uVlg0W_UU1IJIN3dZK_Jhqvg6w0_Kh1Ue4Y84PIYqh7wUR6KSXtXieRtIVeNeOXSl9jq03zb7Wwe9_kmO00hf0A&maxwidth=400",
+        "googlePlaceId": "ChIJq-FUnZ0OZ0gR9_TAnOCOC7o",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "06:30",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "06:30",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 645 8813",
+        "website": "https://www.dublincastle.ie/the-castle-gardens/",
+        "isOutdoor": true,
+        "score": 24.523933232728147,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJe1F08akNZ0gRa1ndmi3YJqE",
+        "name": "Phoenix Park",
+        "type": "park",
+        "description": "",
+        "latitude": 53.3558823,
+        "longitude": -6.3298133,
+        "rating": 4.7,
+        "reviewCount": 41082,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfV8CULoNfwcPPgUWYCYtZ5LEGoVMZgMPAXL-z4Vn2EZJgmoLHKCS_sz8OAlraLQQ_vA49QTdbtUjO9agsolsHPVbXt1SA6m4ClUPbdJh_CdCUfARnPb5nEfY_1XIga9DSztbTL1RNOzCKBLwfuEzDy6_WVFmoJBI6uZjud1NV_meaUxSbplCNOW6KwLhRBMEFH51KNk-W9Ul-T-0nrBogNtWioAyciYq91EuXe0oeLaZQgmXm6pWHzmgw9i377PWxbuMiFRQDDvT_9IcBG-JKYH_0y_wDsk81u8Pzr2ejJRR7mLBWLcWwyYwnibKg8C8T7nVIpVIn7Tag5efcNydGlMEgnhRppfWua5jJjQgRBRg7CSCoFsCT9A0doEy3N6N2EPEEKLUL7FwNFzYihdvtLq7jCLucF3tfA1jvODFakd6qtL7Bk1tlRtPj5yjRiMpnzU40oa4d6b4XagrJNBWe2rsCQg-hk0UKaa_8bFsV5ge_LCByO5jYin6Bl4wwOwqjnrNBZgPdB7v3W92uxEAbGAVSs_TITkXWjVdxJDFhTCnlh18pu7Zs9U94UsVnSxKOFqBxeL&maxwidth=400",
+        "googlePlaceId": "ChIJe1F08akNZ0gRa1ndmi3YJqE",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 820 5800",
+        "website": "https://www.phoenixpark.ie/",
+        "isOutdoor": true,
+        "score": 22.627303156501924,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-318510P2",
+        "name": "Boissons à pied: Visite du pub traditionnel de Dublin ",
+        "type": "culture",
+        "description": "Découvrez les bières locales que les vrais Dublinois apprécient. Apprenez l'histoire irlandaise en sirotant. Entrez dans quatre pubs traditionnels de Dublin hors des sentiers battus. Attention : cette activité ne convient qu'aux personnes de plus de 18 ans. Cette excellente visite de dégustation vous emmène loin du sentier touristique vers des endroits que seuls les habitants connaissent. Vous voyagerez dans le temps en dégustant des boissons irlandaises traditionnelles tout en profitant d'une gamme de pubs typiques de Dublin. Vous apprendrez tout ce qu'il y a à savoir sur la bière irlandaise, le cidre, le whisky et la stout au cœur de la belle ville de Dublin, en étanchant votre soif dans quatre lieux authentiques. Votre guide vous fera des recommandations, mais en fin de compte, c'est à vous de décider ce que vous échantillonnez. Non seulement cela, mais votre guide brillant et compétent vous fera également découvrir un peu d'histoire à boire avec vos boissons. Remarque : lors de cette visite, vous payez vos boissons individuelles. Les clients dépensent en moyenne environ 25 €.",
+        "duration": 180,
+        "estimatedCost": 28,
+        "latitude": 53.3454742,
+        "longitude": -6.2641937,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Dublin/Drinks-on-Foot-Dublin-Walking-Tour-with-a-local/d503-318510P2?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/0e/c6/34/18.jpg",
+        "providerName": "Viator",
+        "reviewCount": 62,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": true,
+        "includesMeal": true,
+        "score": 21.08478337899651,
+        "source": "viator"
+      },
+      {
+        "id": "gp-ChIJif9mNYcOZ0gRhlbhwPbNDwU",
+        "name": "Château de Dublin",
+        "type": "attraction",
+        "description": "",
+        "latitude": 53.34288609999999,
+        "longitude": -6.2674284,
+        "rating": 4.3,
+        "reviewCount": 36497,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:45",
+          "close": "17:15"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU3T46pKNroeIiQdJ18s28p9WWZa_QXwhLnUAfEOiSCjcTYPXxIaFOE2o5fYiFVpKhOTl3ARbB3OHxoxpSQ0vXhLl7Cpzj3HBVCfECCQEFN1Z-eZsGEnb0c7EaP-tEiXO6e3HpCjKp1OZoVeHdppMTxOXwFlUUOSlV-10TZu0Rp7dCAK3WXL0P_tO3BpfOJUnPZvzIOWEG2bi0C582fAF0lZmZABS15eOc1jNvXIMWxnQ-e6PNc9uZzLAX4x3ln8-gMlF2-0RMBiyfUrIidbEIcH55YB3GTSl2oKs_pFW_p6WOMOMtE4mR14LmdQczoygQ-zTvZmekrAZqUQlbUf7Y0yvW3e5-67awKImY-EZ5qQ2MHCvaYn_2SHCmm8fWhYFH2572XJk3CKvqq9Dtfzj3VzDHJg1mv6iY-SP59JYf0Spf1tA2WA86AH2PFceeM9qhdivSRv3P6TY-nnhpXCuw6O8pcbVvJz2mcexWfifiOiC-dpms5Mx-29HpsXGeJEXkJ2sEMj8jETw05c7l0Na0bdZevD0HMBEKl0NpLirDeWlQyc6t-atoaUBzuxRs7XaimkGYS&maxwidth=400",
+        "googlePlaceId": "ChIJif9mNYcOZ0gRhlbhwPbNDwU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "monday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "tuesday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "wednesday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "thursday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "friday": {
+            "open": "09:45",
+            "close": "17:15"
+          },
+          "saturday": {
+            "open": "09:45",
+            "close": "17:15"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(046) 942 2213",
+        "website": "https://dublincastle.ie/",
+        "isOutdoor": false,
+        "score": 20.724514335105177,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJS7Q-vDEMZ0gRWoYY0_5aAVY",
+        "name": "National Museum of Ireland, Kildare Street",
+        "type": "museum",
+        "description": "",
+        "latitude": 53.3402225,
+        "longitude": -6.2549209,
+        "rating": 4.6,
+        "reviewCount": 14581,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "17:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUdgHM52nQrMZ5ApI0KNWkAkND1Vyr8fY0rXr0Nl02Hm8Tgg7f4Prf7vxYvpZ19pGcghvsFFVneiLtQHJ9wbgmU-6tDIQMxhoLTenLjYxzqq0dQ7WS1Rd1ZdiMqLnRP0HtZDcevPOuMDmzl6IAJ-UH_8BUfqTZGyVacHkQyKDDpGKKpS7ESx_cuWrlXTs8976RrVMH1dEVU3ZAzL_S8TqsjyH09kZ_f7qWFgrUHJ1b6HQLv8h-UrWoPxlbzZoOnYtZo18nuuy6VuY1mlZwg1duqs7ih0-TXt0tCOfcX7yFuU88aS-WGgAzoJLm0TU59Dic7Kagf7mgKz0gn9mw7y2YLqrsWTbcHHz02dJeQfGo09w1w3dHZvTi3ix-aiCV8E2G_XofTWxNRxc_zbJKTXtZ_ACv6GGAuLoseK8I2FGSArXs2gXf6_JNMy-q8Zn0MuF5bKLb_eTPAjDzs55twtDy-DruflSqV5HIoEabPl9-TDfYGyXy0OA17lhzTU-8ND1X3FUlobjodkKV8Y0LnMDdq7fLGRcWHxTHH02HdOkQiHc3w4ZoXR-TpuOABtXjmf56lhmb5&maxwidth=400",
+        "googlePlaceId": "ChIJS7Q-vDEMZ0gRWoYY0_5aAVY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "13:00",
+            "close": "17:00"
+          },
+          "monday": {
+            "open": "13:00",
+            "close": "17:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "17:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 677 7444",
+        "website": "https://www.museum.ie/Home",
+        "isOutdoor": false,
+        "score": 20.527574619924003,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ6dPJX5sOZ0gRgwlwZ29L4xg",
+        "name": "Irish Whiskey Museum",
+        "type": "museum",
+        "description": "",
+        "latitude": 53.344198,
+        "longitude": -6.259525,
+        "rating": 4.7,
+        "reviewCount": 7617,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "22:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUmzWDwIONBx0fflLuP4_y9UzfOzEhZh1unsY1toJ4RJVagmZnhuElSJng-9_Jc5HmSc4tg31G4QwUWW8eOYL_tQJ8XnfnHOl7ayYUb06i55ZP_ZREKZ35-ELSDSNahjts-cmLKVx8lOZCxYmVc-ADATvVFTAe8cw_4IobB-6L_80HJP8tSXRYUn5IFSgLoABPFh2pRgJIFCUxR2vZlXHzAchYqZQ4YUkwj7HXdDdivRFv32rnWWQejPY-_nPyvbT_CpdbNgFhbSsoVwts4JuVEVVZv6bvme_DUX5lvYqHwJ7sAelY3-ljH0iy7smgIfjTnY_Hh9EcTp5uLponkcKeapPVBFq-t6A07MzVq0Nb7mVbSI5SCdI1HDk0T2sKjKQGOapyRDv3TJs770bvjJxh6AoJHltaBXkUqIe_f3_tBJXCVZ7ZChgxEBkJJTo_0cAMoHZwTspdx3q0odKA8-V1rmDwkSp47K9XQsgyfslWRnkpcD0MCjLmTK1eT1AVDYPRN28quhZ9GaIVR2lLgmalt5JcJtgoopVldNSJCxGkbhNjBg71dSAVfgIJ9Oyb3yPvGGxYi&maxwidth=400",
+        "googlePlaceId": "ChIJ6dPJX5sOZ0gRgwlwZ29L4xg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "(01) 525 0970",
+        "website": "https://irishwhiskeymuseum.ie/",
+        "isOutdoor": false,
+        "score": 20.163567911186767,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJGerRTiYMZ0gRuVDCYtqFU50",
+        "name": "Dublinia",
+        "type": "museum",
+        "description": "",
+        "latitude": 53.3430474,
+        "longitude": -6.2721152,
+        "rating": 4.5,
+        "reviewCount": 6984,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXiaIBvOs9cRRx32dSEZnb5Y2-av2sS4fG6X3NijEVSWiAuhvbF6dJs873TvlJcKcUO4stxW27gxq6pZirCSu4_7iUDaUQQHGzyBwKsFGsLI1nKxtzV3SpqcxlXb7VR9tvglzmvxAJLsm-t0RJuSC0mhI2yP6JquV-Z6DuQEcqi-RNGTOkQR2de8hwmO39OT625t7TlbQrgMi12dlEoZRj0gzpFFpIEtFbq69ZS_QKkko8tvtGZz4X8YZFCCelj5ShmlMPc7vT_YYa5v10FGewTFgewpxADF2Z_b0WZG8xUHT1AqbUDQeuvfy96eKN80Hd9cXRzE0wFeXZ0AClmf6MhgiM_6hi8uIZRU-dWrNCqM5_fhYZiq2Z1MluFsXw6fGqGKNu8bJYTT0hQwnkCa8XNU4UV2KRyahrfRlhEbKn5dlvN-YJmgCVeZ2y_EWzWQLGvOF8abVcKQSKeGs4jDHVTfZVItvPvAraY5PF-_65wTQi600GUtp3bxzN7_2Sfm7Va06u649C6mF67FjAwkZwNCTkUemiI2YkPSuLU7vXxxxYSZPbyY41E4shzqlA9AKY-iVb7HsiBGA&maxwidth=400",
+        "googlePlaceId": "ChIJGerRTiYMZ0gRuVDCYtqFU50",
+        "isOutdoor": false,
+        "score": 19.68820846139503,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 15,
+        "byEngine": {
+          "google_maps": 9,
+          "google_local": 5,
+          "google_hotels": 1
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-direct-07",
+    "   Lille → Dublin (3j)",
+    "   couple (2p) | economic | gastronomy, nature",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Dublin\", ll=\"@53.3498,-6.2603,14z\", gl=\"us\"",
+    "[Weather] 3 days fetched for 2026-03-31 → 2026-04-02",
+    "[Google Places] Filtered \"Dublin Tourist Information Centre Barnardo Square\" (types: travel_agency, point_of_interest, establishment)",
+    "[Google Places] ✅ 27 attractions found for Dublin",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Hotels] Booking pass relax: 13 options retained (strict=1, relaxed=13)",
+    "[Hotels] Disponibilité live: 7/13 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (180ms)",
+    "[Pipeline V2] Resolving GPS for 3 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/3 activities",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Dublin\" from local database",
+    "[Pipeline V2]   → Trinity College & Book of Kells, Quartier de Temple Bar, Guinness Storehouse",
+    "[Pipeline V2] Step 1: All data fetched in 26187ms",
+    "[Pipeline V2]   Activities: 27 Google + 21 SerpAPI + 2 Overpass + 9 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 7 | Transport options: 4",
+    "[Pipeline V2] Step 1 done in 26187ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [118.6] ⭐ \"Guinness Storehouse\" (src=google_places, reviews=23910, rating=4.4, tags=none)",
+    "[Pipeline V2]   #2 [110.2] ⭐ \"Trinity College & Book of Kells\" (src=mustsee, reviews=0, rating=4.6, tags=none)",
+    "[Pipeline V2]   #3 [108.0] ⭐ \"Quartier de Temple Bar\" (src=mustsee, reviews=0, rating=4.5, tags=party)",
+    "[Pipeline V2]   #4 [24.5]    \"Dubh Linn Garden\" (src=google_places, reviews=1452, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #5 [24.4]    \"Visite à pied historique et culturelle de la fierté LGBTQ de Dublin\" (src=viator, reviews=91, rating=5, tags=romantic,deep_culture,relaxing)",
+    "[Pipeline V2]   #6 [24.0]    \"Croke Park\" (src=google_places, reviews=20945, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #7 [22.6]    \"Phoenix Park\" (src=google_places, reviews=41082, rating=4.7, tags=relaxing)",
+    "[Pipeline V2]   #8 [21.1]    \"Boissons à pied: Visite du pub traditionnel de Dublin \" (src=viator, reviews=62, rating=5, tags=foodie)",
+    "[Pipeline V2]   #9 [20.7]    \"Château de Dublin\" (src=google_places, reviews=36497, rating=4.3, tags=deep_culture)",
+    "[Pipeline V2]   #10 [20.5]    \"National Museum of Ireland, Kildare Street\" (src=google_places, reviews=14581, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #11 [20.2]    \"Irish Whiskey Museum\" (src=google_places, reviews=7617, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #12 [19.7]    \"Dublinia\" (src=google_places, reviews=6984, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #13 [19.3]    \"14 Henrietta Street\" (src=google_places, reviews=1788, rating=4.9, tags=deep_culture)",
+    "[Pipeline V2]   #14 [19.0]    \"GPO Museum\" (src=google_places, reviews=2464, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #15 [18.9]    \"The Irish Rock 'n' Roll Museum Experience\" (src=google_places, reviews=1764, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #16 [18.9]    \"Cathédrale Saint-Patrick de Dublin\" (src=google_places, reviews=26805, rating=4.5, tags=none)",
+    "[Pipeline V2]   #17 [18.5]    \"O'Connell Monument\" (src=google_places, reviews=2211, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #18 [18.3]    \"Pont Ha'penny\" (src=google_places, reviews=14616, rating=4.5, tags=none)",
+    "[Pipeline V2]   #19 [18.3]    \"The Book of Kells Experience\" (src=google_places, reviews=18281, rating=4.4, tags=none)",
+    "[Pipeline V2]   #20 [18.1]    \"Statue Molly Malone\" (src=google_places, reviews=13817, rating=4.4, tags=none)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 4/42",
+    "[Pipeline V2] Step 2: 12 activities selected (3 must-sees) from 59 total",
+    "[Pipeline V2] Must-sees: \"Guinness Storehouse\" (118.6), \"Trinity College & Book of Kells\" (110.2), \"Quartier de Temple Bar\" (108.0)",
+    "[Pipeline V2] Using user-preferred transport: train (1004min, €56)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=2.15km, median=1.27km, maxClusterRadius=0.72km",
+    "[Pipeline V2] Radius-constrained clustering produced 5 clusters (target 3), running soft pass with 1.07km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (53.3432, -6.2656), Day 2: centroid (53.3573, -6.2606), Day 3: centroid (53.3559, -6.3298)",
+    "[Pipeline V2] Cluster Day 1: 9 activities, radius=1.41km, intraDistance=4.64km",
+    "[Pipeline V2] Cluster Day 2: 2 activities, radius=0.74km, intraDistance=1.48km",
+    "[Pipeline V2] Cluster Day 3: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 9 activities [3 must-sees] (14.0h avail, max 5), Day 2: 2 activities [0 must-sees] (12.0h avail, max 5), Day 3: 1 activities [0 must-sees] (6.0h avail, max 3)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Guinness Storehouse\" (score=118.6), \"Trinity College & Book of Kells\" (score=110.2), \"Quartier de Temple Bar\" (score=108.0)",
+    "[Pipeline V2]   Day 1: Guinness Storehouse, Trinity College & Book of Kells, Quartier de Temple Bar",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1: Guinness Storehouse, Dublinia, Château de Dublin, Dubh Linn Garden, National Museum of Ireland, Kildare Street, Trinity College & Book of Kells, Irish Whiskey Museum, Boissons à pied: Visite du pub traditionnel de Dublin , Quartier de Temple Bar (3.3km intra)",
+    "[Pipeline V2]   Day 2: Visite à pied historique et culturelle de la fierté LGBTQ de Dublin, Croke Park (1.5km intra)",
+    "[Pipeline V2]   Day 3: Phoenix Park (0.0km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Abbey Court Hostel\" (1.51 score, 0.53km center, 1.90km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] Self-catered meals disabled: selected accommodation has no kitchen",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Step 4 prefetch: sparse anchors=1/7 (day-3-centroid)",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Dublin\", ll=\"@53.3558823,-6.3298133,14z\", gl=\"us\"",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Step 4: supplemental API restaurants fetched=20, total SerpAPI pool=20",
+    "[Pipeline V2] Restaurants pool: total=49, budgetFiltered=20, geo=18",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=3, targets=3",
+    "[SerpAPI Places] Requête: q=\"breakfast brunch café bakery\", location=\"Dublin\", ll=\"@53.3473570889229,-6.26029059290886,14z\", gl=\"us\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Dublin\", ll=\"@53.3558823,-6.3298133,14z\", gl=\"us\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Dublin\", ll=\"@53.35417725778458,-6.315908758581772,14z\", gl=\"us\"",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=65, budgetFiltered=36, geo=34",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=36, missing meals 3 -> 3",
+    "[Pipeline V2] Step 4: 6/9 meals assigned restaurants (pool=34)",
+    "[Pipeline V2] Step 5: Hotel selected: \"Generator Dublin\" (1.83 score, 0.69km center, 1.70km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] Restaurants pool: total=65, budgetFiltered=36, geo=34",
+    "[Pipeline V2] Restaurants pool: total=64, budgetFiltered=36, geo=34",
+    "[Pipeline V2] Budget balancing: transport train->bus | hotel Generator Dublin | meals downgraded x2 | self-catered skipped (no kitchen) | hotel budget fallback The Dawson Hostel - DUBLIN | self-catered skipped (post-hotel, no kitchen)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 1: \"Arrivée et centre historique\" → \"Guinness Storehouse et Dublinia\"",
+    "[Pipeline V2] Theme mismatch fixed for day 2: \"Culture irlandaise et patrimoine\" → \"Visite à pied historique et culturelle de la fierté LGBTQ de Dublin et Croke Park\"",
+    "[Pipeline V2] Theme mismatch fixed for day 3: \"Culture locale et sport\" → \"Phoenix Park\"",
+    "[Pipeline V2] Step 6 done in 10235ms — \"Progression logique de l'historique vers la culture irlandaise, puis vers les expériences locales modernes, avec Phoenix Park évité car fermé.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 10/12 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 15 pairs...",
+    "[Pipeline V2] Directions cache: 15/15 pairs fetched",
+    "[Pipeline V2] Day 1 re-optimized with real times: National Museum of Ireland, Kildare Street → Trinity College & Book of Kells → Irish Whiskey Museum → Boissons à pied: Visite du pub traditionnel de Dublin  → Quartier de Temple Bar → Château de Dublin → Dubh Linn Garden → Dublinia → Guinness Storehouse",
+    "[Pipeline V2] 2-opt re-optimization: 1/3 days changed with real times",
+    "[Pipeline V2] Day 1: 9 activities to schedule (3 must-sees), dayStart=19:00, dayEnd=22:00, window=3.0h, cursor=19:00",
+    "[Pipeline V2]   → \"National Museum of Ireland, Kildare Street\" (60min, score=20.5, mustSee=false)",
+    "[Pipeline V2]   → \"Trinity College & Book of Kells\" (90min, score=110.2, mustSee=true)",
+    "[Pipeline V2]   → \"Irish Whiskey Museum\" (120min, score=20.2, mustSee=false)",
+    "[Pipeline V2]   → \"Boissons à pied: Visite du pub traditionnel de Dublin \" (180min, score=21.1, mustSee=false)",
+    "[Pipeline V2]   → \"Quartier de Temple Bar\" (120min, score=108.0, mustSee=true)",
+    "[Pipeline V2]   → \"Château de Dublin\" (60min, score=20.7, mustSee=false)",
+    "[Pipeline V2]   → \"Dubh Linn Garden\" (60min, score=24.5, mustSee=false)",
+    "[Pipeline V2]   → \"Dublinia\" (120min, score=19.7, mustSee=false)",
+    "[Pipeline V2]   → \"Guinness Storehouse\" (60min, score=118.6, mustSee=true)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 lunch: \"La Maison\" (0.4km) → \"The Old Storehouse Bar and Restaurant\" (0.1km)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 dinner: \"The Old Storehouse Bar and Restaurant\" (1.0km) → \"Bar Italia Ristorante\" (0.9km)",
+    "[Pipeline V2] Day 1: meal-inclusive activity found — skipLunch=true, skipDinner=false",
+    "[Pipeline V2] Day 1: Must-see \"Trinity College & Book of Kells\" rejected at 90min, retrying with 45min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 1: Must-see \"Trinity College & Book of Kells\" RETRY 3 — extending day end to 23:00 (was 22:00)",
+    "[Pipeline V2] Day 1: Must-see \"Guinness Storehouse\" rejected at 60min, retrying with 30min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 1: Must-see \"Guinness Storehouse\" RETRY 3 — extending day end to 23:00 (was 22:00)",
+    "[Pipeline V2] Day 2: 2 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Visite à pied historique et culturelle de la fierté LGBTQ de Dublin\" (120min, score=24.4, mustSee=false)",
+    "[Pipeline V2]   → \"Croke Park\" (60min, score=24.0, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 lunch: \"Panem Café & Restaurant\" (0.9km) → \"Mr Fox\" (0.4km)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 2 dinner: \"Mr Fox\" (0.7km) → \"The Vintage Kitchen\" (0.6km)",
+    "[Pipeline V2] Day 2: Lunch inserted via findBestMealSlot at 12:00-13:00",
+    "[Pipeline V2] Day 3: 1 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=13:00, window=5.0h, cursor=08:15",
+    "[Pipeline V2]   → \"Phoenix Park\" (60min, score=22.6, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 lunch, searching pool + API near \"Phoenix Park\"...",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 dinner, searching pool + API near \"Phoenix Park\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 dinner: found \"Fruition\" (0.72km from Phoenix Park)",
+    "[Pipeline V2] Day 3: Skipping \"Phoenix Park\" — closed on thursday",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 12:00-12:45",
+    "[Pipeline V2] Fetching images for 1 items without photos...",
+    "[Pipeline V2] ✅ Place images: 1/1 enriched (restaurants handled in dedicated Google photo pass)",
+    "[Pipeline V2] 📸 Enriching 9 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 8/9 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule: 1 restaurant(s) still far — trying SerpAPI nearby search",
+    "[Pipeline V2] Post-schedule SerpAPI re-opt: Day 2 \"Dîner — The Vintage Kitchen\" (1.6km) → \"Wallace’s Asti\" (0.3km from ref)",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 2 restaurant(s) (0 API calls)",
+    "[Pipeline V2] 📸 Enriching 6 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 5/6 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 3 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 1 large intra-day gap segment(s)",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=2, fallback-flagged=0",
+    "[Pipeline V2] Step 7: 9 alternatives, pool trimmed to 12/12",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "  🔧 Day 1: Fixed activity count in narrative (9 → 1)",
+    "  🔧 Day 1: Regenerated theme (no match): \"Guinness Storehouse et Dublinia\" → \"Quartier de Temple Bar\"",
+    "  🔧 Day 3: Cleared narrative (no activities)",
+    "[Pipeline V2] Step 8: Quality score 100/100 (0 warnings, 3 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 15 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 49235ms (49.2s)",
+    "[Pipeline V2]   3 days, 12 items total"
+  ],
+  "warnings": [
+    "[Pipeline V2] Directions prefetch timeout (15s) — using partial cache",
+    "[Pipeline V2] ⚠️ Restaurant photo enrichment timeout (10s) — continuing",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[Pipeline V2] Day 1: REJECTED activity \"National Museum of Ireland, Kildare Street\" (duration=60min, travel=5min, cursor=19:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Trinity College & Book of Kells\" (duration=90min, travel=10min, cursor=19:00, dayEnd=22:00) ⚠️ MUST-SEE LOST",
+    "[Pipeline V2] Day 1: REJECTED activity \"Irish Whiskey Museum\" (duration=120min, travel=5min, cursor=19:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Boissons à pied: Visite du pub traditionnel de Dublin \" (duration=180min, travel=10min, cursor=19:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Château de Dublin\" (duration=60min, travel=10min, cursor=21:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Dubh Linn Garden\" (duration=60min, travel=10min, cursor=21:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Dublinia\" (duration=120min, travel=10min, cursor=21:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Guinness Storehouse\" (duration=60min, travel=15min, cursor=21:00, dayEnd=22:00) ⚠️ MUST-SEE LOST",
+    "[Scheduler] Conflict: \"Petit-déjeuner — The Stage Door Cafe\" overlaps with \"Check-out The Dawson Hostel - DUBLIN\""
+  ],
+  "errors": [
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Guinness Storehouse\", \"Trinity College & Book of Kells\"",
+    "[Pipeline V2]   Day 1: Quartier de Temple Bar",
+    "[Pipeline V2]   Day 2: Visite à pied historique et culturelle de la fierté LGBTQ de Dublin, Croke Park",
+    "[Pipeline V2]   Day 3: (no activities)"
+  ],
+  "durationMs": 49235,
+  "generatedAt": "2026-02-17T13:12:48.650Z",
+  "success": true,
+  "runType": "direct"
+}

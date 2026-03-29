@@ -1,0 +1,3614 @@
+{
+  "scenarioId": "bali-wellness-6d",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "Bali",
+    "startDate": "2026-03-06T13:17:16.475Z",
+    "durationDays": 6,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 2,
+    "groupType": "couple",
+    "budgetLevel": "comfort",
+    "activities": [
+      "wellness",
+      "nature"
+    ],
+    "dietary": [
+      "vegan"
+    ],
+    "mustSee": "Ubud Rice Terraces, Tanah Lot",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Bali",
+        "days": 6
+      }
+    ]
+  },
+  "trip": {
+    "id": "23024b9c-67dd-4b75-8a42-5c70e2d784db",
+    "createdAt": "2026-02-20T13:23:31.295Z",
+    "updatedAt": "2026-02-20T13:23:31.295Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "Bali",
+      "startDate": "2026-03-06T13:17:16.475Z",
+      "durationDays": 6,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 2,
+      "groupType": "couple",
+      "budgetLevel": "comfort",
+      "activities": [
+        "wellness",
+        "nature"
+      ],
+      "dietary": [
+        "vegan"
+      ],
+      "mustSee": "Ubud Rice Terraces, Tanah Lot",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Bali",
+          "days": 6
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-06T13:17:16.475Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "11:30",
+            "endTime": "14:00",
+            "type": "transport",
+            "title": "✈️ Vol aller",
+            "description": "Paris → Bali (estimation, lien vols recommandé)",
+            "locationName": "Paris → Bali",
+            "latitude": -8.5431917243824,
+            "longitude": 115.277130967249,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 989,
+            "bookingUrl": "https://www.aviasales.com/search/PARIS0603BALI2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/PARIS0603BALI2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/paris/bali?departure_date=2026-03-06",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ]
+          },
+          {
+            "id": "00508827-566a-40b0-9313-e28cfa1a481f",
+            "dayNumber": 1,
+            "startTime": "14:00",
+            "endTime": "14:15",
+            "type": "checkin",
+            "title": "Check-in Live at Serendipity Wellness Villas",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Live at Serendipity Wellness Villas",
+            "latitude": -8.5431917243824,
+            "longitude": 115.277130967249,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "booking-14488859",
+              "name": "Live at Serendipity Wellness Villas",
+              "type": "hotel",
+              "address": "F74G+MVR, Jl. Raya Mas, Ubud, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571, Indonesia",
+              "latitude": -8.5431917243824,
+              "longitude": 115.277130967249,
+              "rating": 9.1,
+              "reviewCount": 7,
+              "stars": 3,
+              "pricePerNight": 43,
+              "totalPrice": 215,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/715584284.jpg?k=bc194889934faf44fa9a1554dbfbacccd178cae4ba74ef815cfb46bc5d353f35&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.booking.com/hotel/id/live-at-serendipity-wellness-villas.html?checkin=2026-03-06&checkout=2026-03-11&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.booking.com/hotel/id/live-at-serendipity-wellness-villas.html?checkin=2026-03-06&checkout=2026-03-12&group_adults=2&group_children=0&no_rooms=1"
+          },
+          {
+            "id": "69ae05e5-1793-4e06-9f2e-b998cc8c060a",
+            "dayNumber": 1,
+            "startTime": "16:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Forêt des singes d'Ubud",
+            "description": "",
+            "locationName": "Forêt des singes d'Ubud",
+            "latitude": -8.5193727,
+            "longitude": 115.2606299,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.5193727,115.2606299",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=For%C3%AAt%20des%20singes%20d'Ubud&query_place_id=&center=-8.5193727,115.2606299",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXM-wnGwdRj14cYSb8GXH4CI4SYbMU3tOSxOK_YmnQUc0OTkzqkrX3tyTYP74aUbKrktfK-3Xb_OsAnYEuXDfSCfy7mo6hB_Ha7DZMTpKz4YYcg-X5QRzGsIx0NBeM5K8BDsYw9p_MhB44IICtVAU8Mc4kFn215lyB74_Elg0-DMcuYM75dMzxTPONiw4NKwpthnNP6_GbzqKJQk-BihLRuFFemUoeh-Y2kLOW1iE-mb2EuHo_GhorQ8OA9OFljoWkyWzG8qxhILkMMldbPetEbAbxp7cXBcBqGy-8Taooyc8V7fF95Ja_084FdJmvDR6pfKSvfBtHGOcoWZkiLoMIHNE6iaBKholXufU9GnV15c1Y0IRHaonRjdEPVGs8a7AeH4xBChCmOLMd-Qb6tnSSxsqLjxmgh40_5JSrfPF2ShNEOtkIsSYVlzA21onVi_LLpCyyTUgW-evOMILcKCy15rgxeA_eVBRJhH-27GJcrKPPyy6wyl9xBBit__8fAExGamQREiB2R1oUaP7yGdjVtyVy3nN7hBF6XmlaPdKrdgwJP1YdFsEh3Vj3KVQrS7HEfUkTg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 3.21,
+            "timeFromPrevious": 41,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "7f093833-45ee-48d8-aa6e-247143dabfa6",
+            "dayNumber": 1,
+            "startTime": "17:15",
+            "endTime": "19:15",
+            "type": "activity",
+            "title": "Ôde à l'Indonésie - Art Photo Gallery by Marius Moragues",
+            "description": "Ôde à l'Indonésie - Art Photo Gallery by Marius Moragues à Bali",
+            "locationName": "Ôde à l'Indonésie - Art Photo Gallery by Marius Moragues",
+            "latitude": -8.508297299999999,
+            "longitude": 115.2642798,
+            "orderIndex": 3,
+            "estimatedCost": 5,
+            "duration": 120,
+            "rating": 5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.508297299999999,115.2642798",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%C3%94de%20%C3%A0%20l'Indon%C3%A9sie%20-%20Art%20Photo%20Gallery%20by%20Marius%20Moragues&query_place_id=&center=-8.508297299999999,115.2642798",
+            "mustSee": false,
+            "imageUrl": "https://lh3.googleusercontent.com/p/AF1QipPQCT6SCtWoCByvqJj1YqoDkXkZGsJqy0rrVZzq=w122-h92-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.3,
+            "timeFromPrevious": 17,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "418c0504-e850-4974-8f77-ce2cfa0d6a3c",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Tropical Restaurant - Ubud",
+            "description": "\"Cocktails au top, repas excellent, personnel adorable\"",
+            "locationName": "Gianyar Regency, Bali",
+            "latitude": -8.5075445,
+            "longitude": 115.26205,
+            "orderIndex": 4,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.513044,115.26072",
+            "restaurant": {
+              "id": "serp-4893964901361353043",
+              "name": "Tropical Restaurant - Ubud",
+              "address": "Gianyar Regency, Bali",
+              "latitude": -8.5075445,
+              "longitude": 115.26205,
+              "rating": 4.7,
+              "reviewCount": 4700,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"... top ( SUKA 😍 respectueux et attentionné) Cuisine très très bon\""
+              ],
+              "description": "\"... top ( SUKA 😍 respectueux et attentionné) Cuisine très très bon\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Tropical%20Restaurant%20-%20Ubud%2C%20Gianyar%20Regency%2C%20Bali",
+              "googlePlaceId": "4893964901361353043",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3490359628661348195",
+                "name": "Habitat Bistro Restaurant Ubud by Wonderspace",
+                "address": "Kabupaten de Gianyar, Bali",
+                "latitude": -8.516354,
+                "longitude": 115.25782,
+                "rating": 4.9,
+                "reviewCount": 2300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Super du début à la fin le risotto aux crevettes était excellent !!\""
+                ],
+                "description": "\"Super du début à la fin le risotto aux crevettes était excellent !!\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Habitat%20Bistro%20Restaurant%20Ubud%20by%20Wonderspace%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+                "photos": [
+                  "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/oWFFWJ4y5bjkw5q2uE8CHYYIcjgjvMmsG0sCSuidToY.jpeg"
+                ],
+                "googlePlaceId": "3490359628661348195",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-2645255445660932947",
+                "name": "Donna",
+                "address": "Kabupaten de Gianyar, Bali",
+                "latitude": -8.513044,
+                "longitude": 115.26072,
+                "rating": 4.8,
+                "reviewCount": 7100,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cocktails au top, repas excellent, personnel adorable\""
+                ],
+                "description": "\"Cocktails au top, repas excellent, personnel adorable\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Donna%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+                "photos": [
+                  "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/XOGeQ2o2CzBs6rTO023_ZwMtzzoU9OcLeYenS4XWo0I.jpeg"
+                ],
+                "googlePlaceId": "2645255445660932947",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.66,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Tropical%20Restaurant%20-%20Ubud%2C%20Gianyar%20Regency%2C%20Bali",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tropical%20Restaurant%20-%20Ubud%2C%20Gianyar%20Regency%2C%20Bali",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Arrivée et immersion à Ubud",
+        "dayNarrative": "Après votre arrivée et l'installation à l'hôtel, cette journée légère vous plonge dans l'ambiance unique d'Ubud avec une rencontre ludique et une découverte artistique, suivie d'un dîner relaxant.",
+        "geoDiagnostics": {
+          "maxLegKm": 1.3,
+          "p95LegKm": 0.66,
+          "totalTravelMin": 26,
+          "totalLegKm": 1.96,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.26,
+          "mstLowerBoundKm": 1.55
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 105,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-07T13:17:16.475Z",
+        "items": [
+          {
+            "id": "18a22a34-fe57-4925-a437-142db9929147",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Suka Kopi Ubud",
+            "description": "\"Excellente expérience en cuisine entourée de 2 charmantes cuisinières.\"",
+            "locationName": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+            "latitude": -8.5435742,
+            "longitude": 115.27198779999999,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.490766,115.26516",
+            "restaurant": {
+              "id": "serp-nearby-ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "name": "Suka Kopi Ubud",
+              "address": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+              "latitude": -8.5435742,
+              "longitude": 115.27198779999999,
+              "rating": 4.8,
+              "reviewCount": 976,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café",
+                "café",
+                "torréfacteur"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0813-3915-5272",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+              "googlePlaceId": "ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.5671450286046151,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "name": "Odette Bali",
+                "address": "Jl. Raya Mas, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.534316,
+                "longitude": 115.272064,
+                "rating": 4.6,
+                "reviewCount": 712,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 972161",
+                "website": "https://www.instagram.com/odettebali/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Odette%20Bali%2C%20Jl.%20Raya%20Mas%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoX5dwptfM7mvtNWl0oEdY5jd6RaczYCwCCxNWwgDCWvtksDoa2s1GzPbalZp7NWYW1m3AYB4cTn1p0S8e_c7v3zHM0ys6LupSwt5CvCtCD_6OEIVl3IFv4mUWQfv7pOoV649knJw=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 1.133351979216061,
+                "walkingTime": 14
+              },
+              {
+                "id": "serp-nearby-ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "name": "Gula Kopi Bali",
+                "address": "Jl. Ambarawati, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.5422587,
+                "longitude": 115.2698726,
+                "rating": 4.5,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0859-6592-6566",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gula%20Kopi%20Bali%2C%20Jl.%20Ambarawati%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweox8coRmPP_imSTSnHfaGvxaqFD16UMbhjp-wtt-oyQK6xN4-EjjYqwm4oAAro4lofYyXidoxY5PDmdgn35r9ZbQLfPNQP5xcjCgpbGbdacyYioz8uGIeELRBxDWt0rRPZt4p4v2t-wm0pu=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8048538707908068,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "selectionSource": "api"
+          },
+          {
+            "id": "df9a371d-3bfa-4fbc-975a-c0df11fc56ca",
+            "dayNumber": 2,
+            "startTime": "09:30",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Tegallalang Rice Terrace",
+            "description": "Tegallalang is a district in the Gianyar Regency, Bali, Indonesia.  As of the 2010 census, the area was 61.",
+            "locationName": "Tegallalang Rice Terrace",
+            "latitude": -8.431711199999999,
+            "longitude": 115.279303,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.431711199999999,115.279303",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tegallalang%20Rice%20Terrace&query_place_id=&center=-8.431711199999999,115.279303",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU0f0-Y9TxOVbbz-9qqau_HrVw9bB3ZSfSO24emNkyUjWlwLY_GQhonT5R7cV7saJjySr691GzqFt50Ym6PZnlRAxQ86hHJnD3ia4kvUBRNXooWoWUIPth0ooUIy36dKWubr0dVFEInVbgeyX4u-5dyh0LUsYYOMh-m8uNIJiFXaJY8m9AejSwM01Q3M80myU-fWdjsPyLh5cHiO9NNztAqTUoGF8pbwCaOiiw0gdfenJewczPl33N-9SpOL2KEtCfcsNKq1PxvBtT7po7E3qapGeXHKCGLs1zUpNsXjusbFvu7S7YrlqO5ZcF4aguFOKnc3_2b9p0WJzaIIE-ILusS9T6s7zTTTGoQeEfC5kUkg1nI8uAgUlFxp6qYICUlKWhLO1DDG4nAh9Swb_NZF55qezvuweWRmJQ03Cl3TIGcjNq2rLIITgESWG3EcrxkLfikP5Wg0--c7FzKwEJdtPzvZnupIcb3SwqkQQITJ1bDWQf45k_eywdAx282W4ldBPIfScxHAW1brOfjC43LHH6G3Cdyh9Z1fzW8TZPklT30je8o948laycApxwQhoz6rMy7muhs&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 6.75,
+            "timeFromPrevious": 85,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "eceea3f1-7316-4f8b-97d5-e786324b9afa",
+            "dayNumber": 2,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Tegenungan Waterfall",
+            "description": "Tegenungan Waterfall is a waterfall in Bali, Indonesia.  It is located at the village of Tegenungan Kemenuh, also known as Kemenuh Village on the Petanu River in the Gianyar Regency, north from the ca",
+            "locationName": "Tegenungan Waterfall",
+            "latitude": -8.5753621,
+            "longitude": 115.2889599,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.5753621,115.2889599",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tegenungan%20Waterfall&query_place_id=&center=-8.5753621,115.2889599",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV0P3givuqLKvxpOzXJLUSzPqjPwWqMDRo1KfN1VtYfu6sD3FU-4aPHXfy1qJQBi27LgWAnfczZAtkk8bQ6kDutkC_NeMQQgI1tTy0-SYrZBHK7OwRYTPRSzMUvWFCQ-Qt6hgICCGiLIRtauUByJ6XRqTxtI5rj0DT24oW5BNvvJLSIvvokoHO8zl_eI3x8G7f1z0JXRFU-E2mLw2vf-6Kn1tzm5LewO1YsKCT8_hUBQE9HveyzclPDrWhjPx2G4iA9vpVDbyLDB94spOvsEo48P0c_OreBeik5osDkg-IbcOctFW49jCtTUQ-2lK_Rfsxrbf8W22IN0lpRsNHnjfgUIsNgp87o6bEcszTU0mYHe3ZR18INWYz2b4nRTC4PcHnruTOnRXB-PlipvT2zq6AlCR6ZHduSgcO2El9239ziBxSedZsNnt30X01h0-ZhF9srbvuBw2XkhwA-aE-ixVEEVbZvrM0k5r9WpxotBLEFiPX0jADNgGAoqntlhbaILIG-VrpRqOMBzlBQ7pWJodLbnCAprckPrPgf55ya0EgSSBbZUgE5z0adArgA5FmGtA3VDQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 16.01,
+            "timeFromPrevious": 201,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "8395c6c2-6862-43a5-928d-8caf228498d4",
+            "dayNumber": 2,
+            "startTime": "12:30",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Omma Dayclub Bali",
+            "description": "\"Plats excellents, très bonne ambiance et service de qualité grâce à Bayu !\"",
+            "locationName": "C7FQ+MV6, Kemenuh, Sukawati, Gianyar Regency, Bali 80581",
+            "latitude": -8.5756152,
+            "longitude": 115.28949709999999,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.441438,115.28597",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ49kn4n0V0i0RjtqUIkEdXBw",
+              "name": "Omma Dayclub Bali",
+              "address": "C7FQ+MV6, Kemenuh, Sukawati, Gianyar Regency, Bali 80581",
+              "latitude": -8.5756152,
+              "longitude": 115.28949709999999,
+              "rating": 4.8,
+              "reviewCount": 6935,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "bar"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0812-9999-1245",
+              "website": "http://ommabali.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Omma%20Dayclub%20Bali%2C%20C7FQ%2BMV6%2C%20Kemenuh%2C%20Sukawati%2C%20Gianyar%20Regency%2C%20Bali%2080581",
+              "googlePlaceId": "ChIJ49kn4n0V0i0RjtqUIkEdXBw",
+              "openingHours": {
+                "friday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                },
+                "saturday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                },
+                "sunday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                },
+                "monday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                },
+                "tuesday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                },
+                "wednesday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                },
+                "thursday": {
+                  "open": "07:30",
+                  "close": "21:00"
+                }
+              },
+              "distance": 0.06542826421141508,
+              "walkingTime": 1
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJO1eVP_cV0i0RUyL6H1Pc3WA",
+                "name": "Bumbu Asli International Warung",
+                "address": "Jl. Ir. Sutami, Tempat Wisata Air Terjun Tegenungan, Kemenuh, Kec. Sukawati, Kabupaten Gianyar, Bali 80581",
+                "latitude": -8.576208099999999,
+                "longitude": 115.2890334,
+                "rating": 4.7,
+                "reviewCount": 269,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant de fruits de mer",
+                  "restaurant de fruits de mer",
+                  "restaurant asiatique"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0857-3897-3391",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bumbu%20Asli%20International%20Warung%2C%20Jl.%20Ir.%20Sutami%2C%20Tempat%20Wisata%20Air%20Terjun%20Tegenungan%2C%20Kemenuh%2C%20Kec.%20Sukawati%2C%20Kabupaten%20Gianyar%2C%20Bali%2080581",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipP3ZfvV57YZ1ZiUWsCv2HrkYDQNSTSE0DeGzV3M=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJO1eVP_cV0i0RUyL6H1Pc3WA",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "19:00"
+                  }
+                },
+                "distance": 0.09441740076353783,
+                "walkingTime": 1
+              },
+              {
+                "id": "serp-nearby-ChIJrw1yfsRG0i0Rtg072BrBpGw",
+                "name": "pekandelan warung",
+                "address": "Tegenungan Waterfall, Kemenuh, Sukawati, Gianyar Regency, Bali 80361",
+                "latitude": -8.5753279,
+                "longitude": 115.2877137,
+                "rating": 4.6,
+                "reviewCount": 117,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0818-0564-0509",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=pekandelan%20warung%2C%20Tegenungan%20Waterfall%2C%20Kemenuh%2C%20Sukawati%2C%20Gianyar%20Regency%2C%20Bali%2080361",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweq_zBcJQcAyQVsysIQ6XmP91vzR1CEyXtpudd5YXDGEaRJsSmqXIESwVB7nkVyt1FkenFkMoEty7Ex1NVnUM0QeRrdezXtSo698fWQiw-38xdvoETWmur3AQfu5x2WI-Owlgvap=w138-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJrw1yfsRG0i0Rtg072BrBpGw",
+                "openingHours": {
+                  "friday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "monday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "10:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.1370747422910487,
+                "walkingTime": 2
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 14.9,
+            "timeFromPrevious": 187,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Omma%20Dayclub%20Bali%2C%20C7FQ%2BMV6%2C%20Kemenuh%2C%20Sukawati%2C%20Gianyar%20Regency%2C%20Bali%2080581",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Omma%20Dayclub%20Bali%2C%20C7FQ%2BMV6%2C%20Kemenuh%2C%20Sukawati%2C%20Gianyar%20Regency%2C%20Bali%2080581",
+            "selectionSource": "api"
+          },
+          {
+            "id": "c41ab872-93cd-4e3f-ae44-de10c29811aa",
+            "dayNumber": 2,
+            "startTime": "14:15",
+            "endTime": "14:45",
+            "type": "activity",
+            "title": "Goa Gajah",
+            "description": "Goa Gajah, lit.  meaning \"The Elephant Cave\", is located in Gianyar on the island of Bali near Ubud, in Indonesia.  Built in the 9th century, it served as a sanctuary.",
+            "locationName": "Goa Gajah",
+            "latitude": -8.523441,
+            "longitude": 115.287156,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.523441,115.287156",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Goa%20Gajah&query_place_id=&center=-8.523441,115.287156",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVUXzpXYAXKpGiqOgmCVT6lptPIwIpoFlOc84QlEbypBXHiRPZ-cWRlWdxIuiWCQYmLAVZQwg9oQxXrlOdPBeUl5HSRu3yosySmywEbeaAbN9cWdEKy7klyT7tcyb8mQDQA8AnBBOsoOuDZ6HgvsyTQXcpmNBBhdREQLJOYkFVNmBgShyvzv8QC0kZrS7HNU2hUeOtbwZ3h3H9FOAx8yaLEDuvnucSqEvaGWBrFaW6osbQgy2iJF3vAUw0BkTqMkKyQi0ipmril-2o7yjMaszynpduUoxuJmWAQCQdFous0hSHVdgkxU76_fWj0vIUR9TtlVK1xKT0Ev1LXxqGqXu57lkJq3HMPuCZId6bZo0ulMMFi2XSaffkaLLnpCI7wrT5ECskX6ho4cG_zeVOx6o79bXg2Pq5gQgFCfii5G5o84JmJ2DHc7NdSyBAWJN2akxT5kk5o8uhgBj3MJXbkF6XNhcdwXyGlkog2Oi53F2NGLQK9WlxjLjsOHwLfpjuliAngQIRA6SgKP-D5_Zo_IA4AO93FUiiwND22KEDaSRyAU1XTDyAHu1zHLD6muwDvEMdwg-kO&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 9.12,
+            "timeFromPrevious": 114,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "274293f3-511d-4dde-a7b3-66962453c91a",
+            "dayNumber": 2,
+            "startTime": "15:15",
+            "endTime": "15:45",
+            "type": "activity",
+            "title": "Temple Tirta Empul",
+            "description": "Tirta Empul temple is a Hindu Balinese water temple located near the town of Tampaksiring, Bali, Indonesia.  The temple compound consists of a petirtaan or bathing structure, famous for its holy sprin",
+            "locationName": "Temple Tirta Empul",
+            "latitude": -8.4156589,
+            "longitude": 115.3153284,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.4156589,115.3153284",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Temple%20Tirta%20Empul&query_place_id=&center=-8.4156589,115.3153284",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV4WvEURXls2eejh4Kk426k1N_LYejLQrfuItsGiYEeUQtDNuWYYdT6co604pyCSmurmGrXVRSKoFk3ozxhjRypiIju-rSSxhMLY2Pa7fiTArgst1mEDDeztSFNAHaIa3QV9nBJuG1FVOWKXWZxoz3ro3ZGSkEgQP7q5Sb5zUmBgpFTow7tqqHkRRhqDLyWwA5nz0MpthoSZrz6CmJqjvGmqF_QkrdmwY3HNHYiDBCpP9MSWzQCkwDtRa6p0hngRXfuNVlHlYZ6ztb1dijcU2FCno3d9gV4BE2ioVnWqgQXx_HM3KlJL4W7LJq-bryaIdzKgoie5EEIiO-kBjWDJFiPS6mx9VodMvTLxE-9yHI7LIZVeBcPsvecUFiWtT8DPraSe4EUJvNYgtQX4uYxo4SeDLwer1wOwb-kLZ_FT3bXudVM9VK_H8F3PNDg3qcAN02GHxWt-XHUDH-z7xETNbOC2ypEhyY9QxrNNfxVjh4N_f-AHmKH6ekNEOe7On3iVlGPmj0e96vZ98qSE6UuSQh2a5F-_Vbsr_9DXt-mwhHltwbpDV9pWzPtkfcHMwPSkAQDfXZW&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 12.38,
+            "timeFromPrevious": 155,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "9ba34307-0d23-4cfd-a03f-09490e63fa84",
+            "dayNumber": 2,
+            "startTime": "16:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Garuda Wisnu Kencana",
+            "description": "Garuda Wisnu Kencana Cultural Park, or GWK, is a tourist destination and attraction located at Ungasan, Badung on the island of Bali, Indonesia, about 10–15 minutes drive from Ngurah Rai International",
+            "locationName": "Garuda Wisnu Kencana",
+            "latitude": -8.8104228,
+            "longitude": 115.1675986,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.8104228,115.1675986",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Garuda%20Wisnu%20Kencana&query_place_id=&center=-8.8104228,115.1675986",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUXEI8FAJCkzyAuCdSXul5e52nZLjgzPNmSVRos4FsqcOMhPrBIbnIxvN5AsTgLBekmnQFt6QndCm4FgL5M1tS4DnU0hWZe9GZKy5saI52bT3B_u3SL8QUPnWgUrT5sbBH3ybKMXQE3KME2LUsiXbv9MGVK0aWMdfDxfdDIcYyofVRYtA5T4_lsk1EezHdrp66hRYcHGXtfoaoC1-7dNukHtJRxJ4_CFmkH9wW2zAh5Loo319XTYAFKsA1z0NdUqSmkcITleeT5azv1Dhii15EEDs-xatR6jbI4PSV5vl6P2j4DD3AMJa-tZxYUCRuAaueaTqlhOWxK6j3sCDekClSmsg7D9M4536al0FXW9NAMkUBeXtTzsYoVuGyfd6jX9F4oj7BIjEjPeOGEr5Ox04E_ZKlUasCgBT8csMJb4mVvAjHGMvLeFF0XPdD_OtoLpqe9Fd00e2fmNV65vKPFYSJUGMIGi84WMr2r9fGyGgy24N88vilXWf2jkmFNd8V_cHrmENaQgjELa4MPcxxQt7x9fgUoZ82UBxnxRXZUJnxPYVOSehyWr8hwOG-5Vvd8iIPVU_8otj-3Hg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 46.8,
+            "timeFromPrevious": 586,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "4382d2f2-a838-42fd-9a1f-940c1ad6c9ba",
+            "dayNumber": 2,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Jendela Bali The Panoramic Resto",
+            "description": "\"... très sympathiques le repas a été délicieux Très bon restaurant\"",
+            "locationName": "Uluwatu St, Ungasan, South Kuta, Badung Regency, Bali 80361",
+            "latitude": -8.8086738,
+            "longitude": 115.1680313,
+            "orderIndex": 7,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.3,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.488817,115.26488",
+            "restaurant": {
+              "id": "serp-nearby-ChIJr5WuWbZE0i0Rdk-Yq6O9QCU",
+              "name": "Jendela Bali The Panoramic Resto",
+              "address": "Uluwatu St, Ungasan, South Kuta, Badung Regency, Bali 80361",
+              "latitude": -8.8086738,
+              "longitude": 115.1680313,
+              "rating": 4.3,
+              "reviewCount": 1521,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant indonésien",
+                "restaurant indonésien",
+                "restaurant asiatique",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0813-3768-5367",
+              "website": "http://www.gwkbali.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Jendela%20Bali%20The%20Panoramic%20Resto%2C%20Uluwatu%20St%2C%20Ungasan%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+              "googlePlaceId": "ChIJr5WuWbZE0i0Rdk-Yq6O9QCU",
+              "openingHours": {
+                "friday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "monday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "22:00"
+                }
+              },
+              "distance": 0.2002076561589975,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJlYEwDbhE0i0RJqAeNFdsKtE",
+                "name": "Mama Chew 360 Rooftop Jimbaran Bali by reservation only",
+                "address": "Bumi Jimbaran Asri, Jl. Akuntansi No.91, Jimbaran, Kec. Kuta Sel., Kabupaten Badung, Bali 80361",
+                "latitude": -8.804166,
+                "longitude": 115.16574849999999,
+                "rating": 4.6,
+                "reviewCount": 188,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant asiatique",
+                  "restaurant asiatique"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0812-3777-0518",
+                "website": "https://www.facebook.com/FIGIEmamachew/?ref=bookmarks",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mama%20Chew%20360%20Rooftop%20Jimbaran%20Bali%20by%20reservation%20only%2C%20Bumi%20Jimbaran%20Asri%2C%20Jl.%20Akuntansi%20No.91%2C%20Jimbaran%2C%20Kec.%20Kuta%20Sel.%2C%20Kabupaten%20Badung%2C%20Bali%2080361",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerng1Zb_kutSUpNiwKzyodEXcweeNqo_qA9kQTjg4fXa5QQAWBBefQBDMiLWoIAa_LAxfugXd7pdogZ38ccLhMeOtwznEcF3juNdWkJs2ptdfbJDDSIM1eZL_JZC9bf3xhjGvzM=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJlYEwDbhE0i0RJqAeNFdsKtE",
+                "openingHours": {
+                  "friday": {
+                    "open": "18:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "18:00",
+                    "close": "22:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "18:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "18:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "18:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "18:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.560507300773371,
+                "walkingTime": 7
+              },
+              {
+                "id": "serp-nearby-ChIJvdLsbxdF0i0R3h5em6gDxgE",
+                "name": "Warung House, Lounge & Bar",
+                "address": "Uluwatu St No.3, Ungasan, South Kuta, Badung Regency, Bali 80361",
+                "latitude": -8.8054095,
+                "longitude": 115.1592484,
+                "rating": 4.7,
+                "reviewCount": 304,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "restaurant indonésien",
+                  "restaurant occidental"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Warung%20House%2C%20Lounge%20%26%20Bar%2C%20Uluwatu%20St%20No.3%2C%20Ungasan%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerKxWp5I8pPwp8-f6LduvA5iNFCThffRk3hALNgiCSsgYhpKV3sgNPy1cV4E-w874Gw6L6CaCrr4EPF5UDTMMVfjrR5m_REt6_V46fGG91ki0EMM8pPBb6NfxNroe7YRoEo4yOnUdCgS28k=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJvdLsbxdF0i0R3h5em6gDxgE",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "09:30",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 1.0310995818253923,
+                "walkingTime": 13
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 37.33,
+            "timeFromPrevious": 467,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Jendela%20Bali%20The%20Panoramic%20Resto%2C%20Uluwatu%20St%2C%20Ungasan%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jendela%20Bali%20The%20Panoramic%20Resto%2C%20Uluwatu%20St%2C%20Ungasan%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Tegallalang Rice Terrace et Tegenungan Waterfall",
+        "dayNarrative": "Explorez les emblématiques rizières en terrasses de Tegallalang, un must-see, puis rafraîchissez-vous à la cascade de Tegenungan avant de découvrir un temple ancien et de profiter d'un dîner local.",
+        "geoDiagnostics": {
+          "maxLegKm": 46.8,
+          "p95LegKm": 16.01,
+          "totalTravelMin": 1172,
+          "totalLegKm": 93.73,
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.85,
+          "mstLowerBoundKm": 50.79
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 150,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-08T13:17:16.475Z",
+        "items": [
+          {
+            "id": "e7c21b4a-67a8-4e35-a037-deaaadfb163c",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Suka Kopi Ubud",
+            "description": "\"Excellente expérience en cuisine entourée de 2 charmantes cuisinières.\"",
+            "locationName": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+            "latitude": -8.5435742,
+            "longitude": 115.27198779999999,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.490766,115.26516",
+            "restaurant": {
+              "id": "serp-nearby-ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "name": "Suka Kopi Ubud",
+              "address": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+              "latitude": -8.5435742,
+              "longitude": 115.27198779999999,
+              "rating": 4.8,
+              "reviewCount": 976,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café",
+                "café",
+                "torréfacteur"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0813-3915-5272",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+              "googlePlaceId": "ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.5671450286046151,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "name": "Odette Bali",
+                "address": "Jl. Raya Mas, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.534316,
+                "longitude": 115.272064,
+                "rating": 4.6,
+                "reviewCount": 712,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 972161",
+                "website": "https://www.instagram.com/odettebali/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Odette%20Bali%2C%20Jl.%20Raya%20Mas%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoX5dwptfM7mvtNWl0oEdY5jd6RaczYCwCCxNWwgDCWvtksDoa2s1GzPbalZp7NWYW1m3AYB4cTn1p0S8e_c7v3zHM0ys6LupSwt5CvCtCD_6OEIVl3IFv4mUWQfv7pOoV649knJw=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 1.133351979216061,
+                "walkingTime": 14
+              },
+              {
+                "id": "serp-nearby-ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "name": "Gula Kopi Bali",
+                "address": "Jl. Ambarawati, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.5422587,
+                "longitude": 115.2698726,
+                "rating": 4.5,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0859-6592-6566",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gula%20Kopi%20Bali%2C%20Jl.%20Ambarawati%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweox8coRmPP_imSTSnHfaGvxaqFD16UMbhjp-wtt-oyQK6xN4-EjjYqwm4oAAro4lofYyXidoxY5PDmdgn35r9ZbQLfPNQP5xcjCgpbGbdacyYioz8uGIeELRBxDWt0rRPZt4p4v2t-wm0pu=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8048538707908068,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "61ea51ca-bf6a-486b-860b-41a036405726",
+            "dayNumber": 3,
+            "startTime": "10:00",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Tanah Lot",
+            "description": "Tanah Lot is a rock formation off the Indonesian island of Bali.  It is home to the ancient Hindu pilgrimage temple Pura Tanah Lot, a popular tourist and cultural icon for photography.",
+            "locationName": "Tanah Lot",
+            "latitude": -8.621213,
+            "longitude": 115.086807,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.621213,115.086807",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tanah%20Lot&query_place_id=&center=-8.621213,115.086807",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWnt3HLXS1zWryUwajIAzP1yJsmNPTn6FgiwTncYK-qEzRJg_nUcQxyY5rddDlRbj54AZf44CjChEX29lW7iNPbq2exLDVJB_q9CmiAfUotGkDWh4vudsRPqmiN4T5enhDtgu1_jnK8ylMlfoywQ4ekNRXQDNWDfXhr0NuCKqZ60bmyK-Zhzs0N1ZHaf1bD4xxwV2rsviJugBfdB5BdyVhnSgyADjN4PcpaNATWwdLQpOy70l9NoON5PcLAZhl57oDA92FKL7wTg5w5WlFAoh7592y6XgnnXQQM5TqMuv5u_aDuDqE5uG6-qwkJJH7rkW8BKOi5aIAnAo2agajlLwYNEmwLdqeEBCeDxPvrnqUTMC8tNhOvySuFnbZsE8RfA72M7MNmUWnJzMdmErQ-psS74d0aHmgtuehheFmEZ8yW0EzUyvHXSi2VjYgTDqwTxZluALeBg2jpuHE_ITdhcRayNzj6EDWC756FrhKztbQ4_oZE8xO1WvIGnZsTcnQVHtuWNtiUvmDAGRYSbU0etzNlzIZlZOt7Aqvf-kbFCiJqUwBKTleUVaUDy0_eqARzR-oQQ4LqD-8eiA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 24.39,
+            "timeFromPrevious": 305,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "999349f4-9f2a-4a5e-a470-efc7fb1f6fce",
+            "dayNumber": 3,
+            "startTime": "11:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Tanah Lot Temple Square",
+            "description": "Prambanan is a 9th-century Hindu temple compound in the Special Region of Yogyakarta, in southern Java, Indonesia, dedicated to the Trimūrti, the expression of God as the Creator (Brahma), the Preserv",
+            "locationName": "Tanah Lot Temple Square",
+            "latitude": -8.6166989,
+            "longitude": 115.0868991,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.6166989,115.0868991",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tanah%20Lot%20Temple%20Square&query_place_id=&center=-8.6166989,115.0868991",
+            "mustSee": false,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoE1KOFwd4eH9hnMCysydyUbUcVIOjDVNkZcxzMNaO-oyQCkV3bWiTA8eL3I3lG_TFvO1wY0fuoZVMnxgNvI1ge93Xi85tSQSJM7RPtZm4eRPJKke8qOFBHLvfb1NcPITT9plJ3je2Ns5Hi=w80-h106-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.5,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "50594b94-7ec0-4897-8a54-ffb1901f7f14",
+            "dayNumber": 3,
+            "startTime": "12:30",
+            "endTime": "13:45",
+            "type": "restaurant",
+            "title": "Déjeuner — De jukung Resto & Bar Tanah Lot",
+            "description": "\"Incroyable restaurant, personnel agréable et cuisine délicieuse\"",
+            "locationName": "Tanah Lot - Bali, Jl. Tanah Lot, Kabupaten Tabanan, Bali 82171",
+            "latitude": -8.6169245,
+            "longitude": 115.0855515,
+            "orderIndex": 3,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.653312,115.13065",
+            "restaurant": {
+              "id": "serp-nearby-ChIJIS3Wvgo30i0RvMBfJ6sb4GE",
+              "name": "De jukung Resto & Bar Tanah Lot",
+              "address": "Tanah Lot - Bali, Jl. Tanah Lot, Kabupaten Tabanan, Bali 82171",
+              "latitude": -8.6169245,
+              "longitude": 115.0855515,
+              "rating": 4.2,
+              "reviewCount": 972,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant de fruits de mer",
+                "restaurant de fruits de mer"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0853-3350-2404",
+              "website": "https://www.suryamandalatanahlot.com/de-jukung-resto-bar/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=De%20jukung%20Resto%20%26%20Bar%20Tanah%20Lot%2C%20Tanah%20Lot%20-%20Bali%2C%20Jl.%20Tanah%20Lot%2C%20Kabupaten%20Tabanan%2C%20Bali%2082171",
+              "googlePlaceId": "ChIJIS3Wvgo30i0RvMBfJ6sb4GE",
+              "openingHours": {
+                "friday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                },
+                "saturday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                },
+                "sunday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                },
+                "monday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                },
+                "tuesday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                },
+                "wednesday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                },
+                "thursday": {
+                  "open": "10:00",
+                  "close": "21:00"
+                }
+              },
+              "distance": 0.15026362430889878,
+              "walkingTime": 2
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ-xiTGII30i0ReErnNBDCZUs",
+                "name": "Natys restaurant Tanah Lot",
+                "address": "Jalan Kawasan Wisata Tanah Lot, Beraban, Kediri, Tabanan Regency, Bali 82121",
+                "latitude": -8.6186588,
+                "longitude": 115.0882723,
+                "rating": 4.7,
+                "reviewCount": 968,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 819158",
+                "website": "https://natysrestaurant.com/natys-tanah-lot/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Natys%20restaurant%20Tanah%20Lot%2C%20Jalan%20Kawasan%20Wisata%20Tanah%20Lot%2C%20Beraban%2C%20Kediri%2C%20Tabanan%20Regency%2C%20Bali%2082121",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipPKuLOx1BuNXdUSll1cd0j8QBYWUl5HGVxV9qmE=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ-xiTGII30i0ReErnNBDCZUs",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.26511418720967134,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJV4HBPFQ50i0RJmNJ-31a_n0",
+                "name": "Nyantra Café & Eatery",
+                "address": "Jl. Tanah Lot No.88, Beraban, Kec. Kediri, Kabupaten Tabanan, Bali 82121",
+                "latitude": -8.616755,
+                "longitude": 115.0901641,
+                "rating": 4.5,
+                "reviewCount": 210,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café spécialisé dans les boissons expresso"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0812-2700-2477",
+                "website": "https://linktr.ee/Nyantra",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Nyantra%20Caf%C3%A9%20%26%20Eatery%2C%20Jl.%20Tanah%20Lot%20No.88%2C%20Beraban%2C%20Kec.%20Kediri%2C%20Kabupaten%20Tabanan%2C%20Bali%2082121",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipPaYsI2T-uqGXg86UGlHrdeVZhTHl4tckRWv_MP=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJV4HBPFQ50i0RJmNJ-31a_n0",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.3590077584570991,
+                "walkingTime": 4
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 6.3,
+            "timeFromPrevious": 79,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=De%20jukung%20Resto%20%26%20Bar%20Tanah%20Lot%2C%20Tanah%20Lot%20-%20Bali%2C%20Jl.%20Tanah%20Lot%2C%20Kabupaten%20Tabanan%2C%20Bali%2082171",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=De%20jukung%20Resto%20%26%20Bar%20Tanah%20Lot%2C%20Tanah%20Lot%20-%20Bali%2C%20Jl.%20Tanah%20Lot%2C%20Kabupaten%20Tabanan%2C%20Bali%2082171",
+            "selectionSource": "api"
+          },
+          {
+            "id": "e0fb8978-5e24-4db3-a233-343df6935b34",
+            "dayNumber": 3,
+            "startTime": "14:15",
+            "endTime": "14:45",
+            "type": "activity",
+            "title": "Temple Taman Ayun",
+            "description": "Pura Taman Ayun is a compound of Balinese temple and garden located in Mengwi district (kecamatan) in Badung Regency, Bali, Indonesia.  Its water features are an integral part of the local subak syste",
+            "locationName": "Temple Taman Ayun",
+            "latitude": -8.5418425,
+            "longitude": 115.1724843,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.5418425,115.1724843",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Temple%20Taman%20Ayun&query_place_id=&center=-8.5418425,115.1724843",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXTHtA_xVGXnoPR11e-xcns2BPn5sw-ZTVHovdjz7r8dQm76r6TjLkF-YMvfkxy5ifZEAOWM3OAlQChD8kJip8FGXbj_fd0N2XohWGWYHyBYcpMScKSywMhmYLXaBfbuIUdGQQjYe0zEi3eOp5o1qPEA40lHds6BIG8Fx6ZM7D_3tHmfeSyByV8vkgso3Je_KRfrTqQ4phw0DFWGg6CSnUonWQL0laZFmAqS163JfCtmtTXOpTT6ayKOfc9EwK9Cmfinz7Lf6uX50Gfz4n1mRWDg3kw7CwgusEIiKhDJaCVQi1aEnSxRrravbiy2mX3iyW7rgbloBFlAmw53Ly9BIHQrPEczsHLt108LOsZM2Rbr6ety39BonKRH_JMuJ3e8NkQkC2EiGkSdj3woYIHQ9bEHl04G5zazn10p3VbZf4g1SLK1zgIQPDhiQMRPW2Rcuv2OagvwIkwgyeFvObVZojcheYXP5ePDjALUsytkdFEhIa75-W6FCgado9rU-qgqONXSRwS1IEpvqIpr7e9X9Ouq_o9PBIU3DWPrO2aF75X2r31nzfxFPRN4AtscB4WQwBWrfYH&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 13.22,
+            "timeFromPrevious": 166,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "e5c0c310-57dd-4287-9c23-4569d3b7b463",
+            "dayNumber": 3,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Jatiluwih Rice Terraces",
+            "description": "A terrace in agriculture is a flat surface that has been cut into hills or mountains to provide areas for the cultivation for crops, as a method of more effective farming.  Terrace agriculture or cult",
+            "locationName": "Jatiluwih Rice Terraces",
+            "latitude": -8.3700942,
+            "longitude": 115.1312269,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.3700942,115.1312269",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Jatiluwih%20Rice%20Terraces&query_place_id=&center=-8.3700942,115.1312269",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW90EJcP_u7N6oV6V9wENJbktjNE0kgh0DWvg3YHqmc95Vpxm21wXaoeB-5QFP6C0dN-uWQVuomBnVm89572nsoef40OFgoWkO2PRYr0zN9QTs5i4FxLJdvXNnBUbeyRm0UbP854pbi5sbE31-zFuBPBs0ReMHtqUsQWI7xfCH4pRbPXa2KPd89bZ2bdlgI8PGcpfBiZvqJ36u5HcwQ9P7SJGNqswyqX0fX2d7D7Ok9pYJ2tiVK_iqTl4bvdvajlqGrwKIHdfQsz_WIeDyVGvb1u4hDA2eJsxNr8-7gzKBX25mRAnbO5O6j64a8cWB1Z1CIXC4y7rp2HZ1hz0Vvk7JNrpiXIP1zuXLAm7IX1uYwKAozbQ_Ukdco-jNtXKN9zVp8UimlTlY2PmNvBBDgJcTzxB4dqlf_6A_CNY5VkeOUrhmHcj3XW6Vb419ujL_i01GvvGl6FAKZ9-aStMuJ5GNBusp2hHHvGoo799JTF2Y3IFuoCKkdbUbTvHYVGxcHvZbqrJi7zzdGgYEkND4bmYpfPWQ-i4Qjy99duRqjeZecx6seGvfXXuWh-AS5gKw86LyOJPFlHSQPyg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 19.63,
+            "timeFromPrevious": 246,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "bbbbcb5e-39a6-4fde-8f94-731a252e4b9d",
+            "dayNumber": 3,
+            "startTime": "16:45",
+            "endTime": "17:15",
+            "type": "activity",
+            "title": "Pura Luhur Uluwatu",
+            "description": "Uluwatu Temple is a Balinese Hindu temple located on the south-western tip of the Bukit Peninsula in Uluwatu, Badung Regency, Bali, Indonesia.  It is the only Balinese sea temple that is also one of t",
+            "locationName": "Pura Luhur Uluwatu",
+            "latitude": -8.829143199999999,
+            "longitude": 115.0849069,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.829143199999999,115.0849069",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pura%20Luhur%20Uluwatu&query_place_id=&center=-8.829143199999999,115.0849069",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVUTPFrxi5RCPzooGsMntZPAFEyxCot-RzssgfIDPiiY6t-ICoJzZqbOhh4NrGGhfOesJL9nx5YXT_OHBRRb-n9bv88ovPciC5H3nhRIWyjmf0DX31pzfzFcaaPBBGPHo9KTmiQkZmb0GorFbHMHzeJbe1CS98PmjHBsf1kqZw_KEryznxc15k5ck46m6P6VDvxU8fUd77I_k4Ecdinlcb9sisrk_3J5yiaBMS5bqx7FGjnDWFbqloxqsLqHcCFf_RVaxUxhVI7sNy_xxHGPeBrEzAtSnwl4K4_nsP6ODw0BkutRAVrnuBMRVm3WNS4-k5gcSyWhFxLjODJ-dA5F16hVxyvJlrVQtRQ7ZkmgvSOXPfHoXVxebszl1THhvc6Nfo-G0gw4MaPyXm4aA7iaO6oZnSEJiwaWjcyyjlhvaOyAuQyQrYAqODr5oi_dXo5ItDPxZdVu1c-fdGMzWyfitE6ci6Bqs_zBImDY7RlPz58ou_AJ-6mGPnDXShOzV3EnEH5rv0vKf38fpmj5B6DCA2daGRlKg1VPiPWkUcjw6cvDohgZCgZU-qshE1AWaZS7Eukej54&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 51.3,
+            "timeFromPrevious": 642,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "f661d36c-291f-4508-9589-d0acc6ca5177",
+            "dayNumber": 3,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — Malini Uluwatu - SEAFOOD & SUNSET",
+            "description": "\"C’est une cuisine créative avec de belle inspiration.\"",
+            "locationName": "Jalan Raya Malini No.151, Karangboma, Pecatu, South Kuta, Badung Regency, Bali 80361",
+            "latitude": -8.832232399999999,
+            "longitude": 115.0870231,
+            "orderIndex": 7,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.2,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.651864,115.13106",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ-TdiSA9Q0i0RPSaL1TMhlQs",
+              "name": "Malini Uluwatu - SEAFOOD & SUNSET",
+              "address": "Jalan Raya Malini No.151, Karangboma, Pecatu, South Kuta, Badung Regency, Bali 80361",
+              "latitude": -8.832232399999999,
+              "longitude": 115.0870231,
+              "rating": 4.2,
+              "reviewCount": 5093,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant de fruits de mer",
+                "restaurant de fruits de mer",
+                "bar",
+                "club de musique"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0811-2974-999",
+              "website": "https://linktr.ee/malini_uluwatu",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Malini%20Uluwatu%20-%20SEAFOOD%20%26%20SUNSET%2C%20Jalan%20Raya%20Malini%20No.151%2C%20Karangboma%2C%20Pecatu%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+              "googlePlaceId": "ChIJ-TdiSA9Q0i0RPSaL1TMhlQs",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.4148020798485459,
+              "walkingTime": 5
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ4eaqKQRQ0i0RIyVpTo-h70o",
+                "name": "Warung Bejana Uluwatu",
+                "address": "Kawasan Wisata Luar Pura Uluwatu, Jl. Raya Uluwatu Pecatu, Pecatu, Kec. Kuta Sel., Kabupaten Badung, Bali 80364",
+                "latitude": -8.8281288,
+                "longitude": 115.0881038,
+                "rating": 4,
+                "reviewCount": 3200,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant indonésien",
+                  "restaurant indonésien",
+                  "restaurant diététique",
+                  "restaurant occidental"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0813-3733-4821",
+                "website": "https://instagram.com/warung_bejana?igshid=1rbn6qcj5ei89",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Warung%20Bejana%20Uluwatu%2C%20Kawasan%20Wisata%20Luar%20Pura%20Uluwatu%2C%20Jl.%20Raya%20Uluwatu%20Pecatu%2C%20Pecatu%2C%20Kec.%20Kuta%20Sel.%2C%20Kabupaten%20Badung%2C%20Bali%2080364",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqDyUBWnbYuLcJK_zzo_UXPhLCFeDZJ7v3uLiJucyDXo_EERr5HwkOEY_2havvjCegYH5fKcasZtB3gqkzFrIml7BwTl2fBxFiXM_dsHvVFRGOjToYHo8K7uytoBSUze-_ZMGD1pw=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJ4eaqKQRQ0i0RIyVpTo-h70o",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.36893314398637933,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJ952CT9NR0i0RVrUIvDJHQrM",
+                "name": "Three Steps coffee",
+                "address": "Jl. Raya Uluwatu Pecatu No.500, Pecatu, Kec. Kuta Sel., Kabupaten Badung, Bali 80361",
+                "latitude": -8.828424,
+                "longitude": 115.08816709999999,
+                "rating": 4.5,
+                "reviewCount": 1094,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "/url?q=https://threestepscoffee.shop/&opi=79508299&sa=U&ved=0ahUKEwjCw4GuleiSAxVNkYkEHWohOiAQ61gI_wcoDQ&usg=AOvVaw3TTy59dyHLmrcbnhYdqpGK",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Three%20Steps%20coffee%2C%20Jl.%20Raya%20Uluwatu%20Pecatu%20No.500%2C%20Pecatu%2C%20Kec.%20Kuta%20Sel.%2C%20Kabupaten%20Badung%2C%20Bali%2080361",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerCHXWeEpqROqpkcWKtMgkocLvA3mIfLe-vditG14Hj3glA4bX5NNULw45OotlteJNEIWW6kHUvEl36f5KjLNTOtY41nuddQ_NhPPHACjcS7ReZHTqMQS1s-gVtwSll7MjK02yTBw=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ952CT9NR0i0RVrUIvDJHQrM",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 0.4417365407173617,
+                "walkingTime": 6
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 20.35,
+            "timeFromPrevious": 255,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Malini%20Uluwatu%20-%20SEAFOOD%20%26%20SUNSET%2C%20Jalan%20Raya%20Malini%20No.151%2C%20Karangboma%2C%20Pecatu%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Malini%20Uluwatu%20-%20SEAFOOD%20%26%20SUNSET%2C%20Jalan%20Raya%20Malini%20No.151%2C%20Karangboma%2C%20Pecatu%2C%20South%20Kuta%2C%20Badung%20Regency%2C%20Bali%2080361",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Temples côtiers et couchers de soleil",
+        "dayNarrative": "Cette journée est dédiée aux temples emblématiques de la côte ouest, dont le majestueux Tanah Lot, offrant des vues spectaculaires et un coucher de soleil mémorable, avant un dîner dans les environs.",
+        "geoDiagnostics": {
+          "maxLegKm": 51.3,
+          "p95LegKm": 22.12,
+          "totalTravelMin": 1336,
+          "totalLegKm": 107.33,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.59,
+          "mstLowerBoundKm": 67.32
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 105,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-09T13:17:16.475Z",
+        "items": [
+          {
+            "id": "15b61215-2d6c-43c6-8ba6-7f0415dc9fe3",
+            "dayNumber": 4,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Suka Kopi Ubud",
+            "description": "\"Excellente expérience en cuisine entourée de 2 charmantes cuisinières.\"",
+            "locationName": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+            "latitude": -8.5435742,
+            "longitude": 115.27198779999999,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.490766,115.26516",
+            "restaurant": {
+              "id": "serp-nearby-ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "name": "Suka Kopi Ubud",
+              "address": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+              "latitude": -8.5435742,
+              "longitude": 115.27198779999999,
+              "rating": 4.8,
+              "reviewCount": 976,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café",
+                "café",
+                "torréfacteur"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0813-3915-5272",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+              "googlePlaceId": "ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.5671450286046151,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "name": "Odette Bali",
+                "address": "Jl. Raya Mas, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.534316,
+                "longitude": 115.272064,
+                "rating": 4.6,
+                "reviewCount": 712,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 972161",
+                "website": "https://www.instagram.com/odettebali/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Odette%20Bali%2C%20Jl.%20Raya%20Mas%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoX5dwptfM7mvtNWl0oEdY5jd6RaczYCwCCxNWwgDCWvtksDoa2s1GzPbalZp7NWYW1m3AYB4cTn1p0S8e_c7v3zHM0ys6LupSwt5CvCtCD_6OEIVl3IFv4mUWQfv7pOoV649knJw=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 1.133351979216061,
+                "walkingTime": 14
+              },
+              {
+                "id": "serp-nearby-ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "name": "Gula Kopi Bali",
+                "address": "Jl. Ambarawati, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.5422587,
+                "longitude": 115.2698726,
+                "rating": 4.5,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0859-6592-6566",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gula%20Kopi%20Bali%2C%20Jl.%20Ambarawati%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweox8coRmPP_imSTSnHfaGvxaqFD16UMbhjp-wtt-oyQK6xN4-EjjYqwm4oAAro4lofYyXidoxY5PDmdgn35r9ZbQLfPNQP5xcjCgpbGbdacyYioz8uGIeELRBxDWt0rRPZt4p4v2t-wm0pu=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8048538707908068,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "f07eeb11-1415-4818-bab0-58db78dfeb5e",
+            "dayNumber": 4,
+            "startTime": "10:00",
+            "endTime": "10:45",
+            "type": "activity",
+            "title": "Pura Ulun Danu Bratan",
+            "description": "Pura Ulun Danu Beratan, or Pura Bratan, is a major Hindu Shaivite temple in Bali, Indonesia.  The temple complex is on the shores of Lake Beratan in the mountains near Bedugul.  The water from the lak",
+            "locationName": "Pura Ulun Danu Bratan",
+            "latitude": -8.2751807,
+            "longitude": 115.1668234,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.2751807,115.1668234",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pura%20Ulun%20Danu%20Bratan&query_place_id=&center=-8.2751807,115.1668234",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUSoa_hxUwbnsHcvAOgkSyMHcp_vRKYGuY5r49GP49gruo3jFVxzaMFYq2roNCBIlig8o1CSSeOqhFGeuaA-1rikSUPoXfCHAvu_Wd9wPhjL6t1EZC9k2B7ghCpiWHA7BueRFSZ9QYlDYECjMa4NocBHbEtmEYhjtChKWXu0LBUWndPoMUb5PUVvvXhm4TM6NFsNN9Ru0uQ8Aya9KrjJzHkrgTnX37eDfbNlvm3B5neoQNiY2-U12j-XSWiwIqN2gy2KU9lCAGpjZlJaKnFylhOwQxsJgKPSwuuZtlsOKcL7_gdeuOj8bNNO6Ui6I8i25144-APpQj4Qm95h1y04foH6l1BStPGG_fsiARBoqrYMqLZkbNP9QiczUM9L3rBIoidmPxeO4QpKq_9OWOuKBCm8q8b_jny7J30zpfT8os3FCsOrkd0yjvKLDXHJDG-UFP8jH_tGTjPRpGUTNUVV6FHMO52PEzoS_vaho7ocR92aeCcHK4cKpRkzBbXUU9q1JiqG0N0Z_do31rAlfThu7Ds1nMP0xVimC2U94_giUjwfCZlpCZukNnbMHamfcz3p29hPgTw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 26.3,
+            "timeFromPrevious": 329,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "320c7db0-15fe-4f52-9304-88220a4b0cc9",
+            "dayNumber": 4,
+            "startTime": "11:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Bali Botanical Garden",
+            "description": "Grand jardin botanique, parcours d'accrobranche. Ce vaste jardin botanique présente une faune et des plantes tropicales locales, ainsi que des parcours d'accrobranche.",
+            "locationName": "Bali Botanical Garden",
+            "latitude": -8.2761215,
+            "longitude": 115.1542029,
+            "orderIndex": 2,
+            "estimatedCost": 5,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.2761215,115.1542029",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bali%20Botanical%20Garden&query_place_id=&center=-8.2761215,115.1542029",
+            "mustSee": false,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqeE12g4CosPMBX44L-Zn9qhcq_furR2guHBDfE8oay0sibUUPTxkG0CRK0ArFD8QiVkuyx71QBEXpdjQTchAbcJFVieSoVujZVkh3EHfODmMI0ci9r4JLhC4ab5v7_dYVJDVPrOw=w194-h92-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.39,
+            "timeFromPrevious": 18,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "919cab14-d03a-4da6-9637-45c963a36b35",
+            "dayNumber": 4,
+            "startTime": "13:30",
+            "endTime": "14:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Padi Restaurant at Puri Sebali Resort",
+            "description": "\"Le service est impeccable et la cuisine est délicieuse.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Kabupaten de Gianyar, Bali",
+            "latitude": -8.47093,
+            "longitude": 115.25812,
+            "orderIndex": 3,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.47093,115.25812",
+            "restaurant": {
+              "id": "serp-10738160858818164351",
+              "name": "Padi Restaurant at Puri Sebali Resort",
+              "address": "Kabupaten de Gianyar, Bali",
+              "latitude": -8.47093,
+              "longitude": 115.25812,
+              "rating": 5,
+              "reviewCount": 443,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Le service est impeccable et la cuisine est délicieuse.\""
+              ],
+              "description": "\"Le service est impeccable et la cuisine est délicieuse.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Padi%20Restaurant%20at%20Puri%20Sebali%20Resort%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+              "photos": [
+                "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/ibaZuIuQNOD_Xj4_WX_kN76YfCfN-lQKjgu82TJOJ70.jpeg"
+              ],
+              "googlePlaceId": "10738160858818164351",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ6z7dxTYj0i0Ra2jvreZvw8k",
+                "name": "Bali Green Sunset - Cafe, Bar & Ricefield",
+                "address": "G7J5+8V7, Jl. Raya Sebali, Kelusa, Payangan, Gianyar Regency, Bali 80571",
+                "latitude": -8.4687436,
+                "longitude": 115.2597771,
+                "rating": 4.6,
+                "reviewCount": 466,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant occidental",
+                  "restaurant occidental"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0851-0192-8547",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bali%20Green%20Sunset%20-%20Cafe%2C%20Bar%20%26%20Ricefield%2C%20G7J5%2B8V7%2C%20Jl.%20Raya%20Sebali%2C%20Kelusa%2C%20Payangan%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoBeva2ECSqRhV8LCNsAc_ZVX8nHCiiD2IQ2vvVX5Yu-e97-8R66Sv04Okrs_-7FEPL7hkTtpakKRWzsWxNuExw-6Qqc1b8PLuDymzlUx1q3j-UOGH56VllBDJXsQHUPRorDgRO=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ6z7dxTYj0i0Ra2jvreZvw8k",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.303844163774905,
+                "walkingTime": 4
+              },
+              {
+                "id": "serp-nearby-ChIJN-GnQMkj0i0R60aXPbY_weY",
+                "name": "Natys Restaurant Ubud",
+                "address": "Jl. Raya Tegallalang, Tegallalang, Ubud, Gianyar Regency, Bali 80561",
+                "latitude": -8.4671152,
+                "longitude": 115.2638939,
+                "rating": 5,
+                "reviewCount": 1021,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 9082175",
+                "website": "https://natysrestaurant.com/natys-ubud/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Natys%20Restaurant%20Ubud%2C%20Jl.%20Raya%20Tegallalang%2C%20Tegallalang%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080561",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo6r18S_nRpAfzfK3fB1uXrUK7FZqle_i0UuW2XDfvGWjvrFD1jhi3XnxKsE_nSnyH0VSpPAH_Q7iwQiUJmf4AMccWLglZTT0_DdLiX_cniUpIQPKJysgSc0d8rksbsqTDTIZZTSQ=w197-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJN-GnQMkj0i0R60aXPbY_weY",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.7636713950123173,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 24.49,
+            "timeFromPrevious": 307,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "2f71f65a-d305-42ff-b870-16a7c8de1e0a",
+            "dayNumber": 4,
+            "startTime": "16:30",
+            "endTime": "17:30",
+            "type": "activity",
+            "title": "Tanah Wuk – Hidden Jungle Retreat",
+            "description": "",
+            "locationName": "Tanah Wuk – Hidden Jungle Retreat",
+            "latitude": -8.4745676,
+            "longitude": 115.2057216,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.1,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.4745676,115.2057216",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tanah%20Wuk%20%E2%80%93%20Hidden%20Jungle%20Retreat&query_place_id=&center=-8.4745676,115.2057216",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfV2VzoxMuJVRj7UMZMcuMkK002QRLilOVz2369VdXjsIX2KYyr_MQfUU331TVGSACUS4xc0b-OeKbiYN6mRzW3ojKNdBJ9QrBB4KFx4Gcs0e1uYH0oI3hSGcQcETfxcWXQuAdYoTsYNMh1TDzlhHI8Y7_R4mSDOYUjkjNBQ90rt_DUL7QfenVmm618leu1fIiQr9N_iTjUTW_HZAiKJvOBAOkoP2rEn-TTwxzTAEdawvg8TU1GOwIzdZ8A8zzZTBrAifIKMG03rW7KhOdKRrN4V5Fw9euBtiSNbepEs_CucJo1zmfDbbWGUnOEFlLUuz-RbEV-3_Q6pWBt9uH5VDYhZCadtq2_5yc8ceUy5OeCy1iMZdue9cADZLbptqVyJ8eXVLdOpBWdX3zRXTsBd3tqn6xnWcY5M8u_l-wIUXC4W1fLH4ossAOaw6HQTei2DuA8OQkF3oqUB3LMNorWZYEsvE2GPXWDB2Zfofl8AiNJc3Vt1oKANKdJsIPi7hEOCHYdOLyLh10APk-aDgfnGU4YwggKYK19aGyXwNU5-j8dNO37xz9wqVhOhEyaxCbpc5lXN3Flm&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 5.78,
+            "timeFromPrevious": 73,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "6fa7bc14-0d10-4361-b67c-78f27afa2ddb",
+            "dayNumber": 4,
+            "startTime": "17:45",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "Palais aquatique de Tirta Gangga",
+            "description": "",
+            "locationName": "Palais aquatique de Tirta Gangga",
+            "latitude": -8.4123473,
+            "longitude": 115.5872919,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.4123473,115.5872919",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20aquatique%20de%20Tirta%20Gangga&query_place_id=&center=-8.4123473,115.5872919",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWXoLvUFdF5yghJg8l57TWMEQRZ3EDNc3v7fv92u0CUVh_Bja3q_H5GUw9-0WurDWqINqDAZsEGNo1SPaBtfT5oCiGRiXgx07UEbVpwTo9Kh3LRJIMBpFm4NhVN3t1IHWIgSm5yAtd0qTlKPCwxhLTPUxNXG-0FGZDR3m9eQTLfzFsvzzqvZbij2PEmfSsq-gAoeou60tF7dEjGhmD7QebziSKAYf_hkeLyZ9Sc9Wv5mSRHM_FbgX_nbngiDfQ3ro79C1L2SBrDbGfjca7G8dCcJhwmxkxhrEqNtCJqLUU4fqngkdZnVGcq9pEiQqoEv_GFkkUx8Fo5i_1ESWFoC4J85V81wy7JsiMrhgtuE73_pUyUFq140Dkd-lsM0lhMD7z7ic9Ea26B0tA2jbvYlKZWZh7Mfg9ar5fWX0jC0WW7JpZAidTRomlEhWcaONp-JvnP2M0naMmgnFb3A1_NS8H4OMfer1ejPMdey67HwkSOp1gpaf6L7wDivu3xqgipo6MfcbpecZu_YC8fADValaNVP1vqQLcRSIMYNHbAjOIKn9QU_YcDI_1xrmj05GrOs8m3lw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 42.54,
+            "timeFromPrevious": 532,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "0929120f-87d2-4085-abc6-f9d2b716c3ad",
+            "dayNumber": 4,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Good Karma Warung and Homestay",
+            "description": "\"Super du début à la fin le risotto aux crevettes était excellent !!\"",
+            "locationName": "Tirta Gangga, Ababi, Abang, Karangasem Regency, Bali 80852",
+            "latitude": -8.411442599999999,
+            "longitude": 115.5874649,
+            "orderIndex": 6,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.516354,115.25782",
+            "restaurant": {
+              "id": "serp-nearby-ChIJU6kNc5IG0i0RGYVaAXzVixE",
+              "name": "Good Karma Warung and Homestay",
+              "address": "Tirta Gangga, Ababi, Abang, Karangasem Regency, Bali 80852",
+              "latitude": -8.411442599999999,
+              "longitude": 115.5874649,
+              "rating": 4.7,
+              "reviewCount": 357,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "(0363) 22445",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Good%20Karma%20Warung%20and%20Homestay%2C%20Tirta%20Gangga%2C%20Ababi%2C%20Abang%2C%20Karangasem%20Regency%2C%20Bali%2080852",
+              "googlePlaceId": "ChIJU6kNc5IG0i0RGYVaAXzVixE",
+              "openingHours": {
+                "friday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                },
+                "saturday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                },
+                "sunday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                },
+                "monday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                },
+                "tuesday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                },
+                "wednesday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                },
+                "thursday": {
+                  "open": "07:00",
+                  "close": "21:00"
+                }
+              },
+              "distance": 0.10238212717317055,
+              "walkingTime": 1
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJIcocSA0H0i0Rr472A5AmAjs",
+                "name": "CAFE BENZA at Tirtagangga",
+                "address": "Jl. Raya Tirta Gangga, Ababi, Abang, Karangasem Regency, Bali 80852",
+                "latitude": -8.4117198,
+                "longitude": 115.5876394,
+                "rating": 4.6,
+                "reviewCount": 193,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0853-3304-4234",
+                "website": "https://cafebenza.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=CAFE%20BENZA%20at%20Tirtagangga%2C%20Jl.%20Raya%20Tirta%20Gangga%2C%20Ababi%2C%20Abang%2C%20Karangasem%20Regency%2C%20Bali%2080852",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerQiryvIW2Id66UsMfkEudBpy_UEJTZzNvlVgknQ7peGC6rN5G2J5o8BneIKmrIgQ4ZLlYo5B53hEhbuGrsEsA26tmzlEtk-zufj1b3_0-6h0qDRx_0fWTcSe_Z0S2TzGAUj9a40Q=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJIcocSA0H0i0Rr472A5AmAjs",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.07955903334575716,
+                "walkingTime": 1
+              },
+              {
+                "id": "serp-nearby-ChIJ4bQhWbgH0i0RmmcZDDhMR7A",
+                "name": "La Grande",
+                "address": "Ababi, Kec. Abang, Kabupaten Karangasem, Bali 80852",
+                "latitude": -8.4123552,
+                "longitude": 115.5880627,
+                "rating": 4.2,
+                "reviewCount": 404,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0821-4430-5864",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Grande%2C%20Ababi%2C%20Kec.%20Abang%2C%20Kabupaten%20Karangasem%2C%20Bali%2080852",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepLn97OtyV2r3-KReB-cp255Gyp_ovCFEzC09skGU-NUcRCFrzvRZGw3SxmCEkOpLm5dCqLmaFfcSa_yoax9XUltUevjpoQbiXekaCmrOWGCDi0y824AMK3GBAusF7g8yT6xNCmmQ=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ4bQhWbgH0i0RmmcZDDhMR7A",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "20:00"
+                  }
+                },
+                "distance": 0.0847914407130661,
+                "walkingTime": 1
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 38.04,
+            "timeFromPrevious": 476,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Good%20Karma%20Warung%20and%20Homestay%2C%20Tirta%20Gangga%2C%20Ababi%2C%20Abang%2C%20Karangasem%20Regency%2C%20Bali%2080852",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Good%20Karma%20Warung%20and%20Homestay%2C%20Tirta%20Gangga%2C%20Ababi%2C%20Abang%2C%20Karangasem%20Regency%2C%20Bali%2080852",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Nature luxuriante et spiritualité balinaise",
+        "dayNarrative": "Découvrez la sérénité du temple sur l'eau de Pura Ulun Danu Bratan, explorez les jardins botaniques luxuriants et terminez la journée par une visite culturelle et un dîner raffiné.",
+        "geoDiagnostics": {
+          "maxLegKm": 42.54,
+          "p95LegKm": 32.01,
+          "totalTravelMin": 1319,
+          "totalLegKm": 106.31,
+          "zigzagTurns": 1,
+          "routeInefficiencyRatio": 1.42,
+          "mstLowerBoundKm": 74.86
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 105,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 5,
+        "date": "2026-03-10T13:17:16.475Z",
+        "items": [
+          {
+            "id": "241bc0e6-ecd1-43df-9125-7fdc383d9ace",
+            "dayNumber": 5,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Suka Kopi Ubud",
+            "description": "\"Excellente expérience en cuisine entourée de 2 charmantes cuisinières.\"",
+            "locationName": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+            "latitude": -8.5435742,
+            "longitude": 115.27198779999999,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.490766,115.26516",
+            "restaurant": {
+              "id": "serp-nearby-ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "name": "Suka Kopi Ubud",
+              "address": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+              "latitude": -8.5435742,
+              "longitude": 115.27198779999999,
+              "rating": 4.8,
+              "reviewCount": 976,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café",
+                "café",
+                "torréfacteur"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0813-3915-5272",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+              "googlePlaceId": "ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.5671450286046151,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "name": "Odette Bali",
+                "address": "Jl. Raya Mas, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.534316,
+                "longitude": 115.272064,
+                "rating": 4.6,
+                "reviewCount": 712,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 972161",
+                "website": "https://www.instagram.com/odettebali/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Odette%20Bali%2C%20Jl.%20Raya%20Mas%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoX5dwptfM7mvtNWl0oEdY5jd6RaczYCwCCxNWwgDCWvtksDoa2s1GzPbalZp7NWYW1m3AYB4cTn1p0S8e_c7v3zHM0ys6LupSwt5CvCtCD_6OEIVl3IFv4mUWQfv7pOoV649knJw=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 1.133351979216061,
+                "walkingTime": 14
+              },
+              {
+                "id": "serp-nearby-ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "name": "Gula Kopi Bali",
+                "address": "Jl. Ambarawati, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.5422587,
+                "longitude": 115.2698726,
+                "rating": 4.5,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0859-6592-6566",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gula%20Kopi%20Bali%2C%20Jl.%20Ambarawati%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweox8coRmPP_imSTSnHfaGvxaqFD16UMbhjp-wtt-oyQK6xN4-EjjYqwm4oAAro4lofYyXidoxY5PDmdgn35r9ZbQLfPNQP5xcjCgpbGbdacyYioz8uGIeELRBxDWt0rRPZt4p4v2t-wm0pu=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8048538707908068,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "2fd801f7-9ba4-46d4-8f4b-9961ec0852f9",
+            "dayNumber": 5,
+            "startTime": "09:30",
+            "endTime": "11:30",
+            "type": "activity",
+            "title": "Museum Rudana & Rudana Fine Art Gallery",
+            "description": "Nyoman Rudana is a former member of the Regional Representatives Council of Indonesia.  He is also the founder and owner of Museum Rudana, Rudana Fine Art Gallery and Genta Fine Art Gallery, and found",
+            "locationName": "Museum Rudana & Rudana Fine Art Gallery",
+            "latitude": -8.5296746,
+            "longitude": 115.27123689999999,
+            "orderIndex": 1,
+            "estimatedCost": 5,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.5296746,115.27123689999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Museum%20Rudana%20%26%20Rudana%20Fine%20Art%20Gallery&query_place_id=&center=-8.5296746,115.27123689999999",
+            "mustSee": false,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepon3KZql1QqZsqTKhHZ3GunbWpfzTAEBTa1H7XWv4NF1UNOnUp3ag0CoCqSUIApMgEtvGnMjXi77NlMT9Gbbdjzd7LrJZh4Cyxk_EBuzSKGi4SSd5B6dLfpOHCVLaP8OU0KA8=w122-h92-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 4.38,
+            "timeFromPrevious": 55,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "14d02ea8-affc-444f-970d-6f518875953f",
+            "dayNumber": 5,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Leke Leke Waterfall",
+            "description": "Wolayita or Wolaita is an administrative zone in Ethiopia.  Wolayita is bordered on the south by Gamo Zone, on the west by the Omo River which separates it from Dawro, on the northwest by Kembata Zone",
+            "locationName": "Leke Leke Waterfall",
+            "latitude": -8.366982499999999,
+            "longitude": 115.1982865,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.366982499999999,115.1982865",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Leke%20Leke%20Waterfall&query_place_id=&center=-8.366982499999999,115.1982865",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX3qYt7EYPMLMts7TaeWKBjC1jRwoEbG8PcS9QhiEwsp_pb8rWqi_ZuTsGuysdyuACc3fHIf3NYJ4HlHwP7A8kFz3Ttt-h4398EwOMfFxJTAOnHsmdjgv6GWIRXDChC21gWVW421ZuEtpFa16WZcO7mug4bWnId-0zCIiPO4MMvsGbwtHd74FFagv66YqW8b5MDiSYrYrzhwgTUKQNbk3C4eqdNU-NN7TCk_ChA1MyyBr8GBCcw3qROprqrEkYo1tHZdpjy7OvMSum2FlJ66y16cyiBvuWScKd3OOAeGW0FOKYD_barFYs1xdSDAu8WJWZ-JN6q11E9CX8LV9cWRLWQvlRpauNL_Xq-vseUBx3Ixtaksxlwt-7GUmrf-gPk2BrY5UL7ZhX3e5dX6KaVJCWimmux81-UnWYC20iMTQRZj3vtGKkIZ2o_qVRX4QnKc5b4fcya1nHiLm_zh2cOcrDiZe_NmQWTzLhUp0C1M2q-KLoZPpiASR3LPz1Nharrqol2ioqAEbGL4eqof68G07ytb0QDGSUoY5gTbVUJk4ZFSN2r27Hp4wDNbuO3zlU_AGmbbA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 19.79,
+            "timeFromPrevious": 248,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "3a35f738-b849-4d60-bb11-d524716c7e19",
+            "dayNumber": 5,
+            "startTime": "13:30",
+            "endTime": "14:45",
+            "type": "restaurant",
+            "title": "Déjeuner — Tropical Restaurant - Ubud",
+            "description": "\"... top ( SUKA 😍 respectueux et attentionné) Cuisine très très bon\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Gianyar Regency, Bali",
+            "latitude": -8.5075445,
+            "longitude": 115.26205,
+            "orderIndex": 3,
+            "estimatedCost": 24,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.5075445,115.26205",
+            "restaurant": {
+              "id": "serp-4893964901361353043",
+              "name": "Tropical Restaurant - Ubud",
+              "address": "Gianyar Regency, Bali",
+              "latitude": -8.5075445,
+              "longitude": 115.26205,
+              "rating": 4.7,
+              "reviewCount": 4700,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"... top ( SUKA 😍 respectueux et attentionné) Cuisine très très bon\""
+              ],
+              "description": "\"... top ( SUKA 😍 respectueux et attentionné) Cuisine très très bon\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Tropical%20Restaurant%20-%20Ubud%2C%20Gianyar%20Regency%2C%20Bali",
+              "photos": [
+                "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/Y4TCoo81B0rLoga27-9QLiMRq_E1-9GLCzVZIjQAkYg.jpeg"
+              ],
+              "googlePlaceId": "4893964901361353043",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3490359628661348195",
+                "name": "Habitat Bistro Restaurant Ubud by Wonderspace",
+                "address": "Kabupaten de Gianyar, Bali",
+                "latitude": -8.516354,
+                "longitude": 115.25782,
+                "rating": 4.9,
+                "reviewCount": 2300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Super du début à la fin le risotto aux crevettes était excellent !!\""
+                ],
+                "description": "\"Super du début à la fin le risotto aux crevettes était excellent !!\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Habitat%20Bistro%20Restaurant%20Ubud%20by%20Wonderspace%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+                "photos": [
+                  "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/oWFFWJ4y5bjkw5q2uE8CHYYIcjgjvMmsG0sCSuidToY.jpeg"
+                ],
+                "googlePlaceId": "3490359628661348195",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-2645255445660932947",
+                "name": "Donna",
+                "address": "Kabupaten de Gianyar, Bali",
+                "latitude": -8.513044,
+                "longitude": 115.26072,
+                "rating": 4.8,
+                "reviewCount": 7100,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cocktails au top, repas excellent, personnel adorable\""
+                ],
+                "description": "\"Cocktails au top, repas excellent, personnel adorable\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Donna%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+                "photos": [
+                  "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/XOGeQ2o2CzBs6rTO023_ZwMtzzoU9OcLeYenS4XWo0I.jpeg"
+                ],
+                "googlePlaceId": "2645255445660932947",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 17.13,
+            "timeFromPrevious": 215,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "a427173f-6b86-41e4-8e8b-08d1084fd7c2",
+            "dayNumber": 5,
+            "startTime": "15:15",
+            "endTime": "16:15",
+            "type": "activity",
+            "title": "Secret Garden Village",
+            "description": "The garden city movement was a 20th-century urban planning movement promoting satellite communities surrounding the central city and separated with greenbelts.  These Garden Cities would contain propo",
+            "locationName": "Secret Garden Village",
+            "latitude": -8.3726305,
+            "longitude": 115.1933824,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.3726305,115.1933824",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Secret%20Garden%20Village&query_place_id=&center=-8.3726305,115.1933824",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUhoksEpzP72rHP5LGO4eO3ZuLCUggBHkebTa_X3I5aXeGuFTVDy5ad5UmTn-WiglsIIucThUPryQcYbl1HjBKUqd-XjqKsZ4yFJL4N3kGVgcy8MTbuBI-zws41rgVUFQTiZD8rehisSHIZot8rwrsQM8glM5FK_UQwYEUItxxkYNRt6lb2enwybpuuVmGTQAH7Rd-LpAuRI1bQzu2T2zaRMCdIxvmLZZAd8rDanaoN0uTOxdADHWBKukyCOfh_dLUyjEPS2gSs_EqNxz6sVv7MbY7GjpMnKNo8FYgU7y8MEBklWVnajto-tCvO72d5fbtmyrMMszktbtMh8IRt2zoqXISLeIjXlPwDUiabJFG1-NJvmosjL-flc9C9A8LdWk3dxc9EwSLp7ipjM_iGs_FCtb7D9UZprMWbkFH7cYYXKjOqQvZWpkEwfvuMO01zqeNfVR6qMvf9FaZunQTdkt6pUstGiEVBob6pOPA3O8wnGESjiiu0MAWhCBih8gPD82Qgp_K5VOET6ecEIpB2Ci8U9NPCSXRzvMrHn0W3Xvqn_jHGMZ_Q4THM3iAVafNpzrOSsPiiRxAdgQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 16.8,
+            "timeFromPrevious": 210,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "37c2d537-1e9b-444c-a308-d598c97a9416",
+            "dayNumber": 5,
+            "startTime": "16:30",
+            "endTime": "17:30",
+            "type": "activity",
+            "title": "Bayan Ancient Tree",
+            "description": "\"Bayan Ko\" is a Filipino patriotic song.  It was written in Spanish by the revolutionary general José Alejandrino in light of the Philippine–American War and subsequent American occupation, and transl",
+            "locationName": "Bayan Ancient Tree",
+            "latitude": -8.4065528,
+            "longitude": 115.18692,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.4065528,115.18692",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bayan%20Ancient%20Tree&query_place_id=&center=-8.4065528,115.18692",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUKOf5A69swcVqdaDKV6blW2k8rGd0cwOKNS45KhHhexctNgog3Rr6ZlIdK53FXtVmNxvI1ioBVj_xfqkODdc1fyALvGaD14ojlnXJYBqa4cWvbluzQpxqlBMs1RdV1DHD-ISZWY151NtlgreMlKv2yF6OlBiPznR6HuLra9_W5eWAeA3BeiCczJyUy4ItlvsL6iblVEci5ZvBvd9BLz3dbRgAM4JEQRh_2nK-sAF0FzhYR-0lXa3RLC8hpuCgZAC8Tyt-wbLyTLCZsLIZbfPg5_-yjXuiiV0spt-FjBpECBd5uLlfVWZd6AUt5g6GohvrRrCIdFbSEUBiGBWP0n-DTm3OIMYRRxVVjaFoGuHpeNlxCLDKLO-FF4ZhrCA1hlxxDYFfvfNZ62JY9VAaws2ailVCSM28uCxk0_hFUO7vjESH79sJz3bB2dmmNq-Sw8lKPY0KM224s25wVKk5A2cekmmZqPkk2y25F9Mg0wvJuCv-FKi9KdqSr0oR3I3DDS1McOR9PMs3xo47Hm51thkue3YSSg8l5tuThvVRdxKhsmssd9e1OlMvTcu531zzy228XEriabJL1vg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 3.84,
+            "timeFromPrevious": 48,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "ed5c35ad-862a-4dc6-975f-8a5d825bccdd",
+            "dayNumber": 5,
+            "startTime": "17:45",
+            "endTime": "18:45",
+            "type": "activity",
+            "title": "Bajra Sandhi Monument",
+            "description": "Bajra Sandhi Monument is a monument to the struggles of the Balinese people throughout history.  The monument is located in front of the Bali Governor's Office in Denpasar, Indonesia, on the island of",
+            "locationName": "Bajra Sandhi Monument",
+            "latitude": -8.6717817,
+            "longitude": 115.2338962,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.6717817,115.2338962",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bajra%20Sandhi%20Monument&query_place_id=&center=-8.6717817,115.2338962",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVYvY7ZbM4Y5nyHbOYwlqp24lPGGEjUPheMCntGHacaXGmHB9CBmY5Atqxp-Q36fyaOI6WC9YkejO0mVNmmFQXD2GGutoaTdYUaWWr8F6uHgCJe5pU095jSnXsQeLt4iCl8Pmu_KAdxRPGkEw0zeZGPwxiEpN9xfwt0keatXZO-4gpr26lFLFXdj01RaMET8SDoTCHPKpJDTLSwUyOiANg3PZTMlUmVzWCEen1Uw-0ClnJhykgtyt2nS5mE7QFXgP9j7Uc4OuxkKQgZyAhceyhuinbnmUtETYkBUc0g1-zyWievQA9_EJSmG6--2EBRdsYGEURjp8KY0gw4_5cgx9SkCYwb569e9z01RKoTLqYez9P7_is90QMRaSFVrWM8oC6GpA8jNlyZcORgcyaSTIJ5SdUns15yRfNE4fNh0fV8jMgKxHWKzN35LaoDw-As3Fn3nVsM-j4nKyVAJEA5bfU_eN-330GBS-3EekqTTJ0HcJtThlJm-P8GMke4iibIIHBr7ilLl_TPAY2JG99L9Lesq6Hd1oCHlDsTPpW5LP6v7Y2phEn85L8ZMRt9I0yRglTtx_qx&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 29.94,
+            "timeFromPrevious": 375,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "f2a00fcd-31fe-4ad4-af28-175e7a44269f",
+            "dayNumber": 5,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Arcadia",
+            "description": "\"Une cuisine semi-gastronomique avec des touches de saveurs indonésiennes.\" · Restaurant conservé faute d'alternative proche",
+            "locationName": "Gianyar Regency, Bali",
+            "latitude": -8.505003,
+            "longitude": 115.254425,
+            "orderIndex": 7,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.9,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.505003,115.254425",
+            "restaurant": {
+              "id": "serp-9907327036489470974",
+              "name": "Arcadia",
+              "address": "Gianyar Regency, Bali",
+              "latitude": -8.505003,
+              "longitude": 115.254425,
+              "rating": 4.9,
+              "reviewCount": 1400,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Une cuisine semi-gastronomique avec des touches de saveurs indonésiennes.\""
+              ],
+              "description": "\"Une cuisine semi-gastronomique avec des touches de saveurs indonésiennes.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Arcadia%2C%20Gianyar%20Regency%2C%20Bali",
+              "photos": [
+                "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/9oUKCCoCjj4tqo4a7FpP4uwQZe250_2jmXUzTrigl30.jpeg"
+              ],
+              "googlePlaceId": "9907327036489470974",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-3490359628661348195",
+                "name": "Habitat Bistro Restaurant Ubud by Wonderspace",
+                "address": "Kabupaten de Gianyar, Bali",
+                "latitude": -8.516354,
+                "longitude": 115.25782,
+                "rating": 4.9,
+                "reviewCount": 2300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Super du début à la fin le risotto aux crevettes était excellent !!\""
+                ],
+                "description": "\"Super du début à la fin le risotto aux crevettes était excellent !!\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Habitat%20Bistro%20Restaurant%20Ubud%20by%20Wonderspace%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+                "photos": [
+                  "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/oWFFWJ4y5bjkw5q2uE8CHYYIcjgjvMmsG0sCSuidToY.jpeg"
+                ],
+                "googlePlaceId": "3490359628661348195",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-2645255445660932947",
+                "name": "Donna",
+                "address": "Kabupaten de Gianyar, Bali",
+                "latitude": -8.513044,
+                "longitude": 115.26072,
+                "rating": 4.8,
+                "reviewCount": 7100,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cocktails au top, repas excellent, personnel adorable\""
+                ],
+                "description": "\"Cocktails au top, repas excellent, personnel adorable\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Donna%2C%20Kabupaten%20de%20Gianyar%2C%20Bali",
+                "photos": [
+                  "https://serpapi.com/searches/69986019e6590e4761ce50c0/images/XOGeQ2o2CzBs6rTO023_ZwMtzzoU9OcLeYenS4XWo0I.jpeg"
+                ],
+                "googlePlaceId": "2645255445660932947",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 18.68,
+            "timeFromPrevious": 234,
+            "transportToPrevious": "public",
+            "selectionSource": "fallback"
+          }
+        ],
+        "theme": "Museum Rudana & Rudana Fine Art Gallery et Leke Leke Waterfall",
+        "dayNarrative": "Plongez dans l'art balinais avec une visite de musée, explorez une cascade secrète et un village artisanal, puis terminez la journée par une expérience culinaire unique.",
+        "geoDiagnostics": {
+          "maxLegKm": 29.94,
+          "p95LegKm": 19.79,
+          "totalTravelMin": 1349,
+          "totalLegKm": 107.73,
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 2.85,
+          "mstLowerBoundKm": 37.84
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 2,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 6,
+        "date": "2026-03-11T13:17:16.475Z",
+        "items": [
+          {
+            "id": "20a402eb-4086-4b6c-baf0-80d6e5bd3a9c",
+            "dayNumber": 6,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Suka Kopi Ubud",
+            "description": "\"Excellente expérience en cuisine entourée de 2 charmantes cuisinières.\"",
+            "locationName": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+            "latitude": -8.5435742,
+            "longitude": 115.27198779999999,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.490766,115.26516",
+            "restaurant": {
+              "id": "serp-nearby-ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "name": "Suka Kopi Ubud",
+              "address": "Jl. Raya Mas No.114, Mas, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571",
+              "latitude": -8.5435742,
+              "longitude": 115.27198779999999,
+              "rating": 4.8,
+              "reviewCount": 976,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "café",
+                "café",
+                "torréfacteur"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "0813-3915-5272",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+              "googlePlaceId": "ChIJW75pC1wW0i0RETIhQrKiZj4",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "23:00"
+                }
+              },
+              "distance": 0.5671450286046151,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "name": "Odette Bali",
+                "address": "Jl. Raya Mas, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.534316,
+                "longitude": 115.272064,
+                "rating": 4.6,
+                "reviewCount": 712,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "café",
+                  "café",
+                  "pâtisserie",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "(0361) 972161",
+                "website": "https://www.instagram.com/odettebali/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Odette%20Bali%2C%20Jl.%20Raya%20Mas%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoX5dwptfM7mvtNWl0oEdY5jd6RaczYCwCCxNWwgDCWvtksDoa2s1GzPbalZp7NWYW1m3AYB4cTn1p0S8e_c7v3zHM0ys6LupSwt5CvCtCD_6OEIVl3IFv4mUWQfv7pOoV649knJw=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJHRiCUoU90i0RmjxLSJuPPd0",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "sunday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "21:00"
+                  }
+                },
+                "distance": 1.133351979216061,
+                "walkingTime": 14
+              },
+              {
+                "id": "serp-nearby-ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "name": "Gula Kopi Bali",
+                "address": "Jl. Ambarawati, Mas, Ubud, Gianyar Regency, Bali 80571",
+                "latitude": -8.5422587,
+                "longitude": 115.2698726,
+                "rating": 4.5,
+                "reviewCount": 319,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "0859-6592-6566",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gula%20Kopi%20Bali%2C%20Jl.%20Ambarawati%2C%20Mas%2C%20Ubud%2C%20Gianyar%20Regency%2C%20Bali%2080571",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweox8coRmPP_imSTSnHfaGvxaqFD16UMbhjp-wtt-oyQK6xN4-EjjYqwm4oAAro4lofYyXidoxY5PDmdgn35r9ZbQLfPNQP5xcjCgpbGbdacyYioz8uGIeELRBxDWt0rRPZt4p4v2t-wm0pu=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJe-pLxb490i0Rm2rXh_f0hGQ",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.8048538707908068,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Suka%20Kopi%20Ubud%2C%20Jl.%20Raya%20Mas%20No.114%2C%20Mas%2C%20Kecamatan%20Ubud%2C%20Kabupaten%20Gianyar%2C%20Bali%2080571",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "4d79e083-7573-47f8-9537-85f871f5374b",
+            "dayNumber": 6,
+            "startTime": "09:00",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Musée d'Art Neka",
+            "description": "Musée classique avec œuvres d'art régionales. Musée d'Art abritant des œuvres balinaises modernes et traditionnelles inspirées par la culture et la beauté locales.",
+            "locationName": "Musée d'Art Neka",
+            "latitude": -8.4925407,
+            "longitude": 115.2540154,
+            "orderIndex": 1,
+            "estimatedCost": 5,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=-8.4925407,115.2540154",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20d'Art%20Neka&query_place_id=&center=-8.4925407,115.2540154",
+            "mustSee": false,
+            "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHVAwerlIqBvkecsUh_9b-aTsXW-vUm3aMdEnv6egY2iCmdnpJ8lLNvVwizhxVpMg3Cec2bxFO4syOIoXrSA8idPkMymWEwH08N0uHIS-IaR685xNQNIXkB2xTdL-gXOklhVvw0J4eOWGg=w163-h92-k-no",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.24,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "0164c79c-ff21-4909-a3a6-02fe1752c531",
+            "dayNumber": 6,
+            "startTime": "12:00",
+            "endTime": "12:15",
+            "type": "checkout",
+            "title": "Check-out Live at Serendipity Wellness Villas",
+            "description": "Départ de l'hôtel",
+            "locationName": "Live at Serendipity Wellness Villas",
+            "latitude": -8.5431917243824,
+            "longitude": 115.277130967249,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "booking-14488859",
+              "name": "Live at Serendipity Wellness Villas",
+              "type": "hotel",
+              "address": "F74G+MVR, Jl. Raya Mas, Ubud, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571, Indonesia",
+              "latitude": -8.5431917243824,
+              "longitude": 115.277130967249,
+              "rating": 9.1,
+              "reviewCount": 7,
+              "stars": 3,
+              "pricePerNight": 43,
+              "totalPrice": 215,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/715584284.jpg?k=bc194889934faf44fa9a1554dbfbacccd178cae4ba74ef815cfb46bc5d353f35&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.booking.com/hotel/id/live-at-serendipity-wellness-villas.html?checkin=2026-03-06&checkout=2026-03-11&group_adults=2&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 6.18,
+            "timeFromPrevious": 78,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "transport-ret-6-fallback",
+            "dayNumber": 6,
+            "startTime": "12:45",
+            "endTime": "15:15",
+            "type": "transport",
+            "title": "✈️ Vol retour",
+            "description": "Bali → Paris (estimation, lien vols recommandé)",
+            "locationName": "Bali → Paris",
+            "latitude": -8.5435742,
+            "longitude": 115.27198779999999,
+            "orderIndex": 3,
+            "duration": 150,
+            "estimatedCost": 989,
+            "bookingUrl": "https://www.aviasales.com/search/BALI1103PARIS2?currency=eur&locale=fr",
+            "aviasalesUrl": "https://www.aviasales.com/search/BALI1103PARIS2?currency=eur&locale=fr",
+            "omioFlightUrl": "https://www.omio.fr/vols/paris/bali?departure_date=2026-03-11",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected",
+              "plane_transport_fallback",
+              "aviasales_fallback_link"
+            ]
+          }
+        ],
+        "theme": "Musée d'Art Neka",
+        "dayNarrative": "Profitez d'un dernier petit-déjeuner balinais et d'une activité légère avant de vous diriger vers l'aéroport, emportant avec vous de merveilleux souvenirs de Bali.",
+        "geoDiagnostics": {
+          "maxLegKm": 6.01,
+          "p95LegKm": 6.01,
+          "totalTravelMin": 72,
+          "totalLegKm": 6.01,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 6.01
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 90,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Bali",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": -8.2271303,
+              "lng": 115.1919203
+            },
+            "duration": 927,
+            "price": 989,
+            "co2": 1878,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/PARIS0603BALI2?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 1217,
+        "totalPrice": 989,
+        "totalCO2": 1878,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.aviasales.com/search/PARIS0603BALI2?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/bali?departure_date=2026-03-06",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Bali",
+            "duration": 912,
+            "price": 1216,
+            "co2": 2371
+          }
+        ],
+        "totalDuration": 1200,
+        "totalPrice": 1240,
+        "totalCO2": 2372,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 0
+        }
+      }
+    ],
+    "selectedTransport": {
+      "id": "plane",
+      "mode": "plane",
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Paris",
+          "to": "Bali",
+          "fromCoords": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "toCoords": {
+            "lat": -8.2271303,
+            "lng": 115.1919203
+          },
+          "duration": 927,
+          "price": 989,
+          "co2": 1878,
+          "frequency": "Plusieurs vols par jour",
+          "bookingUrl": "https://www.aviasales.com/search/PARIS0603BALI2?currency=eur&locale=fr"
+        }
+      ],
+      "totalDuration": 1217,
+      "totalPrice": 989,
+      "totalCO2": 1878,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 0,
+        "co2Score": 10
+      },
+      "bookingUrl": "https://www.aviasales.com/search/PARIS0603BALI2?currency=eur&locale=fr",
+      "omioFlightUrl": "https://www.omio.fr/vols/paris/bali?departure_date=2026-03-06",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "booking-14488859",
+      "name": "Live at Serendipity Wellness Villas",
+      "type": "hotel",
+      "address": "F74G+MVR, Jl. Raya Mas, Ubud, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571, Indonesia",
+      "latitude": -8.5431917243824,
+      "longitude": 115.277130967249,
+      "rating": 9.1,
+      "reviewCount": 7,
+      "stars": 3,
+      "pricePerNight": 43,
+      "totalPrice": 215,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/715584284.jpg?k=bc194889934faf44fa9a1554dbfbacccd178cae4ba74ef815cfb46bc5d353f35&o="
+      ],
+      "checkInTime": "14:00",
+      "checkOutTime": "12:00",
+      "bookingUrl": "https://www.booking.com/hotel/id/live-at-serendipity-wellness-villas.html?checkin=2026-03-06&checkout=2026-03-11&group_adults=2&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-14488859",
+        "name": "Live at Serendipity Wellness Villas",
+        "type": "hotel",
+        "address": "F74G+MVR, Jl. Raya Mas, Ubud, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571, Indonesia",
+        "latitude": -8.5431917243824,
+        "longitude": 115.277130967249,
+        "rating": 9.1,
+        "reviewCount": 7,
+        "stars": 3,
+        "pricePerNight": 43,
+        "totalPrice": 215,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/715584284.jpg?k=bc194889934faf44fa9a1554dbfbacccd178cae4ba74ef815cfb46bc5d353f35&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/hotel/id/live-at-serendipity-wellness-villas.html?checkin=2026-03-06&checkout=2026-03-11&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-12761009",
+        "name": "Winaka Ubud",
+        "type": "hotel",
+        "address": "Jl. Jembawan, Ubud, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571, Indonesia",
+        "latitude": -8.511546090538,
+        "longitude": 115.266869324211,
+        "rating": 9.1,
+        "reviewCount": 171,
+        "stars": 3,
+        "pricePerNight": 31,
+        "totalPrice": 155,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/595016600.jpg?k=c95efeff1b012c40edd1cc4067f2960bca29061b17047a30adfa9c5fb308c41a&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Winaka+Ubud+Bali&checkin=2026-03-06&checkout=2026-03-11&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-15035096",
+        "name": "Donald Ubud Cottage",
+        "type": "hotel",
+        "address": "Jl. Tirta Tawar, Petulu, Kecamatan Ubud, Kabupaten Gianyar, Bali 80571, Indonesia",
+        "latitude": -8.50053802458879,
+        "longitude": 115.268644076057,
+        "rating": 9.1,
+        "reviewCount": 65,
+        "stars": 3,
+        "pricePerNight": 38,
+        "totalPrice": 190,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/757223114.jpg?k=35ae73046effefe6b89a480d9477244b699b9b4b0af97e8de59eee8daa5aa043&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Donald+Ubud+Cottage+Bali&checkin=2026-03-06&checkout=2026-03-11&group_adults=2&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 778,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 258,
+      "food": 480,
+      "activities": 40,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 50,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 35,
+      "transportTips": "Utilisez les scooters en location (3-5€/jour) ou les taxis locaux/Grab. Évitez les transferts touristiques surpricés. Les transports locaux coûtent moins de 2€ par trajet.",
+      "reasoning": "Budget serré (188€/personne/jour). Bali offre restauration très bon marché (1-3€ street food, 3-8€ restaurant local). Stratégie: Airbnb avec cuisine pour petit-déj économe (5-8€/jour/pers), puis restaurants locaux pour lunch/dinner (10-15€/jour/pers total). Accommodation 50€/nuit = hôtel 3* ou bon Airbnb. Cela libère ~35€/personne/jour pour activités wellness (massage 5-10€, yoga classes 3-8€, temples gratuits/petites donations). Transport local très bon marché. Cette approche maximise wellness/nature tout en restant dans le budget.",
+      "maxPricePerActivity": 80
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: bali-wellness-6d",
+    "   Paris → Bali (6j)",
+    "   couple (2p) | comfort | wellness, nature",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1223ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Bali\", ll=\"@-8.2271303,115.1919203,14z\", gl=\"id\"",
+    "[Transport] Multi-modal skipped for long-haul route (12357km)",
+    "[Google Places] Filtered \"Bali\" (types: administrative_area_level_1, political)",
+    "[Google Places] Filtered \"Hanging Gardens Of Bali\" (types: spa, lodging, restaurant, food, point_of_interest, establishment)",
+    "[Google Places] ✅ 28 attractions found for Bali",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (362ms)",
+    "[Pipeline V2] Injected 2 curated must-see attractions for \"Bali\" from local database",
+    "[Pipeline V2]   → Temple de Tanah Lot, Rizières de Tegallalang, Temple d'Uluwatu",
+    "[Flights] Airport search scope: full (6 airport pairs)",
+    "[Pipeline V2] Step 1: All data fetched in 37566ms",
+    "[Pipeline V2]   Activities: 28 Google + 23 SerpAPI + 0 Overpass + 2 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 15 | Transport options: 2",
+    "[Pipeline V2 LLM] Step 1 done in 37566ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Live at Serendipity Wellness Villas\" (9.1★, €43/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 57 activities → 42 after dedup (dropped 15)",
+    "[Pipeline V2 LLM] Step 2: Selected 35 activities (0 must-sees, 35 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 50 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 94 pairs",
+    "[Pipeline V2 LLM] Step 2: 35 activities, 18 restaurants, 94 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 11ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 15255 in + 3715 out, ~$0.0045, 21483ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Arrivée et immersion à Ubud\",\n      \"narrative\": \"Après votre arrivée et l'installation à l'hôtel, cette journée légère vous plonge dans l'amb...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 1 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 225min gap on day 2 with \"Garuda Wisnu Kencana\"",
+    "[Pipeline V2 LLM] Enrichment: filled 150min gap on day 3 with \"Pura Luhur Uluwatu\"",
+    "[Pipeline V2 LLM] Enrichment: filled 120min gap on day 4 with \"Palais aquatique de Tirta Gangga\"",
+    "[Pipeline V2 LLM] Enrichment: filled 120min gap on day 5 with \"Bajra Sandhi Monument\"",
+    "[Pipeline V2 LLM] Enrichment complete: added 4 activities",
+    "[Pipeline V2 LLM] Plan: 6 days, 22 activities, 14 meals",
+    "[Pipeline V2 LLM] Step 3 done in 21483ms — 6 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 35 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 6 days with 36 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 6777ms",
+    "[Pipeline V2 LLM] Step 4 done in 6777ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 11 restaurants swapped, 3 kept as fallback (23452ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 28 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 5635ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 87/100",
+    "  📦 Complétude: 23/25",
+    "  ⏱️  Rythme:     25/25",
+    "  🗺️  Géo:        14/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 6: transport retour manquant",
+    "  ⚠️ Jour 4: Déjeuner — Padi Restaurant at Puri Sebali Resort est à 5777m de l'activité la plus proche",
+    "  ⚠️ Jour 5: Déjeuner — Tropical Restaurant - Ubud est à 16796m de l'activité la plus proche",
+    "  ⚠️ Jour 5: Dîner — Arcadia est à 18682m de l'activité la plus proche",
+    "  ⚠️ Distance moyenne entre items: 14.1km (élevée)",
+    "  ⚠️ Hôtel à 7.6km du centre des activités",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 6: transport retour inséré (fallback)",
+    "  🔧 Jour 2: thème régénéré \"Rizières et cascades d'Ubud\" → \"Tegallalang Rice Terrace et Tegenungan Waterfall\"",
+    "  🔧 Jour 5: thème régénéré \"Culture, art et cascades cachées\" → \"Museum Rudana & Rudana Fine Art Gallery et Leke Leke Waterfall\"",
+    "  🔧 Jour 6: thème régénéré \"Derniers instants à Bali\" → \"Musée d'Art Neka\"",
+    "[Pipeline V2 LLM] Step 5 done in 1ms — score: 87/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 94927ms ==="
+  ],
+  "warnings": [
+    "Aéroports non trouvés pour \"Bali\", utilisation de Paris par défaut",
+    "[Weather] Fetch failed (non-critical): Open-Meteo forecast API error: 400",
+    "[Hotels] Aucun match de disponibilité trouvé pour \"Bali\" (2026-03-06 → 2026-03-11) — conservation de la liste initiale",
+    "[SerpAPI] Vols filtrés ORY→SIN 2026-03-06: escale_nuit=4 (Aéroport international Hamad×2, Aéropuerto Adolfo-Suárez de Madrid-Barajas×1, Aéroport de Londres-Heathrow×1), escale_longue=1 (Aéropuerto Adolfo-Suárez de Madrid-Barajas×1)",
+    "[SerpAPI] Vols filtrés SIN→ORY 2026-03-11: escale_nuit=3 (Zayed International Airport×2, Aéroport de Londres-Heathrow×1), escale_longue=1 (Aéroport de Milan-Linate×1)",
+    "[SerpAPI] Vols filtrés ORY→BKK 2026-03-06: escale_nuit=4 (Aéroport de Milan-Linate×4), escale_longue=2 (Aéroport de Milan Malpensa×1, Aéropuerto Adolfo-Suárez de Madrid-Barajas×1)",
+    "[SerpAPI] Vols filtrés BKK→ORY 2026-03-11: escale_nuit=6 (Aéroport de Milan-Linate×2, Aéroport Léonard-de-Vinci de Rome Fiumicino×1, Zayed International Airport×1), escale_longue=2 (Aéroport de Milan-Linate×1, Aéroport de Londres Gatwick×1)",
+    "[SerpAPI] Vols filtrés ORY→HKG 2026-03-06: escale_nuit=3 (Aéroport international Hamad×2, Aéroport de Londres-Heathrow×1), escale_longue=1 (Aéropuerto Adolfo-Suárez de Madrid-Barajas×1)",
+    "[SerpAPI] Vols filtrés HKG→ORY 2026-03-11: escale_nuit=4 (Aéroport international de Chongqing×2, Aéroport de Londres-Heathrow×1, Aéroport international Hamad×1), escale_longue=4 (Aéroport de Milan-Linate×3, Aéroport Suvarnabhumi de Bangkok×1)",
+    "[SerpAPI] Vols filtrés CDG→SIN 2026-03-06: escale_nuit=1 (Zayed International Airport×1), escale_longue=3 (Aéroport d'Helsinki-Vantaa×1, Aéroport international Bandaranaike×1, Aéroport international de Nội Bài×1)",
+    "[Pipeline V2] Flight search failed (20003ms): Flight search timeout (20s)",
+    "[SerpAPI] Vols filtrés SIN→CDG 2026-03-11: escale_nuit=1 (Zayed International Airport×1)",
+    "[SerpAPI] Vols filtrés CDG→BKK 2026-03-06: escale_nuit=2 (Zayed International Airport×1, Aéroport d'Helsinki-Vantaa×1), escale_longue=1 (Aéroport international Indira Gandhi×1)",
+    "[SerpAPI] Vols filtrés BKK→CDG 2026-03-11: escale_nuit=2 (Aéroport international de Shanghai-Pudong×1, Aéroport International de Muscat×1), escale_longue=2 (Aéroport international de Shanghai-Pudong×2)",
+    "[FlightValidator] Code compagnie inconnu: UL",
+    "[FlightValidator] Code compagnie inconnu: FM",
+    "[FlightValidator] Code compagnie inconnu: SB",
+    "[FlightValidator] Code compagnie inconnu: MF",
+    "[SerpAPI] Vols filtrés CDG→HKG 2026-03-06: escale_nuit=1 (Aéroport international de Shenzhen Bao'an×1)",
+    "[SerpAPI] Vols filtrés HKG→CDG 2026-03-11: escale_nuit=3 (Aéroport international de Xi'an Xianyang×1, Aéroport international Hamad×1, Aéroport international de Dubaï×1), escale_longue=1 (Aéroport international de Shanghai-Pudong×1)",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"gp-ChIJJo-YhLEkj0i0RwrBdmWw4Fbc\" from day 4"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 4993 (line 144 column 8)"
+  ],
+  "durationMs": 94927,
+  "generatedAt": "2026-02-20T13:22:32.233Z",
+  "success": true
+}

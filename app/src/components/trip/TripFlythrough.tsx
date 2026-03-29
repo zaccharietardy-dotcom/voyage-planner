@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Play, Pause, SkipForward, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -283,7 +283,7 @@ interface Waypoint {
   type: string;
 }
 
-export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
+function TripFlythroughInner({ trip, isOpen, onClose }: TripFlythroughProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const cesiumRef = useRef<any>(null);
@@ -1288,5 +1288,39 @@ export function TripFlythrough({ trip, isOpen, onClose }: TripFlythroughProps) {
       `}</style>
     </div>,
     document.body
+  );
+}
+
+class TripFlythroughErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.error('[TripFlythrough] Render error:', error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <p className="text-white/60 text-sm">Animation indisponible</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export function TripFlythrough(props: TripFlythroughProps) {
+  return (
+    <TripFlythroughErrorBoundary>
+      <TripFlythroughInner {...props} />
+    </TripFlythroughErrorBoundary>
   );
 }

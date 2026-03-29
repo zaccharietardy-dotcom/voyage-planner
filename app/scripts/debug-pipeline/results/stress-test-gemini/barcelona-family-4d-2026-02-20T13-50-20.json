@@ -1,0 +1,2195 @@
+{
+  "scenarioId": "barcelona-family-4d",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Barcelona",
+    "startDate": "2026-02-27T13:47:18.701Z",
+    "durationDays": 4,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 4,
+    "groupType": "family_with_kids",
+    "budgetLevel": "moderate",
+    "activities": [
+      "beach",
+      "nature",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "Sagrada Familia, Park Güell",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Barcelona",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "9f8b916e-c3f3-450e-b719-c14d4d29374a",
+    "createdAt": "2026-02-20T13:50:11.747Z",
+    "updatedAt": "2026-02-20T13:50:11.747Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Barcelona",
+      "startDate": "2026-02-27T13:47:18.701Z",
+      "durationDays": 4,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 4,
+      "groupType": "family_with_kids",
+      "budgetLevel": "moderate",
+      "activities": [
+        "beach",
+        "nature",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "Sagrada Familia, Park Güell",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Barcelona",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-27T13:47:18.701Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "11:30",
+            "endTime": "14:00",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Lyon → Barcelona (estimation)",
+            "locationName": "Lyon → Barcelona",
+            "latitude": 41.3870154,
+            "longitude": 2.1700471,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 21,
+            "bookingUrl": "https://www.omio.fr/bus/lyon/barcelona?departure_date=2026-02-27",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "a8c97dd5-b3d0-4da5-85e8-738a8cb46e8c",
+            "dayNumber": 1,
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Place de Catalogne",
+            "description": "Gédéon de Catalogne fue un topógrafo, cartógrafo, señor y oficial francés, nacido en 1663 en Balansun (Pyrénées-Atlantiques), en Bearne, y fallecido el 5 de julio de 1729 en Louisbourg, Acadia.  Pasó ",
+            "locationName": "Place de Catalogne",
+            "latitude": 41.3870154,
+            "longitude": 2.1700471,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3870154,2.1700471",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Place%20de%20Catalogne&query_place_id=&center=41.3870154,2.1700471",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWlIX1UBpkk-Hi_8Nouv3bQfAj2WLBRvIiweIbk5sMXnVu8AlEWKlms_ACkncrg-DlxwcZoUSXdGhxn5TqKtwk8MU15tijKzP3lkgGA-hJIe0CHEAOiFPTKARhSfSyLZRyt9VvDWBxqeeLQl3V0ijMGKsDxOplea83SZ4YtOiOmJMV7_LZTSlffJNeZcx_E1Ng-h_qECe0szRJ4Pz6nB_HsJTJC19bzHPQ9_GfsLzaFvUMw9spirUxY9rRasjbWrmHBRRe0siWt-b45Z5UhTSTQxDBqevTLNvCLQCyxpfwC1cnH9t4c8FsGz-D3yq8h3Bkw1AbGA3-wNIA72FF3GYWG_-y6r44Agu-WTC4PeN3YjlyR6U5NvXkzo7Kf8bvcPzLqBIbR8NbLUAnYGxEMD0R4ylC_HqXU71pCITrG6JJq7r0mxFjMhNChhJZWuSigjKk8gtB5_KudaVK0J9FUgNUVzY4BB6sVHb3Ah_z18FgkPTiiJfuIYalWLg2efjxXZULuryzG3pt_REFghhP_URhYxC1wfZeGSmu7Ev4VqZ999iI2IwxSRIYxqGf2P_41G18AuA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "a92a9bc0-1a18-460c-8927-0299b5dc3e6b",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in Seventy Barcelona",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Seventy Barcelona",
+            "latitude": 41.385597,
+            "longitude": 2.169576,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "ta-hotel-19092478",
+              "name": "Seventy Barcelona",
+              "type": "hotel",
+              "address": "Barcelona",
+              "latitude": 41.385597,
+              "longitude": 2.169576,
+              "rating": 4.9,
+              "reviewCount": 1479,
+              "pricePerNight": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/29/89/23/spa.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "description": "Eixample • Prix via Official Hotel • Disponibilité confirmée",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Seventy+Barcelona+Barcelona&checkin=2026-02-27&checkout=2026-03-02&group_adults=4&group_children=0&no_rooms=1",
+              "totalPrice": 0
+            },
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Seventy+Barcelona+Barcelona&checkin=2026-02-27&checkout=2026-03-03&group_adults=4&group_children=0&no_rooms=1",
+            "distanceFromPrevious": 0.16,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "f25c9077-2240-4310-9b18-9ae7663ba7de",
+            "dayNumber": 1,
+            "startTime": "15:15",
+            "endTime": "16:15",
+            "type": "activity",
+            "title": "Casa Batlló",
+            "description": "La Casa Batlló es un edificio obra del arquitecto Antoni Gaudí, máximo representante del modernismo catalán.  Se trata de una remodelación integral de un edificio previamente existente en el solar, ob",
+            "locationName": "Casa Batlló",
+            "latitude": 41.3917,
+            "longitude": 2.164918,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3917,2.164918",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Batll%C3%B3&query_place_id=&center=41.3917,2.164918",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWcsaBRIjZQtRN_hg5_fDcTte8xYJzHE0rYkBrrg3Ux8odMUptY_h9Pi0w42bB2RkxXFqa18cWHaWdU5Rohtfs2knNMvaJg6D-hcI6K7JclTenLy6F0c9y4AkZ0COSBZ0KCYHORVJMCvh-kspGJHO42_EJlgY4ObqfBIpQ5ny6q3T6vhQFOhaoXb9aZOD03tdtxfMOZXxKj2o5B4T8CVKkuwdpt47Q_4KI7c6bGa7jiWhKdZMUltGKPJg82DJLRz2BSDNL1bFiY2TPPmOf8AanCVNz5QiA77eZEj7tkdkMvfE2sl8AIVtUgyQB9JCI7q6qb-HEb224UfTJWNP-PmNx2A5WfInXB9I3L_b37WLHosJe2abStwMaYY62uRcZvkOdSwZtAikhvIvpwVz_wd0jWOfnes6Vx_lbY6RUieInBopWdo51-WXgoyuaetTBSjDuhjcOtvG0M0f0nIANArfJld8rUXcdz5urJ0uxfr-L0LcOpTCAIIbdHbIXoWp31iNvO7RMSlBTYuaiZyF6R6yijLKV0kC69U9Ygee4jSONIbwmla92y0DC7KeZVU3ypQt1ul-PrQOx6WA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.78,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "bdd60367-94dc-4a58-9cb5-342703768b7c",
+            "dayNumber": 1,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "La Rambla",
+            "description": "La Rambla, antiguamente también llamada Las Ramblas, es un emblemático paseo de la ciudad de Barcelona que discurre entre la plaza de Cataluña, centro neurálgico de la ciudad, y el puerto antiguo.",
+            "locationName": "La Rambla",
+            "latitude": 41.3809,
+            "longitude": 2.1734,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3809,2.1734",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Rambla&query_place_id=&center=41.3809,2.1734",
+            "mustSee": true,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/15-10-27-Vista_des_de_l%27est%C3%A0tua_de_Colom_a_Barcelona-WMA_2791.jpg/330px-15-10-27-Vista_des_de_l%27est%C3%A0tua_de_Colom_a_Barcelona-WMA_2791.jpg",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.39,
+            "timeFromPrevious": 18,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "31587df2-49de-4db0-ade5-cb248879c7ae",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "La Boqueria",
+            "description": "El Mercado de San José, popularmente conocido como La Boquería, es un mercado municipal que se encuentra en la Rambla de Barcelona (España).  Además de ser un lugar donde se puede comprar todo tipo de",
+            "locationName": "La Boqueria",
+            "latitude": 41.3817399,
+            "longitude": 2.1715853,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3817399,2.1715853",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Boqueria&query_place_id=&center=41.3817399,2.1715853",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXjtv-v3mB-6NqUFfDS2H0YzFJW7C0rqCBAVadh98ZG0JpF4lGUIHr9FxGrN2r9oApLxt82omAXbfm7f-v00lbB0_z9uqhscqp3uzQ4JUL5D3yxmmsEbVl3dsFw1gt0EfcmDGxNyjGay9Fco0zOmwtlpHXW5CKZ21l0p-9LwlVagFtHVHAJkgXJXcUBeRy__15MN0Gc_QnoLXGBwq7UUf-81A3tda-YuferzWmmrbEINiOTduy35yv9dbSduiOpAGGBm58QASwWY_5eYb5ALx5q2861AGLGXU62qf3jowm-DHtznc_4WI_6a2U5ghWPAPAVCVuLhQ6w3z_nxjsfZ7wUv6A2R9GRS_z7dJQGKyWIvFLIUY1mAEqKgk9_cRRiWNBOqR8Y6dtERezZEdqf8LVMdgqpTODhiu7lWLajZzK1HB1zpY_9T9gqqFZTYgvn-WbHmq9txPXVPMj5cHWVxtu4RLyAbOhF5wPZr3y2wHxJviShhpnbOLfwZOo-JpYjug48uLxitgHrMcd3QEs_6PCDtnVb3Fph-JkWs8B-AFAXa_SIQ5IdPk0QkUcVO0sUY4-gO53-&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.18,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "69f6779a-6c59-44de-8f39-586a98233f3d",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Amades Restaurant",
+            "description": "Dîner — restaurant méditerranéen",
+            "locationName": "Carrer dels Banys Nous, 8, Local, 08002 Barcelona",
+            "latitude": 41.382205,
+            "longitude": 2.175153,
+            "orderIndex": 6,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.382205,2.175153",
+            "restaurant": {
+              "id": "serp-1035370980938475198",
+              "name": "Amades Restaurant",
+              "address": "Carrer dels Banys Nous, 8, Local, 08002 Barcelona",
+              "latitude": 41.382205,
+              "longitude": 2.175153,
+              "rating": 4.8,
+              "reviewCount": 1660,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant méditerranéen"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "934 76 50 47",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Amades%20Restaurant%2C%20Carrer%20dels%20Banys%20Nous%2C%208%2C%20Local%2C%2008002%20Barcelona",
+              "photos": [
+                "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/fwoMIZb2ZDb2UdddyEX823DQrcVfSOwp4I07NDM0mec.jpeg"
+              ],
+              "googlePlaceId": "1035370980938475198",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-2229419551265143052",
+                "name": "Restaurant La Taverna del Coure",
+                "address": "Carrer de l'Argenteria, 53, 08003 Barcelona",
+                "latitude": 41.383656,
+                "longitude": 2.18077,
+                "rating": 4.7,
+                "reviewCount": 8483,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "932 71 81 31",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20La%20Taverna%20del%20Coure%2C%20Carrer%20de%20l'Argenteria%2C%2053%2C%2008003%20Barcelona",
+                "photos": [
+                  "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/4jn5wnm79nyDlWaktxDcHU6r3wTlL94FLOrJPJjxkXE.jpeg"
+                ],
+                "googlePlaceId": "2229419551265143052",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-116052914911791316",
+                "name": "The Grill Barcelona",
+                "address": "Plaça Portal de la Pau, 4, 08002 Barcelona",
+                "latitude": 41.376848,
+                "longitude": 2.177443,
+                "rating": 4.8,
+                "reviewCount": 2084,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant méditerranéen"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "936 67 78 94",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20Grill%20Barcelona%2C%20Pla%C3%A7a%20Portal%20de%20la%20Pau%2C%204%2C%2008002%20Barcelona",
+                "photos": [
+                  "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/Lun58fXlcI4ckKinrjQExESVYKPiGgndaQqt41gnVbY.jpeg"
+                ],
+                "googlePlaceId": "116052914911791316",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.3,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Place de Catalogne et Casa Batlló",
+        "dayNarrative": "Après l'arrivée et le check-in, cette journée débute par une immersion dans le cœur de Barcelone avec des sites emblématiques et une balade animée, suivie d'un dîner savoureux.",
+        "geoDiagnostics": {
+          "maxLegKm": 1.39,
+          "p95LegKm": 0.78,
+          "totalTravelMin": 35,
+          "totalLegKm": 2.65,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.6,
+          "mstLowerBoundKm": 1.66
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-28T13:47:18.701Z",
+        "items": [
+          {
+            "id": "e8369033-b387-4146-9ae4-7e5fc292f337",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — El Nacional Barcelona",
+            "description": "Grande brasserie servant une cuisine espagnole",
+            "locationName": "Pg. de Gràcia, 24 Bis, 08007 Barcelona",
+            "latitude": 41.390583,
+            "longitude": 2.168391,
+            "orderIndex": 0,
+            "estimatedCost": 12,
+            "duration": 45,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.390583,2.168391",
+            "restaurant": {
+              "id": "serp-787139403907623797",
+              "name": "El Nacional Barcelona",
+              "address": "Pg. de Gràcia, 24 Bis, 08007 Barcelona",
+              "latitude": 41.390583,
+              "longitude": 2.168391,
+              "rating": 4.4,
+              "reviewCount": 39555,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant espagnol"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Grande brasserie servant une cuisine espagnole"
+              ],
+              "description": "Grande brasserie servant une cuisine espagnole",
+              "phoneNumber": "935 18 50 53",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Nacional%20Barcelona%2C%20Pg.%20de%20Gr%C3%A0cia%2C%2024%20Bis%2C%2008007%20Barcelona",
+              "photos": [
+                "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/e8BIG2dODrI2_oCdSZ0wji9KiqDbg6tPRrCQY46quO4.jpeg"
+              ],
+              "googlePlaceId": "787139403907623797",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJz03MMYCjpBIRe1oNMf6VJOM",
+                "name": "Bloome By Sasha | Brunch Sin Gluten Gótico",
+                "address": "Via Laietana, 45, Ciutat Vella, 08003 Barcelona",
+                "latitude": 41.386731999999995,
+                "longitude": 2.175043,
+                "rating": 4.8,
+                "reviewCount": 4350,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant sans gluten",
+                  "restaurant sans gluten",
+                  "restaurant servant le petit-déjeuner",
+                  "restaurant brunch",
+                  "restaurant de desserts",
+                  "café à chiens",
+                  "café spécialisé dans les boissons expresso",
+                  "restaurant familial",
+                  "restaurant diététique",
+                  "restaurant végétalien",
+                  "restaurant végétarien"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "602 50 03 35",
+                "website": "https://www.bloomebysasha.es/brunch-gotico",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bloome%20By%20Sasha%20%7C%20Brunch%20Sin%20Gluten%20G%C3%B3tico%2C%20Via%20Laietana%2C%2045%2C%20Ciutat%20Vella%2C%2008003%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoUgL9ih2SIxtg_6Iffol2rAnpbRSuvxFSrnGYyYioySA7gGsvn3cXFabz3fvnX29NHedLYeOJcb8-B9i217h4ei6AjJxmECfhcAqE488EKhnYjjKsSYy_-8dSc9iVbD_xOp5aU=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJz03MMYCjpBIRe1oNMf6VJOM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "saturday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "sunday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "monday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  }
+                },
+                "distance": 0.7009372660176728,
+                "walkingTime": 9
+              },
+              {
+                "id": "serp-nearby-ChIJOyPou5OjpBIR-uuMDlw_Nmg",
+                "name": "Billy Café",
+                "address": "Carrer de Bailèn, 113, Eixample, 08009 Barcelona",
+                "latitude": 41.3976374,
+                "longitude": 2.1694809999999998,
+                "rating": 4.9,
+                "reviewCount": 103,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "https://billybrunch.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Billy%20Caf%C3%A9%2C%20Carrer%20de%20Bail%C3%A8n%2C%20113%2C%20Eixample%2C%2008009%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo2tpIcB1cDzH5aW7X1V26Y5mo3DtPAKqF8hc9ZmSbCRHB-NJ353N87aCEBZbtmyO85dcbtzGGKUpfh9uKYZcsdanxDnop2J9YGmDcMZWz4YgIAIukM2obajtlYN_Oxl0QFO0bFbw=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJOyPou5OjpBIR-uuMDlw_Nmg",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.7896655093355501,
+                "walkingTime": 10
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "61316196-6c54-4b0f-a8f7-ade7ae2e1455",
+            "dayNumber": 2,
+            "startTime": "09:15",
+            "endTime": "09:45",
+            "type": "activity",
+            "title": "Sagrada Família",
+            "description": "El término Sagrada Familia puede referirse a las siguientes acepciones:",
+            "locationName": "Sagrada Família",
+            "latitude": 41.4036299,
+            "longitude": 2.1743558,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.4036299,2.1743558",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sagrada%20Fam%C3%ADlia&query_place_id=&center=41.4036299,2.1743558",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXumQya5rcmJQE21ySSup70sr2kvbxjkI2Hb882MPGw_9BCpWf3IPzqKCCY8rbMX1tYxqdHo1X_AdFT1pVyNo36TAhxuuYtzbgUmj3cFdhNqrrEYcXxBxg7xyH2Bb2LQ6oQStIDGcdgs6EVxSP2tThKnQEf4YKWQyCc30P4BMBFdGHoepd1DLe8Bvktr2qbCoMSauMm30E03Ra_qokz8uI9U5gT799mGyV9UN4_E-4jjbNXo7yJvkitqgckniKNAYiKm5UJYbHY_UdX-3ximtx1FH43dnXnIgfTidu0dK5SAyNCizR3xDSkGAYU6aL7UJa1u0uwHr62kvoqu6nAlyhB07p5hus3grje5RRSfI2Vec1i6GNZhKhihY4B9U7Nx25Rd-UahkK3EGZ3Jowkh6VVbFwT6DDbE2NF6Xf0zzPGwPCafvZfFojps0s46T8vnTfUVANw-mOW_8hu0mPqp5hfUawyhKVAd9kqgyZuqs32-t4ToygekPXmK3EZ_Kko2gBhxhNci1et3u7fNxt1c2SVvxU2yFT01YGRuMoOEzJXI9jot2T7JOb8tGhBcbjrAf3RSr-MNfKj7g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.53,
+            "timeFromPrevious": 20,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "581fef47-c6f5-459a-b3de-3aa1ffad8012",
+            "dayNumber": 2,
+            "startTime": "10:15",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Parc Güell",
+            "description": "El parque Güell es un parque público con jardines y elementos arquitectónicos situado en la parte superior de la ciudad de Barcelona (España), en las estribaciones de la sierra de Collserola.  El parq",
+            "locationName": "Parc Güell",
+            "latitude": 41.4144948,
+            "longitude": 2.1526945,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.4144948,2.1526945",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20G%C3%BCell&query_place_id=&center=41.4144948,2.1526945",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUraKE-smMd6W9-Ydz0O1Pven_NKUTE_VbhX_t1fTxNxzCDt-sM63ddf54SisxDoWVRLdC-Dnnd0wmQI51ewSjqmHTB9t1zvnJ2syU2w9xclNBI0bsJ8NXdjW-Ezxo7ASEDGPh0iLOUL6LzXYhVx58C3U0tpSA9sV9R6EeJhPNKl0ndB3P8HX_tYWR5OvHiFN6WcgEt4I5gYFHokZ3Wev05y1_BRiOTio6hgmQZpAAfSsJaLHEcnjdtjLifxCZMpFI-G0EU4XiUPSqH8fX1MViHLKbf8pvHE7kRprd_DQSYF1MOJwZpXJw-DLlwLA6p5p59bQJnMFif2Epc2ARTAc16402aBBC8cvvwX1C-2INzd_l3AM3SkHxUiCcG1skJTW0J5RD8LVto3nHjoBkoATCuvoUtEP-4v5VQ2sqjVUKEDc4gV7sQJOMzfx2mSy4lcKRwKn8_DDqG2YMx2IvoYS6-M9acUT7ld4TdE7j5MlfSwbZyn_CYDYkh7NY7GbFrrpK9AAUxj2yCH1pN73GmmvF3PsfOcBFjr28sl8zbX-BXcZwMCRgIzITi5-OeOPexs64MS2ow&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.17,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "36192e57-ccd1-43ba-b1be-6ea1f2915d25",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:15",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurant Terra Mía",
+            "description": "Repas sur place",
+            "locationName": "C/ Ana Mª Matute Ausejo, 31, Gràcia, 08024 Barcelona",
+            "latitude": 41.4162943,
+            "longitude": 2.1575267,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.403906,2.182015",
+            "restaurant": {
+              "id": "serp-nearby-ChIJq4cO07OipBIRS5h6cBIPRng",
+              "name": "Restaurant Terra Mía",
+              "address": "C/ Ana Mª Matute Ausejo, 31, Gràcia, 08024 Barcelona",
+              "latitude": 41.4162943,
+              "longitude": 2.1575267,
+              "rating": 4.5,
+              "reviewCount": 2696,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant méditerranéen",
+                "restaurant méditerranéen",
+                "restaurant italien",
+                "restaurant spécialisé dans la cuisine de sardaigne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Tapas, mets méditerranéens et terrasse. Petit restaurant-bar avec grande terrasse arborée proposant des tapas, des mets méditerranéens et des sandwiches."
+              ],
+              "description": "Tapas, mets méditerranéens et terrasse. Petit restaurant-bar avec grande terrasse arborée proposant des tapas, des mets méditerranéens et des sandwiches.",
+              "phoneNumber": "931 86 30 99",
+              "website": "https://www.terramiabarcelona.com/es/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Terra%20M%C3%ADa%2C%20C%2F%20Ana%20M%C2%AA%20Matute%20Ausejo%2C%2031%2C%20Gr%C3%A0cia%2C%2008024%20Barcelona",
+              "googlePlaceId": "ChIJq4cO07OipBIRS5h6cBIPRng",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "sunday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "monday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "tuesday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "wednesday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                },
+                "thursday": {
+                  "open": "08:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.4498976056397369,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJN34PrLOipBIRuRrbyRBDU_A",
+                "name": "Las Delicias",
+                "address": "Carrer de Mühlberg, 1, Horta-Guinardó, 08024 Barcelona",
+                "latitude": 41.4183003,
+                "longitude": 2.1576021,
+                "rating": 4.3,
+                "reviewCount": 5095,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "bar à tapas",
+                  "bar à tapas",
+                  "bar",
+                  "café et restaurant de grillades",
+                  "restaurant",
+                  "restaurant espagnol"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Cuisine espagnole classique dans un cadre simple. Plats espagnols et tapas traditionnels dans un restaurant-bar fonctionnel avec terrasse."
+                ],
+                "description": "Cuisine espagnole classique dans un cadre simple. Plats espagnols et tapas traditionnels dans un restaurant-bar fonctionnel avec terrasse.",
+                "phoneNumber": "934 29 22 02",
+                "website": "http://www.barrestaurantedelicias.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Las%20Delicias%2C%20Carrer%20de%20M%C3%BChlberg%2C%201%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqXKpnHmzieWErBOyOZLCIkNtb-pIT-HdbfNwLDmu7Iw2W8XBgpfy4TZpYQVENdSK4edazEigmOBkI0Otxxmb4-xh0aCzzob_-tx-tupN04w5KPXZeVo0hzwjlKL66xa4GKG2o_nP_dz88A=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJN34PrLOipBIRuRrbyRBDU_A",
+                "openingHours": {
+                  "friday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.3634972862047573,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJy3bDmbaipBIRd4iytkKkx4I",
+                "name": "Les Brases De Can Baró",
+                "address": "Av. de Can Baró, 7, Horta-Guinardó, 08024 Barcelona",
+                "latitude": 41.4154479,
+                "longitude": 2.1612044,
+                "rating": 4.5,
+                "reviewCount": 138,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "698 55 97 48",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Brases%20De%20Can%20Bar%C3%B3%2C%20Av.%20de%20Can%20Bar%C3%B3%2C%207%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoCTsYsJKcVT6lE_q8mwWX8Rj-_gTFEnAOMVhQFgPtQZzJNxzqRtU61xabPGezCGkEyFPZOBiLkVChx1ZROQE4ASOxa-VFsg6UCRtQVxN_clAZ2xO9N08P0yWa_U-mWmNI-Fio=w162-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJy3bDmbaipBIRd4iytkKkx4I",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "sunday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.423933853308804,
+                "walkingTime": 5
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 2.71,
+            "timeFromPrevious": 34,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Terra%20M%C3%ADa%2C%20C%2F%20Ana%20M%C2%AA%20Matute%20Ausejo%2C%2031%2C%20Gr%C3%A0cia%2C%2008024%20Barcelona",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Terra%20M%C3%ADa%2C%20C%2F%20Ana%20M%C2%AA%20Matute%20Ausejo%2C%2031%2C%20Gr%C3%A0cia%2C%2008024%20Barcelona",
+            "selectionSource": "api"
+          },
+          {
+            "id": "f5e0445a-5022-495c-8dd5-1f547bd167ab",
+            "dayNumber": 2,
+            "startTime": "13:45",
+            "endTime": "15:45",
+            "type": "activity",
+            "title": "La Pedrera",
+            "description": "La Pedrera hace referencia a varios artículos:",
+            "locationName": "La Pedrera",
+            "latitude": 41.3952155,
+            "longitude": 2.1619024,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3952155,2.1619024",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=La%20Pedrera&query_place_id=&center=41.3952155,2.1619024",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXVU5_4dcxp_7HXdhcpAgldRFqSQdQTJvKy-EQhlTAqYxUQonJ6siQYQXFGVRyMOJeOBKigoIecvQWrCnHvFL_Tljw89IXPdyf7ArpUfpmM6WOUWFszyOisQ63Ur22JqLPhmQRz7SZSa_r-6Jhh29IEYk3Hr1DH0VOO8cubMsiTg0U_vV-d8eZlzJXJbzZUaajYAhtdUXE_LTYLe1nXcKMwjUWKM3SRUK7Ax4KvU_8bJNu3eqi_Ei3yCJ8IJ3plR3RVpEO5XCQI3k6jWyC1XHVI1QMJ38I3LuCU0yFhJ7JfLfan0rCahP1eBKIkZZbSPpNWd-nMVu9SVdJ0mrNuu5rco_mVVYTK5NedC_WYL3tQwWnWyPcUu4DAZJlRzdzjWS9r7xnvWnm53CqrY-AKAZC8-wPcuXmgzfdON34Pm-oNS3Ppiwh_drXfEdPD7cLpuyEWmAMHWi4FU9Xqa_Dgq7i47sxVpqFBB4pSGWZADPQvy17YwIZmK4HQVznYJrCmcwnHeaRvTcRKPnzRPThicqsdngTrf6ZAQskP1K5pKKoa5T07PC9O3FxSCEGiylYCGdDzd-57&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.94,
+            "timeFromPrevious": 25,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e2fdc80c-a610-4e84-8b14-744d7f85b9c0",
+            "dayNumber": 2,
+            "startTime": "16:15",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Quartier Gothique",
+            "description": "La catedral de San Justo y San Pastor (Francia), está en Narbona, Francia y se halla comprendida dentro del conjunto monumental del Palacio de los Arzobispos de Narbona.  Está dedicada a los santos Ju",
+            "locationName": "Quartier Gothique",
+            "latitude": 41.3833,
+            "longitude": 2.1761,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3833,2.1761",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Quartier%20Gothique&query_place_id=&center=41.3833,2.1761",
+            "mustSee": true,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Narbonne_Cathedrale_Saint_Just_et_Saint_Pasteur.jpg/330px-Narbonne_Cathedrale_Saint_Just_et_Saint_Pasteur.jpg",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.78,
+            "timeFromPrevious": 23,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "7d1fddeb-377c-4f31-9bec-d7b5082bd3d1",
+            "dayNumber": 2,
+            "startTime": "18:30",
+            "endTime": "19:30",
+            "type": "activity",
+            "title": "Bunkers del Carmel",
+            "description": "Las baterías antiaéreas se encuentran situadas en Barcelona, en el barrio del Carmelo, en lo alto del Turó de la Rovira. \nEstá protegido por la Declaración genérica del Decreto de 22 de abril de 1949 ",
+            "locationName": "Bunkers del Carmel",
+            "latitude": 41.419236,
+            "longitude": 2.161779,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.419236,2.161779",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Bunkers%20del%20Carmel&query_place_id=&center=41.419236,2.161779",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUduNnhb8ZfwSQBmJfVj-1MbmLCpYJYzuGHH8qadwONJxtjYQ9JHr72j2hQfHcF_Z8EUm3jGcqPJS0J7jBg0zOlKa1rbAPPOdKniqFFx9i1fGGQGweaBj4Gj38Qz7T7HGxz62XUO7mJaCkTK3LUm3itwg2zT6OZrYJJs2GFXA8MWtUabsz5Hk3qf9c3tJ_ysrOZsFowCLntBqR0EPp8fp5gMFsrhj788tMPb7IyQE457YWvePHP29biW0mvQlqzT89HBx3AwbYMOUCCkfLdcvLZo1TpvZhv8ZIpxE3jydTLbQtGYTWsNV-ICGaHgG3nH6Nca2Ru_JBsqxU-xcvTs1qk_X85Z-24Fu11751eolBbKimU6sSMckXBmNE1Todez2CyK1obrZDA-HfnW-4OqL5M00bvV-h5D3YD5Napdd2lATjepQg9DuktDOGIMtpNSiu8Vp0Ym04xZnPOMWM5pumpx7DQnCjqhB3ahTJq20J3oenn4pv91xoKm4jkRYE2dt_gSY2qq1NpVRhBrL0ajj280hGjQUzKt9h6viMF6UvhSdzDG4Mq7GW3hykG_Y8UNUyVTsq9WjNsl3ZX620F_LzOslyi-g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 4.17,
+            "timeFromPrevious": 53,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "8afe59f5-c544-4713-ad72-998a4ae0c6ce",
+            "dayNumber": 2,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — El Mirador",
+            "description": "Repas sur place",
+            "locationName": "Carrer de Pasteur, 2, Horta-Guinardó, 08024 Barcelona",
+            "latitude": 41.4169774,
+            "longitude": 2.1589342,
+            "orderIndex": 7,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.388977,2.165751",
+            "restaurant": {
+              "id": "serp-nearby-ChIJqWXz67OipBIR_5P9FJixl9k",
+              "name": "El Mirador",
+              "address": "Carrer de Pasteur, 2, Horta-Guinardó, 08024 Barcelona",
+              "latitude": 41.4169774,
+              "longitude": 2.1589342,
+              "rating": 4.5,
+              "reviewCount": 1331,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "restaurant andalou",
+                "restaurant méditerranéen",
+                "bar à tapas"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "931 64 20 22",
+              "website": "https://www.instagram.com/elmiradorcarmelo/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Mirador%2C%20Carrer%20de%20Pasteur%2C%202%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+              "googlePlaceId": "ChIJqWXz67OipBIR_5P9FJixl9k",
+              "openingHours": {
+                "friday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "saturday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "sunday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                },
+                "monday": null,
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": {
+                  "open": "12:00",
+                  "close": "17:00"
+                }
+              },
+              "distance": 0.3454626820398701,
+              "walkingTime": 4
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJy3bDmbaipBIRd4iytkKkx4I",
+                "name": "Les Brases De Can Baró",
+                "address": "Av. de Can Baró, 7, Horta-Guinardó, 08024 Barcelona",
+                "latitude": 41.4154479,
+                "longitude": 2.1612044,
+                "rating": 4.5,
+                "reviewCount": 138,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "698 55 97 48",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Les%20Brases%20De%20Can%20Bar%C3%B3%2C%20Av.%20de%20Can%20Bar%C3%B3%2C%207%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoCTsYsJKcVT6lE_q8mwWX8Rj-_gTFEnAOMVhQFgPtQZzJNxzqRtU61xabPGezCGkEyFPZOBiLkVChx1ZROQE4ASOxa-VFsg6UCRtQVxN_clAZ2xO9N08P0yWa_U-mWmNI-Fio=w162-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJy3bDmbaipBIRd4iytkKkx4I",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "sunday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.423933853308804,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJN34PrLOipBIRuRrbyRBDU_A",
+                "name": "Las Delicias",
+                "address": "Carrer de Mühlberg, 1, Horta-Guinardó, 08024 Barcelona",
+                "latitude": 41.4183003,
+                "longitude": 2.1576021,
+                "rating": 4.3,
+                "reviewCount": 5095,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "bar à tapas",
+                  "bar à tapas",
+                  "bar",
+                  "café et restaurant de grillades",
+                  "restaurant",
+                  "restaurant espagnol"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Cuisine espagnole classique dans un cadre simple. Plats espagnols et tapas traditionnels dans un restaurant-bar fonctionnel avec terrasse."
+                ],
+                "description": "Cuisine espagnole classique dans un cadre simple. Plats espagnols et tapas traditionnels dans un restaurant-bar fonctionnel avec terrasse.",
+                "phoneNumber": "934 29 22 02",
+                "website": "http://www.barrestaurantedelicias.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Las%20Delicias%2C%20Carrer%20de%20M%C3%BChlberg%2C%201%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqXKpnHmzieWErBOyOZLCIkNtb-pIT-HdbfNwLDmu7Iw2W8XBgpfy4TZpYQVENdSK4edazEigmOBkI0Otxxmb4-xh0aCzzob_-tx-tupN04w5KPXZeVo0hzwjlKL66xa4GKG2o_nP_dz88A=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJN34PrLOipBIRuRrbyRBDU_A",
+                "openingHours": {
+                  "friday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "monday": null,
+                  "tuesday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "10:00",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.3634972862047573,
+                "walkingTime": 5
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 3.38,
+            "timeFromPrevious": 43,
+            "transportToPrevious": "public",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=El%20Mirador%2C%20Carrer%20de%20Pasteur%2C%202%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=El%20Mirador%2C%20Carrer%20de%20Pasteur%2C%202%2C%20Horta-Guinard%C3%B3%2C%2008024%20Barcelona",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Sagrada Família et Parc Güell",
+        "dayNarrative": "Cette journée est dédiée à l'exploration des incontournables de Gaudi, la Sagrada Familia et le Parc Güell, avec une pause déjeuner et une vue imprenable sur la ville en soirée.",
+        "geoDiagnostics": {
+          "maxLegKm": 4.17,
+          "p95LegKm": 2.17,
+          "totalTravelMin": 159,
+          "totalLegKm": 12.39,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 2.04,
+          "mstLowerBoundKm": 6.08
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 45,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-01T13:47:18.701Z",
+        "items": [
+          {
+            "id": "da7fc563-31e9-45cd-ba2c-267c895c10b0",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Casa Amàlia",
+            "description": "Resto rustique branché, cuisine créative locale",
+            "locationName": "Ptge. del Mercat, 14, 08009 Barcelona",
+            "latitude": 41.396266,
+            "longitude": 2.168521,
+            "orderIndex": 0,
+            "estimatedCost": 24,
+            "duration": 45,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.396266,2.168521",
+            "restaurant": {
+              "id": "serp-17064161635510388204",
+              "name": "Casa Amàlia",
+              "address": "Ptge. del Mercat, 14, 08009 Barcelona",
+              "latitude": 41.396266,
+              "longitude": 2.168521,
+              "rating": 4.7,
+              "reviewCount": 9649,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Resto rustique branché, cuisine créative locale"
+              ],
+              "description": "Resto rustique branché, cuisine créative locale",
+              "phoneNumber": "934 58 94 58",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Am%C3%A0lia%2C%20Ptge.%20del%20Mercat%2C%2014%2C%2008009%20Barcelona",
+              "photos": [
+                "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/GmjkgmujIDK4Cpk_b7J6hvSiU1T9hXvfbuXyrfMS4SM.jpeg"
+              ],
+              "googlePlaceId": "17064161635510388204",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJOyPou5OjpBIR-uuMDlw_Nmg",
+                "name": "Billy Café",
+                "address": "Carrer de Bailèn, 113, Eixample, 08009 Barcelona",
+                "latitude": 41.3976374,
+                "longitude": 2.1694809999999998,
+                "rating": 4.9,
+                "reviewCount": 103,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café",
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "website": "https://billybrunch.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Billy%20Caf%C3%A9%2C%20Carrer%20de%20Bail%C3%A8n%2C%20113%2C%20Eixample%2C%2008009%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo2tpIcB1cDzH5aW7X1V26Y5mo3DtPAKqF8hc9ZmSbCRHB-NJ353N87aCEBZbtmyO85dcbtzGGKUpfh9uKYZcsdanxDnop2J9YGmDcMZWz4YgIAIukM2obajtlYN_Oxl0QFO0bFbw=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJOyPou5OjpBIR-uuMDlw_Nmg",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "tuesday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "wednesday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "09:30",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.7896655093355501,
+                "walkingTime": 10
+              },
+              {
+                "id": "serp-nearby-ChIJz03MMYCjpBIRe1oNMf6VJOM",
+                "name": "Bloome By Sasha | Brunch Sin Gluten Gótico",
+                "address": "Via Laietana, 45, Ciutat Vella, 08003 Barcelona",
+                "latitude": 41.386731999999995,
+                "longitude": 2.175043,
+                "rating": 4.8,
+                "reviewCount": 4350,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant sans gluten",
+                  "restaurant sans gluten",
+                  "restaurant servant le petit-déjeuner",
+                  "restaurant brunch",
+                  "restaurant de desserts",
+                  "café à chiens",
+                  "café spécialisé dans les boissons expresso",
+                  "restaurant familial",
+                  "restaurant diététique",
+                  "restaurant végétalien",
+                  "restaurant végétarien"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "602 50 03 35",
+                "website": "https://www.bloomebysasha.es/brunch-gotico",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bloome%20By%20Sasha%20%7C%20Brunch%20Sin%20Gluten%20G%C3%B3tico%2C%20Via%20Laietana%2C%2045%2C%20Ciutat%20Vella%2C%2008003%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweoUgL9ih2SIxtg_6Iffol2rAnpbRSuvxFSrnGYyYioySA7gGsvn3cXFabz3fvnX29NHedLYeOJcb8-B9i217h4ei6AjJxmECfhcAqE488EKhnYjjKsSYy_-8dSc9iVbD_xOp5aU=w80-h106-k-no"
+                ],
+                "googlePlaceId": "ChIJz03MMYCjpBIRe1oNMf6VJOM",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "saturday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "sunday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "monday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "tuesday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "wednesday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  },
+                  "thursday": {
+                    "open": "08:30",
+                    "close": "16:30"
+                  }
+                },
+                "distance": 0.7009372660176728,
+                "walkingTime": 9
+              }
+            ],
+            "dataReliability": "verified",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "15b68309-2a5c-4522-b1a4-b0e309777920",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "09:30",
+            "type": "activity",
+            "title": "Église Sainte-Marie-de-la-Mer de Barcelone",
+            "description": "San Martín es una colectividad de ultramar francesa situada en el Caribe.  Ocupa unos 53.",
+            "locationName": "Église Sainte-Marie-de-la-Mer de Barcelone",
+            "latitude": 41.3838871,
+            "longitude": 2.1820711,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3838871,2.1820711",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%C3%89glise%20Sainte-Marie-de-la-Mer%20de%20Barcelone&query_place_id=&center=41.3838871,2.1820711",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVJCdPyv1nto55QTRpYq0pIXpLb3rYzKhPyELb5gyNsjsMFzKLY-NVE-1qR5u9UCcLS0_wDOjLx_N63czo5xt7WXZL8NVNCP477_-gPICgTjxhwZWHmz-q9FgwqqGbrNPtPW27auI4mXeMkVJ0xclLmvb2ApaYuhh9yIiSTqnXum94JS8UcRf8Q4hs5vaAa17rjWX5fBhGFDoe9K-l7FkKtmKfT70Ao9c2gqug-2-RMNJ287T3GOIEoVoUSwn3Tdzhs36k5ht1hIdvAPfrgMyOBHp8n5Z-2IWUDMHP-MQK73aOe22Qa-WTwaHs6FPXeI6N55iHYE_X8qSjpHpSffLkTr-hHkvEIcMJnjZY0_UXg3ZjyyNOfclktqg8-QB3tSFCgAgEN1pwxi7xUUBRoShmb7EIeH87sfUJzHStU-JOrz5oqYCsQiv6ARMariIhmkQo9QVIPaQ5tyyoQxmHssXwsiZt1qeBzy7QsznxC7JtFw9O7spUG4WuieCCqwFGtcz4kiZf6BcE4ifTh4F19EYRjen-JCAwYPulMGEGB4X2xm7eysjM9o1MMWPDvmQlBxM91N5Kf&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.78,
+            "timeFromPrevious": 23,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "216669bd-aa86-42c2-afe7-4b044f52a50d",
+            "dayNumber": 3,
+            "startTime": "09:45",
+            "endTime": "11:15",
+            "type": "activity",
+            "title": "Château de Montjuïc",
+            "description": "Tony Rominger es un exciclista suizo.  Es ganador de tres Vueltas a España y un Giro de Italia, entre un total de 92 victorias.  Fue uno de los mayores rivales que tuvo Miguel Induráin, destacó como u",
+            "locationName": "Château de Montjuïc",
+            "latitude": 41.362959,
+            "longitude": 2.1650636,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 90,
+            "rating": 4.4,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.362959,2.1650636",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Ch%C3%A2teau%20de%20Montju%C3%AFc&query_place_id=&center=41.362959,2.1650636",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWRkG43RSvTlrJ9eyt1AO6g3V17-FGzWuDee8C3NaFKAeZpJ7XTDh2sYleNDkrvEPLTqyebP-Ximmc4VpmWdcfavIQhO1Vq8jrG5TawgD31Jt1t8l2eIMWJLY08IRpcuNF0pOGMH-LphZOEgtw1_xdKDElPXIxpo0ftzxk8eHTsPwkxb45YiJgd9_h1CF854Ko-rT04306ICAg2mjgn_F4qX6rp_Yr_ZUWnzc6omq8njctDJQh-IdiIFydPNGf1U8yYFZZxmfosakCxeX3ERehnqaT3bd6xx6MGahyr_1J6kAglS3cs-fOIk6wdWQABqJSotLRx8ipGaPkVGghe-k9iud3LEHmcnSp59cqqSXyePg2mR90xwGJtrYfvYqSkSwsHBIr7ozCdHwdAejnUwMUX0s-F7BTV9EhE8dwjIVSYrQm8R75NrLtk37EMtXwvnal_h049QuKs56PS-V-4G3zGo7aPtlgtLvHn_MbcWBkP_BoudN9as9ocs_EsNRI-nb_ZMku2vGhVgzzeYbkSLhKC7ufY7RAaNrQM2pAXP-tfXH11PDkUCWAM3uHOifhBzLQ0HWCI&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.73,
+            "timeFromPrevious": 35,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "38a30db5-3dea-4e4b-ba7a-29a80fabd581",
+            "dayNumber": 3,
+            "startTime": "11:30",
+            "endTime": "13:30",
+            "type": "activity",
+            "title": "Palais national",
+            "description": "El Grand Palais, también llamado Grand Palais des Champs-Elysées, es un edificio singular de la ciudad de París, situado en los Campos Elíseos, en el VIII arrondissement, conformando un entorno monume",
+            "locationName": "Palais national",
+            "latitude": 41.3687659,
+            "longitude": 2.1533595,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3687659,2.1533595",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20national&query_place_id=&center=41.3687659,2.1533595",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUi_TTbGjhXKTrRSocV6f3xy7URuvrzVPCImzJkM0YW5hMS2wk5wK2IoLR2WGlAGMWdgzjUGP3dkPhUeWsVfP8F_h_3aowRRgiqL-siT4IxCKQn-tQ0DtpYfeZbdX7-l62D5hJkgZ-jGiRA-i7gEXhSshZcwho2-U3fbtL-MlCP3iGNvBozjfqoH-hTmjkQmNyJeVxfi4saz-BdNdI1AUFuhSzvDR2tT_JoatcpAgX0zQ-Mxa_o215SHtPVBuDKx-IBdZf0sdl-VxOVycrV3OCR69fjvnszJJeb2kcaE7lUGwyussIpAGhf7fdL0K3qklXruM6BTPmKNiLkngssa41Jwydnz2G9tE6t2jfj6dhg61xZpdeTHqx0HeD5zI6vNhLw8hkp6_4Q_NBY8hTEHDU_jh6mtLZsjGBKgGCcwuruExjx0kLwEVllK0rcLZAtncfXAtZAzMHHMKDFecJV8QOI4vZvbihJAxhQCoxJbJxLEsHYqX3C7p2tDv5Et68qjXjg_XnPFt7am9oke_xgPQA7SzdlmeMoZDevqqV1zk3PXQY6S7l3aDhXZJSPfDtZY1kEQbBjwpeA9g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.17,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "c2e272b3-99db-4b0a-84b2-3d3d0b413355",
+            "dayNumber": 3,
+            "startTime": "13:45",
+            "endTime": "15:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Olivia Bistro",
+            "description": "Repas sur place · Restaurant conservé faute d'alternative proche",
+            "locationName": "Carrer de Viladomat, 80, 08015 Barcelona",
+            "latitude": 41.378522,
+            "longitude": 2.159053,
+            "orderIndex": 4,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.378522,2.159053",
+            "restaurant": {
+              "id": "serp-15213764497343719948",
+              "name": "Olivia Bistro",
+              "address": "Carrer de Viladomat, 80, 08015 Barcelona",
+              "latitude": 41.378522,
+              "longitude": 2.159053,
+              "rating": 4.8,
+              "reviewCount": 2388,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "658 08 68 69",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Olivia%20Bistro%2C%20Carrer%20de%20Viladomat%2C%2080%2C%2008015%20Barcelona",
+              "photos": [
+                "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/9jMe2sorya-CjNYFRjsGhcpZxchQDjKtFb9QkIBWyYI.jpeg"
+              ],
+              "googlePlaceId": "15213764497343719948",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ96iHJHiipBIRUitR5YiTlog",
+                "name": "Casa Julio",
+                "address": "Carrer de Sant Germà, 18, Sants-Montjuïc, 08004 Barcelona",
+                "latitude": 41.3716814,
+                "longitude": 2.1465776,
+                "rating": 4.5,
+                "reviewCount": 498,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "933 28 23 29",
+                "website": "https://www.facebook.com/Rest-Casa-Julio-786763418034385/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Julio%2C%20Carrer%20de%20Sant%20Germ%C3%A0%2C%2018%2C%20Sants-Montju%C3%AFc%2C%2008004%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepLJv9lD-kCmynpHIprj4UT5CN6YCZ-keC5K8chaZAYdD3s6cv9aqRW8MUJHThK1APqvAVbdwGh3Dx6gDxaYh3Y_G8bavRqlJPUjPnZwpLkq5tRMregwKvUwaI0WR2K9hPMnSVP=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ96iHJHiipBIRUitR5YiTlog",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "16:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.43467363121193203,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-13124236537820212529",
+                "name": "La Lolita Barcelona",
+                "address": "Rambla de Catalunya, 27, Local, 08007 Barcelona",
+                "latitude": 41.388977,
+                "longitude": 2.165751,
+                "rating": 4.5,
+                "reviewCount": 12451,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant méditerranéen"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "933 42 92 04",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Lolita%20Barcelona%2C%20Rambla%20de%20Catalunya%2C%2027%2C%20Local%2C%2008007%20Barcelona",
+                "photos": [
+                  "https://serpapi.com/searches/69985f8e556ce38efc7d49b8/images/9dbyzVgxCX_q6LhP-HEyXyARIICHwEhSyH-fnZ0vsMg.jpeg"
+                ],
+                "googlePlaceId": "13124236537820212529",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "estimated",
+            "distanceFromPrevious": 1.18,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "walk",
+            "selectionSource": "fallback"
+          },
+          {
+            "id": "fd59b5a0-480c-4150-ab3a-228336b83c98",
+            "dayNumber": 3,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Parc de la Ciutadella",
+            "description": "El parque de la Ciudadela se encuentra en el distrito de Ciutat Vella, en Barcelona (España).  Durante muchos años fue el único parque público de la Ciudad Condal.",
+            "locationName": "Parc de la Ciutadella",
+            "latitude": 41.388123,
+            "longitude": 2.1860152,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.388123,2.1860152",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Parc%20de%20la%20Ciutadella&query_place_id=&center=41.388123,2.1860152",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU1DdyxkcFWgCHBBeGdS4TZM2JctmGVziw2bKXkkO1qtRXYtGHTn6O85L4I5xkQYcnllgbeWcGdzhwwjtKk9g6_rjouxyy3EVqhklr2OwJnn4F1IrHJO5UtGsZsgCvinQrV-j-9_kkjOsEl1h-JnZYQBhbM5fxU5McO1N30OTdr0bKF9fY5SC3F0EVN0aRAHEohr42fsKHN18de5VDrJ36hvY1JgHnERCSO2qqlVbXyNSOqUGro-eRf1Xw1Co4RXjy0EBApUI2kZbTC-b1L6z_UaJXPcXCu4eWta-O_4F03FsN7TLRpc9LtOuCM4xQEDiFvzxvjd1KERmzkBzPpffLw97RrTooZxjt3ZjWy0_JlvegVShOt4gpa5FaI7fA4CP-ujtHALYvJbYHcC0EtBcJ1PA3CMrNlSeGMeVzOXpq8kYN31cqU_V3LE7evla7MLi3Yfh_sM4pDPZL4o7oS8OO8NGOoL281oeI3PJlfSMjUF1CdQl8Ur-gVVCCBcQPyR0vHF5vHGnKepNy_-8lKmbIJSHye-TZnYvawuo_QL5SmhgDiXegJ_mFU-7tFrrXf5Qx96g&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.49,
+            "timeFromPrevious": 32,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "85d9d961-af4f-4add-b6f5-c6e5a5ed46dc",
+            "dayNumber": 3,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Arc de triomphe",
+            "description": "El Arco de Triunfo de París es uno de los monumentos más famosos de la capital francesa y probablemente se trate del arco de triunfo más célebre del mundo.  Construido entre 1806 y 1836 por orden de N",
+            "locationName": "Arc de triomphe",
+            "latitude": 41.3910524,
+            "longitude": 2.1806449,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3910524,2.1806449",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Arc%20de%20triomphe&query_place_id=&center=41.3910524,2.1806449",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVeeLyZW_-dJOKfx5ibI_cOAbpu1a7g5aEgX5ngUBBnl32am5bcNoFkmpLXQlOOcogGO1PELfWc7tZ8yoWo1qVYMKSPAA46Yll-CPNhqZJ2BuQJmxG8nMGYdmUS6f-JIfALKdQeX9bwcBmqVTYcg4SpETurJTVGLPMZjdaIYW5FcrvzhRcDt7I4pNn4P1EwkwqF0OQkG-SfwHDTQflUf0zKIcJjDH9k9A8etaJ23KSZ06Z08yvdo_GvriJYt9f0s0FHJYwi-eklyfU0jd3saKFLywK49pFvk_3GdAWiCushE0ExFyooSakk_BSGWqWx5KckoOY-PHG_IgVPqo4iwDrhtvhQm_R7YTwhliBxsFA6RTCTfyYCpnoSJw1LKnuSUcnwc3ii3vM4rcBCgu3J2q_uH0UzzQLGCcrc_cqsXTZXBcWAF63-pCK8oWj6Pug2KgopLIldPmp0RtySQWyqkvS702i3oiYERYSNtdxWiNdWs1PEoZdX6gtSurYRERZXlg2k37E1_nZrZvGwV8BbSE2oGzoM44znCwYUJnarKvZVIsaskW6banDB8O7FQLUJWEclUBX8&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.55,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "48d28811-90ad-4ab0-b500-999ed78ab505",
+            "dayNumber": 3,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Monument à Christophe Colomb",
+            "description": "Christoph von Schmid, de nombre completo Johann Christoph Friedrich von Schmid, fue un escritor alemán de libros para niños y de escritos religiosos, y sacerdote católico.",
+            "locationName": "Monument à Christophe Colomb",
+            "latitude": 41.3758087,
+            "longitude": 2.1777606,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3758087,2.1777606",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Monument%20%C3%A0%20Christophe%20Colomb&query_place_id=&center=41.3758087,2.1777606",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU99UrA2k_JBA_uvcAdyYR1FDRcVIf-ecpCRMZOqOI1djEpD2a9ARWwCzMCe6nNxnqRqHv_S3HSCWbP9EdE7XDuFEsL6gbdvKvKh-7ZlbUrXZtj1OTbTtALtrCBe_lBgNpVJcd5S2FYfOTDF5Fd0dDJArZTJPuvdg9WK-Znilnv6vrhYuoXZq5dz1E-jwxlTAEihur6YNKf9Cz5XbJ-T7xxkCEDTpW-QZXYMWh9cDa1KT46cG6tyDip1cnB3gg16ZRhynjeLBt7DI1cmxcCW4ie9CKB7KiXsFTWzAPUoA-wxr605on-o4uyhKRH3UYeM5lEzfIsK-OyEIMehPA9UsryOiZnOsZwZYHVYdvjIPSdvpyjJXI4CHOhVGml5GgzFP-YyzeNug9IOq13YWoSOXFdGS5dp5bDdJrKj5SP-Rx5rPTEKqzHFongIOaTMZ8h5rKc0KD1LFtiLi5qBQaD_uEUKIwLKT0zS7OVyjvRx_LIMojVSzWToJaqm6szjIN3aBGiSguJgUs1XqaF_uqS34bwulGqtKX8IWt6qfLsmmvFqGig8a0GadifR5qR7fNnWNqxrw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.71,
+            "timeFromPrevious": 22,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "75e880ab-06b0-45b0-bc8f-94bff6de6783",
+            "dayNumber": 3,
+            "startTime": "20:00",
+            "endTime": "21:00",
+            "type": "activity",
+            "title": "Fontaine magique de Montjuïc",
+            "description": "",
+            "locationName": "Fontaine magique de Montjuïc",
+            "latitude": 41.3711603,
+            "longitude": 2.1517402,
+            "orderIndex": 8,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3711603,2.1517402",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Fontaine%20magique%20de%20Montju%C3%AFc&query_place_id=&center=41.3711603,2.1517402",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVWHsZxmsBSHxbJxkOontQVIFe_nnkQQTNXu64ojHQr6WLKP860qciHvMjIagqJh-ofxRmRPWNQ4ErZrLE74RM07wJAldnCHW8vASbSXm9oG5HNYFT-_jE5dpzLXg0Vs0tQzDSBkq_pZfpo8NXcwxrOkcEwrOVrZ2eBKGXZofhCruTjS8bw_B-ExUuIdpLU54UQyNsRxLNDy50ejS0ApzUjsRwZ0ohl0XrRqIzo52NdUPw-2yxo9A-2V0asguIdvhdhhirP5yo8kDAj0rJlrRoFOOzNmmFMkCdvUVE3ekYz5g7QEsbD31bIS73nhwHlB3THfNS84nk_oWYt0Oi0XO21fR2w5MI7N6SPYO4xInNXzqVf-MSSIyBSU03ev_UMXqvk2AQPvpybxEoNh4i6C02XPolMyQobmOXJTSduxWvfP97DfETRecdVsNJBznI9dADsh_suQUDwS2S16IbWo5gQUew0LxtqhCjML75oxma-3HKYeamtq6_YS4h0TC4ZoIvzBMk58e-PZuJ2lh_Ia64U3e67C0932J2B9h8RZoxDnL5D57pWB3-zB4eRiZ8KHqTfzGhlk8w63Q&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.23,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "e0eb596f-59ea-46a2-9081-4294284d3cf7",
+            "dayNumber": 3,
+            "startTime": "21:15",
+            "endTime": "22:30",
+            "type": "restaurant",
+            "title": "Dîner — Santamadre Carn, peix i marisc",
+            "description": "Repas sur place",
+            "locationName": "Carrer de la França Xica, 25, Sants-Montjuïc, 08004 Barcelona",
+            "latitude": 41.372075599999995,
+            "longitude": 2.1574561,
+            "orderIndex": 9,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.376848,2.177443",
+            "restaurant": {
+              "id": "serp-nearby-ChIJ9_oDn2WipBIRWZcN-tNK38s",
+              "name": "Santamadre Carn, peix i marisc",
+              "address": "Carrer de la França Xica, 25, Sants-Montjuïc, 08004 Barcelona",
+              "latitude": 41.372075599999995,
+              "longitude": 2.1574561,
+              "rating": 4.8,
+              "reviewCount": 773,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "934 25 18 10",
+              "website": "http://www.instagram.com/santamadre_barcelona",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Santamadre%20Carn%2C%20peix%20i%20marisc%2C%20Carrer%20de%20la%20Fran%C3%A7a%20Xica%2C%2025%2C%20Sants-Montju%C3%AFc%2C%2008004%20Barcelona",
+              "googlePlaceId": "ChIJ9_oDn2WipBIRWZcN-tNK38s",
+              "openingHours": {
+                "friday": {
+                  "open": "13:00",
+                  "close": "00:00"
+                },
+                "saturday": {
+                  "open": "13:00",
+                  "close": "00:00"
+                },
+                "sunday": {
+                  "open": "13:00",
+                  "close": "17:00"
+                },
+                "monday": null,
+                "tuesday": {
+                  "open": "18:30",
+                  "close": "00:00"
+                },
+                "wednesday": {
+                  "open": "13:00",
+                  "close": "00:00"
+                },
+                "thursday": {
+                  "open": "13:00",
+                  "close": "00:00"
+                }
+              },
+              "distance": 0.48770098886931407,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJ96iHJHiipBIRUitR5YiTlog",
+                "name": "Casa Julio",
+                "address": "Carrer de Sant Germà, 18, Sants-Montjuïc, 08004 Barcelona",
+                "latitude": 41.3716814,
+                "longitude": 2.1465776,
+                "rating": 4.5,
+                "reviewCount": 498,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "933 28 23 29",
+                "website": "https://www.facebook.com/Rest-Casa-Julio-786763418034385/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20Julio%2C%20Carrer%20de%20Sant%20Germ%C3%A0%2C%2018%2C%20Sants-Montju%C3%AFc%2C%2008004%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepLJv9lD-kCmynpHIprj4UT5CN6YCZ-keC5K8chaZAYdD3s6cv9aqRW8MUJHThK1APqvAVbdwGh3Dx6gDxaYh3Y_G8bavRqlJPUjPnZwpLkq5tRMregwKvUwaI0WR2K9hPMnSVP=w163-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ96iHJHiipBIRUitR5YiTlog",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "16:00"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "tuesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "wednesday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  },
+                  "thursday": {
+                    "open": "07:30",
+                    "close": "16:00"
+                  }
+                },
+                "distance": 0.43467363121193203,
+                "walkingTime": 5
+              },
+              {
+                "id": "serp-nearby-ChIJ857-9WWipBIRpL2CcxObhx4",
+                "name": "Petit Montjuïc",
+                "address": "Carrer de Sant Isidre, 2, Sants-Montjuïc, 08004 Barcelona",
+                "latitude": 41.371057799999996,
+                "longitude": 2.1588575999999997,
+                "rating": 4.6,
+                "reviewCount": 650,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant",
+                  "restaurant",
+                  "restaurant méditerranéen"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "931 47 29 66",
+                "website": "http://www.petitmontjuic.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Petit%20Montju%C3%AFc%2C%20Carrer%20de%20Sant%20Isidre%2C%202%2C%20Sants-Montju%C3%AFc%2C%2008004%20Barcelona",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweo2_KwBtJ0Uu_grMfwvVBQTP-b60sK6vWwD1iKXA6_K6o8-79fZg9Ne4f4HtgNuBhSjyxM2hvHzE1m3DXZKWMEZWsWpNZdnMm_9layHlGxbPmJZnvdWAm054xva3SzFcF23dGQ=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJ857-9WWipBIRpL2CcxObhx4",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "sunday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "monday": null,
+                  "tuesday": null,
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "17:00"
+                  }
+                },
+                "distance": 0.16274299195219896,
+                "walkingTime": 2
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 2.24,
+            "timeFromPrevious": 28,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Santamadre%20Carn%2C%20peix%20i%20marisc%2C%20Carrer%20de%20la%20Fran%C3%A7a%20Xica%2C%2025%2C%20Sants-Montju%C3%AFc%2C%2008004%20Barcelona",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Santamadre%20Carn%2C%20peix%20i%20marisc%2C%20Carrer%20de%20la%20Fran%C3%A7a%20Xica%2C%2025%2C%20Sants-Montju%C3%AFc%2C%2008004%20Barcelona",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Église Sainte-Marie-de-la-Mer de Barcelone et Château de Montjuïc",
+        "dayNarrative": "Cette journée combine des visites culturelles avec des moments de détente en pleine nature, culminant avec le spectacle féerique de la Fontaine Magique de Montjuïc.",
+        "geoDiagnostics": {
+          "maxLegKm": 2.73,
+          "p95LegKm": 2.49,
+          "totalTravelMin": 183,
+          "totalLegKm": 14.33,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.9,
+          "mstLowerBoundKm": 7.54
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 1,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-03-02T13:47:18.701Z",
+        "items": [
+          {
+            "id": "b1d01118-0195-4b2b-bb51-4c7a0ad08d35",
+            "dayNumber": 4,
+            "startTime": "09:15",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Aquarium de Barcelone",
+            "description": "L´Aquàrium de Barcelona, situado en el Port Vell de Barcelona, es el principal y único gran acuario de la ciudad y de Cataluña.  Además, es el centro más importante del mundo en temática mediterránea.",
+            "locationName": "Aquarium de Barcelone",
+            "latitude": 41.3768473,
+            "longitude": 2.1843334,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 45,
+            "rating": 4.1,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=41.3768473,2.1843334",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Aquarium%20de%20Barcelone&query_place_id=&center=41.3768473,2.1843334",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfW0h7h_J_GRqUC2BEKxPj7RFMvImlCNwbHhASAY6PMAYkPs0L56140vWOXa-Yka3Nwvp-Bh-K_CanaBnpJVf4L7ZNtaJNnaCPSyPZJIFjrSubnXp0w37O76zi5_5RzOQqL2wjgzq2WAMscX4__s1AO1YHPLVQIPSx9qVDotyqpdYTKCYqOyYabUFcXGIn4bG6fqL9AL4bZ83368-goHUYepcc9rfhhAZemuSDthd-stJQKGOBFR1IDnatTVzKql-n1llesw_O2EQNyembgOe7JKOaP9USmZg8UXFRVPpZSa0aigkMzHApbtoIhZ7idVH55uxSGFONU4NI4BQBigrzaT_BaiqY9Gu1gNQbbri1oHhnS-fpRG4fxbM0UohbDQ92hjp1eDczvhJLhJRqlpmLSAZpOcuA607Xn8__6GV3yB8O17Yx6Xh4wqgDchuh7sNuEuZZb4gXbjSZJQm73yMVNPiuGrgnNs5oKQLcqqZFDKgmYHEi3JW5w4Ed9Wz688Jc_W0CYDoqgr3B5ZctTWQr8hFIFRxkCQd5Fx8yf6CSzWTP80ivVTt0RlaAuB0zYwWBLySJQAepzyUQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "b276d4c3-d832-4696-b6c0-92ee14649feb",
+            "dayNumber": 4,
+            "startTime": "11:00",
+            "endTime": "11:15",
+            "type": "checkout",
+            "title": "Check-out Seventy Barcelona",
+            "description": "Départ de l'hôtel",
+            "locationName": "Seventy Barcelona",
+            "latitude": 41.385597,
+            "longitude": 2.169576,
+            "orderIndex": 1,
+            "accommodation": {
+              "id": "ta-hotel-19092478",
+              "name": "Seventy Barcelona",
+              "type": "hotel",
+              "address": "Barcelona",
+              "latitude": 41.385597,
+              "longitude": 2.169576,
+              "rating": 4.9,
+              "reviewCount": 1479,
+              "pricePerNight": 0,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/29/89/23/spa.jpg?w=600&h=400&s=1"
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "11:00",
+              "description": "Eixample • Prix via Official Hotel • Disponibilité confirmée",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Seventy+Barcelona+Barcelona&checkin=2026-02-27&checkout=2026-03-02&group_adults=4&group_children=0&no_rooms=1",
+              "totalPrice": 0
+            },
+            "distanceFromPrevious": 1.57,
+            "timeFromPrevious": 20,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "transport-ret-4-fallback",
+            "dayNumber": 4,
+            "startTime": "11:45",
+            "endTime": "14:15",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "Barcelona → Lyon (estimation)",
+            "locationName": "Barcelona → Lyon",
+            "latitude": 41.3768473,
+            "longitude": 2.1843334,
+            "orderIndex": 2,
+            "duration": 150,
+            "estimatedCost": 21,
+            "bookingUrl": "https://www.omio.fr/bus/lyon/barcelona?departure_date=2026-03-02",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "Aquarium de Barcelone",
+        "dayNarrative": "Pour le dernier jour, une activité familiale divertissante est prévue avant le départ, permettant de profiter des dernières heures à Barcelone.",
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Barcelona",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 41.3851,
+              "lng": 2.1734
+            },
+            "duration": 399,
+            "price": 21,
+            "co2": 14,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/barcelona?departure_date=2026-02-27"
+          }
+        ],
+        "totalDuration": 454,
+        "totalPrice": 21,
+        "totalCO2": 14,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0.7,
+          "co2Score": 9.5
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/barcelona?departure_date=2026-02-27",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Barcelona",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 41.3851,
+              "lng": 2.1734
+            },
+            "duration": 423,
+            "price": 43,
+            "co2": 7,
+            "operator": "TER",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/barcelona?departure_date=2026-02-27"
+          }
+        ],
+        "totalDuration": 463,
+        "totalPrice": 43,
+        "totalCO2": 7,
+        "score": 5.9,
+        "scoreDetails": {
+          "priceScore": 7.4,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/barcelona?departure_date=2026-02-27",
+        "dataSource": "estimated",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lyon-Perrache",
+            "to": "Lyon Part Dieu",
+            "departure": "2026-02-27T16:57:00.000Z",
+            "arrival": "2026-02-27T17:05:00.000Z",
+            "duration": 8,
+            "line": "TER"
+          },
+          {
+            "mode": "train",
+            "from": "Lyon Part Dieu",
+            "to": "Sète",
+            "departure": "2026-02-27T17:10:00.000Z",
+            "arrival": "2026-02-27T19:21:00.000Z",
+            "duration": 131,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "train",
+            "from": "Sète",
+            "to": "Perpignan",
+            "departure": "2026-02-27T19:35:00.000Z",
+            "arrival": "2026-02-27T20:57:00.000Z",
+            "duration": 82,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "bus",
+            "from": "Perpignan Bus Station",
+            "to": "Barcelona North Carrer d'Alí Bei",
+            "departure": "2026-02-27T21:25:00.000Z",
+            "arrival": "2026-02-28T00:00:00.000Z",
+            "duration": 155,
+            "line": "FlixBus"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Barcelona",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 41.3851,
+              "lng": 2.1734
+            },
+            "duration": 319,
+            "price": 107,
+            "co2": 14,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Barcelona"
+          }
+        ],
+        "totalDuration": 364,
+        "totalPrice": 107,
+        "totalCO2": 14,
+        "score": 5.7,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 7.4,
+          "co2Score": 9.5
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Barcelona",
+        "dataSource": "estimated"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Barcelona",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 41.3851,
+              "lng": 2.1734
+            },
+            "duration": 40,
+            "price": 53,
+            "co2": 136,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON2702BARCELONA4?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 330,
+        "totalPrice": 53,
+        "totalCO2": 136,
+        "score": 5.4,
+        "scoreDetails": {
+          "priceScore": 6.3,
+          "timeScore": 10,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON2702BARCELONA4?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/barcelona?departure_date=2026-02-27"
+      }
+    ],
+    "selectedTransport": {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Lyon",
+          "to": "Barcelona",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "duration": 399,
+          "price": 21,
+          "co2": 14,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/lyon/barcelona?departure_date=2026-02-27"
+        }
+      ],
+      "totalDuration": 454,
+      "totalPrice": 21,
+      "totalCO2": 14,
+      "score": 6.7,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 0.7,
+        "co2Score": 9.5
+      },
+      "bookingUrl": "https://www.omio.fr/bus/lyon/barcelona?departure_date=2026-02-27",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "ta-hotel-19092478",
+      "name": "Seventy Barcelona",
+      "type": "hotel",
+      "address": "Barcelona",
+      "latitude": 41.385597,
+      "longitude": 2.169576,
+      "rating": 4.9,
+      "reviewCount": 1479,
+      "pricePerNight": 0,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/29/89/23/spa.jpg?w=600&h=400&s=1"
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "11:00",
+      "description": "Eixample • Prix via Official Hotel • Disponibilité confirmée",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Seventy+Barcelona+Barcelona&checkin=2026-02-27&checkout=2026-03-02&group_adults=4&group_children=0&no_rooms=1",
+      "totalPrice": 0
+    },
+    "accommodationOptions": [],
+    "totalEstimatedCost": 384,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 0,
+      "food": 384,
+      "activities": 0,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 260,
+      "mealsStrategy": {
+        "breakfast": "self_catered",
+        "lunch": "mixed",
+        "dinner": "mixed"
+      },
+      "groceryShoppingNeeded": true,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 10,
+      "transportTips": "Achetez le T-Casual 10 voyages (11,35€) ou abonnement T-dia 8,15€. Utilisez les plages gratuites et parcs (Parc Güell entrée libre certains horaires). Explorez à pied le Gothique.",
+      "reasoning": "Avec 63€/pers/jour, le budget est très serré. Airbnb avec cuisine permet d'économiser ~7-10€/repas vs restaurants. Petit-déj maison (2€), déjeuners mix courses/restos locaux bon marché (8-10€), dîners alternés maison/petits restos (10€). Activités: priorité plages gratuites, Sagrada Familia peut être observée extérieurement (gratuit), musées limités à 1-2 (14€ chacun). Transport efficace via T-Casual. Cet ajustement permet confort basique + quelques expériences culturelles sans stress financier.",
+      "maxPricePerActivity": 50
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: barcelona-family-4d",
+    "   Lyon → Barcelona (4j)",
+    "   family_with_kids (4p) | moderate | beach, nature, culture",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Barcelona\", ll=\"@41.3851,2.1734,14z\", gl=\"es\"",
+    "[Weather] Cache hit for 2026-02-27 → 2026-03-02",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Google Places] ✅ 27 attractions found for Barcelona",
+    "[Hotels] Disponibilité live: 5/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (520ms)",
+    "[Pipeline V2] Injected 5 curated must-see attractions for \"Barcelona\" from local database",
+    "[Pipeline V2]   → Sagrada Familia, Parc Güell, La Rambla, Marché de la Boqueria, Casa Batlló, Quartier Gothique",
+    "[Pipeline V2] Step 1: All data fetched in 14233ms",
+    "[Pipeline V2]   Activities: 27 Google + 14 SerpAPI + 3 Overpass + 12 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 5 | Transport options: 4",
+    "[Pipeline V2 LLM] Step 1 done in 14233ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Seventy Barcelona\" (4.9★, €0/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 62 activities → 35 after dedup (dropped 27)",
+    "[Pipeline V2 LLM] Step 2: Selected 26 activities (2 must-sees, 24 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 10 restaurants from 40 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 542 pairs",
+    "[Pipeline V2 LLM] Step 2: 26 activities, 10 restaurants, 542 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 10ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 21777 in + 2468 out, ~$0.0047, 18822ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Arrivée et découverte du centre historique\",\n      \"narrative\": \"Après l'arrivée et le check-in, cette journée débute par une immersion dans l...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 2 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 165min gap on day 3 with \"Église Sainte-Marie-de-la-Mer de Barcelone\" (fill 1/3)",
+    "[Pipeline V2 LLM] Enrichment: filled 135min gap on day 3 with \"Monument à Christophe Colomb\" (fill 2/3)",
+    "[Pipeline V2 LLM] Enrichment: filled 120min gap on day 3 with \"Château de Montjuïc\" (fill 3/3)",
+    "[Pipeline V2 LLM] Enrichment complete: added 3 activities",
+    "[Pipeline V2 LLM] Plan: 4 days, 17 activities, 7 meals",
+    "[Pipeline V2 LLM] Step 3 done in 18823ms — 4 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 26 activities, 10 restaurants",
+    "[Pipeline V2 LLM] Built 4 days with 24 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 837ms",
+    "[Pipeline V2 LLM] Step 4 done in 837ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 3 restaurants swapped, 1 kept as fallback (5174ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 14 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 3105ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 91/100",
+    "  📦 Complétude: 21/25",
+    "  ⏱️  Rythme:     24/25",
+    "  🗺️  Géo:        21/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 4: transport retour manquant",
+    "  ⚠️ Jour 3: Déjeuner — Olivia Bistro est à 1184m de l'activité la plus proche",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 4: transport retour inséré (fallback)",
+    "  🔧 Jour 1: thème régénéré \"Arrivée et découverte du centre historique\" → \"Place de Catalogne et Casa Batlló\"",
+    "  🔧 Jour 2: thème régénéré \"Chef-d'œuvres de Gaudi et vues panoramiques\" → \"Sagrada Família et Parc Güell\"",
+    "  🔧 Jour 3: thème régénéré \"Culture, nature et spectacle nocturne\" → \"Église Sainte-Marie-de-la-Mer de Barcelone et Château de Montjuïc\"",
+    "  🔧 Jour 4: thème régénéré \"Derniers instants avant le départ\" → \"Aquarium de Barcelone\"",
+    "[Pipeline V2 LLM] Step 5 done in 1ms — score: 91/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 42184ms ==="
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"gp-ChIJN7FiCkGipBIR1a1z3FTGCoY\" from day 3",
+    "[Pipeline V2 LLM] Sanitize: removed unknown restaurant \"serp-49876543210987654321\" from day 4"
+  ],
+  "errors": [
+    "[SerpAPI Hotels] Erreur: Google Hotels hasn't returned any results for this query.",
+    "[TravelTips] Error: SyntaxError: Expected ',' or '}' after property value in JSON at position 5670 (line 150 column 4)"
+  ],
+  "durationMs": 42184,
+  "generatedAt": "2026-02-20T13:49:38.679Z",
+  "success": true
+}

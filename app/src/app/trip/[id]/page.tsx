@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useGoBack } from '@/hooks/useGoBack';
 import dynamic from 'next/dynamic';
 import { Trip, TripItem, TripDay, Accommodation, GROUP_TYPE_LABELS, ACTIVITY_LABELS } from '@/lib/types';
 import { DayTimeline, CarbonFootprint, TransportOptions, BookingChecklist } from '@/components/trip';
@@ -81,6 +82,7 @@ import { optimizeDay } from '@/lib/services/routeOptimizer';
 import { Attraction } from '@/lib/services/attractions';
 import { ActivityAlternativesDialog } from '@/components/trip/ActivitySwapButton';
 import { AddActivityModal } from '@/components/trip/AddActivityModal';
+import { ActivityPool } from '@/components/trip/ActivityPool';
 import { CalendarView } from '@/components/trip/CalendarView';
 import { CommentsSection } from '@/components/trip/CommentsSection';
 import { ChatPanel, ChatButton } from '@/components/trip/ChatPanel';
@@ -267,6 +269,7 @@ function resolveSelectedTransportFromGeneratedTrip(
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
+  const goBack = useGoBack('/');
   const tripId = params.id as string;
   const { user } = useAuth();
   const { isOffline } = useConnectivity();
@@ -580,7 +583,7 @@ export default function TripPage() {
       setOriginalTransportId(updatedTrip.selectedTransport?.id);
     } catch (error) {
       console.error('Erreur régénération:', error);
-      alert('Erreur lors de la régénération du voyage');
+      toast.error('Erreur lors de la régénération du voyage');
     } finally {
       setRegenerating(false);
     }
@@ -608,6 +611,7 @@ export default function TripPage() {
 
   const handleDeleteItem = useCallback((item: TripItem) => {
     if (!trip) return;
+    const previousTrip = trip;
     const updatedDays = cascadeRecalculate(
       trip.days.map((day) => ({
         ...day,
@@ -618,7 +622,15 @@ export default function TripPage() {
     );
     const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
     saveTrip(updatedTrip);
-    toast.success('Activité supprimée');
+    toast('Activité supprimée', {
+      duration: 5000,
+      action: {
+        label: 'Annuler',
+        onClick: () => {
+          saveTrip({ ...previousTrip, updatedAt: new Date() });
+        },
+      },
+    });
   }, [trip, saveTrip]);
 
   const handleSwapActivity = useCallback((oldItem: TripItem, newAttraction: Attraction) => {
@@ -949,6 +961,47 @@ export default function TripPage() {
     saveTrip(updatedTrip);
     setShowAddActivityModal(false);
     toast.success(`"${newItem.title}" ajouté au Jour ${newItem.dayNumber}`);
+  }, [trip, saveTrip]);
+
+  const handleAddFromPool = useCallback((attraction: Attraction, dayNumber: number) => {
+    if (!trip) return;
+    const day = trip.days.find(d => d.dayNumber === dayNumber);
+    if (!day) return;
+    const lastItem = day.items[day.items.length - 1];
+    const startTime = lastItem?.endTime || '10:00';
+    const [h, m] = startTime.split(':').map(Number);
+    const duration = attraction.duration || 60;
+    const endH = h + Math.floor((m + duration) / 60);
+    const endM = (m + duration) % 60;
+    const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+    const newItem: TripItem = {
+      id: crypto.randomUUID(),
+      dayNumber,
+      startTime,
+      endTime,
+      type: 'activity',
+      title: attraction.name,
+      description: attraction.description || '',
+      locationName: attraction.name,
+      latitude: attraction.latitude,
+      longitude: attraction.longitude,
+      orderIndex: day.items.length,
+      imageUrl: attraction.imageUrl || '',
+      rating: attraction.rating,
+      duration,
+      estimatedCost: attraction.estimatedCost,
+      googleMapsPlaceUrl: attraction.googleMapsUrl || '',
+      dataReliability: attraction.dataReliability || 'verified',
+    };
+
+    const updatedDays = trip.days.map(d => {
+      if (d.dayNumber !== dayNumber) return d;
+      return { ...d, items: [...d.items, newItem] };
+    });
+    const updatedTrip = { ...trip, days: updatedDays, updatedAt: new Date() };
+    saveTrip(updatedTrip);
+    toast.success(`${attraction.name} ajouté au jour ${dayNumber}`);
   }, [trip, saveTrip]);
 
   const handleImportBooking = useCallback((booking: ParsedBooking) => {
@@ -1534,7 +1587,7 @@ export default function TripPage() {
           <div className="rounded-[2rem] border border-gold/20 bg-white/50 dark:bg-white/5 px-6 py-4 shadow-xl shadow-gold/5 backdrop-blur-md">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-5">
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-gold/10 hover:text-gold transition-all" onClick={() => router.push('/')}>
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-gold/10 hover:text-gold transition-all" onClick={goBack}>
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="min-w-0">
@@ -1688,7 +1741,7 @@ export default function TripPage() {
             <div className="flex items-center gap-3">
               <button
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"
-                onClick={() => { hapticImpactLight(); router.push('/'); }}
+                onClick={() => { hapticImpactLight(); goBack(); }}
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
@@ -1732,9 +1785,12 @@ export default function TripPage() {
           )}
 
           {/* Bottom sheet */}
-          <Drawer open modal={false} snapPoints={[0.3, 0.94]} dismissible={false}>
+          <Drawer open modal={false} snapPoints={[0.3, 0.94]} dismissible={false} handleOnly>
             <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628] border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
-              <DrawerHandle className="bg-white/20 w-12 h-1.5 mt-3 mb-2 shrink-0" />
+              {/* Zone de drag élargie — 48px de hauteur tactile */}
+              <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+                <DrawerHandle className="bg-white/20 w-12 h-1.5 shrink-0" />
+              </div>
               
               <Tabs value={mainTab} onValueChange={(v) => { hapticImpactLight(); setMainTab(v); }} className="flex-1 flex flex-col min-h-0">
                 <TabsList className="mx-4 mb-4 flex w-auto gap-1 bg-white/5 border border-white/5 rounded-xl p-1 shrink-0" data-tour="tabs">
@@ -1743,6 +1799,7 @@ export default function TripPage() {
                   <TabsTrigger value="overview" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Résumé</TabsTrigger>
                   <TabsTrigger value="reserver" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Réserver</TabsTrigger>
                   <TabsTrigger value="infos" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Infos</TabsTrigger>
+                  {trip.attractionPool?.length ? <TabsTrigger value="pool" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Pool</TabsTrigger> : null}
                 </TabsList>
 
                 <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(env(safe-area-inset-bottom)+80px)] scrollbar-hide">
@@ -1778,13 +1835,13 @@ export default function TripPage() {
                       <div className="flex items-center justify-between">
                         <div className="inline-flex p-0.5 bg-white/5 rounded-lg border border-white/5" data-tour="view-toggle">
                           <button 
-                            className={cn("px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all", planningView === 'timeline' ? "bg-white/10 text-white" : "text-white/40")}
+                            className={cn("px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all", planningView === 'timeline' ? "bg-white/10 text-white" : "text-white/60")}
                             onClick={() => setPlanningView('timeline')}
                           >
                             Timeline
                           </button>
                           <button 
-                            className={cn("px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all", planningView === 'calendar' ? "bg-white/10 text-white" : "text-white/40")}
+                            className={cn("px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all", planningView === 'calendar' ? "bg-white/10 text-white" : "text-white/60")}
                             onClick={() => setPlanningView('calendar')}
                           >
                             Calendrier
@@ -1900,6 +1957,10 @@ export default function TripPage() {
                       {user && <ExpensesPanel tripId={tripId} members={expenseMembers} currentUserId={user?.id || ''} />}
                     </div>
                   </TabsContent>
+
+                  <TabsContent value="pool" className="mt-0">
+                    <ActivityPool trip={trip} onAddToDay={handleAddFromPool} />
+                  </TabsContent>
                 </div>
               </Tabs>
             </DrawerContent>
@@ -1917,6 +1978,7 @@ export default function TripPage() {
                 <TabsTrigger value="planning" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Itinéraire</TabsTrigger>
                 <TabsTrigger value="reserver" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Réserver</TabsTrigger>
                 <TabsTrigger value="infos" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Infos</TabsTrigger>
+                {trip.attractionPool?.length ? <TabsTrigger value="pool" className="flex-1 text-[10px] font-bold uppercase tracking-widest rounded-xl data-[state=active]:bg-gold data-[state=active]:text-white transition-all">Pool</TabsTrigger> : null}
               </TabsList>
 
               {liveState && (
@@ -2067,6 +2129,10 @@ export default function TripPage() {
                 </div>
               </TabsContent>
 
+              <TabsContent value="pool">
+                <ActivityPool trip={trip} onAddToDay={handleAddFromPool} />
+              </TabsContent>
+
               <TabsContent value="depenses">
                 <Card>
                   <CardHeader>
@@ -2150,7 +2216,7 @@ export default function TripPage() {
       <ActivityEditModal item={editingItem} isOpen={showEditModal} onClose={() => { setShowEditModal(false); setEditingItem(null); }} onSave={handleSaveItem} onDelete={handleDeleteItem} />
 
       {trip && (
-        <AddActivityModal isOpen={showAddActivityModal} onClose={() => setShowAddActivityModal(false)} onAdd={handleAddNewItem} dayNumber={addActivityDay} destination={trip.preferences?.destination || collaborativeTrip?.destination || ''} defaultStartTime={addActivityDefaultTime} defaultEndTime={addActivityDefaultEndTime} />
+        <AddActivityModal isOpen={showAddActivityModal} onClose={() => setShowAddActivityModal(false)} onAdd={handleAddNewItem} dayNumber={addActivityDay} destination={trip.preferences?.destination || collaborativeTrip?.destination || ''} defaultStartTime={addActivityDefaultTime} defaultEndTime={addActivityDefaultEndTime} attractionPool={trip.attractionPool} />
       )}
 
       {swapItem && trip?.attractionPool && (

@@ -22,115 +22,120 @@ const BUDGET_OPTIONS: BudgetLevel[] = ['economic', 'moderate', 'comfort', 'luxur
 
 export function StepBudget({ data, onChange }: StepBudgetProps) {
   return (
-    <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold mb-2">Quel est votre budget ?</h2>
-        <p className="text-muted-foreground">Définissez votre budget total pour le voyage</p>
+    <div className="space-y-12 max-w-[600px] mx-auto w-full">
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+          Quel budget prévoir ?
+        </h2>
+        <p className="text-[17px] text-[#94a3b8] font-light">
+          Pour adapter le choix des hébergements et des restaurants.
+        </p>
       </div>
 
-      {/* Niveaux de budget */}
-      <div className="space-y-4">
-        <Label className="text-base font-medium">Niveau de budget</Label>
-        <div className="grid grid-cols-2 gap-4">
-          {BUDGET_OPTIONS.map((budget) => (
-            <button
-              key={budget}
-              type="button"
-              onClick={() => onChange({ budgetLevel: budget, budgetCustom: undefined })}
-              className={cn(
-                'flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all',
-                'hover:border-primary hover:bg-primary/5',
-                'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
-                data.budgetLevel === budget && !data.budgetCustom
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card'
-              )}
-            >
-              <div
+      <div className="space-y-10">
+        {/* Niveaux de budget */}
+        <div className="space-y-4">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Niveau de confort</p>
+          <div className="grid grid-cols-2 gap-4">
+            {BUDGET_OPTIONS.map((budget) => (
+              <button
+                key={budget}
+                type="button"
+                onClick={() => onChange({ budgetLevel: budget, budgetCustom: undefined })}
                 className={cn(
-                  'p-3 rounded-full mb-3',
+                  'flex flex-col items-center justify-center p-6 rounded-[1.5rem] border transition-all duration-300 group',
                   data.budgetLevel === budget && !data.budgetCustom
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    ? 'border-gold bg-[#0e1220] shadow-[0_10px_30px_rgba(197,160,89,0.15)] scale-[1.02]'
+                    : 'border-white/[0.08] bg-[#0e1220]/50 hover:bg-[#0f1429] hover:border-white/20'
                 )}
               >
-                {BUDGET_ICONS[budget]}
-              </div>
-              <span className="font-semibold">{BUDGET_LABELS[budget].label}</span>
-              <span className="text-sm text-muted-foreground mt-1">
-                {BUDGET_LABELS[budget].range}
-              </span>
-            </button>
-          ))}
+                <div
+                  className={cn(
+                    'p-4 rounded-2xl mb-4 transition-all duration-300',
+                    data.budgetLevel === budget && !data.budgetCustom
+                      ? 'bg-gold text-black shadow-lg shadow-gold/30'
+                      : 'bg-white/5 text-white/40 group-hover:text-white/60'
+                  )}
+                >
+                  {BUDGET_ICONS[budget]}
+                </div>
+                <span className={cn(
+                  'text-lg font-bold tracking-tight transition-colors',
+                  data.budgetLevel === budget && !data.budgetCustom ? 'text-white' : 'text-white/70 group-hover:text-white/90'
+                )}>
+                  {BUDGET_LABELS[budget].label}
+                </span>
+                <span className="text-xs font-medium text-white/40 mt-1">
+                  {BUDGET_LABELS[budget].range}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
       {/* Divider */}
-      <div className="relative">
+      <div className="relative pt-4 pb-2">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
+          <span className="w-full border-t border-white/[0.05]" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">ou</span>
+        <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
+          <span className="bg-[#050814] px-4 text-white/30">ou budget précis</span>
         </div>
       </div>
 
       {/* Budget personnalisé */}
-      <div className="space-y-3">
-        <Label htmlFor="custom-budget" className="text-base font-medium">
-          Budget personnalisé
-        </Label>
-        <div className="relative">
-          <Input
-            id="custom-budget"
-            type="number"
-            placeholder="2000"
-            min="0"
-            value={data.budgetCustom || ''}
-            onChange={(e) => {
-              const rawValue = e.target.value;
-              if (rawValue === '') {
-                onChange({ budgetCustom: undefined, budgetLevel: undefined });
-                return;
-              }
-              const parsedValue = parseInt(rawValue);
-              if (isNaN(parsedValue) || parsedValue < 0) {
-                // Invalid input - don't update
-                return;
-              }
-              onChange({ budgetCustom: parsedValue, budgetLevel: undefined });
-            }}
-            className="h-12 text-base pr-12"
-          />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
-            €
-          </span>
+      <div className="space-y-4">
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gold/20 rounded-[1.2rem] blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+          <div className="relative">
+            <Input
+              id="custom-budget"
+              type="number"
+              placeholder="Ex: 2000"
+              min="0"
+              value={data.budgetCustom || ''}
+              onChange={(e) => {
+                const rawValue = e.target.value;
+                if (rawValue === '') {
+                  onChange({ budgetCustom: undefined, budgetLevel: undefined });
+                  return;
+                }
+                const parsedValue = parseInt(rawValue);
+                if (isNaN(parsedValue) || parsedValue < 0) {
+                  return;
+                }
+                onChange({ budgetCustom: parsedValue, budgetLevel: undefined });
+              }}
+              className="pl-6 pr-16 h-[64px] text-xl rounded-[1.2rem] bg-[#0e1220]/50 border-white/[0.08] text-white placeholder:text-white/30 focus:border-white/20 focus:bg-[#0f1429] focus-visible:ring-0 shadow-inner transition-all font-bold tracking-wide"
+            />
+            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-gold font-bold text-xl">
+              €
+            </span>
+          </div>
         </div>
 
         {/* Toggle total / par personne */}
-        <div className="flex items-center gap-2 rounded-lg border p-1 bg-muted/50 w-fit">
+        <div className="flex items-center justify-center gap-2 rounded-[1.2rem] border border-white/[0.05] p-1.5 bg-[#0e1220]/30 w-fit mx-auto">
           <button
             type="button"
             onClick={() => onChange({ budgetIsPerPerson: false })}
             className={cn(
-              'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-              'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
+              'px-5 py-2.5 rounded-xl text-sm font-bold transition-all',
               !data.budgetIsPerPerson
-                ? 'bg-background shadow-sm text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-gold text-black shadow-md'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/5'
             )}
           >
-            Budget total
+            Total
           </button>
           <button
             type="button"
             onClick={() => onChange({ budgetIsPerPerson: true })}
             className={cn(
-              'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-              'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
+              'px-5 py-2.5 rounded-xl text-sm font-bold transition-all',
               data.budgetIsPerPerson
-                ? 'bg-background shadow-sm text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-gold text-black shadow-md'
+                : 'text-white/50 hover:text-white/80 hover:bg-white/5'
             )}
           >
             Par personne
@@ -138,24 +143,19 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
         </div>
 
         {data.budgetCustom && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] text-center text-white/50 font-medium">
             {data.budgetIsPerPerson
               ? `${data.budgetCustom}€ × ${data.groupSize || 1} = ${data.budgetCustom * (data.groupSize || 1)}€ total`
               : `${data.budgetCustom}€ total pour ${data.groupSize || 1} personne${(data.groupSize || 1) > 1 ? 's' : ''} (${Math.round(data.budgetCustom / (data.groupSize || 1))}€/pers)`
             }
           </p>
         )}
-        {!data.budgetCustom && (
-          <p className="text-sm text-muted-foreground">
-            Budget {data.budgetIsPerPerson ? 'par personne' : 'total'} pour le voyage
-          </p>
-        )}
       </div>
 
       {/* Préférence repas */}
-      <div className="space-y-4">
-        <Label className="text-base font-medium">Préférence pour les repas</Label>
-        <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-4 pt-6 border-t border-white/[0.05]">
+        <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Préférence pour les repas</p>
+        <div className="grid grid-cols-2 gap-4">
           {([
             { value: 'auto', label: 'Automatique', desc: 'Selon votre budget', icon: <Zap className="h-5 w-5" /> },
             { value: 'mostly_cooking', label: 'Plutôt cuisiner', desc: 'Plus économique', icon: <ChefHat className="h-5 w-5" /> },
@@ -167,31 +167,35 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
               type="button"
               onClick={() => onChange({ mealPreference: option.value })}
               className={cn(
-                'flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left',
-                'hover:border-primary hover:bg-primary/5',
-                'focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none',
+                'flex items-center gap-4 p-4 rounded-[1.2rem] border transition-all text-left duration-300 group',
                 (data.mealPreference || 'auto') === option.value
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card'
+                  ? 'border-gold bg-[#0e1220] shadow-[0_10px_30px_rgba(197,160,89,0.1)] scale-[1.02]'
+                  : 'border-white/[0.08] bg-[#0e1220]/50 hover:bg-[#0f1429] hover:border-white/20'
               )}
             >
               <div
                 className={cn(
-                  'p-2 rounded-full shrink-0',
+                  'p-3 rounded-2xl shrink-0 transition-colors',
                   (data.mealPreference || 'auto') === option.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
+                    ? 'bg-gold text-black shadow-lg shadow-gold/30'
+                    : 'bg-white/5 text-white/40 group-hover:text-white/60'
                 )}
               >
                 {option.icon}
               </div>
               <div>
-                <span className="font-medium text-sm">{option.label}</span>
-                <p className="text-xs text-muted-foreground">{option.desc}</p>
+                <span className={cn(
+                  'font-bold text-[14px] transition-colors',
+                  (data.mealPreference || 'auto') === option.value ? 'text-white' : 'text-white/70 group-hover:text-white/90'
+                )}>
+                  {option.label}
+                </span>
+                <p className="text-[11px] text-white/40 mt-0.5">{option.desc}</p>
               </div>
             </button>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

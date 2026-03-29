@@ -1,0 +1,2634 @@
+{
+  "scenarioId": "geo-direct-01",
+  "preferences": {
+    "origin": "Lyon",
+    "destination": "Berlin",
+    "startDate": "2026-03-19T14:19:06.013Z",
+    "durationDays": 3,
+    "transport": "train",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "economic",
+    "activities": [
+      "culture",
+      "gastronomy"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Berlin",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "f4e99851-9325-46ec-bf89-04e836740d56",
+    "createdAt": "2026-02-17T14:20:22.670Z",
+    "updatedAt": "2026-02-17T14:20:22.670Z",
+    "preferences": {
+      "origin": "Lyon",
+      "destination": "Berlin",
+      "startDate": "2026-03-19T14:19:06.013Z",
+      "durationDays": 3,
+      "transport": "train",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "economic",
+      "activities": [
+        "culture",
+        "gastronomy"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Berlin",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-19T14:19:06.013Z",
+        "items": [
+          {
+            "id": "home-ground-out-1",
+            "dayNumber": 1,
+            "startTime": "07:39",
+            "endTime": "08:00",
+            "type": "transport",
+            "title": "🧭 Départ depuis Lyon",
+            "description": "Départ depuis Lyon",
+            "locationName": "Lyon",
+            "latitude": 45.764,
+            "longitude": 4.8357,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 21,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%A7%AD%20D%C3%A9part%20depuis%20Lyon%2C%20Berlin",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "home_departure_local_segment",
+              "home_departure_prep_only"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "transport-out-1",
+            "dayNumber": 1,
+            "startTime": "08:00",
+            "endTime": "21:06",
+            "type": "transport",
+            "title": "🚌 Bus → Berlin",
+            "description": "Lyon → Berlin",
+            "locationName": "Lyon → Berlin",
+            "latitude": 52.52,
+            "longitude": 13.405,
+            "orderIndex": 1,
+            "estimatedCost": 39,
+            "duration": 786,
+            "bookingUrl": "https://www.omio.fr/bus/lyon/berlin?departure_date=2026-03-19",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%8C%20Bus%20%E2%86%92%20Berlin%2C%20Berlin",
+            "transportMode": "bus",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "22:30",
+            "endTime": "23:00",
+            "type": "checkin",
+            "title": "Check-in Generator Berlin Mitte",
+            "description": "Disponibilité confirmée",
+            "locationName": "Oranienburger Str. 65, 10117 Berlin, Germany",
+            "latitude": 52.5250788606418,
+            "longitude": 13.3914569020271,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 7.7,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Generator+Berlin+Mitte+Berlin&checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Generator%20Berlin%20Mitte%2C%20Berlin",
+            "accommodation": {
+              "id": "booking-440769",
+              "name": "Generator Berlin Mitte",
+              "type": "hotel",
+              "address": "Oranienburger Str. 65, 10117 Berlin, Germany",
+              "latitude": 52.5250788606418,
+              "longitude": 13.3914569020271,
+              "rating": 7.7,
+              "reviewCount": 7193,
+              "stars": 3,
+              "pricePerNight": 28,
+              "totalPrice": 56,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/325302514.jpg?k=086b056f674fdf6f906a1b5ec7bbeba1ec8020b8aaecfbe9fb9e0af531f12053&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Generator+Berlin+Mitte+Berlin&checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/325302514.jpg?k=086b056f674fdf6f906a1b5ec7bbeba1ec8020b8aaecfbe9fb9e0af531f12053&o="
+          }
+        ],
+        "theme": "Arrivée et installation",
+        "dayNarrative": "Découverte des symboles emblématiques de Berlin avec la Porte de Brandebourg et le Reichstag, puis exploration d'Alexanderplatz.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": -3,
+          "tempMax": 11,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 0,
+          "transport": 39,
+          "total": 39
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 84,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0,
+          "p95LegKm": 0,
+          "totalTravelMin": 0,
+          "totalLegKm": 0,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 0
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-20T14:19:06.013Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Kin Za Georgian Kitchen Cafe and",
+            "description": "Repas sur place",
+            "locationName": "Krausnickstraße 23, 10115 Berlin",
+            "latitude": 52.524937,
+            "longitude": 13.395636,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 4.800000190734863,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Kin%20Za%20Georgian%20Kitchen%20Cafe%20and%2C%20Krausnickstra%C3%9Fe%2023%2C%2010115%20Berlin",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Kin%20Za%20Georgian%20Kitchen%20Cafe%20and%2C%20Berlin",
+            "restaurant": {
+              "id": "serp-190898164266441717",
+              "name": "Kin Za Georgian Kitchen Cafe and",
+              "address": "Krausnickstraße 23, 10115 Berlin",
+              "latitude": 52.524937,
+              "longitude": 13.395636,
+              "rating": 4.800000190734863,
+              "reviewCount": 14752,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant géorgien"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "0163 5120124",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Kin%20Za%20Georgian%20Kitchen%20Cafe%20and%2C%20Krausnickstra%C3%9Fe%2023%2C%2010115%20Berlin",
+              "googlePlaceId": "190898164266441717",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-17116415471197574534",
+                  "name": "Boulangerie Fresh",
+                  "address": "Reinhardtstraße 8, 10117 Berlin",
+                  "latitude": 52.52378,
+                  "longitude": 13.386451,
+                  "rating": 4.800000190734863,
+                  "reviewCount": 252,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "boulangerie"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "phoneNumber": "030 27890594",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Boulangerie%20Fresh%2C%20Reinhardtstra%C3%9Fe%208%2C%2010117%20Berlin",
+                  "googlePlaceId": "17116415471197574534",
+                  "openingHours": {},
+                  "distance": 0.3681772473086646,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfVMMRp_VRjqyUbo482RVDcNw8uBuBMFM5hamzeZOSqV4RajZERVYOzI2z2nIEJbJMFFPMbvwjwEghspfsyCzUbpS6tKZayTPISvpaX2mykKlAW8IX3-TDmsTJ1mCwEEolZrv-7fDYkK5URxBOYFHrlHIfFmpqI9OimTp3AnIZQqBBJZvhEnODK-LZHUH40-fX1NtKCp0zRlAoeF5Qs6fFPFIgvzHyTXmQuQsYSabuU8npfhxSE9f5YGPLK1xmcTuebpcBv7A7vo3iM_Wb0hgc6av2sOtt8zp-PCqUYzADymhBUzn2YbT1phAE3dsgR51vkN6jhnmrREatK4VFebbOy3j6my8Z-clkeXZHRTpgXq0nMPN6eUIyVg4rNm3eCMS1pA7w6mCbaUmazy8GygUHSiHvda9BZc7ErriasqluM0NdrUKCLEx6adIPbGQ-5jaFGDKgG9_aHwKy2l2mRddjOhsN95wMMXG7kmAkxrAm6syWuZKfIH9b4DI5S7iZy2FWL-fi8sQJDzoxQWIS_ai9VNty7hWgGdafM_Cp0Po_4Uc_IR4bbOv-TWC8bsedTyFMlIzxKYTvTMCbIjjXNf1bJpd4c&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-4172383394325636326",
+                  "name": "Zeit für Brot",
+                  "address": "Weinbergsweg 2, 10119 Berlin",
+                  "latitude": 52.5304,
+                  "longitude": 13.402094,
+                  "rating": 4.400000095367432,
+                  "reviewCount": 1262,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "boulangerie"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "030 41500490",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Zeit%20f%C3%BCr%20Brot%2C%20Weinbergsweg%202%2C%2010119%20Berlin",
+                  "googlePlaceId": "4172383394325636326",
+                  "openingHours": {},
+                  "distance": 0.9316060288133576,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfWfU5MEVV1SD0uJ8AyEZHLT_71qYUK0TRa7rWSx1mB1DCsHQGnCrB0O6zh_xbNoBJgJnerIIa-X5Bfsa0aanfDXJLBnQaTgCC-4viRo2DZo_bjUjC0aJV6cItFY7-yuaADxK8OYY_TAEmlsy9kKYuDP5fLNPby8zRUqHXXswPF-42VhxFpAuHdoLe8uKjJOh_VbTm9zWcU1HM3dJc2V9s0mFE5HbZtJwy551RTBNtLwjhjtkDTyYx9E1m_qkY1XUgkPJY_pvkkRGEc4B6OTHrPcTQbamziFTDkVNjKA7TFeKrvD3ywaAeTo7B874KoFR0w_PY2flbF4a-IMwZAPbX1iXFG9EvVxg6-95RxJ2K6I4iP4eBqgx1R5ilXYYUIvmzqqeJVN8WmaYfcTKOdiXXKgDVX-ObKAdv6x1TZ4pJr3N6k03X7dyFuwEvtuDNbqaccr9F-l2Pih2GmTOBg7fEgqO7i1jKydrxA78HhWxWd-Jo_96lUZtm3_xm3M-vKXLAldgWgCb_8hvCa95iS3iWnMILBZiwHFH94CdfSpVjmN3ZBVoxciDJ-fGSKeWie86ZdtrKdXFEgFIw&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfUIlsUsfWMj4hEL1yCLOlLgXPvyztehVuMEqnOHhKqAUwrZed_qnRbLTpIHMgjA5tFh_VqMP3pUKbN1QDS_p5RtNGMRTbioSDcyMQaIeA9ZtWooP2C5d7oWulOdURGXH0gM0JY4R6RltznDFNyE6P7oCkEXNbVWJWWexynPGVLSFkeqqRj79jrjaGaM7eEkDBEoEdsIoWL4AnRZH2hPVOR7AoRrqGc6sr1lB2Aw4H5axhInpkZROF1Cx7CIdIHpmppyuCG8RhHv6rQsslGRhwxYYy72c-gF7LX5wnvn80vMc8mMkO5Ts4fRsqYHSpLLNaeD-aJeGqDt4IL_FIQgfzojHXkE1CkWwrrJ9q-j2UHy334mOF1btWZo41mpdlEQWvZhxpsYnHvNLgskF_Y_I8NaahbUcDZ161kNiSqE1ImzwptrpffkfwnyZw5TQY7x0SPOTwyBqCbuWzUkcHO72uc5tsyCnqCs4Ft8lZD6YJpP96jGCh8FIOv9EvamwhT2qhxZClBbreXsCwk106adpv9lv1_CaILfM2gp6YnUCYThMSo9At4hhuuKTygqpmGpypZab_g1BtcYdfosf4MKAZEX0F5Vfg&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-17116415471197574534",
+                "name": "Boulangerie Fresh",
+                "address": "Reinhardtstraße 8, 10117 Berlin",
+                "latitude": 52.52378,
+                "longitude": 13.386451,
+                "rating": 4.800000190734863,
+                "reviewCount": 252,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "030 27890594",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Boulangerie%20Fresh%2C%20Reinhardtstra%C3%9Fe%208%2C%2010117%20Berlin",
+                "googlePlaceId": "17116415471197574534",
+                "openingHours": {},
+                "distance": 0.3681772473086646,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVMMRp_VRjqyUbo482RVDcNw8uBuBMFM5hamzeZOSqV4RajZERVYOzI2z2nIEJbJMFFPMbvwjwEghspfsyCzUbpS6tKZayTPISvpaX2mykKlAW8IX3-TDmsTJ1mCwEEolZrv-7fDYkK5URxBOYFHrlHIfFmpqI9OimTp3AnIZQqBBJZvhEnODK-LZHUH40-fX1NtKCp0zRlAoeF5Qs6fFPFIgvzHyTXmQuQsYSabuU8npfhxSE9f5YGPLK1xmcTuebpcBv7A7vo3iM_Wb0hgc6av2sOtt8zp-PCqUYzADymhBUzn2YbT1phAE3dsgR51vkN6jhnmrREatK4VFebbOy3j6my8Z-clkeXZHRTpgXq0nMPN6eUIyVg4rNm3eCMS1pA7w6mCbaUmazy8GygUHSiHvda9BZc7ErriasqluM0NdrUKCLEx6adIPbGQ-5jaFGDKgG9_aHwKy2l2mRddjOhsN95wMMXG7kmAkxrAm6syWuZKfIH9b4DI5S7iZy2FWL-fi8sQJDzoxQWIS_ai9VNty7hWgGdafM_Cp0Po_4Uc_IR4bbOv-TWC8bsedTyFMlIzxKYTvTMCbIjjXNf1bJpd4c&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-4172383394325636326",
+                "name": "Zeit für Brot",
+                "address": "Weinbergsweg 2, 10119 Berlin",
+                "latitude": 52.5304,
+                "longitude": 13.402094,
+                "rating": 4.400000095367432,
+                "reviewCount": 1262,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "boulangerie"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "030 41500490",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Zeit%20f%C3%BCr%20Brot%2C%20Weinbergsweg%202%2C%2010119%20Berlin",
+                "googlePlaceId": "4172383394325636326",
+                "openingHours": {},
+                "distance": 0.9316060288133576,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWfU5MEVV1SD0uJ8AyEZHLT_71qYUK0TRa7rWSx1mB1DCsHQGnCrB0O6zh_xbNoBJgJnerIIa-X5Bfsa0aanfDXJLBnQaTgCC-4viRo2DZo_bjUjC0aJV6cItFY7-yuaADxK8OYY_TAEmlsy9kKYuDP5fLNPby8zRUqHXXswPF-42VhxFpAuHdoLe8uKjJOh_VbTm9zWcU1HM3dJc2V9s0mFE5HbZtJwy551RTBNtLwjhjtkDTyYx9E1m_qkY1XUgkPJY_pvkkRGEc4B6OTHrPcTQbamziFTDkVNjKA7TFeKrvD3ywaAeTo7B874KoFR0w_PY2flbF4a-IMwZAPbX1iXFG9EvVxg6-95RxJ2K6I4iP4eBqgx1R5ilXYYUIvmzqqeJVN8WmaYfcTKOdiXXKgDVX-ObKAdv6x1TZ4pJr3N6k03X7dyFuwEvtuDNbqaccr9F-l2Pih2GmTOBg7fEgqO7i1jKydrxA78HhWxWd-Jo_96lUZtm3_xm3M-vKXLAldgWgCb_8hvCa95iS3iWnMILBZiwHFH94CdfSpVjmN3ZBVoxciDJ-fGSKeWie86ZdtrKdXFEgFIw&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUIlsUsfWMj4hEL1yCLOlLgXPvyztehVuMEqnOHhKqAUwrZed_qnRbLTpIHMgjA5tFh_VqMP3pUKbN1QDS_p5RtNGMRTbioSDcyMQaIeA9ZtWooP2C5d7oWulOdURGXH0gM0JY4R6RltznDFNyE6P7oCkEXNbVWJWWexynPGVLSFkeqqRj79jrjaGaM7eEkDBEoEdsIoWL4AnRZH2hPVOR7AoRrqGc6sr1lB2Aw4H5axhInpkZROF1Cx7CIdIHpmppyuCG8RhHv6rQsslGRhwxYYy72c-gF7LX5wnvn80vMc8mMkO5Ts4fRsqYHSpLLNaeD-aJeGqDt4IL_FIQgfzojHXkE1CkWwrrJ9q-j2UHy334mOF1btWZo41mpdlEQWvZhxpsYnHvNLgskF_Y_I8NaahbUcDZ161kNiSqE1ImzwptrpffkfwnyZw5TQY7x0SPOTwyBqCbuWzUkcHO72uc5tsyCnqCs4Ft8lZD6YJpP96jGCh8FIOv9EvamwhT2qhxZClBbreXsCwk106adpv9lv1_CaILfM2gp6YnUCYThMSo9At4hhuuKTygqpmGpypZab_g1BtcYdfosf4MKAZEX0F5Vfg&maxwidth=800",
+            "distanceFromPrevious": 0.28,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "osm-Q5086",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Mur de Berlin",
+            "description": "Die Mur ist ein Nebenfluss der Drau, der durch Österreich, Slowenien, Kroatien und Ungarn fließt und in Teilen seines Verlaufs auch die Grenze zwischen diesen Staaten bildet.",
+            "locationName": "Mur de Berlin",
+            "latitude": 52.534059,
+            "longitude": 13.3894002,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.690308509457033,
+            "bookingUrl": "https://www.berlin.de/mauer/",
+            "officialBookingUrl": "https://www.berlin.de/mauer/",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mur%20de%20Berlin%2C%20Berlin",
+            "dataReliability": "verified",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Berlin_Wall_Potsdamer_Platz_November_1975_looking_east_crop.jpg/400px-Berlin_Wall_Potsdamer_Platz_November_1975_looking_east_crop.jpg",
+            "mustSee": true,
+            "distanceFromPrevious": 1.1,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.524937,13.395636&destination=52.534059,13.3894002&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJZ0KxF_JRqEcRrLHB-4r-U-o",
+            "dayNumber": 2,
+            "startTime": "10:00",
+            "endTime": "12:00",
+            "type": "activity",
+            "title": "Gedenkstätte Berliner Mauer",
+            "description": "Als Gedenkstätte Berliner Mauer wird primär das Gelände an der südöstlichen Seite der Bernauer Straße zwischen der Gartenstraße und der Schwedter Straße, auf dem sich die Berliner Mauer und der Todesstreifen dahinter befanden, bezeichnet. Damit wi...",
+            "locationName": "Gedenkstätte Berliner Mauer",
+            "latitude": 52.53505209999999,
+            "longitude": 13.3901898,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.6,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Gedenkst%C3%A4tte%20Berliner%20Mauer%2C%20Berlin",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9gHJYfHOk91qnDiRNwi0ikIrsKH9T9j8FlJI5OHMgLLqQqKdjG1c8Ymeb4XHrYAMpQSNADDTcRwYZNi-WzYlHdgHTRITn8ePOhH2Yyf7mtzd3gF7MKHIUbAWAvFeMweZyE4wtmbOOO6QOGSv6OcURNlE_a511l9UE54Mj5Zk6aX66UG0LD7qv_MOWObIFvB4C7nIyadHchexlOAeat3PzQVV7KXp7ikGGD3W3j4sg2h0ilSdrQWGOtDywim8GzYaC3hDZTebuPkEak4kkOfgv2nAl7c-ld5xuXccvW9Rw6wk54b7aGCfJPKzUEqRnJvmqthBs5ELlb1_HPcEC89NFSRhvc3fX6oDDIKBY_ZbsWfc_sZJxbzZwWD3chXvwS6hbQxWvq9_vn7djTzGI-dCZXmCOvD1TmEYyWALhMJt9CI2Pdd1HkhQShi3Dz8agdocI7x2FQytHgI8bVdPFHKS4Ai5MGRS7cWgzJUUmzM855AWyOLr2DIRD6dcQzL_ngSVecYaTMM-2YmuzyOjjy-EYDOX9ukpkNfWVOV26rXNs3bfiwyU2td0XfVoKsiBQhZlx2A&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.12,
+            "timeFromPrevious": 3,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Zeit für Brot",
+            "description": "Repas sur place",
+            "locationName": "Weinbergsweg 2, 10119 Berlin",
+            "latitude": 52.5304,
+            "longitude": 13.402094,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.400000095367432,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Zeit%20f%C3%BCr%20Brot%2C%20Weinbergsweg%202%2C%2010119%20Berlin",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Zeit%20f%C3%BCr%20Brot%2C%20Berlin",
+            "restaurant": {
+              "id": "serp-4172383394325636326",
+              "name": "Zeit für Brot",
+              "address": "Weinbergsweg 2, 10119 Berlin",
+              "latitude": 52.5304,
+              "longitude": 13.402094,
+              "rating": 4.400000095367432,
+              "reviewCount": 1262,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "boulangerie"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Repas sur place"
+              ],
+              "description": "Repas sur place",
+              "phoneNumber": "030 41500490",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Zeit%20f%C3%BCr%20Brot%2C%20Weinbergsweg%202%2C%2010119%20Berlin",
+              "googlePlaceId": "4172383394325636326",
+              "openingHours": {},
+              "distance": 0.9501470517559397,
+              "walkingTime": 0,
+              "_alternatives": [],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWfU5MEVV1SD0uJ8AyEZHLT_71qYUK0TRa7rWSx1mB1DCsHQGnCrB0O6zh_xbNoBJgJnerIIa-X5Bfsa0aanfDXJLBnQaTgCC-4viRo2DZo_bjUjC0aJV6cItFY7-yuaADxK8OYY_TAEmlsy9kKYuDP5fLNPby8zRUqHXXswPF-42VhxFpAuHdoLe8uKjJOh_VbTm9zWcU1HM3dJc2V9s0mFE5HbZtJwy551RTBNtLwjhjtkDTyYx9E1m_qkY1XUgkPJY_pvkkRGEc4B6OTHrPcTQbamziFTDkVNjKA7TFeKrvD3ywaAeTo7B874KoFR0w_PY2flbF4a-IMwZAPbX1iXFG9EvVxg6-95RxJ2K6I4iP4eBqgx1R5ilXYYUIvmzqqeJVN8WmaYfcTKOdiXXKgDVX-ObKAdv6x1TZ4pJr3N6k03X7dyFuwEvtuDNbqaccr9F-l2Pih2GmTOBg7fEgqO7i1jKydrxA78HhWxWd-Jo_96lUZtm3_xm3M-vKXLAldgWgCb_8hvCa95iS3iWnMILBZiwHFH94CdfSpVjmN3ZBVoxciDJ-fGSKeWie86ZdtrKdXFEgFIw&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11378103693364219630",
+                "name": "Restauration 1840",
+                "address": "Am Zwirngraben 8-10, 10178 Berlin",
+                "latitude": 52.522781,
+                "longitude": 13.402641,
+                "rating": 4.599999904632568,
+                "reviewCount": 2785,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant allemand"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant style rétro, spécialités allemandes"
+                ],
+                "description": "Restaurant style rétro, spécialités allemandes",
+                "phoneNumber": "030 24727401",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restauration%201840%2C%20Am%20Zwirngraben%208-10%2C%2010178%20Berlin",
+                "googlePlaceId": "11378103693364219630",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU1Gk85unJoBE0_aniJnSasvbKWPdhkr-_q0z1lPDSTHGEWrq6e-OHFqFsdQo-4b7wG--jS-x4oLAygFzu85SunIFDdUOZN1x3M7VBrrsxQGBflFWc1iI4vLAXv0-_J1zO4_YP_45zIHYaBEiQzJJFcEBANiGELgIW48KXUghGUKCZiSZyvPIM2ewGcRcl_zQW6wcUqAI45hh6rJopcV1WKEQkuoxpEB29GkcrOsGOacK1WpcDsg-Xm8k4mN4csm8iRfN1QRx06sPoHRLD_pT2HKa_4wDjo_hbN1ixKaWGreifoWJ0&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-12184049860976491965",
+                "name": "Cowei Restaurant - Asian Fusion Berlin",
+                "address": "James - Simon - Park 152, 10178 Berlin",
+                "latitude": 52.52226,
+                "longitude": 13.399644,
+                "rating": 4.699999809265137,
+                "reviewCount": 1956,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant asiatique"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "030 60051647",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cowei%20Restaurant%20-%20Asian%20Fusion%20Berlin%2C%20James%20-%20Simon%20-%20Park%20152%2C%2010178%20Berlin",
+                "googlePlaceId": "12184049860976491965",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX1MbySIcxVdEDFmjvB40b2fqVq_JCipw5XTUVaeRGZGfnyWRDQ51zvGgDCD-shtqT1HdmZwD4RkEpKe1NUpqwr4x2YJngtEwYN_cyMWv1Rap0dnRVFclooteLPg9WhVeBZk5cAFLNINZCkkXdX2pS7jqO-w4npJ-2hhHwALfDgHrGnbsXDWTSPDWIAyHqL-hQ8boyp1rgf42fHdrmC-Hb4gBKXM1wTYjKSW09GYExmGFPLr-yOjWgZ9Qg9Wy-92CZ5KfVvZE_Eks3Qrn1MW0ZYvsRX8x-hO-9Y9ZoLO0eRfVybRgk&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWfU5MEVV1SD0uJ8AyEZHLT_71qYUK0TRa7rWSx1mB1DCsHQGnCrB0O6zh_xbNoBJgJnerIIa-X5Bfsa0aanfDXJLBnQaTgCC-4viRo2DZo_bjUjC0aJV6cItFY7-yuaADxK8OYY_TAEmlsy9kKYuDP5fLNPby8zRUqHXXswPF-42VhxFpAuHdoLe8uKjJOh_VbTm9zWcU1HM3dJc2V9s0mFE5HbZtJwy551RTBNtLwjhjtkDTyYx9E1m_qkY1XUgkPJY_pvkkRGEc4B6OTHrPcTQbamziFTDkVNjKA7TFeKrvD3ywaAeTo7B874KoFR0w_PY2flbF4a-IMwZAPbX1iXFG9EvVxg6-95RxJ2K6I4iP4eBqgx1R5ilXYYUIvmzqqeJVN8WmaYfcTKOdiXXKgDVX-ObKAdv6x1TZ4pJr3N6k03X7dyFuwEvtuDNbqaccr9F-l2Pih2GmTOBg7fEgqO7i1jKydrxA78HhWxWd-Jo_96lUZtm3_xm3M-vKXLAldgWgCb_8hvCa95iS3iWnMILBZiwHFH94CdfSpVjmN3ZBVoxciDJ-fGSKeWie86ZdtrKdXFEgFIw&maxwidth=800",
+            "distanceFromPrevious": 0.96,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "14:15",
+            "endTime": "15:30",
+            "type": "restaurant",
+            "title": "Dîner — Restaurant Dae Mon",
+            "description": "Cuisine innovante et design avant-gardiste",
+            "locationName": "Monbijoupl. 11, 10178 Berlin",
+            "latitude": 52.52277,
+            "longitude": 13.399358,
+            "orderIndex": 4,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.800000190734863,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Dae%20Mon%2C%20Monbijoupl.%2011%2C%2010178%20Berlin",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Dae%20Mon%2C%20Berlin",
+            "restaurant": {
+              "id": "serp-2728123987993537231",
+              "name": "Restaurant Dae Mon",
+              "address": "Monbijoupl. 11, 10178 Berlin",
+              "latitude": 52.52277,
+              "longitude": 13.399358,
+              "rating": 4.800000190734863,
+              "reviewCount": 768,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant de cuisine fusion"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Cuisine innovante et design avant-gardiste"
+              ],
+              "description": "Cuisine innovante et design avant-gardiste",
+              "phoneNumber": "030 26304811",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%20Dae%20Mon%2C%20Monbijoupl.%2011%2C%2010178%20Berlin",
+              "googlePlaceId": "2728123987993537231",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-12184049860976491965",
+                  "name": "Cowei Restaurant - Asian Fusion Berlin",
+                  "address": "James - Simon - Park 152, 10178 Berlin",
+                  "latitude": 52.52226,
+                  "longitude": 13.399644,
+                  "rating": 4.699999809265137,
+                  "reviewCount": 1956,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant asiatique"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "Repas sur place"
+                  ],
+                  "description": "Repas sur place",
+                  "phoneNumber": "030 60051647",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cowei%20Restaurant%20-%20Asian%20Fusion%20Berlin%2C%20James%20-%20Simon%20-%20Park%20152%2C%2010178%20Berlin",
+                  "googlePlaceId": "12184049860976491965",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfX1MbySIcxVdEDFmjvB40b2fqVq_JCipw5XTUVaeRGZGfnyWRDQ51zvGgDCD-shtqT1HdmZwD4RkEpKe1NUpqwr4x2YJngtEwYN_cyMWv1Rap0dnRVFclooteLPg9WhVeBZk5cAFLNINZCkkXdX2pS7jqO-w4npJ-2hhHwALfDgHrGnbsXDWTSPDWIAyHqL-hQ8boyp1rgf42fHdrmC-Hb4gBKXM1wTYjKSW09GYExmGFPLr-yOjWgZ9Qg9Wy-92CZ5KfVvZE_Eks3Qrn1MW0ZYvsRX8x-hO-9Y9ZoLO0eRfVybRgk&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWik4QWalJBAoynCG_7vDzV9DbiZBqa-ojMcq6HUXK05SoH4i4r2Y0OfX298_uFY50XmMaf9gC-IPm9oCVB2nZyqmFgNJEylrbhuGe41slpcEbOkx0kqHhm8LUfd1sQykJ79KB6qJyG_2qM7KfPRUds37_FkRErYQGXpyb1rUTjoJBDFGqWIb2kg7yk9u0dRrsvlyzksR8pl5S14ZdXTirhDGYM7zYZQgHB8ViOTX6obBjAiD3_KwdnRqeEnh06_3J93vqrC46ns10LO9cY-YO_o_FikZtVWLZxBg4zXiQ2XjG76R8&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-12184049860976491965",
+                "name": "Cowei Restaurant - Asian Fusion Berlin",
+                "address": "James - Simon - Park 152, 10178 Berlin",
+                "latitude": 52.52226,
+                "longitude": 13.399644,
+                "rating": 4.699999809265137,
+                "reviewCount": 1956,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant asiatique"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Repas sur place"
+                ],
+                "description": "Repas sur place",
+                "phoneNumber": "030 60051647",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Cowei%20Restaurant%20-%20Asian%20Fusion%20Berlin%2C%20James%20-%20Simon%20-%20Park%20152%2C%2010178%20Berlin",
+                "googlePlaceId": "12184049860976491965",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfX1MbySIcxVdEDFmjvB40b2fqVq_JCipw5XTUVaeRGZGfnyWRDQ51zvGgDCD-shtqT1HdmZwD4RkEpKe1NUpqwr4x2YJngtEwYN_cyMWv1Rap0dnRVFclooteLPg9WhVeBZk5cAFLNINZCkkXdX2pS7jqO-w4npJ-2hhHwALfDgHrGnbsXDWTSPDWIAyHqL-hQ8boyp1rgf42fHdrmC-Hb4gBKXM1wTYjKSW09GYExmGFPLr-yOjWgZ9Qg9Wy-92CZ5KfVvZE_Eks3Qrn1MW0ZYvsRX8x-hO-9Y9ZoLO0eRfVybRgk&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-11378103693364219630",
+                "name": "Restauration 1840",
+                "address": "Am Zwirngraben 8-10, 10178 Berlin",
+                "latitude": 52.522781,
+                "longitude": 13.402641,
+                "rating": 4.599999904632568,
+                "reviewCount": 2785,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant allemand"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Restaurant style rétro, spécialités allemandes"
+                ],
+                "description": "Restaurant style rétro, spécialités allemandes",
+                "phoneNumber": "030 24727401",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restauration%201840%2C%20Am%20Zwirngraben%208-10%2C%2010178%20Berlin",
+                "googlePlaceId": "11378103693364219630",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU1Gk85unJoBE0_aniJnSasvbKWPdhkr-_q0z1lPDSTHGEWrq6e-OHFqFsdQo-4b7wG--jS-x4oLAygFzu85SunIFDdUOZN1x3M7VBrrsxQGBflFWc1iI4vLAXv0-_J1zO4_YP_45zIHYaBEiQzJJFcEBANiGELgIW48KXUghGUKCZiSZyvPIM2ewGcRcl_zQW6wcUqAI45hh6rJopcV1WKEQkuoxpEB29GkcrOsGOacK1WpcDsg-Xm8k4mN4csm8iRfN1QRx06sPoHRLD_pT2HKa_4wDjo_hbN1ixKaWGreifoWJ0&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWik4QWalJBAoynCG_7vDzV9DbiZBqa-ojMcq6HUXK05SoH4i4r2Y0OfX298_uFY50XmMaf9gC-IPm9oCVB2nZyqmFgNJEylrbhuGe41slpcEbOkx0kqHhm8LUfd1sQykJ79KB6qJyG_2qM7KfPRUds37_FkRErYQGXpyb1rUTjoJBDFGqWIb2kg7yk9u0dRrsvlyzksR8pl5S14ZdXTirhDGYM7zYZQgHB8ViOTX6obBjAiD3_KwdnRqeEnh06_3J93vqrC46ns10LO9cY-YO_o_FikZtVWLZxBg4zXiQ2XjG76R8&maxwidth=800",
+            "distanceFromPrevious": 0.87,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Histoire et mémoire berlinoise",
+        "dayNarrative": "Immersion dans l'histoire du XXe siècle avec la Topographie des Terrors, le Musée juif, et découverte du patrimoine au Tränenpalast.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 0,
+          "tempMax": 16,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 45,
+          "transport": 0,
+          "total": 45
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.1,
+          "p95LegKm": 0.96,
+          "totalTravelMin": 46,
+          "totalLegKm": 3.05,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.41,
+          "mstLowerBoundKm": 2.17
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-21T14:19:06.013Z",
+        "items": [
+          {
+            "id": "checkout-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out Generator Berlin Mitte",
+            "description": "Disponibilité confirmée",
+            "locationName": "Oranienburger Str. 65, 10117 Berlin, Germany",
+            "latitude": 52.5250788606418,
+            "longitude": 13.3914569020271,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 7.7,
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Generator+Berlin+Mitte+Berlin&checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Generator%20Berlin%20Mitte%2C%20Berlin",
+            "accommodation": {
+              "id": "booking-440769",
+              "name": "Generator Berlin Mitte",
+              "type": "hotel",
+              "address": "Oranienburger Str. 65, 10117 Berlin, Germany",
+              "latitude": 52.5250788606418,
+              "longitude": 13.3914569020271,
+              "rating": 7.7,
+              "reviewCount": 7193,
+              "stars": 3,
+              "pricePerNight": 28,
+              "totalPrice": 56,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/325302514.jpg?k=086b056f674fdf6f906a1b5ec7bbeba1ec8020b8aaecfbe9fb9e0af531f12053&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Generator+Berlin+Mitte+Berlin&checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/325302514.jpg?k=086b056f674fdf6f906a1b5ec7bbeba1ec8020b8aaecfbe9fb9e0af531f12053&o="
+          },
+          {
+            "id": "viator-17194P33",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "10:30",
+            "type": "activity",
+            "title": "Berlin pendant le nazisme - Tour en italien",
+            "description": "Dies ist eine Liste der Bände von Que sais-je ? , d.",
+            "locationName": "Berlin pendant le nazisme - Tour en italien",
+            "latitude": 52.5098738,
+            "longitude": 13.470103799999999,
+            "orderIndex": 1,
+            "estimatedCost": 27,
+            "duration": 90,
+            "rating": 5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Berlin%20pendant%20le%20nazisme%20-%20Tour%20en%20italien%2C%20Berlin",
+            "dataReliability": "estimated",
+            "geoSource": "geocode",
+            "geoConfidence": "medium",
+            "qualityFlags": [
+              "viator_filtered_low_plus_value"
+            ],
+            "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/56/23/fd.jpg",
+            "freeCancellation": true,
+            "instantConfirmation": false,
+            "mustSee": false,
+            "distanceFromPrevious": 5.58,
+            "timeFromPrevious": 31,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.5250788606418,13.3914569020271&destination=52.5098738,13.470103799999999&travelmode=transit"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Butterhandlung | Restaurant | Berlin | Friedrichshain | Bar | Club",
+            "description": "boulangerie",
+            "locationName": "Butterhandlung | Restaurant | Berlin | Friedrichshain | Bar | Club",
+            "latitude": 52.5121623,
+            "longitude": 13.4707561,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.5,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Butterhandlung%20%7C%20Restaurant%20%7C%20Berlin%20%7C%20Friedrichshain%20%7C%20Bar%20%7C%20Club%2C%20Scharnweberstra%C3%9Fe%2054%2C%2010247%20Berlin",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Butterhandlung%20%7C%20Restaurant%20%7C%20Berlin%20%7C%20Friedrichshain%20%7C%20Bar%20%7C%20Club%2C%20Scharnweberstra%C3%9Fe%2054%2C%2010247%20Berlin",
+            "restaurant": {
+              "id": "serp-nearby-ChIJrbYAl_ROqEcRrxT7Xky9TXI",
+              "name": "Butterhandlung | Restaurant | Berlin | Friedrichshain | Bar | Club",
+              "address": "Scharnweberstraße 54, 10247 Berlin",
+              "latitude": 52.5121623,
+              "longitude": 13.4707561,
+              "rating": 4.5,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant",
+                "bar",
+                "café",
+                "espace événementiel",
+                "club de musique",
+                "restaurant végétalien",
+                "restaurant végétarien"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "030 68915679",
+              "website": "https://speisekartenweb.de/restaurants/berlin/butterhandlung-8258?utm_source=google_profile&utm_medium=google_profile&utm_campaign=brief_38_02_2025",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Butterhandlung%20%7C%20Restaurant%20%7C%20Berlin%20%7C%20Friedrichshain%20%7C%20Bar%20%7C%20Club%2C%20Scharnweberstra%C3%9Fe%2054%2C%2010247%20Berlin",
+              "googlePlaceId": "ChIJrbYAl_ROqEcRrxT7Xky9TXI",
+              "openingHours": {
+                "tuesday": null
+              },
+              "distance": 0.25827012064941673,
+              "walkingTime": 3,
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWGlS5tfeTAbGkHJWOmOf_MO1oS03NrO8DCkn4BmcDARfb7cwTTM0i4OMYItqfvzmEBglc9IYhuml11KHXg9x6ZpqCRaUCsBWKG5okzBJ2HqC-K2MLFSD7UvAzUHtC5S5uwNEw11pdGnSYfrg4CcuhgdglBJ3azraScq7P811Ko1V5VxMijNnSdxPpf6aKk4RW69WjbPUPLieIWLr2uSPX5zFWBvy7DAeGP7Izsywhrya1MgNhVF56L24tM69BbTZ6hdwdDfQC9q97k7tSGl23gnvMg3qwI5bXj5NBqB23d-g&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWGlS5tfeTAbGkHJWOmOf_MO1oS03NrO8DCkn4BmcDARfb7cwTTM0i4OMYItqfvzmEBglc9IYhuml11KHXg9x6ZpqCRaUCsBWKG5okzBJ2HqC-K2MLFSD7UvAzUHtC5S5uwNEw11pdGnSYfrg4CcuhgdglBJ3azraScq7P811Ko1V5VxMijNnSdxPpf6aKk4RW69WjbPUPLieIWLr2uSPX5zFWBvy7DAeGP7Izsywhrya1MgNhVF56L24tM69BbTZ6hdwdDfQC9q97k7tSGl23gnvMg3qwI5bXj5NBqB23d-g&maxwidth=800",
+            "distanceFromPrevious": 0.26,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.5098738,13.470103799999999&destination=52.507527,13.414716&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "transport-ret-3",
+            "dayNumber": 3,
+            "startTime": "14:00",
+            "endTime": "03:06",
+            "type": "transport",
+            "title": "🚌 Bus → Lyon",
+            "description": "Berlin → Lyon",
+            "locationName": "Berlin → Lyon",
+            "latitude": 52.52,
+            "longitude": 13.405,
+            "orderIndex": 3,
+            "estimatedCost": 39,
+            "duration": 786,
+            "bookingUrl": "https://www.omio.fr/bus/berlin/lyon?departure_date=2026-03-21",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%8C%20Bus%20%E2%86%92%20Lyon%2C%20Berlin",
+            "transportMode": "bus",
+            "transportRole": "longhaul",
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600&h=400&fit=crop",
+            "distanceFromPrevious": 2.005,
+            "timeFromPrevious": 16,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=52.507527,13.414716&destination=52.52,13.405&travelmode=transit"
+          }
+        ],
+        "theme": "East Side Gallery et Berlin pendant le nazisme - Tour en italien",
+        "dayNarrative": "Journée consacrée à East Side Gallery, Berlin pendant le nazisme - Tour en italien. 1 activité prévue.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Principalement dégagé",
+          "tempMin": 2,
+          "tempMax": 16,
+          "icon": "🌤️"
+        },
+        "dailyBudget": {
+          "activities": 27,
+          "food": 15,
+          "transport": 39,
+          "total": 81
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 150,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false,
+          "geoCleanupApplied": false,
+          "geoPrunedActivitiesCount": 0
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.26,
+          "p95LegKm": 0.26,
+          "totalTravelMin": 10,
+          "totalLegKm": 0.26,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.01,
+          "mstLowerBoundKm": 0.26
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "bus",
+        "mode": "bus",
+        "segments": [
+          {
+            "mode": "bus",
+            "from": "Lyon",
+            "to": "Berlin",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "duration": 731,
+            "price": 39,
+            "co2": 26,
+            "operator": "FlixBus / BlaBlaCar Bus",
+            "frequency": "1-4 par jour",
+            "bookingUrl": "https://www.omio.fr/bus/lyon/berlin?departure_date=2026-03-19"
+          }
+        ],
+        "totalDuration": 786,
+        "totalPrice": 39,
+        "totalCO2": 26,
+        "score": 7.2,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 1.8,
+          "co2Score": 9.6
+        },
+        "bookingUrl": "https://www.omio.fr/bus/lyon/berlin?departure_date=2026-03-19",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Berlin",
+            "duration": 58,
+            "price": 77,
+            "co2": 151
+          }
+        ],
+        "totalDuration": 346,
+        "totalPrice": 101,
+        "totalCO2": 152,
+        "score": 6.9,
+        "scoreDetails": {
+          "priceScore": 4.9,
+          "timeScore": 10,
+          "co2Score": 5.8
+        }
+      },
+      {
+        "id": "train+plane-via-paris",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Paris",
+            "duration": 171,
+            "price": 0,
+            "co2": 2.9,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Paris&outwardDate=2026-03-19&passengers=1"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Berlin",
+            "duration": 105,
+            "price": 45,
+            "co2": 273,
+            "operator": "U2",
+            "bookingUrl": "https://www.aviasales.com/search/CDG1903BER1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 396,
+        "totalPrice": 45,
+        "totalCO2": 275.9,
+        "score": 6.8,
+        "scoreDetails": {
+          "priceScore": 9.5,
+          "timeScore": 9.1,
+          "co2Score": 2
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Paris&outwardDate=2026-03-19&passengers=1"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Lyon",
+            "to": "Berlin",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "duration": 73,
+            "price": 97,
+            "co2": 249,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/LYON1903BERLIN1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 363,
+        "totalPrice": 97,
+        "totalCO2": 249,
+        "score": 5.9,
+        "scoreDetails": {
+          "priceScore": 5.2,
+          "timeScore": 9.7,
+          "co2Score": 2.8
+        },
+        "bookingUrl": "https://www.aviasales.com/search/LYON1903BERLIN1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/lyon/berlin?departure_date=2026-03-19"
+      },
+      {
+        "id": "train",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Berlin",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "duration": 841,
+            "price": 78,
+            "co2": 14,
+            "operator": "TGV INOUI",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/lyon/berlin?departure_date=2026-03-19"
+          }
+        ],
+        "totalDuration": 881,
+        "totalPrice": 78,
+        "totalCO2": 14,
+        "score": 5.6,
+        "scoreDetails": {
+          "priceScore": 6.8,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/lyon/berlin?departure_date=2026-03-19",
+        "dataSource": "estimated",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Lyon-Perrache",
+            "to": "Gare de Lyon",
+            "departure": "2026-03-19T14:50:00.000Z",
+            "arrival": "2026-03-19T17:08:00.000Z",
+            "duration": 138,
+            "line": "TGV INOUI"
+          },
+          {
+            "mode": "train",
+            "from": "Gare de Lyon",
+            "to": "Gare du Nord",
+            "departure": "2026-03-19T17:15:00.000Z",
+            "arrival": "2026-03-19T17:22:30.000Z",
+            "duration": 8,
+            "line": "D"
+          },
+          {
+            "mode": "train",
+            "from": "Gare du Nord",
+            "to": "Köln Hauptbahnhof",
+            "departure": "2026-03-19T17:45:00.000Z",
+            "arrival": "2026-03-19T21:22:00.000Z",
+            "duration": 217,
+            "line": "Eurostar"
+          },
+          {
+            "mode": "train",
+            "from": "Köln Hauptbahnhof",
+            "to": "Wannsee",
+            "departure": "2026-03-19T22:27:00.000Z",
+            "arrival": "2026-03-20T04:14:00.000Z",
+            "duration": 347,
+            "line": "ICE 1541"
+          },
+          {
+            "mode": "train",
+            "from": "Wannsee",
+            "to": "Alexanderplatz",
+            "departure": "2026-03-20T04:26:00.000Z",
+            "arrival": "2026-03-20T04:51:00.000Z",
+            "duration": 25,
+            "line": "RE7"
+          }
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "train+plane-via-marseille",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Lyon",
+            "to": "Marseille",
+            "duration": 116,
+            "price": 0,
+            "co2": 1.9,
+            "operator": "TGV INOUI",
+            "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Marseille&outwardDate=2026-03-19&passengers=1"
+          },
+          {
+            "mode": "plane",
+            "from": "Marseille",
+            "to": "Berlin",
+            "duration": 130,
+            "price": 72,
+            "co2": 338,
+            "operator": "FR",
+            "bookingUrl": "https://www.aviasales.com/search/MRS1903BER1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 366,
+        "totalPrice": 72,
+        "totalCO2": 339.9,
+        "score": 5.6,
+        "scoreDetails": {
+          "priceScore": 7.3,
+          "timeScore": 9.6,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.sncf-connect.com/app/home/search?departure=Lyon&arrival=Marseille&outwardDate=2026-03-19&passengers=1"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Lyon",
+            "to": "Berlin",
+            "fromCoords": {
+              "lat": 45.764,
+              "lng": 4.8357
+            },
+            "toCoords": {
+              "lat": 52.52,
+              "lng": 13.405
+            },
+            "duration": 585,
+            "price": 161,
+            "co2": 51,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Lyon/Berlin"
+          }
+        ],
+        "totalDuration": 660,
+        "totalPrice": 161,
+        "totalCO2": 51,
+        "score": 4.4,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 4.1,
+          "co2Score": 8.9
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Lyon/Berlin",
+        "dataSource": "estimated"
+      }
+    ],
+    "selectedTransport": {
+      "id": "bus",
+      "mode": "bus",
+      "segments": [
+        {
+          "mode": "bus",
+          "from": "Lyon",
+          "to": "Berlin",
+          "fromCoords": {
+            "lat": 45.764,
+            "lng": 4.8357
+          },
+          "toCoords": {
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          "duration": 731,
+          "price": 39,
+          "co2": 26,
+          "operator": "FlixBus / BlaBlaCar Bus",
+          "frequency": "1-4 par jour",
+          "bookingUrl": "https://www.omio.fr/bus/lyon/berlin?departure_date=2026-03-19"
+        }
+      ],
+      "totalDuration": 786,
+      "totalPrice": 39,
+      "totalCO2": 26,
+      "score": 7.2,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 1.8,
+        "co2Score": 9.6
+      },
+      "bookingUrl": "https://www.omio.fr/bus/lyon/berlin?departure_date=2026-03-19",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "booking-440769",
+      "name": "Generator Berlin Mitte",
+      "type": "hotel",
+      "address": "Oranienburger Str. 65, 10117 Berlin, Germany",
+      "latitude": 52.5250788606418,
+      "longitude": 13.3914569020271,
+      "rating": 7.7,
+      "reviewCount": 7193,
+      "stars": 3,
+      "pricePerNight": 28,
+      "totalPrice": 56,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/325302514.jpg?k=086b056f674fdf6f906a1b5ec7bbeba1ec8020b8aaecfbe9fb9e0af531f12053&o="
+      ],
+      "checkInTime": "14:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Generator+Berlin+Mitte+Berlin&checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-77841",
+        "name": "Three Little Pigs Hostel - Your Berlin Castle",
+        "type": "hotel",
+        "address": "Stresemannstraße 66, 10963 Berlin, Germany",
+        "latitude": 52.502927662593,
+        "longitude": 13.3845676481724,
+        "rating": 8.1,
+        "reviewCount": 5957,
+        "stars": 2,
+        "pricePerNight": 21,
+        "totalPrice": 42,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/790430809.jpg?k=73cc3f2b2b36fec80aaa536cff0b6df870cb94044ba686b68762718ba1fc6dd6&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/de/three-little-pigs-hostel.html?checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-61830",
+        "name": "a&o Berlin Mitte",
+        "type": "hotel",
+        "address": "Köpenicker Str. 127-129, 10179 Berlin, Germany",
+        "latitude": 52.5088621870246,
+        "longitude": 13.42404037714,
+        "rating": 7.4,
+        "reviewCount": 10437,
+        "stars": 2,
+        "pricePerNight": 21,
+        "totalPrice": 42,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/158513786.jpg?k=a520a762f9bf396a429eae2b6cee6f26e19d091be83d82126061213b9b3a00a6&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/de/mitteberlinhostelao.html?checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-61833",
+        "name": "a&o Berlin Friedrichshain",
+        "type": "hotel",
+        "address": "Boxhagener Str. 73, 10245 Berlin, Germany",
+        "latitude": 52.5069113107269,
+        "longitude": 13.4689190983772,
+        "rating": 7.2,
+        "reviewCount": 4134,
+        "stars": 2,
+        "pricePerNight": 21,
+        "totalPrice": 42,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/440248598.jpg?k=7e951d4563b886ae7a6ca1a1d12397761df7c1c51a4815e3c09a61942fe7990e&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/de/friedrichshainaohostel.html?checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-60726",
+        "name": "a&o Berlin Kolumbus",
+        "type": "hotel",
+        "address": "Genslerstraße 18, 13055 Berlin, Germany",
+        "latitude": 52.5390627800393,
+        "longitude": 13.4982517361641,
+        "rating": 6.9,
+        "reviewCount": 7064,
+        "stars": 2,
+        "pricePerNight": 21,
+        "totalPrice": 42,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/317858822.jpg?k=cc1216711df319ed189bf5da80475e7c39fa0ac943bdb2b16eacacaef1e923c3&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/hotel/de/kolumbus.html?checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-5922948",
+        "name": "New Hostel Berlin Mitte FREE SNACK hot tea and coffee",
+        "type": "hotel",
+        "address": "Provinzstraße 125, 13409 Berlin, Germany",
+        "latitude": 52.561278,
+        "longitude": 13.377009,
+        "rating": 8.2,
+        "reviewCount": 1923,
+        "stars": 4,
+        "pricePerNight": 21,
+        "totalPrice": 42,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/238097049.jpg?k=88da4196dcc3c0ccd63a36e20ae70aa086c037c59646995059680384b017e04b&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "10:30",
+        "bookingUrl": "https://www.booking.com/hotel/de/new-hsotel-berlin-mitte.html?checkin=2026-03-19&checkout=2026-03-21&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 236,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 56,
+      "food": 75,
+      "activities": 27,
+      "transport": 78,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Allemand",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Guten Tag",
+            "phonetic": "goo-ten tahk",
+            "context": "Salutation formelle"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Vielen Dank",
+            "phonetic": "fee-len dank",
+            "context": "Remerciement"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "Sprechen Sie Französisch?",
+            "phonetic": "shprek-en zee fran-tzö-zish",
+            "context": "Communication"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "Wo sind die Toiletten?",
+            "phonetic": "vo zind dee twa-let-ten",
+            "context": "Demande de direction"
+          },
+          {
+            "original": "L'addition, s'il vous plaît",
+            "translation": "Die Rechnung, bitte",
+            "phonetic": "dee rech-noong, bit-te",
+            "context": "Au restaurant"
+          },
+          {
+            "original": "Je voudrais une bière",
+            "translation": "Ich hätte gerne ein Bier",
+            "phonetic": "ich hé-te ger-ne ayn beer",
+            "context": "Commande"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "Wie viel kostet das?",
+            "phonetic": "vee feel kos-tet dass",
+            "context": "Prix"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "Ich verstehe nicht",
+            "phonetic": "ich ver-shtey-e nichт",
+            "context": "Incompréhension"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "Hilfe!",
+            "phonetic": "hil-fe",
+            "context": "Urgence"
+          },
+          {
+            "original": "Un, deux, trois",
+            "translation": "Eins, zwei, drei",
+            "phonetic": "ayns, tsvey, dry",
+            "context": "Chiffres"
+          },
+          {
+            "original": "Je suis désolé",
+            "translation": "Es tut mir leid",
+            "phonetic": "ess toot meer layd",
+            "context": "Excuse"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Veste imperméable",
+            "reason": "Climat variable en mars"
+          },
+          {
+            "item": "Pull chaud",
+            "reason": "Températures fraîches"
+          },
+          {
+            "item": "Adaptateur prise européen",
+            "reason": "Compatibilité électrique"
+          },
+          {
+            "item": "Chaussures confortables",
+            "reason": "Marche en ville"
+          },
+          {
+            "item": "Écharpe",
+            "reason": "Protection contre le froid"
+          },
+          {
+            "item": "Bonnet",
+            "reason": "Températures basses"
+          }
+        ],
+        "plugType": "Type C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Pas de visa pour un séjour touristique de moins de 90 jours"
+          }
+        ],
+        "importantLaws": [
+          "Respect strict du code de la route",
+          "Interdiction de traverser au feu rouge",
+          "Contrôle d'identité possible à tout moment",
+          "Recyclage obligatoire"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "110",
+        "ambulance": "112",
+        "fire": "112",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "Ambassade de France à Berlin",
+            "number": "+49 30 590039-0"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 55,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 30,
+      "transportTips": "Achetez un pass 3 jours de transport en commun (AB zone)",
+      "reasoning": "Budget serré nécessite optimisation. Airbnb avec cuisine permet économies repas. Mélange restaurants locaux et courses pour expérience culinaire et budget. Transport public économique. Activités mixtes entre sites gratuits et payants pour découvrir Berlin culturellement.",
+      "maxPricePerActivity": 25
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJiQnyVcZRqEcRY0xnhE77uyY",
+        "name": "Porte de Brandebourg",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.5162746,
+        "longitude": 13.3777041,
+        "rating": 4.7,
+        "reviewCount": 182488,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Brandenburger_Tor_morgens.jpg/400px-Brandenburger_Tor_morgens.jpg",
+        "googlePlaceId": "ChIJiQnyVcZRqEcRY0xnhE77uyY",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.berlin.de/sehenswuerdigkeiten/3560266-3558930-brandenburger-tor.html",
+        "score": 120.92246862300824,
+        "source": "google_places"
+      },
+      {
+        "id": "museum-island",
+        "name": "Île aux Musées",
+        "type": "culture",
+        "description": "Ensemble de cinq musées classés UNESCO avec des collections d'art antique",
+        "duration": 240,
+        "estimatedCost": 19,
+        "latitude": 52.5169,
+        "longitude": 13.4019,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": true,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "tips": "Le billet combiné donne accès aux 5 musées.",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 115.4,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "osm-Q5086",
+        "name": "Mur de Berlin",
+        "type": "culture",
+        "description": "mur entourant l’enclave de Berlin-Ouest de 1961 à 1989",
+        "duration": 60,
+        "estimatedCost": 0,
+        "latitude": 52.534059,
+        "longitude": 13.3894002,
+        "rating": 4.690308509457033,
+        "mustSee": true,
+        "bookingRequired": false,
+        "bookingUrl": "https://www.berlin.de/mauer/",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "verified",
+        "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mur%20de%20Berlin",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Berlin_Wall_Potsdamer_Platz_November_1975_looking_east_crop.jpg/400px-Berlin_Wall_Potsdamer_Platz_November_1975_looking_east_crop.jpg",
+        "providerName": "OpenStreetMap + Wikidata",
+        "reviewCount": 140,
+        "isOutdoor": false,
+        "score": 64.67287309027054,
+        "source": "overpass"
+      },
+      {
+        "id": "gp-ChIJZ0KxF_JRqEcRrLHB-4r-U-o",
+        "name": "Gedenkstätte Berliner Mauer",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.53505209999999,
+        "longitude": 13.3901898,
+        "rating": 4.6,
+        "reviewCount": 45218,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU9gHJYfHOk91qnDiRNwi0ikIrsKH9T9j8FlJI5OHMgLLqQqKdjG1c8Ymeb4XHrYAMpQSNADDTcRwYZNi-WzYlHdgHTRITn8ePOhH2Yyf7mtzd3gF7MKHIUbAWAvFeMweZyE4wtmbOOO6QOGSv6OcURNlE_a511l9UE54Mj5Zk6aX66UG0LD7qv_MOWObIFvB4C7nIyadHchexlOAeat3PzQVV7KXp7ikGGD3W3j4sg2h0ilSdrQWGOtDywim8GzYaC3hDZTebuPkEak4kkOfgv2nAl7c-ld5xuXccvW9Rw6wk54b7aGCfJPKzUEqRnJvmqthBs5ELlb1_HPcEC89NFSRhvc3fX6oDDIKBY_ZbsWfc_sZJxbzZwWD3chXvwS6hbQxWvq9_vn7djTzGI-dCZXmCOvD1TmEYyWALhMJt9CI2Pdd1HkhQShi3Dz8agdocI7x2FQytHgI8bVdPFHKS4Ai5MGRS7cWgzJUUmzM855AWyOLr2DIRD6dcQzL_ngSVecYaTMM-2YmuzyOjjy-EYDOX9ukpkNfWVOV26rXNs3bfiwyU2td0XfVoKsiBQhZlx2A&maxwidth=400",
+        "googlePlaceId": "ChIJZ0KxF_JRqEcRrLHB-4r-U-o",
+        "isOutdoor": false,
+        "score": 27.51062269902742,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJx3iXOMxRqEcRSGbJBczVSzc",
+        "name": "Topographie des Terrors",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.506747,
+        "longitude": 13.3837099,
+        "rating": 4.6,
+        "reviewCount": 39766,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "20:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWKlUi6KH4PUX4rOnFPmtxkP-pBq_PzzWtK8jLxJIGCwFwTWfVjRKOJILX6NZX7iZDVhZQrvTXrQ8L0MszUPDsa86UeunwobX3EEjMwIfxDVKEhty46PCcc6USuRbvwa2rqracb_fhTEJdMGQOnlvDj656grXjaJPArB_OHlYd4T_hTtUu0CIVvXH8YePksm9qC5mDPKEi8QWDQujr4sWi5w1E0dFTMBTy0dOt09jJKGrmi3Xa78yg8HzGN5XEkjcjgKZAuM3hTqQ76geACoZiscaqS88Jp1z0Oq5FzGOsXl_6ukppzWESGxbP59ZKeTBX-GW6DNvIyFTVSw6Rg2NBdIu4f4lRMxJCS3xlWsn_hqvd-XEQZS7ik7WLZ4bzKKZYECcFkDDhoUMUztcUlr3qoC7dRH-E6JmqwVjslNYcsE7SbOvdmXvIrNY7ZcpFKyaPMq0Ma54iqI5DwFMOpUyIf_fpVqQJ84myDgvWpPWKdVG2fYweFtt3bSi-gUIPf9UjHU6OC0nUXB3sp2EJ8OKjHhMgnJo4BfHG1vY1jFzeaJzFAx7-9VzEKb-5mWsvBkMc_4QEB&maxwidth=400",
+        "googlePlaceId": "ChIJx3iXOMxRqEcRSGbJBczVSzc",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 25450950",
+        "website": "https://www.topographie.de/",
+        "isOutdoor": false,
+        "score": 27.399023816354926,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJS6_t9aZHqEcRGCiRSnvpm94",
+        "name": "East Side Gallery",
+        "type": "gallery",
+        "description": "",
+        "latitude": 52.50502239999999,
+        "longitude": 13.4396952,
+        "rating": 4.6,
+        "reviewCount": 63338,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUx_5XLOlTgzuCAS-nBnmwPylG0b9eWwrqqT1ht8IuoXvBLeyZWFQS1CD8r-fzT9aShVsIAwa1fezQyhq-RyIWO1qwAypLT-8V2-H-kdku92C6-iQqHgF1tcL-jcHNcZvx0IeYetgqoP9TiPTqF85179-TzFNA_2aUVnmJV9SoU-lbedqOhJMcY0yUjC92epOiasJJBdi7Xni42alWqdQTh_47igNKZnLLs2HSldHp51YiREAixQuWb7_ScoVNU0g1qfslcesQE90nyOmS4BFJHggbC7p7xciSKr3FWOUIWjF3JGqQ7sEetyL12pdwQXd8wFV90KQRmMORZ6q5gDPS7jSNGG9I8or9JXYzOnz2YNXNS2qrISqsaepDdkreEmg5H-AIPwOXdkcKR2OBjicLVHOZ9jNkfE_b6WcebWBCJFTXl1ExrQW6Id-XI9MOwKK-uQJC57DxGddfPhnTDz5S8Y_5tiTSdL_zbpLnNjpUkLEEbWh0d6gipjaGJ1XS-5d-F1Z5dD79tF3B4nAnB-e_smqV2rj19jy6_wRUWRhtIzPgnyYsncYqsNj10gLLOQg6XvgJUhn1-Xg&maxwidth=400",
+        "googlePlaceId": "ChIJS6_t9aZHqEcRGCiRSnvpm94",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 213085222",
+        "website": "https://www.stiftung-berliner-mauer.de/de/east-side-gallery",
+        "isOutdoor": false,
+        "score": 26.303328691400576,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ-UrRPdVRqEcRTzDm7VTSLEw",
+        "name": "Musée juif de Berlin",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.5023238,
+        "longitude": 13.3954016,
+        "rating": 4.4,
+        "reviewCount": 17616,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUZPqApS2lnR1Wy_bC71_QU4cDqsIigT36RCcsifp05I_jCRIqZ8JGfqkyd7b-ATpOzLiWa8i_jZwwRtYYIVZL8jLGPUwEME2MEQl1zSOBuZA8H6nlCnuXPhPSelW8OOxxFcwUklcWYF-6N1WZ9m79c_7KhBFClyEHHYeVkjXNBaLUXiqxKot7AJkfnf-BBkemc008351KZQUgtVMshY1ISnYrNHvhTG7pXP5fyaV9T6SbXh8yc1Jgb8Q0_gRbqcqyZUlqc3Ngty2HytaByWZL3H3KDB0fBw_f9futICOPhX--UajVkFWW5g0vzxvuGTqaQJDTZkGA2n480mmd2erRt119XS_YCX_wZEdV6tB_D9dR4qlsc1dmnRzIj99wxIY3gExMeh8e1nqpwCi1rSvLJuuAdnmZEa3J8uzRFSey66PVfhWwvxo045PydpU5XMscNEYyzvYnD7R9VP6yX79ElteE8G-MwnAIRdV0Vc47WVSPUpzO4OH3NB9U4yOC_u0NZyM65RYfAWTDxhTllzNtR28LXnv3atgoQhCuEuWzRj0UO4CPQzKsIDTZCLTZqxOGV0Q&maxwidth=400",
+        "googlePlaceId": "ChIJ-UrRPdVRqEcRTzDm7VTSLEw",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 25993549",
+        "website": "https://www.jmberlin.de/",
+        "isOutdoor": false,
+        "score": 26.291814603255354,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJyS1mU8JRqEcRulOPzPV2oSI",
+        "name": "Tränenpalast",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.5209565,
+        "longitude": 13.3872123,
+        "rating": 4.6,
+        "reviewCount": 6916,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXgUlMy0_qK78g1kcxdlJHYaLsebwl13nJxtGt-t4mmWiMNHNjsYK3MYrWt-akZCYHH5jlciFOk0e12etGB6c1WLm8ZqEXDeibD_iE3jaF63N8Vc-0lKbDqHFuH9xpTToPnowgTsKtBohK8rH34-Tzas8ZiPl-OHLvbA4RP7Bph5PpxJ-Pv3pyy7aPeq7ek3N45QbseA00smj4mECzhv7DcE0050WTFChAKPSciZ_3DqI_qwZ_aJbR0W1h0L-NloFDRqu5q5qapSqpBb9zCFdbOuPhkb6wYdIgp1_q3otIAylTF1BROt25ls092c4-OlrZdQO5CXzdbTPZtJYbuyjfIDbYr1WWJgA9XC2W9EJoEuW4rzbuGGjXZcNEK37W3A_PwT6sW_GLrXf_aY1WuewfJ60DB6KAtD9-9xYs7G5IiWur1QxGp0mvzwdsb0Q29PIaYKzMHP6rzLRXOhHYXytOXQt4beAqusT_3Vjk-B1cUl5ZfyE3SRPV2PaFv6HlNOWikvJq-Nyo0biJV1wtgvLyIEO85ozG8WIs60S5yGbEDCEYHg8CZw-O2fnSW_O-1exxm_7Ov&maxwidth=400",
+        "googlePlaceId": "ChIJyS1mU8JRqEcRulOPzPV2oSI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 467777911",
+        "website": "http://www.hdg.de/traenenpalast/",
+        "isOutdoor": false,
+        "score": 25.87970996920377,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJM28dat1RqEcRu_1H_QZRHrY",
+        "name": "Altes Museum",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.5194665,
+        "longitude": 13.3987445,
+        "rating": 4.6,
+        "reviewCount": 5801,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW6uO8yoh5H9fLPzAYfWZ1w91eMSGxAYiPu2K35bz-OB30ePvRIZUVlODuluQxk-CwKteRgT53jExzUG4ALmcJqwA64efPR0WlFjNLFWDFbTiykLh4ovaL4mv5eAoDR5eZO0PUWX8R3PkMcjcsbaeQQo-ZaWS3-zz00ZkoKVGaKAK0D-VBcu3xccLbEQhcyikk32o7xdbhdS6RJuYn4ZZzYmH0_RHIJr7GO0FsPE4hVRy6RKw_8gj6tN_Ju9Bgs2zLOgaiccfncRkTdncC0qbTvLEpz2EgGsEslw-BJjNQVMA84jbc&maxwidth=400",
+        "googlePlaceId": "ChIJM28dat1RqEcRu_1H_QZRHrY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 266424242",
+        "website": "https://www.smb.museum/museen-einrichtungen/altes-museum/home/",
+        "isOutdoor": false,
+        "score": 25.727005730935193,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ61P_Gt9RqEcR0Zp4VZCfHHw",
+        "name": "Humboldt Forum",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.51725219999999,
+        "longitude": 13.4017087,
+        "rating": 4.4,
+        "reviewCount": 9055,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:30",
+          "close": "18:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWK293NZSL9vwsuaDNSFXKbvTo-9CeNC-E9ZyYl6h0ylMP9MzwtPPeo0Qyvfi1U2ytMBX206yLq2SEByr47QXpQhyXVtgji3OGhwSgxX8jGgP3Oy97KAL9qL8q8fsOcYszq7heo5F8GwWQygNJeqR1sEPQKmbHxzMIqXGHYlqsWMx11m9Z8n_9cNqlQmWU5mfuanIL-ttjgNCigqxQf9RXmue-taqWdRBRwKR86I-osSpKoHofPqELJP8cYTnXAuRObUblbChL0PVg_iTY5vUqbFEbsvQug9iOeEDrqh126sNYFFNQ&maxwidth=400",
+        "googlePlaceId": "ChIJ61P_Gt9RqEcR0Zp4VZCfHHw",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "monday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "tuesday": null,
+          "wednesday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "thursday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "friday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "18:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 992118989",
+        "website": "https://www.humboldtforum.org/",
+        "isOutdoor": false,
+        "score": 25.713776909300154,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJbVDuQcdRqEcR5X3xq9NSG2Q",
+        "name": "Palais du Reichstag",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.5186202,
+        "longitude": 13.3761872,
+        "rating": 4.7,
+        "reviewCount": 9521,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX6NC_Vucr6XcHh7TdN6d5EKegJOCLJOxDEkY8PjKSxvKcMx6XpGFxglpf6nNkUr03edpMVLuDqH0TfujilLURFc_s6osGMj6AvRZxKJCJF17gV1KP25cIzXj-GK-6laAQADwINbPCZO5RdAUiJtL2ldYSCm4OxZzSuEmmU-Cu5a_DhbeIYM-T9nHJ_sZHsogCbQXgWBpAooov5i6zVBLXaD1xanqPbXpk8ve2be4AiJtqNC3nfdA8v1vZyxh_gp3NTm7wx6f6IYOOmX1QmkWbAaz8WoTQzUHh0yqB6fC1bECka0OSBuMlrrz32-aXCQ8AQjB1m1F_K5wK6UAxq8-xHOZhNHs3pbNSuAXjsqQuQZIc6D665EBWQKaTlblRguxWekrgfdffT2Tf7R-eMheR2oeP6Y4by9jTGo3TMajq7Q6uHyNfSG28cJ-UQBcgFgeBzuWbDL2Ky_02-pjEDVy4QVkD6HWYFaIXEfObq4pXfBGvDW78ud_2ru0wQCnsQnSofknmmxI2IeqH5EylkTKgo7XhFTmO6WCd9MKaKMllgB00OUm9WaErN7q8O3SW-quoKiQ&maxwidth=400",
+        "googlePlaceId": "ChIJbVDuQcdRqEcR5X3xq9NSG2Q",
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 22732083",
+        "website": "https://www.bundestag.de/besuche/architektur/reichstag/",
+        "isOutdoor": false,
+        "score": 23.357365130313887,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJbygR2x5OqEcRbhbkZsMB_DA",
+        "name": "Alexanderplatz",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.52198139999999,
+        "longitude": 13.413306,
+        "rating": 4.3,
+        "reviewCount": 238753,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU8SqToqVOvmwQfYIim18HgPa44KNZcakhesMexRHTKkORLnyWkew42lHQp0RRDoay1mjprHQMTOZXxy7ShcU2L8C17JdkNa3yxXSlYZhOF0nEXdheU50eGfUoKy0gJdgXxdjPWD5hn2phjcgf0mG_OMUjLj_J5cQPajT8bsoh8X5M9iJIHY2LjeCqYxlsE4smmvTYwehMB-rQEJi_xX4vLXYJ3yRj1CugMtbJMJ6yryUItja4jDLKmDKg-WWembODyzlOrfo4VdbO5qmAnxZcMQT4tI7434VGOvfqYoMnefFvIaiqF24ZkgLZorAQERGFPZafr9E8NSPZKvS5qstBnuJFm33HEFOlSkdb3lJYAxnP9dnadwdljJLZN3zhUFNWK7NCc97DVlOMiBv2me7-ErhdxKLtd0-iaD9U9PFRFZ2JKDw8LRl1R8MINJracrUlim_Z1O32LZ6PfJnhZcMldlQ8k92Tb_ys0m0VT8vtciD4HIKaACbs65b7uKt1yoBpWCbvcpW5PCqkpBMUJKm8_eR-h3BZxXD6DNSbTJi78-SXvHglitlDChs5cSjFqcHrokSlPyiun2Q&maxwidth=400",
+        "googlePlaceId": "ChIJbygR2x5OqEcRbhbkZsMB_DA",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.berlin.de/sehenswuerdigkeiten/3560109-3558930-alexanderplatz.html",
+        "score": 20.355897674649874,
+        "source": "google_places"
+      },
+      {
+        "id": "viator-17194P33",
+        "name": "Berlin pendant le nazisme - Tour en italien",
+        "type": "culture",
+        "description": "Avec cette visite guidée, vous découvrirez comment l'accession au pouvoir d'Hitler en 1933 fut possible et tous les secrets de la relation tragique entre les chrétiens de Berlin et le monde juif. Revenez sur les lieux de la terreur nazie, découvrez le quartier juif avec la route de la tolérance et la nouvelle synagogue, le musée de la résistance allemande et les ruines de la gare Anhalter Bahnhof. Avec cette tournée, vous comprendrez comment Hitler est arrivé au pouvoir et a consolidé la naissance de l'antisémitisme moderne et comment l'Allemagne vit avec ce chapitre de son histoire.",
+        "duration": 90,
+        "estimatedCost": 27,
+        "latitude": 52.5098738,
+        "longitude": 13.470103799999999,
+        "rating": 5,
+        "mustSee": false,
+        "bookingRequired": true,
+        "bookingUrl": "https://www.viator.com/fr-FR/tours/Berlin/Third-Reich-Berlin-Guided-Tour-with-an-Italian-Speaking-Guide/d488-17194P33?mcid=42383&pid=P00286664&medium=api&api_version=2.0",
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "dataReliability": "estimated",
+        "geoSource": "geocode",
+        "geoConfidence": "medium",
+        "qualityFlags": [],
+        "imageUrl": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-480x320/09/56/23/fd.jpg",
+        "providerName": "Viator",
+        "reviewCount": 62,
+        "freeCancellation": true,
+        "instantConfirmation": false,
+        "isOutdoor": false,
+        "score": 9.084783378996509,
+        "source": "viator"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJiQnyVcZRqEcRY0xnhE77uyY",
+        "name": "Porte de Brandebourg",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.5162746,
+        "longitude": 13.3777041,
+        "rating": 4.7,
+        "reviewCount": 182488,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Brandenburger_Tor_morgens.jpg/400px-Brandenburger_Tor_morgens.jpg",
+        "googlePlaceId": "ChIJiQnyVcZRqEcRY0xnhE77uyY",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.berlin.de/sehenswuerdigkeiten/3560266-3558930-brandenburger-tor.html",
+        "score": 120.92246862300824,
+        "source": "google_places"
+      },
+      {
+        "id": "museum-island",
+        "name": "Île aux Musées",
+        "type": "culture",
+        "description": "Ensemble de cinq musées classés UNESCO avec des collections d'art antique",
+        "duration": 240,
+        "estimatedCost": 19,
+        "latitude": 52.5169,
+        "longitude": 13.4019,
+        "rating": 4.7,
+        "mustSee": true,
+        "bookingRequired": true,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "tips": "Le billet combiné donne accès aux 5 musées.",
+        "dataReliability": "verified",
+        "isOutdoor": false,
+        "score": 115.4,
+        "source": "mustsee",
+        "reviewCount": 0
+      },
+      {
+        "id": "gp-ChIJx3iXOMxRqEcRSGbJBczVSzc",
+        "name": "Topographie des Terrors",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.506747,
+        "longitude": 13.3837099,
+        "rating": 4.6,
+        "reviewCount": 39766,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "20:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWKlUi6KH4PUX4rOnFPmtxkP-pBq_PzzWtK8jLxJIGCwFwTWfVjRKOJILX6NZX7iZDVhZQrvTXrQ8L0MszUPDsa86UeunwobX3EEjMwIfxDVKEhty46PCcc6USuRbvwa2rqracb_fhTEJdMGQOnlvDj656grXjaJPArB_OHlYd4T_hTtUu0CIVvXH8YePksm9qC5mDPKEi8QWDQujr4sWi5w1E0dFTMBTy0dOt09jJKGrmi3Xa78yg8HzGN5XEkjcjgKZAuM3hTqQ76geACoZiscaqS88Jp1z0Oq5FzGOsXl_6ukppzWESGxbP59ZKeTBX-GW6DNvIyFTVSw6Rg2NBdIu4f4lRMxJCS3xlWsn_hqvd-XEQZS7ik7WLZ4bzKKZYECcFkDDhoUMUztcUlr3qoC7dRH-E6JmqwVjslNYcsE7SbOvdmXvIrNY7ZcpFKyaPMq0Ma54iqI5DwFMOpUyIf_fpVqQJ84myDgvWpPWKdVG2fYweFtt3bSi-gUIPf9UjHU6OC0nUXB3sp2EJ8OKjHhMgnJo4BfHG1vY1jFzeaJzFAx7-9VzEKb-5mWsvBkMc_4QEB&maxwidth=400",
+        "googlePlaceId": "ChIJx3iXOMxRqEcRSGbJBczVSzc",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "20:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "20:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 25450950",
+        "website": "https://www.topographie.de/",
+        "isOutdoor": false,
+        "score": 27.399023816354926,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJS6_t9aZHqEcRGCiRSnvpm94",
+        "name": "East Side Gallery",
+        "type": "gallery",
+        "description": "",
+        "latitude": 52.50502239999999,
+        "longitude": 13.4396952,
+        "rating": 4.6,
+        "reviewCount": 63338,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUx_5XLOlTgzuCAS-nBnmwPylG0b9eWwrqqT1ht8IuoXvBLeyZWFQS1CD8r-fzT9aShVsIAwa1fezQyhq-RyIWO1qwAypLT-8V2-H-kdku92C6-iQqHgF1tcL-jcHNcZvx0IeYetgqoP9TiPTqF85179-TzFNA_2aUVnmJV9SoU-lbedqOhJMcY0yUjC92epOiasJJBdi7Xni42alWqdQTh_47igNKZnLLs2HSldHp51YiREAixQuWb7_ScoVNU0g1qfslcesQE90nyOmS4BFJHggbC7p7xciSKr3FWOUIWjF3JGqQ7sEetyL12pdwQXd8wFV90KQRmMORZ6q5gDPS7jSNGG9I8or9JXYzOnz2YNXNS2qrISqsaepDdkreEmg5H-AIPwOXdkcKR2OBjicLVHOZ9jNkfE_b6WcebWBCJFTXl1ExrQW6Id-XI9MOwKK-uQJC57DxGddfPhnTDz5S8Y_5tiTSdL_zbpLnNjpUkLEEbWh0d6gipjaGJ1XS-5d-F1Z5dD79tF3B4nAnB-e_smqV2rj19jy6_wRUWRhtIzPgnyYsncYqsNj10gLLOQg6XvgJUhn1-Xg&maxwidth=400",
+        "googlePlaceId": "ChIJS6_t9aZHqEcRGCiRSnvpm94",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 213085222",
+        "website": "https://www.stiftung-berliner-mauer.de/de/east-side-gallery",
+        "isOutdoor": false,
+        "score": 26.303328691400576,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ-UrRPdVRqEcRTzDm7VTSLEw",
+        "name": "Musée juif de Berlin",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.5023238,
+        "longitude": 13.3954016,
+        "rating": 4.4,
+        "reviewCount": 17616,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUZPqApS2lnR1Wy_bC71_QU4cDqsIigT36RCcsifp05I_jCRIqZ8JGfqkyd7b-ATpOzLiWa8i_jZwwRtYYIVZL8jLGPUwEME2MEQl1zSOBuZA8H6nlCnuXPhPSelW8OOxxFcwUklcWYF-6N1WZ9m79c_7KhBFClyEHHYeVkjXNBaLUXiqxKot7AJkfnf-BBkemc008351KZQUgtVMshY1ISnYrNHvhTG7pXP5fyaV9T6SbXh8yc1Jgb8Q0_gRbqcqyZUlqc3Ngty2HytaByWZL3H3KDB0fBw_f9futICOPhX--UajVkFWW5g0vzxvuGTqaQJDTZkGA2n480mmd2erRt119XS_YCX_wZEdV6tB_D9dR4qlsc1dmnRzIj99wxIY3gExMeh8e1nqpwCi1rSvLJuuAdnmZEa3J8uzRFSey66PVfhWwvxo045PydpU5XMscNEYyzvYnD7R9VP6yX79ElteE8G-MwnAIRdV0Vc47WVSPUpzO4OH3NB9U4yOC_u0NZyM65RYfAWTDxhTllzNtR28LXnv3atgoQhCuEuWzRj0UO4CPQzKsIDTZCLTZqxOGV0Q&maxwidth=400",
+        "googlePlaceId": "ChIJ-UrRPdVRqEcRTzDm7VTSLEw",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 25993549",
+        "website": "https://www.jmberlin.de/",
+        "isOutdoor": false,
+        "score": 26.291814603255354,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJyS1mU8JRqEcRulOPzPV2oSI",
+        "name": "Tränenpalast",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.5209565,
+        "longitude": 13.3872123,
+        "rating": 4.6,
+        "reviewCount": 6916,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXgUlMy0_qK78g1kcxdlJHYaLsebwl13nJxtGt-t4mmWiMNHNjsYK3MYrWt-akZCYHH5jlciFOk0e12etGB6c1WLm8ZqEXDeibD_iE3jaF63N8Vc-0lKbDqHFuH9xpTToPnowgTsKtBohK8rH34-Tzas8ZiPl-OHLvbA4RP7Bph5PpxJ-Pv3pyy7aPeq7ek3N45QbseA00smj4mECzhv7DcE0050WTFChAKPSciZ_3DqI_qwZ_aJbR0W1h0L-NloFDRqu5q5qapSqpBb9zCFdbOuPhkb6wYdIgp1_q3otIAylTF1BROt25ls092c4-OlrZdQO5CXzdbTPZtJYbuyjfIDbYr1WWJgA9XC2W9EJoEuW4rzbuGGjXZcNEK37W3A_PwT6sW_GLrXf_aY1WuewfJ60DB6KAtD9-9xYs7G5IiWur1QxGp0mvzwdsb0Q29PIaYKzMHP6rzLRXOhHYXytOXQt4beAqusT_3Vjk-B1cUl5ZfyE3SRPV2PaFv6HlNOWikvJq-Nyo0biJV1wtgvLyIEO85ozG8WIs60S5yGbEDCEYHg8CZw-O2fnSW_O-1exxm_7Ov&maxwidth=400",
+        "googlePlaceId": "ChIJyS1mU8JRqEcRulOPzPV2oSI",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 467777911",
+        "website": "http://www.hdg.de/traenenpalast/",
+        "isOutdoor": false,
+        "score": 25.87970996920377,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJM28dat1RqEcRu_1H_QZRHrY",
+        "name": "Altes Museum",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.5194665,
+        "longitude": 13.3987445,
+        "rating": 4.6,
+        "reviewCount": 5801,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfW6uO8yoh5H9fLPzAYfWZ1w91eMSGxAYiPu2K35bz-OB30ePvRIZUVlODuluQxk-CwKteRgT53jExzUG4ALmcJqwA64efPR0WlFjNLFWDFbTiykLh4ovaL4mv5eAoDR5eZO0PUWX8R3PkMcjcsbaeQQo-ZaWS3-zz00ZkoKVGaKAK0D-VBcu3xccLbEQhcyikk32o7xdbhdS6RJuYn4ZZzYmH0_RHIJr7GO0FsPE4hVRy6RKw_8gj6tN_Ju9Bgs2zLOgaiccfncRkTdncC0qbTvLEpz2EgGsEslw-BJjNQVMA84jbc&maxwidth=400",
+        "googlePlaceId": "ChIJM28dat1RqEcRu_1H_QZRHrY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "17:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 266424242",
+        "website": "https://www.smb.museum/museen-einrichtungen/altes-museum/home/",
+        "isOutdoor": false,
+        "score": 25.727005730935193,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ61P_Gt9RqEcR0Zp4VZCfHHw",
+        "name": "Humboldt Forum",
+        "type": "museum",
+        "description": "",
+        "latitude": 52.51725219999999,
+        "longitude": 13.4017087,
+        "rating": 4.4,
+        "reviewCount": 9055,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:30",
+          "close": "18:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWK293NZSL9vwsuaDNSFXKbvTo-9CeNC-E9ZyYl6h0ylMP9MzwtPPeo0Qyvfi1U2ytMBX206yLq2SEByr47QXpQhyXVtgji3OGhwSgxX8jGgP3Oy97KAL9qL8q8fsOcYszq7heo5F8GwWQygNJeqR1sEPQKmbHxzMIqXGHYlqsWMx11m9Z8n_9cNqlQmWU5mfuanIL-ttjgNCigqxQf9RXmue-taqWdRBRwKR86I-osSpKoHofPqELJP8cYTnXAuRObUblbChL0PVg_iTY5vUqbFEbsvQug9iOeEDrqh126sNYFFNQ&maxwidth=400",
+        "googlePlaceId": "ChIJ61P_Gt9RqEcR0Zp4VZCfHHw",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "monday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "tuesday": null,
+          "wednesday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "thursday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "friday": {
+            "open": "10:30",
+            "close": "18:30"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "18:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 992118989",
+        "website": "https://www.humboldtforum.org/",
+        "isOutdoor": false,
+        "score": 25.713776909300154,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJbVDuQcdRqEcR5X3xq9NSG2Q",
+        "name": "Palais du Reichstag",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.5186202,
+        "longitude": 13.3761872,
+        "rating": 4.7,
+        "reviewCount": 9521,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfX6NC_Vucr6XcHh7TdN6d5EKegJOCLJOxDEkY8PjKSxvKcMx6XpGFxglpf6nNkUr03edpMVLuDqH0TfujilLURFc_s6osGMj6AvRZxKJCJF17gV1KP25cIzXj-GK-6laAQADwINbPCZO5RdAUiJtL2ldYSCm4OxZzSuEmmU-Cu5a_DhbeIYM-T9nHJ_sZHsogCbQXgWBpAooov5i6zVBLXaD1xanqPbXpk8ve2be4AiJtqNC3nfdA8v1vZyxh_gp3NTm7wx6f6IYOOmX1QmkWbAaz8WoTQzUHh0yqB6fC1bECka0OSBuMlrrz32-aXCQ8AQjB1m1F_K5wK6UAxq8-xHOZhNHs3pbNSuAXjsqQuQZIc6D665EBWQKaTlblRguxWekrgfdffT2Tf7R-eMheR2oeP6Y4by9jTGo3TMajq7Q6uHyNfSG28cJ-UQBcgFgeBzuWbDL2Ky_02-pjEDVy4QVkD6HWYFaIXEfObq4pXfBGvDW78ud_2ru0wQCnsQnSofknmmxI2IeqH5EylkTKgo7XhFTmO6WCd9MKaKMllgB00OUm9WaErN7q8O3SW-quoKiQ&maxwidth=400",
+        "googlePlaceId": "ChIJbVDuQcdRqEcR5X3xq9NSG2Q",
+        "businessStatus": "OPERATIONAL",
+        "phone": "030 22732083",
+        "website": "https://www.bundestag.de/besuche/architektur/reichstag/",
+        "isOutdoor": false,
+        "score": 23.357365130313887,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJbygR2x5OqEcRbhbkZsMB_DA",
+        "name": "Alexanderplatz",
+        "type": "attraction",
+        "description": "",
+        "latitude": 52.52198139999999,
+        "longitude": 13.413306,
+        "rating": 4.3,
+        "reviewCount": 238753,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU8SqToqVOvmwQfYIim18HgPa44KNZcakhesMexRHTKkORLnyWkew42lHQp0RRDoay1mjprHQMTOZXxy7ShcU2L8C17JdkNa3yxXSlYZhOF0nEXdheU50eGfUoKy0gJdgXxdjPWD5hn2phjcgf0mG_OMUjLj_J5cQPajT8bsoh8X5M9iJIHY2LjeCqYxlsE4smmvTYwehMB-rQEJi_xX4vLXYJ3yRj1CugMtbJMJ6yryUItja4jDLKmDKg-WWembODyzlOrfo4VdbO5qmAnxZcMQT4tI7434VGOvfqYoMnefFvIaiqF24ZkgLZorAQERGFPZafr9E8NSPZKvS5qstBnuJFm33HEFOlSkdb3lJYAxnP9dnadwdljJLZN3zhUFNWK7NCc97DVlOMiBv2me7-ErhdxKLtd0-iaD9U9PFRFZ2JKDw8LRl1R8MINJracrUlim_Z1O32LZ6PfJnhZcMldlQ8k92Tb_ys0m0VT8vtciD4HIKaACbs65b7uKt1yoBpWCbvcpW5PCqkpBMUJKm8_eR-h3BZxXD6DNSbTJi78-SXvHglitlDChs5cSjFqcHrokSlPyiun2Q&maxwidth=400",
+        "googlePlaceId": "ChIJbygR2x5OqEcRbhbkZsMB_DA",
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.berlin.de/sehenswuerdigkeiten/3560109-3558930-alexanderplatz.html",
+        "score": 20.355897674649874,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 16,
+        "byEngine": {
+          "google_local": 6,
+          "google_hotels": 1,
+          "google_flights": 2,
+          "google_maps": 7
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-direct-01",
+    "   Lyon → Berlin (3j)",
+    "   solo (1p) | economic | culture, gastronomy",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 1ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Berlin\", ll=\"@52.52,13.405,14z\", gl=\"de\"",
+    "[Weather] Cache hit for 2026-03-19 → 2026-03-21",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Google Places] ✅ 27 attractions found for Berlin",
+    "[Hotels] Disponibilité live: 13/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (491ms)",
+    "[Pipeline V2] Resolving GPS for 5 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/5 activities",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Berlin\" from local database",
+    "[Pipeline V2]   → Porte de Brandebourg, Île aux Musées, Mémorial du Mur de Berlin",
+    "[Pipeline V2] Step 1: All data fetched in 53586ms",
+    "[Pipeline V2]   Activities: 27 Google + 22 SerpAPI + 10 Overpass + 19 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 10 SerpAPI",
+    "[Pipeline V2]   Hotels: 13 | Transport options: 7",
+    "[Pipeline V2] Step 1 done in 53586ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [120.9] ⭐ \"Porte de Brandebourg\" (src=google_places, reviews=182488, rating=4.7, tags=none)",
+    "[Pipeline V2]   #2 [115.4] ⭐ \"Île aux Musées\" (src=mustsee, reviews=0, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #3 [64.7] ⭐ \"Mur de Berlin\" (src=overpass, reviews=140, rating=4.690308509457033, tags=none)",
+    "[Pipeline V2]   #4 [27.5]    \"Gedenkstätte Berliner Mauer\" (src=google_places, reviews=45218, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #5 [27.4]    \"Topographie des Terrors\" (src=google_places, reviews=39766, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #6 [26.3]    \"East Side Gallery\" (src=google_places, reviews=63338, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #7 [26.3]    \"Musée juif de Berlin\" (src=google_places, reviews=17616, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #8 [25.9]    \"Tränenpalast\" (src=google_places, reviews=6916, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #9 [25.7]    \"Altes Museum\" (src=google_places, reviews=5801, rating=4.6, tags=deep_culture)",
+    "[Pipeline V2]   #10 [25.7]    \"Humboldt Forum\" (src=google_places, reviews=9055, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #11 [23.4]    \"Palais du Reichstag\" (src=google_places, reviews=9521, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #12 [20.4]    \"Alexanderplatz\" (src=google_places, reviews=238753, rating=4.3, tags=none)",
+    "[Pipeline V2]   #13 [20.1]    \"Lustgarten\" (src=google_places, reviews=9414, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #14 [19.6]    \"Mémorial aux Juifs assassinés d'Europe\" (src=google_places, reviews=48785, rating=4.6, tags=none)",
+    "[Pipeline V2]   #15 [19.5]    \"Berliner Dom\" (src=google_places, reviews=44813, rating=4.6, tags=none)",
+    "[Pipeline V2]   #16 [19.5]    \"Potsdamer Platz\" (src=google_places, reviews=69439, rating=4.4, tags=none)",
+    "[Pipeline V2]   #17 [19.2]    \"Fernsehturm de Berlin\" (src=google_places, reviews=50800, rating=4.4, tags=none)",
+    "[Pipeline V2]   #18 [19.1]    \"Checkpoint Charlie\" (src=google_places, reviews=94108, rating=4.1, tags=none)",
+    "[Pipeline V2]   #19 [18.6]    \"Bebelplatz\" (src=google_places, reviews=15884, rating=4.6, tags=none)",
+    "[Pipeline V2]   #20 [17.8]    \"musée de Pergame\" (src=overpass, reviews=60, rating=4.106566670344977, tags=deep_culture)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 9/55",
+    "[Pipeline V2] Added guaranteed experiential: \"Berlin pendant le nazisme - Tour en italien\"",
+    "[Pipeline V2] Step 2: 13 activities selected (3 must-sees) from 78 total",
+    "[Pipeline V2] Must-sees: \"Porte de Brandebourg\" (120.9), \"Île aux Musées\" (115.4), \"Mur de Berlin\" (64.7)",
+    "[Pipeline V2] Using user-preferred transport: train (881min, €78)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=medium, p75=3.20km, median=2.10km, maxClusterRadius=1.07km",
+    "[Pipeline V2] Radius-constrained clustering produced 5 clusters (target 3), running soft pass with 1.60km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (52.5156, 13.3929), Day 2: centroid (52.5346, 13.3898), Day 3: centroid (52.5074, 13.4549)",
+    "[Pipeline V2] Cluster Day 1: 9 activities, radius=1.55km, intraDistance=7.10km",
+    "[Pipeline V2] Cluster Day 2: 2 activities, radius=0.06km, intraDistance=0.12km",
+    "[Pipeline V2] Cluster Day 3: 2 activities, radius=1.06km, intraDistance=2.13km",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 9 activities [2 must-sees] (16.0h avail, max 6), Day 2: 2 activities [1 must-sees] (12.0h avail, max 5), Day 3: 2 activities [0 must-sees] (6.0h avail, max 3)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Porte de Brandebourg\" (score=120.9), \"Île aux Musées\" (score=115.4), \"Mur de Berlin\" (score=64.7)",
+    "[Pipeline V2]   Day 1: Porte de Brandebourg, Île aux Musées",
+    "[Pipeline V2]   Day 2: Mur de Berlin",
+    "[Pipeline V2] Step 3: 3 clusters created",
+    "[Pipeline V2]   Day 1: Porte de Brandebourg, Palais du Reichstag, Tränenpalast, Altes Museum, Alexanderplatz, Humboldt Forum, Île aux Musées, Musée juif de Berlin, Topographie des Terrors (6.5km intra)",
+    "[Pipeline V2]   Day 2: Mur de Berlin, Gedenkstätte Berliner Mauer (0.1km intra)",
+    "[Pipeline V2]   Day 3: East Side Gallery, Berlin pendant le nazisme - Tour en italien (2.1km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Generator Berlin Mitte\" (2.09 score, 0.95km center, 2.52km boundary avg, profile=urban_standard)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Step 4 prefetch: sparse anchors=2/8 (day-3-centroid, day-3-last)",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Berlin\", ll=\"@52.50744809999999,13.4548995,14z\", gl=\"de\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Berlin\", ll=\"@52.5098738,13.470103799999999,14z\", gl=\"de\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Step 4: supplemental API restaurants fetched=10, total SerpAPI pool=10",
+    "[Pipeline V2] Restaurants pool: total=39, budgetFiltered=9, geo=8",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=4, targets=3",
+    "[SerpAPI Places] Requête: q=\"frühstück café bäckerei\", location=\"Berlin\", ll=\"@52.5250788606418,13.3914569020271,14z\", gl=\"de\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Berlin\", ll=\"@52.50502239999999,13.4396952,14z\", gl=\"de\"",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Berlin\", ll=\"@52.512914812128365,13.45437442040542,14z\", gl=\"de\"",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[SerpAPI Places] 10 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=49, budgetFiltered=19, geo=18",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=20, missing meals 4 -> 4",
+    "[Pipeline V2] Step 4: 5/9 meals assigned restaurants (pool=18)",
+    "[Pipeline V2] Budget balancing: transport train->bus",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 3: \"Culture et départ\" → \"East Side Gallery et Berlin pendant le nazisme - Tour en italien\"",
+    "[Pipeline V2] Step 6 done in 9243ms — \"Progression logique de l'iconique vers l'historique puis le culturel, avec allègement progressif pour le départ et optimisation géographique.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 13/13 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 16 pairs...",
+    "[Pipeline V2] Directions cache: 16/16 pairs fetched",
+    "[Pipeline V2] Day 1 re-optimized with real times: Tränenpalast → Palais du Reichstag → Porte de Brandebourg → Topographie des Terrors → Musée juif de Berlin → Humboldt Forum → Île aux Musées → Altes Museum → Alexanderplatz",
+    "[Pipeline V2] 2-opt re-optimization: 1/3 days changed with real times",
+    "[Pipeline V2] Day 1: 9 activities to schedule (2 must-sees), dayStart=23:00, dayEnd=23:59, window=1.0h, cursor=23:00",
+    "[Pipeline V2]   → \"Tränenpalast\" (120min, score=25.9, mustSee=false)",
+    "[Pipeline V2]   → \"Palais du Reichstag\" (60min, score=23.4, mustSee=false)",
+    "[Pipeline V2]   → \"Porte de Brandebourg\" (30min, score=120.9, mustSee=true)",
+    "[Pipeline V2]   → \"Topographie des Terrors\" (120min, score=27.4, mustSee=false)",
+    "[Pipeline V2]   → \"Musée juif de Berlin\" (120min, score=26.3, mustSee=false)",
+    "[Pipeline V2]   → \"Humboldt Forum\" (120min, score=25.7, mustSee=false)",
+    "[Pipeline V2]   → \"Île aux Musées\" (240min, score=115.4, mustSee=true)",
+    "[Pipeline V2]   → \"Altes Museum\" (120min, score=25.7, mustSee=false)",
+    "[Pipeline V2]   → \"Alexanderplatz\" (60min, score=20.4, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 1 lunch: \"Backlover\" (1.6km) → \"Café Bakery Bonjour\" (0.7km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 1 dinner, searching pool + API near \"Alexanderplatz\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 1 dinner: found \"Restauration 1840\" (0.14km from Alexanderplatz)",
+    "[Pipeline V2] Day 1: Must-see \"Porte de Brandebourg\" rejected at 30min, retrying with 30min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 1: Must-see \"Porte de Brandebourg\" RETRY 3 — extending day end to 23:00 (was 23:00)",
+    "[Pipeline V2] Day 1: Must-see \"Île aux Musées\" rejected at 240min, retrying with 168min (min=30min, factor=0.7)",
+    "[Pipeline V2] Day 1: Must-see \"Île aux Musées\" RETRY 3 — extending day end to 23:00 (was 23:00)",
+    "[Pipeline V2] Day 2: 2 activities to schedule (1 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Mur de Berlin\" (60min, score=64.7, mustSee=true)",
+    "[Pipeline V2]   → \"Gedenkstätte Berliner Mauer\" (120min, score=27.5, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (pool) day 2 breakfast: \"Boulangerie Fresh\" (0.4km) → \"Kin Za Georgian Kitchen Cafe and\" (0.3km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Gedenkstätte Berliner Mauer\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"Restaurant Dae Mon\" (1.09km from Gedenkstätte Berliner Mauer)",
+    "[Pipeline V2] Day 2: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] Day 3: 2 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=13:00, window=5.0h, cursor=08:15",
+    "[Pipeline V2]   → \"East Side Gallery\" (60min, score=26.3, mustSee=false)",
+    "[Pipeline V2]   → \"Berlin pendant le nazisme - Tour en italien\" (90min, score=9.1, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 breakfast, searching pool + API near \"Generator Berlin Mitte\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 breakfast: found \"Croissant Couture Breakfast & Brunch\" (0.19km from Generator Berlin Mitte)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 dinner, searching pool + API near \"Berlin pendant le nazisme - Tour en italien\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 3 dinner: found \"A Mano\" (0.85km from Berlin pendant le nazisme - Tour en italien)",
+    "[Pipeline V2] Day 3: Skipping \"East Side Gallery\" — closed on saturday",
+    "[Pipeline V2] Day 3: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] 📸 Enriching 7 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 7/7 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule: 1 restaurant(s) still far — trying SerpAPI nearby search",
+    "[Pipeline V2] Post-schedule SerpAPI re-opt: Day 3 \"Déjeuner — Bacco Bäckerei\" (3.8km) → \"Butterhandlung | Restaurant | Berlin | Friedrichshain | Bar | Club\" (0.3km from ref)",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 2 restaurant(s) (0 API calls)",
+    "[Pipeline V2] 📸 Enriching 3 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 3/3 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 3 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 1 large intra-day gap segment(s)",
+    "[Pipeline V2] Step 7: 10 alternatives, pool trimmed to 13/13",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "  🔧 Day 3: Fixed activity count in narrative (2 → 1)",
+    "[Pipeline V2] Step 8: Quality score 100/100 (0 warnings, 1 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 16 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 76781ms (76.8s)",
+    "[Pipeline V2]   3 days, 12 items total"
+  ],
+  "warnings": [
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] Day 1: REJECTED activity \"Tränenpalast\" (duration=120min, travel=5min, cursor=23:00, dayEnd=23:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Palais du Reichstag\" (duration=60min, travel=15min, cursor=23:00, dayEnd=23:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Porte de Brandebourg\" (duration=30min, travel=15min, cursor=23:00, dayEnd=23:00) ⚠️ MUST-SEE LOST",
+    "[Pipeline V2] Day 1: REJECTED activity \"Topographie des Terrors\" (duration=120min, travel=25min, cursor=23:00, dayEnd=23:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Musée juif de Berlin\" (duration=120min, travel=30min, cursor=23:00, dayEnd=23:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Humboldt Forum\" (duration=120min, travel=10min, cursor=23:00, dayEnd=23:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Île aux Musées\" (duration=240min, travel=15min, cursor=23:00, dayEnd=23:00) ⚠️ MUST-SEE LOST",
+    "[Pipeline V2] Day 1: REJECTED activity \"Altes Museum\" (duration=120min, travel=15min, cursor=23:00, dayEnd=23:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Alexanderplatz\" (duration=60min, travel=15min, cursor=23:00, dayEnd=23:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner — Croissant Couture Breakfast & Brunch\" overlaps with \"Check-out Generator Berlin Mitte\""
+  ],
+  "errors": [
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Porte de Brandebourg\", \"Île aux Musées\"",
+    "[Pipeline V2]   Day 1: (no activities)",
+    "[Pipeline V2]   Day 2: Mur de Berlin, Gedenkstätte Berliner Mauer",
+    "[Pipeline V2]   Day 3: Berlin pendant le nazisme - Tour en italien"
+  ],
+  "durationMs": 76782,
+  "generatedAt": "2026-02-17T14:19:06.013Z",
+  "success": true,
+  "runType": "direct"
+}

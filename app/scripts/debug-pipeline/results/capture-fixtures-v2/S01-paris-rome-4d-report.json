@@ -1,0 +1,427 @@
+{
+  "tripId": "e4c7c423-a4a7-460e-b60f-177cc8658423",
+  "scenarioId": "paris-rome-4d",
+  "generatedAt": "2026-03-19T10:26:28.892Z",
+  "destination": "Rome",
+  "summary": {
+    "totalIssues": 22,
+    "critical": 1,
+    "warning": 6,
+    "info": 15,
+    "score": 95,
+    "weightedScore": 95
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 90,
+      "critical": 1,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 10
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "links": {
+      "score": 92,
+      "critical": 0,
+      "warning": 0,
+      "info": 11,
+      "totalIssues": 11,
+      "weightedPenalty": 7.7
+    },
+    "dataQuality": {
+      "score": 91,
+      "critical": 0,
+      "warning": 2,
+      "info": 3,
+      "totalIssues": 5,
+      "weightedPenalty": 9.1
+    },
+    "rhythm": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "relevance": {
+      "score": 96,
+      "critical": 0,
+      "warning": 1,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 4.2
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "LINK_RESTAURANT_MAPS_MISSING",
+      "code": "LINK_RESTAURANT_MAPS_MISSING",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/restaurants",
+      "count": 11,
+      "impactScore": 11,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 1: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 1: restaurant \"Dîner — Repas libre\" n'a pas de lien Google Maps"
+      ]
+    },
+    {
+      "key": "schedule:Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (débu",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (début 17:00)"
+      ]
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ]
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "category": "data-quality",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 4: seulement 30min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: seulement 30min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ]
+    },
+    {
+      "key": "relevance:Tous les must-see présents (2/2)",
+      "category": "relevance",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Tous les must-see présents (2/2)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (début 17:00)",
+        "dayNumber": 4,
+        "itemTitle": "musées du Vatican",
+        "details": {
+          "currentEnd": "17:20",
+          "nextStart": "17:00",
+          "overlapMinutes": 20
+        }
+      }
+    ],
+    "geography": [],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas de costBreakdown dans le trip"
+      },
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Pas d'hébergement défini dans le voyage"
+      }
+    ],
+    "links": [
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 1,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 1,
+        "itemTitle": "Déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 1: restaurant \"Dîner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 1,
+        "itemTitle": "Dîner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 2,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 2,
+        "itemTitle": "Déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: restaurant \"Dîner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 3,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 3: restaurant \"Dîner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 3,
+        "itemTitle": "Dîner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 4,
+        "itemTitle": "Petit-déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 4: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "dayNumber": 4,
+        "itemTitle": "Déjeuner — Repas libre",
+        "code": "LINK_RESTAURANT_MAPS_MISSING",
+        "component": "pipeline/restaurants"
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas d'hébergement défini"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Pas de breakdown des coûts"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de vol aller défini (transport optimal/avion)"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 4: seulement 30min de temps libre — pas de pause",
+        "dayNumber": 4,
+        "details": {
+          "freeMinutes": 30,
+          "occupiedMinutes": 895
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "info",
+        "category": "relevance",
+        "message": "Tous les must-see présents (2/2)"
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 40,
+    "activitiesCount": 14,
+    "restaurantsCount": 11,
+    "avgItemsPerDay": 10,
+    "totalEstimatedCost": null,
+    "hasAccommodation": false,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

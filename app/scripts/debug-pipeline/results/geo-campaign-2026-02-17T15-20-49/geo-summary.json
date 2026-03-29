@@ -1,0 +1,128 @@
+{
+  "campaignId": "geo-campaign-2026-02-17T15-20-49",
+  "startedAt": "2026-02-17T15:20:49.512Z",
+  "finishedAt": "2026-02-17T15:24:23.116Z",
+  "durationMs": 213604,
+  "seed": 20260217,
+  "maxRuns": 3,
+  "expectedDirectRuns": 2,
+  "expectedSuggestionRuns": 1,
+  "envHealth": {
+    "ANTHROPIC": "✅",
+    "SERPAPI": "✅",
+    "RAPIDAPI": "✅",
+    "VIATOR": "✅"
+  },
+  "runStats": {
+    "total": 3,
+    "success": 3,
+    "failed": 0,
+    "direct": 2,
+    "suggestion": 1
+  },
+  "geoCodeTotals": {
+    "GEO_IMPOSSIBLE_TRANSITION": 0,
+    "GEO_URBAN_HARD_LONG_LEG": 2,
+    "GEO_INTRA_DAY_ZIGZAG": 2,
+    "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+  },
+  "inefficiency": {
+    "failDays": 0,
+    "exemptDays": 0
+  },
+  "mustSeeCoverageFailures": 0,
+  "acceptance": {
+    "noImpossibleTransition": {
+      "pass": true,
+      "count": 0
+    },
+    "noUrbanHardLongLeg": {
+      "pass": false,
+      "count": 2
+    },
+    "noIntraDayZigzag": {
+      "pass": false,
+      "count": 2,
+      "highZigzagDays": 1
+    },
+    "routeInefficiencyWithinTarget": {
+      "pass": true,
+      "count": 0,
+      "exempt": 0
+    },
+    "mustSeeCoverage": {
+      "pass": true,
+      "count": 0
+    },
+    "campaignExecutedTargetMix": {
+      "pass": true,
+      "expected": 3,
+      "actual": 3
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "geo-direct-02",
+      "runType": "direct",
+      "scenarioId": "geo-direct-02",
+      "success": true,
+      "durationMs": 84835,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T15-20-49/geo-direct-02.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T15-20-49/geo-direct-02-report.json",
+      "score": 96,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "highZigzagDays": 1,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-08",
+      "runType": "direct",
+      "scenarioId": "geo-direct-08",
+      "success": true,
+      "durationMs": 61829,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T15-20-49/geo-direct-08.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T15-20-49/geo-direct-08-report.json",
+      "score": 87,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 2,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "highZigzagDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-suggest-01",
+      "runType": "suggestion",
+      "scenarioId": "geo-suggest-01-bologna-la-dolce-vita-gourmande",
+      "success": true,
+      "durationMs": 57344,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T15-20-49/geo-suggest-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T15-20-49/geo-suggest-01-report.json",
+      "score": 99,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 0,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "highZigzagDays": 0,
+      "mustSeeMissing": [],
+      "suggestionQuery": "Je veux un city-break gastronomie pas cher depuis Lyon",
+      "suggestionTitle": "Bologna : La Dolce Vita Gourmande"
+    }
+  ]
+}

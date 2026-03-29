@@ -1,0 +1,259 @@
+{
+  "campaignId": "geo-campaign-2026-02-17T13-03-59",
+  "startedAt": "2026-02-17T13:03:59.345Z",
+  "finishedAt": "2026-02-17T13:17:51.189Z",
+  "durationMs": 831844,
+  "seed": 20260217,
+  "maxRuns": 10,
+  "expectedDirectRuns": 8,
+  "expectedSuggestionRuns": 2,
+  "envHealth": {
+    "ANTHROPIC": "✅",
+    "SERPAPI": "✅",
+    "RAPIDAPI": "✅",
+    "VIATOR": "✅"
+  },
+  "runStats": {
+    "total": 10,
+    "success": 10,
+    "failed": 0,
+    "direct": 8,
+    "suggestion": 2
+  },
+  "geoCodeTotals": {
+    "GEO_IMPOSSIBLE_TRANSITION": 0,
+    "GEO_URBAN_HARD_LONG_LEG": 2,
+    "GEO_INTRA_DAY_ZIGZAG": 16,
+    "GEO_DAY_ROUTE_EFFICIENCY_LOW": 2
+  },
+  "inefficiency": {
+    "failDays": 2,
+    "exemptDays": 0
+  },
+  "mustSeeCoverageFailures": 0,
+  "acceptance": {
+    "noImpossibleTransition": {
+      "pass": true,
+      "count": 0
+    },
+    "noUrbanHardLongLeg": {
+      "pass": false,
+      "count": 2
+    },
+    "noIntraDayZigzag": {
+      "pass": false,
+      "count": 16
+    },
+    "routeInefficiencyWithinTarget": {
+      "pass": false,
+      "count": 2,
+      "exempt": 0
+    },
+    "mustSeeCoverage": {
+      "pass": true,
+      "count": 0
+    },
+    "campaignExecuted8Plus2": {
+      "pass": true,
+      "expected": 10,
+      "actual": 10
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "geo-direct-01",
+      "runType": "direct",
+      "scenarioId": "geo-direct-01",
+      "success": true,
+      "durationMs": 102548,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-01-report.json",
+      "score": 99,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-02",
+      "runType": "direct",
+      "scenarioId": "geo-direct-02",
+      "success": true,
+      "durationMs": 121814,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-02.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-02-report.json",
+      "score": 90,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 1,
+        "GEO_INTRA_DAY_ZIGZAG": 4,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 1
+      },
+      "inefficiencyFailDays": 1,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-03",
+      "runType": "direct",
+      "scenarioId": "geo-direct-03",
+      "success": true,
+      "durationMs": 89452,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-03.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-03-report.json",
+      "score": 95,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 2,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-04",
+      "runType": "direct",
+      "scenarioId": "geo-direct-04",
+      "success": true,
+      "durationMs": 102260,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-04.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-04-report.json",
+      "score": 90,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 1,
+        "GEO_INTRA_DAY_ZIGZAG": 3,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-05",
+      "runType": "direct",
+      "scenarioId": "geo-direct-05",
+      "success": true,
+      "durationMs": 52306,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-05.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-05-report.json",
+      "score": 94,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-06",
+      "runType": "direct",
+      "scenarioId": "geo-direct-06",
+      "success": true,
+      "durationMs": 60894,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-06.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-06-report.json",
+      "score": 96,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 2,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-07",
+      "runType": "direct",
+      "scenarioId": "geo-direct-07",
+      "success": true,
+      "durationMs": 49235,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-07.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-07-report.json",
+      "score": 98,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 0,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-direct-08",
+      "runType": "direct",
+      "scenarioId": "geo-direct-08",
+      "success": true,
+      "durationMs": 125133,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-08.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-direct-08-report.json",
+      "score": 92,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 2,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 1
+      },
+      "inefficiencyFailDays": 1,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": []
+    },
+    {
+      "runId": "geo-suggest-01",
+      "runType": "suggestion",
+      "scenarioId": "geo-suggest-01-escapade-gourmande-a-bologne-capitale-ga",
+      "success": true,
+      "durationMs": 77655,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-suggest-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-suggest-01-report.json",
+      "score": 99,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 0,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": [],
+      "suggestionQuery": "Je veux faire un break de 3 jours en Europe",
+      "suggestionTitle": "Escapade Gourmande à Bologne, Capitale Gastronomique Italienne"
+    },
+    {
+      "runId": "geo-suggest-02",
+      "runType": "suggestion",
+      "scenarioId": "geo-suggest-02-barcelone-tapas-et-culture-catalane",
+      "success": true,
+      "durationMs": 33581,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-suggest-02.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-17T13-03-59/geo-suggest-02-report.json",
+      "score": 98,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "mustSeeMissing": [],
+      "suggestionQuery": "Je veux un city-break gastronomie pas cher depuis Lyon",
+      "suggestionTitle": "Barcelone : Tapas et Culture Catalane"
+    }
+  ]
+}

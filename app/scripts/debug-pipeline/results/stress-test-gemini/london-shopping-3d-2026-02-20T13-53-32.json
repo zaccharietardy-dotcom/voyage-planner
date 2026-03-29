@@ -1,0 +1,1741 @@
+{
+  "scenarioId": "london-shopping-3d",
+  "preferences": {
+    "origin": "Paris",
+    "destination": "London",
+    "startDate": "2026-02-23T13:47:18.701Z",
+    "durationDays": 3,
+    "transport": "optimal",
+    "carRental": false,
+    "groupSize": 3,
+    "groupType": "friends",
+    "budgetLevel": "comfort",
+    "activities": [
+      "shopping",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "British Museum, Tower of London",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "London",
+        "days": 3
+      }
+    ]
+  },
+  "trip": {
+    "id": "6afcf226-73fe-44a8-8f43-aec538dd7641",
+    "createdAt": "2026-02-20T13:53:28.868Z",
+    "updatedAt": "2026-02-20T13:53:28.868Z",
+    "preferences": {
+      "origin": "Paris",
+      "destination": "London",
+      "startDate": "2026-02-23T13:47:18.701Z",
+      "durationDays": 3,
+      "transport": "optimal",
+      "carRental": false,
+      "groupSize": 3,
+      "groupType": "friends",
+      "budgetLevel": "comfort",
+      "activities": [
+        "shopping",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "British Museum, Tower of London",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "London",
+          "days": 3
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-02-23T13:47:18.701Z",
+        "items": [
+          {
+            "id": "transport-out-1-fallback",
+            "dayNumber": 1,
+            "startTime": "11:30",
+            "endTime": "14:00",
+            "type": "transport",
+            "title": "Transport inter-ville aller",
+            "description": "Paris → London (estimation)",
+            "locationName": "Paris → London",
+            "latitude": 51.50811239999999,
+            "longitude": -0.0759493,
+            "orderIndex": 0,
+            "duration": 150,
+            "estimatedCost": 56,
+            "bookingUrl": "https://www.google.com/maps/dir/Paris/London",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          },
+          {
+            "id": "dc2a16fa-3871-4cb4-8c09-0c4723d9368f",
+            "dayNumber": 1,
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Tour de Londres",
+            "description": "Ladies of London is an American reality television series that premiered on June 2, 2014, on Bravo.  During its original run, it aired on ITVBe in the United Kingdom.  The show can be streamed on Peac",
+            "locationName": "Tour de Londres",
+            "latitude": 51.50811239999999,
+            "longitude": -0.0759493,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.50811239999999,-0.0759493",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tour%20de%20Londres&query_place_id=&center=51.50811239999999,-0.0759493",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUB8ZtelwSbXBcW--GVN_MnKylmLtJ9qE0fxEIjG6ns3iivDusLWCgQKwm_Ts4LkLITbdJlbcTI6WVEtUikoYEccCFaiaw5T36JpMghwtuPac2gmuFelDWKTZDCgqw8_kEw6_0wv7el16biPlUjBrgywUUMqSV3DOlOm7GjqT-yrQTK2ajy2jpZkgVU9ogIJWPdeevLd7CMTEi1aI8LqNSji9i_i0GsTqYOFYa36_dm37t4ecqNrc5KbxHs8p1KcB2fKPkUKaLi5ZPD3k9VXMLPnckoNTJjGb1fqnLx6osOo3z0NukW1R_o-_vv2ngN3DzjSLRUgncXoVKXuccRJx5R5CmPATAOcuCk4c1RGTMoC6jgvRayYtocZuiKwue0hfSPYTIHQhXnzhYpLNNKJce1A-uDej_uvbTkwiHZixpS9ASXc8BzVj4mxL9K71oZLitLdbjtTTFAuueyGj36frwzY63NDAlNuG9zHHTjBoWb1g8S_fKQuAXcueIgJwqQVr6tHWMA01Zng6BqfXgr5EO5JHN1SBD-KznPLTzFZI9bzGqqgSY5f84nW8w3X90y1zw1C_ME&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high"
+          },
+          {
+            "id": "085e43a4-3412-457d-8c1d-6f8566099dec",
+            "dayNumber": 1,
+            "startTime": "15:00",
+            "endTime": "15:15",
+            "type": "checkin",
+            "title": "Check-in Stylish Studios by Luxestays Shepherds Bush",
+            "description": "Arrivée et installation à l'hôtel",
+            "locationName": "Stylish Studios by Luxestays Shepherds Bush",
+            "latitude": 51.503604017125,
+            "longitude": -0.2278435718275,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "booking-8727996",
+              "name": "Stylish Studios by Luxestays Shepherds Bush",
+              "type": "hotel",
+              "address": "London W12 8EA, United Kingdom",
+              "latitude": 51.503604017125,
+              "longitude": -0.2278435718275,
+              "rating": 8.3,
+              "reviewCount": 1447,
+              "stars": 3,
+              "pricePerNight": 122,
+              "totalPrice": 244,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/388746595.jpg?k=053427546d9ec27b18f4c6b78f1e74f04968fa38bb0e37a459f12a021a45f792&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Stylish+Studios+by+Luxestays+Shepherds+Bush+London&checkin=2026-02-23&checkout=2026-02-25&group_adults=3&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "bookingUrl": "https://www.booking.com/searchresults.html?ss=Stylish+Studios+by+Luxestays+Shepherds+Bush+London&checkin=2026-02-23&checkout=2026-02-26&group_adults=3&group_children=0&no_rooms=1",
+            "distanceFromPrevious": 10.52,
+            "timeFromPrevious": 132,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "0ac86185-00fd-4bc4-a64d-7b44f65d00ae",
+            "dayNumber": 1,
+            "startTime": "15:30",
+            "endTime": "16:30",
+            "type": "activity",
+            "title": "Tower Bridge",
+            "description": "Tower Bridge is a Grade I listed combined bascule, suspension, and, until 1960, cantilever bridge in London, built between 1886 and 1894, designed by Horace Jones and engineered by John Wolfe Barry wi",
+            "locationName": "Tower Bridge",
+            "latitude": 51.5054564,
+            "longitude": -0.07535649999999999,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.5054564,-0.07535649999999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Tower%20Bridge&query_place_id=&center=51.5054564,-0.07535649999999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVk8pWXohNOj7ODasv4YzLYRhJY_cjxzCq49soOQizXfKOoGX9fJI5Fsef2GE-fnCr78maOeZgwIM8ViBHv3UxHGspXWl3_SRSohRzYMSx31lU73Cr3_awZM4SfILqlvcCKpSxcehLJnkOPgCoKgcSEykCWM8SpduhTKzFqyyOJMFMD12fkXJt-IqOp2y5dxObUv159bLwPnobMG9egrKwZaS03ags9ClsjM1JDXMUzoMDTFexfOsQOYJEnPS5rfP4KcH_DVvImQFWCX9CAGoopvklHRMFfxC0VJsS9ZOkUHC88grdLBtGtjitL2y_7MXn-sF_qzF8w4ELEJDYyxMA8DKxE3e_bzfSmnKwKoxjJcTXCnA1V173WoYW3WEtHYOJpyAwrHujSvkE7Ya2Cq1uuVPcVLeKnouzAXTbrrAisLCepXazuhzqOVfuLJFD0BgKYh162PDwmpdiFMVDLUXj2Lu-7afx80gUbCDBgfWjrPH8Flahvyy-OFEGhmWQ-bpfKd7MC-mK8pHw0eeYiiYdYG85ZVojB7-328MYmHEERMY0w18SmTGic3rBnZ3u5CotGnw&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 10.56,
+            "timeFromPrevious": 132,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "d667dbd7-95d2-485b-baee-67f05b6b5e6e",
+            "dayNumber": 1,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Pont de Londres",
+            "description": "London Bridge: Guignol's Band II is a novel by the French writer Louis-Ferdinand Céline, published posthumously in 1964.  The story follows Ferdinand, an invalid French World War I veteran who lives i",
+            "locationName": "Pont de Londres",
+            "latitude": 51.5078788,
+            "longitude": -0.0877321,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.5078788,-0.0877321",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Pont%20de%20Londres&query_place_id=&center=51.5078788,-0.0877321",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXadw6e5AfKutLXxhFV3xaLmbL-7oSJTV5l_Z3yya6JC3DW-TpuPihvHfeF3obNUS2qWYZkKDirjOld4NMBgluO_ohf9JGBld-DaKcNUQNtknfeLFY3c0G6vX0UUC39N_TsjKRHFeSYHIKEzYBiOlrCGcV4gasJyrPSr-cny9it_emnp1D8fLoECfwoeoHaJE62p50Y_wqMWl02eQgKTmJyPa2nOsiA2vvpnixNW0pS9s5A4eHp_x-_TrLfJDubccyxZYa3cnsEQ_5Xy91E1H7zEtvj96HSoW0k9bJfYwC1k32vjyuspUOKzGjSugVD4XcJyP75LlMFinOJlh-KaofnNrGsahFP0rwHa8cSeYks2m4WVLPVR65Wv6LjL43nmArxEcjenI4l1DOCV48-PCCStewhsi-PfsKEMTRjYls6RYIwZUXhWli_rSJnEe_bJYe9ISLoTBNerXIRB0snnIvFwfmBnyffb6Jj9C0bV_KjoKtGpJQyghLPBVcFXj7hshXy4P5aXTTd6MxAfdBK46nzwURPGbvExhrm43fpUtYzp6z9pxw9O2nbIoH0WqwOLvV2bA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.9,
+            "timeFromPrevious": 12,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "817e3c0e-8a54-4085-840b-c2b8bcee3778",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Sky Garden",
+            "description": "Sky garden may refer to:20 Fenchurch Street sky garden, an indoor garden atop a skyscraper in the City of London financial district\nMeguro Sky Garden, a roof garden park in Tokyo\nSeoul Skygarden, an e",
+            "locationName": "Sky Garden",
+            "latitude": 51.5112422,
+            "longitude": -0.08354929999999999,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.5112422,-0.08354929999999999",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sky%20Garden&query_place_id=&center=51.5112422,-0.08354929999999999",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWKX_pYtKLBSwUbmhXqmEvAfzb4j-GdBuRs_C_yFTiLGoMF7F8nXdLHKVi6-138Q-rT3jHh2ZZHF2LgTQm8LiZ_nb8LQuwqKNMQTAJERHhYJuzhboVA_TYjFSlxBdu23vZ62IFCCBeiA3UsZ_Ee-9ZL3wqSq1XSM7qSRgisD2MDVLzLbB1KAlSL-a3TLfHhdiu-q57eskwHjqfgIg47j19C0-AaSX3H8uOIAu6nvV2G68NBilRnhkcARvNO5q8y-LnQyt46kjzIJX5oPS6qMH8cE4RrB9bhbtsFlSKbHmKknxb-0rt2Zw5SE037Ru76ge5zIsGOy_rcBoXEMmF6_jbogrHOEzABH4W6ToYONoQpL2WF0-AcsqEaOpI6xyTpzc2zf-_fGoiHIPzJRi6pEgVc3GwyKx-tKP_a6ECrSaTK5yiXRZALdUr7bAcXqjhbYHBQRcxlz6Idto6UKEij2lJ9ts6d6zj7HoqW3zst_9ag36b1OHoHZYjNL-WT4pCwCIaecvASNqVrYaBl7eH2hnsxxUa691jtMIp0kjgJToQgNijo9zANUI6BJeOXf2BcA2PHVBX4&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.47,
+            "timeFromPrevious": 6,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "4e5f745d-ae04-493f-9f08-3d919f1ba8aa",
+            "dayNumber": 1,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — The India - Monument",
+            "description": "\"Très bons plats, serveurs attentionnés ambiance agréable\"",
+            "locationName": "London",
+            "latitude": 51.510338,
+            "longitude": -0.0833855,
+            "orderIndex": 6,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.510338,-0.0833855",
+            "restaurant": {
+              "id": "serp-5891059301794578505",
+              "name": "The India - Monument",
+              "address": "London",
+              "latitude": 51.510338,
+              "longitude": -0.0833855,
+              "rating": 4.8,
+              "reviewCount": 3000,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "indienne"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Très bons plats, serveurs attentionnés ambiance agréable\""
+              ],
+              "description": "\"Très bons plats, serveurs attentionnés ambiance agréable\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=The%20India%20-%20Monument%2C%20London",
+              "photos": [
+                "https://serpapi.com/searches/69986077bd1c20f880c539af/images/hf2DvygxKcgoWcdwA9nHIfrPOldOuO1_J3PfYAcZ2X4.jpeg"
+              ],
+              "googlePlaceId": "5891059301794578505",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-9371802220458844138",
+                "name": "De Vine",
+                "address": "London",
+                "latitude": 51.511017,
+                "longitude": -0.0756282,
+                "rating": 5,
+                "reviewCount": 4900,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Équipe au top , service rapide et nourriture incroyable.\""
+                ],
+                "description": "\"Équipe au top , service rapide et nourriture incroyable.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=De%20Vine%2C%20London",
+                "photos": [
+                  "https://serpapi.com/searches/69986077bd1c20f880c539af/images/BNJb4NbdPcp0u11l2-muWuujy1TLFsUNx07j6P6oWaY.jpeg"
+                ],
+                "googlePlaceId": "9371802220458844138",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              },
+              {
+                "id": "serp-1220899330887618081",
+                "name": "Galvin La Chapelle",
+                "address": "London",
+                "latitude": 51.5203,
+                "longitude": -0.078105,
+                "rating": 4.6,
+                "reviewCount": 3000,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "française"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Vraiment excellent, service et cuisine au top.\""
+                ],
+                "description": "\"Vraiment excellent, service et cuisine au top.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Galvin%20La%20Chapelle%2C%20London",
+                "photos": [
+                  "https://serpapi.com/searches/69986077bd1c20f880c539af/images/71UFS3rf09xknYlgbDwpQVsLVKEO3rxNgOZ-Oerf3Y8.jpeg"
+                ],
+                "googlePlaceId": "1220899330887618081",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.1,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Tour de Londres et Tower Bridge",
+        "dayNarrative": "Le premier jour, après l'arrivée, se concentre sur les sites historiques majeurs de Londres, notamment la Tour de Londres et le Tower Bridge, avec une vue panoramique depuis Sky Garden pour le soir. Le dîner est prévu à proximité.",
+        "geoDiagnostics": {
+          "maxLegKm": 0.9,
+          "p95LegKm": 0.47,
+          "totalTravelMin": 25,
+          "totalLegKm": 1.77,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.28,
+          "mstLowerBoundKm": 1.38
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-02-24T13:47:18.701Z",
+        "items": [
+          {
+            "id": "e8b070ff-0bb3-40e1-8085-1bf809d85c0e",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Sweet Caroline",
+            "description": "\"Excellent restaurant, les plats sont à la fois copieux et délicieux.\"",
+            "locationName": "4 - 5 Shepherd's Bush Market, London, W12 8DG",
+            "latitude": 51.5052059,
+            "longitude": -0.226231,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.485992,-0.2026281",
+            "restaurant": {
+              "id": "serp-nearby-ChIJF4v3CG8PdkgRtDKtXXG5K08",
+              "name": "Sweet Caroline",
+              "address": "4 - 5 Shepherd's Bush Market, London, W12 8DG",
+              "latitude": 51.5052059,
+              "longitude": -0.226231,
+              "rating": 5,
+              "reviewCount": 262,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "07769 894730",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20Caroline%2C%204%20-%205%20Shepherd's%20Bush%20Market%2C%20London%2C%20W12%208DG",
+              "googlePlaceId": "ChIJF4v3CG8PdkgRtDKtXXG5K08",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "16:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "17:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": null
+              },
+              "distance": 0.21020099944656281,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJd29If9oPdkgRLzA_jS3tiOA",
+                "name": "Afternoon Tea at Caffe Concerto The Village",
+                "address": "Unit SU2024, The Village Westfield Shopping Centre, London, W12 7GE",
+                "latitude": 51.506583299999996,
+                "longitude": -0.2195854,
+                "rating": 4.3,
+                "reviewCount": 209,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "café",
+                  "restaurant sans gluten",
+                  "restaurant halal",
+                  "marchand de glaces",
+                  "restaurant italien",
+                  "salle de concert",
+                  "pâtisserie",
+                  "restaurant",
+                  "pâtissier spécialisé dans les gâteaux de mariage"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café italien raffiné, menu de brasserie. Café élégant de chaîne italienne proposant plats principaux, mets traditionnels, salades et pâtisseries."
+                ],
+                "description": "Café italien raffiné, menu de brasserie. Café élégant de chaîne italienne proposant plats principaux, mets traditionnels, salades et pâtisseries.",
+                "phoneNumber": "020 7494 6847",
+                "website": "https://www.caffeconcerto.co.uk/menu/the-village/afternoon-tea-cream-tea.html",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Afternoon%20Tea%20at%20Caffe%20Concerto%20The%20Village%2C%20Unit%20SU2024%2C%20The%20Village%20Westfield%20Shopping%20Centre%2C%20London%2C%20W12%207GE",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqAwEa6pRHvasC2H-fCF8sM2jmD2b7-z_FGIl0cWMVYMJASAmdTxm0LWY5mKs05PTLCKEbpaIBBgw7XGYXSHqNqXyuTNtIxThECo83fN1nIbEAvJBLfhmALyfqS_T1-C0rhl3ux=w80-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJd29If9oPdkgRLzA_jS3tiOA",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "19:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.6606362004690364,
+                "walkingTime": 8
+              },
+              {
+                "id": "serp-nearby-ChIJl1o_2dIPdkgRecrPuOJEZ0g",
+                "name": "Z & Z Bakery",
+                "address": "354 Uxbridge Rd, London, W12 7LL",
+                "latitude": 51.506581499999996,
+                "longitude": -0.23380179999999998,
+                "rating": 4.5,
+                "reviewCount": 600,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant libanais",
+                  "restaurant libanais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 8746 9009",
+                "website": "http://zeitzaatar.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Z%20%26%20Z%20Bakery%2C%20354%20Uxbridge%20Rd%2C%20London%2C%20W12%207LL",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepllct7gWUCv67wXtBr9xPUsuiMlXIXELSpaZIfKI2GFl57pdlPaFcHHrttuD9a6GKJYSvbGGI0AbRgLaYRCDtwz5ZIh6E45GulH05XA8GmgPCoLJQuagt2M0Gzj9_BiTM8110=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJl1o_2dIPdkgRecrPuOJEZ0g",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.5288442360361303,
+                "walkingTime": 7
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20Caroline%2C%204%20-%205%20Shepherd's%20Bush%20Market%2C%20London%2C%20W12%208DG",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20Caroline%2C%204%20-%205%20Shepherd's%20Bush%20Market%2C%20London%2C%20W12%208DG",
+            "selectionSource": "api"
+          },
+          {
+            "id": "ed500b4f-5bde-4163-9209-f81874248fdb",
+            "dayNumber": 2,
+            "startTime": "09:45",
+            "endTime": "11:45",
+            "type": "activity",
+            "title": "British Museum",
+            "description": "The British Museum is a public museum dedicated to human history, art and culture located in the Bloomsbury area of London.  Its permanent collection of eight million works is the largest in the world",
+            "locationName": "British Museum",
+            "latitude": 51.5194133,
+            "longitude": -0.1269566,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.5194133,-0.1269566",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=British%20Museum&query_place_id=&center=51.5194133,-0.1269566",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVxsaF7vwZPktDKXjGKrh-8Dodr569Xn7wY0tH6qZD-0lw6iranmy7X5-VvTWYRkQyHMzb9JL9YT56FFhkMVYpp0XdiqX-5tVm3bB5fUvd4dDxUrqPOGAFUxMj_dWHDJHlpjLDn5P6-_RgzflPDERlMAQsQjTibs3PG3g9tgq4Vifx-3VQeWzXtg2c9EPNl_u54Q4fmE6WdMcoCZoqLe_2dazRFsPmeUIU5OUSO9i9zZVG1ZEWJyPp-MBwSyoNA8PsQTYgnTP4jlizgPJMLRsTehR5c5qA9pTdS6kIBRa9qCfywe_tD2JJBUZN-m5Np9335eyMdNGt63T9KfehDF9womFIwLVpnfaitStoTnhkxJIjn-5wGaZk3eH4LLAmOvlwBYNdF9kTKK55kwxdxl9shi9K2NC11cLj-jnMsi6daQ4czFu9RcgkziV74jc0LfJ5rLDXmA8jpgN9-mwzQVpyh7b0yQKEKaiQE-EvlpaXCfFnqc--B7FaU3vusk8Un0-btIKwl83r3lygxxYjB0eRs6RHemw_9-ZD73vBUb7qaPeLXhDyUZ-gKSpsn6FeBGNzKgoKtcxmZrg&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 6.42,
+            "timeFromPrevious": 81,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "6f6909a6-08de-401c-ba6f-91db7b5ad6a0",
+            "dayNumber": 2,
+            "startTime": "12:15",
+            "endTime": "13:30",
+            "type": "restaurant",
+            "title": "Déjeuner — Tattu London",
+            "description": "\"Le cadre est magnifique, la cuisine délicieuse et le service au top.\"",
+            "locationName": "London",
+            "latitude": 51.51534,
+            "longitude": -0.1294841,
+            "orderIndex": 2,
+            "estimatedCost": 12,
+            "duration": 75,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.51534,-0.1294841",
+            "restaurant": {
+              "id": "serp-6201181249743229066",
+              "name": "Tattu London",
+              "address": "London",
+              "latitude": 51.51534,
+              "longitude": -0.1294841,
+              "rating": 4.7,
+              "reviewCount": 6800,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "plats asiatiques"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Le cadre est magnifique, la cuisine délicieuse et le service au top.\""
+              ],
+              "description": "\"Le cadre est magnifique, la cuisine délicieuse et le service au top.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Tattu%20London%2C%20London",
+              "photos": [
+                "https://serpapi.com/searches/69986077bd1c20f880c539af/images/UiPo8zLo3NXjdRXr7rGRjeKrU9W7xpH4LMfK4eRZoCM.jpeg"
+              ],
+              "googlePlaceId": "6201181249743229066",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJxe02As0EdkgRZeOhNiEbtt8",
+                "name": "Bill's Covent Garden Restaurant",
+                "address": "St Martin's Courtyard, Slingsby Pl, London, WC2H 9EF",
+                "latitude": 51.512581399999995,
+                "longitude": -0.12657269999999998,
+                "rating": 4.6,
+                "reviewCount": 8018,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant britannique",
+                  "restaurant britannique",
+                  "restaurant servant le petit-déjeuner",
+                  "café",
+                  "restaurant de hamburgers",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Resto européen moderne, repas toute la journée. Chaîne européenne contemporaine proposant des menus pour le petit-déjeuner, le déjeuner, le thé de l'après-midi et le dîner."
+                ],
+                "description": "Resto européen moderne, repas toute la journée. Chaîne européenne contemporaine proposant des menus pour le petit-déjeuner, le déjeuner, le thé de l'après-midi et le dîner.",
+                "phoneNumber": "020 8054 5400",
+                "website": "https://bills-website.co.uk/restaurants/covent-garden/?utm_source=LocalGoogle&utm_medium=Organic",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bill's%20Covent%20Garden%20Restaurant%2C%20St%20Martin's%20Courtyard%2C%20Slingsby%20Pl%2C%20London%2C%20WC2H%209EF",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepAod6RiKnHYmsZ9b2uHv_8hqihUVTpjfH-i0ac5O4Prw_2PvBBy7-GnD2vUUqf4I8AlUNVNI51Yq8y9N8Z1uVeW_UKV1SW3YT8Ib14BxWqFD4hkZKztdvtvovpZFXKmJsm8PT7Sg=w138-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJxe02As0EdkgRZeOhNiEbtt8",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "21:30"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "22:00"
+                  }
+                },
+                "distance": 0.3455324355110738,
+                "walkingTime": 4
+              },
+              {
+                "id": "serp-nearby-ChIJSzaWIDkFdkgRW97KH_V1dbE",
+                "name": "Restaurant 45 St Martins Lane",
+                "address": "45 St Martin's Ln, London, WC2N 4HX",
+                "latitude": 51.5104696,
+                "longitude": -0.12658239999999998,
+                "rating": 4.6,
+                "reviewCount": 561,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant français",
+                  "restaurant français",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 7300 5500",
+                "website": "https://morgansoriginals.com/st-martins-lane/restaurants-bars/the-restaurant/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurant%2045%20St%20Martins%20Lane%2C%2045%20St%20Martin's%20Ln%2C%20London%2C%20WC2N%204HX",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipO2ZlG136Pb2cHJeBq3wl4BFCPtNpkUIi5eUGSC=w124-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJSzaWIDkFdkgRW97KH_V1dbE",
+                "openingHours": {
+                  "friday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "saturday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "sunday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "monday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "tuesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "wednesday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  },
+                  "thursday": {
+                    "open": "07:00",
+                    "close": "10:30"
+                  }
+                },
+                "distance": 0.24115289597238518,
+                "walkingTime": 3
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.49,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "24376462-6799-4b1f-a5a9-92971c148ccd",
+            "dayNumber": 2,
+            "startTime": "14:00",
+            "endTime": "15:00",
+            "type": "activity",
+            "title": "Palais de Buckingham",
+            "description": "The Palais de la Légion d'Honneur, also known as the Hôtel de Salm, is a historic building on the Left Bank of the River Seine in Paris, France.  Originally built in the 1770s, and rebuilt after an 18",
+            "locationName": "Palais de Buckingham",
+            "latitude": 51.501364,
+            "longitude": -0.14189,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.501364,-0.14189",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palais%20de%20Buckingham&query_place_id=&center=51.501364,-0.14189",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXntakcJv1zgSKC8pKF5kBCIBbf2E6glkYfYWUFyeKcn7ci-L96CIUo9ZvrpJvpewddNpUOcQNhaJcR-05jKzG5378vqSE3BN18X9FvLzcbrsPPASSZn3OXpdxTF2ssNdtpMRg4ubu0V0hH7HRsPIGoKB4GNk1EEM100VRa7aDjD0lMeiWt_7fbXZFR5bzimBky1rDU3jhzs7ksOKG1nN_nftxEFHDdecze52zRtgv4okvy9hCQ70ufcBqJyFYk8wkftzzjS0RiFVArD4s1RCjAmniUOB0ny8eJnQ64maOZFCXJW_StKA-zIbuXU8Xrw9gfVMogUe6ArigPSg_DbkUZ2KfZ6JqBwaSFqZCGaONpE_aUpKcobkgWOH1ExzEw-KVeGP33Z3l2Nhk-LPUV8xrDQrY3PBaqTpIfnmrLZw13QzaMytCXmIyy9MdkCKdoj-lVKGbq35TTI_7qtSOpoduf-r_P6LU7jBdTlln_Nv1PJ0bXUmo7a9PIf2BFALWygujI9yKuNQ0CA_HngMl0X5e7tAMn6J0TV45XfCBd6wHJhiy6rOiqVahvEsTGicLK5KDVAJEN9bTrjQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.78,
+            "timeFromPrevious": 23,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "1903b41f-b2c8-4d1c-8325-709abbf64513",
+            "dayNumber": 2,
+            "startTime": "15:15",
+            "endTime": "16:15",
+            "type": "activity",
+            "title": "Hyde Park",
+            "description": "Hyde Park is a 350-acre (140-hectare), historic Grade I-listed urban park in Westminster, Greater London.  A Royal Park, it is the largest of the parks and green spaces that form a chain from Kensingt",
+            "locationName": "Hyde Park",
+            "latitude": 51.5073638,
+            "longitude": -0.1641135,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.5073638,-0.1641135",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Hyde%20Park&query_place_id=&center=51.5073638,-0.1641135",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfX5ZT3DQI35gpBgzCSA9yZViljT90lWcCSw6oewJLhAMk2S62CoY4U0tKEXKYxfyo8CuDtudT8V9iCUZuhOVVHsgoz6s35Xb_d_5R7gXSA-pqDtM7HTymC5UHjgH7OqRwAUThpqEGBmT22M0J90Uws4p6PhuqH1QHBzJOa35KaVmYdBvqQM96aD-WIZAti8zP6bn2snd_kgN78HkE-2TeBmXtKrE7wi7XJTI7aJICwuTFJNxWFTytLvjWMT94fVRvbC61JWnSsqeKfGRLCec5RjOgGOWve1YO2uT3UxPG49So1siXvJ8Ii5NvsaDOAqexvIfqTD8IKFnHVJ1nx-YF0FCROZ6OtKSXlZX_T_LNBjxgSfHPHoZKvOU9t4BOSxUY2gmVV20RlnNnIQD6m-rskQgpb0LOlK-m-VaPmlQZGYoOt3Yavwvla2N5yrWL7UwXp83trioxKlBURPFc32pbWmGq1gHgx8HCDWHqawzGrbGbVQS7EPJByGay1AftWR6eiFNepLITWwbFpzryWqfQxW8OugIJb3v-plKwPxFG7o5rwKpnor7kc7pUmStkoTj4fFWnjcj3rkNA&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 1.68,
+            "timeFromPrevious": 21,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "196ee0d6-01ac-4cab-b155-0203ac138144",
+            "dayNumber": 2,
+            "startTime": "16:45",
+            "endTime": "17:45",
+            "type": "activity",
+            "title": "Trafalgar Square",
+            "description": "Trafalgar Square is a public square in the City of Westminster in Central London.  It was established in the early 19th century around the area known as Charing Cross.  Its name commemorates the Battl",
+            "locationName": "Trafalgar Square",
+            "latitude": 51.508039,
+            "longitude": -0.128069,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.508039,-0.128069",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Trafalgar%20Square&query_place_id=&center=51.508039,-0.128069",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVhLwgOfFfMUR3kuXnn5drNinBFk7hQOHzc98-RcL390RKBFg_wzGlySjV3Sm2rpUM2_zsaSlPXC6byZqqtObCHQBkLwLMyHSRDkulepzQh9uTkZSrSEOBDTemBgfrY6P2f0mPM3jPYZvb5GYHu56bjbKj3Ez69y4CIBrZ_W0IDn930KalyfNDA2Bvl3PNrxodRUzbM4F2uWNsyyNoZrSZZMy23XY40KU5BKQb9QHQ73wrZ5k3rBf6XeI0WYFAa2w71F7L5Tsg7fvWA_DA2A3V7anMl8TcTSdLTAuudPLsJpvNv6YN4ZOak6aJBEgJtlP3fQR_L9ErZJzLNvkRI_hqhh2PR-k0Jkqtvkmph42-fSANSSTiTTdCiFfHxrLo4u0sh4Fwxb1voReJy3roNFh2N9k_U8VTVX8v0PvDlJ8-YyOq5vFYa6E2Ert9kooHOcLEwVE2qZWhK4NbJ5mnOF6xo0lH7ojWQ4NMY1d5d2Mm4ePJ1-MlzG3fn_J1SH9VdbONoOWykSeGv92PXUNDKS4SCKIHyqp7WHZpefAYTvu4uDKka11a_KIK5lPExEMUcPoTkaQ&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 2.5,
+            "timeFromPrevious": 32,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "b529dd60-6b73-42b8-b05b-e85fd94a6463",
+            "dayNumber": 2,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Leicester Square",
+            "description": "Leicester Square is a pedestrianised square in the West End of London, England, and is the centre of London's entertainment district.  It was laid out in 1670 as Leicester Fields, which was named afte",
+            "locationName": "Leicester Square",
+            "latitude": 51.510359,
+            "longitude": -0.1300625,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.510359,-0.1300625",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Leicester%20Square&query_place_id=&center=51.510359,-0.1300625",
+            "mustSee": false,
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWrTM7n-ttbajDyUGyH_FZB7NWLWaEPEQcsQyEdIgkl-XfJwa1biEqylng1J6A9ZxnFgiAIw_qIXDyxDJA3Ny9Hm4GdYEk0r_p6o0iPdQJx4zbp7XYJdoe1yDkBxsbaUd2rfHBoHmtbUB5YB0Z8sqmgPMfHJr3RAialJN59LZmwR2sA0apwgIa1vTgmCmqnsftiq57JNa_GyWIxI3tSqA2ZFVu1WO15mxpXrwH_fnzLNMmX0RvZVOoyP66gb0CPFo8aWrMb2bsvGyCpfKcRFDO5YO9sFH5n9k3Kj-20VZxZA0xHzx8gcaHaB7jVEJFtznQNRq6tM7rHk9m8ZLHTtoVZMlr82VW4difq-t-8Z5P1f7cZgSC-fX8ujxLwMhu83jil8-zfOENqXO_2sv2FNsFXjeZDTHvquy9le0HoVc8o08b-YqVxaEsroENvCyYSP25grGPdJTPqwcnH7t-BJTFHX4aTx7RcIVGk3nE0v9ERl0IxdF2G9kiDfG0iW88WQWTc5-ePJ9ucmY5ZAuwJ3ajTd392aFKxx0-SDiHlqgisEj0_zHzLuRH9RWLHNHs4Cqy2RGbj&maxwidth=400",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 0.29,
+            "timeFromPrevious": 4,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "bb74602b-30c0-4f56-ba2e-6a0d26673bb5",
+            "dayNumber": 2,
+            "startTime": "19:30",
+            "endTime": "20:45",
+            "type": "restaurant",
+            "title": "Dîner — Scully",
+            "description": "\"Une cuisine du monde apportent variété et découverte!\"",
+            "locationName": "4 St James's Market, London, SW1Y 4AH",
+            "latitude": 51.508665,
+            "longitude": -0.1330131,
+            "orderIndex": 7,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.8,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.51304,-0.1363628",
+            "restaurant": {
+              "id": "serp-nearby-ChIJr4SsXNEEdkgRK-Tjo-eEEl4",
+              "name": "Scully",
+              "address": "4 St James's Market, London, SW1Y 4AH",
+              "latitude": 51.508665,
+              "longitude": -0.1330131,
+              "rating": 4.8,
+              "reviewCount": 1344,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant gastronomique",
+                "restaurant gastronomique",
+                "restaurant asiatique",
+                "restaurant de cuisine fusion",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Restaurant élégant, petits plats de saison. Restaurant branché décoré de boiseries servant des plats australiens, indiens ou irlandais de saison à la présentation soignée."
+              ],
+              "description": "Restaurant élégant, petits plats de saison. Restaurant branché décoré de boiseries servant des plats australiens, indiens ou irlandais de saison à la présentation soignée.",
+              "phoneNumber": "07359 519227",
+              "website": "http://www.scullyrestaurant.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Scully%2C%204%20St%20James's%20Market%2C%20London%2C%20SW1Y%204AH",
+              "googlePlaceId": "ChIJr4SsXNEEdkgRK-Tjo-eEEl4",
+              "openingHours": {
+                "friday": {
+                  "open": "17:00",
+                  "close": "23:00"
+                },
+                "saturday": {
+                  "open": "17:00",
+                  "close": "23:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": {
+                  "open": "17:00",
+                  "close": "23:00"
+                },
+                "wednesday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                },
+                "thursday": {
+                  "open": "12:00",
+                  "close": "15:00"
+                }
+              },
+              "distance": 0.2778100477901965,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJG2FmSSkFdkgRPqBdM_VFKi0",
+                "name": "'O Ver St. James - Italian Restaurant",
+                "address": "unit 2, 1 Norris St, London, SW1Y 4RJ",
+                "latitude": 51.509133299999995,
+                "longitude": -0.132822,
+                "rating": 4.6,
+                "reviewCount": 995,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant italien",
+                  "restaurant italien"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Cuisine de rue napolitaine raffinée. Pizzas, pâtes et autres plats italiens à base d'eau de mer dans un cadre moderne et chic, avec tables en extérieur."
+                ],
+                "description": "Cuisine de rue napolitaine raffinée. Pizzas, pâtes et autres plats italiens à base d'eau de mer dans un cadre moderne et chic, avec tables en extérieur.",
+                "phoneNumber": "020 7930 9664",
+                "website": "https://www.overuk.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query='O%20Ver%20St.%20James%20-%20Italian%20Restaurant%2C%20unit%202%2C%201%20Norris%20St%2C%20London%2C%20SW1Y%204RJ",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipNThMxMdyuKV9Vg5u8trpNLDc9RAqoXuAxSIHIh=w138-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJG2FmSSkFdkgRPqBdM_VFKi0",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "saturday": {
+                    "open": "12:00",
+                    "close": "22:30"
+                  },
+                  "sunday": null,
+                  "monday": {
+                    "open": "17:00",
+                    "close": "22:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "15:00"
+                  }
+                },
+                "distance": 0.23461906572553787,
+                "walkingTime": 3
+              },
+              {
+                "id": "serp-nearby-ChIJa0lD7foFdkgRbWHThMeKaCY",
+                "name": "Claro London",
+                "address": "12 Waterloo Pl, London, SW1Y 4AU",
+                "latitude": 51.5076196,
+                "longitude": -0.1332274,
+                "rating": 4.8,
+                "reviewCount": 422,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant méditerranéen",
+                  "restaurant méditerranéen",
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 4580 1429",
+                "website": "https://www.claro-london.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Claro%20London%2C%2012%20Waterloo%20Pl%2C%20London%2C%20SW1Y%204AU",
+                "photos": [
+                  "https://lh3.googleusercontent.com/p/AF1QipOhZx0ewbqgLvyNGnVkTnIPPISz31ZH8t5_XCrO=w80-h100-k-no"
+                ],
+                "googlePlaceId": "ChIJa0lD7foFdkgRbWHThMeKaCY",
+                "openingHours": {
+                  "friday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "saturday": {
+                    "open": "11:00",
+                    "close": "00:00"
+                  },
+                  "sunday": {
+                    "open": "11:00",
+                    "close": "18:00"
+                  },
+                  "monday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "tuesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "wednesday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  },
+                  "thursday": {
+                    "open": "12:00",
+                    "close": "00:00"
+                  }
+                },
+                "distance": 0.3751812347123443,
+                "walkingTime": 5
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.53,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Scully%2C%204%20St%20James's%20Market%2C%20London%2C%20SW1Y%204AH",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Scully%2C%204%20St%20James's%20Market%2C%20London%2C%20SW1Y%204AH",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "British Museum et Palais de Buckingham",
+        "dayNarrative": "Cette journée est dédiée à l'exploration culturelle avec le British Museum, suivie d'une immersion dans les parcs royaux et les sites emblématiques du centre de Londres, comme Buckingham Palace et Trafalgar Square. La journée se termine par un dîner dans un quartier animé.",
+        "geoDiagnostics": {
+          "maxLegKm": 6.42,
+          "p95LegKm": 2.5,
+          "totalTravelMin": 175,
+          "totalLegKm": 13.69,
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.59,
+          "mstLowerBoundKm": 8.61
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 60,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-02-25T13:47:18.701Z",
+        "items": [
+          {
+            "id": "b559b19e-12c8-4b76-938a-e9d20723a980",
+            "dayNumber": 3,
+            "startTime": "07:30",
+            "endTime": "08:15",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Sweet Caroline",
+            "description": "\"Excellent restaurant, les plats sont à la fois copieux et délicieux.\"",
+            "locationName": "4 - 5 Shepherd's Bush Market, London, W12 8DG",
+            "latitude": 51.5052059,
+            "longitude": -0.226231,
+            "orderIndex": 0,
+            "estimatedCost": 15,
+            "duration": 45,
+            "rating": 5,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.485992,-0.2026281",
+            "restaurant": {
+              "id": "serp-nearby-ChIJF4v3CG8PdkgRtDKtXXG5K08",
+              "name": "Sweet Caroline",
+              "address": "4 - 5 Shepherd's Bush Market, London, W12 8DG",
+              "latitude": 51.5052059,
+              "longitude": -0.226231,
+              "rating": 5,
+              "reviewCount": 262,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "café",
+                "café"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "07769 894730",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20Caroline%2C%204%20-%205%20Shepherd's%20Bush%20Market%2C%20London%2C%20W12%208DG",
+              "googlePlaceId": "ChIJF4v3CG8PdkgRtDKtXXG5K08",
+              "openingHours": {
+                "friday": {
+                  "open": "08:00",
+                  "close": "16:00"
+                },
+                "saturday": {
+                  "open": "08:00",
+                  "close": "17:00"
+                },
+                "sunday": null,
+                "monday": null,
+                "tuesday": null,
+                "wednesday": null,
+                "thursday": null
+              },
+              "distance": 0.21020099944656281,
+              "walkingTime": 3
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-nearby-ChIJd29If9oPdkgRLzA_jS3tiOA",
+                "name": "Afternoon Tea at Caffe Concerto The Village",
+                "address": "Unit SU2024, The Village Westfield Shopping Centre, London, W12 7GE",
+                "latitude": 51.506583299999996,
+                "longitude": -0.2195854,
+                "rating": 4.3,
+                "reviewCount": 209,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "boulangerie",
+                  "boulangerie",
+                  "café",
+                  "restaurant sans gluten",
+                  "restaurant halal",
+                  "marchand de glaces",
+                  "restaurant italien",
+                  "salle de concert",
+                  "pâtisserie",
+                  "restaurant",
+                  "pâtissier spécialisé dans les gâteaux de mariage"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café italien raffiné, menu de brasserie. Café élégant de chaîne italienne proposant plats principaux, mets traditionnels, salades et pâtisseries."
+                ],
+                "description": "Café italien raffiné, menu de brasserie. Café élégant de chaîne italienne proposant plats principaux, mets traditionnels, salades et pâtisseries.",
+                "phoneNumber": "020 7494 6847",
+                "website": "https://www.caffeconcerto.co.uk/menu/the-village/afternoon-tea-cream-tea.html",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Afternoon%20Tea%20at%20Caffe%20Concerto%20The%20Village%2C%20Unit%20SU2024%2C%20The%20Village%20Westfield%20Shopping%20Centre%2C%20London%2C%20W12%207GE",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqAwEa6pRHvasC2H-fCF8sM2jmD2b7-z_FGIl0cWMVYMJASAmdTxm0LWY5mKs05PTLCKEbpaIBBgw7XGYXSHqNqXyuTNtIxThECo83fN1nIbEAvJBLfhmALyfqS_T1-C0rhl3ux=w80-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJd29If9oPdkgRLzA_jS3tiOA",
+                "openingHours": {
+                  "friday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "saturday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  },
+                  "sunday": {
+                    "open": "10:00",
+                    "close": "19:00"
+                  },
+                  "monday": {
+                    "open": "09:00",
+                    "close": "22:30"
+                  },
+                  "tuesday": {
+                    "open": "09:00",
+                    "close": "22:30"
+                  },
+                  "wednesday": {
+                    "open": "09:00",
+                    "close": "22:30"
+                  },
+                  "thursday": {
+                    "open": "09:00",
+                    "close": "23:00"
+                  }
+                },
+                "distance": 0.6606362004690364,
+                "walkingTime": 8
+              },
+              {
+                "id": "serp-nearby-ChIJl1o_2dIPdkgRecrPuOJEZ0g",
+                "name": "Z & Z Bakery",
+                "address": "354 Uxbridge Rd, London, W12 7LL",
+                "latitude": 51.506581499999996,
+                "longitude": -0.23380179999999998,
+                "rating": 4.5,
+                "reviewCount": 600,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant libanais",
+                  "restaurant libanais"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "phoneNumber": "020 8746 9009",
+                "website": "http://zeitzaatar.com/",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Z%20%26%20Z%20Bakery%2C%20354%20Uxbridge%20Rd%2C%20London%2C%20W12%207LL",
+                "photos": [
+                  "https://lh3.googleusercontent.com/gps-cs-s/AHVAwepllct7gWUCv67wXtBr9xPUsuiMlXIXELSpaZIfKI2GFl57pdlPaFcHHrttuD9a6GKJYSvbGGI0AbRgLaYRCDtwz5ZIh6E45GulH05XA8GmgPCoLJQuagt2M0Gzj9_BiTM8110=w122-h92-k-no"
+                ],
+                "googlePlaceId": "ChIJl1o_2dIPdkgRecrPuOJEZ0g",
+                "openingHours": {
+                  "friday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "saturday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "sunday": {
+                    "open": "08:00",
+                    "close": "17:00"
+                  },
+                  "monday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "tuesday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "wednesday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  },
+                  "thursday": {
+                    "open": "08:00",
+                    "close": "18:00"
+                  }
+                },
+                "distance": 0.5288442360361303,
+                "walkingTime": 7
+              }
+            ],
+            "dataReliability": "verified",
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20Caroline%2C%204%20-%205%20Shepherd's%20Bush%20Market%2C%20London%2C%20W12%208DG",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sweet%20Caroline%2C%204%20-%205%20Shepherd's%20Bush%20Market%2C%20London%2C%20W12%208DG",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "de276fd2-f34e-47e4-8529-1e3db6fe4539",
+            "dayNumber": 3,
+            "startTime": "08:30",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Borough Market",
+            "description": "Borough Market is a wholesale and retail market hall in Southwark, London, England.  It is one of the largest and oldest food markets in London, with a market on the site dating back to at least the 1",
+            "locationName": "Borough Market",
+            "latitude": 51.5055,
+            "longitude": -0.091,
+            "orderIndex": 1,
+            "estimatedCost": 20,
+            "duration": 90,
+            "rating": 4.6,
+            "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=51.5055,-0.091",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Borough%20Market&query_place_id=&center=51.5055,-0.091",
+            "mustSee": true,
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/London_2018_March_IMG_0663.jpg/330px-London_2018_March_IMG_0663.jpg",
+            "dataReliability": "verified",
+            "geoConfidence": "high",
+            "distanceFromPrevious": 8.03,
+            "timeFromPrevious": 101,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "0da86852-3363-481f-b135-d271d71e2176",
+            "dayNumber": 3,
+            "startTime": "10:00",
+            "endTime": "10:15",
+            "type": "checkout",
+            "title": "Check-out Stylish Studios by Luxestays Shepherds Bush",
+            "description": "Départ de l'hôtel",
+            "locationName": "Stylish Studios by Luxestays Shepherds Bush",
+            "latitude": 51.503604017125,
+            "longitude": -0.2278435718275,
+            "orderIndex": 2,
+            "accommodation": {
+              "id": "booking-8727996",
+              "name": "Stylish Studios by Luxestays Shepherds Bush",
+              "type": "hotel",
+              "address": "London W12 8EA, United Kingdom",
+              "latitude": 51.503604017125,
+              "longitude": -0.2278435718275,
+              "rating": 8.3,
+              "reviewCount": 1447,
+              "stars": 3,
+              "pricePerNight": 122,
+              "totalPrice": 244,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/388746595.jpg?k=053427546d9ec27b18f4c6b78f1e74f04968fa38bb0e37a459f12a021a45f792&o="
+              ],
+              "checkInTime": "15:00",
+              "checkOutTime": "10:00",
+              "bookingUrl": "https://www.booking.com/searchresults.html?ss=Stylish+Studios+by+Luxestays+Shepherds+Bush+London&checkin=2026-02-23&checkout=2026-02-25&group_adults=3&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified"
+            },
+            "distanceFromPrevious": 9.47,
+            "timeFromPrevious": 119,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "transport-ret-3-fallback",
+            "dayNumber": 3,
+            "startTime": "10:45",
+            "endTime": "13:15",
+            "type": "transport",
+            "title": "Transport inter-ville retour",
+            "description": "London → Paris (estimation)",
+            "locationName": "London → Paris",
+            "latitude": 51.5052059,
+            "longitude": -0.226231,
+            "orderIndex": 3,
+            "duration": 150,
+            "estimatedCost": 56,
+            "bookingUrl": "https://www.google.com/maps/dir/Paris/London",
+            "transportMode": "transit",
+            "transportRole": "longhaul",
+            "dataReliability": "estimated",
+            "qualityFlags": [
+              "longhaul_fallback_injected"
+            ]
+          }
+        ],
+        "theme": "Borough Market",
+        "dayNarrative": "Le dernier jour commence par une visite du célèbre Borough Market, un incontournable pour les gourmands. Après un déjeuner rapide, il est temps de se préparer pour le départ, en respectant l'heure de check-out de l'hôtel.",
+        "geoDiagnostics": {
+          "maxLegKm": 9.36,
+          "p95LegKm": 9.36,
+          "totalTravelMin": 112,
+          "totalLegKm": 9.36,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1,
+          "mstLowerBoundKm": 9.36
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 15,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Paris",
+            "to": "London",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 206,
+            "price": 56,
+            "co2": 12,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Paris/London"
+          }
+        ],
+        "totalDuration": 236,
+        "totalPrice": 56,
+        "totalCO2": 12,
+        "score": 8.6,
+        "scoreDetails": {
+          "priceScore": 9.6,
+          "timeScore": 7,
+          "co2Score": 9.2
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Paris/London",
+        "dataSource": "estimated",
+        "recommended": true,
+        "recommendationReason": "Option économique, écologique"
+      },
+      {
+        "id": "train_api",
+        "mode": "train",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Paris",
+            "to": "London",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 161,
+            "price": 150,
+            "co2": 5,
+            "operator": "B",
+            "frequency": "1-3 par jour",
+            "bookingUrl": "https://www.omio.fr/trains/paris/london?departure_date=2026-02-23"
+          }
+        ],
+        "totalDuration": 201,
+        "totalPrice": 150,
+        "totalCO2": 5,
+        "score": 6.7,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 10,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.omio.fr/trains/paris/london?departure_date=2026-02-23",
+        "dataSource": "api",
+        "transitLegs": [
+          {
+            "mode": "train",
+            "from": "Saint-Michel Notre-Dame",
+            "to": "Gare du Nord",
+            "departure": "2026-02-23T14:54:09.000Z",
+            "arrival": "2026-02-23T14:59:00.000Z",
+            "duration": 5,
+            "line": "B"
+          },
+          {
+            "mode": "train",
+            "from": "Gare du Nord",
+            "to": "St Pancras International",
+            "departure": "2026-02-23T15:09:00.000Z",
+            "arrival": "2026-02-23T17:35:00.000Z",
+            "duration": 146,
+            "line": "Eurostar"
+          }
+        ],
+        "priceRange": [
+          80,
+          300
+        ],
+        "recommendationReason": "Option la plus écologique"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "London",
+            "fromCoords": {
+              "lat": 48.8566,
+              "lng": 2.3522
+            },
+            "toCoords": {
+              "lat": 51.5074,
+              "lng": -0.1278
+            },
+            "duration": 26,
+            "price": 52,
+            "co2": 88,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/PARIS2302LONDON3?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 316,
+        "totalPrice": 52,
+        "totalCO2": 88,
+        "score": 3.3,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 0,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/PARIS2302LONDON3?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/paris/london?departure_date=2026-02-23"
+      }
+    ],
+    "selectedTransport": {
+      "id": "car",
+      "mode": "car",
+      "segments": [
+        {
+          "mode": "car",
+          "from": "Paris",
+          "to": "London",
+          "fromCoords": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "toCoords": {
+            "lat": 51.5074,
+            "lng": -0.1278
+          },
+          "duration": 206,
+          "price": 56,
+          "co2": 12,
+          "frequency": "Flexible",
+          "bookingUrl": "https://www.google.com/maps/dir/Paris/London"
+        }
+      ],
+      "totalDuration": 236,
+      "totalPrice": 56,
+      "totalCO2": 12,
+      "score": 8.6,
+      "scoreDetails": {
+        "priceScore": 9.6,
+        "timeScore": 7,
+        "co2Score": 9.2
+      },
+      "bookingUrl": "https://www.google.com/maps/dir/Paris/London",
+      "dataSource": "estimated",
+      "recommended": true,
+      "recommendationReason": "Option économique, écologique"
+    },
+    "accommodation": {
+      "id": "booking-8727996",
+      "name": "Stylish Studios by Luxestays Shepherds Bush",
+      "type": "hotel",
+      "address": "London W12 8EA, United Kingdom",
+      "latitude": 51.503604017125,
+      "longitude": -0.2278435718275,
+      "rating": 8.3,
+      "reviewCount": 1447,
+      "stars": 3,
+      "pricePerNight": 122,
+      "totalPrice": 244,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/388746595.jpg?k=053427546d9ec27b18f4c6b78f1e74f04968fa38bb0e37a459f12a021a45f792&o="
+      ],
+      "checkInTime": "15:00",
+      "checkOutTime": "10:00",
+      "bookingUrl": "https://www.booking.com/searchresults.html?ss=Stylish+Studios+by+Luxestays+Shepherds+Bush+London&checkin=2026-02-23&checkout=2026-02-25&group_adults=3&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified"
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-8727996",
+        "name": "Stylish Studios by Luxestays Shepherds Bush",
+        "type": "hotel",
+        "address": "London W12 8EA, United Kingdom",
+        "latitude": 51.503604017125,
+        "longitude": -0.2278435718275,
+        "rating": 8.3,
+        "reviewCount": 1447,
+        "stars": 3,
+        "pricePerNight": 122,
+        "totalPrice": 244,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/388746595.jpg?k=053427546d9ec27b18f4c6b78f1e74f04968fa38bb0e37a459f12a021a45f792&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "10:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Stylish+Studios+by+Luxestays+Shepherds+Bush+London&checkin=2026-02-23&checkout=2026-02-25&group_adults=3&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-7409314",
+        "name": "Roland House",
+        "type": "hotel",
+        "address": "121 Old Brompton Rd, South Kensington, London SW7 3RD, United Kingdom",
+        "latitude": 51.4908496,
+        "longitude": -0.1807617,
+        "rating": 8.1,
+        "reviewCount": 1058,
+        "stars": 3,
+        "pricePerNight": 124,
+        "totalPrice": 248,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/304656769.jpg?k=f577e555853acab3004d2a8f48377af8c4355e4f74bae20a38ad2e1cb3fc8b12&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/hotel/gb/roland-house-apartments-london.html?checkin=2026-02-23&checkout=2026-02-25&group_adults=3&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-8811449",
+        "name": "Victoria Studios",
+        "type": "hotel",
+        "address": "387 Edgware Rd, London NW2 6LF, United Kingdom",
+        "latitude": 51.566311,
+        "longitude": -0.226626,
+        "rating": 7.4,
+        "reviewCount": 2884,
+        "stars": 3,
+        "pricePerNight": 92,
+        "totalPrice": 184,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/589318808.jpg?k=c89df707a5ff749e5507c7bcab7f9032c26beb810e2ae3e29287bea3c3a608a9&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Victoria+Studios+London&checkin=2026-02-23&checkout=2026-02-25&group_adults=3&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 606,
+    "costBreakdown": {
+      "flights": 0,
+      "accommodation": 366,
+      "food": 180,
+      "activities": 60,
+      "transport": 0,
+      "parking": 0,
+      "other": 0
+    },
+    "travelTips": null,
+    "budgetStrategy": {
+      "accommodationType": "hotel",
+      "accommodationBudgetPerNight": 330,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mostly_free",
+      "dailyActivityBudget": 15,
+      "transportTips": "Achetez un Oyster card (rechargeable) pour transports illimités à tarif réduit. Les musées majeurs sont gratuits (British Museum, National Gallery, V&A).",
+      "reasoning": "Budget de 250€/pers/jour permet un hôtel 3-étoiles correct (110€ de référence × 3 personnes = 330€/nuit). Petit-déjeuner self-catered (économies: ~5€/pers). Déjeuners au restaurant pour découvrir la gastronomie londonnienne (15-20€/pers). Dîners en alternance: courses supermarché certains soirs + restaurants autres soirs pour équilibrer. Budget activités culture limité mais suffisant car musées gratuits à Londres. Reste ~75€/jour/pers après logement et repas pour shopping dans West End/Oxford Street et transport Oyster.",
+      "maxPricePerActivity": 80
+    },
+    "attractionPool": [],
+    "alternativeActivities": []
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: london-shopping-3d",
+    "   Paris → London (3j)",
+    "   friends (3p) | comfort | shopping, culture",
+    "======================================================================\n",
+    "[Pipeline V2] Using LLM pipeline (Claude as primary planner)",
+    "[Pipeline V2 LLM] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"London\", ll=\"@51.5074,-0.1278,14z\", gl=\"uk\"",
+    "[Weather] Cache hit for 2026-02-23 → 2026-02-25",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Google Places] ✅ 29 attractions found for London",
+    "[Hotels] Disponibilité live: 7/15 hôtels confirmés",
+    "[Google Places Details] ✅ 20/20 attractions enriched with real hours (390ms)",
+    "[Pipeline V2] Resolving GPS for 11 Viator activities...",
+    "[Pipeline V2] Resolved precise Viator GPS for 0/11 activities",
+    "[Pipeline V2] Injected 9 curated must-see attractions for \"London\" from local database",
+    "[Pipeline V2]   → Big Ben & Houses of Parliament, Tower Bridge, British Museum, Tower of London, Buckingham Palace, Westminster Abbey, Natural History Museum, Borough Market, St Paul's Cathedral",
+    "[Pipeline V2] Step 1: All data fetched in 30264ms",
+    "[Pipeline V2]   Activities: 29 Google + 23 SerpAPI + 24 Overpass + 13 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 7 | Transport options: 3",
+    "[Pipeline V2 LLM] Step 1 done in 30264ms",
+    "[Pipeline V2 LLM] === Step 2: Preparing data for LLM... ===",
+    "[Pipeline V2 LLM] Hotel selected: \"Stylish Studios by Luxestays Shepherds Bush\" (8.3★, €122/night)",
+    "[Pipeline V2 LLM] Step 2: Merged 99 activities → 51 after dedup (dropped 48)",
+    "[Pipeline V2 LLM] Step 2: Selected 19 activities (1 must-sees, 18 others)",
+    "[Pipeline V2 LLM] Step 2: Selected 18 restaurants from 50 total",
+    "[Pipeline V2 LLM] Step 2: Built distance matrix with 270 pairs",
+    "[Pipeline V2 LLM] Step 2: 19 activities, 18 restaurants, 270 distance pairs",
+    "[Pipeline V2 LLM] Step 2 done in 17ms",
+    "[Pipeline V2 LLM] === Step 3: LLM planning (gemini-2.5-flash)... ===",
+    "[Pipeline V2 LLM] Using model: gemini-2.5-flash",
+    "[Pipeline V2 LLM] Calling Gemini 2.5 Flash for trip planning...",
+    "[Pipeline V2 LLM] Gemini Flash: 15093 in + 1773 out, ~$0.0033, 15771ms",
+    "[Pipeline V2 LLM] Gemini response preview: {\n  \"days\": [\n    {\n      \"dayNumber\": 1,\n      \"theme\": \"Découverte historique et vues emblématiques\",\n      \"narrative\": \"Le premier jour, après l'arrivée, se concentre sur les sites historiques maj...",
+    "[Pipeline V2 LLM] Sanitized plan: removed 1 invalid items",
+    "[Pipeline V2 LLM] Enrichment: filled 100min gap on day 2 with \"Hyde Park\" (fill 1/3)",
+    "[Pipeline V2 LLM] Enrichment complete: added 1 activities",
+    "[Pipeline V2 LLM] Plan: 3 days, 10 activities, 5 meals",
+    "[Pipeline V2 LLM] Step 3 done in 15773ms — 3 days planned",
+    "[Pipeline V2 LLM] === Step 4: Assembling trip... ===",
+    "[Pipeline V2 LLM] Step 4: Assembling Trip from LLM plan...",
+    "[Pipeline V2 LLM] Built maps: 19 activities, 18 restaurants",
+    "[Pipeline V2 LLM] Built 3 days with 15 items",
+    "[Pipeline V2 LLM] Computed distances and diagnostics",
+    "[Pipeline V2 LLM] Built Trip object",
+    "[Pipeline V2 LLM] Image enrichment complete",
+    "[Pipeline V2 LLM] Sanitized URLs",
+    "[Pipeline V2 LLM] Step 4 complete in 1127ms",
+    "[Pipeline V2 LLM] Step 4 done in 1127ms",
+    "[Pipeline V2 LLM] === Step 4b: Fixing restaurant proximity... ===",
+    "[Pipeline V2 LLM] Step 4b: 3 restaurants swapped, 0 kept as fallback (2416ms)",
+    "[Pipeline V2 LLM] === Step 4c: Populating restaurant alternatives... ===",
+    "[Pipeline V2 LLM] Restaurant alternatives: 10 alternatives added",
+    "[Pipeline V2 LLM] Step 4c done in 4ms",
+    "[Pipeline V2 LLM] === Step 5: Validating... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 91/100",
+    "  📦 Complétude: 23/25",
+    "  ⏱️  Rythme:     25/25",
+    "  🗺️  Géo:        18/25",
+    "  📊 Données:    15/15",
+    "  🔗 Cohérence:  10/10",
+    "  ⚠️ Jour 1: transport aller manquant",
+    "  ⚠️ Jour 3: transport retour manquant",
+    "  ⚠️ Hôtel à 8.1km du centre des activités",
+    "  🔧 Jour 1: transport aller inséré (fallback)",
+    "  🔧 Jour 3: transport retour inséré (fallback)",
+    "  🔧 Jour 1: thème régénéré \"Découverte historique et vues emblématiques\" → \"Tour de Londres et Tower Bridge\"",
+    "  🔧 Jour 2: thème régénéré \"Culture, parcs royaux et cœur de Londres\" → \"British Museum et Palais de Buckingham\"",
+    "  🔧 Jour 3: thème régénéré \"Marché animé et départ\" → \"Borough Market\"",
+    "[Pipeline V2 LLM] Step 5 done in 1ms — score: 91/100",
+    "[Pipeline V2 LLM] === Total pipeline time: 49602ms ==="
+  ],
+  "warnings": [
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"Le StrummerWalk, London\": 18702.2km de la destination (max 30km)",
+    "[CoordsResolver] ❌ Travel Places rejeté pour \"La National Gallery de Londres -  exclusive du musée, London\": 340.7km de la destination (max 30km)",
+    "[CoordsResolver] ❌ SerpAPI rejeté pour \"Emplacements Slow Horses – Visite à pied télévisée à Londres, London\": 1000.4km de la destination (max 30km)",
+    "[Pipeline V2 LLM] Sanitize: removed unknown activity \"gp-ChIJG-CxwNoEdkgRJ8aJ8P1CUxo\" from day 2"
+  ],
+  "errors": [
+    "[TravelTips] Error: SyntaxError: Expected ',' or ']' after array element in JSON at position 5281 (line 140 column 8)",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Le StrummerWalk, London\" à London — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Visite à pied du grand pub britannique : Londres, London\" à London — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"La National Gallery de Londres -  exclusive du musée, London\" à London — aucune API n'a pu résoudre",
+    "[CoordsResolver] ❌ ÉCHEC TOTAL: \"Emplacements Slow Horses – Visite à pied télévisée à Londres, London\" à London — aucune API n'a pu résoudre"
+  ],
+  "durationMs": 49602,
+  "generatedAt": "2026-02-20T13:52:42.813Z",
+  "success": true
+}

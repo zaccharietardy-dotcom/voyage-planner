@@ -1,0 +1,478 @@
+{
+  "tripId": "d5bf6b40-79f1-44c5-8962-0157ed6fe2a4",
+  "scenarioId": "geo-suggest-01-escapade-gourmande-en-provence-culinaire",
+  "generatedAt": "2026-02-18T22:12:09.724Z",
+  "destination": "Marseille",
+  "summary": {
+    "totalIssues": 16,
+    "critical": 7,
+    "warning": 7,
+    "info": 2,
+    "score": 75,
+    "weightedScore": 75
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "geography": {
+      "score": 13,
+      "critical": 3,
+      "warning": 4,
+      "info": 0,
+      "totalIssues": 7,
+      "weightedPenalty": 87.45
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 60,
+      "critical": 2,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 40
+    },
+    "dataQuality": {
+      "score": 63,
+      "critical": 2,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 3,
+      "weightedPenalty": 36.7
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_URBAN_HARD_LONG_LEG",
+      "code": "GEO_URBAN_HARD_LONG_LEG",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 44,
+      "avgFrequencyWeight": 2.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: segment urbain dur 6.6km entre \"Déjeuner — Restaurant à proximité\" et \"Basilique Notre-Dame de la Garde\" (> 4km)",
+        "Jour 2: segment urbain dur 8.4km entre \"Château d'If\" et \"Dîner — l'Oasis Sormiou\" (> 4km)"
+      ]
+    },
+    {
+      "key": "LINK_TRANSPORT_DATE_MISMATCH",
+      "code": "LINK_TRANSPORT_DATE_MISMATCH",
+      "category": "links",
+      "severity": "critical",
+      "component": "pipeline/step7-assemble",
+      "count": 2,
+      "impactScore": 40,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: departure_date=2026-04-05 incohérente pour \"🚄 Train → Marseille\" (attendu 2026-04-04)",
+        "Jour 3: departure_date=2026-04-07 incohérente pour \"🚄 Train → Lyon\" (attendu 2026-04-06)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DUPLICATE",
+      "code": "DATA_ACTIVITY_DUPLICATE",
+      "category": "data-quality",
+      "severity": "critical",
+      "component": "pipeline/step6-balance",
+      "count": 2,
+      "impactScore": 36,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Attraction \"château d'if\" apparaît 2 fois (jours 1, 2)",
+        "Attraction \"basilique notre-dame de la garde\" apparaît 2 fois (jours 2, 2)"
+      ]
+    },
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "category": "geography",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 20,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 6.6km entre \"Déjeuner — Restaurant à proximité\" et \"Basilique Notre-Dame de la Garde\" avec seulement 10min de battement"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 14.4,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (3 demi-tours détectés)",
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6.4,
+      "avgFrequencyWeight": 1.6,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: 3 segments > 2.5km (max cible: 1)"
+      ]
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 6,
+      "avgFrequencyWeight": 1.5,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: efficacité de route faible (1.77x du minimum MST)"
+      ]
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Dîner — l'Oasis Sormiou\" à 8.4km de l'activité pré",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: restaurant \"Dîner — l'Oasis Sormiou\" à 8.4km de l'activité précédente (\"Château d'If\") avec seulement 15min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"culture\" demandée mais aucune activité correspondante trouvé",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"culture\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2 (7 activités) vs jour 3 (2 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2 (7 activités) vs jour 3 (2 activités) — déséquilibre important"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.3,
+          "totalLegKm": 5.79
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: 6.6km entre \"Déjeuner — Restaurant à proximité\" et \"Basilique Notre-Dame de la Garde\" avec seulement 10min de battement",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": "6.6",
+          "gapMinutes": 10
+        },
+        "code": "GEO_IMPOSSIBLE_TRANSITION",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment urbain dur 6.6km entre \"Déjeuner — Restaurant à proximité\" et \"Basilique Notre-Dame de la Garde\" (> 4km)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 6.61,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 2: segment urbain dur 8.4km entre \"Château d'If\" et \"Dîner — l'Oasis Sormiou\" (> 4km)",
+        "dayNumber": 2,
+        "details": {
+          "distanceKm": 8.38,
+          "thresholdKm": 4
+        },
+        "code": "GEO_URBAN_HARD_LONG_LEG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 2.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: 3 segments > 2.5km (max cible: 1)",
+        "dayNumber": 2,
+        "details": {
+          "longLegCount": 3,
+          "thresholdKm": 2.5,
+          "maxAllowed": 1
+        },
+        "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.6,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.77,
+          "totalLegKm": 19.67
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: efficacité de route faible (1.77x du minimum MST)",
+        "dayNumber": 2,
+        "details": {
+          "routeInefficiencyRatio": 1.77,
+          "threshold": 1.75,
+          "totalLegKm": 19.67,
+          "mstLowerBoundKm": 11.14
+        },
+        "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.5,
+        "autofixCandidate": true
+      }
+    ],
+    "budget": [],
+    "links": [
+      {
+        "severity": "critical",
+        "category": "links",
+        "message": "Jour 1: departure_date=2026-04-05 incohérente pour \"🚄 Train → Marseille\" (attendu 2026-04-04)",
+        "dayNumber": 1,
+        "itemTitle": "🚄 Train → Marseille",
+        "details": {
+          "departureDate": "2026-04-05",
+          "expectedDate": "2026-04-04",
+          "bookingUrl": "https://www.omio.fr/trains/lyon/marseille?departure_date=2026-04-05"
+        },
+        "code": "LINK_TRANSPORT_DATE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "links",
+        "message": "Jour 3: departure_date=2026-04-07 incohérente pour \"🚄 Train → Lyon\" (attendu 2026-04-06)",
+        "dayNumber": 3,
+        "itemTitle": "🚄 Train → Lyon",
+        "details": {
+          "departureDate": "2026-04-07",
+          "expectedDate": "2026-04-06",
+          "bookingUrl": "https://www.omio.fr/trains/marseille/lyon?departure_date=2026-04-07"
+        },
+        "code": "LINK_TRANSPORT_DATE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "critical",
+        "category": "data-quality",
+        "message": "Attraction \"château d'if\" apparaît 2 fois (jours 1, 2)",
+        "details": {
+          "days": [
+            1,
+            2
+          ]
+        },
+        "code": "DATA_ACTIVITY_DUPLICATE",
+        "component": "pipeline/step6-balance",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "data-quality",
+        "message": "Attraction \"basilique notre-dame de la garde\" apparaît 2 fois (jours 2, 2)",
+        "details": {
+          "days": [
+            2,
+            2
+          ]
+        },
+        "code": "DATA_ACTIVITY_DUPLICATE",
+        "component": "pipeline/step6-balance",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2 (7 activités) vs jour 3 (2 activités) — déséquilibre important",
+        "details": {
+          "day1": 7,
+          "day2": 2
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"culture\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "culture"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 2: restaurant \"Dîner — l'Oasis Sormiou\" à 8.4km de l'activité précédente (\"Château d'If\") avec seulement 15min de battement",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — l'Oasis Sormiou",
+        "details": {
+          "distKm": "8.4",
+          "gapMin": 15
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 20,
+    "activitiesCount": 9,
+    "restaurantsCount": 6,
+    "avgItemsPerDay": 6.666666666666667,
+    "totalEstimatedCost": 334,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

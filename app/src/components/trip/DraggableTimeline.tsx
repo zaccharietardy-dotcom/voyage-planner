@@ -56,6 +56,16 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface DraggableTimelineProps {
   days: TripDay[];
@@ -101,7 +111,7 @@ function DayReorderPanel({
             <ArrowUpDown className="h-4 w-4" />
             Réorganiser les jours
           </CardTitle>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Fermer" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -283,6 +293,7 @@ export function DraggableTimeline({
 }: DraggableTimelineProps) {
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
   const [showReorder, setShowReorder] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ dayIndex: number; itemIndex: number; title: string } | null>(null);
   const filteredDays = useMemo(() => days.map(day => ({ ...day, items: [...day.items] })), [days]);
   const [localDays, setLocalDays] = useState(filteredDays);
 
@@ -319,15 +330,20 @@ export function DraggableTimeline({
   }, [localDays, applyUpdate]);
 
   const handleDeleteItem = useCallback((dayIndex: number, itemIndex: number, itemTitle: string) => {
-    if (!confirm(`Supprimer "${itemTitle}" ?`)) return;
+    setDeleteTarget({ dayIndex, itemIndex, title: itemTitle });
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (!deleteTarget) return;
     try {
-      const newDays = removeItem(localDays, dayIndex, itemIndex);
+      const newDays = removeItem(localDays, deleteTarget.dayIndex, deleteTarget.itemIndex);
       applyUpdate(newDays);
-      toast.success(`"${itemTitle}" supprimé`);
+      toast.success(`"${deleteTarget.title}" supprimé`);
     } catch (err) {
       console.error('Delete error:', err);
     }
-  }, [localDays, applyUpdate]);
+    setDeleteTarget(null);
+  }, [localDays, applyUpdate, deleteTarget]);
 
   const handleSwapDays = useCallback((dayIndexA: number, dayIndexB: number) => {
     try {
@@ -476,6 +492,23 @@ export function DraggableTimeline({
       <DragOverlay>
         {activeItem && <ActivityOverlay item={activeItem} />}
       </DragOverlay>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette activité ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &laquo; {deleteTarget?.title} &raquo; sera retiré de votre itinéraire.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DndContext>
   );
 }

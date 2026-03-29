@@ -548,7 +548,7 @@ export default function PlanPage() {
         )}
 
         {/* Step dots */}
-        <div className="flex items-center justify-center gap-4 mb-12">
+        <div className="flex items-center justify-center gap-6 mb-16 pt-6">
           {STEPS.map((step) => (
             <button
               key={step.id}
@@ -559,16 +559,18 @@ export default function PlanPage() {
                 }
               }}
               disabled={step.id > currentStep}
-              className="flex flex-col items-center gap-2 group"
+              className="flex flex-col items-center gap-2 group relative"
             >
-              <div className={cn(
-                'h-2.5 rounded-full transition-all duration-500',
-                step.id === currentStep ? 'w-10 bg-gold shadow-[0_0_20px_rgba(197,160,89,0.6)]' : 'w-2.5 bg-white/10 group-hover:bg-white/20',
-                step.id < currentStep && 'bg-gold/40'
-              )} />
+              <div className="relative flex items-center justify-center h-4 w-12">
+                <div className={cn(
+                  'h-1.5 rounded-full transition-all duration-500 absolute',
+                  step.id === currentStep ? 'w-8 bg-gold shadow-[0_0_20px_rgba(197,160,89,0.8)]' : 'w-2 bg-white/10 group-hover:bg-white/30',
+                  step.id < currentStep && 'bg-gold/50'
+                )} />
+              </div>
               <span className={cn(
-                'text-[10px] font-black uppercase tracking-widest transition-colors duration-300',
-                step.id === currentStep ? 'text-gold' : 'text-white/20 group-hover:text-white/40'
+                'text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 absolute -bottom-6 w-max text-center',
+                step.id === currentStep ? 'text-gold drop-shadow-md' : 'text-white/20 group-hover:text-white/50'
               )}>
                 {step.label}
               </span>
@@ -577,7 +579,7 @@ export default function PlanPage() {
         </div>
 
         {/* Step content */}
-        <div className="rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] min-h-[400px] md:min-h-[450px]">
+        <div className="relative min-h-[400px] md:min-h-[450px] rounded-[2.5rem] border border-white/[0.08] bg-[#020617]/40 backdrop-blur-3xl p-6 sm:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <AnimatePresence mode="wait" custom={directionRef.current}>
             <motion.div
               key={currentStep}
@@ -593,66 +595,61 @@ export default function PlanPage() {
           </AnimatePresence>
         </div>
 
-        {/* Navigation */}
-        {currentStep < 6 && (
-          <div className="mt-5 space-y-3">
-            <div className="flex justify-between">
-              {currentStep === 1 ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push('/')}
-                  className="gap-1.5 text-muted-foreground/50 h-12 px-6 rounded-xl hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                  Quitter
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  onClick={handleBack}
-                  className="gap-1.5 text-muted-foreground h-12 px-6 rounded-xl"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Retour
-                </Button>
-              )}
-
-              <Button onClick={handleNext} className="gap-1.5 h-12 px-8 rounded-xl font-bold bg-white text-black hover:bg-white/90">
-                Suivant
-                <ArrowRight className="h-4 w-4" />
+        {/* Navigation - Moved OUTSIDE the container to match screenshot */}
+        {currentStep < 7 && (
+          <div className="mt-8 flex justify-between items-center max-w-xl mx-auto px-4">
+            {currentStep === 1 ? (
+              <Button
+                variant="ghost"
+                onClick={() => router.push('/')}
+                className="gap-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-full px-6 h-14"
+              >
+                <X className="h-4 w-4" />
+                Quitter
               </Button>
-            </div>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                className="gap-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-full px-6 h-14"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Retour
+              </Button>
+            )}
 
-            {/* Validation errors */}
-            <AnimatePresence>
-              {showErrors && getValidationErrors().length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30"
-                >
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                  <div className="space-y-0.5">
-                    {getValidationErrors().map((error) => (
-                      <p key={error} className="text-sm text-amber-700 dark:text-amber-300">
-                        {error}
-                      </p>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <Button onClick={handleNext} className="gap-2 h-14 px-8 rounded-full font-bold bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95">
+              Suivant
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
 
-        {currentStep === 6 && (
-          <div className="mt-4">
+        {/* Validation errors */}
+        <AnimatePresence>
+          {showErrors && getValidationErrors().length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="mt-6 flex justify-center"
+            >
+              <div className="flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 backdrop-blur-md px-6 py-3 shadow-xl">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <p className="text-sm font-medium text-red-200">
+                  {getValidationErrors()[0]}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {currentStep === 7 && (
+          <div className="mt-8 flex justify-center max-w-xl mx-auto px-4">
             <Button
               variant="ghost"
               onClick={handleBack}
-              className="gap-1.5 text-muted-foreground h-12 px-6 rounded-xl"
+              className="gap-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-full px-6 h-14"
             >
               <ArrowLeft className="h-4 w-4" />
               Retour

@@ -1,0 +1,371 @@
+{
+  "tripId": "81e40b59-d899-4729-8662-77aa64281472",
+  "scenarioId": "geo-direct-08",
+  "generatedAt": "2026-02-17T15:29:36.837Z",
+  "destination": "Amsterdam",
+  "summary": {
+    "totalIssues": 13,
+    "critical": 2,
+    "warning": 6,
+    "info": 5,
+    "score": 93,
+    "weightedScore": 93
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "geography": {
+      "score": 67,
+      "critical": 2,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 4,
+      "weightedPenalty": 32.6
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 94,
+      "critical": 0,
+      "warning": 1,
+      "info": 3,
+      "totalIssues": 4,
+      "weightedPenalty": 6.3
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 93,
+      "critical": 0,
+      "warning": 2,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 7
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "impactScore": 14.4,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 3: itinéraire en zigzag (2 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "geography:Jour 1: \"🔄 Transport → Amsterdam\" a des coordonnées (0, 0) — non géoc",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"🔄 Transport → Amsterdam\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "geography:Jour 4: \"🔄 Transport → Toulouse\" a des coordonnées (0, 0) — non géoco",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4: \"🔄 Transport → Toulouse\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "DATA_TRANSPORT_MODE_TITLE_MISMATCH",
+      "code": "DATA_TRANSPORT_MODE_TITLE_MISMATCH",
+      "category": "data-quality",
+      "severity": "warning",
+      "component": "pipeline/step7-assemble",
+      "count": 1,
+      "impactScore": 4.8,
+      "avgFrequencyWeight": 1.2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: transportMode=\"transit\" incohérent avec le titre \"🔄 Transport → Amsterdam\""
+      ]
+    },
+    {
+      "key": "budget:Hébergement \"1. Monet Garden Hotel Amsterdam\" a un prix de 0€/nuit",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Hébergement \"1. Monet Garden Hotel Amsterdam\" a un prix de 0€/nuit"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"nightlife\" demandée mais aucune activité correspondante trou",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"nightlife\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"shopping\" demandée mais aucune activité correspondante trouv",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"shopping\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 2,
+      "impactScore": 2,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Rijksmuseum Amsterdam\" n'a pas de description",
+        "Jour 2: \"Vondelpark\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "schedule:Jour 3: 6h de vide entre \"Déjeuner — Coffee & Cakes\" (fin 14:30) et \"D",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: 6h de vide entre \"Déjeuner — Coffee & Cakes\" (fin 14:30) et \"Dîner — A Beautiful Mess - Amsterdam\" (début 20:00)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 3: 6h de vide entre \"Déjeuner — Coffee & Cakes\" (fin 14:30) et \"Dîner — A Beautiful Mess - Amsterdam\" (début 20:00)",
+        "dayNumber": 3,
+        "details": {
+          "gapMinutes": 330
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: \"🔄 Transport → Amsterdam\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 1,
+        "itemTitle": "🔄 Transport → Amsterdam"
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 2: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 2,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.43,
+          "totalLegKm": 3.94
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 3: itinéraire en zigzag (2 demi-tours détectés)",
+        "dayNumber": 3,
+        "details": {
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.16,
+          "totalLegKm": 2.68
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 4: \"🔄 Transport → Toulouse\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 4,
+        "itemTitle": "🔄 Transport → Toulouse"
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Hébergement \"1. Monet Garden Hotel Amsterdam\" a un prix de 0€/nuit"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "warning",
+        "category": "data-quality",
+        "message": "Jour 1: transportMode=\"transit\" incohérent avec le titre \"🔄 Transport → Amsterdam\"",
+        "dayNumber": 1,
+        "itemTitle": "🔄 Transport → Amsterdam",
+        "details": {
+          "transportMode": "transit",
+          "titleMode": "train"
+        },
+        "code": "DATA_TRANSPORT_MODE_TITLE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 1.2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Rijksmuseum Amsterdam\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Rijksmuseum Amsterdam",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Vondelpark\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Vondelpark",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 3 (5 activités) vs jour 4 (1 activités) — déséquilibre important",
+        "details": {
+          "day1": 5,
+          "day2": 1
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"shopping\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "shopping"
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"nightlife\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "nightlife"
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 4,
+    "totalItems": 20,
+    "activitiesCount": 9,
+    "restaurantsCount": 6,
+    "avgItemsPerDay": 5,
+    "totalEstimatedCost": 433,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

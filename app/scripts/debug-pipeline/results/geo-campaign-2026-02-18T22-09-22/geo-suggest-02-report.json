@@ -1,0 +1,387 @@
+{
+  "tripId": "e95224df-0cf4-4f2f-9a11-87422f2c6191",
+  "scenarioId": "geo-suggest-02-escapade-gourmande-a-prague",
+  "generatedAt": "2026-02-18T22:13:42.980Z",
+  "destination": "Prague",
+  "summary": {
+    "totalIssues": 14,
+    "critical": 2,
+    "warning": 5,
+    "info": 7,
+    "score": 92,
+    "weightedScore": 92
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 59,
+      "critical": 2,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 4,
+      "weightedPenalty": 41.4
+    },
+    "dataQuality": {
+      "score": 98,
+      "critical": 0,
+      "warning": 0,
+      "info": 3,
+      "totalIssues": 3,
+      "weightedPenalty": 2.1
+    },
+    "rhythm": {
+      "score": 92,
+      "critical": 0,
+      "warning": 2,
+      "info": 2,
+      "totalIssues": 4,
+      "weightedPenalty": 8.4
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "LINK_TRANSPORT_DATE_MISMATCH",
+      "code": "LINK_TRANSPORT_DATE_MISMATCH",
+      "category": "links",
+      "severity": "critical",
+      "component": "pipeline/step7-assemble",
+      "count": 2,
+      "impactScore": 40,
+      "avgFrequencyWeight": 2,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: departure_date=2026-04-08 incohérente pour \"🚌 Bus → Prague\" (attendu 2026-04-07)",
+        "Jour 3: departure_date=2026-04-10 incohérente pour \"🚌 Bus → Lyon\" (attendu 2026-04-09)"
+      ]
+    },
+    {
+      "key": "realism:Jour 3: restaurant \"Déjeuner — Seifert’s Brunch\" à 3.1km de l'activité",
+      "category": "realism",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: restaurant \"Déjeuner — Seifert’s Brunch\" à 3.1km de l'activité précédente (\"Pont Charles\") avec seulement 0min de battement"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 1: seulement 50min de temps libre — pas de pause",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: seulement 50min de temps libre — pas de pause"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2: 10 activités/restaurants — journée surchargée",
+      "category": "rhythm",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: 10 activités/restaurants — journée surchargée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 3: petit-déjeuner \"Déjeuner — Seifert’s Brunch\" à 13:00 — trop ta",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: petit-déjeuner \"Déjeuner — Seifert’s Brunch\" à 13:00 — trop tard (attendu avant 11h00)"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 2,
+      "impactScore": 2,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Château de Prague\" n'a pas de description",
+        "Jour 3: \"Maison dansante\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "LINK_ACTIVITY_NONE",
+      "code": "LINK_ACTIVITY_NONE",
+      "category": "links",
+      "severity": "info",
+      "component": "pipeline/links",
+      "count": 2,
+      "impactScore": 2,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: \"Horloge astronomique de Prague\" n'a aucun lien (booking, viator, maps)",
+        "Jour 2: \"Cathédrale Saint-Guy\" n'a aucun lien (booking, viator, maps)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2 (10 activités) vs jour 3 (3 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2 (10 activités) vs jour 3 (3 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 2: ~8.4km de marche implicite entre activités",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: ~8.4km de marche implicite entre activités"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 3: petit-déjeuner \"Déjeuner — Seifert’s Brunch\" à 13:00 — trop tard (attendu avant 11h00)",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — Seifert’s Brunch"
+      }
+    ],
+    "geography": [],
+    "budget": [],
+    "links": [
+      {
+        "severity": "critical",
+        "category": "links",
+        "message": "Jour 1: departure_date=2026-04-08 incohérente pour \"🚌 Bus → Prague\" (attendu 2026-04-07)",
+        "dayNumber": 1,
+        "itemTitle": "🚌 Bus → Prague",
+        "details": {
+          "departureDate": "2026-04-08",
+          "expectedDate": "2026-04-07",
+          "bookingUrl": "https://www.omio.fr/bus/lyon/prague?departure_date=2026-04-08"
+        },
+        "code": "LINK_TRANSPORT_DATE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Horloge astronomique de Prague\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Horloge astronomique de Prague",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "info",
+        "category": "links",
+        "message": "Jour 2: \"Cathédrale Saint-Guy\" n'a aucun lien (booking, viator, maps)",
+        "dayNumber": 2,
+        "itemTitle": "Cathédrale Saint-Guy",
+        "code": "LINK_ACTIVITY_NONE",
+        "component": "pipeline/links"
+      },
+      {
+        "severity": "critical",
+        "category": "links",
+        "message": "Jour 3: departure_date=2026-04-10 incohérente pour \"🚌 Bus → Lyon\" (attendu 2026-04-09)",
+        "dayNumber": 3,
+        "itemTitle": "🚌 Bus → Lyon",
+        "details": {
+          "departureDate": "2026-04-10",
+          "expectedDate": "2026-04-09",
+          "bookingUrl": "https://www.omio.fr/bus/prague/lyon?departure_date=2026-04-10"
+        },
+        "code": "LINK_TRANSPORT_DATE_MISMATCH",
+        "component": "pipeline/step7-assemble",
+        "frequencyWeight": 2,
+        "autofixCandidate": true
+      }
+    ],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"Château de Prague\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "Château de Prague",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 3: \"Maison dansante\" n'a pas de description",
+        "dayNumber": 3,
+        "itemTitle": "Maison dansante",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 1: seulement 50min de temps libre — pas de pause",
+        "dayNumber": 1,
+        "details": {
+          "freeMinutes": 50,
+          "occupiedMinutes": 751
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "rhythm",
+        "message": "Jour 2: 10 activités/restaurants — journée surchargée",
+        "dayNumber": 2,
+        "details": {
+          "activityCount": 10
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2: ~8.4km de marche implicite entre activités",
+        "dayNumber": 2,
+        "details": {
+          "walkKm": "8.4"
+        }
+      },
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 2 (10 activités) vs jour 3 (3 activités) — déséquilibre important",
+        "details": {
+          "day1": 10,
+          "day2": 3
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "gastronomy"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "warning",
+        "category": "realism",
+        "message": "Jour 3: restaurant \"Déjeuner — Seifert’s Brunch\" à 3.1km de l'activité précédente (\"Pont Charles\") avec seulement 0min de battement",
+        "dayNumber": 3,
+        "itemTitle": "Déjeuner — Seifert’s Brunch",
+        "details": {
+          "distKm": "3.1",
+          "gapMin": 0
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 18,
+    "activitiesCount": 9,
+    "restaurantsCount": 4,
+    "avgItemsPerDay": 6,
+    "totalEstimatedCost": 223,
+    "hasAccommodation": true,
+    "hasOutboundFlight": false,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

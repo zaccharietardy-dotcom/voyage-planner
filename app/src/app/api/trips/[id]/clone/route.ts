@@ -118,7 +118,9 @@ export async function POST(
         .from('trips')
         .update({ clone_count: ((sourceTrip as any).clone_count || 0) + 1 })
         .eq('id', id);
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.error('[trips/clone] clone_count update failed:', e);
+    }
 
     return NextResponse.json(clonedTrip);
   } catch (error) {

@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { TripVisibilitySelector } from '@/components/trip/TripVisibilitySelector';
 import { trackEvent } from '@/lib/analytics';
 import { useTranslation } from '@/lib/i18n';
+import { toast } from 'sonner';
 
 interface ShareTripDialogProps {
   open: boolean;
@@ -570,7 +571,7 @@ export function ShareTripDialog({
                           window.open(icsDownloadUrl);
                           // Small delay to show instructions after download starts
                           setTimeout(() => {
-                            alert('Fichier .ics téléchargé !\n\nPour l\'importer dans Google Calendar :\n1. Ouvrez calendar.google.com\n2. Cliquez sur ⚙️ Paramètres\n3. Importation et exportation\n4. Sélectionnez le fichier .ics téléchargé');
+                            toast.info('Fichier .ics téléchargé ! Ouvrez calendar.google.com > Paramètres > Importation et exportation > Sélectionnez le fichier .ics');
                           }, 500);
                         }
                       }}

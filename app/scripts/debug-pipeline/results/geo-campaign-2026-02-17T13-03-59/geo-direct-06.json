@@ -1,0 +1,3705 @@
+{
+  "scenarioId": "geo-direct-06",
+  "preferences": {
+    "origin": "Nice",
+    "destination": "Séville",
+    "startDate": "2026-03-29T13:11:47.753Z",
+    "durationDays": 4,
+    "transport": "plane",
+    "carRental": false,
+    "groupSize": 1,
+    "groupType": "solo",
+    "budgetLevel": "luxury",
+    "activities": [
+      "wellness",
+      "culture"
+    ],
+    "dietary": [
+      "none"
+    ],
+    "mustSee": "",
+    "tripMode": "precise",
+    "cityPlan": [
+      {
+        "city": "Séville",
+        "days": 4
+      }
+    ]
+  },
+  "trip": {
+    "id": "72780f2c-921d-4811-9cbb-91c0a98e4b6b",
+    "createdAt": "2026-02-17T13:12:48.462Z",
+    "updatedAt": "2026-02-17T13:12:48.462Z",
+    "preferences": {
+      "origin": "Nice",
+      "destination": "Séville",
+      "startDate": "2026-03-29T13:11:47.753Z",
+      "durationDays": 4,
+      "transport": "plane",
+      "carRental": false,
+      "groupSize": 1,
+      "groupType": "solo",
+      "budgetLevel": "luxury",
+      "activities": [
+        "wellness",
+        "culture"
+      ],
+      "dietary": [
+        "none"
+      ],
+      "mustSee": "",
+      "tripMode": "precise",
+      "cityPlan": [
+        {
+          "city": "Séville",
+          "days": 4
+        }
+      ]
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "date": "2026-03-29T13:11:47.753Z",
+        "items": [
+          {
+            "id": "home-airport-out-1",
+            "dayNumber": 1,
+            "startTime": "06:49",
+            "endTime": "07:10",
+            "type": "transport",
+            "title": "🚗 Trajet vers NCE",
+            "description": "Nice → Nice Côte d'Azur",
+            "locationName": "Nice Côte d'Azur",
+            "latitude": 43.6584,
+            "longitude": 7.2159,
+            "orderIndex": 0,
+            "estimatedCost": 2,
+            "duration": 21,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=%F0%9F%9A%97%20Trajet%20vers%20NCE%2C%20S%C3%A9ville",
+            "transportMode": "car",
+            "transportRole": "inter_item",
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "airport_parking_included"
+            ],
+            "imageUrl": "https://images.unsplash.com/photo-1449965408869-ebd13bc9e5a8?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "parking-out-1",
+            "dayNumber": 1,
+            "startTime": "07:10",
+            "endTime": "07:25",
+            "type": "parking",
+            "title": "Parking aéroport — P2 - Terminal 2",
+            "description": "",
+            "locationName": "Nice Côte d'Azur Terminal 2",
+            "latitude": 43.6584,
+            "longitude": 7.2159,
+            "orderIndex": 1,
+            "estimatedCost": 108,
+            "duration": 15,
+            "rating": 4.1,
+            "bookingUrl": "https://www.nice.aeroport.fr/Passagers/ACCES-PARKING/Parking",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=P2%20-%20Terminal%202%2C%20S%C3%A9ville",
+            "parking": {
+              "id": "nce-p2",
+              "name": "P2 - Terminal 2",
+              "type": "airport",
+              "address": "Nice Côte d'Azur Terminal 2",
+              "latitude": 43.6584,
+              "longitude": 7.2159,
+              "distanceToTerminal": 100,
+              "pricePerDay": 27,
+              "currency": "EUR",
+              "amenities": [
+                "covered",
+                "24h"
+              ],
+              "rating": 4.1,
+              "reviewCount": 520,
+              "bookingUrl": "https://www.nice.aeroport.fr/Passagers/ACCES-PARKING/Parking",
+              "totalPrice": 108,
+              "locationName": "Nice Côte d'Azur Terminal 2",
+              "estimatedCost": 108,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "airport_parking_selected"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "airport_parking_selected"
+            ],
+            "distanceFromPrevious": 0,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "flight-out-1",
+            "dayNumber": 1,
+            "startTime": "08:55",
+            "endTime": "14:50",
+            "type": "flight",
+            "title": "Vol VY 1516",
+            "description": "",
+            "locationName": "",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 2,
+            "estimatedCost": 181,
+            "duration": 355,
+            "bookingUrl": "https://www.aviasales.com/search/NCE2903SVQ1?currency=eur&locale=fr",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20VY%201516%2C%20S%C3%A9ville",
+            "flight": {
+              "id": "serp-VY 1516-2026-03-29",
+              "airline": "VY",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/VY.png",
+              "flightNumber": "VY 1516",
+              "departureAirport": "Aéroport Nice Côte d’Azur",
+              "departureAirportCode": "NCE",
+              "departureCity": "NCE",
+              "departureTime": "2026-03-29T06:55:00.000Z",
+              "departureTimeDisplay": "08:55",
+              "arrivalAirport": "Aéroport de Séville",
+              "arrivalAirportCode": "SVQ",
+              "arrivalCity": "SVQ",
+              "arrivalTime": "2026-03-29T12:50:00.000Z",
+              "arrivalTimeDisplay": "14:50",
+              "duration": 355,
+              "stops": 1,
+              "stopCities": [
+                "Aéroport international de Barcelone-El Prat"
+              ],
+              "price": 181,
+              "pricePerPerson": 181,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/NCE2903SVQ1?currency=eur&locale=fr"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop"
+          },
+          {
+            "id": "checkin-1",
+            "dayNumber": 1,
+            "startTime": "15:50",
+            "endTime": "16:20",
+            "type": "checkin",
+            "title": "Check-in Virgen de los Reyes",
+            "description": "Disponibilité confirmée",
+            "locationName": "C. Luis Montoto, 129, 41007 Sevilla, Spain",
+            "latitude": 37.3876345488867,
+            "longitude": -5.96869558095932,
+            "orderIndex": 3,
+            "estimatedCost": 0,
+            "duration": 30,
+            "rating": 8.3,
+            "bookingUrl": "https://www.booking.com/hotel/es/virgenreyes.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Virgen%20de%20los%20Reyes%2C%20S%C3%A9ville",
+            "accommodation": {
+              "id": "booking-90127",
+              "name": "Virgen de los Reyes",
+              "type": "hotel",
+              "address": "C. Luis Montoto, 129, 41007 Sevilla, Spain",
+              "latitude": 37.3876345488867,
+              "longitude": -5.96869558095932,
+              "rating": 8.3,
+              "reviewCount": 4130,
+              "stars": 4,
+              "pricePerNight": 133,
+              "totalPrice": 399,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/360163601.jpg?k=23d59e4ec5d47359383cfd53100cca9a64a53f2c7546e30d2d1b17f3f349cc74&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.booking.com/hotel/es/virgenreyes.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "hotel_distance_no_candidate_under_relaxed_cap"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "hotel_distance_no_candidate_under_relaxed_cap"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/360163601.jpg?k=23d59e4ec5d47359383cfd53100cca9a64a53f2c7546e30d2d1b17f3f349cc74&o="
+          },
+          {
+            "id": "gp-ChIJK9S3HhpsEg0RR3Jr5EfWT50",
+            "dayNumber": 1,
+            "startTime": "17:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Giralda",
+            "description": "The Giralda is the bell tower of Seville Cathedral in Seville, Spain. It was built as the minaret for the Great Mosque of Seville in al-Andalus, during the reign of the Almohad dynasty, with a Renaissance-style belfry added by the Catholics after...",
+            "locationName": "Giralda",
+            "latitude": 37.3861784,
+            "longitude": -5.992613700000001,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Giralda%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfUxGYIwNreeSCw5vspsYl4pok3tqBOVcslCFn7RSyv599EHDpBpFoMP5KoOvRY5OuynCnvcr5htxiDOFuAbDDHjsGwXkakqGBRMprRLyAsuTJVwyvESAQtiR4F-slS0q1DNfJ3bKyUbvcVe-Q9E95aVt-9qkIN09Rz8l66Ep3q4XvGXmyRnX6jBKHMJj0JH7qN8-oCGgIu4jx9X-dQX39AZQYtW0h9nELhUVIkD34v1rBmay6C5L91AzHkql66q6egilyePdMhLU_ZHXIqrycfHsJzAIdCmopQE8FteA0CxZJI_ErWf5NLLjfIM6qRoUiC5_Nr8Kmdh9gnihY0SkqoM7Ky-lt_3PInCjc_dOUP2aVTo26R_WBuYSIbOsGH3Dt6AwGLcED_J-PXqfgMYHxzpEnUwCxSfjyZzJQAcoHKhfcb2OrFj7lUhHbtm5IXDdvOAXOvk4yizjvajsCbQ86-q8KpBg4xp6nGDoPbEAV8EEbGk14atqdTvUAW5xgspKMgoflayZ2jeHSNw6EVTowFRbSWZpEBqQzEJ5zsQJRbIAYHga5IY_xnhBxfNy_EuBMfe3iSS&maxwidth=400",
+            "mustSee": true,
+            "distanceFromPrevious": 2.12,
+            "timeFromPrevious": 24,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=37.3876345488867,-5.96869558095932&destination=37.3861784,-5.992613700000001&travelmode=transit"
+          },
+          {
+            "id": "gp-ChIJS6JBjBlsEg0Rh_7Brr92qbo",
+            "dayNumber": 1,
+            "startTime": "18:00",
+            "endTime": "19:00",
+            "type": "activity",
+            "title": "Alcazar de Séville",
+            "description": "The Alcázar of Seville, officially called Royal Alcázar of Seville, is a historic royal palace in Seville, Spain and one of the official residences of the Spanish royal family. It was formerly the site of the Islamic-era citadel of the city, begun...",
+            "locationName": "Alcazar de Séville",
+            "latitude": 37.3830519,
+            "longitude": -5.9902257,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Alcazar%20de%20S%C3%A9ville%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Patio_de_las_doncellas001.JPG/400px-Patio_de_las_doncellas001.JPG",
+            "mustSee": true,
+            "distanceFromPrevious": 0.41,
+            "timeFromPrevious": 7,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-1-dinner",
+            "dayNumber": 1,
+            "startTime": "19:00",
+            "endTime": "20:15",
+            "type": "restaurant",
+            "title": "Dîner — El Pasaje Santa María la Blanca",
+            "description": "\"Une atmosphère charmante, une cuisine délicieuse et un service excellent.\"",
+            "locationName": "C/ Ximénez de Enciso, 33",
+            "latitude": 37.38659,
+            "longitude": -5.9882946,
+            "orderIndex": 6,
+            "estimatedCost": 15,
+            "duration": 75,
+            "rating": 4.5,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=El%20Pasaje%20Santa%20Mar%C3%ADa%20la%20Blanca%2C%20C%2F%20Xim%C3%A9nez%20de%20Enciso%2C%2033",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=El%20Pasaje%20Santa%20Mar%C3%ADa%20la%20Blanca%2C%20S%C3%A9ville",
+            "restaurant": {
+              "id": "serp-9151128881820575053",
+              "name": "El Pasaje Santa María la Blanca",
+              "address": "C/ Ximénez de Enciso, 33",
+              "latitude": 37.38659,
+              "longitude": -5.9882946,
+              "rating": 4.5,
+              "reviewCount": 2300,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Une atmosphère charmante, une cuisine délicieuse et un service excellent.\""
+              ],
+              "description": "\"Une atmosphère charmante, une cuisine délicieuse et un service excellent.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Pasaje%20Santa%20Mar%C3%ADa%20la%20Blanca%2C%20C%2F%20Xim%C3%A9nez%20de%20Enciso%2C%2033",
+              "googlePlaceId": "9151128881820575053",
+              "openingHours": {},
+              "distance": 0.4071204549246985,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "ta-Restaurant_Review-g187443-d13238943-Reviews-Al_Wadi-Seville_Province_of_Seville_Andalucia",
+                  "name": "Al Wadi",
+                  "address": "Adresse non disponible",
+                  "latitude": 37.386757,
+                  "longitude": -5.994943,
+                  "rating": 4.7,
+                  "reviewCount": 2454,
+                  "priceLevel": 3,
+                  "cuisineTypes": [
+                    "Moroccan"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "openingHours": {},
+                  "isOpenNow": true,
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Al%20Wadi%2C%20S%C3%A9ville",
+                  "distance": 0.5185845590556449,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfV2oMhuUu6usgwPywajpvl6bbIKmA3OVUq2oKvvLuvd3TxjpBX-i8egucctTiMikBaFzrsjCHf4H3v0Ut7I3hsVquN8oXCLxo5qbyPMJSk3aNP3JmaQiVhMUQ-UQyQrOdvKiWENsZhWzORzxyCkC09-beo-_olLKfqHhqGwbvILAd8THYhMOn0Uze-23iiwE4SdqhRdGCqT1C2EHSnGlL6V-4lFAoMBbagtCWM1R_66Y_BxWKsr6nuLT_DTai3SaDh3IQkIx4u1KZVQeea1uZNfVKV1Gk9CK_yUCd8a0OsGjE_2ZLA&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "ta-Restaurant_Review-g187443-d23922048-Reviews-Acento_Social_Eatery-Seville_Province_of_Seville_Andalucia",
+                  "name": "Acento - Social Eatery",
+                  "address": "Adresse non disponible",
+                  "latitude": 37.38651,
+                  "longitude": -5.995885,
+                  "rating": 4.8,
+                  "reviewCount": 564,
+                  "priceLevel": 3,
+                  "cuisineTypes": [
+                    "International",
+                    "Mediterranean",
+                    "Spanish"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "openingHours": {},
+                  "isOpenNow": true,
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Acento%20-%20Social%20Eatery%2C%20S%C3%A9ville",
+                  "distance": 0.5641974160343003,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUSgedI7NtSEBakLDlCh-xtSkdqdnDpaVcZEgLplY-YhsqHdXhsNvQCiEEZz7UFRPIWdbfg6e2elJcV3P4kecgEoLCRF-azFvNeMeA6spL1clYW_EIupPrB5-oINWOogdosSUk1qo_P6_-uUzVTWtPPUIrJGmDRRBlL4LMWsTmQfy5ht_G7GccpmMSSKohG3RwOHmPinzXg8g5ejCrcnzYAs1-gQmtQJmGrQu95CLeDpXjDXJMgpu9eUWpYdBipZIAWQ4vtwEt5LkiB39p_FF9e9TGm-3GXjOkSi9Iv2WPTPjKY0oY&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWsmL8YvSsN1erl4sJnQaUq4dJIkPJhH7GxCoYv5dltennLAZibL4s_wUc5rvHk7oCfUFGVUNv898mYZtMxKxBySSLBS3bJO-rlSIckL_PklSDHlHIvxalv8-7qed1xiqhEIaryN13PotmAIRvVHwydkD-hfYjAQYdKtEW7Ay_uQaqu0CrpP7VnNRsScEKBt6jkhD5TOL-k6WFgfOZvujqRu44DS-bA8ZtL5i3aIWxQZhot6Dlvb_GC5XNnSlB6iFHWfvVncRPuUbeav67tANhM9i_OE7aoYFKgx_saMLBqOBNw6Tk&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "ta-Restaurant_Review-g187443-d13238943-Reviews-Al_Wadi-Seville_Province_of_Seville_Andalucia",
+                "name": "Al Wadi",
+                "address": "Adresse non disponible",
+                "latitude": 37.386757,
+                "longitude": -5.994943,
+                "rating": 4.7,
+                "reviewCount": 2454,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "Moroccan"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": true,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Al%20Wadi%2C%20S%C3%A9ville",
+                "distance": 0.5185845590556449,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfV2oMhuUu6usgwPywajpvl6bbIKmA3OVUq2oKvvLuvd3TxjpBX-i8egucctTiMikBaFzrsjCHf4H3v0Ut7I3hsVquN8oXCLxo5qbyPMJSk3aNP3JmaQiVhMUQ-UQyQrOdvKiWENsZhWzORzxyCkC09-beo-_olLKfqHhqGwbvILAd8THYhMOn0Uze-23iiwE4SdqhRdGCqT1C2EHSnGlL6V-4lFAoMBbagtCWM1R_66Y_BxWKsr6nuLT_DTai3SaDh3IQkIx4u1KZVQeea1uZNfVKV1Gk9CK_yUCd8a0OsGjE_2ZLA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "ta-Restaurant_Review-g187443-d23922048-Reviews-Acento_Social_Eatery-Seville_Province_of_Seville_Andalucia",
+                "name": "Acento - Social Eatery",
+                "address": "Adresse non disponible",
+                "latitude": 37.38651,
+                "longitude": -5.995885,
+                "rating": 4.8,
+                "reviewCount": 564,
+                "priceLevel": 3,
+                "cuisineTypes": [
+                  "International",
+                  "Mediterranean",
+                  "Spanish"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "openingHours": {},
+                "isOpenNow": true,
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Acento%20-%20Social%20Eatery%2C%20S%C3%A9ville",
+                "distance": 0.5641974160343003,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUSgedI7NtSEBakLDlCh-xtSkdqdnDpaVcZEgLplY-YhsqHdXhsNvQCiEEZz7UFRPIWdbfg6e2elJcV3P4kecgEoLCRF-azFvNeMeA6spL1clYW_EIupPrB5-oINWOogdosSUk1qo_P6_-uUzVTWtPPUIrJGmDRRBlL4LMWsTmQfy5ht_G7GccpmMSSKohG3RwOHmPinzXg8g5ejCrcnzYAs1-gQmtQJmGrQu95CLeDpXjDXJMgpu9eUWpYdBipZIAWQ4vtwEt5LkiB39p_FF9e9TGm-3GXjOkSi9Iv2WPTPjKY0oY&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWsmL8YvSsN1erl4sJnQaUq4dJIkPJhH7GxCoYv5dltennLAZibL4s_wUc5rvHk7oCfUFGVUNv898mYZtMxKxBySSLBS3bJO-rlSIckL_PklSDHlHIvxalv8-7qed1xiqhEIaryN13PotmAIRvVHwydkD-hfYjAQYdKtEW7Ay_uQaqu0CrpP7VnNRsScEKBt6jkhD5TOL-k6WFgfOZvujqRu44DS-bA8ZtL5i3aIWxQZhot6Dlvb_GC5XNnSlB6iFHWfvVncRPuUbeav67tANhM9i_OE7aoYFKgx_saMLBqOBNw6Tk&maxwidth=800",
+            "distanceFromPrevious": 0.43,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Alcazar de Séville et Murillo Gardens",
+        "dayNarrative": "Journée consacrée à Alcazar de Séville, Murillo Gardens, Giralda. 2 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": 9,
+          "tempMax": 24,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 15,
+          "transport": 110,
+          "total": 125
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 90,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.43,
+          "p95LegKm": 0.41,
+          "totalTravelMin": 17,
+          "totalLegKm": 0.84,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 1.06,
+          "mstLowerBoundKm": 0.79
+        }
+      },
+      {
+        "dayNumber": 2,
+        "date": "2026-03-30T13:11:47.753Z",
+        "items": [
+          {
+            "id": "meal-2-breakfast",
+            "dayNumber": 2,
+            "startTime": "08:00",
+            "endTime": "08:45",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Voilá Café & Brunch",
+            "description": "Petits-déjeuners/déjeuners légers, cadre détendu",
+            "locationName": "C. Luis de Morales, 22, 41018 Sevilla, Espagne",
+            "latitude": 37.3847668,
+            "longitude": -5.9732989,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 45,
+            "rating": 4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Voil%C3%A1%20Caf%C3%A9%20%26%20Brunch%2C%20C.%20Luis%20de%20Morales%2C%2022%2C%2041018%20Sevilla%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Voil%C3%A1%20Caf%C3%A9%20%26%20Brunch%2C%20C.%20Luis%20de%20Morales%2C%2022%2C%2041018%20Sevilla%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJaQuUFnNvEg0RkL-h76lV8mM",
+              "name": "Voilá Café & Brunch",
+              "address": "C. Luis de Morales, 22, 41018 Sevilla, Espagne",
+              "latitude": 37.3847668,
+              "longitude": -5.9732989,
+              "rating": 4,
+              "reviewCount": 1608,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "pâtisserie",
+                "pâtisserie"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+34 955 28 90 07",
+              "website": "http://www.cafevoila.es/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Voil%C3%A1%20Caf%C3%A9%20%26%20Brunch%2C%20C.%20Luis%20de%20Morales%2C%2022%2C%2041018%20Sevilla%2C%20Espagne",
+              "googlePlaceId": "ChIJaQuUFnNvEg0RkL-h76lV8mM",
+              "openingHours": {
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "friday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "monday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                }
+              },
+              "distance": 0.5168130075661704,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-5098782362533856146",
+                "name": "La Cacharrería",
+                "address": "C. Regina, 14",
+                "latitude": 37.394684,
+                "longitude": -5.991436,
+                "rating": 4.4,
+                "reviewCount": 3500,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "petit-déjeuner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Petit restaurant branché, brunchs et cocktails"
+                ],
+                "description": "Petit restaurant branché, brunchs et cocktails",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Cacharrer%C3%ADa%2C%20C.%20Regina%2C%2014",
+                "googlePlaceId": "5098782362533856146",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfVhmynEO2IZ0p7Gjlu1Rykitcc0yrUMrf51iK449a7osYAPqB2IBBqtW9ViW1Cm4WYaS_iZoHM4K9Zo5A9vrIFrbn-EAOYlnjz37w1So0YSZlvcfJAAq2grLBINh0a29gNZeEyOUaFTliihrfHa0a1ks3m_N39H1hpyYEWzzGkhWMXu5mlrgBJ39nbNCl3iVoVNmGzRmpk2IgXtoO2mDtTzBYN8JEC5RkSD_3zlontqC6dCZHpoMkhKCi8W0qsmC-UB6wNYGDH-C_5Ebqofh_cRmdb2GxS7XTKc_IKpi2UVLdQwUFM&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-6254179950471859009",
+                "name": "LA CRÈME DE LA CRÈME Brunch & Breakfast. Crepes, Galettes, Gofres.",
+                "address": "Las Setas, C. Regina, 1, Local 1",
+                "latitude": 37.39429,
+                "longitude": -5.9918013,
+                "rating": 4.5,
+                "reviewCount": 3900,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "brunch"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "Café de mets français sucrés et salés"
+                ],
+                "description": "Café de mets français sucrés et salés",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=LA%20CR%C3%88ME%20DE%20LA%20CR%C3%88ME%20Brunch%20%26%20Breakfast.%20Crepes%2C%20Galettes%2C%20Gofres.%2C%20Las%20Setas%2C%20C.%20Regina%2C%201%2C%20Local%201",
+                "googlePlaceId": "6254179950471859009",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWt3rc5bILLzMDTfFWdQEyvogNQ7vvYu7vvLCh36PZtkUhS52jgSPJkS-l68XyjtD96GSowjY4iZnMmomhMdcOR52yWTBahAoqrL5zRxjYGjlw18Boma1BYuVxRuu-hFLlo9wN3fjZNnQ88Izm7zmxmhxV8CoqZlqtgUs2HdHsEM4K0SWYg15iGhhObk5j-H9QvAqlql3Se56ALJCjlC2d7rxFSWsPg2redggTnp-ka-AnTkL4PvIjorajVDfscmqXUajewHawPyxZ0TFyAY7jk0Ivm3Ba01dXEolRQs8H3j9x3Ib8&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 1.2468589853666356,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "public",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJ856papNrEg0R2CKyI0x6vHQ",
+            "dayNumber": 2,
+            "startTime": "09:00",
+            "endTime": "10:00",
+            "type": "activity",
+            "title": "Isla Mágica",
+            "description": "Isla Mágica is a theme park at the Isla de La Cartuja, in Seville, Andalusia in Spain. The park has six themed areas and a water park called Agua Mágica.",
+            "locationName": "Isla Mágica",
+            "latitude": 37.4057472,
+            "longitude": -5.9995192,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.1,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Isla%20M%C3%A1gica%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWS1e4VQbOvxUq0R694-wxU6dswGKU9iV7QC7nmr5z1QLtYOYPhE5Ww6oyPJIp_VAuLWXbVFqfGtu256dhd_S158u79oqjx1k1_AZJuynah7MbxHRaF4yJcmpg_aV6SZHjx9cjOLsL3WQc3i-B92WByN_CpUgid79JVRrOn04nTGW8TQfSjRm8qCprgk5zBv0ZNzkFYatQJgeZyKioebEQEtQLM9R19tBrJcy_GMZn0uTEKfDZMHtOh4YFy6gq9_9EL9h7BY14QIlYdF6BY_FrIxvmtR6mxUjUe3i607f58yDNJdhzxH4SdlTA_ZaG3hHpzUorZYSkV3PQsNQAxMbmJ8OXzHwJ97wXflY7y3CeoxGQU9kjeutR2visQULtX-tK4zpi1jnMUPpuMXvyzQOWQC8bpWaEHsQ4mtBu6LRk1Eus3A-fa2Y8XWWnQz5bOSe_yS002k3dE5UHUEzoPk6fYSaA6kGSoENwECTd34g_BOGz9VVOjIgZMOwNUbZA2IALScYeqRZFCQrFeRau7xY_4KzwcjJlbGcLxJyh0vy1RPy5JUEkqsmTjxLtd7d3yF0q3XWVG&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 3.29,
+            "timeFromPrevious": 18,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=37.385666,-5.97808&destination=37.4057472,-5.9995192&travelmode=transit"
+          },
+          {
+            "id": "meal-2-lunch",
+            "dayNumber": 2,
+            "startTime": "12:00",
+            "endTime": "13:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Marabunda Sevilla Restaurante tapas Bar",
+            "description": "\"Cuisine excellente et originale, plats soignés et serveurs disponibles.\"",
+            "locationName": "Jesús del Gran Poder, 31",
+            "latitude": 37.39592,
+            "longitude": -5.9955964,
+            "orderIndex": 2,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Marabunda%20Sevilla%20Restaurante%20tapas%20Bar%2C%20Jes%C3%BAs%20del%20Gran%20Poder%2C%2031",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Marabunda%20Sevilla%20Restaurante%20tapas%20Bar%2C%20S%C3%A9ville",
+            "restaurant": {
+              "id": "serp-7426134765277451025",
+              "name": "Marabunda Sevilla Restaurante tapas Bar",
+              "address": "Jesús del Gran Poder, 31",
+              "latitude": 37.39592,
+              "longitude": -5.9955964,
+              "rating": 4.7,
+              "reviewCount": 2600,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant de cuisine fusion"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Cuisine excellente et originale, plats soignés et serveurs disponibles.\""
+              ],
+              "description": "\"Cuisine excellente et originale, plats soignés et serveurs disponibles.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Marabunda%20Sevilla%20Restaurante%20tapas%20Bar%2C%20Jes%C3%BAs%20del%20Gran%20Poder%2C%2031",
+              "googlePlaceId": "7426134765277451025",
+              "openingHours": {},
+              "distance": 0,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-11337655673008417630",
+                  "name": "La Cayetana | Restaurante Sevilla",
+                  "address": "C. Javier Lasso de la Vega, 9",
+                  "latitude": 37.393482,
+                  "longitude": -5.9945364,
+                  "rating": 4.6,
+                  "reviewCount": 1300,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Excellente cuisine, serveur au top, bons vins et ambiance décontractée.\""
+                  ],
+                  "description": "\"Excellente cuisine, serveur au top, bons vins et ambiance décontractée.\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Cayetana%20%7C%20Restaurante%20Sevilla%2C%20C.%20Javier%20Lasso%20de%20la%20Vega%2C%209",
+                  "googlePlaceId": "11337655673008417630",
+                  "openingHours": {},
+                  "distance": 0,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfU3dd4_cCQzcOJVj3I11JEfFen8GxnQj2efeYGlK8vdFL9y_sX6_quTSa653PM8WAXczu1H9fDOHIdbbPddWdrvhdnolz9-rs78B6Bp7jBmupqBmb4z_9z49OT60c32hKmW6ycj3XrbC8Fg9tIVUTxDbMz_2vd7Dh-z2IkJNs_6scSAjdjenDFdP6yXhryu0lgjk8ufbP5t9Fj5_GEgwx6xyUsYVwQsxq5_TG9eXqxkLYcqEShe4tMwJ8prQv9Kzr3skLLuMOHhIaEfLQGZwLEULsV6apbJI-nyZayInIytCLc5_o3gTQ3DpADI9V4a3uzQukY15EHSD7wFOIaxD6x-xikOQVVNHTTlh09kZQoCwgoto6PEJy081QUnFXzDFLz2v0Fo9lPqkcgpZ6NYSNuZhaNgQqcY9FxZqbm5YCcawaxqgtvqlpuIfmEm09hEnR2uNuBxGdtdtfAdJ4nplLDDcNJ-oIVR2Sp_52lhjVLNAtxm0kKi_d9jj_bH28ud2eRjDLnOhzw8CNH4wfUlbOx1nY_3H5E3Siv7qHwiYkv-3yCvCA4ma2IhabBb395kObTDQw77KTLnlA&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfVG0YMf-wP1OhNf9zKg-w9okcBlygnDsIwyPeKZSZONMu9tPjMO5L4Qyco5Q1rXbTvl6pzbEF2gcG6AJtE6Wu2TrMwwD5-XnzM3cB1jQMp02Fx7drPA2NARXE5gq39YDtbHSCjbN7IrKOrxijvPGoWgbvE7cYRLsXvwBuPHdnONL1IiStx_wDW6QJx735QrbhUzUidQ-BlOs-_yRNILiLFHk1YZaGQc-UB8-FK8Iz8vNKVbLw0t6Nc0QrlGTSIuHs3J7WlDhATVaOul0sfkkBTWLmQY-hkIoDWZrs8M4OYTnx-R79lwM5uHShdoFWO9D57ILlUx9AjHEqEI-grs5KvVlp1paUtaMrl_fghcsUTNijafDpdxHSKAvKeq6IeeuEMxd3i5KPXQhgr8Luhzwg7bmswuk7E1_0cwOYGXvynnR4G3Pc_erRRpz_yO6ZpsAU9Oq78HgmmVDAWXKRZa0IXXCl7yjTmWMr9srEVFMF_OJjXPfOLgu1ks2v0kPXzTGb9o0BLPeLxK8xiROKTAt78GzYhwIHfrAm_CdknUj527BbTETzbJ4PC-6kGQNafKjml0aqxn&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-11337655673008417630",
+                "name": "La Cayetana | Restaurante Sevilla",
+                "address": "C. Javier Lasso de la Vega, 9",
+                "latitude": 37.393482,
+                "longitude": -5.9945364,
+                "rating": 4.6,
+                "reviewCount": 1300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Excellente cuisine, serveur au top, bons vins et ambiance décontractée.\""
+                ],
+                "description": "\"Excellente cuisine, serveur au top, bons vins et ambiance décontractée.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Cayetana%20%7C%20Restaurante%20Sevilla%2C%20C.%20Javier%20Lasso%20de%20la%20Vega%2C%209",
+                "googlePlaceId": "11337655673008417630",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfU3dd4_cCQzcOJVj3I11JEfFen8GxnQj2efeYGlK8vdFL9y_sX6_quTSa653PM8WAXczu1H9fDOHIdbbPddWdrvhdnolz9-rs78B6Bp7jBmupqBmb4z_9z49OT60c32hKmW6ycj3XrbC8Fg9tIVUTxDbMz_2vd7Dh-z2IkJNs_6scSAjdjenDFdP6yXhryu0lgjk8ufbP5t9Fj5_GEgwx6xyUsYVwQsxq5_TG9eXqxkLYcqEShe4tMwJ8prQv9Kzr3skLLuMOHhIaEfLQGZwLEULsV6apbJI-nyZayInIytCLc5_o3gTQ3DpADI9V4a3uzQukY15EHSD7wFOIaxD6x-xikOQVVNHTTlh09kZQoCwgoto6PEJy081QUnFXzDFLz2v0Fo9lPqkcgpZ6NYSNuZhaNgQqcY9FxZqbm5YCcawaxqgtvqlpuIfmEm09hEnR2uNuBxGdtdtfAdJ4nplLDDcNJ-oIVR2Sp_52lhjVLNAtxm0kKi_d9jj_bH28ud2eRjDLnOhzw8CNH4wfUlbOx1nY_3H5E3Siv7qHwiYkv-3yCvCA4ma2IhabBb395kObTDQw77KTLnlA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-10116934979097345888",
+                "name": "Catalina Casa de Comidas",
+                "address": "Pl. Padre Jerónimo de Córdoba, 12",
+                "latitude": 37.39312,
+                "longitude": -5.986418,
+                "rating": 4.5,
+                "reviewCount": 2500,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "plats andalous"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine délicieuse et copieuse, service chaleureux, décor soigné.\""
+                ],
+                "description": "\"Cuisine délicieuse et copieuse, service chaleureux, décor soigné.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Catalina%20Casa%20de%20Comidas%2C%20Pl.%20Padre%20Jer%C3%B3nimo%20de%20C%C3%B3rdoba%2C%2012",
+                "googlePlaceId": "10116934979097345888",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUv2jKFe8hdmmAihdJuwzJDsonWngntHdlJEE8oRtWYVuQygLBxSXzmA6wKivhvn2pnpPsa5T-68oi8N8zs4VWHEuX0bfVpnTW0XyJb6R3SMTsHov_RmpYTcQRGtP3udExrcYVnREex1jgaGAqp8oNQDeaeJNltGAZEVeJcyl82EvpZ-7GxdS_8W6io-sTZAEcodbw8sx86CFbl0IT8G6eGSUzOdJko-TR9eBgGHcn0gNNj0pcUvbStUk08kaZacz4yai7KWXzgy-6zIvS4aCu_a7w8pxJHJtxnqG7FrqFY4K_nkNnByCHFj12wi4eWvgrcG64xwvjbRtXvXo1Yf_k1Y4llPdpS5DvCyMtCG1gVSEd7JSGNmh8E9_KHTSYQaRWpba_g1GQI6KUpA-NCDXy-ms1sZA7GBXwzJiZ-NOM6UOahMd3LGwF6eGGHAVYCwF2i7yg6oXNyANhlW2tQgu9_ZGabTnOvMJRWuinTDbBoa36_8BsyvwK8VL3zs3TFcSyx4PNJKbLFDhSWFLvJL66T1FEbhAPW5WL_2pu8k8iDz-MwitL03PVp3bU4SPTTtyWafA&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVG0YMf-wP1OhNf9zKg-w9okcBlygnDsIwyPeKZSZONMu9tPjMO5L4Qyco5Q1rXbTvl6pzbEF2gcG6AJtE6Wu2TrMwwD5-XnzM3cB1jQMp02Fx7drPA2NARXE5gq39YDtbHSCjbN7IrKOrxijvPGoWgbvE7cYRLsXvwBuPHdnONL1IiStx_wDW6QJx735QrbhUzUidQ-BlOs-_yRNILiLFHk1YZaGQc-UB8-FK8Iz8vNKVbLw0t6Nc0QrlGTSIuHs3J7WlDhATVaOul0sfkkBTWLmQY-hkIoDWZrs8M4OYTnx-R79lwM5uHShdoFWO9D57ILlUx9AjHEqEI-grs5KvVlp1paUtaMrl_fghcsUTNijafDpdxHSKAvKeq6IeeuEMxd3i5KPXQhgr8Luhzwg7bmswuk7E1_0cwOYGXvynnR4G3Pc_erRRpz_yO6ZpsAU9Oq78HgmmVDAWXKRZa0IXXCl7yjTmWMr9srEVFMF_OJjXPfOLgu1ks2v0kPXzTGb9o0BLPeLxK8xiROKTAt78GzYhwIHfrAm_CdknUj527BbTETzbJ4PC-6kGQNafKjml0aqxn&maxwidth=800",
+            "distanceFromPrevious": 1.15,
+            "timeFromPrevious": 13,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=37.4057472,-5.9995192&destination=37.39592,-5.9955964&travelmode=transit",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "meal-2-dinner",
+            "dayNumber": 2,
+            "startTime": "13:10",
+            "endTime": "14:25",
+            "type": "restaurant",
+            "title": "Dîner — Restaurante La Cochera del Abuelo",
+            "description": "\"Cuisine délicieuse et copieuse, service chaleureux, décor soigné.\"",
+            "locationName": "C. Álvaro de Bazán, 2, Casco Antiguo, 41002 Sevilla, Espagne",
+            "latitude": 37.4010033,
+            "longitude": -5.996448399999999,
+            "orderIndex": 3,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.8,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20La%20Cochera%20del%20Abuelo%2C%20C.%20%C3%81lvaro%20de%20Baz%C3%A1n%2C%202%2C%20Casco%20Antiguo%2C%2041002%20Sevilla%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20La%20Cochera%20del%20Abuelo%2C%20C.%20%C3%81lvaro%20de%20Baz%C3%A1n%2C%202%2C%20Casco%20Antiguo%2C%2041002%20Sevilla%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJiU2qMghsEg0RQsu8CbZQhOw",
+              "name": "Restaurante La Cochera del Abuelo",
+              "address": "C. Álvaro de Bazán, 2, Casco Antiguo, 41002 Sevilla, Espagne",
+              "latitude": 37.4010033,
+              "longitude": -5.996448399999999,
+              "rating": 4.8,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant andalou",
+                "restaurant andalou"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Cuisine gastronomique dans un cadre vintage. Plats à base de viande et fruits de mer à la présentation élégante et vins proposés dans espace rétro doté d'éléments de décoration."
+              ],
+              "description": "Cuisine gastronomique dans un cadre vintage. Plats à base de viande et fruits de mer à la présentation élégante et vins proposés dans espace rétro doté d'éléments de décoration.",
+              "phoneNumber": "+34 664 44 06 36",
+              "website": "https://www.instagram.com/lacocheradelabuelo?igsh=NGlldXdueGVpMmU0&utm_source=qr",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20La%20Cochera%20del%20Abuelo%2C%20C.%20%C3%81lvaro%20de%20Baz%C3%A1n%2C%202%2C%20Casco%20Antiguo%2C%2041002%20Sevilla%2C%20Espagne",
+              "googlePlaceId": "ChIJiU2qMghsEg0RQsu8CbZQhOw",
+              "openingHours": {
+                "tuesday": {
+                  "open": "19:00",
+                  "close": "22:30"
+                }
+              },
+              "distance": 0.5931512492240361,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-10087560773971850993",
+                "name": "Petra",
+                "address": "C. Alfalfa, 5",
+                "latitude": 37.390167,
+                "longitude": -5.9902396,
+                "rating": 4.7,
+                "reviewCount": 2400,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "bar à tapas"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très bien, tapas de bonne qualité, cadre cosy, service sympa.\""
+                ],
+                "description": "\"Très bien, tapas de bonne qualité, cadre cosy, service sympa.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Petra%2C%20C.%20Alfalfa%2C%205",
+                "googlePlaceId": "10087560773971850993",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUP8Dz-J_ubEFF0WyuXcx2EzgwTr_KlsezcijQgtcjAl7Y-HFoEpY8vKqaXWWX8AjziV2We1Kvp6CV3fAcB02lL8kfrTEpRmVIxI4wwm9iNTZGcMu-HlcgXassEIUBX63RDEuBlVVaBvK8jjToyc7k7J3hCoTeEN0ERzLiterfaV16OIsP6qpvXyLUoy3I3DYHxYbxgU3tpeyYyJl6pnLJRGEcLF6CZBWQHFV5NacVnyFoHPR-ssjoiAXASOfCW8KSXVXD5zaHFqoY3DSLHOssxQ8SuriAHmJooHabOlnG6rs6UQwA&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-10116934979097345888",
+                "name": "Catalina Casa de Comidas",
+                "address": "Pl. Padre Jerónimo de Córdoba, 12",
+                "latitude": 37.39312,
+                "longitude": -5.986418,
+                "rating": 4.5,
+                "reviewCount": 2500,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "plats andalous"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Cuisine délicieuse et copieuse, service chaleureux, décor soigné.\""
+                ],
+                "description": "\"Cuisine délicieuse et copieuse, service chaleureux, décor soigné.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Catalina%20Casa%20de%20Comidas%2C%20Pl.%20Padre%20Jer%C3%B3nimo%20de%20C%C3%B3rdoba%2C%2012",
+                "googlePlaceId": "10116934979097345888",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUv2jKFe8hdmmAihdJuwzJDsonWngntHdlJEE8oRtWYVuQygLBxSXzmA6wKivhvn2pnpPsa5T-68oi8N8zs4VWHEuX0bfVpnTW0XyJb6R3SMTsHov_RmpYTcQRGtP3udExrcYVnREex1jgaGAqp8oNQDeaeJNltGAZEVeJcyl82EvpZ-7GxdS_8W6io-sTZAEcodbw8sx86CFbl0IT8G6eGSUzOdJko-TR9eBgGHcn0gNNj0pcUvbStUk08kaZacz4yai7KWXzgy-6zIvS4aCu_a7w8pxJHJtxnqG7FrqFY4K_nkNnByCHFj12wi4eWvgrcG64xwvjbRtXvXo1Yf_k1Y4llPdpS5DvCyMtCG1gVSEd7JSGNmh8E9_KHTSYQaRWpba_g1GQI6KUpA-NCDXy-ms1sZA7GBXwzJiZ-NOM6UOahMd3LGwF6eGGHAVYCwF2i7yg6oXNyANhlW2tQgu9_ZGabTnOvMJRWuinTDbBoa36_8BsyvwK8VL3zs3TFcSyx4PNJKbLFDhSWFLvJL66T1FEbhAPW5WL_2pu8k8iDz-MwitL03PVp3bU4SPTTtyWafA&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.57,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "api"
+          }
+        ],
+        "theme": "Isla Mágica",
+        "dayNarrative": "Journée consacrée à Isla Mágica. 1 activités prévues.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Ciel dégagé",
+          "tempMin": 12,
+          "tempMax": 20,
+          "icon": "☀️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 45,
+          "transport": 0,
+          "total": 45
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 120,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 3.29,
+          "p95LegKm": 1.15,
+          "totalTravelMin": 41,
+          "totalLegKm": 5.01,
+          "zigzagTurns": 2,
+          "routeInefficiencyRatio": 1.44,
+          "mstLowerBoundKm": 3.49
+        }
+      },
+      {
+        "dayNumber": 3,
+        "date": "2026-03-31T13:11:47.753Z",
+        "items": [
+          {
+            "id": "self-breakfast-3",
+            "dayNumber": 3,
+            "startTime": "08:00",
+            "endTime": "08:30",
+            "type": "restaurant",
+            "title": "Petit-déjeuner — Voilá Café & Brunch",
+            "description": "Petit-déjeuner à l'hôtel",
+            "locationName": "C. Luis de Morales, 22, 41018 Sevilla, Espagne",
+            "latitude": 37.3847668,
+            "longitude": -5.9732989,
+            "orderIndex": 0,
+            "estimatedCost": 30,
+            "duration": 30,
+            "rating": 4,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Voil%C3%A1%20Caf%C3%A9%20%26%20Brunch%2C%20C.%20Luis%20de%20Morales%2C%2022%2C%2041018%20Sevilla%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Voil%C3%A1%20Caf%C3%A9%20%26%20Brunch%2C%20C.%20Luis%20de%20Morales%2C%2022%2C%2041018%20Sevilla%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJaQuUFnNvEg0RkL-h76lV8mM",
+              "name": "Voilá Café & Brunch",
+              "address": "C. Luis de Morales, 22, 41018 Sevilla, Espagne",
+              "latitude": 37.3847668,
+              "longitude": -5.9732989,
+              "rating": 4,
+              "reviewCount": 1608,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "pâtisserie",
+                "pâtisserie"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "phoneNumber": "+34 955 28 90 07",
+              "website": "http://www.cafevoila.es/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Voil%C3%A1%20Caf%C3%A9%20%26%20Brunch%2C%20C.%20Luis%20de%20Morales%2C%2022%2C%2041018%20Sevilla%2C%20Espagne",
+              "googlePlaceId": "ChIJaQuUFnNvEg0RkL-h76lV8mM",
+              "openingHours": {
+                "tuesday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "wednesday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "thursday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "friday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "saturday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "sunday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                },
+                "monday": {
+                  "open": "09:00",
+                  "close": "21:00"
+                }
+              },
+              "distance": 0.5168130075661704,
+              "walkingTime": 6
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-6001172198873386591",
+                "name": "Love Horno Artesano",
+                "address": "Pl. de la Alfalfa, 10",
+                "latitude": 37.390263,
+                "longitude": -5.9908867,
+                "rating": 3.7,
+                "reviewCount": 1300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Love%20Horno%20Artesano%2C%20Pl.%20de%20la%20Alfalfa%2C%2010",
+                "googlePlaceId": "6001172198873386591",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfW7n4t03lPHOl3BX0s7VPIdHhB3VaLjeDahxobM2jWUknrizfOnmNmeqUc2cqppWwftWkWNRz1fmIoYzpSlQLFbda8kqPbqkLrXQtZo2AKoISJcDfGScL-zLiwA1pfC0frvKWONfOAlS9u0RtHFONgxI3m-jp2W2O3edbQV34agwnF2tTsp5sdhBn_dZZ528hsCofiMZV8kP42IBbSR4Kr8SGDtyMMR_u1JX2ntKvYUjQdBHRmDIylbDAdHVVY-TLW8pyJl04l0KKmhrZ9A-aDsVT3VLtLh6u3mVyuuKQD31NtI0l74E5YogIkZatgu1zhiOxEcdHhYlukIyKrnYArCHm54zX4O16MShDJZTWm4OoKoctdSXaRW-qoXy4rUYb-r8U6dcICsA4WYKQnx45CT4Anc8Abm-mCZZmmdlPasDhNkLW0KiUDSLCoBd6Tcw_S-rAAdQVxjQS8oz7QUaStk4w9BD9q8_TQbOSbvvP_z8ua8DnA3_UUrtsPb6kjv_WDyQBGDX_o9r5s599BdwqxjO1ZiA2tyKjuWs9M9G7hlPwQ0HXRAyd5Ees4eqMcwmXbwHORo&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-3231665781844195103",
+                "name": "La Comissura brunch and breakfast",
+                "address": "La Comissura brunch, C. Santillana, 1",
+                "latitude": 37.39214,
+                "longitude": -5.990905,
+                "rating": 4.6,
+                "reviewCount": 770,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "petit-déjeuner"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=La%20Comissura%20brunch%20and%20breakfast%2C%20La%20Comissura%20brunch%2C%20C.%20Santillana%2C%201",
+                "googlePlaceId": "3231665781844195103",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXeCkiRYlS7kuobxK57pZIiIDiWQ9UrOYl6eQV7Lj6pnPeCsnV2PdbJkLhknyrqOHke-9rKyvgQkcwFLgNT8JFdT7fGFz8xU3Paro6rDi9fx_KwGTMhnjn5f3J24lrxWLWg0Jkz6dudTRnpb0ZQWQG-_CcEBPNsXHeII1uEx8pB79pKaXhKykbi9j00e3KtZ43jYoUZhKlT5kuWV9dIAp6Gz5amnu5xlH00cyg6m5lPjJxmpyCLaZs0OWsFxo50aXK-x-Zz3Pcsq8o-8hKHmdWAJNM4NXlvqk6PpKc0CpmgHUASTx1dlZm0YkBtHM3zSXJ2ZsrxUT50AfHw5JjXX5FOIgKWpXS_DwzkW2aDpIxSy-TpJSReFUHphetC_RB2tpMWQdP-w6__k1ZK1-a5i9lXyZJ5AC3Plo1Cxpukw5q2UYn1XBidMy5B955szEmn4lGXBFRHq8nhc2y9wAZcTgmuQqVjDAfm5NiUu95pWkECb3gYwZms6mW2HrUQ9z-LcMWrUtjQ3HwQSyQ4y12GweryTfD9I8o_2lRp7FCDuyizGZyd8yb2EuQh3fBUBzWzUL7lwz5S&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.2183861437400674,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJNbFm6xxsEg0Rq59iZILsBgo",
+            "dayNumber": 3,
+            "startTime": "09:00",
+            "endTime": "11:00",
+            "type": "activity",
+            "title": "Casa de Pilatos",
+            "description": "La Casa de Pilatos is an Andalusian palace in Seville, Spain, which serves as the permanent residence of the Dukes of Medinaceli. It is an example of an Italian Renaissance building with Mudéjar elements and decorations. It is considered the proto...",
+            "locationName": "Casa de Pilatos",
+            "latitude": 37.3899919,
+            "longitude": -5.9871976,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Casa%20de%20Pilatos%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWPUTkoEc82KSH13oinsybAP3naaDUOv56vwtVc3HHQddl3uXWsiU01yt4Ovu0thdSERJPfjvnDNrlCCaA8VOTppv3VCaXrqK7SvBGfrCvIscrf4Kl1CLLGtGlOOk0UYlUIvBcuFsq2iwJK7W1OuJCO70ZgHT7rLNr0Dy7tenXWWGYzXfzuBMhKwPuusGDJmNt5SxtsE8INkKVBiQ4u5591u70DRlkCcWs_xDGVVTY3fkDi2RCG0FXXHL77ZhH1-jQtYAovk0H6t9nODZJNYuLzpPEzlN-HoIKy9r_LCQnwMvyfOpg9pb5Ornq44Ce0-6VR7dbJNr_uvJMUEKrBLGB1zMwwW53Cw7X0O-SEyjVVRVnIwVdFi1B3ibutfRXsYVkynm6AiP9KsNJS4Go2HKJlgZDEe7K6gdl8GLTflTwG632KNv9Gmp2AoMs0KUpvgpzvhu31IfJVIjQdD9YL2ALBWxf4jtOpAeSmmu2bJGiuzLtumqoUJ9GRy_st_9yhvPR2Kljd8PhBdKpqK1YQfLnc_HZmc-VmdELR1wDFjSIM3V-PtU-G2UWApQXIT7QMWAE2ZSUZ&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 1.36,
+            "timeFromPrevious": 15,
+            "transportToPrevious": "public"
+          },
+          {
+            "id": "gp-ChIJLYzAbARsEg0RY6dLRhmk4P4",
+            "dayNumber": 3,
+            "startTime": "11:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Palacio de las Dueñas - Casa de Alba",
+            "description": "Palacio de las Dueñas is a palace in Seville, Spain, currently belonging to the House of Alba. It was built in the late 15th century in the Renaissance style with Gothic and Moorish influences.",
+            "locationName": "Palacio de las Dueñas - Casa de Alba",
+            "latitude": 37.3948492,
+            "longitude": -5.9893635,
+            "orderIndex": 2,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palacio%20de%20las%20Due%C3%B1as%20-%20Casa%20de%20Alba%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwTX6xuQzWnS9vH07jj_HYrm8o2RC-7NeJD0F24VYljRSMhj6gJL3AdzEiO7kmex7kYl2UII1bQ_TVtyOmFC3qmROQ9QL8rHFlUerVUA5SffGBanrCzomJ6yAWkUARPEi7jshuvtT1KbdxppTg8nWfqAAxLfFn0lYizDqWdJbZwYnshldShhQ9mJDaC7-gUUOkz8fxgro9KFZ7OWwHVa3Ho8rgJYraG9FmrNhmJnrJOtYzyqeiP7DC-11Et1AgGYaz__63b5aKU7T98SoZvJTqzQfaCAj1gH48cez_KwS2mA5IXSP69m62L5V0VCLwpztQhmI7Fo8E0BRDwclS7rOa3uO0rirXrzyP5vsBCjjySWj2eNN1GtF-U8oWtH_PsutasO-ZbdvGWlhMF_iXSwJ2JcymkWDtO_FzwRq-XWsNvKLjZEqcrQipq0mrX1epWfuhX5niNOhX5605Kxs5JsGdvm8bHEfBHthNovk8cOKcJ0GXDxswXPPoSqQTCZoGidqi6Q_nuhSDGcxwxPo7kx3k5LkVTfNUKMdvLNcTGkGPggxMSgcJ_UzQCA-5nCaueKF33MUJIRLS6A&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.57,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-3-lunch",
+            "dayNumber": 3,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Restaurante Alfalfa 8",
+            "description": "\"Superbe adresse Excellent tapas Très bon service Beau cadre\"",
+            "locationName": "Pl. de la Alfalfa, 8",
+            "latitude": 37.390465,
+            "longitude": -5.9906254,
+            "orderIndex": 3,
+            "estimatedCost": 15,
+            "duration": 60,
+            "rating": 4.7,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Alfalfa%208%2C%20Pl.%20de%20la%20Alfalfa%2C%208",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Alfalfa%208%2C%20S%C3%A9ville",
+            "restaurant": {
+              "id": "serp-10436142784604802720",
+              "name": "Restaurante Alfalfa 8",
+              "address": "Pl. de la Alfalfa, 8",
+              "latitude": 37.390465,
+              "longitude": -5.9906254,
+              "rating": 4.7,
+              "reviewCount": 1100,
+              "priceLevel": 1,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Superbe adresse Excellent tapas Très bon service Beau cadre\""
+              ],
+              "description": "\"Superbe adresse Excellent tapas Très bon service Beau cadre\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Alfalfa%208%2C%20Pl.%20de%20la%20Alfalfa%2C%208",
+              "googlePlaceId": "10436142784604802720",
+              "openingHours": {},
+              "distance": 0.38295073554521764,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-1374500091920887106",
+                  "name": "Bar Ajo&Agua",
+                  "address": "C. Boteros, 28",
+                  "latitude": 37.3905,
+                  "longitude": -5.9894013,
+                  "rating": 4.9,
+                  "reviewCount": 452,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "bar à tapas"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Très très chouette ambiance, super service et tapas délicieux !\""
+                  ],
+                  "description": "\"Très très chouette ambiance, super service et tapas délicieux !\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Ajo%26Agua%2C%20C.%20Boteros%2C%2028",
+                  "googlePlaceId": "1374500091920887106",
+                  "openingHours": {},
+                  "distance": 0.42918364386172786,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUz4JGPw_7es7QrsL32zOVc0c7PtzhOLJc1TaQgR9B9j3vIweZT1dpirsTYevc6ld69Lw8httw8kFl4CuTQMrGLlv9MRs9rOyJbd24bmnyT7FfU_gOiq41KtlXLGHPG5MHtW1XkRdbmMtrLqT1KOc3LIj0JyF2T9mBbFRGN8rBVZjWwJfr7FUbfYVKFZy4slD-jBaeNC2jIJ7Aq3HPV__x7Jbq7e7W9RykPLrVwM0xNF5tL7DFlKJbHDh__SgY917vp1fVDrSaADju5GpF1Cd3mKewHZa27iaOgtcc_Fkfds8BVTRw&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-13089197684213297530",
+                  "name": "El Traga",
+                  "address": "C. Águilas, 6",
+                  "latitude": 37.38986,
+                  "longitude": -5.9892845,
+                  "rating": 4.6,
+                  "reviewCount": 3300,
+                  "priceLevel": 2,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Viande excellente et service très efficace le tput dans une belle ambiance.\""
+                  ],
+                  "description": "\"Viande excellente et service très efficace le tput dans une belle ambiance.\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Traga%2C%20C.%20%C3%81guilas%2C%206",
+                  "googlePlaceId": "13089197684213297530",
+                  "openingHours": {},
+                  "distance": 0.49489838154948923,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfXuxiojYv3HqKU5pobAesVQZEpof6yvomWcUBWSaFg4Idt0mWF6qoLTP2KVnbCaKBc9lrAlHDwi6FNuwdRfQ6c85rw-6fyE_bOvjkfct_aJdpmWqZCcCGoMMUpxmyOVHTrQWw9FFqk3arynjsiZfMnyNS8ut3_5rx7pVV_aNhG5wD9H09wzSYLZAv8C_iiRVJayPST0NKaWxhoGzvwF6nNiV3pw2L0b3_gEAJnDrUK8Ivg734MgKnyAhrQZueWx03O2DjkjjnHArMfW1Z6niH0eBdIFfwEryPHFFeCbghnFgo_IsCM&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfWe6jXd291DyBwSrlYJBzxgsFk0v9jCDSgj9PPd-pjH97aY1J6coA6zaJssZbvXiXFOaDXa6yA5gWNVy2pCESWIAvZi4KVBQ9oF9sPNeK_iP1hhBxvabOu3pKVKkeinQhH6Ym8mbNs6A1dwO5Dh-04qjLuwKMhjEANlnVhcIETZWNegTIDI3juOet1NR-U0aNrQo7j_hqF6lRh_L6_SZymeUgSM0lPswor9mwmhWfjbAZu_MRpaktQgiRl_ufSYje4egmc3M7Hgw4WZjezbdfqpjqkkD4aRJgr7UTF8-jSy9y5sHCs&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-1374500091920887106",
+                "name": "Bar Ajo&Agua",
+                "address": "C. Boteros, 28",
+                "latitude": 37.3905,
+                "longitude": -5.9894013,
+                "rating": 4.9,
+                "reviewCount": 452,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "bar à tapas"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Très très chouette ambiance, super service et tapas délicieux !\""
+                ],
+                "description": "\"Très très chouette ambiance, super service et tapas délicieux !\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Bar%20Ajo%26Agua%2C%20C.%20Boteros%2C%2028",
+                "googlePlaceId": "1374500091920887106",
+                "openingHours": {},
+                "distance": 0.42918364386172786,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUz4JGPw_7es7QrsL32zOVc0c7PtzhOLJc1TaQgR9B9j3vIweZT1dpirsTYevc6ld69Lw8httw8kFl4CuTQMrGLlv9MRs9rOyJbd24bmnyT7FfU_gOiq41KtlXLGHPG5MHtW1XkRdbmMtrLqT1KOc3LIj0JyF2T9mBbFRGN8rBVZjWwJfr7FUbfYVKFZy4slD-jBaeNC2jIJ7Aq3HPV__x7Jbq7e7W9RykPLrVwM0xNF5tL7DFlKJbHDh__SgY917vp1fVDrSaADju5GpF1Cd3mKewHZa27iaOgtcc_Fkfds8BVTRw&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-13089197684213297530",
+                "name": "El Traga",
+                "address": "C. Águilas, 6",
+                "latitude": 37.38986,
+                "longitude": -5.9892845,
+                "rating": 4.6,
+                "reviewCount": 3300,
+                "priceLevel": 2,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Viande excellente et service très efficace le tput dans une belle ambiance.\""
+                ],
+                "description": "\"Viande excellente et service très efficace le tput dans une belle ambiance.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Traga%2C%20C.%20%C3%81guilas%2C%206",
+                "googlePlaceId": "13089197684213297530",
+                "openingHours": {},
+                "distance": 0.49489838154948923,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfXuxiojYv3HqKU5pobAesVQZEpof6yvomWcUBWSaFg4Idt0mWF6qoLTP2KVnbCaKBc9lrAlHDwi6FNuwdRfQ6c85rw-6fyE_bOvjkfct_aJdpmWqZCcCGoMMUpxmyOVHTrQWw9FFqk3arynjsiZfMnyNS8ut3_5rx7pVV_aNhG5wD9H09wzSYLZAv8C_iiRVJayPST0NKaWxhoGzvwF6nNiV3pw2L0b3_gEAJnDrUK8Ivg734MgKnyAhrQZueWx03O2DjkjjnHArMfW1Z6niH0eBdIFfwEryPHFFeCbghnFgo_IsCM&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfWe6jXd291DyBwSrlYJBzxgsFk0v9jCDSgj9PPd-pjH97aY1J6coA6zaJssZbvXiXFOaDXa6yA5gWNVy2pCESWIAvZi4KVBQ9oF9sPNeK_iP1hhBxvabOu3pKVKkeinQhH6Ym8mbNs6A1dwO5Dh-04qjLuwKMhjEANlnVhcIETZWNegTIDI3juOet1NR-U0aNrQo7j_hqF6lRh_L6_SZymeUgSM0lPswor9mwmhWfjbAZu_MRpaktQgiRl_ufSYje4egmc3M7Hgw4WZjezbdfqpjqkkD4aRJgr7UTF8-jSy9y5sHCs&maxwidth=800",
+            "distanceFromPrevious": 0.5,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          },
+          {
+            "id": "gp-ChIJxcKKDgVsEg0RI6NiOEod4iM",
+            "dayNumber": 3,
+            "startTime": "14:00",
+            "endTime": "16:00",
+            "type": "activity",
+            "title": "Antiquarium",
+            "description": "The Antiquarium was built from 1568 to house the ducal Collection of Classical Antiquities and Library as an extension of the Munich Residenz and was converted into a ballroom soon after. It is one of the most important surviving Renaissance colle...",
+            "locationName": "Antiquarium",
+            "latitude": 37.3936966,
+            "longitude": -5.992124,
+            "orderIndex": 4,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.3,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Antiquarium%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXeeifuJdyTOIC_gtv4o27Lja7IXQs4wbqRK0He9zoDY8J7-OAqk178ehRlfbn3MycFrtbde11i6frkKDjR2QHY8kZpWyGNvf5CNZTGM1RisZCz7xDQHBzCYA8AF88d8PpaKjjKLV-AmCJWMjGuPx4jrFJzEPMp9TowFL1yGBjqxmuODGlmcgktzTuhtsdmV8fmmGXMWpM2BLknV9YssEDKdPWVsrGD7QVLnn85HQVovV-OfHvxuUrsgQ5rca2z26S-gwDeZ2HwHZ3dKZDyExNkxNY1lbxtNaIhJytBC7KCi6b0HpIHlPe8wjR38rYS8vY5K9rwkTpeIlQnTcIkIkYicDaxz8dDVGpTuovQfHnHWRdZk1FeW3rRV7gzZLSZwM5cd0uqO2daZp-uscWFK8aKJ8xo-empCx5Y8rLITY_XJvILkl0cHhzVs3nUlt5LcWA_3T4abSW7wk84_2RYnM0kL9Sebvk6PjPlBwsjg6Ur5kWRzFRMIyje9fjKKOY2P4emwN9gNj0k51XU_cg91-v47PEiLzAs5imM6wHmSVUmrbaquhfiGSYvz-LYJGmSgw42UMTL&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.38,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJH1SaEAVsEg0RxNL-4W2upL0",
+            "dayNumber": 3,
+            "startTime": "16:00",
+            "endTime": "17:00",
+            "type": "activity",
+            "title": "Metropol Parasol",
+            "description": "Setas de Sevilla or Las Setas, initially titled Metropol Parasol, is a large, predominantly wood structure located at La Encarnación square in the old quarter of Seville, Spain. It accommodates a traditional market, restaurants, a performance squa...",
+            "locationName": "Metropol Parasol",
+            "latitude": 37.3932701,
+            "longitude": -5.9917478,
+            "orderIndex": 5,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.4,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Metropol%20Parasol%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfVbEdkF33fxik3X5KjWqfnVbwjAyctWhJHLnMVbDjo7IRWSi5hzKaZBR7uy5IUeXy5DzGmtxcwGT2J8b4UxL5c4ijj6GkgRexrINNFkLeTFqzcRCTiC_46aUcroBP6_UOpa-WkCYg5O1rXzXJL7IIop8KylgaahaJg9_W9kNrNBLJOTAHIDV7u7Gpu9yJqcPXYd-EGHtM9KqQpWpVrH26QWPk6H8lNvvxTTHlN0UcgrD1QTvmltRvX9i1FjntZi45B_BKHiyH2xzpJ8qo-ecFqSCqVJYZKtjLs_OW-aOtlsdpIY2HTQ0bxTwyqAfquneC2wCuI3G6xWSxlpkcO1ExrKSe8CMQWaRfGg2gCjXvYEZUZVNvXmyNkx5_jEi7lrXTd74OkCT2lguVXxI7JfUbx01_1uRR_48vQiYS8ZaQKDTaYDmiJ5RNHG5C64C-jub68QMQBNK7mW-ZQX3WkZQemF2oPID62SnserLoatcuX3453piG6OS8REvhFEX49uoUN0kcF0x9YCdnJdUKZFcuo653EBlDiGiWxlMOyxqcRALr7R2ds1SS0kahQmpAGykrkfjMJH&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.06,
+            "timeFromPrevious": 2,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJ2-X2XgVsEg0Rsy1MkAVOKBY",
+            "dayNumber": 3,
+            "startTime": "17:00",
+            "endTime": "18:00",
+            "type": "activity",
+            "title": "Palace of the Countess of Lebrija",
+            "description": "The Lebrija Palace or Palacio de la Condesa de Lebrija is a house museum in central Seville, Spain. Dating to the 16th century and remodeled between the 18th and 20th centuries, the palace is characterised by its collection of art, including Roman...",
+            "locationName": "Palace of the Countess of Lebrija",
+            "latitude": 37.3922213,
+            "longitude": -5.993704399999999,
+            "orderIndex": 6,
+            "estimatedCost": 0,
+            "duration": 60,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Palace%20of%20the%20Countess%20of%20Lebrija%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfU47v1dFxwgRCBW9RjFTek5cCo8t4FuIeT6zPQASGbG8IJLl5dBr95R-fAT0EUIO3tg7Ttrdg6cEknd_rpE195S4Ahh2Son7NtCkATUbIR-jeS4bWt2uyklZ9lIT9eX2poHMhlUHHQyxHUjqy_wed6_q0Br57M9ottWq1iI1TRddXOWes5QXxCmhQV0Ta172jpZoxYEoP7Dlo4qmgsyEzB4pyUkvZtAS1kBlx8BVHYQ50g-7owvtGz2PkuekDiUaoypGzM5ui8W51L2Bab5xyek2OokMGpVLq0Yu_kNr5lP629ldPpzXCwYdNzFnnLZGcsWSc8WtQGSi0slNSQRX_4xua2maMAhOW8qJIBPaS06L7RpOwulq-2TFX5y8JYHjqg6lipACsgL52y8mu-s0SpId5F1WSWUg-FcP7VKDMyCQuArW5RvG2IJElyP6FaSguGhjLhbe3klOwMl6hUtoZ8bBo3oHfWvsLre0YcTU0JiVZcUzaT5pLiX_NhjT1hz3qdUK7vp2FDdS3Vv18oREkgVGZnC1s5uYeWkBwu69F7AVNYUfMuPt7eUD-au3hWkyNu1biVMIWCCWQ&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.21,
+            "timeFromPrevious": 5,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "gp-ChIJp_IY2w1sEg0RNLww11Nc7LM",
+            "dayNumber": 3,
+            "startTime": "18:00",
+            "endTime": "20:00",
+            "type": "activity",
+            "title": "Musée des beaux-arts de Séville",
+            "description": "Meir Eshel, known professionally as Absalon, was an Israeli-French sculptor.",
+            "locationName": "Musée des beaux-arts de Séville",
+            "latitude": 37.3925104,
+            "longitude": -6.0000265,
+            "orderIndex": 7,
+            "estimatedCost": 0,
+            "duration": 120,
+            "rating": 4.7,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Mus%C3%A9e%20des%20beaux-arts%20de%20S%C3%A9ville%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXzjOyzIkzZCjmtRGqxjpuRfwHhvbgFoYolwcLrgcda-jyz6yoGirMgB9xh-JWTIFPuwyCZXIiZodAq-K7cR0WG-L3F9ABwixdDAvs65ZYfmeyIMjUJ-KGDqfhvYyyGE6mNWcG5nyJWnO-uUCJUrIRRXzBz1ITSLxavDLZg1XqJfWgoUUFfR6IXvIyqkbGmue-7jk3Bbeqz-uQm94va-3rft_mYszwlAUP7vxhdAXwEXIk9hz3hq0vKyC6CQ4XHaYSxnekIygVkNWB5ZYBYrtFknLU-sbtx2OV0YtDs2HoCatl9trSklsWVs_S5haPnznriy2Qx6eh1DtpalQgN_xcnOHGY8SNV9PcKQz9Osvgsp1LssI6XjTEzwxi8cd0NXMXdZJuEGFYcYTQOntnHKF_FI563isKG_eCyZrzJAkqpYvH7YYA3hAnernhyITf5AGHySnm5-pMQbGJeoNyMjWOXxSO1ythg1gHVbam0oIeiY5YuonxW-xI2c7tsBB5yjX_Y7hQ54qWDT1pX710fsXH_EARQEUQCJ8FjdJCoiYKy5jpPPCErud49W9nMRL3MkecJijA3&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 0.56,
+            "timeFromPrevious": 9,
+            "transportToPrevious": "walk"
+          },
+          {
+            "id": "meal-3-dinner",
+            "dayNumber": 3,
+            "startTime": "20:00",
+            "endTime": "21:15",
+            "type": "restaurant",
+            "title": "Dîner — El Traga",
+            "description": "\"Viande excellente et service très efficace le tput dans une belle ambiance.\"",
+            "locationName": "C. Águilas, 6",
+            "latitude": 37.38986,
+            "longitude": -5.9892845,
+            "orderIndex": 8,
+            "estimatedCost": 30,
+            "duration": 75,
+            "rating": 4.6,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=El%20Traga%2C%20C.%20%C3%81guilas%2C%206",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=El%20Traga%2C%20S%C3%A9ville",
+            "restaurant": {
+              "id": "serp-13089197684213297530",
+              "name": "El Traga",
+              "address": "C. Águilas, 6",
+              "latitude": 37.38986,
+              "longitude": -5.9892845,
+              "rating": 4.6,
+              "reviewCount": 3300,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "\"Viande excellente et service très efficace le tput dans une belle ambiance.\""
+              ],
+              "description": "\"Viande excellente et service très efficace le tput dans une belle ambiance.\"",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Traga%2C%20C.%20%C3%81guilas%2C%206",
+              "googlePlaceId": "13089197684213297530",
+              "openingHours": {},
+              "distance": 0.7270771074640415,
+              "walkingTime": 0,
+              "_alternatives": [
+                {
+                  "id": "serp-10436142784604802720",
+                  "name": "Restaurante Alfalfa 8",
+                  "address": "Pl. de la Alfalfa, 8",
+                  "latitude": 37.390465,
+                  "longitude": -5.9906254,
+                  "rating": 4.7,
+                  "reviewCount": 1100,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "restaurant"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "specialties": [
+                    "\"Superbe adresse Excellent tapas Très bon service Beau cadre\""
+                  ],
+                  "description": "\"Superbe adresse Excellent tapas Très bon service Beau cadre\"",
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Alfalfa%208%2C%20Pl.%20de%20la%20Alfalfa%2C%208",
+                  "googlePlaceId": "10436142784604802720",
+                  "openingHours": {},
+                  "distance": 0.6771779942862904,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfWe6jXd291DyBwSrlYJBzxgsFk0v9jCDSgj9PPd-pjH97aY1J6coA6zaJssZbvXiXFOaDXa6yA5gWNVy2pCESWIAvZi4KVBQ9oF9sPNeK_iP1hhBxvabOu3pKVKkeinQhH6Ym8mbNs6A1dwO5Dh-04qjLuwKMhjEANlnVhcIETZWNegTIDI3juOet1NR-U0aNrQo7j_hqF6lRh_L6_SZymeUgSM0lPswor9mwmhWfjbAZu_MRpaktQgiRl_ufSYje4egmc3M7Hgw4WZjezbdfqpjqkkD4aRJgr7UTF8-jSy9y5sHCs&maxwidth=800"
+                  ]
+                },
+                {
+                  "id": "serp-9787898771431297948",
+                  "name": "Alfonsito",
+                  "address": "Plaza San Agustín, C. Prta de Carmona, 1. (esquina",
+                  "latitude": 37.389458,
+                  "longitude": -5.984595,
+                  "rating": 4.5,
+                  "reviewCount": 1400,
+                  "priceLevel": 1,
+                  "cuisineTypes": [
+                    "café spécialisé dans les boissons expresso"
+                  ],
+                  "dietaryOptions": [
+                    "none"
+                  ],
+                  "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Alfonsito%2C%20Plaza%20San%20Agust%C3%ADn%2C%20C.%20Prta%20de%20Carmona%2C%201.%20(esquina",
+                  "googlePlaceId": "9787898771431297948",
+                  "openingHours": {},
+                  "distance": 0.8576100535358029,
+                  "walkingTime": 0,
+                  "photos": [
+                    "/api/place-photo?photo_reference=ATCDNfUq_bSMPzSZmwgfeOKDRF9zezxlNfyqAFhmU41VxQuP0O0XxH2mCw23VHVFAx-PXskFBB0V5a96fKmNEnNHE35z41FLDRBq4bq-LEiXhAYu8E3gpfhVU5_Z6w1GW4Vs57RuTPxrjbzYiJyo4C4h7xRHXcW9yhupAM-ZWGxMQRIqWecKZVSK-wm6m9FfpYPudk5slN4HSkxSbeOMfkoUQ-EJ5aT_qC-eHt7qKzo7Dix9midiN9o-87I50kWZ_MMt9EiLfrdqffJTihfiRzCvN2EKUCyo3HUxc8Y-Sev_TXEVueuDYCg&maxwidth=800"
+                  ]
+                }
+              ],
+              "photos": [
+                "/api/place-photo?photo_reference=ATCDNfXuxiojYv3HqKU5pobAesVQZEpof6yvomWcUBWSaFg4Idt0mWF6qoLTP2KVnbCaKBc9lrAlHDwi6FNuwdRfQ6c85rw-6fyE_bOvjkfct_aJdpmWqZCcCGoMMUpxmyOVHTrQWw9FFqk3arynjsiZfMnyNS8ut3_5rx7pVV_aNhG5wD9H09wzSYLZAv8C_iiRVJayPST0NKaWxhoGzvwF6nNiV3pw2L0b3_gEAJnDrUK8Ivg734MgKnyAhrQZueWx03O2DjkjjnHArMfW1Z6niH0eBdIFfwEryPHFFeCbghnFgo_IsCM&maxwidth=800"
+              ]
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-10436142784604802720",
+                "name": "Restaurante Alfalfa 8",
+                "address": "Pl. de la Alfalfa, 8",
+                "latitude": 37.390465,
+                "longitude": -5.9906254,
+                "rating": 4.7,
+                "reviewCount": 1100,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Superbe adresse Excellent tapas Très bon service Beau cadre\""
+                ],
+                "description": "\"Superbe adresse Excellent tapas Très bon service Beau cadre\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Restaurante%20Alfalfa%208%2C%20Pl.%20de%20la%20Alfalfa%2C%208",
+                "googlePlaceId": "10436142784604802720",
+                "openingHours": {},
+                "distance": 0.6771779942862904,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWe6jXd291DyBwSrlYJBzxgsFk0v9jCDSgj9PPd-pjH97aY1J6coA6zaJssZbvXiXFOaDXa6yA5gWNVy2pCESWIAvZi4KVBQ9oF9sPNeK_iP1hhBxvabOu3pKVKkeinQhH6Ym8mbNs6A1dwO5Dh-04qjLuwKMhjEANlnVhcIETZWNegTIDI3juOet1NR-U0aNrQo7j_hqF6lRh_L6_SZymeUgSM0lPswor9mwmhWfjbAZu_MRpaktQgiRl_ufSYje4egmc3M7Hgw4WZjezbdfqpjqkkD4aRJgr7UTF8-jSy9y5sHCs&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-9787898771431297948",
+                "name": "Alfonsito",
+                "address": "Plaza San Agustín, C. Prta de Carmona, 1. (esquina",
+                "latitude": 37.389458,
+                "longitude": -5.984595,
+                "rating": 4.5,
+                "reviewCount": 1400,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "café spécialisé dans les boissons expresso"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Alfonsito%2C%20Plaza%20San%20Agust%C3%ADn%2C%20C.%20Prta%20de%20Carmona%2C%201.%20(esquina",
+                "googlePlaceId": "9787898771431297948",
+                "openingHours": {},
+                "distance": 0.8576100535358029,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfUq_bSMPzSZmwgfeOKDRF9zezxlNfyqAFhmU41VxQuP0O0XxH2mCw23VHVFAx-PXskFBB0V5a96fKmNEnNHE35z41FLDRBq4bq-LEiXhAYu8E3gpfhVU5_Z6w1GW4Vs57RuTPxrjbzYiJyo4C4h7xRHXcW9yhupAM-ZWGxMQRIqWecKZVSK-wm6m9FfpYPudk5slN4HSkxSbeOMfkoUQ-EJ5aT_qC-eHt7qKzo7Dix9midiN9o-87I50kWZ_MMt9EiLfrdqffJTihfiRzCvN2EKUCyo3HUxc8Y-Sev_TXEVueuDYCg&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXuxiojYv3HqKU5pobAesVQZEpof6yvomWcUBWSaFg4Idt0mWF6qoLTP2KVnbCaKBc9lrAlHDwi6FNuwdRfQ6c85rw-6fyE_bOvjkfct_aJdpmWqZCcCGoMMUpxmyOVHTrQWw9FFqk3arynjsiZfMnyNS8ut3_5rx7pVV_aNhG5wD9H09wzSYLZAv8C_iiRVJayPST0NKaWxhoGzvwF6nNiV3pw2L0b3_gEAJnDrUK8Ivg734MgKnyAhrQZueWx03O2DjkjjnHArMfW1Z6niH0eBdIFfwEryPHFFeCbghnFgo_IsCM&maxwidth=800",
+            "distanceFromPrevious": 0.99,
+            "timeFromPrevious": 17,
+            "transportToPrevious": "walk",
+            "selectionSource": "pool"
+          }
+        ],
+        "theme": "Palais et musées sévillans",
+        "dayNarrative": "Journée culturelle intensive avec la visite de l'Alcazar royal, suivie de l'exploration des collections du Musée des beaux-arts et du Palais de la Comtesse de Lebrija malgré le temps couvert.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Couvert",
+          "tempMin": 11,
+          "tempMax": 24,
+          "icon": "☁️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 53,
+          "transport": 0,
+          "total": 53
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 30,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 1.36,
+          "p95LegKm": 0.99,
+          "totalTravelMin": 78,
+          "totalLegKm": 4.63,
+          "zigzagTurns": 4,
+          "routeInefficiencyRatio": 1.49,
+          "mstLowerBoundKm": 3.11
+        }
+      },
+      {
+        "dayNumber": 4,
+        "date": "2026-04-01T13:11:47.753Z",
+        "items": [
+          {
+            "id": "checkout-4",
+            "dayNumber": 4,
+            "startTime": "08:00",
+            "endTime": "08:15",
+            "type": "checkout",
+            "title": "Check-out Virgen de los Reyes",
+            "description": "Disponibilité confirmée",
+            "locationName": "C. Luis Montoto, 129, 41007 Sevilla, Spain",
+            "latitude": 37.3876345488867,
+            "longitude": -5.96869558095932,
+            "orderIndex": 0,
+            "estimatedCost": 0,
+            "duration": 15,
+            "rating": 8.3,
+            "bookingUrl": "https://www.booking.com/hotel/es/virgenreyes.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Virgen%20de%20los%20Reyes%2C%20S%C3%A9ville",
+            "accommodation": {
+              "id": "booking-90127",
+              "name": "Virgen de los Reyes",
+              "type": "hotel",
+              "address": "C. Luis Montoto, 129, 41007 Sevilla, Spain",
+              "latitude": 37.3876345488867,
+              "longitude": -5.96869558095932,
+              "rating": 8.3,
+              "reviewCount": 4130,
+              "stars": 4,
+              "pricePerNight": 133,
+              "totalPrice": 399,
+              "currency": "EUR",
+              "amenities": [],
+              "photos": [
+                "https://cf.bstatic.com/xdata/images/hotel/square500/360163601.jpg?k=23d59e4ec5d47359383cfd53100cca9a64a53f2c7546e30d2d1b17f3f349cc74&o="
+              ],
+              "checkInTime": "14:00",
+              "checkOutTime": "12:00",
+              "bookingUrl": "https://www.booking.com/hotel/es/virgenreyes.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+              "distanceToCenter": 0,
+              "description": "Disponibilité confirmée",
+              "breakfastIncluded": false,
+              "dataReliability": "verified",
+              "qualityFlags": [
+                "hotel_distance_no_candidate_under_relaxed_cap"
+              ]
+            },
+            "dataReliability": "verified",
+            "qualityFlags": [
+              "hotel_distance_no_candidate_under_relaxed_cap"
+            ],
+            "imageUrl": "https://cf.bstatic.com/xdata/images/hotel/square500/360163601.jpg?k=23d59e4ec5d47359383cfd53100cca9a64a53f2c7546e30d2d1b17f3f349cc74&o="
+          },
+          {
+            "id": "gp-ChIJ2WNhgiVsEg0RsUq_xImjRAA",
+            "dayNumber": 4,
+            "startTime": "10:00",
+            "endTime": "13:00",
+            "type": "activity",
+            "title": "Aquarium de Séville",
+            "description": "Seville has been one of the most important cities in the Iberian Peninsula since ancient times; the first settlers of the site have been identified with the Tartessian culture. Spal was founded by Hercules, a myth recounted by early historians lik...",
+            "locationName": "Aquarium de Séville",
+            "latitude": 37.3707103,
+            "longitude": -5.9910478,
+            "orderIndex": 1,
+            "estimatedCost": 0,
+            "duration": 180,
+            "rating": 4.5,
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Aquarium%20de%20S%C3%A9ville%2C%20S%C3%A9ville",
+            "dataReliability": "verified",
+            "imageUrl": "/api/place-photo?photo_reference=ATCDNfXLvFaBEDOQ6NNJQVuW1YbH-qQdNLG3SFGq6r0geiHT1-yCUdhqE46teIsD_U2IKIjiFqomyxlziEa-jtPQPuDTA7ez5cDQ3vNDCeuuU_mCxcZpnIW38LvvBId-oNd4bjELSYm-rZv-Xp_zDa0cO-zaq8H3h34yPRQ03gr033mML57fZlrhAufy1IAf5j5UgakMTZc-L-ejI84npZlm0xOQVCBeBlK1-NGKe354_gNLFWBDOgS3Diy69v6LKgj2VNC59a6Oo4GwuqSOKzMSI5lZHK3jEpbQy7Oo6azlqSMrsgRNZcdATLdIMvdeif2ZSxFXzNpXyKNnWRTJGDIHT6K1cglXDQZ-fpFYKK3Jr29J3l6wPlr84UcD-nF8aUJ2RPCFKhwa3TKABRs3c7CqYOjPlhlgusDKyuJ0LNEvr6d57mYHgyhTkFFoKVZiqlogw7LJt8tW-s-Nfldw3Mc3biE4rmzKyd-QyxleZ1whsYc24LW4QBWUT69ewCoxHaBR0YXry4_XYXA8zkm7j2YJzhTHilnAw8mEZA7v8fsU4sPfb5j1yiNTUMHT7JWvfqb8UrX3tIuP&maxwidth=400",
+            "mustSee": false,
+            "distanceFromPrevious": 2.73,
+            "timeFromPrevious": 31,
+            "transportToPrevious": "public",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=37.3876345488867,-5.96869558095932&destination=37.3707103,-5.9910478&travelmode=transit"
+          },
+          {
+            "id": "meal-4-lunch",
+            "dayNumber": 4,
+            "startTime": "13:00",
+            "endTime": "14:00",
+            "type": "restaurant",
+            "title": "Déjeuner — Sobretablas",
+            "description": "\"Service adorable, cuisine délicieuse et prix raisonnables.\"",
+            "locationName": "C. Colombia, 7, 41013 Sevilla, Espagne",
+            "latitude": 37.3698267,
+            "longitude": -5.9846534,
+            "orderIndex": 2,
+            "estimatedCost": 30,
+            "duration": 60,
+            "rating": 4.6,
+            "bookingUrl": "https://www.google.com/maps/search/?api=1&query=Sobretablas%2C%20C.%20Colombia%2C%207%2C%2041013%20Sevilla%2C%20Espagne",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Sobretablas%2C%20C.%20Colombia%2C%207%2C%2041013%20Sevilla%2C%20Espagne",
+            "restaurant": {
+              "id": "serp-nearby-ChIJaWlCrtttEg0RQ9g1xFwaUYk",
+              "name": "Sobretablas",
+              "address": "C. Colombia, 7, 41013 Sevilla, Espagne",
+              "latitude": 37.3698267,
+              "longitude": -5.9846534,
+              "rating": 4.6,
+              "reviewCount": 0,
+              "priceLevel": 2,
+              "cuisineTypes": [
+                "restaurant",
+                "restaurant"
+              ],
+              "dietaryOptions": [
+                "none"
+              ],
+              "specialties": [
+                "Cuisine espagnole contemporaine et vin. Restaurant raffiné et lumineux proposant des mets espagnols modernes créatifs et raffinés, accompagnés de vins naturels et bio."
+              ],
+              "description": "Cuisine espagnole contemporaine et vin. Restaurant raffiné et lumineux proposant des mets espagnols modernes créatifs et raffinés, accompagnés de vins naturels et bio.",
+              "phoneNumber": "+34 955 54 64 51",
+              "website": "http://www.sobretablasrestaurante.com/",
+              "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Sobretablas%2C%20C.%20Colombia%2C%207%2C%2041013%20Sevilla%2C%20Espagne",
+              "googlePlaceId": "ChIJaWlCrtttEg0RQ9g1xFwaUYk",
+              "openingHours": {
+                "tuesday": {
+                  "open": "13:30",
+                  "close": "16:30"
+                }
+              },
+              "distance": 0.5735507028616961,
+              "walkingTime": 7
+            },
+            "restaurantAlternatives": [
+              {
+                "id": "serp-9151128881820575053",
+                "name": "El Pasaje Santa María la Blanca",
+                "address": "C/ Ximénez de Enciso, 33",
+                "latitude": 37.38659,
+                "longitude": -5.9882946,
+                "rating": 4.5,
+                "reviewCount": 2300,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "restaurant"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Une atmosphère charmante, une cuisine délicieuse et un service excellent.\""
+                ],
+                "description": "\"Une atmosphère charmante, une cuisine délicieuse et un service excellent.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Pasaje%20Santa%20Mar%C3%ADa%20la%20Blanca%2C%20C%2F%20Xim%C3%A9nez%20de%20Enciso%2C%2033",
+                "googlePlaceId": "9151128881820575053",
+                "openingHours": {},
+                "distance": 1.0519136789166057,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWsmL8YvSsN1erl4sJnQaUq4dJIkPJhH7GxCoYv5dltennLAZibL4s_wUc5rvHk7oCfUFGVUNv898mYZtMxKxBySSLBS3bJO-rlSIckL_PklSDHlHIvxalv8-7qed1xiqhEIaryN13PotmAIRvVHwydkD-hfYjAQYdKtEW7Ay_uQaqu0CrpP7VnNRsScEKBt6jkhD5TOL-k6WFgfOZvujqRu44DS-bA8ZtL5i3aIWxQZhot6Dlvb_GC5XNnSlB6iFHWfvVncRPuUbeav67tANhM9i_OE7aoYFKgx_saMLBqOBNw6Tk&maxwidth=800"
+                ]
+              },
+              {
+                "id": "serp-5639018031399363773",
+                "name": "El Librero Tapas Y Quesos",
+                "address": "Pje. Andreu, 4",
+                "latitude": 37.385696,
+                "longitude": -5.9902797,
+                "rating": 4.6,
+                "reviewCount": 4800,
+                "priceLevel": 1,
+                "cuisineTypes": [
+                  "plats andalous"
+                ],
+                "dietaryOptions": [
+                  "none"
+                ],
+                "specialties": [
+                  "\"Acceuil, service, repas, ambiance, décoration.\""
+                ],
+                "description": "\"Acceuil, service, repas, ambiance, décoration.\"",
+                "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=El%20Librero%20Tapas%20Y%20Quesos%2C%20Pje.%20Andreu%2C%204",
+                "googlePlaceId": "5639018031399363773",
+                "openingHours": {},
+                "distance": 0,
+                "walkingTime": 0,
+                "photos": [
+                  "/api/place-photo?photo_reference=ATCDNfWhscd8TU7knQhoNSoNt_Q-O2bTl0IJjSqodT7_dbM9IYDEvSZJidnqXRCBvZbGyYGH1EoeNJxwiHlupZh1Un7UEmrWodACqvGXC2tpGcNm5oUgAiA93yKX25W55sF3oByF9ohfpPpM9JzdyJRDvi0kcdbNelmJgCUlvdIgw4k_wZBur6-bE45gXtZPoCRR7xhTZzR04-epCxa72EGEpMKJPMdWlnWV2hjfuUSvQhP-0RPPBSxrQXtnxvI4g3Y8jpzSrO2n-gAxhLmoGaNs1zrH-aNeaf3oaM_jrxwBPHmy5SZ2oO_N82dImCE1c0xLz1vlGrEciIgqrGlf7C2msskL1pWHagdUwDDd7leEX8OC2Db_fle_BTPX6zJw9mdc44A9pucPsVHuVA-S4muzO9V5pifjTtjumUzSVATNScVeA2n_j8iyJOEAwVHcVtJcRrdtDaZyDAH9p7VptuZJ4DRi0iQJ5vRZvJt9tfhbfKR7TDloRVSWiuJo-qSMMCvLRj1uO_vg1qiEQYouP_TZEJtAGb65uY777Adzt9UmS9C-F_EXzixGmSnk6UY6rN_5AQ7WDcFj&maxwidth=800"
+                ]
+              }
+            ],
+            "dataReliability": "verified",
+            "distanceFromPrevious": 0.57,
+            "timeFromPrevious": 10,
+            "transportToPrevious": "walk",
+            "googleMapsUrl": "https://www.google.com/maps/dir/?api=1&origin=37.3707103,-5.9910478&destination=37.382065,-5.991282&travelmode=transit",
+            "selectionSource": "api"
+          },
+          {
+            "id": "flight-ret-4",
+            "dayNumber": 4,
+            "startTime": "15:25",
+            "endTime": "21:45",
+            "type": "flight",
+            "title": "Vol VY 2227",
+            "description": "",
+            "locationName": "",
+            "latitude": 0,
+            "longitude": 0,
+            "orderIndex": 3,
+            "estimatedCost": 90,
+            "duration": 380,
+            "bookingUrl": "https://www.aviasales.com/search/SVQ0104NCE1?currency=eur&locale=fr",
+            "googleMapsPlaceUrl": "https://www.google.com/maps/search/?api=1&query=Vol%20VY%202227%2C%20S%C3%A9ville",
+            "flight": {
+              "id": "serp-VY 2227-2026-04-01",
+              "airline": "VY",
+              "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/VY.png",
+              "flightNumber": "VY 2227",
+              "departureAirport": "Aéroport de Séville",
+              "departureAirportCode": "SVQ",
+              "departureCity": "SVQ",
+              "departureTime": "2026-04-01T13:25:00.000Z",
+              "departureTimeDisplay": "15:25",
+              "arrivalAirport": "Aéroport Nice Côte d’Azur",
+              "arrivalAirportCode": "NCE",
+              "arrivalCity": "NCE",
+              "arrivalTime": "2026-04-01T19:45:00.000Z",
+              "arrivalTimeDisplay": "21:45",
+              "duration": 380,
+              "stops": 1,
+              "stopCities": [
+                "Aéroport international de Barcelone-El Prat"
+              ],
+              "price": 90,
+              "pricePerPerson": 90,
+              "currency": "EUR",
+              "cabinClass": "economy",
+              "baggageIncluded": true,
+              "bookingUrl": "https://www.aviasales.com/search/SVQ0104NCE1?currency=eur&locale=fr"
+            },
+            "dataReliability": "verified",
+            "imageUrl": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop"
+          }
+        ],
+        "theme": "Aquarium de Séville",
+        "dayNarrative": "Journée consacrée à Plaza de España, Parc de María Luisa, Aquarium de Séville. 1 activité prévue.",
+        "isDayTrip": false,
+        "weatherForecast": {
+          "condition": "Bruine légère",
+          "tempMin": 12,
+          "tempMax": 21,
+          "icon": "🌦️"
+        },
+        "dailyBudget": {
+          "activities": 0,
+          "food": 15,
+          "transport": 0,
+          "total": 15
+        },
+        "scheduleDiagnostics": {
+          "largestGapMin": 105,
+          "outlierRestaurantsCount": 0,
+          "loadRebalanced": false
+        },
+        "geoDiagnostics": {
+          "maxLegKm": 0.57,
+          "p95LegKm": 0.57,
+          "totalTravelMin": 10,
+          "totalLegKm": 0.57,
+          "zigzagTurns": 0,
+          "routeInefficiencyRatio": 0.99,
+          "mstLowerBoundKm": 0.57
+        }
+      }
+    ],
+    "transportOptions": [
+      {
+        "id": "combined_train_plane",
+        "mode": "combined",
+        "segments": [
+          {
+            "mode": "train",
+            "from": "Nice",
+            "to": "Paris",
+            "duration": 48,
+            "price": 24,
+            "co2": 1,
+            "operator": "Train grande vitesse"
+          },
+          {
+            "mode": "plane",
+            "from": "Paris",
+            "to": "Séville",
+            "duration": 84,
+            "price": 112,
+            "co2": 218
+          }
+        ],
+        "totalDuration": 372,
+        "totalPrice": 136,
+        "totalCO2": 219,
+        "score": 7.2,
+        "scoreDetails": {
+          "priceScore": 9.7,
+          "timeScore": 10,
+          "co2Score": 2
+        },
+        "recommended": true,
+        "recommendationReason": "Option économique, rapide"
+      },
+      {
+        "id": "plane",
+        "mode": "plane",
+        "segments": [
+          {
+            "mode": "plane",
+            "from": "Nice",
+            "to": "Séville",
+            "fromCoords": {
+              "lat": 43.7102,
+              "lng": 7.262
+            },
+            "toCoords": {
+              "lat": 37.3891,
+              "lng": -5.9845
+            },
+            "duration": 99,
+            "price": 132,
+            "co2": 257,
+            "frequency": "Plusieurs vols par jour",
+            "bookingUrl": "https://www.aviasales.com/search/NICE2903SÉVILLE1?currency=eur&locale=fr"
+          }
+        ],
+        "totalDuration": 389,
+        "totalPrice": 132,
+        "totalCO2": 257,
+        "score": 6.5,
+        "scoreDetails": {
+          "priceScore": 10,
+          "timeScore": 9.7,
+          "co2Score": 0
+        },
+        "bookingUrl": "https://www.aviasales.com/search/NICE2903SÉVILLE1?currency=eur&locale=fr",
+        "omioFlightUrl": "https://www.omio.fr/vols/nice/seville?departure_date=2026-03-29"
+      },
+      {
+        "id": "car",
+        "mode": "car",
+        "segments": [
+          {
+            "mode": "car",
+            "from": "Nice",
+            "to": "Séville",
+            "fromCoords": {
+              "lat": 43.7102,
+              "lng": 7.262
+            },
+            "toCoords": {
+              "lat": 37.3891,
+              "lng": -5.9845
+            },
+            "duration": 792,
+            "price": 278,
+            "co2": 69,
+            "frequency": "Flexible",
+            "bookingUrl": "https://www.google.com/maps/dir/Nice/S%C3%A9ville"
+          }
+        ],
+        "totalDuration": 897,
+        "totalPrice": 278,
+        "totalCO2": 69,
+        "score": 3.4,
+        "scoreDetails": {
+          "priceScore": 0,
+          "timeScore": 0,
+          "co2Score": 10
+        },
+        "bookingUrl": "https://www.google.com/maps/dir/Nice/S%C3%A9ville",
+        "dataSource": "estimated",
+        "recommendationReason": "Option la plus écologique"
+      }
+    ],
+    "selectedTransport": {
+      "id": "plane",
+      "mode": "plane",
+      "segments": [
+        {
+          "mode": "plane",
+          "from": "Nice",
+          "to": "Séville",
+          "fromCoords": {
+            "lat": 43.7102,
+            "lng": 7.262
+          },
+          "toCoords": {
+            "lat": 37.3891,
+            "lng": -5.9845
+          },
+          "duration": 99,
+          "price": 132,
+          "co2": 257,
+          "frequency": "Plusieurs vols par jour",
+          "bookingUrl": "https://www.aviasales.com/search/NICE2903SÉVILLE1?currency=eur&locale=fr"
+        }
+      ],
+      "totalDuration": 389,
+      "totalPrice": 132,
+      "totalCO2": 257,
+      "score": 6.5,
+      "scoreDetails": {
+        "priceScore": 10,
+        "timeScore": 9.7,
+        "co2Score": 0
+      },
+      "bookingUrl": "https://www.aviasales.com/search/NICE2903SÉVILLE1?currency=eur&locale=fr",
+      "omioFlightUrl": "https://www.omio.fr/vols/nice/seville?departure_date=2026-03-29"
+    },
+    "outboundFlight": {
+      "id": "serp-VY 1516-2026-03-29",
+      "airline": "VY",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/VY.png",
+      "flightNumber": "VY 1516",
+      "departureAirport": "Aéroport Nice Côte d’Azur",
+      "departureAirportCode": "NCE",
+      "departureCity": "NCE",
+      "departureTime": "2026-03-29T06:55:00.000Z",
+      "departureTimeDisplay": "08:55",
+      "arrivalAirport": "Aéroport de Séville",
+      "arrivalAirportCode": "SVQ",
+      "arrivalCity": "SVQ",
+      "arrivalTime": "2026-03-29T12:50:00.000Z",
+      "arrivalTimeDisplay": "14:50",
+      "duration": 355,
+      "stops": 1,
+      "stopCities": [
+        "Aéroport international de Barcelone-El Prat"
+      ],
+      "price": 181,
+      "pricePerPerson": 181,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/NCE2903SVQ1?currency=eur&locale=fr"
+    },
+    "returnFlight": {
+      "id": "serp-VY 2227-2026-04-01",
+      "airline": "VY",
+      "airlineLogo": "https://www.gstatic.com/flights/airline_logos/70px/VY.png",
+      "flightNumber": "VY 2227",
+      "departureAirport": "Aéroport de Séville",
+      "departureAirportCode": "SVQ",
+      "departureCity": "SVQ",
+      "departureTime": "2026-04-01T13:25:00.000Z",
+      "departureTimeDisplay": "15:25",
+      "arrivalAirport": "Aéroport Nice Côte d’Azur",
+      "arrivalAirportCode": "NCE",
+      "arrivalCity": "NCE",
+      "arrivalTime": "2026-04-01T19:45:00.000Z",
+      "arrivalTimeDisplay": "21:45",
+      "duration": 380,
+      "stops": 1,
+      "stopCities": [
+        "Aéroport international de Barcelone-El Prat"
+      ],
+      "price": 90,
+      "pricePerPerson": 90,
+      "currency": "EUR",
+      "cabinClass": "economy",
+      "baggageIncluded": true,
+      "bookingUrl": "https://www.aviasales.com/search/SVQ0104NCE1?currency=eur&locale=fr"
+    },
+    "accommodation": {
+      "id": "booking-90127",
+      "name": "Virgen de los Reyes",
+      "type": "hotel",
+      "address": "C. Luis Montoto, 129, 41007 Sevilla, Spain",
+      "latitude": 37.3876345488867,
+      "longitude": -5.96869558095932,
+      "rating": 8.3,
+      "reviewCount": 4130,
+      "stars": 4,
+      "pricePerNight": 133,
+      "totalPrice": 399,
+      "currency": "EUR",
+      "amenities": [],
+      "photos": [
+        "https://cf.bstatic.com/xdata/images/hotel/square500/360163601.jpg?k=23d59e4ec5d47359383cfd53100cca9a64a53f2c7546e30d2d1b17f3f349cc74&o="
+      ],
+      "checkInTime": "14:00",
+      "checkOutTime": "12:00",
+      "bookingUrl": "https://www.booking.com/hotel/es/virgenreyes.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+      "distanceToCenter": 0,
+      "description": "Disponibilité confirmée",
+      "breakfastIncluded": false,
+      "dataReliability": "verified",
+      "qualityFlags": [
+        "hotel_distance_no_candidate_under_relaxed_cap"
+      ]
+    },
+    "parking": {
+      "id": "nce-p2",
+      "name": "P2 - Terminal 2",
+      "type": "airport",
+      "address": "Nice Côte d'Azur Terminal 2",
+      "latitude": 43.6584,
+      "longitude": 7.2159,
+      "distanceToTerminal": 100,
+      "pricePerDay": 27,
+      "currency": "EUR",
+      "amenities": [
+        "covered",
+        "24h"
+      ],
+      "rating": 4.1,
+      "reviewCount": 520,
+      "bookingUrl": "https://www.nice.aeroport.fr/Passagers/ACCES-PARKING/Parking",
+      "totalPrice": 108
+    },
+    "accommodationOptions": [
+      {
+        "id": "booking-94462",
+        "name": "Ilunion Alcora Sevilla",
+        "type": "hotel",
+        "address": "Av. Canal Sur, s/n, 41920 San Juan de Aznalfarache, Sevilla, Spain",
+        "latitude": 37.369935493763,
+        "longitude": -6.03313565254211,
+        "rating": 8.3,
+        "reviewCount": 13516,
+        "stars": 4,
+        "pricePerNight": 98,
+        "totalPrice": 294,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/559651415.jpg?k=ddaaea1405eb31346b6d50e32b9dae6f15cb38c9975c50cf05a65a07ee02c272&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/hotel/es/trh-alcora.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-5661792",
+        "name": "Apartamentos Sevilla Este by QHotels",
+        "type": "hotel",
+        "address": "C. Eufrates, 50, 41020 Sevilla, Spain",
+        "latitude": 37.411731,
+        "longitude": -5.934697,
+        "rating": 8.6,
+        "reviewCount": 2875,
+        "stars": 3,
+        "pricePerNight": 104,
+        "totalPrice": 312,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/233345851.jpg?k=f7c9f58362de028ea2f29f60521c1f112b7265df92098f9f51e8309526dc84ef&o="
+        ],
+        "checkInTime": "15:30",
+        "checkOutTime": "11:30",
+        "bookingUrl": "https://www.booking.com/hotel/es/apartamentos-sevilla-este.html?checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-11024807",
+        "name": "Guest house with shared pool.",
+        "type": "hotel",
+        "address": "Pl. Europa, 5, Casco Antiguo, 41003 Sevilla, Spain",
+        "latitude": 37.2668222,
+        "longitude": -6.0028464,
+        "rating": 8.6,
+        "reviewCount": 27,
+        "stars": 3,
+        "pricePerNight": 107,
+        "totalPrice": 321,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/605367141.jpg?k=7d6f725aa1bd403c1c36693f4994b11df4233bd3e9371238a5d6cb70079da4b8&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Guest+house+with+shared+pool.+S%C3%A9ville&checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-7964586",
+        "name": "Apartamentos CuatroVigas",
+        "type": "hotel",
+        "address": "41110 Bollullos de la Mitación, Seville, Spain",
+        "latitude": 37.3350320319421,
+        "longitude": -6.13756681035145,
+        "rating": 9.4,
+        "reviewCount": 52,
+        "stars": 3,
+        "pricePerNight": 120,
+        "totalPrice": 360,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/328668801.jpg?k=d9013dbfd9d8c1f112f408582688dcd65d4f307996702329e299e8190bb91146&o="
+        ],
+        "checkInTime": "15:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=Apartamentos+CuatroVigas+S%C3%A9ville&checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      },
+      {
+        "id": "booking-278549",
+        "name": "YIT Vía Sevilla Mairena",
+        "type": "hotel",
+        "address": "Av. de los Descubrimientos, S/N, 41927 Mairena del Aljarafe, Sevilla, Spain",
+        "latitude": 37.3491363258722,
+        "longitude": -6.05313420295715,
+        "rating": 8,
+        "reviewCount": 2658,
+        "stars": 4,
+        "pricePerNight": 122,
+        "totalPrice": 366,
+        "currency": "EUR",
+        "amenities": [],
+        "photos": [
+          "https://cf.bstatic.com/xdata/images/hotel/square500/280239452.jpg?k=a78635ee54fd7047c454e619bf185fccbb6135108b809fcc5873b66c8774bc7a&o="
+        ],
+        "checkInTime": "14:00",
+        "checkOutTime": "12:00",
+        "bookingUrl": "https://www.booking.com/searchresults.html?ss=YIT+V%C3%ADa+Sevilla+Mairena+S%C3%A9ville&checkin=2026-03-29&checkout=2026-04-01&group_adults=1&group_children=0&no_rooms=1",
+        "distanceToCenter": 0,
+        "description": "Disponibilité confirmée",
+        "breakfastIncluded": false,
+        "dataReliability": "verified"
+      }
+    ],
+    "totalEstimatedCost": 973,
+    "costBreakdown": {
+      "flights": 271,
+      "accommodation": 399,
+      "food": 195,
+      "activities": 0,
+      "transport": 0,
+      "parking": 108,
+      "other": 0
+    },
+    "travelTips": {
+      "vocabulary": {
+        "language": "Espagnol",
+        "phrases": [
+          {
+            "original": "Bonjour",
+            "translation": "Hola",
+            "phonetic": "Oh-la",
+            "context": "Salutation générale"
+          },
+          {
+            "original": "Comment allez-vous ?",
+            "translation": "¿Cómo estás?",
+            "phonetic": "Koh-mo es-tas",
+            "context": "Demander à quelqu'un comment il va"
+          },
+          {
+            "original": "Je voudrais...",
+            "translation": "Me gustaría...",
+            "phonetic": "Meh goos-ta-ree-a",
+            "context": "Commander au restaurant"
+          },
+          {
+            "original": "L'addition, s'il vous plaît",
+            "translation": "La cuenta, por favor",
+            "phonetic": "La kwen-ta por fa-vor",
+            "context": "Demander l'addition"
+          },
+          {
+            "original": "Où sont les toilettes ?",
+            "translation": "¿Dónde están los baños?",
+            "phonetic": "Don-deh es-tan los ba-nyos",
+            "context": "Demander les toilettes"
+          },
+          {
+            "original": "Je ne comprends pas",
+            "translation": "No entiendo",
+            "phonetic": "No en-tien-do",
+            "context": "Signaler un problème de compréhension"
+          },
+          {
+            "original": "Parlez-vous français ?",
+            "translation": "¿Habla francés?",
+            "phonetic": "A-bla fran-ses",
+            "context": "Demander si la personne parle français"
+          },
+          {
+            "original": "Merci beaucoup",
+            "translation": "Muchas gracias",
+            "phonetic": "Moo-chas gra-sias",
+            "context": "Remercier chaleureusement"
+          },
+          {
+            "original": "Au secours !",
+            "translation": "¡Ayuda!",
+            "phonetic": "A-you-da",
+            "context": "Appel à l'aide en urgence"
+          },
+          {
+            "original": "Je suis perdu",
+            "translation": "Estoy perdido",
+            "phonetic": "Es-toy per-dee-do",
+            "context": "Demander son chemin"
+          },
+          {
+            "original": "Combien ça coûte ?",
+            "translation": "¿Cuánto cuesta?",
+            "phonetic": "Kwan-to kues-ta",
+            "context": "Demander le prix"
+          },
+          {
+            "original": "Bonne journée",
+            "translation": "Que tenga un buen día",
+            "phonetic": "Keh ten-ga oon bwen dee-a",
+            "context": "Souhait de bonne journée"
+          }
+        ]
+      },
+      "packing": {
+        "essentials": [
+          {
+            "item": "Pull léger",
+            "reason": "Températures fraîches en mars"
+          },
+          {
+            "item": "Adaptateur prise européen",
+            "reason": "Compatibilité électrique"
+          },
+          {
+            "item": "Crème solaire",
+            "reason": "Soleil de début de printemps"
+          },
+          {
+            "item": "Chaussures de marche confortables",
+            "reason": "Nombreuses visites à pied"
+          },
+          {
+            "item": "Veste imperméable légère",
+            "reason": "Possibilité de pluie"
+          },
+          {
+            "item": "Petit parapluie",
+            "reason": "Averses possibles en mars"
+          },
+          {
+            "item": "Lunettes de soleil",
+            "reason": "Luminosité importante"
+          },
+          {
+            "item": "Bouteille d'eau réutilisable",
+            "reason": "Hydratation et écologie"
+          }
+        ],
+        "plugType": "Type C/F",
+        "voltage": "230V 50Hz"
+      },
+      "legal": {
+        "visaInfo": [
+          {
+            "originCountry": "France",
+            "requirement": "Pas de visa requis pour un séjour touristique de moins de 90 jours, passeport ou carte d'identité valide"
+          }
+        ],
+        "importantLaws": [
+          "Interdiction de boire sur la voie publique dans certaines zones",
+          "Port du masque dans les transports en commun possible selon contexte sanitaire",
+          "Respect strict des horaires de sieste dans certains espaces publics",
+          "Consommation modérée d'alcool dans l'espace public"
+        ],
+        "disclaimer": "Les informations légales sont fournies à titre indicatif. Vérifiez toujours auprès des autorités officielles avant votre départ."
+      },
+      "emergency": {
+        "police": "112",
+        "ambulance": "061",
+        "fire": "080",
+        "generalEmergency": "112",
+        "otherNumbers": [
+          {
+            "label": "SOS Tourisme",
+            "number": "952 211 000"
+          },
+          {
+            "label": "Consulat français à Séville",
+            "number": "+34 954 212 450"
+          }
+        ]
+      }
+    },
+    "budgetStrategy": {
+      "accommodationType": "airbnb_with_kitchen",
+      "accommodationBudgetPerNight": 120,
+      "mealsStrategy": {
+        "breakfast": "restaurant",
+        "lunch": "restaurant",
+        "dinner": "restaurant"
+      },
+      "groceryShoppingNeeded": false,
+      "activitiesLevel": "mixed",
+      "dailyActivityBudget": 200,
+      "transportTips": "Utilisez le pass Séville tourisme pour transports et réductions attractions",
+      "reasoning": "Budget confortable permet flexibilité. Airbnb avec cuisine pour économiser sur petits-déjeuners et quelques repas. Séville offre de bons restaurants à prix raisonnables. Activités variées entre culture (Alcázar, cathédrale) et wellness (hammams, parcs). Transport local facile avec pass ville.",
+      "maxPricePerActivity": 200
+    },
+    "attractionPool": [
+      {
+        "id": "gp-ChIJD7G2bqduEg0ROdrTdOj1Jok",
+        "name": "Plaza de España",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3771957,
+        "longitude": -5.986892999999999,
+        "rating": 4.8,
+        "reviewCount": 180497,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "00:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWrXJ6W8NsnaovTCd6fbT11PKZ8ke-G9mYIuGA5JSGIEpU85_VLOLE_T5HX4h41bSkmE7Hvk2jo-VM1Rpf1h0H_lWM_MCViffoAr1qIg_ZXHutggvryX06OCWji68AmplTdgtMqvHnkou9tA03glFMf_2R0GlN_GF7JUduqjjUI-6ygcOF50oruXITlEelCS_X1VCjv8JfQgXhnFX08GIEcNpO5_cR6B3BBP_NcpOGT17woRqaf4v36VPBg1RUfGD1UrNgmaucILrZW1_timoLmlTTgChBgiYBv0Mres1FIHcKa-q_zeK67Z1KX4_BPHamK7_kX0JR4KbArtK0s4Bt6gU7jWwpAKUFq8UvBuEGSMuglPR_T1uqs2D7oSEHAGni5E0P03CKw0eP6NPyW8oesGzb0Xo4dLDwOvuEbTCRqPlcYzduS0ZmryUquVFRmBxslP8IcY6C0HeQggZMStNw-AHO6UfiPZZ97nVkZrCx_S-2iI9XcrmIwAV8AAueR3Zn5W18AtFjFjDIJjrjcazaw5j4aRXjeo1AA9RtwdluewE9_Ww4cDeNODefkqz-P_IUFB-Wx&maxwidth=400",
+        "googlePlaceId": "ChIJD7G2bqduEg0ROdrTdOj1Jok",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.andalucia.org/es/sevilla-visitas-plaza-de-espana",
+        "isOutdoor": true,
+        "score": 122.1129399759817,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJS6JBjBlsEg0Rh_7Brr92qbo",
+        "name": "Alcazar de Séville",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3830519,
+        "longitude": -5.9902257,
+        "rating": 4.7,
+        "reviewCount": 97705,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "19:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Patio_de_las_doncellas001.JPG/400px-Patio_de_las_doncellas001.JPG",
+        "googlePlaceId": "ChIJS6JBjBlsEg0Rh_7Brr92qbo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 50 23 24",
+        "website": "https://www.alcazarsevilla.org/",
+        "score": 120.37983357814065,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJK9S3HhpsEg0RR3Jr5EfWT50",
+        "name": "Giralda",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3861784,
+        "longitude": -5.992613700000001,
+        "rating": 4.7,
+        "reviewCount": 55517,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUxGYIwNreeSCw5vspsYl4pok3tqBOVcslCFn7RSyv599EHDpBpFoMP5KoOvRY5OuynCnvcr5htxiDOFuAbDDHjsGwXkakqGBRMprRLyAsuTJVwyvESAQtiR4F-slS0q1DNfJ3bKyUbvcVe-Q9E95aVt-9qkIN09Rz8l66Ep3q4XvGXmyRnX6jBKHMJj0JH7qN8-oCGgIu4jx9X-dQX39AZQYtW0h9nELhUVIkD34v1rBmay6C5L91AzHkql66q6egilyePdMhLU_ZHXIqrycfHsJzAIdCmopQE8FteA0CxZJI_ErWf5NLLjfIM6qRoUiC5_Nr8Kmdh9gnihY0SkqoM7Ky-lt_3PInCjc_dOUP2aVTo26R_WBuYSIbOsGH3Dt6AwGLcED_J-PXqfgMYHxzpEnUwCxSfjyZzJQAcoHKhfcb2OrFj7lUhHbtm5IXDdvOAXOvk4yizjvajsCbQ86-q8KpBg4xp6nGDoPbEAV8EEbGk14atqdTvUAW5xgspKMgoflayZ2jeHSNw6EVTowFRbSWZpEBqQzEJ5zsQJRbIAYHga5IY_xnhBxfNy_EuBMfe3iSS&maxwidth=400",
+        "googlePlaceId": "ChIJK9S3HhpsEg0RR3Jr5EfWT50",
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 21 49 71",
+        "website": "https://www.catedraldesevilla.es/la-catedral/edificio/la-giralda/",
+        "score": 119.88885197978382,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJp_IY2w1sEg0RNLww11Nc7LM",
+        "name": "Musée des beaux-arts de Séville",
+        "type": "museum",
+        "description": "",
+        "latitude": 37.3925104,
+        "longitude": -6.0000265,
+        "rating": 4.7,
+        "reviewCount": 15907,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "21:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXzjOyzIkzZCjmtRGqxjpuRfwHhvbgFoYolwcLrgcda-jyz6yoGirMgB9xh-JWTIFPuwyCZXIiZodAq-K7cR0WG-L3F9ABwixdDAvs65ZYfmeyIMjUJ-KGDqfhvYyyGE6mNWcG5nyJWnO-uUCJUrIRRXzBz1ITSLxavDLZg1XqJfWgoUUFfR6IXvIyqkbGmue-7jk3Bbeqz-uQm94va-3rft_mYszwlAUP7vxhdAXwEXIk9hz3hq0vKyC6CQ4XHaYSxnekIygVkNWB5ZYBYrtFknLU-sbtx2OV0YtDs2HoCatl9trSklsWVs_S5haPnznriy2Qx6eh1DtpalQgN_xcnOHGY8SNV9PcKQz9Osvgsp1LssI6XjTEzwxi8cd0NXMXdZJuEGFYcYTQOntnHKF_FI563isKG_eCyZrzJAkqpYvH7YYA3hAnernhyITf5AGHySnm5-pMQbGJeoNyMjWOXxSO1ythg1gHVbam0oIeiY5YuonxW-xI2c7tsBB5yjX_Y7hQ54qWDT1pX710fsXH_EARQEUQCJ8FjdJCoiYKy5jpPPCErud49W9nMRL3MkecJijA3&maxwidth=400",
+        "googlePlaceId": "ChIJp_IY2w1sEg0RNLww11Nc7LM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "15:00"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "21:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "21:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 78 64 98",
+        "website": "https://www.museosdeandalucia.es/web/museodebellasartesdesevilla",
+        "isOutdoor": false,
+        "score": 26.803176562147037,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJNbFm6xxsEg0Rq59iZILsBgo",
+        "name": "Casa de Pilatos",
+        "type": "museum",
+        "description": "",
+        "latitude": 37.3899919,
+        "longitude": -5.9871976,
+        "rating": 4.4,
+        "reviewCount": 13675,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWPUTkoEc82KSH13oinsybAP3naaDUOv56vwtVc3HHQddl3uXWsiU01yt4Ovu0thdSERJPfjvnDNrlCCaA8VOTppv3VCaXrqK7SvBGfrCvIscrf4Kl1CLLGtGlOOk0UYlUIvBcuFsq2iwJK7W1OuJCO70ZgHT7rLNr0Dy7tenXWWGYzXfzuBMhKwPuusGDJmNt5SxtsE8INkKVBiQ4u5591u70DRlkCcWs_xDGVVTY3fkDi2RCG0FXXHL77ZhH1-jQtYAovk0H6t9nODZJNYuLzpPEzlN-HoIKy9r_LCQnwMvyfOpg9pb5Ornq44Ce0-6VR7dbJNr_uvJMUEKrBLGB1zMwwW53Cw7X0O-SEyjVVRVnIwVdFi1B3ibutfRXsYVkynm6AiP9KsNJS4Go2HKJlgZDEe7K6gdl8GLTflTwG632KNv9Gmp2AoMs0KUpvgpzvhu31IfJVIjQdD9YL2ALBWxf4jtOpAeSmmu2bJGiuzLtumqoUJ9GRy_st_9yhvPR2Kljd8PhBdKpqK1YQfLnc_HZmc-VmdELR1wDFjSIM3V-PtU-G2UWApQXIT7QMWAE2ZSUZ&maxwidth=400",
+        "googlePlaceId": "ChIJNbFm6xxsEg0Rq59iZILsBgo",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "09:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 22 52 98",
+        "website": "http://www.fundacionmedinaceli.org/",
+        "isOutdoor": false,
+        "score": 26.071854670010936,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJLYzAbARsEg0RY6dLRhmk4P4",
+        "name": "Palacio de las Dueñas - Casa de Alba",
+        "type": "museum",
+        "description": "",
+        "latitude": 37.3948492,
+        "longitude": -5.9893635,
+        "rating": 4.4,
+        "reviewCount": 10645,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVwTX6xuQzWnS9vH07jj_HYrm8o2RC-7NeJD0F24VYljRSMhj6gJL3AdzEiO7kmex7kYl2UII1bQ_TVtyOmFC3qmROQ9QL8rHFlUerVUA5SffGBanrCzomJ6yAWkUARPEi7jshuvtT1KbdxppTg8nWfqAAxLfFn0lYizDqWdJbZwYnshldShhQ9mJDaC7-gUUOkz8fxgro9KFZ7OWwHVa3Ho8rgJYraG9FmrNhmJnrJOtYzyqeiP7DC-11Et1AgGYaz__63b5aKU7T98SoZvJTqzQfaCAj1gH48cez_KwS2mA5IXSP69m62L5V0VCLwpztQhmI7Fo8E0BRDwclS7rOa3uO0rirXrzyP5vsBCjjySWj2eNN1GtF-U8oWtH_PsutasO-ZbdvGWlhMF_iXSwJ2JcymkWDtO_FzwRq-XWsNvKLjZEqcrQipq0mrX1epWfuhX5niNOhX5605Kxs5JsGdvm8bHEfBHthNovk8cOKcJ0GXDxswXPPoSqQTCZoGidqi6Q_nuhSDGcxwxPo7kx3k5LkVTfNUKMdvLNcTGkGPggxMSgcJ_UzQCA-5nCaueKF33MUJIRLS6A&maxwidth=400",
+        "googlePlaceId": "ChIJLYzAbARsEg0RY6dLRhmk4P4",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 21 48 28",
+        "website": "https://www.lasduenas.es/",
+        "isOutdoor": false,
+        "score": 25.854291331548684,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ2-X2XgVsEg0Rsy1MkAVOKBY",
+        "name": "Palace of the Countess of Lebrija",
+        "type": "museum",
+        "description": "",
+        "latitude": 37.3922213,
+        "longitude": -5.993704399999999,
+        "rating": 4.5,
+        "reviewCount": 2698,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfU47v1dFxwgRCBW9RjFTek5cCo8t4FuIeT6zPQASGbG8IJLl5dBr95R-fAT0EUIO3tg7Ttrdg6cEknd_rpE195S4Ahh2Son7NtCkATUbIR-jeS4bWt2uyklZ9lIT9eX2poHMhlUHHQyxHUjqy_wed6_q0Br57M9ottWq1iI1TRddXOWes5QXxCmhQV0Ta172jpZoxYEoP7Dlo4qmgsyEzB4pyUkvZtAS1kBlx8BVHYQ50g-7owvtGz2PkuekDiUaoypGzM5ui8W51L2Bab5xyek2OokMGpVLq0Yu_kNr5lP629ldPpzXCwYdNzFnnLZGcsWSc8WtQGSi0slNSQRX_4xua2maMAhOW8qJIBPaS06L7RpOwulq-2TFX5y8JYHjqg6lipACsgL52y8mu-s0SpId5F1WSWUg-FcP7VKDMyCQuArW5RvG2IJElyP6FaSguGhjLhbe3klOwMl6hUtoZ8bBo3oHfWvsLre0YcTU0JiVZcUzaT5pLiX_NhjT1hz3qdUK7vp2FDdS3Vv18oREkgVGZnC1s5uYeWkBwu69F7AVNYUfMuPt7eUD-au3hWkyNu1biVMIWCCWQ&maxwidth=400",
+        "googlePlaceId": "ChIJ2-X2XgVsEg0Rsy1MkAVOKBY",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 22 78 02",
+        "website": "http://www.palaciodelebrija.com/",
+        "isOutdoor": false,
+        "score": 24.86208389067177,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJxcKKDgVsEg0RI6NiOEod4iM",
+        "name": "Antiquarium",
+        "type": "museum",
+        "description": "",
+        "latitude": 37.3936966,
+        "longitude": -5.992124,
+        "rating": 4.3,
+        "reviewCount": 1850,
+        "duration": 120,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "19:30"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXeeifuJdyTOIC_gtv4o27Lja7IXQs4wbqRK0He9zoDY8J7-OAqk178ehRlfbn3MycFrtbde11i6frkKDjR2QHY8kZpWyGNvf5CNZTGM1RisZCz7xDQHBzCYA8AF88d8PpaKjjKLV-AmCJWMjGuPx4jrFJzEPMp9TowFL1yGBjqxmuODGlmcgktzTuhtsdmV8fmmGXMWpM2BLknV9YssEDKdPWVsrGD7QVLnn85HQVovV-OfHvxuUrsgQ5rca2z26S-gwDeZ2HwHZ3dKZDyExNkxNY1lbxtNaIhJytBC7KCi6b0HpIHlPe8wjR38rYS8vY5K9rwkTpeIlQnTcIkIkYicDaxz8dDVGpTuovQfHnHWRdZk1FeW3rRV7gzZLSZwM5cd0uqO2daZp-uscWFK8aKJ8xo-empCx5Y8rLITY_XJvILkl0cHhzVs3nUlt5LcWA_3T4abSW7wk84_2RYnM0kL9Sebvk6PjPlBwsjg6Ur5kWRzFRMIyje9fjKKOY2P4emwN9gNj0k51XU_cg91-v47PEiLzAs5imM6wHmSVUmrbaquhfiGSYvz-LYJGmSgw42UMTL&maxwidth=400",
+        "googlePlaceId": "ChIJxcKKDgVsEg0RI6NiOEod4iM",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "13:30"
+          },
+          "monday": null,
+          "tuesday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "19:30"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:30"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "955 47 15 80",
+        "website": "https://www.turismosevilla.org/es/que-ver-y-hacer/patrimonio/museos-y-otros-espacios-expositivos/museo-antiquarium",
+        "isOutdoor": false,
+        "score": 24.13434345680603,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ7zUaHSRsEg0RQugeffDytmg",
+        "name": "Parc de María Luisa",
+        "type": "park",
+        "description": "",
+        "latitude": 37.3741832,
+        "longitude": -5.9872231,
+        "rating": 4.8,
+        "reviewCount": 41148,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "00:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUDbJpVgwumYkB3DuIvYMjEYbtwQJsv9tkVYgEfD9apaPTkL6RK8Fdv6G_HIvv6Px3NFV8OrbYElSUmHZPpmJxw0UhtwCF_s8WdMwrIx3N24Zc4lyPENoKVQDG8xeuVcpNOunR2M9hB9APshlgPrEyDh3qasM3--BUo-eFR0T1tZwYDxtExsbwg222lYXqFei4C3_8J2USP_nMxl4UnUxeaIx8EQHsV_nLoDP8n2Ta8YH4Zgr1I8qPzm5CNJTgIlLQuuxF6JZcjOEuEGN2381A2Cz1peyPD-9OpiXtoQsUEMSmHT0dgMYLpB2dFWaUOMKwd3X-Z6HtMPtFepQMLRtgM6RaOjNKWwjqwmD_qhH6zYev5jxxpWKoKh9BK7VTftKF752iWw9AoZfY_ajKjn93zI5k6EJQ26g1u7aFFdDznJn3VjYgHCJnduZVO_7Pbga8W_aSD9yfMcu2oJQerT73d1bTiY66b7IKEQsYCEeUyKqvuaqY-x6y7qwzZUSfvDuU2g9NjQWqJE0s7vHRgm1xf74hRhlP8rrmJExsbw-EYPjZA2_Ufn74wqMe33-j35_ZJv-MPP9LIxA&maxwidth=400",
+        "googlePlaceId": "ChIJ7zUaHSRsEg0RQugeffDytmg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "955 47 32 32",
+        "website": "https://www.sevilla.org/servicios/medio-ambiente-parques-jardines/parques/parques-y-jardines-historicos/parque-de-maria-luisa",
+        "isOutdoor": true,
+        "score": 23.828697462325138,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJVWsZPR9sEg0RnlPI0ibW8JQ",
+        "name": "Murillo Gardens",
+        "type": "park",
+        "description": "",
+        "latitude": 37.3833518,
+        "longitude": -5.987810100000001,
+        "rating": 4.6,
+        "reviewCount": 6325,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUj7wCHJrjRa5iDzeR41GCd5T0sBk89GEx06ssTkUFCy2GfXVNMdXfRaXO-hIXvdZlGxeyqF5ip1HgRYAQdBN16b1FG4j-Mf_D-02jE6iAEE8BOluB0L7TRh8dDISX4ezST13wws5ntClJLEmaoP7Oh5oIQmUPkbX6lL8yJr05zTsAmrgKNBDtdCXvRZPmALqqWpQRHi_ncv1yS-2MLY9OsqpHEN_GcM1DzUXLFGU__vq7e9Zfu3IfHJL8HG3c537eH3YaF5QJmuenLrPe0zipAzA9ADnXZr2gu7TcSXnGwlKLMmU_wGSr9czMu0KQQ9fmfFeSvO0XLYE_ccSsyM3688QNBqogTff3aol4Fz1bht1P_ZgAbeFaPwK0mjkZkcRE8VY0UTqiBI16adZg0cELfkplXE8Q8bTwhdjD19ndO-TSbMPbR9u508XsvD73v4t3IbtItF8qapR4-Jt1GLiSNu6pXheqSIIVjlvFa7-_v9g_LfbqNyZ7EFezgadji8U42vPBM0hgdd8ZP7wQSra-E1Tha38LrrjUkBtG4jmffBMCirCo-PUatV0627iOHD8ZVlv_NCRMHSg&maxwidth=400",
+        "googlePlaceId": "ChIJVWsZPR9sEg0RnlPI0ibW8JQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://tic.visitasevilla.es/vsev/Web_php/index.php?contenido=fichaPoi_coconut&idPoi=242&idNivel=0&mode=folder&order=asc&title=jardines-de-murillo",
+        "isOutdoor": true,
+        "score": 21.80212105969571,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ856papNrEg0R2CKyI0x6vHQ",
+        "name": "Isla Mágica",
+        "type": "park",
+        "description": "",
+        "latitude": 37.4057472,
+        "longitude": -5.9995192,
+        "rating": 4.1,
+        "reviewCount": 32785,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:00",
+          "close": "18:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWS1e4VQbOvxUq0R694-wxU6dswGKU9iV7QC7nmr5z1QLtYOYPhE5Ww6oyPJIp_VAuLWXbVFqfGtu256dhd_S158u79oqjx1k1_AZJuynah7MbxHRaF4yJcmpg_aV6SZHjx9cjOLsL3WQc3i-B92WByN_CpUgid79JVRrOn04nTGW8TQfSjRm8qCprgk5zBv0ZNzkFYatQJgeZyKioebEQEtQLM9R19tBrJcy_GMZn0uTEKfDZMHtOh4YFy6gq9_9EL9h7BY14QIlYdF6BY_FrIxvmtR6mxUjUe3i607f58yDNJdhzxH4SdlTA_ZaG3hHpzUorZYSkV3PQsNQAxMbmJ8OXzHwJ97wXflY7y3CeoxGQU9kjeutR2visQULtX-tK4zpi1jnMUPpuMXvyzQOWQC8bpWaEHsQ4mtBu6LRk1Eus3A-fa2Y8XWWnQz5bOSe_yS002k3dE5UHUEzoPk6fYSaA6kGSoENwECTd34g_BOGz9VVOjIgZMOwNUbZA2IALScYeqRZFCQrFeRau7xY_4KzwcjJlbGcLxJyh0vy1RPy5JUEkqsmTjxLtd7d3yF0q3XWVG&maxwidth=400",
+        "googlePlaceId": "ChIJ856papNrEg0R2CKyI0x6vHQ",
+        "businessStatus": "CLOSED_TEMPORARILY",
+        "website": "http://www.islamagica.es/",
+        "isOutdoor": true,
+        "score": 20.731350376005068,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJgUe1VRdsEg0R5W0e512gneQ",
+        "name": "Cathédrale Notre-Dame du Siège de Séville",
+        "type": "religious",
+        "description": "",
+        "latitude": 37.3858247,
+        "longitude": -5.9931068,
+        "rating": 4.8,
+        "reviewCount": 57150,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWlLBCHCsZx4ZHINN61tC8O8BJZFaIa2kjjubzWQRdeHglr7a7WJWrk193R6hM32aXQHHcRLTva275fa43RCxV_rShBdYUmET_QhVigVECn5MLxJCngncZ8R4q0umh4GbQGrPJkJRQzkFCF-1Z9TJJkHaYhZBTEUKeIatT9BrU1gbTiGRjKxnURBkQRZPHHKRIXcw3PPdrFTz5y93zL9QbOJZAnFwtmAulxHgFCJU2VoDfc5Vj-mRG0-Ni1Yg-1lfV7iRLHUVlcHfAveRiNubkHo15Eg403jkPBRbWgcQYrRLfSmdvd63mqyWMcWv6ey94mVPYgUEfw_iY-c5KMG6I9gmrzcEk6yVuPR4yD4pVQplUtyXwp2uyna0s2pANkX6YE7c0XPy5L3FjEWy3po4s0JJ4Pojn8GWNrCT7kqaC3cIWttfNwww9lgwiNIiAagNcFsxViKLvXDtbQoCNE82D576awEnoiyAP7GYOOB_DIgp2Lxn-M8T-wSyFx-NGp2Vcw2aDl_SPeitB02GII4wpcfVVKgsuyGbomJnc_BjCAV4ySmlaK0HfRILw6Gfo8WCS90_0w&maxwidth=400",
+        "googlePlaceId": "ChIJgUe1VRdsEg0R5W0e512gneQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "14:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 21 49 71",
+        "website": "https://www.catedraldesevilla.es/",
+        "isOutdoor": false,
+        "score": 20.1140324694626,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "gp-ChIJH1SaEAVsEg0RxNL-4W2upL0",
+        "name": "Metropol Parasol",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3932701,
+        "longitude": -5.9917478,
+        "rating": 4.4,
+        "reviewCount": 105036,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "23:45"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVbEdkF33fxik3X5KjWqfnVbwjAyctWhJHLnMVbDjo7IRWSi5hzKaZBR7uy5IUeXy5DzGmtxcwGT2J8b4UxL5c4ijj6GkgRexrINNFkLeTFqzcRCTiC_46aUcroBP6_UOpa-WkCYg5O1rXzXJL7IIop8KylgaahaJg9_W9kNrNBLJOTAHIDV7u7Gpu9yJqcPXYd-EGHtM9KqQpWpVrH26QWPk6H8lNvvxTTHlN0UcgrD1QTvmltRvX9i1FjntZi45B_BKHiyH2xzpJ8qo-ecFqSCqVJYZKtjLs_OW-aOtlsdpIY2HTQ0bxTwyqAfquneC2wCuI3G6xWSxlpkcO1ExrKSe8CMQWaRfGg2gCjXvYEZUZVNvXmyNkx5_jEi7lrXTd74OkCT2lguVXxI7JfUbx01_1uRR_48vQiYS8ZaQKDTaYDmiJ5RNHG5C64C-jub68QMQBNK7mW-ZQX3WkZQemF2oPID62SnserLoatcuX3453piG6OS8REvhFEX49uoUN0kcF0x9YCdnJdUKZFcuo653EBlDiGiWxlMOyxqcRALr7R2ds1SS0kahQmpAGykrkfjMJH&maxwidth=400",
+        "googlePlaceId": "ChIJH1SaEAVsEg0RxNL-4W2upL0",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "09:30",
+            "close": "23:45"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "23:45"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "23:45"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "23:45"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "23:45"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "23:45"
+          },
+          "saturday": {
+            "open": "09:30",
+            "close": "23:45"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 56 15 12",
+        "website": "https://www.setasdesevilla.com/",
+        "score": 19.84267634903023,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJZdsRrxZsEg0R5U_Sd56ZBHU",
+        "name": "Tour de l'Or",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3824569,
+        "longitude": -5.9962652,
+        "rating": 4.5,
+        "reviewCount": 53359,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWP_edTMIfUhgsBLtTlBknrUXmA7X3ZAJYcNdQHa89bz6VoJ5mlyvq-f_vcA7TbwelX44eYfn2GO2jGf9qVfx6blClZNLpMGIBGanI6SUjN5q7xXczqVaE_qZ8msYvbo9lih7xe8RpWkAP4f_yYtPfVdRQD-pr87F91SChVx4sdUFO_ol6KoiNg8UJgLo5EWNPKHGht36l0fZA1I73gtkKFiaUYtavZAVSgGGZMsXeDY71BarWpJeLmzbPkAffwy1y6S6Pp5FAtcWhoxe2EYdRQlSz2KDxcaVAJBaXx0fVpu_o-KkzRmrCp5-q7L8ZM3cnp6GSyW2b55Ghb7n9CpdvADXKiXy9c2fjJFC_FPLk2AV94giioLpXtNt-1srZFWA9LXtGiCrFQ5rCaP1qGIlMKBT2zPeqZxGQWNFjjLafxSfqj18raZvfT3ebM14GE4kqdv8IIsLQJwPR9860VMAmyTnyK84SfHGL5o0xHyV1NKe3EGdClRm3KKaB4puuqOyrKHuvU3RfGJb2i6EJCspP6LEUVXNWoUEUTGGBl1v4Mif-8BskwXfsKD7IP_FKIih8Jjewu&maxwidth=400",
+        "googlePlaceId": "ChIJZdsRrxZsEg0R5U_Sd56ZBHU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 22 24 19",
+        "website": "https://fundacionmuseonaval.com/museonavalsevilla.html",
+        "score": 19.454415363760333,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJd0hX2AdsEg0RXypeHJN3RMg",
+        "name": "Promenade d'Hercule",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3985785,
+        "longitude": -5.993890599999999,
+        "rating": 4.4,
+        "reviewCount": 21290,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVMzXHb3TGx9DlsgvcQWxhX_ycfVnfoGUmMWV_Ny8c6vNcmPZEBUp3c9ZcyH0Jjp4Wc-JB80zJoHywvjtB6b_zRwmh2z5Xp1yOU3w60UQE5KQpPa9BF5RGVLpsSXH2Q4fjrIg1EF7rP6VBmw5yYmGtQ_WLUbVpyJ1l8W1i7C89S4N7JiceDL-DpSDC1qDsWAqsgthIrzxFznqySnU6YDjR70H9l_rvt-Jrr1VuGq_0VEayOxDla1gkhwo7IK1qLVC10FknzUkIO3M_7UXi91MLzC6xz17gBxa9XSrumLagghs2MPo90wXgWMHRsbuFtF2n82Sawss1va2KNuX8gHf_A9cnWE1BwXEHLcqOKVcu4qlZBU_tIkX33SLvOX9dPMw_UIt1zODdR7wUrtPL4xwM-bFGxpal-Y1cT7WiobmgQkvd5al2b8dT_xuTHVYdnuKLfHtFAqCpGh-ekAFd6MOhQ6z_cM_MLcE8jqMH2h0ScKHbyGZGP125Viqg6IzwIxenPdCSl_Ct8WjOzD8ryFUvCH806oIa59LNJul52P2t-xCiFtrtNLEVe60uR5Ac91jPA2071Jl1GRg&maxwidth=400",
+        "googlePlaceId": "ChIJd0hX2AdsEg0RXypeHJN3RMg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.sevilla.org/servicios/medio-ambiente-parques-jardines/parques/paseos-arbolados/alameda-de-hercules",
+        "isOutdoor": true,
+        "score": 18.456351322876646,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ2WNhgiVsEg0RsUq_xImjRAA",
+        "name": "Aquarium de Séville",
+        "type": "zoo",
+        "description": "",
+        "latitude": 37.3707103,
+        "longitude": -5.9910478,
+        "rating": 4.5,
+        "reviewCount": 14752,
+        "duration": 180,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "10:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfXLvFaBEDOQ6NNJQVuW1YbH-qQdNLG3SFGq6r0geiHT1-yCUdhqE46teIsD_U2IKIjiFqomyxlziEa-jtPQPuDTA7ez5cDQ3vNDCeuuU_mCxcZpnIW38LvvBId-oNd4bjELSYm-rZv-Xp_zDa0cO-zaq8H3h34yPRQ03gr033mML57fZlrhAufy1IAf5j5UgakMTZc-L-ejI84npZlm0xOQVCBeBlK1-NGKe354_gNLFWBDOgS3Diy69v6LKgj2VNC59a6Oo4GwuqSOKzMSI5lZHK3jEpbQy7Oo6azlqSMrsgRNZcdATLdIMvdeif2ZSxFXzNpXyKNnWRTJGDIHT6K1cglXDQZ-fpFYKK3Jr29J3l6wPlr84UcD-nF8aUJ2RPCFKhwa3TKABRs3c7CqYOjPlhlgusDKyuJ0LNEvr6d57mYHgyhTkFFoKVZiqlogw7LJt8tW-s-Nfldw3Mc3biE4rmzKyd-QyxleZ1whsYc24LW4QBWUT69ewCoxHaBR0YXry4_XYXA8zkm7j2YJzhTHilnAw8mEZA7v8fsU4sPfb5j1yiNTUMHT7JWvfqb8UrX3tIuP&maxwidth=400",
+        "googlePlaceId": "ChIJ2WNhgiVsEg0RsUq_xImjRAA",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:00",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "10:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "10:00",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "955 44 15 41",
+        "website": "http://www.acuariosevilla.es/",
+        "isOutdoor": true,
+        "score": 16.33770180741911,
+        "source": "google_places"
+      }
+    ],
+    "alternativeActivities": [
+      {
+        "id": "gp-ChIJD7G2bqduEg0ROdrTdOj1Jok",
+        "name": "Plaza de España",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3771957,
+        "longitude": -5.986892999999999,
+        "rating": 4.8,
+        "reviewCount": 180497,
+        "duration": 30,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "00:00"
+        },
+        "mustSee": true,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWrXJ6W8NsnaovTCd6fbT11PKZ8ke-G9mYIuGA5JSGIEpU85_VLOLE_T5HX4h41bSkmE7Hvk2jo-VM1Rpf1h0H_lWM_MCViffoAr1qIg_ZXHutggvryX06OCWji68AmplTdgtMqvHnkou9tA03glFMf_2R0GlN_GF7JUduqjjUI-6ygcOF50oruXITlEelCS_X1VCjv8JfQgXhnFX08GIEcNpO5_cR6B3BBP_NcpOGT17woRqaf4v36VPBg1RUfGD1UrNgmaucILrZW1_timoLmlTTgChBgiYBv0Mres1FIHcKa-q_zeK67Z1KX4_BPHamK7_kX0JR4KbArtK0s4Bt6gU7jWwpAKUFq8UvBuEGSMuglPR_T1uqs2D7oSEHAGni5E0P03CKw0eP6NPyW8oesGzb0Xo4dLDwOvuEbTCRqPlcYzduS0ZmryUquVFRmBxslP8IcY6C0HeQggZMStNw-AHO6UfiPZZ97nVkZrCx_S-2iI9XcrmIwAV8AAueR3Zn5W18AtFjFjDIJjrjcazaw5j4aRXjeo1AA9RtwdluewE9_Ww4cDeNODefkqz-P_IUFB-Wx&maxwidth=400",
+        "googlePlaceId": "ChIJD7G2bqduEg0ROdrTdOj1Jok",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.andalucia.org/es/sevilla-visitas-plaza-de-espana",
+        "isOutdoor": true,
+        "score": 122.1129399759817,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJ7zUaHSRsEg0RQugeffDytmg",
+        "name": "Parc de María Luisa",
+        "type": "park",
+        "description": "",
+        "latitude": 37.3741832,
+        "longitude": -5.9872231,
+        "rating": 4.8,
+        "reviewCount": 41148,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "00:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUDbJpVgwumYkB3DuIvYMjEYbtwQJsv9tkVYgEfD9apaPTkL6RK8Fdv6G_HIvv6Px3NFV8OrbYElSUmHZPpmJxw0UhtwCF_s8WdMwrIx3N24Zc4lyPENoKVQDG8xeuVcpNOunR2M9hB9APshlgPrEyDh3qasM3--BUo-eFR0T1tZwYDxtExsbwg222lYXqFei4C3_8J2USP_nMxl4UnUxeaIx8EQHsV_nLoDP8n2Ta8YH4Zgr1I8qPzm5CNJTgIlLQuuxF6JZcjOEuEGN2381A2Cz1peyPD-9OpiXtoQsUEMSmHT0dgMYLpB2dFWaUOMKwd3X-Z6HtMPtFepQMLRtgM6RaOjNKWwjqwmD_qhH6zYev5jxxpWKoKh9BK7VTftKF752iWw9AoZfY_ajKjn93zI5k6EJQ26g1u7aFFdDznJn3VjYgHCJnduZVO_7Pbga8W_aSD9yfMcu2oJQerT73d1bTiY66b7IKEQsYCEeUyKqvuaqY-x6y7qwzZUSfvDuU2g9NjQWqJE0s7vHRgm1xf74hRhlP8rrmJExsbw-EYPjZA2_Ufn74wqMe33-j35_ZJv-MPP9LIxA&maxwidth=400",
+        "googlePlaceId": "ChIJ7zUaHSRsEg0RQugeffDytmg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "00:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "00:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "955 47 32 32",
+        "website": "https://www.sevilla.org/servicios/medio-ambiente-parques-jardines/parques/parques-y-jardines-historicos/parque-de-maria-luisa",
+        "isOutdoor": true,
+        "score": 23.828697462325138,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJVWsZPR9sEg0RnlPI0ibW8JQ",
+        "name": "Murillo Gardens",
+        "type": "park",
+        "description": "",
+        "latitude": 37.3833518,
+        "longitude": -5.987810100000001,
+        "rating": 4.6,
+        "reviewCount": 6325,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "08:00",
+          "close": "22:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfUj7wCHJrjRa5iDzeR41GCd5T0sBk89GEx06ssTkUFCy2GfXVNMdXfRaXO-hIXvdZlGxeyqF5ip1HgRYAQdBN16b1FG4j-Mf_D-02jE6iAEE8BOluB0L7TRh8dDISX4ezST13wws5ntClJLEmaoP7Oh5oIQmUPkbX6lL8yJr05zTsAmrgKNBDtdCXvRZPmALqqWpQRHi_ncv1yS-2MLY9OsqpHEN_GcM1DzUXLFGU__vq7e9Zfu3IfHJL8HG3c537eH3YaF5QJmuenLrPe0zipAzA9ADnXZr2gu7TcSXnGwlKLMmU_wGSr9czMu0KQQ9fmfFeSvO0XLYE_ccSsyM3688QNBqogTff3aol4Fz1bht1P_ZgAbeFaPwK0mjkZkcRE8VY0UTqiBI16adZg0cELfkplXE8Q8bTwhdjD19ndO-TSbMPbR9u508XsvD73v4t3IbtItF8qapR4-Jt1GLiSNu6pXheqSIIVjlvFa7-_v9g_LfbqNyZ7EFezgadji8U42vPBM0hgdd8ZP7wQSra-E1Tha38LrrjUkBtG4jmffBMCirCo-PUatV0627iOHD8ZVlv_NCRMHSg&maxwidth=400",
+        "googlePlaceId": "ChIJVWsZPR9sEg0RnlPI0ibW8JQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "monday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "tuesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "wednesday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "thursday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "friday": {
+            "open": "08:00",
+            "close": "22:00"
+          },
+          "saturday": {
+            "open": "08:00",
+            "close": "22:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://tic.visitasevilla.es/vsev/Web_php/index.php?contenido=fichaPoi_coconut&idPoi=242&idNivel=0&mode=folder&order=asc&title=jardines-de-murillo",
+        "isOutdoor": true,
+        "score": 21.80212105969571,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJgUe1VRdsEg0R5W0e512gneQ",
+        "name": "Cathédrale Notre-Dame du Siège de Séville",
+        "type": "religious",
+        "description": "",
+        "latitude": 37.3858247,
+        "longitude": -5.9931068,
+        "rating": 4.8,
+        "reviewCount": 57150,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "11:00",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWlLBCHCsZx4ZHINN61tC8O8BJZFaIa2kjjubzWQRdeHglr7a7WJWrk193R6hM32aXQHHcRLTva275fa43RCxV_rShBdYUmET_QhVigVECn5MLxJCngncZ8R4q0umh4GbQGrPJkJRQzkFCF-1Z9TJJkHaYhZBTEUKeIatT9BrU1gbTiGRjKxnURBkQRZPHHKRIXcw3PPdrFTz5y93zL9QbOJZAnFwtmAulxHgFCJU2VoDfc5Vj-mRG0-Ni1Yg-1lfV7iRLHUVlcHfAveRiNubkHo15Eg403jkPBRbWgcQYrRLfSmdvd63mqyWMcWv6ey94mVPYgUEfw_iY-c5KMG6I9gmrzcEk6yVuPR4yD4pVQplUtyXwp2uyna0s2pANkX6YE7c0XPy5L3FjEWy3po4s0JJ4Pojn8GWNrCT7kqaC3cIWttfNwww9lgwiNIiAagNcFsxViKLvXDtbQoCNE82D576awEnoiyAP7GYOOB_DIgp2Lxn-M8T-wSyFx-NGp2Vcw2aDl_SPeitB02GII4wpcfVVKgsuyGbomJnc_BjCAV4ySmlaK0HfRILw6Gfo8WCS90_0w&maxwidth=400",
+        "googlePlaceId": "ChIJgUe1VRdsEg0R5W0e512gneQ",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "14:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "tuesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "wednesday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "thursday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "friday": {
+            "open": "11:00",
+            "close": "18:00"
+          },
+          "saturday": {
+            "open": "11:00",
+            "close": "18:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 21 49 71",
+        "website": "https://www.catedraldesevilla.es/",
+        "isOutdoor": false,
+        "score": 20.1140324694626,
+        "source": "google_places",
+        "bookingUrl": "https://www.viator.com/searchResults/all?text=Notre%20Dame%20Paris%20Island%20Walking%20Tour"
+      },
+      {
+        "id": "gp-ChIJZdsRrxZsEg0R5U_Sd56ZBHU",
+        "name": "Tour de l'Or",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3824569,
+        "longitude": -5.9962652,
+        "rating": 4.5,
+        "reviewCount": 53359,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "09:30",
+          "close": "19:00"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfWP_edTMIfUhgsBLtTlBknrUXmA7X3ZAJYcNdQHa89bz6VoJ5mlyvq-f_vcA7TbwelX44eYfn2GO2jGf9qVfx6blClZNLpMGIBGanI6SUjN5q7xXczqVaE_qZ8msYvbo9lih7xe8RpWkAP4f_yYtPfVdRQD-pr87F91SChVx4sdUFO_ol6KoiNg8UJgLo5EWNPKHGht36l0fZA1I73gtkKFiaUYtavZAVSgGGZMsXeDY71BarWpJeLmzbPkAffwy1y6S6Pp5FAtcWhoxe2EYdRQlSz2KDxcaVAJBaXx0fVpu_o-KkzRmrCp5-q7L8ZM3cnp6GSyW2b55Ghb7n9CpdvADXKiXy9c2fjJFC_FPLk2AV94giioLpXtNt-1srZFWA9LXtGiCrFQ5rCaP1qGIlMKBT2zPeqZxGQWNFjjLafxSfqj18raZvfT3ebM14GE4kqdv8IIsLQJwPR9860VMAmyTnyK84SfHGL5o0xHyV1NKe3EGdClRm3KKaB4puuqOyrKHuvU3RfGJb2i6EJCspP6LEUVXNWoUEUTGGBl1v4Mif-8BskwXfsKD7IP_FKIih8Jjewu&maxwidth=400",
+        "googlePlaceId": "ChIJZdsRrxZsEg0R5U_Sd56ZBHU",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "10:30",
+            "close": "19:00"
+          },
+          "monday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "tuesday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "wednesday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "thursday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "friday": {
+            "open": "09:30",
+            "close": "19:00"
+          },
+          "saturday": {
+            "open": "10:30",
+            "close": "19:00"
+          }
+        },
+        "businessStatus": "OPERATIONAL",
+        "phone": "954 22 24 19",
+        "website": "https://fundacionmuseonaval.com/museonavalsevilla.html",
+        "score": 19.454415363760333,
+        "source": "google_places"
+      },
+      {
+        "id": "gp-ChIJd0hX2AdsEg0RXypeHJN3RMg",
+        "name": "Promenade d'Hercule",
+        "type": "attraction",
+        "description": "",
+        "latitude": 37.3985785,
+        "longitude": -5.993890599999999,
+        "rating": 4.4,
+        "reviewCount": 21290,
+        "duration": 60,
+        "estimatedCost": 0,
+        "openingHours": {
+          "open": "00:00",
+          "close": "23:59"
+        },
+        "mustSee": false,
+        "bookingRequired": false,
+        "dataReliability": "verified",
+        "imageUrl": "/api/place-photo?photo_reference=ATCDNfVMzXHb3TGx9DlsgvcQWxhX_ycfVnfoGUmMWV_Ny8c6vNcmPZEBUp3c9ZcyH0Jjp4Wc-JB80zJoHywvjtB6b_zRwmh2z5Xp1yOU3w60UQE5KQpPa9BF5RGVLpsSXH2Q4fjrIg1EF7rP6VBmw5yYmGtQ_WLUbVpyJ1l8W1i7C89S4N7JiceDL-DpSDC1qDsWAqsgthIrzxFznqySnU6YDjR70H9l_rvt-Jrr1VuGq_0VEayOxDla1gkhwo7IK1qLVC10FknzUkIO3M_7UXi91MLzC6xz17gBxa9XSrumLagghs2MPo90wXgWMHRsbuFtF2n82Sawss1va2KNuX8gHf_A9cnWE1BwXEHLcqOKVcu4qlZBU_tIkX33SLvOX9dPMw_UIt1zODdR7wUrtPL4xwM-bFGxpal-Y1cT7WiobmgQkvd5al2b8dT_xuTHVYdnuKLfHtFAqCpGh-ekAFd6MOhQ6z_cM_MLcE8jqMH2h0ScKHbyGZGP125Viqg6IzwIxenPdCSl_Ct8WjOzD8ryFUvCH806oIa59LNJul52P2t-xCiFtrtNLEVe60uR5Ac91jPA2071Jl1GRg&maxwidth=400",
+        "googlePlaceId": "ChIJd0hX2AdsEg0RXypeHJN3RMg",
+        "openingHoursByDay": {
+          "sunday": {
+            "open": "00:00",
+            "close": "23:59"
+          },
+          "monday": null,
+          "tuesday": null,
+          "wednesday": null,
+          "thursday": null,
+          "friday": null,
+          "saturday": null
+        },
+        "businessStatus": "OPERATIONAL",
+        "website": "https://www.sevilla.org/servicios/medio-ambiente-parques-jardines/parques/paseos-arbolados/alameda-de-hercules",
+        "isOutdoor": true,
+        "score": 18.456351322876646,
+        "source": "google_places"
+      }
+    ],
+    "apiUsage": {
+      "serpApi": {
+        "totalRequests": 11,
+        "byEngine": {
+          "google_maps": 6,
+          "google_local": 2,
+          "google_flights": 2,
+          "google_hotels": 1
+        }
+      }
+    }
+  },
+  "logs": [
+    "\n======================================================================",
+    "🚀 Génération: geo-direct-06",
+    "   Nice → Séville (4j)",
+    "   solo (1p) | luxury | wellness, culture",
+    "======================================================================\n",
+    "[Pipeline V2] === Step 1: Fetching data... ===",
+    "[Pipeline V2] Phase 0: Coords resolved in 0ms",
+    "[SerpAPI Places] Requête: q=\"meilleur restaurant\", location=\"Séville\", ll=\"@37.3891,-5.9845,14z\", gl=\"us\"",
+    "[Weather] 4 days fetched for 2026-03-29 → 2026-04-01",
+    "[Google Places] ✅ 19 attractions found for Séville",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Overpass] Excluded \"Giralda\" by Wikidata description: \"bâtiment de la province de Séville, en Espagne\"",
+    "[Hotels] Disponibilité live: 7/15 hôtels confirmés",
+    "[Google Places Details] ✅ 19/19 attractions enriched with real hours (575ms)",
+    "[Pipeline V2] Injected 3 curated must-see attractions for \"Séville\" from local database",
+    "[Pipeline V2]   → Real Alcázar de Séville, Cathédrale de Séville & Giralda, Plaza de España",
+    "[Flights] Airport search scope: full (1 airport pairs)",
+    "[Pipeline V2] Flights found in 7409ms",
+    "[Pipeline V2] Step 1: All data fetched in 27605ms",
+    "[Pipeline V2]   Activities: 19 Google + 22 SerpAPI + 2 Overpass + 0 Viator",
+    "[Pipeline V2]   Restaurants: 30 TA + 20 SerpAPI",
+    "[Pipeline V2]   Hotels: 7 | Transport options: 3",
+    "[Pipeline V2] Step 1 done in 27605ms",
+    "[Pipeline V2] === Step 2: Scoring activities... ===",
+    "[Pipeline V2] Activity ranking (top 20):",
+    "[Pipeline V2]   #1 [122.1] ⭐ \"Plaza de España\" (src=google_places, reviews=180497, rating=4.8, tags=romantic,relaxing)",
+    "[Pipeline V2]   #2 [120.4] ⭐ \"Alcazar de Séville\" (src=google_places, reviews=97705, rating=4.7, tags=none)",
+    "[Pipeline V2]   #3 [119.9] ⭐ \"Giralda\" (src=google_places, reviews=55517, rating=4.7, tags=none)",
+    "[Pipeline V2]   #4 [26.8]    \"Musée des beaux-arts de Séville\" (src=google_places, reviews=15907, rating=4.7, tags=deep_culture)",
+    "[Pipeline V2]   #5 [26.1]    \"Casa de Pilatos\" (src=google_places, reviews=13675, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #6 [25.9]    \"Palacio de las Dueñas - Casa de Alba\" (src=google_places, reviews=10645, rating=4.4, tags=deep_culture)",
+    "[Pipeline V2]   #7 [24.9]    \"Palace of the Countess of Lebrija\" (src=google_places, reviews=2698, rating=4.5, tags=deep_culture)",
+    "[Pipeline V2]   #8 [24.1]    \"Antiquarium\" (src=google_places, reviews=1850, rating=4.3, tags=deep_culture)",
+    "[Pipeline V2]   #9 [23.8]    \"Parc de María Luisa\" (src=google_places, reviews=41148, rating=4.8, tags=relaxing)",
+    "[Pipeline V2]   #10 [21.8]    \"Murillo Gardens\" (src=google_places, reviews=6325, rating=4.6, tags=relaxing)",
+    "[Pipeline V2]   #11 [20.7]    \"Isla Mágica\" (src=google_places, reviews=32785, rating=4.1, tags=relaxing)",
+    "[Pipeline V2]   #12 [20.1]    \"Cathédrale Notre-Dame du Siège de Séville\" (src=google_places, reviews=57150, rating=4.8, tags=none)",
+    "[Pipeline V2]   #13 [19.8]    \"Metropol Parasol\" (src=google_places, reviews=105036, rating=4.4, tags=none)",
+    "[Pipeline V2]   #14 [19.5]    \"Tour de l'Or\" (src=google_places, reviews=53359, rating=4.5, tags=none)",
+    "[Pipeline V2]   #15 [18.5]    \"Promenade d'Hercule\" (src=google_places, reviews=21290, rating=4.4, tags=none)",
+    "[Pipeline V2]   #16 [16.3]    \"Aquarium de Séville\" (src=google_places, reviews=14752, rating=4.5, tags=kid_friendly)",
+    "[Pipeline V2]   #17 [16.3]    \"Patio de Banderas\" (src=google_places, reviews=1459, rating=4.5, tags=none)",
+    "[Pipeline V2]   #18 [15.6]    \"B A L C R I S Gallery\" (src=serpapi, reviews=0, rating=4.8, tags=deep_culture)",
+    "[Pipeline V2]   #19 [15.6]    \"Maison de la science\" (src=serpapi, reviews=0, rating=4.3, tags=romantic,deep_culture,relaxing)",
+    "[Pipeline V2]   #20 [13.2]    \"Letras \"I Love Sevilla\"\" (src=google_places, reviews=30, rating=4.6, tags=none)",
+    "[Pipeline V2] Step 2: filtered low-interest non-must-sees 4/26",
+    "[Pipeline V2] Step 2: 16 activities selected (3 must-sees) from 43 total",
+    "[Pipeline V2] Must-sees: \"Plaza de España\" (122.1), \"Alcazar de Séville\" (120.4), \"Giralda\" (119.9)",
+    "[Pipeline V2] Using user-preferred transport: plane (389min, €132)",
+    "[Pipeline V2] === Step 3: Clustering... ===",
+    "[Pipeline V2] City density profile: category=dense, p75=1.78km, median=1.16km, maxClusterRadius=0.50km",
+    "[Pipeline V2] Radius-constrained clustering produced 5 clusters (target 4), running soft pass with 0.75km",
+    "[Pipeline V2] Clusters reordered by proximity: Day 1: centroid (37.3842, -5.9920), Day 2: centroid (37.3936, -5.9926), Day 3: centroid (37.4057, -5.9995), Day 4: centroid (37.3740, -5.9884)",
+    "[Pipeline V2] Cluster Day 1: 5 activities, radius=0.42km, intraDistance=1.27km",
+    "[Pipeline V2] Cluster Day 2: 7 activities, radius=0.67km, intraDistance=3.32km",
+    "[Pipeline V2] Cluster Day 3: 1 activities, radius=0.00km, intraDistance=0.00km",
+    "[Pipeline V2] Cluster Day 4: 3 activities, radius=0.44km, intraDistance=0.85km",
+    "[Pipeline V2] Phase 8c: reordered middle days by city-zone angle",
+    "[Pipeline V2] Rebalanced clusters: Day 1: 5 activities [2 must-sees] (5.7h avail, max 3), Day 2: 1 activities [0 must-sees] (12.0h avail, max 4), Day 3: 7 activities [0 must-sees] (12.0h avail, max 6), Day 4: 3 activities [1 must-sees] (5.9h avail, max 2)",
+    "[Pipeline V2] Must-sees after rebalancing: \"Alcazar de Séville\" (score=120.4), \"Giralda\" (score=119.9), \"Plaza de España\" (score=122.1)",
+    "[Pipeline V2]   Day 1: Alcazar de Séville, Giralda",
+    "[Pipeline V2]   Day 4: Plaza de España",
+    "[Pipeline V2] Step 3: 4 clusters created",
+    "[Pipeline V2]   Day 1: Alcazar de Séville, Murillo Gardens, Giralda, Cathédrale Notre-Dame du Siège de Séville, Tour de l'Or (1.3km intra)",
+    "[Pipeline V2]   Day 2: Isla Mágica (0.0km intra)",
+    "[Pipeline V2]   Day 3: Musée des beaux-arts de Séville, Palace of the Countess of Lebrija, Antiquarium, Metropol Parasol, Casa de Pilatos, Palacio de las Dueñas - Casa de Alba, Promenade d'Hercule (2.5km intra)",
+    "[Pipeline V2]   Day 4: Plaza de España, Parc de María Luisa, Aquarium de Séville (0.8km intra)",
+    "[Pipeline V2] === Step 5: Selecting hotel... ===",
+    "[Pipeline V2] Step 5: Hotel selected: \"Virgen de los Reyes\" (11.09 score, 2.06km center, 2.56km boundary avg, profile=dense_urban)",
+    "[Pipeline V2] === Step 4: Assigning restaurants... ===",
+    "[Pipeline V2] Restaurants pool: total=48, budgetFiltered=48, geo=20",
+    "[Pipeline V2] Step 4 retry prefetch: missing meals=4, targets=1",
+    "[SerpAPI Places] Requête: q=\"breakfast brunch café bakery\", location=\"Séville\", ll=\"@37.3876345488867,-5.96869558095932,14z\", gl=\"us\"",
+    "[SerpAPI Places] 20 résultats local_results",
+    "[Pipeline V2] Restaurants pool: total=68, budgetFiltered=68, geo=40",
+    "[Pipeline V2] Step 4 retry: targeted API fetched=20, missing meals 4 -> 6",
+    "[Pipeline V2] Step 4: 6/12 meals assigned restaurants (pool=40)",
+    "[Pipeline V2] === Step 6: Claude AI balancing... ===",
+    "[Pipeline V2] Using Claude for day balancing",
+    "[Pipeline V2] Theme mismatch fixed for day 1: \"Arrivée et découverte historique\" → \"Alcazar de Séville et Murillo Gardens\"",
+    "[Pipeline V2] Theme mismatch fixed for day 2: \"Plaza de España et parcs\" → \"Isla Mágica\"",
+    "[Pipeline V2] Theme mismatch fixed for day 4: \"Dernières découvertes avant départ\" → \"Plaza de España et Parc de María Luisa\"",
+    "[Pipeline V2] Step 6 done in 11468ms — \"Progression logique du général au spécifique, avec adaptation météorologique et charge équilibrée entre les jours.\"",
+    "[Pipeline V2] Weather permutation: no swaps needed",
+    "[Pipeline V2] === Step 7: Assembling schedule... ===",
+    "[Pipeline V2] Wikipedia: 16/16 descriptions enriched",
+    "[Pipeline V2] Prefetching directions for 20 pairs...",
+    "[Pipeline V2] Directions cache: 20/20 pairs fetched",
+    "[Pipeline V2] Day 3 re-optimized with real times: Casa de Pilatos → Palacio de las Dueñas - Casa de Alba → Antiquarium → Metropol Parasol → Palace of the Countess of Lebrija → Promenade d'Hercule → Musée des beaux-arts de Séville",
+    "[Pipeline V2] 2-opt re-optimization: 1/4 days changed with real times",
+    "[Pipeline V2] Day 1: 5 activities to schedule (2 must-sees), dayStart=15:50, dayEnd=22:00, window=6.2h, cursor=15:50",
+    "[Pipeline V2]   → \"Murillo Gardens\" (60min, score=21.8, mustSee=false)",
+    "[Pipeline V2]   → \"Alcazar de Séville\" (60min, score=120.4, mustSee=true)",
+    "[Pipeline V2]   → \"Giralda\" (60min, score=119.9, mustSee=true)",
+    "[Pipeline V2]   → \"Cathédrale Notre-Dame du Siège de Séville\" (60min, score=20.1, mustSee=false)",
+    "[Pipeline V2]   → \"Tour de l'Or\" (60min, score=19.5, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 lunch: \"PANYPIU\" (0.8km) → \"Al Wadi\" (0.6km)",
+    "[Pipeline V2] Restaurant re-opt (alt) day 1 dinner: \"Al Wadi\" (0.9km) → \"El Pasaje Santa María la Blanca\" (0.4km)",
+    "[Pipeline V2] Day 1: Must-see \"Giralda\" rejected at 60min, retrying with 30min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 1: Evicted \"Murillo Gardens\" (score=21.80212105969571, slot=17:00-18:00) to make room for must-see \"Giralda\"",
+    "[Pipeline V2] Day 2: 1 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Isla Mágica\" (60min, score=20.7, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 breakfast, searching pool + API near \"Virgen de los Reyes\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 breakfast: found \"ANANÁS Coffee & Brunch\" (0.86km from Virgen de los Reyes)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 lunch, searching pool + API near \"Isla Mágica\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 lunch: found \"Marabunda Sevilla Restaurante tapas Bar\" (1.15km from Isla Mágica)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 2 dinner, searching pool + API near \"Isla Mágica\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 2 dinner: found \"Catalina Casa de Comidas\" (0.60km from Isla Mágica)",
+    "[Pipeline V2] Day 2: Lunch inserted via findBestMealSlot at 12:00-13:00",
+    "[Pipeline V2] Day 3: 7 activities to schedule (0 must-sees), dayStart=08:00, dayEnd=22:00, window=14.0h, cursor=08:00",
+    "[Pipeline V2]   → \"Casa de Pilatos\" (120min, score=26.1, mustSee=false)",
+    "[Pipeline V2]   → \"Palacio de las Dueñas - Casa de Alba\" (120min, score=25.9, mustSee=false)",
+    "[Pipeline V2]   → \"Antiquarium\" (120min, score=24.1, mustSee=false)",
+    "[Pipeline V2]   → \"Metropol Parasol\" (60min, score=19.8, mustSee=false)",
+    "[Pipeline V2]   → \"Palace of the Countess of Lebrija\" (120min, score=24.9, mustSee=false)",
+    "[Pipeline V2]   → \"Promenade d'Hercule\" (60min, score=18.5, mustSee=false)",
+    "[Pipeline V2]   → \"Musée des beaux-arts de Séville\" (120min, score=26.8, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 3 breakfast, searching pool + API near \"Virgen de los Reyes\"...",
+    "[Pipeline V2] Restaurant re-opt (alt) day 3 lunch: \"Bar Ajo&Agua\" (0.4km) → \"Restaurante Alfalfa 8\" (0.4km)",
+    "[Pipeline V2] Day 3: Skipping \"Promenade d'Hercule\" — closed on tuesday",
+    "[Pipeline V2] Day 4: 3 activities to schedule (1 must-sees), dayStart=08:00, dayEnd=13:55, window=5.9h, cursor=08:15",
+    "[Pipeline V2]   → \"Plaza de España\" (30min, score=122.1, mustSee=true)",
+    "[Pipeline V2]   → \"Parc de María Luisa\" (60min, score=23.8, mustSee=false)",
+    "[Pipeline V2]   → \"Aquarium de Séville\" (180min, score=16.3, mustSee=false)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 4 breakfast, searching pool + API near \"Virgen de los Reyes\"...",
+    "[Pipeline V2] Restaurant re-opt (pool) day 4 lunch: \"El Pasaje Santa María la Blanca\" (1.1km) → \"Cristina Bistró\" (0.7km)",
+    "[Pipeline V2] Restaurant re-opt: no restaurant assigned for day 4 dinner, searching pool + API near \"Aquarium de Séville\"...",
+    "[Pipeline V2] Restaurant re-opt (rescue) day 4 dinner: found \"La Tizná\" (0.46km from Aquarium de Séville)",
+    "[Pipeline V2] Day 4: Must-see \"Plaza de España\" rejected at 30min, retrying with 30min (min=30min, factor=0.5)",
+    "[Pipeline V2] Day 4: Must-see \"Plaza de España\" RETRY 3 — extending day end to 15:00 (was 13:00)",
+    "[Pipeline V2] Day 4: Lunch inserted via findBestMealSlot at 13:00-14:00",
+    "[Pipeline V2] 📸 Enriching 19 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 19/19 enriched with Google Places photos",
+    "[Pipeline V2] Post-schedule re-opt: Day 2 \"Petit-déjeuner — ANANÁS Coffee & Brunch\" (2.9km from neighbor) → \"Cafe Otto\" (1.2km from ref)",
+    "[Pipeline V2] Post-schedule re-opt: Day 2 \"Dîner — Catalina Casa de Comidas\" (1.8km from neighbor) → \"La Cayetana | Restaurante Sevilla\" (1.4km from ref)",
+    "[Pipeline V2] Post-schedule re-opt: Day 3 \"Petit-déjeuner — Virgen de los Reyes\" (1.7km from neighbor) → \"PANYPIU\" (0.2km from ref)",
+    "[Pipeline V2] Section 13c: Refilled alternatives for 5 restaurant(s) (0 API calls)",
+    "[Pipeline V2] 📸 Enriching 9 restaurants with Google Places photos...",
+    "[Pipeline V2] ✅ Restaurant photos: 9/9 enriched with Google Places photos",
+    "[Pipeline V2] Section 13d: Opening hours validated 10 activities — 0 conflicts, 0 swaps, 0 unresolved",
+    "[Pipeline V2] Section 13f: compressed 1 large intra-day gap segment(s)",
+    "[Pipeline V2] Section 13g: restaurant outliers fixed=4, fallback-flagged=0",
+    "[Pipeline V2] Step 7: 6 alternatives, pool trimmed to 16/16",
+    "[Pipeline V2] === Step 8: Quality validation... ===",
+    "[Pipeline V2] Step 8 Quality Gate: Score 74/100",
+    "  ⚠️ Day 2: Restaurant \"Petit-déjeuner — Voilá Café & Brunch\" is 3.3km from nearest activity",
+    "  ⚠️ Day 2: zigzag route detected (2 turnbacks)",
+    "  ⚠️ Day 3: zigzag route detected (4 turnbacks)",
+    "  ⚠️ Day 3: 4 long activities scheduled (fatigue risk)",
+    "  ⚠️ Day 3: day load is high (843min planned incl. travel)",
+    "  ⚠️ Hotel \"Check-in Virgen de los Reyes\" is 2.1km from activities centroid (cap=1.9km, profile=urban_standard)",
+    "  🔧 Day 1: Fixed activity count in narrative (5 → 2)",
+    "  🔧 Day 4: Fixed activity count in narrative (3 → 1)",
+    "  🔧 Day 4: Regenerated theme (no match): \"Plaza de España et Parc de María Luisa\" → \"Aquarium de Séville\"",
+    "[Pipeline V2] Step 8: Quality score 74/100 (6 warnings, 3 auto-fixes)",
+    "[Pipeline V2] SerpAPI usage: 11 request(s) this generation",
+    "[Pipeline V2] ✅ Trip generated in 60894ms (60.9s)",
+    "[Pipeline V2]   4 days, 24 items total"
+  ],
+  "warnings": [
+    "[Viator] Search failed: 400",
+    "[Pipeline V2] Directions prefetch timeout (15s) — using partial cache",
+    "[Gemini] Toll: pas de JSON trouvé",
+    "[Pipeline V2] ⚠️ Restaurant photo enrichment timeout (10s) — continuing",
+    "[Hotels] Check-in 12:00 invalide (avant 14h), corrigé à 14:00",
+    "[Hotels] Check-in 13:00 invalide (avant 14h), corrigé à 14:00",
+    "[Pipeline V2] ⚠️ Directions enrichment timeout (20s) — continuing",
+    "[SerpAPI] Vols filtrés NCE→SVQ 2026-03-29: escale_nuit=1 (Aéroport international de Barcelone-El Prat×1), escale_longue=2 (Aéroport international de Zurich×1, Aéroport de Londres Gatwick×1)",
+    "[SerpAPI] Vols filtrés SVQ→NCE 2026-04-01: escale_nuit=2 (Aéroport international de Barcelone-El Prat×1, Aéropuerto Adolfo-Suárez de Madrid-Barajas×1), escale_longue=5 (Aéroport international de Barcelone-El Prat×4, Aéroport international d'Athènes Elefthérios-Venizélos×1)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Cathédrale Notre-Dame du Siège de Séville\" (duration=60min, travel=5min, cursor=18:00, dayEnd=22:00)",
+    "[Pipeline V2] Day 1: REJECTED activity \"Tour de l'Or\" (duration=60min, travel=10min, cursor=18:00, dayEnd=22:00)",
+    "[Scheduler] Conflict: \"Petit-déjeuner à l'hôtel\" overlaps with \"Check-out Virgen de los Reyes\"",
+    "[Pipeline V2] Day 4: REJECTED activity \"Plaza de España\" (duration=30min, travel=25min, cursor=08:15, dayEnd=13:00) ⚠️ MUST-SEE LOST",
+    "[Pipeline V2] Day 4: REJECTED activity \"Parc de María Luisa\" (duration=60min, travel=25min, cursor=08:15, dayEnd=13:00)",
+    "[Scheduler] Conflict: \"Trajet vers SVQ + check-in\" overlaps with \"Déjeuner — Cristina Bistró\"",
+    "[Pipeline V2] ⚠️ Restaurant photo enrichment timeout (10s) — continuing"
+  ],
+  "errors": [
+    "[Pipeline V2] ⚠️ MUST-SEES MISSING FROM SCHEDULE: \"Plaza de España\"",
+    "[Pipeline V2]   Day 1: Giralda, Alcazar de Séville",
+    "[Pipeline V2]   Day 2: Isla Mágica",
+    "[Pipeline V2]   Day 3: Casa de Pilatos, Palacio de las Dueñas - Casa de Alba, Antiquarium, Metropol Parasol, Palace of the Countess of Lebrija, Musée des beaux-arts de Séville",
+    "[Pipeline V2]   Day 4: Aquarium de Séville"
+  ],
+  "durationMs": 60894,
+  "generatedAt": "2026-02-17T13:11:47.753Z",
+  "success": true,
+  "runType": "direct"
+}

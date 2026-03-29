@@ -1,0 +1,231 @@
+{
+  "tripId": "02998820-8700-48ea-9ae3-4332cf1a4852",
+  "scenarioId": "1day-express",
+  "generatedAt": "2026-02-14T22:26:56.554Z",
+  "destination": "Barcelone",
+  "summary": {
+    "totalIssues": 6,
+    "critical": 3,
+    "warning": 1,
+    "info": 2,
+    "score": 96,
+    "weightedScore": 96
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 89,
+      "critical": 1,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 2,
+      "weightedPenalty": 10.7
+    },
+    "geography": {
+      "score": 90,
+      "critical": 1,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 10
+    },
+    "budget": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 90,
+      "critical": 1,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 10
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "geography:Jour 1: \"Vol TO 4756\" a des coordonnées (0, 0) — non géocodé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Vol TO 4756\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "relevance:Must-see manquants (0/1): sagrada familia",
+      "category": "relevance",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Must-see manquants (0/1): sagrada familia"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: \"Check-in 13. Grand Hotel Central\" (fin 20:10) chevauche \"Dépa",
+      "category": "schedule",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Check-in 13. Grand Hotel Central\" (fin 20:10) chevauche \"Départ de l'hôtel\" (début 20:00)"
+      ]
+    },
+    {
+      "key": "budget:Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit",
+      "category": "budget",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:0",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:00) et \"Vol TO 4756\" (début 17:00)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "critical",
+        "category": "schedule",
+        "message": "Jour 1: \"Check-in 13. Grand Hotel Central\" (fin 20:10) chevauche \"Départ de l'hôtel\" (début 20:00)",
+        "dayNumber": 1,
+        "itemTitle": "Check-in 13. Grand Hotel Central",
+        "details": {
+          "currentEnd": "20:10",
+          "nextStart": "20:00",
+          "overlapMinutes": 10
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 1: 6h de vide entre \"Check-out 13. Grand Hotel Central\" (fin 11:00) et \"Vol TO 4756\" (début 17:00)",
+        "dayNumber": 1,
+        "details": {
+          "gapMinutes": 360
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 1: \"Vol TO 4756\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 1,
+        "itemTitle": "Vol TO 4756"
+      }
+    ],
+    "budget": [
+      {
+        "severity": "warning",
+        "category": "budget",
+        "message": "Hébergement \"13. Grand Hotel Central\" a un prix de 0€/nuit"
+      }
+    ],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [
+      {
+        "severity": "critical",
+        "category": "relevance",
+        "message": "Must-see manquants (0/1): sagrada familia",
+        "details": {
+          "found": 0,
+          "total": 1,
+          "missing": [
+            "sagrada familia"
+          ]
+        }
+      }
+    ],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 1,
+    "totalItems": 7,
+    "activitiesCount": 1,
+    "restaurantsCount": 1,
+    "avgItemsPerDay": 7,
+    "totalEstimatedCost": 130,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

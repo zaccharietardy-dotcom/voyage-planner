@@ -77,7 +77,7 @@ export async function getCachedResponse<T>(queryType: string, cacheKey: string):
     const elapsed = Date.now() - t0;
 
     if (!result) {
-      console.log(`[Cache L2] TIMEOUT ${queryType} (${elapsed}ms)`);
+      console.debug(`[Cache L2] TIMEOUT ${queryType} (${elapsed}ms)`);
       return null;
     }
 
@@ -89,11 +89,11 @@ export async function getCachedResponse<T>(queryType: string, cacheKey: string):
 
     // Check expiration
     if (new Date() > new Date(data.expires_at)) {
-      console.log(`[Cache L2] EXPIRED ${queryType}`);
+      console.debug(`[Cache L2] EXPIRED ${queryType}`);
       return null;
     }
 
-    console.log(`[Cache L2] HIT ${queryType} (${elapsed}ms)`);
+    console.debug(`[Cache L2] HIT ${queryType} (${elapsed}ms)`);
     return data.results as T;
   } catch {
     return null;

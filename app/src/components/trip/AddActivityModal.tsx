@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TripItem, TripItemType } from '@/lib/types';
+import { Attraction } from '@/lib/services/attractions';
 import {
   Search,
   Plus,
@@ -35,6 +36,7 @@ interface AddActivityModalProps {
   destination: string;
   defaultStartTime?: string;
   defaultEndTime?: string;
+  attractionPool?: Attraction[];
 }
 
 interface SearchResult {
@@ -69,12 +71,23 @@ export function AddActivityModal({
   destination,
   defaultStartTime,
   defaultEndTime,
+  attractionPool,
 }: AddActivityModalProps) {
   const [tab, setTab] = useState<'search' | 'manual'>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  // Pool-first: filter attractions from pool instantly based on query
+  const poolResults = useMemo(() => {
+    if (!attractionPool?.length) return [];
+    if (!query.trim()) return attractionPool.slice(0, 8);
+    const q = query.toLowerCase();
+    return attractionPool.filter(
+      (a) => a.name.toLowerCase().includes(q) || a.description?.toLowerCase().includes(q)
+    );
+  }, [attractionPool, query]);
 
   // Manual form state
   const [title, setTitle] = useState('');
@@ -153,6 +166,19 @@ export function AddActivityModal({
     setLatitude(result.latitude);
     setLongitude(result.longitude);
     setGoogleMapsUrl(result.googleMapsUrl);
+    setTab('manual');
+  };
+
+  const selectPoolAttraction = (attraction: Attraction) => {
+    setTitle(attraction.name);
+    setType('activity');
+    setDescription(attraction.description || '');
+    setLocationName(attraction.name);
+    setEstimatedCost(attraction.estimatedCost || 0);
+    setDuration(attraction.duration || 60);
+    setLatitude(attraction.latitude);
+    setLongitude(attraction.longitude);
+    setGoogleMapsUrl(attraction.googleMapsUrl);
     setTab('manual');
   };
 
@@ -236,7 +262,73 @@ export function AddActivityModal({
             </div>
 
             <div className="space-y-2 max-h-[350px] overflow-y-auto">
-              {results.length === 0 && hasSearched && !searching && (
+              {/* Pool results (instant, shown first) */}
+              {poolResults.length > 0 && (
+                <>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-1">
+                    Depuis le pool
+                  </p>
+                  {poolResults.map((attraction) => (
+                    <Card
+                      key={`pool-${attraction.id}`}
+                      className="p-3 cursor-pointer hover:bg-accent transition-colors border-primary/20"
+                      onClick={() => selectPoolAttraction(attraction)}
+                    >
+                      <div className="flex items-start gap-3">
+                        {attraction.imageUrl ? (
+                          <img
+                            src={attraction.imageUrl}
+                            alt={attraction.name}
+                            className="w-14 h-14 rounded-md object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                            {getTypeIcon('activity')}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-sm truncate">{attraction.name}</h4>
+                            <Badge variant="secondary" className="text-xs flex-shrink-0">
+                              Pool
+                            </Badge>
+                          </div>
+                          {attraction.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                              {attraction.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            {attraction.rating > 0 && (
+                              <span className="flex items-center gap-0.5">
+                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                {attraction.rating.toFixed(1)}
+                              </span>
+                            )}
+                            {attraction.duration > 0 && (
+                              <span className="flex items-center gap-0.5">
+                                <Clock className="h-3 w-3" />
+                                {attraction.duration}min
+                              </span>
+                            )}
+                            {attraction.estimatedCost > 0 && (
+                              <span>{attraction.estimatedCost}&euro;</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </>
+              )}
+
+              {/* API results */}
+              {results.length > 0 && poolResults.length > 0 && (
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">
+                  Recherche en ligne
+                </p>
+              )}
+              {results.length === 0 && poolResults.length === 0 && hasSearched && !searching && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Aucun résultat. Essayez un autre terme ou ajoutez manuellement.
                 </p>

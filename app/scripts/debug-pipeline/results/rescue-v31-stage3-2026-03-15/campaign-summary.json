@@ -1,0 +1,102 @@
+{
+  "campaignMeta": {
+    "campaignId": "rescue-v31-stage3-2026-03-15",
+    "startedAt": "2026-03-15T13:54:23.486Z",
+    "finishedAt": "2026-03-15T13:54:23.487Z",
+    "durationMs": 1,
+    "seed": 424242,
+    "totalRequested": 17,
+    "randomCountRequested": 0,
+    "scenarioCountRequested": 17,
+    "analyze": true,
+    "failFast": false,
+    "outDir": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/rescue-v31-stage3-2026-03-15",
+    "mode": "golden"
+  },
+  "runStats": {
+    "total": 0,
+    "success": 0,
+    "failed": 0,
+    "scenarioRuns": 0,
+    "randomRuns": 0,
+    "analyzedRuns": 0,
+    "successRate": 0
+  },
+  "scoreStats": {
+    "average": 0,
+    "min": 0,
+    "max": 0,
+    "p50": 0,
+    "p90": 0,
+    "sectionAverages": {
+      "schedule": 0,
+      "geography": 0,
+      "budget": 0,
+      "links": 0,
+      "dataQuality": 0,
+      "rhythm": 0,
+      "relevance": 0,
+      "realism": 0
+    }
+  },
+  "issuesByCode": [],
+  "issuesByComponent": [],
+  "topRegressions": [],
+  "stratification": {
+    "groupTypes": {
+      "solo": 0,
+      "couple": 0,
+      "friends": 0,
+      "family_with_kids": 0,
+      "family_without_kids": 0
+    },
+    "budgetLevels": {
+      "economic": 0,
+      "moderate": 0,
+      "comfort": 0,
+      "luxury": 0
+    },
+    "transports": {
+      "optimal": 0,
+      "plane": 0,
+      "train": 0,
+      "car": 0,
+      "bus": 0
+    },
+    "multiCityRuns": 0
+  },
+  "exitCriteria": {
+    "successRate": {
+      "value": 0,
+      "target": 0.9,
+      "pass": false
+    },
+    "noApiKeyLeaks": {
+      "count": 0,
+      "pass": true
+    },
+    "noHotelBoundaryIncoherent": {
+      "count": 0,
+      "pass": true
+    },
+    "urbanLegPolicy": {
+      "count": 0,
+      "pass": true
+    },
+    "averageScore": {
+      "value": 0,
+      "target": 85,
+      "pass": false
+    },
+    "noCriticalRemaining": {
+      "count": 0,
+      "pass": true
+    },
+    "hardGatesZero": {
+      "count": 0,
+      "pass": true
+    },
+    "overallPass": false
+  },
+  "runs": []
+}

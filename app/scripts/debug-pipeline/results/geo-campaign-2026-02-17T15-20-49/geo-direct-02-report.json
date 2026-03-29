@@ -1,0 +1,340 @@
+{
+  "tripId": "72dba8f3-752e-49a3-baab-d2d9029ea938",
+  "scenarioId": "geo-direct-02",
+  "generatedAt": "2026-02-17T15:22:14.355Z",
+  "destination": "Marrakech",
+  "summary": {
+    "totalIssues": 12,
+    "critical": 1,
+    "warning": 2,
+    "info": 9,
+    "score": 96,
+    "weightedScore": 96
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 2,
+      "totalIssues": 2,
+      "weightedPenalty": 1.4
+    },
+    "geography": {
+      "score": 84,
+      "critical": 1,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 2,
+      "weightedPenalty": 16.3
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 97,
+      "critical": 0,
+      "warning": 0,
+      "info": 5,
+      "totalIssues": 5,
+      "weightedPenalty": 3.5
+    },
+    "rhythm": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "relevance": {
+      "score": 97,
+      "critical": 0,
+      "warning": 1,
+      "info": 0,
+      "totalIssues": 1,
+      "weightedPenalty": 3.5
+    },
+    "realism": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "geography:Jour 5: \"Trajet vers RAK + check-in\" a des coordonnées (0, 0) — non gé",
+      "category": "geography",
+      "severity": "critical",
+      "count": 1,
+      "impactScore": 10,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 5: \"Trajet vers RAK + check-in\" a des coordonnées (0, 0) — non géocodé"
+      ]
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "category": "geography",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "impactScore": 7.2,
+      "avgFrequencyWeight": 1.8,
+      "autofixCandidate": true,
+      "sampleMessages": [
+        "Jour 1: itinéraire en zigzag (3 demi-tours détectés)"
+      ]
+    },
+    {
+      "key": "relevance:Activité \"shopping\" demandée mais aucune activité correspondante trouv",
+      "category": "relevance",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Activité \"shopping\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ]
+    },
+    {
+      "key": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+      "category": "data-quality",
+      "severity": "info",
+      "component": "pipeline/content",
+      "count": 3,
+      "impactScore": 3,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: \"Place Jemaa el fna\" n'a pas de description",
+        "Jour 2: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "Jour 4: \"Jardin Majorelle\" n'a pas de description"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ]
+    },
+    {
+      "key": "realism:Jour 1: 5 activités après l'arrivée (08:55) — jour d'arrivée chargé",
+      "category": "realism",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: 5 activités après l'arrivée (08:55) — jour d'arrivée chargé"
+      ]
+    },
+    {
+      "key": "rhythm:Jour 4 (5 activités) vs jour 5 (1 activités) — déséquilibre important",
+      "category": "rhythm",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 4 (5 activités) vs jour 5 (1 activités) — déséquilibre important"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: 4h de vide entre \"Vol TO 3016\" (fin 08:55) et \"Déjeuner — Cafe",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: 4h de vide entre \"Vol TO 3016\" (fin 08:55) et \"Déjeuner — Cafe Restaurant Dar L'hssira\" (début 13:00)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: 5h de vide entre \"Déjeuner — Poka By Katsura\" (fin 14:00) et \"",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: 5h de vide entre \"Déjeuner — Poka By Katsura\" (fin 14:00) et \"Dîner — Nativ’kitchen M Avenue - Marrakech -Healthy Kitchen\" (début 19:00)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 1: 4h de vide entre \"Vol TO 3016\" (fin 08:55) et \"Déjeuner — Cafe Restaurant Dar L'hssira\" (début 13:00)",
+        "dayNumber": 1,
+        "details": {
+          "gapMinutes": 245
+        }
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 2: 5h de vide entre \"Déjeuner — Poka By Katsura\" (fin 14:00) et \"Dîner — Nativ’kitchen M Avenue - Marrakech -Healthy Kitchen\" (début 19:00)",
+        "dayNumber": 2,
+        "details": {
+          "gapMinutes": 300
+        }
+      }
+    ],
+    "geography": [
+      {
+        "severity": "warning",
+        "category": "geography",
+        "message": "Jour 1: itinéraire en zigzag (3 demi-tours détectés)",
+        "dayNumber": 1,
+        "details": {
+          "zigzagTurns": 3,
+          "routeInefficiencyRatio": 1.72,
+          "totalLegKm": 2.87
+        },
+        "code": "GEO_INTRA_DAY_ZIGZAG",
+        "component": "pipeline/step8-validate",
+        "frequencyWeight": 1.8,
+        "autofixCandidate": true
+      },
+      {
+        "severity": "critical",
+        "category": "geography",
+        "message": "Jour 5: \"Trajet vers RAK + check-in\" a des coordonnées (0, 0) — non géocodé",
+        "dayNumber": 5,
+        "itemTitle": "Trajet vers RAK + check-in"
+      }
+    ],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas de conseils de voyage"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 1: \"Place Jemaa el fna\" n'a pas de description",
+        "dayNumber": 1,
+        "itemTitle": "Place Jemaa el fna",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 2: \"The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence\" n'a pas de description",
+        "dayNumber": 2,
+        "itemTitle": "The Beautiful Marrakech | Excursions, Balades, Piscines et Bien Plus Encore Avec Notre Agence",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      },
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Jour 4: \"Jardin Majorelle\" n'a pas de description",
+        "dayNumber": 4,
+        "itemTitle": "Jardin Majorelle",
+        "code": "DATA_ACTIVITY_DESCRIPTION_MISSING",
+        "component": "pipeline/content"
+      }
+    ],
+    "rhythm": [
+      {
+        "severity": "info",
+        "category": "rhythm",
+        "message": "Jour 4 (5 activités) vs jour 5 (1 activités) — déséquilibre important",
+        "details": {
+          "day1": 5,
+          "day2": 1
+        }
+      }
+    ],
+    "relevance": [
+      {
+        "severity": "warning",
+        "category": "relevance",
+        "message": "Activité \"shopping\" demandée mais aucune activité correspondante trouvée dans l'itinéraire",
+        "details": {
+          "requestedActivity": "shopping"
+        }
+      }
+    ],
+    "realism": [
+      {
+        "severity": "info",
+        "category": "realism",
+        "message": "Jour 1: 5 activités après l'arrivée (08:55) — jour d'arrivée chargé",
+        "dayNumber": 1,
+        "details": {
+          "activitiesAfterArrival": 5,
+          "arrivalTime": "08:55"
+        }
+      }
+    ]
+  },
+  "stats": {
+    "totalDays": 5,
+    "totalItems": 27,
+    "activitiesCount": 9,
+    "restaurantsCount": 12,
+    "avgItemsPerDay": 5.4,
+    "totalEstimatedCost": 1220,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": true,
+    "hasCarbonFootprint": false
+  }
+}

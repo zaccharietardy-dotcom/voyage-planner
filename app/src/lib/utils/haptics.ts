@@ -1,36 +1,47 @@
 'use client';
 
+import { Capacitor } from '@capacitor/core';
+
 /**
  * UTILITY: Haptic Feedback Wrapper
  * 
- * NOTE: Physical vibrations have been disabled based on user feedback.
- * The functions are kept for architectural consistency but perform no action.
+ * Optimized for Premium feel:
+ * - Real physical impact vibrations are DISABLED as requested.
+ * - Soft 'selection' haptics are ENABLED to provide subtle native feedback.
  */
 
 /**
- * Trigger a light impact haptic feedback (DISABLED)
+ * Trigger a light impact haptic feedback (DISABLED - kept for API compatibility)
  */
 export async function hapticImpactLight() {
-  // Disabled: user prefers no physical vibration
+  // Disabled per user preference
 }
 
 /**
- * Trigger a medium impact haptic feedback (DISABLED)
+ * Trigger a medium impact haptic feedback (DISABLED - kept for API compatibility)
  */
 export async function hapticImpactMedium() {
-  // Disabled: user prefers no physical vibration
+  // Disabled per user preference
 }
 
 /**
- * Trigger a selection change haptic feedback (DISABLED)
+ * Trigger a very soft selection change haptic feedback (ENABLED)
+ * This is the subtle "click" felt when scrolling or selecting, not a vibration.
  */
 export async function hapticSelection() {
-  // Disabled: user prefers no physical vibration
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { Haptics } = await import('@capacitor/haptics');
+      await Haptics.selectionChanged();
+    } catch (e) {
+      // Ignore
+    }
+  }
 }
 
 /**
  * Trigger a success notification haptic feedback (DISABLED)
  */
 export async function hapticSuccess() {
-  // Disabled: user prefers no physical vibration
+  // Disabled per user preference
 }

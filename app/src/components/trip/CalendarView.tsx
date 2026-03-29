@@ -257,6 +257,7 @@ export function CalendarView({
                   variant={mobileSubView === 'grid' ? 'default' : 'ghost'}
                   size="icon"
                   className="h-6 w-6"
+                  aria-label="Vue grille"
                   onClick={() => setMobileSubView('grid')}
                 >
                   <Grid3X3 className="h-3 w-3" />
@@ -265,6 +266,7 @@ export function CalendarView({
                   variant={mobileSubView === 'list' ? 'default' : 'ghost'}
                   size="icon"
                   className="h-6 w-6"
+                  aria-label="Vue liste"
                   onClick={() => setMobileSubView('list')}
                 >
                   <List className="h-3 w-3" />
@@ -275,7 +277,7 @@ export function CalendarView({
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7"
+              className="h-11 w-11"
               onClick={handlePrevDay}
               disabled={selectedDay === 0}
               aria-label="Jour précédent"
@@ -293,7 +295,7 @@ export function CalendarView({
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7"
+              className="h-11 w-11"
               onClick={handleNextDay}
               disabled={selectedDay === days.length - 1}
               aria-label="Jour suivant"
@@ -315,7 +317,7 @@ export function CalendarView({
                 key={day.dayNumber}
                 variant={idx === selectedDay ? 'default' : 'outline'}
                 className={cn(
-                  'cursor-pointer text-xs flex-shrink-0 transition-all h-9 px-4',
+                  'cursor-pointer text-xs flex-shrink-0 transition-all h-11 px-4',
                   idx === selectedDay && 'ring-2 ring-primary/30 scale-105',
                 )}
                 style={{ scrollSnapAlign: 'center' }}

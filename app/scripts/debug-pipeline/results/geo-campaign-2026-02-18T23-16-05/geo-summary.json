@@ -1,0 +1,135 @@
+{
+  "campaignId": "geo-campaign-2026-02-18T23-16-05",
+  "startedAt": "2026-02-18T23:16:05.334Z",
+  "finishedAt": "2026-02-18T23:19:38.324Z",
+  "durationMs": 212990,
+  "seed": 20260219,
+  "maxRuns": 3,
+  "expectedDirectRuns": 1,
+  "expectedSuggestionRuns": 2,
+  "envHealth": {
+    "ANTHROPIC": "✅",
+    "SERPAPI": "✅",
+    "RAPIDAPI": "✅",
+    "VIATOR": "✅"
+  },
+  "runStats": {
+    "total": 3,
+    "success": 3,
+    "failed": 0,
+    "direct": 1,
+    "suggestion": 2
+  },
+  "geoCodeTotals": {
+    "GEO_IMPOSSIBLE_TRANSITION": 0,
+    "GEO_URBAN_HARD_LONG_LEG": 4,
+    "GEO_INTRA_DAY_ZIGZAG": 2,
+    "GEO_DAY_ROUTE_EFFICIENCY_LOW": 2
+  },
+  "inefficiency": {
+    "failDays": 2,
+    "exemptDays": 0
+  },
+  "mustSeeCoverageFailures": 2,
+  "acceptance": {
+    "noImpossibleTransition": {
+      "pass": true,
+      "count": 0
+    },
+    "noUrbanHardLongLeg": {
+      "pass": false,
+      "count": 4
+    },
+    "noIntraDayZigzag": {
+      "pass": false,
+      "count": 2,
+      "highZigzagDays": 1
+    },
+    "routeInefficiencyWithinTarget": {
+      "pass": false,
+      "count": 2,
+      "exempt": 0
+    },
+    "mustSeeCoverage": {
+      "pass": false,
+      "count": 2
+    },
+    "campaignExecutedTargetMix": {
+      "pass": true,
+      "expected": 3,
+      "actual": 3
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "geo-direct-01",
+      "runType": "direct",
+      "scenarioId": "geo-direct-01",
+      "success": true,
+      "durationMs": 56281,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-18T23-16-05/geo-direct-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-18T23-16-05/geo-direct-01-report.json",
+      "score": 78,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 4,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 1
+      },
+      "inefficiencyFailDays": 1,
+      "inefficiencyExemptDays": 0,
+      "highZigzagDays": 1,
+      "mustSeeMissing": [
+        "Mur de Berlin"
+      ]
+    },
+    {
+      "runId": "geo-suggest-01",
+      "runType": "suggestion",
+      "scenarioId": "geo-suggest-01-barcelone-tapas-et-architecture",
+      "success": true,
+      "durationMs": 71737,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-18T23-16-05/geo-suggest-01.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-18T23-16-05/geo-suggest-01-report.json",
+      "score": 87,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 1,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 1
+      },
+      "inefficiencyFailDays": 1,
+      "inefficiencyExemptDays": 0,
+      "highZigzagDays": 0,
+      "mustSeeMissing": [],
+      "suggestionQuery": "Je veux un city-break gastronomie pas cher depuis Lyon",
+      "suggestionTitle": "Barcelone : Tapas et Architecture"
+    },
+    {
+      "runId": "geo-suggest-02",
+      "runType": "suggestion",
+      "scenarioId": "geo-suggest-02-escapade-gastronomique-a-lyon-et-ses-env",
+      "success": true,
+      "durationMs": 65171,
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-18T23-16-05/geo-suggest-02.json",
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/geo-campaign-2026-02-18T23-16-05/geo-suggest-02-report.json",
+      "score": 99,
+      "geoCodes": {
+        "GEO_IMPOSSIBLE_TRANSITION": 0,
+        "GEO_URBAN_HARD_LONG_LEG": 0,
+        "GEO_INTRA_DAY_ZIGZAG": 0,
+        "GEO_DAY_ROUTE_EFFICIENCY_LOW": 0
+      },
+      "inefficiencyFailDays": 0,
+      "inefficiencyExemptDays": 0,
+      "highZigzagDays": 0,
+      "mustSeeMissing": [
+        "Basilique Notre-Dame de Fourvière",
+        "Points forts et joyaux cachés de Lyon Visite guidée à pied (anglais)"
+      ],
+      "suggestionQuery": "Je veux faire un break de 3 jours en Europe",
+      "suggestionTitle": "Escapade Gastronomique à Lyon et ses Environs"
+    }
+  ]
+}

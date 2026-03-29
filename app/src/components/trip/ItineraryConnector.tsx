@@ -129,7 +129,7 @@ export function ItineraryConnector({
                   <div className="flex items-center gap-2 text-xs font-bold text-white/90">
                     {duration && formatDuration(duration)}
                     {distance && distance > 0.1 && (
-                      <span className="text-white/40 font-medium">· {formatDistance(distance)}</span>
+                      <span className="text-white/60 font-medium">· {formatDistance(distance)}</span>
                     )}
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export function ItineraryConnector({
                       </div>
                       <div className="flex flex-col items-start">
                         <span className="font-black text-base">{opt.label}</span>
-                        <span className="text-xs text-white/40">{opt.description}</span>
+                        <span className="text-xs text-white/60">{opt.description}</span>
                       </div>
                       {isActive && <Check className="h-5 w-5 text-gold ml-auto" />}
                     </button>

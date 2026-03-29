@@ -1,0 +1,222 @@
+{
+  "tripId": "ba4a6ba6-01e3-4919-bce8-c3c2c4485461",
+  "scenarioId": "geo-suggest-01-escapade-gastronomique-et-culturelle-a-s",
+  "generatedAt": "2026-02-17T14:24:47.604Z",
+  "destination": "San Sebastian",
+  "summary": {
+    "totalIssues": 6,
+    "critical": 0,
+    "warning": 3,
+    "info": 3,
+    "score": 98,
+    "weightedScore": 98
+  },
+  "sectionScores": {
+    "schedule": {
+      "score": 88,
+      "critical": 0,
+      "warning": 3,
+      "info": 2,
+      "totalIssues": 5,
+      "weightedPenalty": 11.9
+    },
+    "geography": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "budget": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "links": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "dataQuality": {
+      "score": 99,
+      "critical": 0,
+      "warning": 0,
+      "info": 1,
+      "totalIssues": 1,
+      "weightedPenalty": 0.7
+    },
+    "rhythm": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "relevance": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    },
+    "realism": {
+      "score": 100,
+      "critical": 0,
+      "warning": 0,
+      "info": 0,
+      "totalIssues": 0,
+      "weightedPenalty": 0
+    }
+  },
+  "topRegressions": [
+    {
+      "key": "schedule:Jour 2: déjeuner \"Déjeuner — Restaurant à proximité\" à 08:40 — créneau",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: déjeuner \"Déjeuner — Restaurant à proximité\" à 08:40 — créneau inhabituel (attendu 11h30-15h00)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 2: dîner \"Dîner — Aduana Elkartea\" à 09:35 — trop tôt (attendu ap",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 2: dîner \"Dîner — Aduana Elkartea\" à 09:35 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 3: dîner \"Dîner — Aduana Elkartea\" à 13:55 — trop tôt (attendu ap",
+      "category": "schedule",
+      "severity": "warning",
+      "count": 1,
+      "impactScore": 4,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: dîner \"Dîner — Aduana Elkartea\" à 13:55 — trop tôt (attendu après 18h00)"
+      ]
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "category": "data-quality",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ]
+    },
+    {
+      "key": "schedule:Jour 1: 3h de vide entre \"Vol XK 131\" (fin 09:55) et \"Déjeuner — Aduan",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 1: 3h de vide entre \"Vol XK 131\" (fin 09:55) et \"Déjeuner — Aduana Elkartea\" (début 13:00)"
+      ]
+    },
+    {
+      "key": "schedule:Jour 3: 4h de vide entre \"Check-out Pensión Lizaso\" (fin 09:15) et \"Dé",
+      "category": "schedule",
+      "severity": "info",
+      "count": 1,
+      "impactScore": 1,
+      "avgFrequencyWeight": 1,
+      "autofixCandidate": false,
+      "sampleMessages": [
+        "Jour 3: 4h de vide entre \"Check-out Pensión Lizaso\" (fin 09:15) et \"Déjeuner — Restaurant à proximité\" (début 13:00)"
+      ]
+    }
+  ],
+  "sections": {
+    "schedule": [
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 1: 3h de vide entre \"Vol XK 131\" (fin 09:55) et \"Déjeuner — Aduana Elkartea\" (début 13:00)",
+        "dayNumber": 1,
+        "details": {
+          "gapMinutes": 185
+        }
+      },
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: déjeuner \"Déjeuner — Restaurant à proximité\" à 08:40 — créneau inhabituel (attendu 11h30-15h00)",
+        "dayNumber": 2,
+        "itemTitle": "Déjeuner — Restaurant à proximité"
+      },
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 2: dîner \"Dîner — Aduana Elkartea\" à 09:35 — trop tôt (attendu après 18h00)",
+        "dayNumber": 2,
+        "itemTitle": "Dîner — Aduana Elkartea"
+      },
+      {
+        "severity": "warning",
+        "category": "schedule",
+        "message": "Jour 3: dîner \"Dîner — Aduana Elkartea\" à 13:55 — trop tôt (attendu après 18h00)",
+        "dayNumber": 3,
+        "itemTitle": "Dîner — Aduana Elkartea"
+      },
+      {
+        "severity": "info",
+        "category": "schedule",
+        "message": "Jour 3: 4h de vide entre \"Check-out Pensión Lizaso\" (fin 09:15) et \"Déjeuner — Restaurant à proximité\" (début 13:00)",
+        "dayNumber": 3,
+        "details": {
+          "gapMinutes": 225
+        }
+      }
+    ],
+    "geography": [],
+    "budget": [],
+    "links": [],
+    "dataQuality": [
+      {
+        "severity": "info",
+        "category": "data-quality",
+        "message": "Pas d'empreinte carbone calculée"
+      }
+    ],
+    "rhythm": [],
+    "relevance": [],
+    "realism": []
+  },
+  "stats": {
+    "totalDays": 3,
+    "totalItems": 13,
+    "activitiesCount": 0,
+    "restaurantsCount": 7,
+    "avgItemsPerDay": 4.333333333333333,
+    "totalEstimatedCost": 446,
+    "hasAccommodation": true,
+    "hasOutboundFlight": true,
+    "hasReturnFlight": false,
+    "hasCarbonFootprint": false
+  }
+}

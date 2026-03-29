@@ -1,0 +1,955 @@
+{
+  "campaignMeta": {
+    "campaignId": "capture-fixtures-v2",
+    "startedAt": "2026-03-19T10:24:36.399Z",
+    "finishedAt": "2026-03-19T16:19:50.950Z",
+    "durationMs": 21314551,
+    "seed": 424242,
+    "totalRequested": 30,
+    "randomCountRequested": 0,
+    "scenarioCountRequested": 4,
+    "analyze": true,
+    "failFast": false,
+    "outDir": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2",
+    "mode": "smoke"
+  },
+  "runStats": {
+    "total": 4,
+    "success": 4,
+    "failed": 0,
+    "scenarioRuns": 4,
+    "randomRuns": 0,
+    "analyzedRuns": 4,
+    "successRate": 1
+  },
+  "scoreStats": {
+    "average": 93.5,
+    "min": 92,
+    "max": 95,
+    "p50": 93,
+    "p90": 95,
+    "sectionAverages": {
+      "schedule": 95,
+      "geography": 81.25,
+      "budget": 95,
+      "links": 96.5,
+      "dataQuality": 92.75,
+      "rhythm": 98.25,
+      "relevance": 94.75,
+      "realism": 98.5
+    }
+  },
+  "issuesByCode": [
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 2: 5.8km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Déjeuner — Rosolino Ristorante\" avec seulement 10min de battement (besoin ~12min)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "schedule:Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (débu",
+      "code": "schedule:Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (débu",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (début 17:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 5: \"basilique Saint-Pierre\" (fin 17:20) chevauche \"Rome → Paris\" ",
+      "code": "schedule:Jour 5: \"basilique Saint-Pierre\" (fin 17:20) chevauche \"Rome → Paris\" ",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Jour 5: \"basilique Saint-Pierre\" (fin 17:20) chevauche \"Rome → Paris\" (début 17:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (0/2): pompei, spaccanapoli",
+      "code": "relevance:Must-see manquants (0/2): pompei, spaccanapoli",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (0/2): pompei, spaccanapoli"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 6,
+      "affectedRuns": 3,
+      "sampleRunIds": [
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 3: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 5: itinéraire en zigzag (2 demi-tours détectés)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "code": "budget:Pas de costBreakdown dans le trip",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "code": "data-quality:Pas de breakdown des coûts",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 7: 2 segments > 2.5km (max cible: 1)",
+        "Jour 2: 2 segments > 2.5km (max cible: 1)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "code": "budget:Pas d'hébergement défini dans le voyage",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "code": "data-quality:Pas d'hébergement défini",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "code": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Jour 5: efficacité de route faible (1.92x du minimum MST)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "rhythm:Jour 4: seulement 30min de temps libre — pas de pause",
+      "code": "rhythm:Jour 4: seulement 30min de temps libre — pas de pause",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: seulement 30min de temps libre — pas de pause"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 55min de temps libre — pas de pause",
+      "code": "rhythm:Jour 3: seulement 55min de temps libre — pas de pause",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Jour 3: seulement 55min de temps libre — pas de pause"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): mont fuji",
+      "code": "relevance:Must-see manquants (1/2): mont fuji",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): mont fuji"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Dernier jour: dernière activité (16:20) à seulement 40min avant le vol",
+      "code": "realism:Dernier jour: dernière activité (16:20) à seulement 40min avant le vol",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Dernier jour: dernière activité (16:20) à seulement 40min avant le vol (17:00) — risqué"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Déjeuner — Rosolino Ristorante\" à 5.8km de l'activ",
+      "code": "realism:Jour 2: restaurant \"Déjeuner — Rosolino Ristorante\" à 5.8km de l'activ",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Déjeuner — Rosolino Ristorante\" à 5.8km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "LINK_RESTAURANT_MAPS_MISSING",
+      "code": "LINK_RESTAURANT_MAPS_MISSING",
+      "severity": "info",
+      "component": "pipeline/restaurants",
+      "count": 19,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 1: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 1: restaurant \"Dîner — Repas libre\" n'a pas de lien Google Maps"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "code": "data-quality:Pas de conseils de voyage",
+      "severity": "info",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "code": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 3,
+      "affectedRuns": 3,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Tous les must-see présents (2/2)",
+      "code": "relevance:Tous les must-see présents (2/2)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Tous les must-see présents (2/2)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Tous les must-see présents (5/5)",
+      "code": "relevance:Tous les must-see présents (5/5)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Tous les must-see présents (5/5)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important",
+      "code": "rhythm:Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "issuesByComponent": [
+    {
+      "component": "unknown",
+      "total": 36,
+      "critical": 3,
+      "warning": 19,
+      "info": 14
+    },
+    {
+      "component": "pipeline/restaurants",
+      "total": 19,
+      "critical": 0,
+      "warning": 0,
+      "info": 19
+    },
+    {
+      "component": "pipeline/step8-validate",
+      "total": 10,
+      "critical": 1,
+      "warning": 9,
+      "info": 0
+    }
+  ],
+  "topRegressions": [
+    {
+      "key": "GEO_IMPOSSIBLE_TRANSITION",
+      "code": "GEO_IMPOSSIBLE_TRANSITION",
+      "severity": "critical",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 2: 5.8km entre \"Visite de la faune et de la flore de l'île Marco\" et \"Déjeuner — Rosolino Ristorante\" avec seulement 10min de battement (besoin ~12min)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "schedule:Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (débu",
+      "code": "schedule:Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (débu",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: \"musées du Vatican\" (fin 17:20) chevauche \"Rome → Paris\" (début 17:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "schedule:Jour 5: \"basilique Saint-Pierre\" (fin 17:20) chevauche \"Rome → Paris\" ",
+      "code": "schedule:Jour 5: \"basilique Saint-Pierre\" (fin 17:20) chevauche \"Rome → Paris\" ",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Jour 5: \"basilique Saint-Pierre\" (fin 17:20) chevauche \"Rome → Paris\" (début 17:00)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (0/2): pompei, spaccanapoli",
+      "code": "relevance:Must-see manquants (0/2): pompei, spaccanapoli",
+      "severity": "critical",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (0/2): pompei, spaccanapoli"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "GEO_INTRA_DAY_ZIGZAG",
+      "code": "GEO_INTRA_DAY_ZIGZAG",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 6,
+      "affectedRuns": 3,
+      "sampleRunIds": [
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 3: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 4: itinéraire en zigzag (2 demi-tours détectés)",
+        "Jour 5: itinéraire en zigzag (2 demi-tours détectés)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "budget:Pas de costBreakdown dans le trip",
+      "code": "budget:Pas de costBreakdown dans le trip",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas de costBreakdown dans le trip"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de breakdown des coûts",
+      "code": "data-quality:Pas de breakdown des coûts",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas de breakdown des coûts"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "code": "GEO_URBAN_TOO_MANY_LONG_LEGS",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 7: 2 segments > 2.5km (max cible: 1)",
+        "Jour 2: 2 segments > 2.5km (max cible: 1)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "budget:Pas d'hébergement défini dans le voyage",
+      "code": "budget:Pas d'hébergement défini dans le voyage",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini dans le voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'hébergement défini",
+      "code": "data-quality:Pas d'hébergement défini",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Pas d'hébergement défini"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "code": "relevance:Activité \"gastronomy\" demandée mais aucune activité correspondante tro",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 2,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Activité \"gastronomy\" demandée mais aucune activité correspondante trouvée dans l'itinéraire"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "code": "GEO_DAY_ROUTE_EFFICIENCY_LOW",
+      "severity": "warning",
+      "component": "pipeline/step8-validate",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Jour 5: efficacité de route faible (1.92x du minimum MST)"
+      ],
+      "autofixCandidate": true
+    },
+    {
+      "key": "rhythm:Jour 4: seulement 30min de temps libre — pas de pause",
+      "code": "rhythm:Jour 4: seulement 30min de temps libre — pas de pause",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Jour 4: seulement 30min de temps libre — pas de pause"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 3: seulement 55min de temps libre — pas de pause",
+      "code": "rhythm:Jour 3: seulement 55min de temps libre — pas de pause",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Jour 3: seulement 55min de temps libre — pas de pause"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Must-see manquants (1/2): mont fuji",
+      "code": "relevance:Must-see manquants (1/2): mont fuji",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Must-see manquants (1/2): mont fuji"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Dernier jour: dernière activité (16:20) à seulement 40min avant le vol",
+      "code": "realism:Dernier jour: dernière activité (16:20) à seulement 40min avant le vol",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Dernier jour: dernière activité (16:20) à seulement 40min avant le vol (17:00) — risqué"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "realism:Jour 2: restaurant \"Déjeuner — Rosolino Ristorante\" à 5.8km de l'activ",
+      "code": "realism:Jour 2: restaurant \"Déjeuner — Rosolino Ristorante\" à 5.8km de l'activ",
+      "severity": "warning",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 2: restaurant \"Déjeuner — Rosolino Ristorante\" à 5.8km de l'activité précédente (\"Visite de la faune et de la flore de l'île Marco\") avec seulement 10min de battement"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "LINK_RESTAURANT_MAPS_MISSING",
+      "code": "LINK_RESTAURANT_MAPS_MISSING",
+      "severity": "info",
+      "component": "pipeline/restaurants",
+      "count": 19,
+      "affectedRuns": 2,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Jour 1: restaurant \"Petit-déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 1: restaurant \"Déjeuner — Repas libre\" n'a pas de lien Google Maps",
+        "Jour 1: restaurant \"Dîner — Repas libre\" n'a pas de lien Google Maps"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas d'empreinte carbone calculée",
+      "code": "data-quality:Pas d'empreinte carbone calculée",
+      "severity": "info",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas d'empreinte carbone calculée"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de conseils de voyage",
+      "code": "data-quality:Pas de conseils de voyage",
+      "severity": "info",
+      "component": "unknown",
+      "count": 4,
+      "affectedRuns": 4,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d",
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Pas de conseils de voyage"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "code": "data-quality:Pas de vol aller défini (transport optimal/avion)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 3,
+      "affectedRuns": 3,
+      "sampleRunIds": [
+        "S01-paris-rome-4d",
+        "S02-must-see-heavy",
+        "S03-tokyo-fuji-7d"
+      ],
+      "sampleMessages": [
+        "Pas de vol aller défini (transport optimal/avion)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Tous les must-see présents (2/2)",
+      "code": "relevance:Tous les must-see présents (2/2)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S01-paris-rome-4d"
+      ],
+      "sampleMessages": [
+        "Tous les must-see présents (2/2)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "relevance:Tous les must-see présents (5/5)",
+      "code": "relevance:Tous les must-see présents (5/5)",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S02-must-see-heavy"
+      ],
+      "sampleMessages": [
+        "Tous les must-see présents (5/5)"
+      ],
+      "autofixCandidate": false
+    },
+    {
+      "key": "rhythm:Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important",
+      "code": "rhythm:Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important",
+      "severity": "info",
+      "component": "unknown",
+      "count": 1,
+      "affectedRuns": 1,
+      "sampleRunIds": [
+        "S04-naples-pompei-3d"
+      ],
+      "sampleMessages": [
+        "Jour 1 (1 activités) vs jour 2 (6 activités) — déséquilibre important"
+      ],
+      "autofixCandidate": false
+    }
+  ],
+  "stratification": {
+    "groupTypes": {
+      "solo": 0,
+      "couple": 4,
+      "friends": 0,
+      "family_with_kids": 0,
+      "family_without_kids": 0
+    },
+    "budgetLevels": {
+      "economic": 0,
+      "moderate": 3,
+      "comfort": 1,
+      "luxury": 0
+    },
+    "transports": {
+      "optimal": 2,
+      "plane": 2,
+      "train": 0,
+      "car": 0,
+      "bus": 0
+    },
+    "multiCityRuns": 0
+  },
+  "exitCriteria": {
+    "successRate": {
+      "value": 1,
+      "target": 0.9,
+      "pass": true
+    },
+    "noApiKeyLeaks": {
+      "count": 0,
+      "pass": true
+    },
+    "noHotelBoundaryIncoherent": {
+      "count": 0,
+      "pass": true
+    },
+    "urbanLegPolicy": {
+      "count": 2,
+      "pass": false
+    },
+    "averageScore": {
+      "value": 93.5,
+      "target": 85,
+      "pass": true
+    },
+    "noCriticalRemaining": {
+      "count": 4,
+      "pass": false
+    },
+    "hardGatesZero": {
+      "count": 1,
+      "pass": false
+    },
+    "overallPass": false
+  },
+  "runs": [
+    {
+      "runId": "S01-paris-rome-4d",
+      "runKind": "scenario",
+      "scenarioId": "paris-rome-4d",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S01-paris-rome-4d.json",
+      "startedAt": "2026-03-19T10:24:36.399Z",
+      "durationMs": 112488,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S01-paris-rome-4d-report.json",
+      "score": 95,
+      "critical": 1,
+      "warning": 6,
+      "info": 15
+    },
+    {
+      "runId": "S02-must-see-heavy",
+      "runKind": "scenario",
+      "scenarioId": "must-see-heavy",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S02-must-see-heavy.json",
+      "startedAt": "2026-03-19T10:26:28.893Z",
+      "durationMs": 1424,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S02-must-see-heavy-report.json",
+      "score": 94,
+      "critical": 1,
+      "warning": 5,
+      "info": 12
+    },
+    {
+      "runId": "S03-tokyo-fuji-7d",
+      "runKind": "scenario",
+      "scenarioId": "tokyo-fuji-7d",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S03-tokyo-fuji-7d.json",
+      "startedAt": "2026-03-19T10:26:30.320Z",
+      "durationMs": 5800015,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S03-tokyo-fuji-7d-report.json",
+      "score": 92,
+      "critical": 0,
+      "warning": 12,
+      "info": 3
+    },
+    {
+      "runId": "S04-naples-pompei-3d",
+      "runKind": "scenario",
+      "scenarioId": "naples-pompei-3d",
+      "filepath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S04-naples-pompei-3d.json",
+      "startedAt": "2026-03-19T12:03:10.344Z",
+      "durationMs": 15400599,
+      "success": true,
+      "reportPath": "/Users/zak/voyage-planner/app/scripts/debug-pipeline/results/capture-fixtures-v2/S04-naples-pompei-3d-report.json",
+      "score": 93,
+      "critical": 2,
+      "warning": 5,
+      "info": 3
+    }
+  ]
+}

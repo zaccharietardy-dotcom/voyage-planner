@@ -106,17 +106,21 @@ export function StepSummary({ data, onChange, onGenerate, isGenerating, onJumpTo
   };
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-serif font-bold mb-1">Résumé</h2>
-        <p className="text-sm text-muted-foreground">Vérifiez et lancez la génération</p>
+    <div className="space-y-12 max-w-[600px] mx-auto w-full">
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+          Résumé
+        </h2>
+        <p className="text-[17px] text-[#94a3b8] font-light">
+          Vérifiez et lancez la génération
+        </p>
       </div>
 
       {/* Destination hero card */}
-      <div className="relative rounded-2xl overflow-hidden border border-border/40 bg-zinc-900 shadow-2xl group">
+      <div className="relative rounded-[2rem] overflow-hidden border border-white/10 bg-[#0e1220]/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] group aspect-[2/1] w-full">
         {imageLoading && (
-          <div className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
-            <Compass className="h-8 w-8 text-zinc-700 animate-spin" />
+          <div className="absolute inset-0 bg-[#0a0f1c] animate-pulse flex items-center justify-center">
+            <Compass className="h-10 w-10 text-gold animate-spin" />
           </div>
         )}
         <img
@@ -124,15 +128,15 @@ export function StepSummary({ data, onChange, onGenerate, isGenerating, onJumpTo
           alt={destination}
           onLoad={() => setImageLoading(false)}
           className={cn(
-            "w-full h-48 object-cover transition-all duration-700",
+            "w-full h-full object-cover transition-all duration-1000",
             imageLoading ? "scale-110 blur-sm opacity-0" : "scale-100 blur-0 opacity-100"
           )}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
-        <div className="absolute bottom-4 left-5 right-5 z-10">
-          <h3 className="text-white text-2xl font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] tracking-tight">{destination || 'Destination'}</h3>
-          <p className="text-white/90 text-sm font-semibold drop-shadow-md flex items-center gap-2 mt-0.5">
-            <span className="bg-primary/20 backdrop-blur-sm px-2 py-0.5 rounded-md border border-primary/30">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent" />
+        <div className="absolute bottom-6 left-8 right-8 z-10">
+          <h3 className="text-white text-4xl font-serif font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] tracking-tight mb-2">{destination || 'Destination'}</h3>
+          <p className="text-white/90 text-sm font-semibold drop-shadow-md flex items-center gap-3">
+            <span className="bg-gold/20 backdrop-blur-md px-3 py-1 rounded-lg border border-gold/30 text-gold">
               {data.durationDays || 7} jours
             </span>
             {dateStr && (
@@ -143,42 +147,42 @@ export function StepSummary({ data, onChange, onGenerate, isGenerating, onJumpTo
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {data.groupType && (
           <button 
             type="button"
-            onClick={() => onJumpToStep?.(3)}
-            className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors group/card"
+            onClick={() => onJumpToStep?.(4)}
+            className="flex items-center gap-4 p-5 rounded-[1.5rem] bg-white/[0.03] border border-white/[0.05] text-left hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-300 group/card"
           >
-            <div className="p-2 rounded-full bg-blue-500/20 text-blue-400 group-hover/card:bg-blue-500/30 transition-colors">
-              <Users className="h-4 w-4" />
+            <div className="p-3.5 rounded-2xl bg-blue-500/10 text-blue-400 group-hover/card:bg-blue-500/20 transition-colors">
+              <Users className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover/card:text-blue-400 transition-colors">Groupe</p>
-              <p className="text-xs font-bold text-white">{GROUP_TYPE_LABELS[data.groupType]} ({data.groupSize})</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 group-hover/card:text-blue-400 transition-colors">Groupe</p>
+              <p className="text-[15px] font-bold text-white mt-1">{GROUP_TYPE_LABELS[data.groupType]} ({data.groupSize})</p>
             </div>
           </button>
         )}
         {(data.budgetLevel || data.budgetCustom) && (
           <button 
             type="button"
-            onClick={() => onJumpToStep?.(5)}
-            className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors group/card"
+            onClick={() => onJumpToStep?.(6)}
+            className="flex items-center gap-4 p-5 rounded-[1.5rem] bg-white/[0.03] border border-white/[0.05] text-left hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-300 group/card"
           >
-            <div className="p-2 rounded-full bg-green-500/20 text-green-400 group-hover/card:bg-green-500/30 transition-colors">
-              <Wallet className="h-4 w-4" />
+            <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-400 group-hover/card:bg-green-500/20 transition-colors">
+              <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover/card:text-green-400 transition-colors">Confort</p>
-              <p className="text-xs font-bold text-white capitalize">{data.budgetCustom ? `${data.budgetCustom}€` : BUDGET_LABELS[data.budgetLevel as keyof typeof BUDGET_LABELS]?.label}</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 group-hover/card:text-green-400 transition-colors">Confort</p>
+              <p className="text-[15px] font-bold text-white capitalize mt-1">{data.budgetCustom ? `${data.budgetCustom}€` : BUDGET_LABELS[data.budgetLevel as keyof typeof BUDGET_LABELS]?.label}</p>
             </div>
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 pt-1">
+      <div className="flex flex-wrap gap-2.5 pt-2">
         {data.activities?.map((act) => (
-          <span key={act} className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">
+          <span key={act} className="inline-flex items-center px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest bg-gold/10 text-gold border border-gold/20 shadow-sm">
             {ACTIVITY_LABELS[act] || act}
           </span>
         ))}
@@ -212,14 +216,16 @@ export function StepSummary({ data, onChange, onGenerate, isGenerating, onJumpTo
       </div>
 
       {/* Generate button */}
-      <Button
-        className="w-full h-14 text-lg font-bold gap-3 rounded-2xl bg-gold-gradient text-black shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-        onClick={handleGenerateClick}
-        disabled={isGenerating}
-      >
-        <Compass className={cn("h-6 w-6", isGenerating && "animate-spin")} />
-        {isGenerating ? 'Génération...' : 'Générer mon voyage'}
-      </Button>
+      <div className="pt-6">
+        <Button
+          className="w-full h-16 text-lg font-bold gap-3 rounded-[2rem] bg-gold-gradient text-black shadow-[0_10px_30px_rgba(197,160,89,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+          onClick={handleGenerateClick}
+          disabled={isGenerating}
+        >
+          <Compass className={cn("h-6 w-6", isGenerating && "animate-spin")} />
+          {isGenerating ? 'Génération...' : 'Générer mon voyage'}
+        </Button>
+      </div>
     </div>
   );
 }

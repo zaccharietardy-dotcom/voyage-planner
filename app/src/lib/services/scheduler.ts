@@ -423,7 +423,7 @@ export class DayScheduler {
 
           const toRemove = priorityA <= priorityB ? itemA : itemB;
 
-          console.log(`[Scheduler] Conflict: "${itemA.title}" (priority=${priorityA}) vs "${itemB.title}" (priority=${priorityB}) → removing "${toRemove.title}"`);
+          console.debug(`[Scheduler] Conflict: "${itemA.title}" (priority=${priorityA}) vs "${itemB.title}" (priority=${priorityB}) → removing "${toRemove.title}"`);
 
           // Supprimer l'item
           const index = this.items.findIndex(item => item.id === toRemove.id);
