@@ -1,6 +1,5 @@
 import { View, Text, Pressable, Share, Alert } from 'react-native';
 import { Link2, Globe, Lock, Users, Copy, Share2 } from 'lucide-react-native';
-import * as Clipboard from 'expo-linking';
 import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';

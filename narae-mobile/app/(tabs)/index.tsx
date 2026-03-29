@@ -138,7 +138,7 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
 }) {
   const { data: trips, isLoading } = useApi(
     () => (userId ? fetchMyTrips() : Promise.resolve([])),
-    [userId],
+    [userId ?? null],
   );
 
   const recentTrips = (trips ?? []).slice(0, 5);

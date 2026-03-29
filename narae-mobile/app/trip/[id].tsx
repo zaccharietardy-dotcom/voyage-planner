@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, SectionList, ScrollView, Pressable, Share, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
@@ -66,11 +66,8 @@ export default function TripDetailScreen() {
   const router = useRouter();
   const { height: screenH } = useWindowDimensions();
   const [activeTab, setActiveTab] = useState<Tab>('itinerary');
-  const [selectedItem, setSelectedItem] = useState<TripItem | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [actionItem, setActionItem] = useState<TripItem | null>(null);
+  const [modalItem, setModalItem] = useState<TripItem | null>(null);
+  const [openModal, setOpenModal] = useState<null | 'detail' | 'actions' | 'chat' | 'share' | 'calendar'>(null);
   const { isOnline } = useNetworkStatus();
   const [bookedItems, setBookedItems] = useState<Record<string, { booked: boolean }>>({});
 
@@ -78,13 +75,13 @@ export default function TripDetailScreen() {
 
   const trip: Trip | null = row?.data ?? null;
 
-  // Initialize booked items from trip data + auto-cache
-  useMemo(() => {
+  // Initialize booked items from trip data
+  useEffect(() => {
     if (trip?.bookedItems) setBookedItems(trip.bookedItems);
   }, [trip?.bookedItems]);
 
   // Auto-cache trip for offline access
-  useMemo(() => {
+  useEffect(() => {
     if (row) cacheTripLocally(row).catch(() => {});
   }, [row]);
 
@@ -93,7 +90,7 @@ export default function TripDetailScreen() {
     return trip.days.map((day: TripDay) => ({ day, data: day.items }));
   }, [trip]);
 
-  const handleShare = async () => setShareOpen(true);
+  const handleShare = async () => setOpenModal('share');
 
   const handleBookingToggle = useCallback(async (itemId: string) => {
     setBookedItems((prev) => {
@@ -236,8 +233,8 @@ export default function TripDetailScreen() {
               item={item}
               isFirst={index === 0}
               isLast={index === section.data.length - 1}
-              onPress={() => setSelectedItem(item)}
-              onLongPress={() => setActionItem(item)}
+              onPress={() => { setModalItem(item); setOpenModal('detail'); }}
+              onLongPress={() => { setModalItem(item); setOpenModal('actions'); }}
             />
           )}
           contentContainerStyle={{ paddingBottom: 100 }}
@@ -246,7 +243,7 @@ export default function TripDetailScreen() {
         <View style={{ flex: 1 }}>
           {headerContent}
           <View style={{ flex: 1, minHeight: screenH * 0.5 }}>
-            <TripMap days={trip.days || []} onMarkerPress={setSelectedItem} />
+            <TripMap days={trip.days || []} onMarkerPress={(item) => { setModalItem(item); setOpenModal('detail'); }} />
           </View>
         </View>
       ) : activeTab === 'booking' && trip ? (
@@ -270,7 +267,7 @@ export default function TripDetailScreen() {
       <View style={{ position: 'absolute', bottom: 100, right: 20, gap: 12, alignItems: 'center' }}>
         {/* Calendar export */}
         <Pressable
-          onPress={() => setCalendarOpen(true)}
+          onPress={() => setOpenModal('calendar')}
           style={{
             width: 48, height: 48, borderRadius: 16,
             backgroundColor: colors.surface,
@@ -285,7 +282,7 @@ export default function TripDetailScreen() {
 
         {/* Chat */}
         <Pressable
-          onPress={() => setChatOpen(true)}
+          onPress={() => setOpenModal('chat')}
           style={{
             width: 56, height: 56, borderRadius: 18,
             backgroundColor: colors.gold,
@@ -299,27 +296,27 @@ export default function TripDetailScreen() {
       </View>
 
       {/* Activity detail */}
-      <BottomSheet isOpen={!!selectedItem} onClose={() => setSelectedItem(null)} height={0.7}>
-        {selectedItem && <ActivityDetail item={selectedItem} />}
+      <BottomSheet isOpen={openModal === 'detail'} onClose={() => setOpenModal(null)} height={0.7}>
+        {modalItem && <ActivityDetail item={modalItem} />}
       </BottomSheet>
 
       {/* Chat panel */}
-      <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} tripId={id!} />
+      <ChatPanel isOpen={openModal === 'chat'} onClose={() => setOpenModal(null)} tripId={id!} />
 
       {/* Activity actions */}
       <ActivityActions
-        item={actionItem}
-        isOpen={!!actionItem}
-        onClose={() => setActionItem(null)}
+        item={modalItem}
+        isOpen={openModal === 'actions'}
+        onClose={() => setOpenModal(null)}
       />
 
       {/* Calendar export */}
-      {trip && <CalendarExport isOpen={calendarOpen} onClose={() => setCalendarOpen(false)} trip={trip} />}
+      {trip && <CalendarExport isOpen={openModal === 'calendar'} onClose={() => setOpenModal(null)} trip={trip} />}
 
       {/* Share panel */}
       <SharePanel
-        isOpen={shareOpen}
-        onClose={() => setShareOpen(false)}
+        isOpen={openModal === 'share'}
+        onClose={() => setOpenModal(null)}
         tripId={id!}
         destination={row.destination}
         visibility={row.visibility}

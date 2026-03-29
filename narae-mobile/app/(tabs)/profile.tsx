@@ -28,7 +28,7 @@ export default function ProfileScreen() {
 
   const { data: trips, isLoading: tripsLoading } = useApi(
     () => (user ? fetchMyTrips() : Promise.resolve([])),
-    [user?.id],
+    [user?.id ?? null],
   );
 
   // Not logged in

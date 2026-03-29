@@ -18,6 +18,7 @@
     "expo-blur": "55.0.11-canary-20260328-2049187",
     "expo-calendar": "55.0.11-canary-20260328-2049187",
     "expo-constants": "55.0.10-canary-20260328-2049187",
+    "expo-file-system": "55.0.13-canary-20260328-2049187",
     "expo-font": "55.0.5-canary-20260328-2049187",
     "expo-haptics": "55.0.10-canary-20260328-2049187",
     "expo-linear-gradient": "55.0.10-canary-20260328-2049187",

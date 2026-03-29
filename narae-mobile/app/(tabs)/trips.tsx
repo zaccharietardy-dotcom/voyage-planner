@@ -44,7 +44,7 @@ export default function TripsScreen() {
 
   const { data: trips, isLoading, refetch } = useApi(
     () => (user ? fetchMyTrips() : Promise.resolve([])),
-    [user?.id],
+    [user?.id ?? null],
   );
 
   useRefreshOnFocus(refetch);

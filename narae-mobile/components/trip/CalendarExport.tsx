@@ -3,7 +3,7 @@ import { CalendarPlus, Apple, Globe, FileDown } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
-import { exportTripToAppleCalendar } from '@/lib/calendar';
+import { exportTripToAppleCalendar, getGoogleCalendarUrl } from '@/lib/calendar';
 import { shareICSFile } from '@/lib/ics';
 import type { Trip } from '@/lib/types/trip';
 
@@ -33,7 +33,6 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
     const firstItem = trip.days?.[0]?.items?.[0];
     const firstDay = trip.days?.[0];
     if (firstItem && firstDay) {
-      const { getGoogleCalendarUrl } = require('@/lib/calendar');
       const url = getGoogleCalendarUrl(firstItem, firstDay);
       Linking.openURL(url);
     }
