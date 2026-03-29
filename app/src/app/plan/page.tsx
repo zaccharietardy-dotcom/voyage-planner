@@ -74,11 +74,11 @@ export default function PlanPage() {
         const check = await res.json();
         if (!check.allowed) {
           if (check.action === 'login') {
-            toast.error('Connectez-vous pour planifier un voyage');
-            router.replace('/login?redirect=/plan');
+            const msg = encodeURIComponent('Connectez-vous pour planifier un voyage');
+            router.replace(`/login?redirect=/plan&reason=${msg}`);
           } else if (check.action === 'upgrade') {
-            toast.error(check.reason || 'Passez à Pro pour créer plus de voyages');
-            router.replace('/pricing');
+            const msg = encodeURIComponent(check.reason || 'Vous avez atteint votre limite de voyages gratuits. Passez à Pro pour continuer.');
+            router.replace(`/pricing?reason=${msg}`);
           }
         }
       } catch {
@@ -265,13 +265,13 @@ export default function PlanPage() {
 
       if (!check.allowed) {
         if (check.action === 'login') {
-          toast.error(check.reason);
-          router.push('/login?redirect=/plan');
+          const msg = encodeURIComponent(check.reason || 'Connectez-vous pour générer votre voyage');
+          router.push(`/login?redirect=/plan&reason=${msg}`);
           return;
         }
         if (check.action === 'upgrade') {
-          toast.error(check.reason);
-          router.push('/pricing');
+          const msg = encodeURIComponent(check.reason || 'Passez à Pro pour créer plus de voyages');
+          router.push(`/pricing?reason=${msg}`);
           return;
         }
       }

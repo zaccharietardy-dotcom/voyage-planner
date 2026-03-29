@@ -8,6 +8,7 @@ export function PricingContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
   const canceled = searchParams.get('canceled');
+  const reason = searchParams.get('reason');
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -17,6 +18,13 @@ export function PricingContent() {
           Planifiez vos voyages avec Narae. Apple Pay, Google Pay et CB acceptés.
         </p>
       </div>
+
+      {reason && (
+        <div className="mb-8 rounded-xl border border-gold/30 bg-gold/5 p-4 flex items-center gap-3">
+          <XCircle className="h-5 w-5 text-gold shrink-0" />
+          <p className="text-sm font-medium text-gold">{decodeURIComponent(reason)}</p>
+        </div>
+      )}
 
       {success && (
         <div className="mb-8 rounded-xl border border-green-500/30 bg-green-500/5 p-4 flex items-center gap-3">

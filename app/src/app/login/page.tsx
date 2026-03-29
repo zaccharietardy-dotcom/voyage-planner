@@ -28,6 +28,7 @@ function LoginContent() {
 
   const redirectTo = searchParams.get('redirect') || '/mes-voyages';
   const errorParam = searchParams.get('error');
+  const reasonParam = searchParams.get('reason');
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -160,6 +161,13 @@ function LoginContent() {
             <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">Bon retour parmi nous</h1>
             <p className="text-slate-400 text-sm md:text-base">Accédez à vos carnets de route et vos projets d'évasion.</p>
           </div>
+
+          {/* Reason banner (from preflight redirect) */}
+          {reasonParam && (
+            <div className="mb-6 p-4 rounded-2xl bg-gold/10 border border-gold/20">
+              <p className="text-gold text-sm font-medium">{decodeURIComponent(reasonParam)}</p>
+            </div>
+          )}
 
           <div className="space-y-8">
             <div className="space-y-3">
