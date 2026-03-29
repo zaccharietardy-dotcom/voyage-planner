@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
       "media-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://appleid.apple.com",
     ].join('; ');
 
     return [
