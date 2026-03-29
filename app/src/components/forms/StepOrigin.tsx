@@ -42,8 +42,21 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     onChange({ origin: city });
   }, [onChange]);
 
+  const [geoError, setGeoError] = useState<string | null>(null);
+
   const handleGeolocation = useCallback(async () => {
-    if (!navigator.geolocation) return;
+    setGeoError(null);
+
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      setGeoError('La géolocalisation nécessite une connexion HTTPS sécurisée.');
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setGeoError('La géolocalisation n\'est pas disponible sur votre navigateur.');
+      return;
+    }
+
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -59,12 +72,25 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
               homeCoords: { lat: latitude, lng: longitude },
               homeAddress: data.address,
             });
+          } else {
+            setGeoError('Impossible de déterminer votre ville.');
           }
-        } catch { /* ignore */ }
+        } catch {
+          setGeoError('Erreur lors de la récupération de votre position.');
+        }
         setIsLocating(false);
       },
-      () => setIsLocating(false),
-      { enableHighAccuracy: true, timeout: 10000 },
+      (error) => {
+        setIsLocating(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setGeoError('Autorisez la géolocalisation dans les réglages de votre navigateur (Safari : Réglages du site > Localisation), puis réessayez.');
+        } else if (error.code === error.TIMEOUT) {
+          setGeoError('La localisation a pris trop de temps. Réessayez.');
+        } else {
+          setGeoError('Impossible de récupérer votre position.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   }, [onChange]);
 
@@ -132,6 +158,10 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
             {isLocating ? 'Localisation...' : 'Utiliser ma position actuelle'}
           </span>
         </Button>
+
+        {geoError && (
+          <p className="text-sm text-red-400 text-center mt-2">{geoError}</p>
+        )}
       </div>
     </motion.div>
   );

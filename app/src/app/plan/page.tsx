@@ -595,9 +595,9 @@ export default function PlanPage() {
           </AnimatePresence>
         </div>
 
-        {/* Navigation - Moved OUTSIDE the container to match screenshot */}
+        {/* Navigation - sticky bottom */}
         {currentStep < 7 && (
-          <div className="mt-8 flex justify-between items-center max-w-xl mx-auto px-4">
+          <div className="sticky bottom-4 mt-8 flex justify-between items-center max-w-xl mx-auto px-4 z-50">
             {currentStep === 1 ? (
               <Button
                 variant="ghost"
