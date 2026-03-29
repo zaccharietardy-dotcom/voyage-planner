@@ -182,7 +182,7 @@ export default function MesVoyagesPage() {
                   Journal de bord
                 </Link>
               </Button>
-              <Button className="h-14 rounded-2xl bg-gold-gradient text-[#020617] px-8 text-[10px] font-bold uppercase tracking-widest gap-2 shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all" asChild>
+              <Button className="h-14 rounded-2xl bg-gold-gradient !text-[#020617] px-8 text-[10px] font-bold uppercase tracking-widest gap-2 shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all" asChild>
                 <Link href="/plan">
                   <Plus className="h-5 w-5" />
                   Nouveau Voyage
@@ -259,7 +259,7 @@ export default function MesVoyagesPage() {
               transition={{ delay: 0.8 }}
               className="text-center"
             >
-              <Button size="lg" className="h-16 px-12 rounded-2xl bg-gold-gradient text-[#020617] text-lg font-bold shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all" asChild>
+              <Button size="lg" className="h-16 px-12 rounded-2xl bg-gold-gradient !text-[#020617] text-lg font-bold shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all" asChild>
                 <Link href="/plan">
                   <Plus className="h-5 w-5 mr-2" />
                   Planifier mon premier voyage
