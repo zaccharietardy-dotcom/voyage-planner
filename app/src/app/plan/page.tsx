@@ -41,8 +41,8 @@ const STEPS = [
 
 const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
   durationDays: 4,
-  groupSize: 2,
-  groupType: 'couple',
+  groupSize: 1,
+  groupType: 'solo',
   transport: 'optimal',
   carRental: false,
   budgetLevel: 'moderate',
@@ -65,6 +65,28 @@ export default function PlanPage() {
   const [pipelineStep, setPipelineStep] = useState<string | undefined>(undefined);
   const [currentQuestion, setCurrentQuestion] = useState<PipelineQuestion | null>(null);
   const questionResolverRef = useRef<((optionId: string) => void) | null>(null);
+
+  // Gate: check auth + quota IMMEDIATELY on page load
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        const res = await fetch('/api/generate/preflight');
+        const check = await res.json();
+        if (!check.allowed) {
+          if (check.action === 'login') {
+            toast.error('Connectez-vous pour planifier un voyage');
+            router.replace('/login?redirect=/plan');
+          } else if (check.action === 'upgrade') {
+            toast.error(check.reason || 'Passez à Pro pour créer plus de voyages');
+            router.replace('/pricing');
+          }
+        }
+      } catch {
+        // Fail open — don't block if preflight errors
+      }
+    };
+    checkAccess();
+  }, [router]);
 
   // Load template preferences if coming from a template card
   useEffect(() => {
