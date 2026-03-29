@@ -694,6 +694,39 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
           <p className="text-xs text-muted-foreground">
             Fonctionne dans toutes les langues (français, anglais, chinois, arabe...)
           </p>
+
+          {/* Popular destinations */}
+          {!stages[0]?.city && (
+            <div className="space-y-4 pt-4">
+              <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Destinations populaires</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { name: 'Paris', emoji: '🗼', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300&h=200&fit=crop' },
+                  { name: 'Rome', emoji: '🏛️', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=300&h=200&fit=crop' },
+                  { name: 'Barcelona', emoji: '🏖️', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=300&h=200&fit=crop' },
+                  { name: 'Tokyo', emoji: '🏯', img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300&h=200&fit=crop' },
+                  { name: 'Amsterdam', emoji: '🚲', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=300&h=200&fit=crop' },
+                  { name: 'Marrakech', emoji: '🕌', img: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=300&h=200&fit=crop' },
+                ].map((dest) => (
+                  <button
+                    key={dest.name}
+                    type="button"
+                    onClick={() => {
+                      hapticSelection();
+                      updateStage(0, { city: dest.name, days: getSuggestedDuration(dest.name, data.origin) });
+                    }}
+                    className="relative overflow-hidden rounded-2xl aspect-[4/3] group border border-white/5 hover:border-gold/30 transition-all"
+                  >
+                    <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-3 left-3">
+                      <p className="text-white font-bold text-sm">{dest.emoji} {dest.name}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

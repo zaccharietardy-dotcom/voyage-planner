@@ -35,7 +35,7 @@ export function Header() {
   }, []);
 
   // Hide on pages with their own header/fullscreen layout
-  const hidden = pathname.startsWith('/trip/') || pathname === '/plan' || pathname === '/globe';
+  const hidden = pathname.startsWith('/trip/');
   if (hidden) return null;
 
   const navLinks = [
