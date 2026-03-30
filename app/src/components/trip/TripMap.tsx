@@ -226,6 +226,32 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
   });
 }
 
+function createEmojiIcon(L: any, type: string, dayNumber: number) {
+  const emoji = TYPE_EMOJIS[type] || '📍';
+  const bgColors: Record<string, string> = {
+    restaurant: '#F97316',
+    hotel: '#8B5CF6',
+  };
+  const bg = bgColors[type] || '#64748b';
+  const size = 28;
+
+  return L.divIcon({
+    className: 'emoji-marker',
+    html: `<div style="
+      width:${size}px;height:${size}px;
+      border-radius:50%;
+      background:${bg};
+      border:2px solid white;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 8px rgba(0,0,0,0.25);
+      font-size:14px;
+    ">${emoji}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2],
+  });
+}
+
 function safeImageUrl(url: string): string {
   if (!url) return '';
   if (url.startsWith('/')) return url;
@@ -595,11 +621,18 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     const bounds = L.latLngBounds([]);
     let globalIndex = 1;
 
-    // Add markers (flights are represented by the arc + plane icon below)
+    // Add markers — only activities get sequential numbers
+    // Transport, checkin, checkout, luggage, free_time, parking are hidden from map to reduce clutter
+    const HIDDEN_TYPES = new Set(['transport', 'flight', 'checkin', 'checkout', 'luggage', 'free_time', 'parking']);
     displayItems.forEach((item) => {
-      if (!item.latitude || !item.longitude || item.type === 'flight') return;
-      const num = mapNumbers?.get(item.id) ?? globalIndex++;
-      const icon = createNumberedIcon(L, num, item.type, item.dayNumber, false);
+      if (!item.latitude || !item.longitude) return;
+      if (HIDDEN_TYPES.has(item.type)) return;
+      // Activities get sequential numbers, restaurants/hotels get emoji-only (num=0)
+      const isNumbered = item.type === 'activity';
+      const num = isNumbered ? (mapNumbers?.get(item.id) ?? globalIndex++) : 0;
+      const icon = isNumbered
+        ? createNumberedIcon(L, num, item.type, item.dayNumber, false)
+        : createEmojiIcon(L, item.type, item.dayNumber);
 
       const marker = L.marker([item.latitude, item.longitude], { icon, interactive: true })
         .bindPopup(getPopupContent(item, num), {
