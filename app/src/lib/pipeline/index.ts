@@ -46,6 +46,7 @@ import { computeTravelTimes } from './step7b-travel-times';
 import { enrichRestaurantPool } from './step8-place-restaurants';
 import { unifiedScheduleV3Days } from './step8910-unified-schedule';
 import { validateContracts } from './step11-contracts';
+import { geoReorderScheduledDay } from './utils/geo-reorder';
 import { decorateTrip } from './step12-decorate';
 import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
@@ -652,6 +653,23 @@ async function runPipelineFromClusters(
       if (day1.items.length < beforeCount2) {
         day1.items.forEach((item, idx) => { item.orderIndex = idx; });
         console.log(`[Pipeline V3] Post-injection sweep: removed ${beforeCount2 - day1.items.length} pre-arrival items on Day ${day1.dayNumber}`);
+      }
+    }
+  }
+
+  // Step 10b: Post-scheduler geographic reorder (reduce zigzag)
+  // Swap activity time slots to minimize total travel distance per day
+  {
+    for (const day of scheduledDays) {
+      const actCount = day.items.filter((i) => i.type === 'activity').length;
+      if (actCount > 2) {
+        day.items = geoReorderScheduledDay(
+          day.items,
+          hotel?.latitude,
+          hotel?.longitude,
+        );
+        // Re-assign orderIndex after reorder
+        day.items.forEach((item, idx) => { item.orderIndex = idx; });
       }
     }
   }

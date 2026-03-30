@@ -206,3 +206,129 @@ export function geoReorderDayItems(
   // Rebuild items list: anchors + reordered activities
   return [...anchors, ...route];
 }
+
+/**
+ * Post-scheduler geographic reorder for a single scheduled day.
+ *
+ * Unlike geoReorderDayItems() which works on unscheduled items,
+ * this function works on ALREADY SCHEDULED items with fixed time slots.
+ *
+ * Algorithm:
+ * 1. Extract all activity-type items (not restaurants, transport, checkin, etc.)
+ * 2. Find the optimal geographic order via greedy NN + 2-opt
+ * 3. Swap the time slots: activity N in optimal order gets the time slot of activity N in original order
+ * 4. Re-sort all items by startTime to rebuild the correct timeline
+ *
+ * This preserves restaurant slots (lunch at 12:30, dinner at 20:00) while
+ * eliminating zigzag patterns in the activity ordering.
+ */
+export function geoReorderScheduledDay(
+  items: TripItem[],
+  hotelLat?: number,
+  hotelLng?: number,
+): TripItem[] {
+  // Extract only activities with valid coords
+  const activities = items.filter(
+    (it) =>
+      it.type === 'activity' &&
+      it.latitude && it.longitude &&
+      it.latitude !== 0 && it.longitude !== 0
+  );
+
+  if (activities.length <= 2) return items; // Nothing to optimize
+
+  // Save original time slots in order
+  const originalSlots = activities
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+    .map((a) => ({
+      startTime: a.startTime,
+      endTime: a.endTime,
+      orderIndex: a.orderIndex,
+    }));
+
+  // Find optimal geographic order using greedy NN + 2-opt
+  const dist = (a: TripItem, b: TripItem): number =>
+    calculateDistance(a.latitude, a.longitude, b.latitude, b.longitude);
+
+  // Greedy nearest-neighbor from all starting points
+  const buildGreedy = (startIdx: number): TripItem[] => {
+    const remaining = [...activities];
+    const route: TripItem[] = [remaining.splice(startIdx, 1)[0]];
+    while (remaining.length > 0) {
+      const last = route[route.length - 1];
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      for (let i = 0; i < remaining.length; i++) {
+        const d = dist(last, remaining[i]);
+        if (d < bestDist) {
+          bestDist = d;
+          bestIdx = i;
+        }
+      }
+      route.push(remaining.splice(bestIdx, 1)[0]);
+    }
+    return route;
+  };
+
+  const routeCost = (route: TripItem[]): number => {
+    let total = 0;
+    // Start from hotel if available
+    if (hotelLat && hotelLng && route.length > 0) {
+      total += calculateDistance(hotelLat, hotelLng, route[0].latitude, route[0].longitude);
+    }
+    for (let i = 0; i < route.length - 1; i++) {
+      total += dist(route[i], route[i + 1]);
+    }
+    return total;
+  };
+
+  // Try all starting points
+  let bestRoute: TripItem[] = [];
+  let bestCost = Infinity;
+  for (let i = 0; i < activities.length; i++) {
+    const candidate = buildGreedy(i);
+    const cost = routeCost(candidate);
+    if (cost < bestCost) {
+      bestCost = cost;
+      bestRoute = candidate;
+    }
+  }
+
+  // 2-opt improvement
+  let improved = true;
+  let route = [...bestRoute];
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < route.length - 2; i++) {
+      for (let k = i + 1; k < route.length - 1; k++) {
+        const nextRoute = [
+          ...route.slice(0, i + 1),
+          ...route.slice(i + 1, k + 1).reverse(),
+          ...route.slice(k + 1),
+        ];
+        const nextCost = routeCost(nextRoute);
+        if (nextCost + 0.01 < bestCost) {
+          route = nextRoute;
+          bestCost = nextCost;
+          improved = true;
+        }
+      }
+    }
+  }
+
+  // Swap time slots: optimized activity i gets the time slot of original activity i
+  const originalCost = routeCost(activities.sort((a, b) => a.startTime.localeCompare(b.startTime)));
+  for (let i = 0; i < route.length; i++) {
+    route[i].startTime = originalSlots[i].startTime;
+    route[i].endTime = originalSlots[i].endTime;
+    route[i].orderIndex = originalSlots[i].orderIndex;
+  }
+
+  if (bestCost < originalCost - 0.1) {
+    const saved = originalCost - bestCost;
+    console.log(`[Geo-Reorder-Post] Day optimized: saved ${saved.toFixed(1)}km (${originalCost.toFixed(1)}km → ${bestCost.toFixed(1)}km) for ${activities.length} activities`);
+  }
+
+  // Re-sort all items by startTime
+  return items.sort((a, b) => a.startTime.localeCompare(b.startTime));
+}
