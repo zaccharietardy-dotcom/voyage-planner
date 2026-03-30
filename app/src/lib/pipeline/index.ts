@@ -881,6 +881,46 @@ async function runPipelineFromClusters(
     sameFamilyOverloadCount,
   };
 
+  // Calculate cost breakdown from actual scheduled items
+  const costBreakdown = { flights: 0, accommodation: 0, food: 0, activities: 0, transport: 0, parking: 0, other: 0 };
+  for (const day of trip.days) {
+    for (const item of day.items) {
+      const cost = Number(item.estimatedCost || 0);
+      if (cost <= 0) continue;
+      switch (item.type) {
+        case 'flight': costBreakdown.flights += cost; break;
+        case 'restaurant': costBreakdown.food += cost; break;
+        case 'activity': costBreakdown.activities += cost; break;
+        case 'transport': costBreakdown.transport += cost; break;
+        case 'parking': costBreakdown.parking += cost; break;
+        default: break;
+      }
+    }
+  }
+  if (hotel?.pricePerNight) {
+    const nights = Math.max(1, preferences.durationDays - 1);
+    costBreakdown.accommodation = hotel.pricePerNight * nights;
+  }
+  if (data.outboundFlight?.price && costBreakdown.flights === 0) {
+    costBreakdown.flights += data.outboundFlight.price;
+    if (data.returnFlight?.price) costBreakdown.flights += data.returnFlight.price;
+  }
+  trip.costBreakdown = costBreakdown;
+  trip.totalEstimatedCost = Object.values(costBreakdown).reduce((s, v) => s + v, 0);
+
+  for (const day of trip.days) {
+    let actCost = 0, foodCost = 0, transCost = 0;
+    for (const item of day.items) {
+      const cost = Number(item.estimatedCost || 0);
+      if (item.type === 'activity') actCost += cost;
+      else if (item.type === 'restaurant') foodCost += cost;
+      else if (item.type === 'transport') transCost += cost;
+    }
+    day.dailyBudget = { activities: actCost, food: foodCost, transport: transCost, total: actCost + foodCost + transCost };
+  }
+
+  console.log(`[Pipeline V3] Budget: ${trip.totalEstimatedCost}€ total (flights: ${costBreakdown.flights}€, hotel: ${costBreakdown.accommodation}€, food: ${costBreakdown.food}€, activities: ${costBreakdown.activities}€)`);
+
   return trip;
 }
 

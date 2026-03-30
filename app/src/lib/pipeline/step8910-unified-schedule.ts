@@ -849,7 +849,8 @@ export function unifiedScheduleV3Days(
     const isArrivalDay = timeWindow?.hasArrivalTransport ?? false;
     const isDepartureDay = timeWindow?.hasDepartureTransport ?? false;
     const nextDayIsDeparture = timeWindows.find(w => w.dayNumber === cluster.dayNumber + 1)?.hasDepartureTransport ?? false;
-    const isEligibleForNightlife = hasNightlifePref && !isDepartureDay && !nextDayIsDeparture && !isTransitOnly;
+    const isGroupCompatibleForNightlife = preferences.groupType !== 'family_with_kids';
+    const isEligibleForNightlife = hasNightlifePref && isGroupCompatibleForNightlife && !isDepartureDay && !nextDayIsDeparture && !isTransitOnly;
 
     if (isEligibleForNightlife) {
       // Arrival day: cap at 1 nightlife activity (traveler just arrived)

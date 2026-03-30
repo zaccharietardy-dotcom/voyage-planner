@@ -558,6 +558,29 @@ export function scoreAndSelectActivities(
     return true;
   });
 
+  // 5b. HARD FILTERS — remove incompatible activities (not just penalize)
+  const maxPrice = data.budgetStrategy?.maxPricePerActivity;
+  const beforeHardFilter = scored.length;
+
+  // Hard filter: nightlife for family_with_kids (unless explicitly requested)
+  if (preferences.groupType === 'family_with_kids' && !preferences.activities?.includes('nightlife')) {
+    scored = scored.filter(a => !isNightlifeActivity(a));
+  }
+
+  // Hard filter: activities way over budget (> 2× maxPrice, except must-sees)
+  if (maxPrice && maxPrice > 0) {
+    scored = scored.filter(a => {
+      if (a.mustSee) return true;
+      const price = Number(a.estimatedCost || 0);
+      if (price <= 0) return true; // No price data = keep
+      return price <= maxPrice * 2;
+    });
+  }
+
+  if (scored.length < beforeHardFilter) {
+    console.log(`[Pipeline V2] Hard filters removed ${beforeHardFilter - scored.length} activities (nightlife/budget incompatible)`);
+  }
+
   // 6. Sort by score descending
   scored.sort((a, b) => b.score - a.score);
 
