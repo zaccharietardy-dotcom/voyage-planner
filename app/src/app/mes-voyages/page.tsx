@@ -229,53 +229,32 @@ export default function MesVoyagesPage() {
               </p>
             </div>
 
-            {/* How it works */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-              {[
-                { icon: <MapPin className="h-5 w-5" />, title: 'Choisissez', desc: 'Destination, dates, style de voyage' },
-                { icon: <Clock className="h-5 w-5" />, title: '2 minutes', desc: 'Notre algorithme génère votre itinéraire' },
-                { icon: <Navigation className="h-5 w-5" />, title: 'Partez !', desc: 'Activités, restos, hôtels — tout est planifié' },
-              ].map((step, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.15 }}
-                  className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-center"
-                >
-                  <div className="w-10 h-10 mx-auto rounded-xl bg-gold/10 flex items-center justify-center text-gold mb-3">
-                    {step.icon}
-                  </div>
-                  <h3 className="font-bold text-sm mb-1">{step.title}</h3>
-                  <p className="text-xs text-muted-foreground">{step.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* CTA */}
+            {/* CTA — Voyage sur mesure */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="text-center"
+              transition={{ delay: 0.4 }}
+              className="text-center mb-6"
             >
               <Button size="lg" className="h-16 px-12 rounded-2xl bg-gold-gradient !text-[#020617] text-lg font-bold shadow-xl shadow-gold/20 hover:scale-105 active:scale-95 transition-all" asChild>
                 <Link href="/plan">
                   <Plus className="h-5 w-5 mr-2" />
-                  Planifier mon premier voyage
+                  Créer un voyage sur mesure
                 </Link>
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">Gratuit — aucune carte requise</p>
+              <p className="text-xs text-muted-foreground mt-3">
+                Choisissez destination, durée, budget — itinéraire généré en 2 min
+              </p>
             </motion.div>
 
             {/* Trip templates */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 }}
-              className="mt-16"
+              transition={{ delay: 0.6 }}
+              className="mt-12"
             >
-              <TripTemplates title="Ou partez d'un modèle" maxItems={6} />
+              <TripTemplates title="Ou partez d'une inspiration" maxItems={6} />
             </motion.div>
           </motion.div>
         ) : (

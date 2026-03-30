@@ -72,13 +72,14 @@ export function TripTemplates({ title = 'Inspirations populaires', maxItems = 6,
               <div className="p-3">
                 <p className="text-sm font-bold group-hover:text-gold transition-colors">{t.title}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{t.subtitle}</p>
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {t.tags.map((tag) => (
-                    <span key={tag} className="text-[9px] font-bold text-gold/70 bg-gold/10 px-1.5 py-0.5 rounded">
-                      {tag}
-                    </span>
-                  ))}
+                {/* Duration + Tags */}
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-[10px] font-black text-white bg-white/10 px-2 py-0.5 rounded-md">
+                    {t.preferences.durationDays}j
+                  </span>
+                  <span className="text-[10px] font-bold text-gold/70 bg-gold/10 px-1.5 py-0.5 rounded">
+                    {t.preferences.groupSize === 1 ? 'Solo' : `${t.preferences.groupSize} pers.`}
+                  </span>
                 </div>
               </div>
               <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
