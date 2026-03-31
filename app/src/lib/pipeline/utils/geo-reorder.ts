@@ -297,20 +297,57 @@ export function geoReorderScheduledDay(
     return items; // No improvement, keep original
   }
 
+  // SAFETY CHECK 1: Validate opening hours before applying reorder
+  // If any activity would be placed outside its opening hours, abort
+  for (let i = 0; i < route.length; i++) {
+    const slot = slots[i];
+    const activity = route[i];
+    const slotStartMin = timeToMinutes(slot.startTime);
+    const slotEndMin = timeToMinutes(slot.endTime);
+
+    // Check openingHours if available
+    if (activity.openingHours) {
+      const openMin = timeToMinutes(activity.openingHours.open);
+      const closeMin = timeToMinutes(activity.openingHours.close);
+      // Activity must start after opening and end before closing
+      if (slotStartMin < openMin - 30 || slotEndMin > closeMin + 15) {
+        console.log(`[Geo-Reorder-Post] Aborted: "${activity.title}" can't fit in ${slot.startTime}-${slot.endTime} (opens ${activity.openingHours.open}, closes ${activity.openingHours.close})`);
+        return items; // Keep original order
+      }
+    }
+  }
+
+  // SAFETY CHECK 2: Duration mismatch guard
+  // Use each activity's own duration to compute endTime
+  // But if total duration drift is > 30min, abort (would cascade-break the schedule)
+  let totalDrift = 0;
+  for (let i = 0; i < route.length; i++) {
+    const slotDuration = timeToMinutes(slots[i].endTime) - timeToMinutes(slots[i].startTime);
+    const actDuration = route[i].duration || slotDuration;
+    totalDrift += Math.abs(actDuration - slotDuration);
+  }
+  if (totalDrift > 30) {
+    console.log(`[Geo-Reorder-Post] Aborted: total duration drift ${totalDrift}min > 30min threshold`);
+    return items; // Keep original order
+  }
+
   console.log(`[Geo-Reorder-Post] Optimized: ${originalCost.toFixed(1)}km → ${bestCost.toFixed(1)}km (saved ${(originalCost - bestCost).toFixed(1)}km) for ${activities.length} activities`);
 
-  // Assign optimally-ordered activities to the original time slots
+  // Apply reorder — assign optimally-ordered activities to original time slots
   const result = [...items];
   for (let i = 0; i < route.length; i++) {
     const slot = slots[i];
     const activity = route[i];
     const targetIdx = slot.originalIndex;
+    const actDuration = activity.duration || (timeToMinutes(slot.endTime) - timeToMinutes(slot.startTime));
 
-    // Copy the activity data into the slot position
+    // Use slot's startTime but activity's own duration for endTime
+    const endTime = minutesToTime(timeToMinutes(slot.startTime) + actDuration);
+
     result[targetIdx] = {
       ...activity,
       startTime: slot.startTime,
-      endTime: slot.endTime,
+      endTime,
       orderIndex: slot.orderIndex,
     };
 
@@ -322,16 +359,12 @@ export function geoReorderScheduledDay(
     } else {
       result[targetIdx].distanceFromPrevious = dist(route[i - 1], activity);
     }
-
-    // Recalculate timeFromPrevious (rough: distance / 4km/h walking)
     const distKm = result[targetIdx].distanceFromPrevious || 0;
-    result[targetIdx].timeFromPrevious = Math.round(distKm * 15); // ~15 min per km walking
+    result[targetIdx].timeFromPrevious = Math.round(distKm * 15);
   }
 
   // Re-sort by startTime
   result.sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-  // Re-assign orderIndex
   result.forEach((item, idx) => { item.orderIndex = idx; });
 
   return result;
