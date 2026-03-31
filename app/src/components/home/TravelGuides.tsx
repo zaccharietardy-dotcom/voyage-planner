@@ -200,8 +200,8 @@ export function TravelGuides() {
                     </div>
                     <div className="h-8 w-px bg-border/50" />
                     <div className="flex flex-col text-right">
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">À partir de</span>
-                      <span className="text-sm font-bold text-gold">Sur mesure</span>
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">Durée</span>
+                      <span className="text-sm font-bold text-gold">{dest.preferences.durationDays} jours</span>
                     </div>
                   </div>
                 </div>
