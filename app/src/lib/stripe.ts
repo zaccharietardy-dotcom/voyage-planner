@@ -1,9 +1,15 @@
 import Stripe from 'stripe';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-01-28.clover',
-});
+let _stripe: Stripe | null = null;
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2026-01-28.clover',
+    });
+  }
+  return _stripe;
+}
 
 export async function getOrCreateCustomer(userId: string, email: string): Promise<string> {
   const supabase = await createRouteHandlerClient();
@@ -20,7 +26,7 @@ export async function getOrCreateCustomer(userId: string, email: string): Promis
   }
 
   // Create a new Stripe customer
-  const customer = await stripe.customers.create({
+  const customer = await getStripe().customers.create({
     email,
     metadata: { supabase_user_id: userId },
   });

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { stripe, getOrCreateCustomer } from '@/lib/stripe';
+import { getStripe, getOrCreateCustomer } from '@/lib/stripe';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 
 export async function POST() {
@@ -18,7 +18,7 @@ export async function POST() {
 
     const customerId = await getOrCreateCustomer(user.id, user.email!);
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: 'payment',
       line_items: [{ price: priceId, quantity: 1 }],

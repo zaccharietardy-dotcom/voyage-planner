@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { upsertBillingEntitlement } from '@/lib/server/billingEntitlements';
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
         if (session.mode === 'subscription') {
           const subscriptionId = session.subscription as string;
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
           // Extract current_period_end safely from the subscription object
           const subData = JSON.parse(JSON.stringify(subscription));
           const periodEnd = subData.current_period_end;
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
           }
 
         } else if (session.mode === 'payment') {
-          const customer = await stripe.customers.retrieve(customerId);
+          const customer = await getStripe().customers.retrieve(customerId);
           const customerMetadata = (!('deleted' in customer) ? customer.metadata : {}) || {};
           const alreadyCredited = customerMetadata.last_one_time_session_id === session.id;
 
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
               return NextResponse.json({ error: `DB error: ${updateError.message}` }, { status: 500 });
             }
 
-            await stripe.customers.update(customerId, {
+            await getStripe().customers.update(customerId, {
               metadata: {
                 ...customerMetadata,
                 last_one_time_session_id: session.id,
