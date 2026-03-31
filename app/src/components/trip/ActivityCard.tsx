@@ -409,18 +409,18 @@ export const ActivityCard = memo(function ActivityCard({
     >
       {/* Compact checkin: simplified for mobile premium feel */}
       {isCompactCheckin && (
-        <div className="flex items-center gap-4 p-4">
-          <div className="w-1.5 h-12 rounded-full" style={{ backgroundColor: color }} />
+        <div className="flex items-center gap-3 px-3 py-2">
+          <div className="w-1 h-8 rounded-full" style={{ backgroundColor: color }} />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="text-sm font-bold tracking-tight text-white truncate">{item.title}</h4>
-              <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-gold/80 bg-gold/10 px-2 py-0.5 rounded-full">
-                <Clock className="h-3 w-3" />
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold tracking-tight text-white truncate">{item.title}</h4>
+              <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-gold/80 bg-gold/10 px-1.5 py-0.5 rounded-full">
+                <Clock className="h-2.5 w-2.5" />
                 {item.startTime}
               </span>
             </div>
             {item.description && (
-              <p className="text-[11px] text-white/50 line-clamp-1 italic">{item.description}</p>
+              <p className="text-[10px] text-white/50 line-clamp-1 italic mt-0.5">{item.description}</p>
             )}
           </div>
         </div>
@@ -428,9 +428,9 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Horizontal Magazine-Style Card */}
       {!isCompactCheckin && (
-        <div className="flex items-stretch h-36 w-full">
+        <div className="flex items-stretch min-h-[7rem] w-full">
           {/* Left Side: Photo with Badge Overlay */}
-          <div className="relative w-36 h-full shrink-0 overflow-hidden">
+          <div className="relative w-32 h-full shrink-0 overflow-hidden">
             {/* Gradient base if image fails */}
             <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
             
@@ -458,12 +458,13 @@ export const ActivityCard = memo(function ActivityCard({
               <div className="absolute bottom-2 left-2 z-10 bg-gold-gradient px-1.5 py-0.5 rounded shadow-lg flex items-center gap-0.5">
                 <Star className="h-2.5 w-2.5 fill-black stroke-black" />
                 <span className="text-[10px] font-black text-black">{item.rating.toFixed(1)}</span>
+                <span className="text-[8px] font-bold text-black/60 ml-0.5">Google</span>
               </div>
             )}
           </div>
 
           {/* Right Side: Content */}
-          <div className="flex-1 min-w-0 p-3 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
+          <div className="flex-1 min-w-0 px-2.5 py-2 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
             <div className="min-w-0">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <span className="text-[9px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
@@ -525,7 +526,9 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Activity voting */}
       {item.type === 'activity' && voteData && onVote && (
-        <ActivityVote {...voteData} onVote={onVote} />
+        <div className="px-3 pb-1">
+          <ActivityVote {...voteData} onVote={onVote} />
+        </div>
       )}
 
       {/* Action Drawer (Mobile First) */}
@@ -1010,7 +1013,7 @@ function TransportCard({ item }: { item: TripItem }) {
             href={bookingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium hover:opacity-90 transition-opacity"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold hover:opacity-90 transition-opacity ${isOmio ? 'bg-[#1B8EE0] text-white shadow-md' : 'bg-primary text-primary-foreground'}`}
           >
             <ExternalLink className="h-3 w-3" />
             {isRealTime ? 'Réserver' : `Voir sur ${isOmio ? 'Omio' : 'le site'}`}

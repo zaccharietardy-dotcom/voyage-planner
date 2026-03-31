@@ -175,7 +175,7 @@ export function buildTrainDescription(
     });
 
   if (unique.length === 0) {
-    return `${prefix} (operateur non disponible)`;
+    return prefix;
   }
   return `${prefix} ${unique.join(' / ')}`;
 }

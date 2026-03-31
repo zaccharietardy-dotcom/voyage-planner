@@ -12,7 +12,7 @@ interface ActivityVoteProps {
 
 export function ActivityVote({ wantCount, skipCount, userVote, onVote }: ActivityVoteProps) {
   return (
-    <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/40">
+    <div className="flex items-center gap-1.5 mt-1 pt-1 border-t border-border/20">
       <button
         onClick={(e) => {
           e.stopPropagation();

@@ -233,7 +233,7 @@ function createEmojiIcon(L: any, type: string, dayNumber: number) {
     hotel: '#8B5CF6',
   };
   const bg = bgColors[type] || '#64748b';
-  const size = 28;
+  const size = 36;
 
   return L.divIcon({
     className: 'emoji-marker',
@@ -244,7 +244,7 @@ function createEmojiIcon(L: any, type: string, dayNumber: number) {
       border:2px solid white;
       display:flex;align-items:center;justify-content:center;
       box-shadow:0 2px 8px rgba(0,0,0,0.25);
-      font-size:14px;
+      font-size:18px;
     ">${emoji}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -729,7 +729,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
     dayEntries.forEach(([dayNum, dayItems]) => {
       // Extract hotel coordinates from checkin/checkout items
-      const hotelItem = displayItems.find(
+      const hotelItem = items.find(
         (item) =>
           (item.type === 'checkin' || item.type === 'checkout') &&
           item.dayNumber === dayNum &&
@@ -832,11 +832,17 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           segmentCoords = [fromNode.coords, toNode.coords];
         }
 
+        // When showing all days, reduce visual noise
+        const isAllDays = filterDay === null;
+        const haloOpacity = isAllDays ? 0.05 : 0.15;
+        const lineOpacity = isAllDays ? 0.3 : 0.7;
+        const lineWeight = isAllDays ? 2 : 3;
+
         // Halo
         const halo = L.polyline(segmentCoords, {
-          color: '#c5a059',
-          weight: 10,
-          opacity: 0.15,
+          color: isAllDays ? getDayColor(dayNum).bg : '#c5a059',
+          weight: isAllDays ? 6 : 10,
+          opacity: haloOpacity,
           smoothFactor: 2,
           lineJoin: 'round',
           lineCap: 'round',
@@ -845,9 +851,9 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
         // Main line
         const polyline = L.polyline(segmentCoords, {
-          color: '#c5a059',
-          weight: 3,
-          opacity: 0.7,
+          color: isAllDays ? getDayColor(dayNum).bg : '#c5a059',
+          weight: lineWeight,
+          opacity: lineOpacity,
           smoothFactor: 2,
           lineJoin: 'round',
           lineCap: 'round',

@@ -60,8 +60,11 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
           <h3 className="text-base font-bold text-white">
             Personnalisez votre voyage
           </h3>
-          <p className="text-xs text-white/60 mt-0.5">
-            {currentIndex + 1}/{cards.length} — {card.slotLabel}
+          <p className="text-[11px] text-white/50 mt-0.5">
+            Choisissez entre les options proposées pour chaque étape
+          </p>
+          <p className="text-xs text-white/60 mt-1">
+            {currentIndex + 1}/{cards.length} — Remplacer {card.slotLabel}
           </p>
         </div>
         <button
