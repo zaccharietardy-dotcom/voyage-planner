@@ -82,6 +82,14 @@ describe('/api/generate DB-backed rate limit', () => {
           origin: 'Paris',
           destination: 'Rome',
           startDate: '2026-04-01',
+          durationDays: 5,
+          transport: 'optimal',
+          carRental: false,
+          groupSize: 2,
+          groupType: 'couple',
+          budgetLevel: 'moderate',
+          activities: ['culture', 'gastronomy'],
+          dietary: ['none'],
         }),
       }) as any
     );

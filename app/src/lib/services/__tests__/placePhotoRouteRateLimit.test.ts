@@ -47,7 +47,7 @@ describe('/api/place-photo rate-limit', () => {
   });
 
   it('returns 400 for too long photo_reference', async () => {
-    const longReference = 'a'.repeat(301);
+    const longReference = 'a'.repeat(2001);
     const response = await GET(
       buildNextRequest(`http://localhost/api/place-photo?photo_reference=${longReference}`)
     );

@@ -74,14 +74,14 @@ function makeRestaurantItem(overrides: Partial<TripItem> = {}): TripItem {
 describe('Transport mode icons', () => {
   it('ActivityCard renders train icon for train transport item', () => {
     const item = makeTransportItem({ transportMode: 'train', title: 'Train vers Milan' });
-    const { getByTestId } = render(<ActivityCard item={item} />);
-    expect(getByTestId('transport-icon-train')).toBeInTheDocument();
+    const { container } = render(<ActivityCard item={item} />);
+    expect(container.querySelector('svg.lucide-train-front')).toBeInTheDocument();
   });
 
   it('ActivityCard renders bus icon for bus transport item', () => {
     const item = makeTransportItem({ transportMode: 'bus', title: 'Bus vers Milan' });
-    const { getByTestId } = render(<ActivityCard item={item} />);
-    expect(getByTestId('transport-icon-bus')).toBeInTheDocument();
+    const { container } = render(<ActivityCard item={item} />);
+    expect(container.querySelector('svg.lucide-bus')).toBeInTheDocument();
   });
 
   it('MobileDayList renders train icon for train transport item', () => {

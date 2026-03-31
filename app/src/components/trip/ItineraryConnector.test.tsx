@@ -10,6 +10,33 @@ jest.mock('lucide-react', () => ({
   Footprints: () => <span data-testid="footprints-icon" />,
   Car: () => <span data-testid="car-icon" />,
   TrainFront: () => <span data-testid="train-front-icon" />,
+  Bike: () => <span data-testid="bike-icon" />,
+  ChevronRight: () => <span data-testid="chevron-right-icon" />,
+  Map: () => <span data-testid="map-icon" />,
+  MoreHorizontal: () => <span data-testid="more-horizontal-icon" />,
+  Check: () => <span data-testid="check-icon" />,
+}));
+
+// Mock cn utility
+jest.mock('@/lib/utils', () => ({
+  cn: (...args: unknown[]) => args.filter(Boolean).join(' '),
+}));
+
+// Mock Drawer components
+jest.mock('@/components/ui/drawer', () => ({
+  Drawer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerContent: ({ children }: { children: React.ReactNode }) => <div data-testid="drawer-content">{children}</div>,
+  DrawerHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerClose: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DrawerHandle: () => <div />,
+}));
+
+// Mock haptics
+jest.mock('@/lib/mobile/haptics', () => ({
+  hapticImpactLight: jest.fn(),
+  hapticImpactMedium: jest.fn(),
 }));
 
 describe('ItineraryConnector', () => {
@@ -26,7 +53,7 @@ describe('ItineraryConnector', () => {
   };
 
   describe('Google Maps URL generation', () => {
-    it('renders a link to Google Maps with correct URL', () => {
+    it('renders a link to Google Maps inside the drawer', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} />);
 
       const link = screen.getByRole('link');
@@ -41,7 +68,6 @@ describe('ItineraryConnector', () => {
       const link = screen.getByRole('link');
       const href = link.getAttribute('href') || '';
 
-      // Décoder l'URL pour vérifier les noms
       expect(decodeURIComponent(href)).toContain('Sagrada Familia');
       expect(decodeURIComponent(href)).toContain('Parc Güell');
     });
@@ -82,17 +108,17 @@ describe('ItineraryConnector', () => {
     });
   });
 
-  describe('destination display', () => {
-    it('displays the destination name', () => {
+  describe('mode label display', () => {
+    it('displays the mode label "À pied" by default', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} />);
 
-      expect(screen.getByText(/Parc Güell/)).toBeInTheDocument();
+      expect(screen.getAllByText('À pied').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('shows arrow and destination name', () => {
-      render(<ItineraryConnector from={mockFrom} to={mockTo} />);
+    it('shows "Transports" label for transit mode', () => {
+      render(<ItineraryConnector from={mockFrom} to={mockTo} mode="transit" />);
 
-      expect(screen.getByText(/→.*Parc Güell/)).toBeInTheDocument();
+      expect(screen.getAllByText('Transports').length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -100,14 +126,13 @@ describe('ItineraryConnector', () => {
     it('does not show duration when not provided', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} />);
 
-      expect(screen.queryByTestId('clock-icon')).not.toBeInTheDocument();
+      expect(screen.queryByText(/min/)).not.toBeInTheDocument();
     });
 
     it('displays duration in minutes when under 60 min', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} duration={15} />);
 
       expect(screen.getByText('15 min')).toBeInTheDocument();
-      expect(screen.getByTestId('clock-icon')).toBeInTheDocument();
     });
 
     it('formats duration with hours when 60+ minutes', () => {
@@ -127,25 +152,26 @@ describe('ItineraryConnector', () => {
     it('does not show distance when not provided', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} />);
 
-      expect(screen.queryByTestId('mappin-icon')).not.toBeInTheDocument();
+      expect(screen.queryByText(/km/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/\d+ m/)).not.toBeInTheDocument();
     });
 
     it('displays distance in km when >= 1 km', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} distance={1.2} />);
 
-      expect(screen.getByText('1.2 km')).toBeInTheDocument();
+      expect(screen.getByText('· 1.2 km')).toBeInTheDocument();
     });
 
     it('displays distance in meters when < 1 km', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} distance={0.5} />);
 
-      expect(screen.getByText('500 m')).toBeInTheDocument();
+      expect(screen.getByText('· 500 m')).toBeInTheDocument();
     });
 
     it('rounds meters correctly', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} distance={0.234} />);
 
-      expect(screen.getByText('234 m')).toBeInTheDocument();
+      expect(screen.getByText('· 234 m')).toBeInTheDocument();
     });
   });
 
@@ -153,25 +179,25 @@ describe('ItineraryConnector', () => {
     it('shows Footprints icon for walk mode', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="walk" />);
 
-      expect(screen.getByTestId('footprints-icon')).toBeInTheDocument();
+      expect(screen.getAllByTestId('footprints-icon').length).toBeGreaterThanOrEqual(1);
     });
 
     it('shows TrainFront icon for transit mode', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="transit" />);
 
-      expect(screen.getByTestId('train-front-icon')).toBeInTheDocument();
+      expect(screen.getAllByTestId('train-front-icon').length).toBeGreaterThanOrEqual(1);
     });
 
     it('shows Car icon for car mode', () => {
       render(<ItineraryConnector from={mockFrom} to={mockTo} mode="car" />);
 
-      expect(screen.getByTestId('car-icon')).toBeInTheDocument();
+      expect(screen.getAllByTestId('car-icon').length).toBeGreaterThanOrEqual(1);
     });
 
-    it('shows Car icon for taxi mode (maps to driving)', () => {
-      render(<ItineraryConnector from={mockFrom} to={mockTo} mode="taxi" />);
+    it('shows Bike icon for bike mode', () => {
+      render(<ItineraryConnector from={mockFrom} to={mockTo} mode="bike" />);
 
-      expect(screen.getByTestId('car-icon')).toBeInTheDocument();
+      expect(screen.getAllByTestId('bike-icon').length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -187,8 +213,7 @@ describe('ItineraryConnector', () => {
       );
 
       expect(screen.getByText('15 min')).toBeInTheDocument();
-      expect(screen.getByText('1.2 km')).toBeInTheDocument();
-      expect(screen.getByTestId('clock-icon')).toBeInTheDocument();
+      expect(screen.getByText('· 1.2 km')).toBeInTheDocument();
     });
   });
 });
