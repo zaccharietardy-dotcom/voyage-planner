@@ -12,12 +12,12 @@ export const generateTripSchema = z.object({
   startDate: z.string().min(1), // ISO date string, converted to Date downstream
   durationDays: z.number().int().min(1).max(30),
   transport: z.enum(['optimal', 'plane', 'train', 'car', 'bus']),
-  carRental: z.boolean(),
+  carRental: z.boolean().default(false),
   groupSize: z.number().int().min(1).max(20),
   groupType: z.enum(['solo', 'couple', 'friends', 'family_with_kids', 'family_without_kids']),
   budgetLevel: z.enum(['economic', 'moderate', 'comfort', 'luxury']),
   activities: z.array(z.enum(['beach', 'nature', 'culture', 'gastronomy', 'nightlife', 'shopping', 'adventure', 'wellness'])),
-  dietary: z.array(z.enum(['none', 'vegetarian', 'vegan', 'halal', 'kosher', 'gluten_free'])),
+  dietary: z.array(z.enum(['none', 'vegetarian', 'vegan', 'halal', 'kosher', 'gluten_free'])).default(['none']),
   mustSee: z.string().max(2000).default(''),
 
   // Optional
