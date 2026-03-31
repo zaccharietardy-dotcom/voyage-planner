@@ -9,12 +9,14 @@ function getResend() {
   return new Resend(key);
 }
 
-// Client admin Supabase pour générer les liens de vérification
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+// Client admin Supabase — lazy init pour éviter crash au build time
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 export async function POST(request: NextRequest) {
   // Rate limiting: 3 req/hour (expensive email sending)
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Générer le lien magique pour la vérification via Supabase Admin
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    const { data: linkData, error: linkError } = await getSupabaseAdmin().auth.admin.generateLink({
       type: 'magiclink',
       email: email,
       options: {

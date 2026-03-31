@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 let cached: { data: Record<string, number>; at: number } | null = null;
 const CACHE_TTL = 3600_000; // 1 hour
@@ -19,9 +21,9 @@ export async function GET() {
 
   try {
     const [tripsRes, usersRes, countriesRes] = await Promise.all([
-      supabase.from('trips').select('*', { count: 'exact', head: true }),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('trips').select('destination'),
+      getSupabase().from('trips').select('*', { count: 'exact', head: true }),
+      getSupabase().from('profiles').select('*', { count: 'exact', head: true }),
+      getSupabase().from('trips').select('destination'),
     ]);
 
     const uniqueDestinations = new Set(
