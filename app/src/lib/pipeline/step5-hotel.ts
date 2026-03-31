@@ -25,7 +25,8 @@ function hasValidPriceAndBookingUrl(hotel: Accommodation): boolean {
   if (!hotel.pricePerNight || hotel.pricePerNight <= 0) return false;
   const url = hotel.bookingUrl;
   if (!url) return false;
-  return url.toLowerCase().includes('booking.com');
+  const lower = url.toLowerCase();
+  return lower.includes('booking.com') || lower.includes('airbnb.com');
 }
 
 /** Absolute maximum distance for any hotel, even in fallback/last-resort scenarios. */

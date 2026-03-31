@@ -19,6 +19,7 @@ import { searchViatorActivities, getViatorProductCoordinates } from '../services
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
 import { searchTripAdvisorRestaurants } from '../services/tripadvisor';
 import { searchHotels } from '../services/hotels';
+import { searchAirbnbListings } from '../services/airbnb';
 import { generateTravelTips } from '../services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from '../services/budgetResolver';
 import { findBestFlights, selectFlightByBudget } from '../tripFlights';
@@ -249,6 +250,13 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     )),
     // 11: Weather forecast (Open-Meteo, free, no key)
     tracked('Weather forecast', fetchWeatherForecast(destCoords, startDate, preferences.durationDays)),
+    // 12: Airbnb listings (apartments/bnb alternative to hotels)
+    tracked('Airbnb', searchAirbnbListings(destination, startDate.toISOString().slice(0, 10), endDate.toISOString().slice(0, 10), {
+      guests: preferences.groupSize || 2,
+      maxPricePerNight: typeof resolvedBudget === 'number' && resolvedBudget > 0 ? Math.round(resolvedBudget / (preferences.durationDays || 3) * 0.4) : undefined,
+      limit: 15,
+      cityCenter: destCoords,
+    })),
   ]);
 
   // Extract results safely (fulfilled or empty array)
@@ -271,6 +279,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   const travelTips = extract(9, null);
   const budgetStrategy = extract(10, null as any);
   const weatherForecasts = extract(11, []);
+  const airbnbListings: import('../types').Accommodation[] = extract(12, []);
 
   // ── Enrich Google Places attractions with real opening hours (Place Details API) ──
   // Non-blocking: wrapped in try/catch + timeout so pipeline never stalls
@@ -489,7 +498,9 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   console.log(`[Pipeline V2] Step 1: All data fetched in ${Date.now() - T0}ms`);
   console.log(`[Pipeline V2]   Activities: ${googlePlacesAttractions.length} Google + ${serpApiAttractions.length} Places/SerpAPI + ${overpassAttractions.length} Overpass + ${viatorActivities.length} Viator`);
   console.log(`[Pipeline V2]   Restaurants: ${tripAdvisorRestaurants.length} TA + ${serpApiRestaurants.length} Places/SerpAPI`);
-  console.log(`[Pipeline V2]   Hotels: ${bookingHotels.length} | Transport options: ${transportOptions.length}`);
+  // Merge Airbnb listings into hotel pool
+  const allAccommodations = [...bookingHotels, ...airbnbListings];
+  console.log(`[Pipeline V2]   Hotels: ${bookingHotels.length} Booking + ${airbnbListings.length} Airbnb | Transport options: ${transportOptions.length}`);
 
   return {
     destCoords,
@@ -503,7 +514,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     mustSeeAttractions,
     tripAdvisorRestaurants,
     serpApiRestaurants,
-    bookingHotels,
+    bookingHotels: allAccommodations,
     transportOptions,
     outboundFlight,
     returnFlight,
