@@ -1970,7 +1970,7 @@ export default function TripPage() {
       {/* Desktop layout: scrollable planning panel left + fixed full-height map right */}
       {isDesktop && <div className="flex h-[calc(100vh-73px)] bg-background">
         {/* Left: Scrollable planning panel */}
-          <div className="w-[500px] xl:w-[580px] 2xl:w-[650px] shrink-0 overflow-y-auto overscroll-contain border-r border-gold/10 px-6 py-8 scrollbar-hide">
+          <div className="w-[540px] xl:w-[640px] 2xl:w-[720px] shrink-0 overflow-y-auto overscroll-contain border-r border-gold/10 px-6 py-8 scrollbar-hide">
             <Tabs value={mainTab} onValueChange={setMainTab} className="space-y-8">
               <TabsList className="w-full h-12 rounded-2xl border border-gold/10 bg-white/50 dark:bg-white/5 p-1 shadow-sm backdrop-blur-md" data-tour="tabs">
                 {liveState && <TabsTrigger value="live" className="flex-1 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-purple-500 to-blue-500 text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl">Live</TabsTrigger>}

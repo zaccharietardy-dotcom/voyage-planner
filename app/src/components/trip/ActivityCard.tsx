@@ -898,7 +898,7 @@ function BookingButtons({ item, isCompact = false }: { item: TripItem; isCompact
           )}
         >
           {btn.icon}
-          {(!isCompact || (btn.label !== 'Maps' && btn.label !== 'Billetterie officielle')) && btn.label}
+          {(!isCompact || (btn.label !== 'Billetterie officielle')) && btn.label}
           {isCompact && btn.label === 'Billetterie officielle' && 'Billets'}
         </a>
       ))}
