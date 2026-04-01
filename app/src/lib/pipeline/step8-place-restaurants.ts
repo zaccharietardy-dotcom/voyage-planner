@@ -375,16 +375,14 @@ export async function findBestRestaurantWithSearch(
   dayDate: Date | null,
   destination: string,
 ): Promise<{ result: Omit<MealPlacement, 'anchorName'> | null; newRestaurants: Restaurant[] }> {
-  // First try: tight passes (200m, 500m) from existing pool
-  for (let i = 0; i < 2; i++) {
-    const pass = { ...PASSES[i] };
-    const results = filterAndScoreCandidates(allRestaurants, anchor, mealType, pass, usedIds, dietary, dayDate, minRating);
-    if (results.length > 0) {
-      return { result: scoreAndSelect(results, anchor, mealType, altCount), newRestaurants: [] };
-    }
+  // First try: ultra-close (200m) from existing pool
+  const tightPass = { ...PASSES[0] };
+  const tightResults = filterAndScoreCandidates(allRestaurants, anchor, mealType, tightPass, usedIds, dietary, dayDate, minRating);
+  if (tightResults.length > 0) {
+    return { result: scoreAndSelect(tightResults, anchor, mealType, altCount), newRestaurants: [] };
   }
 
-  // Nothing within 500m in pool — fire targeted API search near this anchor
+  // Nothing within 200m in pool — fire targeted API search near this anchor
   let newRestaurants: Restaurant[] = [];
   try {
     console.log(`[Place Restaurants] No ${mealType} within 500m of anchor — searching API near [${anchor.lat.toFixed(4)}, ${anchor.lng.toFixed(4)}]`);
