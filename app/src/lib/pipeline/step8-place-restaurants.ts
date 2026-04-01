@@ -289,9 +289,11 @@ interface PassConfig {
 }
 
 const PASSES: PassConfig[] = [
-  // Pass 0: ultra-close (200m), full quality — best possible pick
+  // Pass 0: ultra-close (200m), high quality — rating >= 4.0
   { maxDist: 0.2, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+  // Pass 1: close (500m), high quality — rating >= 4.0
   { maxDist: 0.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+  // Pass 2: standard (800m), rating >= 3.5
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
   { maxDist: 1.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
@@ -347,7 +349,9 @@ export function findBestRestaurant(
     const pass = { ...PASSES[i] };
     // Don't override the tight passes (200m, 500m) — only override from pass index 2+
     if (i >= 2 && pass.maxDist <= maxDistKm) pass.maxDist = maxDistKm;
-    const results = filterAndScoreCandidates(allRestaurants, anchor, mealType, pass, usedIds, dietary, dayDate, minRating);
+    // Passes 0-1 (≤500m) require rating >= 4.0; others use caller's minRating
+    const effectiveMinRating = (i <= 1 && pass.maxDist <= 0.5) ? Math.max(minRating, 4.0) : minRating;
+    const results = filterAndScoreCandidates(allRestaurants, anchor, mealType, pass, usedIds, dietary, dayDate, effectiveMinRating);
     if (results.length > 0) {
       if (i > 0) {
         console.warn(`[Place Restaurants] Pass ${i + 1} (${(pass.maxDist * 1000).toFixed(0)}m${pass.allowReuse ? ', reuse' : ''}): found ${results.length} candidates for ${mealType}`);
