@@ -97,7 +97,13 @@ export function TravelGuides() {
       router.push(`/trip/${trip.id}`);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Erreur inconnue';
-      toast.error(msg);
+      if (msg.includes('authentifié') || msg.includes('Non authentifié')) {
+        router.push('/login?redirect=/');
+      } else if (msg.includes('QUOTA') || msg.includes('Limite') || msg.includes('RATE_LIMIT') || msg.includes('Trop de génération')) {
+        router.push('/pricing?reason=' + encodeURIComponent('Passez à Pro pour des voyages illimités'));
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setGeneratingIdx(null);
       setGeneratingDest(null);

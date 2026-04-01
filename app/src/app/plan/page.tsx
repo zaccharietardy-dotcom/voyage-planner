@@ -397,11 +397,8 @@ export default function PlanPage() {
       if (message.includes('authentifié') || message.includes('Non authentifié')) {
         toast.error('Connectez-vous pour générer votre voyage');
         router.push('/login?redirect=/plan');
-      } else if (message.includes('QUOTA_EXCEEDED') || message.includes('Limite')) {
-        toast.error('Passez à Pro pour des voyages illimités');
-        router.push('/pricing');
-      } else if (message.includes('RATE_LIMIT')) {
-        toast.error('Trop de générations récentes. Réessayez dans quelques minutes.');
+      } else if (message.includes('QUOTA_EXCEEDED') || message.includes('Limite') || message.includes('RATE_LIMIT') || message.includes('Trop de génération')) {
+        router.push('/pricing?reason=' + encodeURIComponent('Passez à Pro pour des voyages illimités'));
       } else {
         toast.error(`Une erreur est survenue. Réessayez.`);
       }
