@@ -395,7 +395,7 @@ export default function TripPage() {
       const cards = generateFeedbackCards(trip);
       if (cards.length > 0) {
         setFeedbackCards(cards);
-        setShowFeedbackCards(true);
+        // showFeedbackCards bottom sheet removed — cards now shown inline via ActivityCard
       }
     } catch (e) {
       console.warn('[FeedbackCards] Failed to generate:', e);
@@ -1927,6 +1927,8 @@ export default function TripPage() {
                                   onOptimizeDay={canOwnerEdit ? handleOptimizeDay : undefined}
                                   getVoteData={useCollaborativeMode ? getVoteData : undefined}
                                   onVote={useCollaborativeMode ? castVote : undefined}
+                                  feedbackCards={feedbackCards}
+                                  onSwapAlternative={handleFeedbackSwap}
                                 />
                               </motion.div>
                             ))}
@@ -2081,6 +2083,8 @@ export default function TripPage() {
                           onOptimizeDay={canOwnerEdit ? handleOptimizeDay : undefined}
                           getVoteData={useCollaborativeMode ? getVoteData : undefined}
                           onVote={useCollaborativeMode ? castVote : undefined}
+                          feedbackCards={feedbackCards}
+                          onSwapAlternative={handleFeedbackSwap}
                         />
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
                         {canOwnerEdit && idx < (trip?.days || []).length - 1 && idx > 0 && (
@@ -2309,8 +2313,8 @@ export default function TripPage() {
       {/* Tour guidé pour les nouveaux utilisateurs */}
       {trip && <TripOnboarding />}
 
-      {/* Post-generation A/B feedback cards */}
-      <AnimatePresence mode="wait">
+      {/* Post-generation A/B feedback cards — moved inline into DayTimeline/ActivityCard */}
+      {/* <AnimatePresence mode="wait">
         {showFeedbackCards && feedbackCards.length > 0 && trip && (
           <TripFeedbackCards
             cards={feedbackCards}
@@ -2319,7 +2323,7 @@ export default function TripPage() {
             onDismiss={handleFeedbackDismiss}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
       </div>
     </TripErrorBoundary>
   );

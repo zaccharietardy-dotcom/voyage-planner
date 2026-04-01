@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useRef } from 'react';
 import { TripDay, TripItem, Accommodation } from '@/lib/types';
+import { FeedbackCard } from '@/lib/types/pipelineQuestions';
 import { ActivityCard } from './ActivityCard';
 import { HotelCarouselSelector } from './HotelCarouselSelector';
 import { ItineraryConnector } from './ItineraryConnector';
@@ -47,6 +48,8 @@ interface DayTimelineProps {
   onOptimizeDay?: (dayNumber: number) => void;
   getVoteData?: (itemId: string) => { wantCount: number; skipCount: number; userVote: 'want' | 'skip' | null };
   onVote?: (itemId: string, vote: 'want' | 'skip' | null) => void;
+  feedbackCards?: FeedbackCard[];
+  onSwapAlternative?: (card: FeedbackCard) => void;
 }
 
 /**
@@ -167,6 +170,8 @@ export const DayTimeline = memo(function DayTimeline({
   onOptimizeDay,
   getVoteData,
   onVote,
+  feedbackCards,
+  onSwapAlternative,
 }: DayTimelineProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -290,6 +295,7 @@ export const DayTimeline = memo(function DayTimeline({
 
           const isFirst = index === 0;
           const isLast = index === visibleItems.length - 1;
+          const altCard = feedbackCards?.find(c => c.targetItemId === item.id);
 
           return (
             <motion.div
@@ -326,6 +332,8 @@ export const DayTimeline = memo(function DayTimeline({
 
               <ActivityCard
                 item={item}
+                alternative={altCard}
+                onSwapAlternative={onSwapAlternative}
                 orderNumber={mapNumbers?.get(item.id) ?? (globalIndexOffset + index + 1)}
                 isSelected={selectedItemId === item.id}
                 onSelect={() => { hapticImpactLight(); onSelectItem?.(item); }}

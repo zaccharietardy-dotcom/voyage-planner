@@ -66,10 +66,11 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { classifyActivityCategory, getCategoryConfig } from '@/lib/utils/activityClassifier';
 import { ActivityVote } from './ActivityVote';
 import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
+import type { FeedbackCard } from '@/lib/types/pipelineQuestions';
 
 type SvgIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
@@ -97,6 +98,8 @@ interface ActivityCardProps {
   hotelAlternatives?: Accommodation[];
   voteData?: { wantCount: number; skipCount: number; userVote: 'want' | 'skip' | null };
   onVote?: (vote: 'want' | 'skip' | null) => void;
+  alternative?: FeedbackCard;
+  onSwapAlternative?: (card: FeedbackCard) => void;
 }
 
 const TYPE_ICONS: Record<TripItemType, SvgIconComponent> = {
@@ -356,6 +359,8 @@ export const ActivityCard = memo(function ActivityCard({
   hotelAlternatives,
   voteData,
   onVote,
+  alternative,
+  onSwapAlternative,
 }: ActivityCardProps) {
   const [showPriceComparisonDrawer, setShowPriceComparisonDrawer] = useState(false);
   const [showActionsDrawer, setShowActionsDrawer] = useState(false);
@@ -370,6 +375,7 @@ export const ActivityCard = memo(function ActivityCard({
   const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [showAlternative, setShowAlternative] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showTimeEdit, setShowTimeEdit] = useState(false);
   const [editStartTime, setEditStartTime] = useState(item.startTime || '');
@@ -428,7 +434,7 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Horizontal Magazine-Style Card */}
       {!isCompactCheckin && (
-        <div className="flex items-stretch min-h-[6.5rem] w-full">
+        <div className="flex items-stretch min-h-[6rem] w-full">
           {/* Left Side: Photo with Badge Overlay */}
           <div className="relative w-28 h-full shrink-0 overflow-hidden">
             {/* Gradient base if image fails */}
@@ -487,8 +493,11 @@ export const ActivityCard = memo(function ActivityCard({
             </div>
 
             <div className="flex items-center justify-between mt-auto">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <BookingButtons item={item} isCompact={true} />
+                {item.type === 'activity' && voteData && onVote && (
+                  <ActivityVote {...voteData} onVote={onVote} />
+                )}
               </div>
               
               {!isHeroType && (
@@ -497,6 +506,75 @@ export const ActivityCard = memo(function ActivityCard({
                 </div>
               )}
             </div>
+
+            {/* Inline alternative badge & swap view */}
+            <AnimatePresence mode="wait">
+              {alternative && !showAlternative && (
+                <motion.button
+                  key="alt-badge"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.2 }}
+                  className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-gold/30 bg-gold/5 text-gold text-[11px] font-bold tracking-wide hover:bg-gold/10 active:scale-[0.97] transition-all"
+                  onClick={(e) => { e.stopPropagation(); setShowAlternative(true); hapticImpactLight(); }}
+                >
+                  🔄 Alternative disponible
+                </motion.button>
+              )}
+              {alternative && showAlternative && (
+                <motion.div
+                  key="alt-view"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                  className="mt-2 rounded-xl border border-gold/20 bg-black/40 p-3 space-y-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-start gap-3">
+                    {alternative.optionB.imageUrl && (
+                      <img
+                        src={alternative.optionB.imageUrl}
+                        alt={alternative.optionB.name}
+                        className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{alternative.optionB.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {alternative.optionB.rating && (
+                          <span className="flex items-center gap-0.5 text-[11px] text-gold">
+                            <Star className="h-3 w-3 fill-gold text-gold" />
+                            {alternative.optionB.rating.toFixed(1)}
+                          </span>
+                        )}
+                        {alternative.optionB.cuisineOrType && (
+                          <span className="text-[11px] text-white/50">{alternative.optionB.cuisineOrType}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1 h-8 rounded-xl bg-gold-gradient text-black font-bold text-xs shadow-md shadow-gold/20"
+                      onClick={() => { onSwapAlternative?.(alternative); hapticImpactMedium(); }}
+                    >
+                      ✓ Choisir
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="flex-1 h-8 rounded-xl text-white/60 font-bold text-xs border border-white/10 hover:bg-white/5"
+                      onClick={() => { setShowAlternative(false); hapticImpactLight(); }}
+                    >
+                      ← Revenir
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       )}
@@ -522,13 +600,6 @@ export const ActivityCard = memo(function ActivityCard({
           alternatives={hotelAlternatives!}
           selectedId={item.accommodation?.id}
         />
-      )}
-
-      {/* Activity voting */}
-      {item.type === 'activity' && voteData && onVote && (
-        <div className="px-3 pb-1">
-          <ActivityVote {...voteData} onVote={onVote} />
-        </div>
       )}
 
       {/* Action Drawer (Mobile First) */}
@@ -709,7 +780,8 @@ export const ActivityCard = memo(function ActivityCard({
     prev.showPriceComparison === next.showPriceComparison &&
     prev.voteData?.wantCount === next.voteData?.wantCount &&
     prev.voteData?.skipCount === next.voteData?.skipCount &&
-    prev.voteData?.userVote === next.voteData?.userVote
+    prev.voteData?.userVote === next.voteData?.userVote &&
+    prev.alternative?.id === next.alternative?.id
   );
 });
 
