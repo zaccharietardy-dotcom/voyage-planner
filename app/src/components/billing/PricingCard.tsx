@@ -238,7 +238,7 @@ export function PricingCards() {
           <div className="mt-4 mb-6">
             {billingPeriod === 'yearly' ? (
               <>
-                <span className="text-4xl font-bold">10.99€</span>
+                <span className="text-4xl font-bold">29.99€</span>
                 <span className="text-muted-foreground">/an</span>
                 <p className="text-xs text-muted-foreground mt-1">
                   soit 0.83€/mois
@@ -246,7 +246,7 @@ export function PricingCards() {
               </>
             ) : (
               <>
-                <span className="text-4xl font-bold">1.99€</span>
+                <span className="text-4xl font-bold">4.99€</span>
                 <span className="text-muted-foreground">/mois</span>
                 <p className="text-xs text-muted-foreground mt-1">
                   soit 23.88€/an
@@ -306,9 +306,9 @@ export function PricingCards() {
                       ? 'Acheter via Google Play'
                       : 'Acheter'
                 ) : billingPeriod === 'yearly' ? (
-                  'S\'abonner — 10.99€/an'
+                  'S\'abonner — 29.99€/an'
                 ) : (
-                  'S\'abonner — 1.99€/mois'
+                  'S\'abonner — 4.99€/mois'
                 )}
               </Button>
               {nativeApp && (

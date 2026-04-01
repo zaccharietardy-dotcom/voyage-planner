@@ -59,7 +59,7 @@ export default function PricingLayout({
             {
               '@type': 'Offer',
               name: 'Pro',
-              price: '10.99',
+              price: '29.99',
               priceCurrency: 'EUR',
               description:
                 'Toutes les fonctionnalités avancées : itinéraires illimités, personnalisation poussée et support prioritaire.',
