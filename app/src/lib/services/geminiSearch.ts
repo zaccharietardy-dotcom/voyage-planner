@@ -30,15 +30,28 @@ export async function fetchGeminiWithRetry(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    if (response.status === 429 && attempt < maxRetries) {
-      const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
-      console.warn(`[Gemini] Rate limited (429), retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
+    // Retry on 429 (rate limit) or 503 (overloaded) with longer backoff
+    if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
+      const delay = Math.pow(2, attempt + 1) * 2000; // 4s, 8s, 16s
+      console.warn(`[Gemini] Rate limited (${response.status}), retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
       await new Promise(r => setTimeout(r, delay));
       continue;
     }
+    // Also check for quota errors in 200 responses
+    if (response.status === 200) {
+      const cloned = response.clone();
+      try {
+        const json = await cloned.json();
+        if (json.error?.status === 'RESOURCE_EXHAUSTED' && attempt < maxRetries) {
+          const delay = Math.pow(2, attempt + 1) * 2000;
+          console.warn(`[Gemini] Quota exhausted in body, retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+      } catch { /* not JSON or parse error — return as-is */ }
+    }
     return response;
   }
-  // Should never reach here, but TypeScript needs it
   return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 }
 
