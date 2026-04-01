@@ -97,7 +97,7 @@ export function ItineraryConnector({
 
   return (
     <div className="relative py-0.5">
-      <div className="flex items-center gap-4 ml-[19px]">
+      <div className="flex items-center gap-4 ml-[11px]">
         {/* Connector Line with animated feel */}
         <div className="w-[2px] h-6 bg-gradient-to-b from-gold/40 via-gold/10 to-transparent border-l border-dashed border-gold/30" />
         

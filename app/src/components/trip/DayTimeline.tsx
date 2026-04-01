@@ -285,7 +285,7 @@ export const DayTimeline = memo(function DayTimeline({
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={{ duration: 1, ease: "easeInOut" }}
-          className="absolute left-[26px] top-12 bottom-12 w-[1px] bg-gradient-to-b from-gold/60 via-gold/10 to-transparent origin-top" 
+          className="absolute left-[18px] top-12 bottom-12 w-[1px] bg-gradient-to-b from-gold/60 via-gold/10 to-transparent origin-top" 
         />
 
         {visibleItems.map((item, index) => {
@@ -301,7 +301,7 @@ export const DayTimeline = memo(function DayTimeline({
             <motion.div
               key={item.id}
               data-item-id={item.id}
-              className="relative pl-14"
+              className="relative pl-10"
               variants={{
                 hidden: { opacity: 0, x: -20, scale: 0.95 },
                 visible: {
@@ -316,7 +316,7 @@ export const DayTimeline = memo(function DayTimeline({
               }}
             >
               {/* Point de connexion (Timeline Dot) */}
-              <div className="absolute left-[21px] top-8 w-3 h-3 rounded-full bg-gold shadow-[0_0_15px_rgba(197,160,89,0.5)] border-[3px] border-black z-10" />
+              <div className="absolute left-[13px] top-8 w-3 h-3 rounded-full bg-gold shadow-[0_0_15px_rgba(197,160,89,0.5)] border-[3px] border-black z-10" />
 
               {departureBoundary && (
                 <div className="mb-4 -ml-2">

@@ -92,6 +92,8 @@ import { ImportBooking } from '@/components/trip/ImportBooking';
 import type { ParsedBooking } from '@/lib/services/bookingParser';
 import { AddToCalendarDropdown } from '@/components/trip/AddToCalendarDropdown';
 import { ImportedPlace } from '@/lib/types';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1757,6 +1759,8 @@ export default function TripPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <NotificationBell />
+              <UserMenu />
               {isOwner && (
                 <button
                   className="flex h-11 w-11 items-center justify-center rounded-full bg-black/60 border border-white/10 shadow-[0_8px_16px_rgba(0,0,0,0.4)] active:scale-90 transition-transform text-white"
@@ -1793,7 +1797,7 @@ export default function TripPage() {
               </div>
               
               <Tabs value={mainTab} onValueChange={(v) => { hapticImpactLight(); setMainTab(v); }} className="flex-1 flex flex-col min-h-0">
-                <TabsList className="mx-4 mb-4 flex w-auto gap-1 bg-white/5 border border-white/5 rounded-xl p-1 shrink-0" data-tour="tabs">
+                <TabsList className="mx-2 mb-4 flex w-auto gap-1 bg-white/5 border border-white/5 rounded-xl p-1 shrink-0" data-tour="tabs">
                   {liveState && <TabsTrigger value="live" className="shrink-0 px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-purple-600">Live</TabsTrigger>}
                   <TabsTrigger value="planning" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Itinéraire</TabsTrigger>
                   <TabsTrigger value="overview" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Résumé</TabsTrigger>
@@ -1802,7 +1806,7 @@ export default function TripPage() {
                   {trip.attractionPool?.length ? <TabsTrigger value="pool" className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-gold data-[state=active]:text-black">Pool</TabsTrigger> : null}
                 </TabsList>
 
-                <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-[calc(env(safe-area-inset-bottom)+80px)] scrollbar-hide">
+                <div className="flex-1 overflow-y-auto overscroll-contain px-1 pb-[calc(env(safe-area-inset-bottom)+80px)] scrollbar-hide">
                   {liveState && (
                     <TabsContent value="live" className="mt-0">
                       <LiveTripDashboard
