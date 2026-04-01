@@ -87,7 +87,7 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress }: Pr
           {/* Time + type icon */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <Clock size={11} color={colors.textMuted} />
-            <Text style={{ color: colors.textMuted, fontSize: 11, fontWeight: '600' }}>
+            <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '600' }}>
               {item.startTime} – {item.endTime}
             </Text>
             <View style={{ marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -97,35 +97,35 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress }: Pr
           </View>
 
           {/* Title */}
-          <Text style={{ color: colors.text, fontSize: 14, fontWeight: '700', marginBottom: 1 }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', marginBottom: 2 }}>
             {item.title}
           </Text>
 
           {/* Location */}
           {item.locationName && item.type !== 'free_time' && (
-            <Text style={{ color: colors.textSecondary, fontSize: 11, marginBottom: 2 }} numberOfLines={1}>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 3 }} numberOfLines={1}>
               {item.locationName}
             </Text>
           )}
 
           {/* Meta row */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
             {item.rating !== undefined && item.rating > 0 && (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                <Star size={10} color={colors.gold} fill={colors.gold} />
-                <Text style={{ color: colors.gold, fontSize: 10, fontWeight: '700' }}>
+                <Star size={11} color={colors.gold} fill={colors.gold} />
+                <Text style={{ color: colors.gold, fontSize: 11, fontWeight: '700' }}>
                   {item.rating.toFixed(1)}
                 </Text>
               </View>
             )}
             {item.estimatedCost !== undefined && item.estimatedCost > 0 && (
-              <Text style={{ color: colors.textMuted, fontSize: 10 }}>~{item.estimatedCost}€</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 11 }}>~{item.estimatedCost}€</Text>
             )}
             {item.duration && (
-              <Text style={{ color: colors.textMuted, fontSize: 10 }}>{formatDuration(item.duration)}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 11 }}>{formatDuration(item.duration)}</Text>
             )}
             {item.distanceFromPrevious !== undefined && item.distanceFromPrevious > 0 && (
-              <Text style={{ color: colors.textDim, fontSize: 9 }}>
+              <Text style={{ color: colors.textDim, fontSize: 10 }}>
                 {item.distanceFromPrevious < 1
                   ? `${Math.round(item.distanceFromPrevious * 1000)}m`
                   : `${item.distanceFromPrevious.toFixed(1)}km`}

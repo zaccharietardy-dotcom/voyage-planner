@@ -482,7 +482,7 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep, ques
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617]"
+      className="fixed inset-0 z-[100] flex flex-col items-center pt-[8vh] bg-[#020617]"
       role="status"
       aria-live="polite"
     >
@@ -490,7 +490,7 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep, ques
       
       <div className="mx-auto w-full max-w-lg px-6 relative z-10">
         {/* Header */}
-        <div className="mb-12 text-center">
+        <div className="mb-8 text-center">
           <motion.div
             animate={{ 
               y: [0, -10, 0],

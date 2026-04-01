@@ -523,7 +523,7 @@ export default function PlanPage() {
         />
       )}
 
-      <div className="container max-w-xl mx-auto px-4 py-8">
+      <div className="container max-w-xl mx-auto px-4 py-4">
         {/* User Preferences Banner */}
         {user && !prefsLoading && userPrefs && !preferencesApplied && (
           <div className="mb-6">
@@ -545,7 +545,7 @@ export default function PlanPage() {
         )}
 
         {/* Step dots */}
-        <div className="flex items-center justify-center gap-6 mb-16 pt-6">
+        <div className="flex items-center justify-center gap-4 mb-8 pt-2">
           {STEPS.map((step) => (
             <button
               key={step.id}

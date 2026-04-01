@@ -434,9 +434,9 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Horizontal Magazine-Style Card */}
       {!isCompactCheckin && (
-        <div className="flex items-stretch min-h-[6rem] w-full">
+        <div className="flex items-stretch w-full">
           {/* Left Side: Photo with Badge Overlay */}
-          <div className="relative w-28 h-full shrink-0 overflow-hidden">
+          <div className="relative w-32 h-auto shrink-0 overflow-hidden">
             {/* Gradient base if image fails */}
             <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
             
@@ -470,23 +470,23 @@ export const ActivityCard = memo(function ActivityCard({
           </div>
 
           {/* Right Side: Content */}
-          <div className="flex-1 min-w-0 px-2.5 py-1.5 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
+          <div className="flex-1 min-w-0 px-3 py-2 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
             <div className="min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-0.5">
-                <span className="text-[9px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
                   {TYPE_LABELS[item.type]}
                 </span>
                 {item.estimatedCost && (
-                  <span className="text-[10px] font-bold text-white/60">{item.estimatedCost}€</span>
+                  <span className="text-xs font-bold text-white/60">{item.estimatedCost}€</span>
                 )}
               </div>
               
-              <h4 className="text-base font-bold text-white tracking-tight leading-tight truncate">
+              <h4 className="text-lg font-bold text-white tracking-tight leading-tight truncate">
                 {item.title}
               </h4>
               
               {item.description && (
-                <p className="text-[11px] text-white/50 line-clamp-2 leading-snug mt-0.5 italic font-serif">
+                <p className="text-xs text-white/50 line-clamp-2 leading-snug mt-1 italic font-serif">
                   {item.description}
                 </p>
               )}
@@ -963,7 +963,7 @@ function BookingButtons({ item, isCompact = false }: { item: TripItem; isCompact
           onClick={(e) => e.stopPropagation()}
           className={cn(
             'inline-flex items-center gap-1 transition-colors font-bold',
-            isCompact ? 'px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md text-white/90 border border-white/10 text-[9px]' : 'px-2.5 py-1 rounded-md text-[11px]',
+            isCompact ? 'px-2 py-1 rounded-lg bg-black/40 backdrop-blur-md text-white/90 border border-white/10 text-[10px]' : 'px-2.5 py-1 rounded-md text-[11px]',
             !isCompact && btn.variant === 'primary' && 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm',
             !isCompact && btn.variant === 'secondary' && 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/50',
             !isCompact && btn.variant === 'ghost' && 'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/40',

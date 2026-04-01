@@ -123,10 +123,10 @@ export function ItineraryConnector({
                 </div>
 
                 <div className="flex flex-col items-start min-w-0 flex-1">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gold/80 mb-0.5">
+                  <span className="text-xs font-black uppercase tracking-widest text-gold/80 mb-0.5">
                     {currentOption.label}
                   </span>
-                  <div className="flex items-center gap-2 text-xs font-bold text-white/90">
+                  <div className="flex items-center gap-2 text-sm font-bold text-white/90">
                     {duration && formatDuration(duration)}
                     {distance && distance > 0.1 && (
                       <span className="text-white/60 font-medium">· {formatDistance(distance)}</span>

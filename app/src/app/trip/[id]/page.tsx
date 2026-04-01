@@ -1484,7 +1484,7 @@ export default function TripPage() {
         <PremiumBackground />
         
         {/* Hero Section - Visual & Immersive */}
-        <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
+        <div className="relative h-[25vh] md:h-[35vh] w-full overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/40 to-[#020617] z-10" />
           {(trip as Trip & { cover_url?: string }).cover_url ? (
             <motion.img
@@ -1499,21 +1499,21 @@ export default function TripPage() {
             <div className="h-full w-full bg-gradient-to-br from-gold/20 via-blue-900/40 to-black" />
           )}
           
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-12 px-4 text-center">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-8 px-4 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <div className="h-px w-8 bg-gold/50" />
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Itinéraire Signature</span>
                 <div className="h-px w-8 bg-gold/50" />
               </div>
-              <h1 className="font-display text-5xl md:text-7xl font-black text-white tracking-tight drop-shadow-2xl">
+              <h1 className="font-display text-4xl md:text-6xl font-black text-white tracking-tight drop-shadow-2xl">
                 {trip.preferences.destination}
               </h1>
-              <p className="mt-4 text-white/60 font-medium tracking-[0.1em] uppercase text-xs md:text-sm">
+              <p className="mt-2 text-white/60 font-medium tracking-[0.1em] uppercase text-[10px] md:text-xs">
                 {format(new Date(trip.preferences.startDate), 'd MMMM yyyy', { locale: fr })} · {trip.days.length} Jours de découverte
               </p>
             </motion.div>

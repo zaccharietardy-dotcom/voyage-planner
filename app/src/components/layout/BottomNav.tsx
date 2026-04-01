@@ -10,7 +10,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   // Hide on certain pages for a cleaner immersive experience
-  if (pathname.startsWith('/trip/') || pathname === '/globe' || pathname === '/plan') return null;
+  if (pathname === '/globe' || pathname === '/plan') return null;
 
   const items = [
     { href: '/mes-voyages', label: 'Voyages', icon: Map },
