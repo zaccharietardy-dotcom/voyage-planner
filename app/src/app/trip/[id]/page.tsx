@@ -1785,7 +1785,7 @@ export default function TripPage() {
           )}
 
           {/* Bottom sheet */}
-          <Drawer open modal={false} snapPoints={[0.3, 0.94]} dismissible={false} handleOnly>
+          <Drawer open modal={false} snapPoints={[0.3, 0.94]} dismissible={false}>
             <DrawerContent showOverlay={false} className="flex flex-col h-full bg-[#0A1628] border-t border-white/10 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.5)] outline-none overflow-hidden">
               {/* Zone de drag élargie — 48px de hauteur tactile */}
               <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
