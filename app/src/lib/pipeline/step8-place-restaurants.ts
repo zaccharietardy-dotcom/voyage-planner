@@ -189,10 +189,17 @@ export async function placeRestaurants(
         ? { lat: lunchAnchorActivity.latitude, lng: lunchAnchorActivity.longitude }
         : getClusterCentroid(activities));
     if (lunchAnchor) {
-      let lunchPlacement = findBestRestaurant(
-        enrichedRestaurants, lunchAnchor, 'lunch',
-        maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
-      );
+      const lunchSearch = options.destination
+        ? await findBestRestaurantWithSearch(
+            enrichedRestaurants, lunchAnchor, 'lunch',
+            maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate, options.destination
+          )
+        : { result: findBestRestaurant(enrichedRestaurants, lunchAnchor, 'lunch', maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate), newRestaurants: [] };
+      // Merge any newly discovered restaurants into pool for future days
+      for (const r of lunchSearch.newRestaurants) {
+        if (!enrichedRestaurants.some(e => e.id === r.id)) enrichedRestaurants.push(r);
+      }
+      let lunchPlacement = lunchSearch.result;
       // Fallback: if anchor is >5km from hotel/center and no restaurants found, retry with hotel coords
       if (!lunchPlacement && hotelCoords) {
         const anchorToHotel = calculateDistance(lunchAnchor.lat, lunchAnchor.lng, hotelCoords.lat, hotelCoords.lng);
@@ -222,10 +229,16 @@ export async function placeRestaurants(
         ? { lat: lastActivity.latitude, lng: lastActivity.longitude }
         : hotelCoords || getClusterCentroid(activities));
     if (dinnerAnchor) {
-      let dinnerPlacement = findBestRestaurant(
-        enrichedRestaurants, dinnerAnchor, 'dinner',
-        maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate
-      );
+      const dinnerSearch = options.destination
+        ? await findBestRestaurantWithSearch(
+            enrichedRestaurants, dinnerAnchor, 'dinner',
+            maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate, options.destination
+          )
+        : { result: findBestRestaurant(enrichedRestaurants, dinnerAnchor, 'dinner', maxDist, minRating, altCount, dietary, usedRestaurantIds, dayDate), newRestaurants: [] };
+      for (const r of dinnerSearch.newRestaurants) {
+        if (!enrichedRestaurants.some(e => e.id === r.id)) enrichedRestaurants.push(r);
+      }
+      let dinnerPlacement = dinnerSearch.result;
       // Fallback: if anchor is >5km from hotel/center and no restaurants found, retry with hotel coords
       if (!dinnerPlacement && hotelCoords) {
         const anchorToHotel = calculateDistance(dinnerAnchor.lat, dinnerAnchor.lng, hotelCoords.lat, hotelCoords.lng);
@@ -332,17 +345,67 @@ export function findBestRestaurant(
 ): Omit<MealPlacement, 'anchorName'> | null {
   for (let i = 0; i < PASSES.length; i++) {
     const pass = { ...PASSES[i] };
-    // First pass uses the caller's maxDist
-    if (i === 0 || i === 1) pass.maxDist = maxDistKm;
+    // Don't override the tight passes (200m, 500m) — only override from pass index 2+
+    if (i >= 2 && pass.maxDist <= maxDistKm) pass.maxDist = maxDistKm;
     const results = filterAndScoreCandidates(allRestaurants, anchor, mealType, pass, usedIds, dietary, dayDate, minRating);
     if (results.length > 0) {
       if (i > 0) {
-        console.warn(`[Place Restaurants] Pass ${i + 1} (${pass.maxDist}km${pass.allowReuse ? ', reuse' : ''}): found ${results.length} candidates for ${mealType}`);
+        console.warn(`[Place Restaurants] Pass ${i + 1} (${(pass.maxDist * 1000).toFixed(0)}m${pass.allowReuse ? ', reuse' : ''}): found ${results.length} candidates for ${mealType}`);
       }
       return scoreAndSelect(results, anchor, mealType, altCount);
     }
   }
   return null;
+}
+
+/**
+ * Enhanced version: tries local pool first (200m → 500m → 800m), then
+ * fires a targeted API search near the anchor if nothing found within 500m.
+ * Results are merged into the pool for future use (cache effect).
+ */
+export async function findBestRestaurantWithSearch(
+  allRestaurants: Restaurant[],
+  anchor: { lat: number; lng: number },
+  mealType: 'breakfast' | 'lunch' | 'dinner',
+  maxDistKm: number,
+  minRating: number,
+  altCount: number,
+  dietary: string[],
+  usedIds: Set<string>,
+  dayDate: Date | null,
+  destination: string,
+): Promise<{ result: Omit<MealPlacement, 'anchorName'> | null; newRestaurants: Restaurant[] }> {
+  // First try: tight passes (200m, 500m) from existing pool
+  for (let i = 0; i < 2; i++) {
+    const pass = { ...PASSES[i] };
+    const results = filterAndScoreCandidates(allRestaurants, anchor, mealType, pass, usedIds, dietary, dayDate, minRating);
+    if (results.length > 0) {
+      return { result: scoreAndSelect(results, anchor, mealType, altCount), newRestaurants: [] };
+    }
+  }
+
+  // Nothing within 500m in pool — fire targeted API search near this anchor
+  let newRestaurants: Restaurant[] = [];
+  try {
+    console.log(`[Place Restaurants] No ${mealType} within 500m of anchor — searching API near [${anchor.lat.toFixed(4)}, ${anchor.lng.toFixed(4)}]`);
+    const nearby = await searchRestaurantsNearbyWithFallback(anchor, destination, {
+      mealType: mealType === 'breakfast' ? 'breakfast' : mealType === 'lunch' ? 'lunch' : 'dinner',
+      maxDistance: 600, // 600m radius
+      limit: 8,
+    });
+    const existingIds = new Set(allRestaurants.map(r => r.id));
+    newRestaurants = nearby.filter(r => !existingIds.has(r.id));
+    if (newRestaurants.length > 0) {
+      console.log(`[Place Restaurants] API found ${newRestaurants.length} new restaurants near anchor`);
+    }
+  } catch (e) {
+    console.warn(`[Place Restaurants] Targeted search failed:`, e);
+  }
+
+  // Retry all passes with merged pool
+  const merged = [...allRestaurants, ...newRestaurants];
+  const result = findBestRestaurant(merged, anchor, mealType, maxDistKm, minRating, altCount, dietary, usedIds, dayDate);
+  return { result, newRestaurants };
 }
 
 function scoreAndSelect(
