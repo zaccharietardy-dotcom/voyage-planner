@@ -65,6 +65,9 @@ export function PricingCards() {
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        console.error('Checkout failed:', data);
+        toast.error(data.error || 'Erreur lors de la création du paiement');
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -235,7 +238,7 @@ export function PricingCards() {
           <div className="mt-4 mb-6">
             {billingPeriod === 'yearly' ? (
               <>
-                <span className="text-4xl font-bold">9.99€</span>
+                <span className="text-4xl font-bold">10.99€</span>
                 <span className="text-muted-foreground">/an</span>
                 <p className="text-xs text-muted-foreground mt-1">
                   soit 0.83€/mois
@@ -303,7 +306,7 @@ export function PricingCards() {
                       ? 'Acheter via Google Play'
                       : 'Acheter'
                 ) : billingPeriod === 'yearly' ? (
-                  'S\'abonner — 9.99€/an'
+                  'S\'abonner — 10.99€/an'
                 ) : (
                   'S\'abonner — 1.99€/mois'
                 )}
