@@ -1,12 +1,38 @@
 /**
  * Pure function: generate A/B preference cards from a completed Trip.
  * No side effects, no API calls.
+ *
+ * Improvements over v1:
+ * - Activity swaps check geographic proximity (< 3km from day center)
+ * - More alternatives: up to 5 cards instead of 3
+ * - Propose alternatives for ALL eligible items, not just afternoon activities
+ * - Restaurant alternatives already filtered by pipeline (< 800m)
  */
 
-import type { Trip, TripItem } from './types';
+import type { Trip, TripItem, TripDay } from './types';
 import type { FeedbackCard } from './types/pipelineQuestions';
 
-const MAX_CARDS = 3;
+const MAX_CARDS = 5;
+
+/** Haversine distance in km between two GPS points */
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/** Compute the geographic center of a day's activities */
+function dayCenter(day: TripDay): { lat: number; lng: number } | null {
+  const items = day.items.filter(i => i.latitude && i.longitude && i.type === 'activity');
+  if (items.length === 0) return null;
+  const lat = items.reduce((s, i) => s + i.latitude, 0) / items.length;
+  const lng = items.reduce((s, i) => s + i.longitude, 0) / items.length;
+  return { lat, lng };
+}
 
 export function generateFeedbackCards(trip: Trip): FeedbackCard[] {
   const cards: FeedbackCard[] = [];
@@ -15,7 +41,7 @@ export function generateFeedbackCards(trip: Trip): FeedbackCard[] {
   const restaurantSwaps = findRestaurantSwaps(trip);
   cards.push(...restaurantSwaps);
 
-  // 2. Activity swaps — afternoon activities with pool alternatives
+  // 2. Activity swaps — activities with pool alternatives nearby
   if (cards.length < MAX_CARDS) {
     const activitySwaps = findActivitySwaps(trip);
     cards.push(...activitySwaps.slice(0, MAX_CARDS - cards.length));
@@ -96,25 +122,46 @@ function findActivitySwaps(trip: Trip): FeedbackCard[] {
     }
   }
 
-  // Available alternatives from the pool
-  const available = trip.attractionPool.filter(a => !scheduledIds.has(a.id || a.name));
+  // Available alternatives from the pool (not already scheduled)
+  const available = trip.attractionPool.filter(a =>
+    !scheduledIds.has(a.id || a.name) && a.latitude && a.longitude
+  );
   if (available.length === 0) return [];
 
-  // Find afternoon activities that could be swapped
-  const candidates: FeedbackCard[] = [];
+  // Pre-compute day centers for proximity check
+  const dayCenters = new Map<number, { lat: number; lng: number }>();
   for (const day of trip.days) {
+    const center = dayCenter(day);
+    if (center) dayCenters.set(day.dayNumber, center);
+  }
+
+  const candidates: FeedbackCard[] = [];
+  const usedAlternatives = new Set<string>();
+
+  for (const day of trip.days) {
+    const center = dayCenters.get(day.dayNumber);
+
     for (const item of day.items) {
       if (item.type !== 'activity') continue;
-      if (item.startTime < '13:00') continue; // afternoon only
       if (item.mustSee) continue; // never swap must-sees
 
-      // Find an alternative of different type with good rating
-      const itemType = item.type as string;
-      const alt = available.find(a =>
-        ((a.type as string) !== itemType || !itemType) &&
-        (a.rating || 0) >= (item.rating || 0) * 0.9
-      );
+      // Find a nearby alternative with decent rating
+      const alt = available.find(a => {
+        const altId = a.id || a.name;
+        if (usedAlternatives.has(altId)) return false;
+
+        // Check proximity: alternative must be < 3km from day center
+        if (center && a.latitude && a.longitude) {
+          const dist = distanceKm(center.lat, center.lng, a.latitude, a.longitude);
+          if (dist > 3) return false;
+        }
+
+        // Must have a reasonable rating
+        return (a.rating || 0) >= (item.rating || 0) * 0.8;
+      });
+
       if (!alt) continue;
+      usedAlternatives.add(alt.id || alt.name);
 
       candidates.push({
         id: `activity-${item.id}`,
@@ -138,9 +185,9 @@ function findActivitySwaps(trip: Trip): FeedbackCard[] {
         targetItemId: item.id,
       });
 
-      if (candidates.length >= 1) break; // max 1 activity card
+      if (candidates.length >= 3) break;
     }
-    if (candidates.length >= 1) break;
+    if (candidates.length >= 3) break;
   }
 
   return candidates;
