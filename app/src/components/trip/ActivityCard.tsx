@@ -428,9 +428,9 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Horizontal Magazine-Style Card */}
       {!isCompactCheckin && (
-        <div className="flex items-stretch min-h-[7rem] w-full">
+        <div className="flex items-stretch min-h-[6.5rem] w-full">
           {/* Left Side: Photo with Badge Overlay */}
-          <div className="relative w-32 h-full shrink-0 overflow-hidden">
+          <div className="relative w-28 h-full shrink-0 overflow-hidden">
             {/* Gradient base if image fails */}
             <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
             
@@ -464,9 +464,9 @@ export const ActivityCard = memo(function ActivityCard({
           </div>
 
           {/* Right Side: Content */}
-          <div className="flex-1 min-w-0 px-2.5 py-2 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
+          <div className="flex-1 min-w-0 px-2.5 py-1.5 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
             <div className="min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center justify-between gap-2 mb-0.5">
                 <span className="text-[9px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
                   {TYPE_LABELS[item.type]}
                 </span>
@@ -480,7 +480,7 @@ export const ActivityCard = memo(function ActivityCard({
               </h4>
               
               {item.description && (
-                <p className="text-[11px] text-white/50 line-clamp-2 leading-snug mt-1 italic font-serif">
+                <p className="text-[11px] text-white/50 line-clamp-2 leading-snug mt-0.5 italic font-serif">
                   {item.description}
                 </p>
               )}

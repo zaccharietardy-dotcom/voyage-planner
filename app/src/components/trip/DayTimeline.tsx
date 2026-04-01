@@ -222,7 +222,7 @@ export const DayTimeline = memo(function DayTimeline({
   }
 
   return (
-    <div ref={timelineRef} className="space-y-5">
+    <div ref={timelineRef} className="space-y-4">
       {/* Day header */}
       <motion.div
         className="flex items-center justify-between rounded-[2.5rem] border border-white/5 bg-black/40 p-5 backdrop-blur-3xl shadow-[0_15px_35px_rgba(0,0,0,0.3)]"
@@ -264,7 +264,7 @@ export const DayTimeline = memo(function DayTimeline({
 
       {/* Timeline Container */}
       <motion.div
-        className="relative space-y-2"
+        className="relative space-y-1"
         initial="hidden"
         animate="visible"
         variants={{
@@ -361,7 +361,7 @@ export const DayTimeline = memo(function DayTimeline({
 
               {/* Connecteur d'itinéraire vers l'activité suivante */}
               {nextItem && shouldShowItinerary(item, nextItem) && (
-                <div className="my-2">
+                <div className="my-1">
                   <ItineraryConnector
                     from={{
                       name: item.locationName || item.title,

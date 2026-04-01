@@ -96,10 +96,10 @@ export function ItineraryConnector({
   };
 
   return (
-    <div className="relative py-2">
+    <div className="relative py-1">
       <div className="flex items-center gap-4 ml-[19px]">
         {/* Connector Line with animated feel */}
-        <div className="w-[2px] h-12 bg-gradient-to-b from-gold/40 via-gold/10 to-transparent border-l border-dashed border-gold/30" />
+        <div className="w-[2px] h-8 bg-gradient-to-b from-gold/40 via-gold/10 to-transparent border-l border-dashed border-gold/30" />
         
         <div className="flex-1">
           <Drawer open={showModeDrawer} onOpenChange={setShowModeDrawer}>
@@ -114,7 +114,7 @@ export function ItineraryConnector({
                   }
                 }}
                 className={cn(
-                  "group flex items-center gap-3 p-3 rounded-2xl bg-[#0A1628]/40 border border-white/5 backdrop-blur-md transition-all active:scale-[0.98] w-full max-w-[320px] shadow-lg",
+                  "group flex items-center gap-3 py-2 px-3 rounded-2xl bg-[#0A1628]/40 border border-white/5 backdrop-blur-md transition-all active:scale-[0.98] w-full max-w-[320px] shadow-lg",
                   isEditable ? "hover:border-gold/30" : "hover:border-white/10"
                 )}
               >
