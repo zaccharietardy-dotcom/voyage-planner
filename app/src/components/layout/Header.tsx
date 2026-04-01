@@ -67,7 +67,7 @@ export function Header() {
               alt="Narae"
               width={32}
               height={32}
-              className="h-8 w-8 object-contain"
+              className="h-8 w-8 object-contain rounded-full"
             />
             <span className="font-display text-xl font-bold tracking-tight text-foreground">
               Narae <span className="text-gold italic">Voyage</span>

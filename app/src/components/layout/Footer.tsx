@@ -51,17 +51,13 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-6 mb-20">
           <div className="lg:col-span-2">
             <Link href="/" className="mb-8 inline-flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gold-gradient p-[1px]">
-                <div className="h-full w-full rounded-[10px] bg-[#020617] flex items-center justify-center">
-                  <Image
-                    src="/logo-narae.png"
-                    alt="Narae"
-                    width={24}
-                    height={24}
-                    className="h-6 w-6"
-                  />
-                </div>
-              </div>
+              <Image
+                src="/logo-narae.png"
+                alt="Narae"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full"
+              />
               <span className="font-display text-2xl font-bold tracking-tight">Narae <span className="text-gold italic">Voyage</span></span>
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-slate-400 mb-8">
