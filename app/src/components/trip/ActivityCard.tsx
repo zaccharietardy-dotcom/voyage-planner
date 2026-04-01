@@ -434,9 +434,9 @@ export const ActivityCard = memo(function ActivityCard({
 
       {/* Horizontal Magazine-Style Card */}
       {!isCompactCheckin && (
-        <div className="flex items-stretch w-full">
+        <div className="flex items-stretch w-full min-h-0">
           {/* Left Side: Photo with Badge Overlay */}
-          <div className="relative w-32 h-auto shrink-0 overflow-hidden">
+          <div className="relative w-28 shrink-0 overflow-hidden min-h-[6rem] max-h-[8rem]">
             {/* Gradient base if image fails */}
             <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
             
@@ -470,9 +470,9 @@ export const ActivityCard = memo(function ActivityCard({
           </div>
 
           {/* Right Side: Content */}
-          <div className="flex-1 min-w-0 px-3 py-2 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
+          <div className="flex-1 min-w-0 px-2.5 py-1.5 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
             <div className="min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center justify-between gap-2 mb-0.5">
                 <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
                   {TYPE_LABELS[item.type]}
                 </span>
@@ -481,7 +481,7 @@ export const ActivityCard = memo(function ActivityCard({
                 )}
               </div>
               
-              <h4 className="text-lg font-bold text-white tracking-tight leading-tight truncate">
+              <h4 className="text-base font-bold text-white tracking-tight leading-tight truncate">
                 {item.title}
               </h4>
               
