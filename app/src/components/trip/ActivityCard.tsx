@@ -403,7 +403,7 @@ export const ActivityCard = memo(function ActivityCard({
   return (
     <Card
       className={cn(
-        'relative group cursor-pointer overflow-hidden active:scale-[0.97] transition-transform rounded-2xl',
+        'relative group cursor-pointer overflow-hidden active:scale-[0.97] transition-transform rounded-2xl !p-0 !gap-0',
         'border-0 bg-[#0A1628] shadow-none',
         'hover:brightness-110',
         isSelected && 'ring-2 ring-gold/50 border-gold/30 shadow-gold/10',

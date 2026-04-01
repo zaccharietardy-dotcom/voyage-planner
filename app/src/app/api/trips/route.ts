@@ -208,8 +208,8 @@ export async function POST(request: Request) {
     // Send "trip ready" email (best effort, don't block response)
     // Only send if trip has actual content (days with items)
     const userEmail = user.email;
-    const tripData = trip.data as any;
-    const hasContent = tripData?.days && Array.isArray(tripData.days) && tripData.days.length > 0 && tripData.days.some((d: any) => d.items?.length > 0);
+    const savedData = trip.data as any;
+    const hasContent = savedData?.days && Array.isArray(savedData.days) && savedData.days.length > 0 && savedData.days.some((d: any) => d.items?.length > 0);
     if (userEmail && hasContent) {
       const formattedDate = new Date(startDateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
       const email = tripReadyEmail(trip.id, destination, formattedDate, durationDays || 7);
