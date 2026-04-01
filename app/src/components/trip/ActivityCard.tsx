@@ -436,7 +436,7 @@ export const ActivityCard = memo(function ActivityCard({
       {!isCompactCheckin && (
         <div className="flex items-stretch w-full min-h-0">
           {/* Left Side: Photo with Badge Overlay */}
-          <div className="relative w-28 shrink-0 overflow-hidden min-h-[6rem] max-h-[8rem] rounded-l-2xl">
+          <div className="relative w-28 shrink-0 overflow-hidden min-h-[7rem] rounded-l-2xl">
             {/* Gradient base if image fails */}
             <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
             

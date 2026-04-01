@@ -747,7 +747,22 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       }
       const nodes: RouteNode[] = [];
 
-      if (hotelCoords) {
+      // Only include hotel in route if it's within 3km of day's activity center
+      // Avoids long parasitic lines when hotel is far from activities
+      const activityCoords = dayItems
+        .filter(i => i.latitude && i.longitude && i.type !== 'checkin' && i.type !== 'checkout' && i.type !== 'transport' && i.type !== 'flight')
+        .map(i => [i.latitude, i.longitude] as [number, number]);
+      let hotelCloseEnough = false;
+      if (hotelCoords && activityCoords.length > 0) {
+        const avgLat = activityCoords.reduce((s, c) => s + c[0], 0) / activityCoords.length;
+        const avgLng = activityCoords.reduce((s, c) => s + c[1], 0) / activityCoords.length;
+        const dLat = (hotelCoords[0] - avgLat) * 111.32;
+        const dLng = (hotelCoords[1] - avgLng) * 111.32 * Math.cos(avgLat * Math.PI / 180);
+        const distKm = Math.sqrt(dLat * dLat + dLng * dLng);
+        hotelCloseEnough = distKm <= 3;
+      }
+
+      if (hotelCoords && hotelCloseEnough) {
         nodes.push({ coords: hotelCoords });
       }
 
@@ -779,7 +794,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         item.transportRole === 'longhaul' &&
         (item.title.includes('→') || item.id.includes('ret-'))
       );
-      if (hotelCoords && !hasReturnTransport) {
+      if (hotelCoords && hotelCloseEnough && !hasReturnTransport) {
         nodes.push({ coords: hotelCoords });
       }
 
