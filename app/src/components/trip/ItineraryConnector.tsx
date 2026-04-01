@@ -96,10 +96,10 @@ export function ItineraryConnector({
   };
 
   return (
-    <div className="relative py-1">
+    <div className="relative py-0.5">
       <div className="flex items-center gap-4 ml-[19px]">
         {/* Connector Line with animated feel */}
-        <div className="w-[2px] h-8 bg-gradient-to-b from-gold/40 via-gold/10 to-transparent border-l border-dashed border-gold/30" />
+        <div className="w-[2px] h-6 bg-gradient-to-b from-gold/40 via-gold/10 to-transparent border-l border-dashed border-gold/30" />
         
         <div className="flex-1">
           <Drawer open={showModeDrawer} onOpenChange={setShowModeDrawer}>

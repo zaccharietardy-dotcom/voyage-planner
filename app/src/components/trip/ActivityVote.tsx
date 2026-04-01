@@ -12,20 +12,20 @@ interface ActivityVoteProps {
 
 export function ActivityVote({ wantCount, skipCount, userVote, onVote }: ActivityVoteProps) {
   return (
-    <div className="flex items-center gap-1.5 mt-1 pt-1 border-t border-border/20">
+    <div className="flex items-center gap-1">
       <button
         onClick={(e) => {
           e.stopPropagation();
           onVote(userVote === 'want' ? null : 'want');
         }}
         className={cn(
-          'inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors',
+          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-black transition-all active:scale-95',
           userVote === 'want'
-            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-            : 'text-muted-foreground hover:bg-muted'
+            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+            : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60 border border-white/5'
         )}
       >
-        <ThumbsUp className="h-3 w-3" />
+        <ThumbsUp className="h-2.5 w-2.5" />
         {wantCount > 0 && <span>{wantCount}</span>}
       </button>
       <button
@@ -34,13 +34,13 @@ export function ActivityVote({ wantCount, skipCount, userVote, onVote }: Activit
           onVote(userVote === 'skip' ? null : 'skip');
         }}
         className={cn(
-          'inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors',
+          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[9px] font-black transition-all active:scale-95',
           userVote === 'skip'
-            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-            : 'text-muted-foreground hover:bg-muted'
+            ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
+            : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60 border border-white/5'
         )}
       >
-        <ThumbsDown className="h-3 w-3" />
+        <ThumbsDown className="h-2.5 w-2.5" />
         {skipCount > 0 && <span>{skipCount}</span>}
       </button>
     </div>
