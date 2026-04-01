@@ -276,6 +276,9 @@ interface PassConfig {
 }
 
 const PASSES: PassConfig[] = [
+  // Pass 0: ultra-close (200m), full quality — best possible pick
+  { maxDist: 0.2, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+  { maxDist: 0.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
   { maxDist: 1.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
