@@ -87,47 +87,56 @@ export interface MultiModalDirections {
 }
 
 /**
- * Obtient les directions entre deux points
- * Utilise la chaîne de fallback automatique
+ * Obtient les directions entre deux points.
+ *
+ * Walking/driving → OSRM (gratuit, open source, polylines incluses)
+ * Transit → Google Directions (seul à fournir les lignes de métro/bus)
+ * Fallback → OpenRouteService → estimation
  */
 export async function getDirections(request: DirectionsRequest): Promise<DirectionsResult> {
   const { from, to, mode = 'transit', departureTime } = request;
 
-  // Générer le lien Google Maps dans tous les cas
   const googleMapsUrl = generateGoogleMapsUrl(from, to, mode);
 
-  // 1. Essayer Google Directions API
-  if (getGoogleMapsKey()) {
+  // 1. Walking & driving → use OSRM (free, no API key needed)
+  if (mode === 'walking' || mode === 'driving') {
+    try {
+      const result = await searchWithOSRM(from, to, mode);
+      return { ...result, googleMapsUrl };
+    } catch (error) {
+      console.warn('[Directions] OSRM failed for', mode, '— falling back:', error);
+    }
+  }
+
+  // 2. Transit → Google Directions API (paid, but needed for metro/bus lines)
+  if (mode === 'transit' && getGoogleMapsKey()) {
     try {
       const result = await searchWithGoogle(from, to, mode, departureTime);
       return { ...result, googleMapsUrl };
     } catch (error) {
-      // Transit mode may fail (ZERO_RESULTS) in some regions (Japan, etc.)
-      // Retry with driving to at least get a polyline for the map
-      if (mode === 'transit') {
-        try {
-          const drivingResult = await searchWithGoogle(from, to, 'driving');
-          console.debug(`[Directions] Transit failed, driving fallback succeeded for ${from.lat},${from.lng} → ${to.lat},${to.lng}`);
-          return { ...drivingResult, googleMapsUrl, transitLines: [] };
-        } catch {
-          // Both failed
-        }
+      // Transit may fail (ZERO_RESULTS) in some regions — try driving via OSRM
+      try {
+        const drivingResult = await searchWithOSRM(from, to, 'driving');
+        console.debug(`[Directions] Transit failed, OSRM driving fallback for ${from.lat.toFixed(4)},${from.lng.toFixed(4)}`);
+        return { ...drivingResult, googleMapsUrl, transitLines: [] };
+      } catch {
+        // OSRM also failed
       }
-      console.warn('Google Directions API error, falling back:', error);
+      console.warn('[Directions] Google transit error, falling back:', error);
     }
   }
 
-  // 2. Essayer OpenRouteService
+  // 3. Fallback: OpenRouteService
   if (getOpenRouteKey()) {
     try {
       const result = await searchWithOpenRouteService(from, to, mode);
       return { ...result, googleMapsUrl };
     } catch (error) {
-      console.warn('OpenRouteService error, falling back:', error);
+      console.warn('[Directions] OpenRouteService error, falling back:', error);
     }
   }
 
-  // 3. Fallback sur estimation
+  // 4. Last resort: estimation
   return estimateDirections(from, to, mode, googleMapsUrl);
 }
 
@@ -222,6 +231,47 @@ async function searchWithGoogle(
   setCachedResponse('directions', cacheKey, dirResult, 14).catch(() => {});
 
   return dirResult;
+}
+
+/**
+ * Recherche via OSRM (100% gratuit, open source, polylines incluses)
+ * Walking: routing.openstreetmap.de/routed-foot
+ * Driving: router.project-osrm.org
+ */
+async function searchWithOSRM(
+  from: Coordinates,
+  to: Coordinates,
+  mode: 'walking' | 'driving'
+): Promise<Omit<DirectionsResult, 'googleMapsUrl'>> {
+  const cacheKey = `osrm|${from.lat.toFixed(4)},${from.lng.toFixed(4)}|${to.lat.toFixed(4)},${to.lng.toFixed(4)}|${mode}`;
+  const cached = await getCachedResponse<Omit<DirectionsResult, 'googleMapsUrl'>>('directions', cacheKey);
+  if (cached) return cached;
+
+  const host = mode === 'walking'
+    ? 'https://routing.openstreetmap.de/routed-foot'
+    : 'https://router.project-osrm.org';
+  const profile = mode === 'walking' ? 'foot' : 'driving';
+
+  const url = `${host}/route/v1/${profile}/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=polyline&steps=false`;
+
+  const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw new Error(`OSRM ${response.status}`);
+
+  const data = await response.json();
+  if (data.code !== 'Ok' || !data.routes?.length) throw new Error('OSRM: no route');
+
+  const route = data.routes[0];
+  const result: Omit<DirectionsResult, 'googleMapsUrl'> = {
+    duration: Math.ceil(route.duration / 60),
+    distance: route.distance / 1000,
+    steps: [],
+    transitLines: [],
+    source: 'openroute' as const, // reuse existing source type
+    overviewPolyline: route.geometry, // OSRM returns encoded polyline
+  };
+
+  setCachedResponse('directions', cacheKey, result, 14).catch(() => {});
+  return result;
 }
 
 /**

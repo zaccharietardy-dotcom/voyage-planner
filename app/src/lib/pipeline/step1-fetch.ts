@@ -207,8 +207,8 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     tracked('Must-sees', preferences.mustSee?.trim()
       ? searchMustSeeWithFallback(preferences.mustSee, destination, destCoords)
       : Promise.resolve([])),
-    // 5: TripAdvisor restaurants
-    tracked('TripAdvisor', searchTripAdvisorRestaurants(destination, { limit: 30 })),
+    // 5: TripAdvisor removed — SerpAPI covers restaurant data (saves $8/month)
+    tracked('TripAdvisor (skipped)', Promise.resolve([])),
     // 6: Google Places (New) → SerpAPI fallback — restaurants with GPS
     tracked('Places restaurants', searchRestaurantsWithFallback(destination, {
           latitude: destCoords.lat,
