@@ -34,9 +34,8 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Hide on pages with their own header/fullscreen layout
-  const hidden = pathname.startsWith('/trip/');
-  if (hidden) return null;
+  // Show on all pages
+  const hidden = false;
 
   const navLinks = [
     { href: '/plan', label: t('nav.createTrip'), icon: PlusCircle },
