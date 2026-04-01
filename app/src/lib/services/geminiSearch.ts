@@ -19,10 +19,19 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/
  * Fetch Gemini with automatic retry on 429 (quota exceeded).
  * Retries up to 3 times with exponential backoff (2s, 4s, 8s).
  */
+// Global quota circuit breaker — skip Gemini for 60s after a quota error
+let quotaExhaustedUntil = 0;
+
 export async function fetchGeminiWithRetry(
   body: Record<string, unknown>,
   maxRetries: number = 3
 ): Promise<Response> {
+  // Circuit breaker: if we recently hit quota, return a fake 429 immediately
+  if (Date.now() < quotaExhaustedUntil) {
+    console.warn(`[Gemini] Circuit breaker active — skipping call (resets in ${Math.ceil((quotaExhaustedUntil - Date.now()) / 1000)}s)`);
+    return new Response(JSON.stringify({ error: { message: 'Gemini quota circuit breaker', status: 'RESOURCE_EXHAUSTED' } }), { status: 429 });
+  }
+
   const url = `${GEMINI_API_URL}?key=${getGeminiApiKey()}`;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await fetch(url, {
@@ -30,23 +39,30 @@ export async function fetchGeminiWithRetry(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    // Retry on 429 (rate limit) or 503 (overloaded) with longer backoff
+    // Retry on 429 (rate limit) or 503 (overloaded)
     if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
       const delay = Math.pow(2, attempt + 1) * 2000; // 4s, 8s, 16s
       console.warn(`[Gemini] Rate limited (${response.status}), retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
       await new Promise(r => setTimeout(r, delay));
       continue;
     }
+    // Activate circuit breaker on final 429
+    if (response.status === 429) {
+      quotaExhaustedUntil = Date.now() + 60_000; // skip all calls for 60s
+      console.warn('[Gemini] Circuit breaker activated for 60s');
+    }
     // Also check for quota errors in 200 responses
     if (response.status === 200) {
       const cloned = response.clone();
       try {
         const json = await cloned.json();
-        if (json.error?.status === 'RESOURCE_EXHAUSTED' && attempt < maxRetries) {
-          const delay = Math.pow(2, attempt + 1) * 2000;
-          console.warn(`[Gemini] Quota exhausted in body, retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
-          await new Promise(r => setTimeout(r, delay));
-          continue;
+        if (json.error?.status === 'RESOURCE_EXHAUSTED') {
+          quotaExhaustedUntil = Date.now() + 60_000;
+          console.warn('[Gemini] RESOURCE_EXHAUSTED in body — circuit breaker activated for 60s');
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, 8000));
+            continue;
+          }
         }
       } catch { /* not JSON or parse error — return as-is */ }
     }
