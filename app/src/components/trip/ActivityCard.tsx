@@ -403,9 +403,9 @@ export const ActivityCard = memo(function ActivityCard({
   return (
     <Card
       className={cn(
-        'relative group cursor-pointer overflow-hidden active:scale-[0.97] transition-transform',
-        'border-white/5 bg-[#0A1628]/80 shadow-[0_8px_30px_rgb(0,0,0,0.12)]',
-        'hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:border-white/10',
+        'relative group cursor-pointer overflow-hidden active:scale-[0.97] transition-transform rounded-2xl',
+        'border-0 bg-[#0A1628] shadow-none',
+        'hover:brightness-110',
         isSelected && 'ring-2 ring-gold/50 border-gold/30 shadow-gold/10',
         isDragging && 'shadow-2xl rotate-2 scale-[1.05] z-50',
       )}
@@ -436,7 +436,7 @@ export const ActivityCard = memo(function ActivityCard({
       {!isCompactCheckin && (
         <div className="flex items-stretch w-full min-h-0">
           {/* Left Side: Photo with Badge Overlay */}
-          <div className="relative w-28 shrink-0 overflow-hidden min-h-[6rem] max-h-[8rem]">
+          <div className="relative w-28 shrink-0 overflow-hidden min-h-[6rem] max-h-[8rem] rounded-l-2xl">
             {/* Gradient base if image fails */}
             <div className={cn("absolute inset-0 bg-gradient-to-br", TYPE_GRADIENTS[item.type] || 'from-slate-800 to-slate-950')} />
             
