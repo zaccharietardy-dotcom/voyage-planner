@@ -444,8 +444,10 @@ export const ActivityCard = memo(function ActivityCard({
               <img
                 src={imageUrl}
                 alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                loading="lazy"
+                className="w-full h-full object-cover"
+                loading="eager"
+                onError={() => setImgError(true)}
+                onLoad={() => setImgLoaded(true)}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-gold/10">
