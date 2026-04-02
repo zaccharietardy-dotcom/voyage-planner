@@ -798,13 +798,13 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         nodes.push({ coords: hotelCoords });
       }
 
-      // Build route nodes: skip transport items but propagate their travel data
-      // to the next non-transport item (so route labels show transit info between activities)
+      // Build route nodes: only activities (skip restaurants, transport, checkin/checkout)
+      // Restaurants create zigzag loops because they're geographically offset from the activity path
       let pendingTransport: TripItem | null = null;
       for (const item of dayItems) {
         if (item.type === 'checkin' || item.type === 'checkout') continue;
+        if (item.type === 'restaurant') continue; // Skip restaurants — they cause route loops
         if (item.type === 'transport') {
-          // Store transport data for the next activity/restaurant node
           pendingTransport = item;
           continue;
         }
