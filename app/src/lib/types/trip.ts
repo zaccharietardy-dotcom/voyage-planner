@@ -756,12 +756,12 @@ export const BUDGET_LABELS: Record<BudgetLevel, { label: string; range: string; 
 export const TRIP_ITEM_COLORS: Record<TripItemType, string> = {
   activity: '#3B82F6', // blue
   restaurant: '#F97316', // orange
-  hotel: '#8B5CF6', // purple
+  hotel: '#6366F1', // indigo
   transport: '#10B981', // green
   flight: '#EC4899', // pink
   parking: '#6B7280', // gray
-  checkin: '#8B5CF6', // purple (same as hotel)
-  checkout: '#8B5CF6', // purple (same as hotel)
+  checkin: '#6366F1', // indigo (same as hotel)
+  checkout: '#6366F1', // indigo (same as hotel)
   luggage: '#F59E0B', // amber - consigne bagages
   free_time: '#22C55E', // green - temps libre
 };

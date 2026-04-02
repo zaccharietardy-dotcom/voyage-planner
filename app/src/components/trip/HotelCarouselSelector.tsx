@@ -2,7 +2,9 @@
 
 import { Accommodation } from '@/lib/types';
 import { useState, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Check, Archive, Star, ExternalLink, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Archive, Star, ExternalLink, MapPin, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface HotelCarouselSelectorProps {
   hotels: Accommodation[];
@@ -83,48 +85,62 @@ export function HotelCarouselSelector({
   return (
     <div className="space-y-4">
       {/* Header avec titre et navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Choisir votre hôtel</h3>
-          <p className="text-sm text-muted-foreground">{visibleHotels.length} hôtels disponibles pour {nights} nuit{nights > 1 ? 's' : ''}</p>
+          <h3 className="text-lg font-bold text-foreground">Choisir votre hôtel</h3>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{visibleHotels.length} hôtels disponibles pour {nights} nuit{nights > 1 ? 's' : ''}</p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Liens de recherche externe */}
-          {searchLinks?.booking && (
-            <a
-              href={searchLinks.booking}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-            >
-              Recherche Booking <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
-          {searchLinks?.airbnb && (
-            <a
-              href={searchLinks.airbnb}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1"
-            >
-              Recherche Airbnb <ExternalLink className="h-3 w-3" />
-            </a>
-          )}
+        
+        <div className="flex items-center gap-3">
+          {/* Liens de recherche externe - Styled as buttons */}
+          <div className="flex items-center gap-2">
+            {searchLinks?.booking && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-1.5 text-[10px] font-black uppercase tracking-wider border-[#003580]/30 text-[#003580] dark:text-blue-400 dark:border-blue-400/30 hover:bg-blue-500/5 rounded-xl transition-all" 
+                asChild
+              >
+                <a href={searchLinks.booking} target="_blank" rel="noopener noreferrer">
+                  <Search className="h-3 w-3" />
+                  Booking
+                </a>
+              </Button>
+            )}
+            {searchLinks?.airbnb && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-1.5 text-[10px] font-black uppercase tracking-wider border-[#FF5A5F]/30 text-[#FF5A5F] dark:text-rose-400 dark:border-rose-400/30 hover:bg-rose-500/5 rounded-xl transition-all" 
+                asChild
+              >
+                <a href={searchLinks.airbnb} target="_blank" rel="noopener noreferrer">
+                  <Search className="h-3 w-3" />
+                  Airbnb
+                </a>
+              </Button>
+            )}
+          </div>
+
+          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+
           {/* Boutons de navigation */}
-          <button
-            onClick={() => scroll('left')}
-            className="p-2 rounded-full hover:bg-muted transition-colors"
-            aria-label="Défiler à gauche"
-          >
-            <ChevronLeft className="h-5 w-5 text-muted-foreground" />
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            className="p-2 rounded-full hover:bg-muted transition-colors"
-            aria-label="Défiler à droite"
-          >
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => scroll('left')}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+              aria-label="Défiler à gauche"
+            >
+              <ChevronLeft className="h-4 w-4 text-foreground" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+              aria-label="Défiler à droite"
+            >
+              <ChevronRight className="h-4 w-4 text-foreground" />
+            </button>
+          </div>
         </div>
       </div>
 

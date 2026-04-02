@@ -54,11 +54,11 @@ export default function HomeScreen() {
             {/* Hero text */}
             <View style={{ marginBottom: 40 }}>
               <Text style={{
-                color: colors.text, fontSize: 38, textAlign: 'center', lineHeight: 46,
-                fontFamily: fonts.display, fontWeight: 'bold'
+                color: colors.text, fontSize: 36, textAlign: 'center', lineHeight: 44,
+                fontFamily: fonts.sansBold, letterSpacing: -0.5
               }}>
                 L&apos;excellence du{'\n'}
-                <Text style={{ color: colors.gold, fontStyle: 'italic' }}>voyage sur-mesure</Text>
+                <Text style={{ color: colors.gold }}>voyage sur-mesure</Text>
               </Text>
 
               <Text style={{
@@ -176,7 +176,7 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
         </Text>
         <Text style={{
           color: colors.text, fontSize: 32,
-          fontFamily: fonts.display, fontWeight: 'bold'
+          fontFamily: fonts.sansBold, letterSpacing: -0.5
         }}>
           {greeting}{name ? `, ${name}` : ''} !
         </Text>
@@ -217,7 +217,7 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
           }}
         >
           <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.bg, fontSize: 22, fontFamily: fonts.display, fontWeight: 'bold' }}>
+            <Text style={{ color: colors.bg, fontSize: 22, fontFamily: fonts.sansBold, letterSpacing: -0.3 }}>
               Créer un voyage
             </Text>
             <Text style={{ color: 'rgba(2,6,23,0.7)', fontSize: 14, marginTop: 6, fontFamily: fonts.sansSemiBold }}>
