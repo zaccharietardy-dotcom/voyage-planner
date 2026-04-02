@@ -35,8 +35,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating checkout session:', error);
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
+    const message = error?.message || 'Erreur interne';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -4,9 +4,7 @@ import { createRouteHandlerClient } from '@/lib/supabase/server';
 let _stripe: Stripe | null = null;
 export function getStripe(): Stripe {
   if (!_stripe) {
-    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2026-01-28.clover',
-    });
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   }
   return _stripe;
 }
@@ -22,7 +20,13 @@ export async function getOrCreateCustomer(userId: string, email: string): Promis
     .single();
 
   if (profile?.stripe_customer_id) {
-    return profile.stripe_customer_id;
+    // Verify the customer still exists in Stripe (handles test→live migration)
+    try {
+      await getStripe().customers.retrieve(profile.stripe_customer_id);
+      return profile.stripe_customer_id;
+    } catch {
+      // Customer doesn't exist (e.g. test mode ID used in live mode) — create a new one
+    }
   }
 
   // Create a new Stripe customer
