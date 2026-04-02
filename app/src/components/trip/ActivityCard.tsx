@@ -416,22 +416,33 @@ export const ActivityCard = memo(function ActivityCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Compact checkin: simplified for mobile premium feel */}
+      {/* Compact checkin: premium minimalist feel */}
       {isCompactCheckin && (
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-1 h-8 rounded-full" style={{ backgroundColor: color }} />
+        <div className="flex items-center gap-4 px-4 py-3 bg-gradient-to-r from-indigo-950/40 via-[#0A1628] to-[#0A1628] relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-l-2xl opacity-80" />
+          
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 shrink-0">
+            <LogIn className="h-5 w-5 text-indigo-400" />
+          </div>
+
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold tracking-tight text-white truncate">{item.title}</h4>
-              <span className="flex items-center gap-1 font-mono text-[10px] font-bold text-gold/80 bg-gold/10 px-1.5 py-0.5 rounded-full">
-                <Clock className="h-2.5 w-2.5" />
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="text-sm font-bold tracking-tight text-white truncate">
+                {item.title}
+              </h4>
+              <div className="flex items-center gap-1.5 font-mono text-[11px] font-black text-gold-gradient bg-gold/5 px-2 py-1 rounded-lg border border-gold/10 shadow-sm shrink-0">
+                <Clock className="h-3 w-3 text-gold" />
                 {item.startTime}
-              </span>
+              </div>
             </div>
             {item.description && (
-              <p className="text-[10px] text-white/50 line-clamp-1 italic mt-0.5">{item.description}</p>
+              <p className="text-xs text-white/40 line-clamp-1 italic mt-0.5 font-serif">
+                {item.description}
+              </p>
             )}
           </div>
+          
+          <ChevronRight className="h-4 w-4 text-white/10 group-hover:text-gold/40 transition-colors shrink-0" />
         </div>
       )}
 
@@ -447,7 +458,7 @@ export const ActivityCard = memo(function ActivityCard({
               <img
                 src={imageUrl}
                 alt={item.title}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover z-[1]"
                 loading="eager"
                 onError={() => setImgError(true)}
                 onLoad={() => setImgLoaded(true)}

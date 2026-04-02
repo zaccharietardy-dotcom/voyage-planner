@@ -296,7 +296,8 @@ export function unifiedScheduleV3Days(
     // Meal eligibility: derived from time window, not ad-hoc heuristics
     const dayStartMin = timeToMin(dayStartTime);
     const dayEndMin = timeToMin(dayEndTime);
-    let canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin;   // start before 10:00 AND window exists
+    const hasArrivalFlight = timeWindow?.hasArrivalTransport ?? false;
+    let canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin && !hasArrivalFlight;   // no breakfast on arrival day
     const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
     const hasDepartureForMeals = timeWindow?.hasDepartureTransport ?? false;
     // Departure days: allow an early dinner if activity window ends late enough
