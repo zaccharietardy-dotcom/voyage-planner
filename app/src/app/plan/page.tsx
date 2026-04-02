@@ -81,7 +81,7 @@ export default function PlanPage() {
             setGateMessage('Connectez-vous pour planifier votre voyage');
           } else if (check.action === 'upgrade') {
             setGate('upgrade');
-            setGateMessage(check.reason || 'Vous avez utilisé tous vos voyages gratuits ce mois-ci');
+            setGateMessage(check.reason || 'Votre voyage gratuit a été utilisé. Achetez un voyage ou passez à Pro.');
           }
         }
       } catch {
@@ -493,12 +493,19 @@ export default function PlanPage() {
                   onClick={() => router.push('/pricing')}
                   className="w-full h-14 rounded-2xl bg-gold hover:bg-gold/90 text-black font-bold text-base"
                 >
-                  Passer à Narae Pro
+                  Voyages illimités — Narae Pro
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/pricing')}
+                  className="w-full h-12 rounded-xl border-white/10 text-white hover:bg-white/5"
+                >
+                  Acheter 1 voyage — 1.99€
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => router.push('/')}
-                  className="w-full h-12 rounded-xl text-muted-foreground"
+                  className="w-full h-10 rounded-xl text-muted-foreground text-xs"
                 >
                   Retour à l&apos;accueil
                 </Button>
