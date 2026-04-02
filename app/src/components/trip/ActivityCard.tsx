@@ -375,6 +375,9 @@ export const ActivityCard = memo(function ActivityCard({
   const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Reset error state when image URL changes
+  useEffect(() => { setImgError(false); setImgLoaded(false); }, [imageUrl]);
   const [showAlternative, setShowAlternative] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showTimeEdit, setShowTimeEdit] = useState(false);
