@@ -219,9 +219,9 @@ export default function PlanScreen() {
           {/* Navigation buttons */}
           {step < 6 && (
             <View style={{
-              flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 20,
+              flexDirection: 'row', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 90,
               gap: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)',
-              backgroundColor: 'transparent',
+              backgroundColor: colors.bg,
             }}>
               {step > 0 && (
                 <Button variant="outline" icon={ArrowLeft} onPress={prev} style={{ borderRadius: radius.button, height: 54 }} textStyle={{ fontFamily: fonts.sansMedium }}>

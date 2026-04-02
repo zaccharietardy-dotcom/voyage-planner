@@ -24,7 +24,6 @@ function TabIcon({ icon: Icon, label, focused, isCentral }: {
           height: 80,
           borderRadius: 40,
           backgroundColor: 'rgba(197,160,89,0.25)',
-          blurRadius: 20,
           transform: [{ translateY: -12 }],
         }} />
         
@@ -143,13 +142,13 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: Math.max(bottom, 20),
-          left: 20,
-          right: 20,
-          height: 76,
+          bottom: Math.max(bottom, 8),
+          left: 16,
+          right: 16,
+          height: 68,
           backgroundColor: Platform.OS === 'ios' ? 'rgba(2,6,23,0.4)' : colors.card,
           borderTopWidth: 0,
-          borderRadius: 38,
+          borderRadius: 34,
           borderWidth: 1,
           borderColor: 'rgba(255,255,255,0.12)',
           paddingBottom: 0,
@@ -163,7 +162,7 @@ export default function TabLayout() {
         },
         tabBarBackground: () => (
           Platform.OS === 'ios' ? (
-            <BlurView intensity={90} tint="dark" style={{ ...StyleSheet.absoluteFillObject, borderRadius: 38 }} />
+            <BlurView intensity={90} tint="dark" style={{ ...StyleSheet.absoluteFillObject, borderRadius: 34 }} />
           ) : null
         ),
         tabBarShowLabel: false,

@@ -26,36 +26,22 @@ export default function HomeScreen() {
         <SafeAreaView style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 40, paddingBottom: 100 }}>
             {/* Premium Logo */}
-            <View style={{ alignItems: 'center', marginBottom: 48 }}>
-              <View style={{ alignItems: 'center', gap: 8 }}>
-                <View style={{
-                  width: 64, height: 64, borderRadius: 24,
-                  backgroundColor: colors.gold,
-                  justifyContent: 'center', alignItems: 'center',
-                  shadowColor: colors.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 20,
-                  borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
-                }}>
-                  <Plane size={32} color={colors.bg} strokeWidth={2.5} />
-                </View>
-                <Text style={{
-                  color: colors.gold,
-                  fontFamily: fonts.display,
-                  fontSize: 24,
-                  letterSpacing: 4,
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase',
-                  marginTop: 8,
-                }}>
-                  VOYAGES
-                </Text>
+            <View style={{ alignItems: 'center', marginBottom: 32 }}>
+              <View style={{
+                width: 56, height: 56, borderRadius: 18,
+                backgroundColor: colors.gold,
+                justifyContent: 'center', alignItems: 'center',
+                shadowColor: colors.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 16,
+              }}>
+                <Plane size={28} color={colors.bg} strokeWidth={2.5} />
               </View>
             </View>
 
             {/* Hero text */}
             <View style={{ marginBottom: 40 }}>
               <Text style={{
-                color: colors.text, fontSize: 36, textAlign: 'center', lineHeight: 44,
-                fontFamily: fonts.sansBold, letterSpacing: -0.5
+                color: colors.text, fontSize: 34, textAlign: 'center', lineHeight: 46,
+                fontFamily: fonts.display, letterSpacing: -0.5
               }}>
                 L&apos;excellence du{'\n'}
                 <Text style={{ color: colors.gold }}>voyage sur-mesure</Text>
@@ -71,7 +57,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Value props - Glassy Cards */}
-            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 48 }}>
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
               {[
                 { icon: Compass, label: 'Exploration\nIllimitée' },
                 { icon: MapPin, label: 'Adaptation\nPrécise' },
