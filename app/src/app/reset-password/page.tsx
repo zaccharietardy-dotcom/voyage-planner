@@ -54,16 +54,24 @@ export default function ResetPasswordPage() {
   const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword !== '';
 
   useEffect(() => {
-    // Check if user has a valid recovery session
-    const checkSession = async () => {
-      const supabase = getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+    const supabase = getSupabaseClient();
 
-      // User should have a session from the recovery link
+    // Listen for PASSWORD_RECOVERY event (triggered by hash fragment from email link)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsValidSession(true);
+      }
+    });
+
+    // Also check if user already has a valid session (e.g. page refresh)
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setIsValidSession(!!session);
     };
 
     checkSession();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleChange = (field: string, value: string) => {

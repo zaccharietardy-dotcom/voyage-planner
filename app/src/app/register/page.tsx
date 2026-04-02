@@ -165,6 +165,9 @@ function RegisterContent() {
             <span className="text-gold font-bold">{formData.email}</span>. <br />
             L&apos;aventure commence dans quelques instants.
           </p>
+          <p className="text-slate-500 text-sm mb-8">
+            Pensez à vérifier vos spams si vous ne trouvez pas l&apos;email.
+          </p>
           <Button variant="outline" className="h-14 rounded-2xl border-white/10 hover:bg-white/5 transition-all text-white px-8" asChild>
             <Link href="/login">Retour à la connexion</Link>
           </Button>
