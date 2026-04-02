@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeInDown, withRepeat, withTiming, useAnimatedStyle, useSharedValue, Easing } from 'react-native-reanimated';
 import { Plane, Check, Compass, Info } from 'lucide-react-native';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import type { GenerateProgress } from '@/lib/api/trips';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
@@ -46,7 +46,7 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
       setFactIndex((i) => (i + 1) % FUN_FACTS.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [anim]);
 
   const planeStyle = useAnimatedStyle(() => ({
     transform: [

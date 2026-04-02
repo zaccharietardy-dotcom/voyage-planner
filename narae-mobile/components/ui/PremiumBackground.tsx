@@ -10,7 +10,7 @@ import Animated, {
   Easing
 } from 'react-native-reanimated';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 export function PremiumBackground() {
   const anim = useSharedValue(0);
@@ -21,7 +21,7 @@ export function PremiumBackground() {
       -1,
       true
     );
-  }, []);
+  }, [anim]);
 
   const blob1Style = useAnimatedStyle(() => ({
     transform: [

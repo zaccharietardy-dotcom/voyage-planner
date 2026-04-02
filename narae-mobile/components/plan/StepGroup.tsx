@@ -2,7 +2,7 @@ import { View, Text, Pressable } from 'react-native';
 import { User, Heart, Users, Baby, UserCheck, Minus, Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { GROUP_TYPE_LABELS, type GroupType, type TripPreferences } from '@/lib/types/trip';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import type { LucideIcon } from 'lucide-react-native';
 
 interface Props {

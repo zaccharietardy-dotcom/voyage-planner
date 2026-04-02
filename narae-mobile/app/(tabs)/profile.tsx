@@ -1,19 +1,18 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, FlatList, Pressable, Alert, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Settings, CreditCard, LogOut, ChevronRight, Crown, Plane, Trophy,
-  Users, Download, Trash2, MapPin, Zap, FileDown, Award,
+  Download, Trash2, MapPin, Zap, FileDown, Award,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
 import { useApi } from '@/hooks/useApi';
-import { fetchMyTrips, type TripListItem } from '@/lib/api/trips';
+import { fetchMyTrips } from '@/lib/api/trips';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { TripCard } from '@/components/trip/TripCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { colors, fonts, radius } from '@/lib/theme';

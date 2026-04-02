@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { View, Text, FlatList, Image, Pressable, TextInput, Keyboard } from 'react-native';
-import { MapPin, Search } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { DESTINATIONS } from '@/lib/destinations';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import type { TripPreferences } from '@/lib/types/trip';
 
 interface Props {

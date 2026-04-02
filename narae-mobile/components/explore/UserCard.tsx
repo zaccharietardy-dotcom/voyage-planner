@@ -1,6 +1,5 @@
-import { View, Text, Pressable } from 'react-native';
+import { Text, Pressable } from 'react-native';
 import { Avatar } from '@/components/ui/Avatar';
-import { Button } from '@/components/ui/Button';
 import { colors, radius } from '@/lib/theme';
 
 interface Props {

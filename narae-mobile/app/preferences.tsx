@@ -25,7 +25,6 @@ export default function PreferencesScreen() {
   const [budgetLevel, setBudgetLevel] = useState<BudgetLevel | null>(null);
   const [pace, setPace] = useState<PaceLevel | null>(null);
   const [saving, setSaving] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -36,7 +35,6 @@ export default function PreferencesScreen() {
         setBudgetLevel((p.budget_level as BudgetLevel) ?? null);
         setPace((p.pace as PaceLevel) ?? null);
       }
-      setLoaded(true);
     });
   }, [user]);
 
@@ -57,7 +55,7 @@ export default function PreferencesScreen() {
         pace,
       });
       router.back();
-    } catch (e) {
+    } catch {
       Alert.alert('Erreur', 'Impossible de sauvegarder vos préférences');
     } finally {
       setSaving(false);

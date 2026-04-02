@@ -3,13 +3,13 @@ import { View, Text, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platfor
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ArrowRight } from 'lucide-react-native';
-import Animated, { SlideInRight, SlideInLeft, FadeIn } from 'react-native-reanimated';
+import Animated, { SlideInRight, SlideInLeft } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
 import { generateTrip, type GenerateProgress } from '@/lib/api/trips';
 import { api } from '@/lib/api/client';
-import type { TripPreferences, Trip } from '@/lib/types/trip';
-import { colors, fonts, radius } from '@/lib/theme';
+import type { TripPreferences } from '@/lib/types/trip';
+import { colors, fonts } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { StepDestination } from '@/components/plan/StepDestination';
 import { StepOrigin } from '@/components/plan/StepOrigin';

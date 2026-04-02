@@ -79,9 +79,9 @@ export default function PricingScreen() {
           ))}
         </View>
 
-        <Button onPress={() => {}}>S'abonner — 9.99€/an</Button>
+        <Button onPress={() => {}}>S&apos;abonner — 9.99€/an</Button>
         <Text style={{ color: colors.textDim, fontSize: 11, textAlign: 'center' }}>
-          Annulation possible à tout moment. Pas d'engagement.
+          Annulation possible à tout moment. Pas d&apos;engagement.
         </Text>
       </ScrollView>
     </SafeAreaView>

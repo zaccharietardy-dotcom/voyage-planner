@@ -65,7 +65,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
           const betterUrl = json.thumbnail.source.replace(/\/\d+px-/, '/1000px-');
           setImageUrl(betterUrl);
         }
-      } catch (e) {
+      } catch {
         // Fallback already set
       } finally {
         setImageLoading(false);

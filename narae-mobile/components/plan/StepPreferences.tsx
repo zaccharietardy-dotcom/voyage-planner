@@ -4,7 +4,7 @@ import {
   type ActivityType, type DietaryType, type PaceLevel, type TripPreferences,
 } from '@/lib/types/trip';
 import * as Haptics from 'expo-haptics';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 
 interface Props {
   prefs: Partial<TripPreferences>;
@@ -37,7 +37,7 @@ export function StepPreferences({ prefs, onChange }: Props) {
     <View style={{ gap: 32 }}>
       <View>
         <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold' }}>
-          Qu'aimez-vous ?
+          Qu&apos;aimez-vous ?
         </Text>
         <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>
           Pour un itinéraire qui vous ressemble

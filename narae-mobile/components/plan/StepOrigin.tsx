@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
-import { MapPin, Navigation } from 'lucide-react-native';
+import { MapPin } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import type { TripPreferences } from '@/lib/types/trip';
 
 interface Props {
@@ -23,7 +23,7 @@ export function StepOrigin({ prefs, onChange }: Props) {
     <View style={{ gap: 32 }}>
       <View>
         <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold' }}>
-          D'où partez-vous ?
+          D&apos;où partez-vous ?
         </Text>
         <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>
           Pour calculer vos temps de trajet

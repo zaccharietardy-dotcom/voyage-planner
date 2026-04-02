@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { Check } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import {
   BUDGET_LABELS, TRANSPORT_LABELS,
   type BudgetLevel, type TransportType, type TripPreferences,

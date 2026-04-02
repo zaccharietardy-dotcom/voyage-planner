@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors } from '@/lib/theme';
 import type { TripDay, TripItem, TripItemType } from '@/lib/types/trip';
 
 interface Props {

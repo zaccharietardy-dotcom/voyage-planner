@@ -8,7 +8,7 @@ import { api } from '@/lib/api/client';
 import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { FeedCard } from '@/components/explore/FeedCard';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import type { FeedTrip } from '@/lib/api/feed';
 
 export default function UserProfileScreen() {

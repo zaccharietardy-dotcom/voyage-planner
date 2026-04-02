@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import type { TripPreferences } from '@/lib/types/trip';
 
 interface Props {

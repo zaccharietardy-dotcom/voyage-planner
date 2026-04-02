@@ -17,7 +17,8 @@
       "bundleIdentifier": "com.naraevoyage.app",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "CFBundleDisplayName": "Narae Voyage"
+        "CFBundleDisplayName": "Narae Voyage",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -27,7 +28,11 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +54,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e2c0abee-87a1-41dc-8e38-207943506430"
+      }
     }
   }
 }

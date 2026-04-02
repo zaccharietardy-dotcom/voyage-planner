@@ -1,10 +1,10 @@
 import { View, Text, Pressable, SectionList } from 'react-native';
 import {
-  Plane, Hotel, MapPin, UtensilsCrossed, Check, Circle, ExternalLink,
+  Plane, Hotel, MapPin, UtensilsCrossed, Check, ExternalLink,
 } from 'lucide-react-native';
 import { openBrowserAsync } from 'expo-web-browser';
 import { colors, fonts, radius } from '@/lib/theme';
-import type { Trip, TripDay, TripItem } from '@/lib/types/trip';
+import type { Trip } from '@/lib/types/trip';
 import type { LucideIcon } from 'lucide-react-native';
 
 interface Props {

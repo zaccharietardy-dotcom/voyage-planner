@@ -11,7 +11,7 @@ export default function NotFoundScreen() {
         </Text>
         <Link href="/">
           <Text style={{ color: '#c5a059', fontSize: 14, fontWeight: '700', textDecorationLine: 'underline' }}>
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Text>
         </Link>
       </View>

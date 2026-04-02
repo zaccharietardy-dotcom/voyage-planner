@@ -165,7 +165,7 @@ export default function ExploreScreen() {
               Dupliquer ce voyage ?
             </Text>
             <Text style={{ color: '#94a3b8', fontSize: 13 }}>
-              Une copie de "{cloneTarget?.title || cloneTarget?.destination}" sera ajoutée à vos voyages.
+              Une copie de &quot;{cloneTarget?.title || cloneTarget?.destination}&quot; sera ajoutée à vos voyages.
             </Text>
             <Button isLoading={cloning} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleClone(); }}>Dupliquer</Button>
           </View>

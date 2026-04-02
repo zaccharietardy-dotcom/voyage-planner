@@ -1,5 +1,5 @@
 import { View, Text, Pressable, Alert, Linking } from 'react-native';
-import { CalendarPlus, Apple, Globe, FileDown } from 'lucide-react-native';
+import { Apple, Globe, FileDown } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -22,7 +22,7 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
       if (count > 0) {
         Alert.alert('Exporté !', `${count} événement${count > 1 ? 's' : ''} ajouté${count > 1 ? 's' : ''} à votre calendrier Apple.`);
       }
-    } catch (e) {
+    } catch {
       Alert.alert('Erreur', 'Impossible d\'exporter vers Apple Calendar');
     }
   };

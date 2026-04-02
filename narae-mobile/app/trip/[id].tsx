@@ -1,14 +1,14 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, SectionList, ScrollView, Pressable, Share, useWindowDimensions } from 'react-native';
+import { View, Text, SectionList, ScrollView, Pressable, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  MapPin, Info, PieChart, Ticket, Map as MapIcon, MessageCircle,
+  MapPin, Info, PieChart, Ticket, Map as MapIcon, MessageCircle, Calendar, Users, Wallet, CalendarPlus,
 } from 'lucide-react-native';
 import { useApi } from '@/hooks/useApi';
-import { fetchTrip, type TripRow } from '@/lib/api/trips';
+import { fetchTrip } from '@/lib/api/trips';
 import { supabase } from '@/lib/supabase/client';
 import type { TripDay, TripItem, Trip } from '@/lib/types/trip';
-import { BUDGET_LABELS, TRANSPORT_LABELS } from '@/lib/types/trip';
+import { BUDGET_LABELS } from '@/lib/types/trip';
 import { colors, fonts, radius } from '@/lib/theme';
 import { TripHero } from '@/components/trip/TripHero';
 import { DayHeader } from '@/components/trip/DayHeader';
@@ -19,16 +19,12 @@ import { TripMap } from '@/components/trip/TripMap';
 import { HotelSelector } from '@/components/trip/HotelSelector';
 import { TransportSelector } from '@/components/trip/TransportSelector';
 import { BookingChecklist } from '@/components/trip/BookingChecklist';
-import { DaySelector } from '@/components/trip/DaySelector';
 import { ChatPanel } from '@/components/trip/ChatPanel';
 import { SharePanel } from '@/components/trip/SharePanel';
 import { CalendarExport } from '@/components/trip/CalendarExport';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { Badge } from '@/components/ui/Badge';
-import { Calendar, Users, Wallet, Train, CalendarPlus, Download } from 'lucide-react-native';
-import { cacheTripLocally, getCachedTrip } from '@/lib/offline/tripCache';
-import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { cacheTripLocally } from '@/lib/offline/tripCache';
 import * as Haptics from 'expo-haptics';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
@@ -70,7 +66,6 @@ export default function TripDetailScreen() {
   const [activeTab, setActiveTab] = useState<Tab>('itinerary');
   const [modalItem, setModalItem] = useState<TripItem | null>(null);
   const [openModal, setOpenModal] = useState<null | 'detail' | 'actions' | 'chat' | 'share' | 'calendar'>(null);
-  const { isOnline } = useNetworkStatus();
   const [bookedItems, setBookedItems] = useState<Record<string, { booked: boolean }>>({});
 
   const { data: row, isLoading, error } = useApi(() => fetchTrip(id!), [id]);

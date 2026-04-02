@@ -1,6 +1,5 @@
-import { View, Text, Pressable, Linking } from 'react-native';
-import { Plane, Train, Bus, Car, Ship, Zap, Clock, Leaf, ChevronDown, Check, ExternalLink } from 'lucide-react-native';
-import { openBrowserAsync } from 'expo-web-browser';
+import { View, Text, Pressable } from 'react-native';
+import { Plane, Train, Bus, Car, Ship, Zap, Clock, Leaf, ChevronDown, Check } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { useState } from 'react';

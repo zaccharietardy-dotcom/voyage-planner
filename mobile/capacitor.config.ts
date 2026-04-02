@@ -12,18 +12,18 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
   },
   android: {
-    backgroundColor: '#0a1628',
+    backgroundColor: '#020617',
   },
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#0a1628',
+      backgroundColor: '#020617',
       showSpinner: false,
       launchFadeOutDuration: 500,
     },
     StatusBar: {
-      style: 'dark',
-      backgroundColor: '#0a1628',
+      style: 'light',
+      backgroundColor: '#020617',
     },
     Keyboard: {
       resize: 'body',

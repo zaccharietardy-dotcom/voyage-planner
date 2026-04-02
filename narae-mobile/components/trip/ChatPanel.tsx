@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, Pressable, FlatList, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Send, Bot, Sparkles } from 'lucide-react-native';
-import { colors, fonts, radius } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { supabase } from '@/lib/supabase/client';
 import { SITE_URL } from '@/lib/constants';
