@@ -55,23 +55,27 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = getSupabaseClient();
+    let resolved = false;
 
-    // Listen for PASSWORD_RECOVERY event (triggered by hash fragment from email link)
+    // Listen for PASSWORD_RECOVERY event (triggered when Supabase processes hash fragment)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        resolved = true;
         setIsValidSession(true);
       }
     });
 
-    // Also check if user already has a valid session (e.g. page refresh)
-    const checkSession = async () => {
+    // Fallback: if no auth event fires within 3s, check session manually
+    const timeout = setTimeout(async () => {
+      if (resolved) return;
       const { data: { session } } = await supabase.auth.getSession();
       setIsValidSession(!!session);
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
     };
-
-    checkSession();
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const handleChange = (field: string, value: string) => {
