@@ -55,7 +55,7 @@ export function TripCard({ trip, onPress, compact }: Props) {
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        borderRadius: radius['3xl'],
+        borderRadius: radius.card,
         overflow: 'hidden',
         backgroundColor: colors.card,
         borderWidth: 1,
@@ -77,10 +77,10 @@ export function TripCard({ trip, onPress, compact }: Props) {
           style={{ width: '100%', height: '100%' }}
           resizeMode="cover"
         />
-        {/* Gradient overlay */}
+        {/* Gradient overlay — transparent to #020617 over bottom half */}
         <View style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, height: imageHeight * 0.5,
-          backgroundColor: 'rgba(2,6,23,0.75)',
+          backgroundColor: 'rgba(2,6,23,0.85)',
         }} />
         {/* Badge */}
         <View style={{ position: 'absolute', top: 14, right: 14 }}>
@@ -92,29 +92,49 @@ export function TripCard({ trip, onPress, compact }: Props) {
             color: colors.text,
             fontSize: compact ? 17 : 20,
             fontFamily: fonts.display,
+            fontWeight: 'bold',
           }}>
             {trip.title || trip.destination}
           </Text>
         </View>
       </View>
 
+      {/* Subtle divider between image area and info section */}
+      <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+
       {/* Info */}
       <View style={{ padding: 16, gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <MapPin size={13} color={colors.textSecondary} />
-          <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{trip.destination}</Text>
+          <Text style={{
+            color: colors.textSecondary,
+            fontSize: 13,
+            fontFamily: fonts.sansMedium,
+          }}>
+            {trip.destination}
+          </Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Calendar size={13} color={colors.textMuted} />
-            <Text style={{ color: colors.textMuted, fontSize: 12 }}>
+            <Calendar size={13} color={colors.textSecondary} />
+            <Text style={{
+              color: colors.textSecondary,
+              fontSize: 13,
+              fontFamily: fonts.sansMedium,
+            }}>
               {formatDate(trip.start_date)} · {trip.duration_days}j
             </Text>
           </View>
           {trip.preferences?.groupSize && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-              <Users size={13} color={colors.textMuted} />
-              <Text style={{ color: colors.textMuted, fontSize: 12 }}>{trip.preferences.groupSize}</Text>
+              <Users size={13} color={colors.textSecondary} />
+              <Text style={{
+                color: colors.textSecondary,
+                fontSize: 13,
+                fontFamily: fonts.sansMedium,
+              }}>
+                {trip.preferences.groupSize}
+              </Text>
             </View>
           )}
         </View>

@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { generateTrip, type GenerateProgress } from '@/lib/api/trips';
 import { api } from '@/lib/api/client';
 import type { TripPreferences } from '@/lib/types/trip';
-import { colors, fonts } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { StepDestination } from '@/components/plan/StepDestination';
 import { StepOrigin } from '@/components/plan/StepOrigin';
@@ -170,25 +170,28 @@ export default function PlanScreen() {
                 <View
                   key={i}
                   style={{
-                    height: 7,
-                    width: i === step ? 32 : 7,
+                    height: 8,
+                    width: i === step ? 32 : 8,
                     borderRadius: 4,
                     backgroundColor: i === step ? colors.gold : i < step ? 'rgba(197,160,89,0.4)' : 'rgba(255,255,255,0.1)',
                     shadowColor: i === step ? colors.gold : 'transparent',
                     shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: i === step ? 0.9 : 0,
-                    shadowRadius: 8,
+                    shadowOpacity: i === step ? 0.8 : 0,
+                    shadowRadius: i === step ? 10 : 0,
                   }}
                 />
               ))}
             </View>
+            <Text style={{ color: colors.textMuted, fontFamily: fonts.sansBold, fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, marginTop: 10 }}>
+              Étape {step + 1} / {STEP_TITLES.length}
+            </Text>
           </View>
 
           {/* Step content */}
           <ScrollView
             ref={scrollRef}
             style={{ flex: 1 }}
-            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+            contentContainerStyle={{ padding: 20, paddingBottom: 100, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: radius['4xl'], backgroundColor: 'rgba(2,6,23,0.4)', marginHorizontal: 4 }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
@@ -221,12 +224,12 @@ export default function PlanScreen() {
               backgroundColor: 'transparent',
             }}>
               {step > 0 && (
-                <Button variant="outline" icon={ArrowLeft} onPress={prev} style={{ borderRadius: 18, height: 54 }}>
+                <Button variant="outline" icon={ArrowLeft} onPress={prev} style={{ borderRadius: radius.button, height: 54 }} textStyle={{ fontFamily: fonts.sansMedium }}>
                   Retour
                 </Button>
               )}
               <View style={{ flex: 1 }}>
-                <Button icon={ArrowRight} iconPosition="right" onPress={next} style={{ borderRadius: 18, height: 54, backgroundColor: 'white' }} textStyle={{ color: 'black', fontWeight: 'bold' }}>
+                <Button icon={ArrowRight} iconPosition="right" onPress={next} style={{ borderRadius: radius.button, height: 54, backgroundColor: 'white' }} textStyle={{ color: 'black', fontFamily: fonts.sansSemiBold }}>
                   {step === 5 ? 'Récapitulatif' : 'Suivant'}
                 </Button>
               </View>

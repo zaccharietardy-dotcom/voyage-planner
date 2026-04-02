@@ -1,7 +1,7 @@
 import { View, Text, Image, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Share2 } from 'lucide-react-native';
-import { colors, fonts } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 
 interface Props {
   imageUrl: string;
@@ -43,7 +43,7 @@ export function TripHero({ imageUrl, title, destination, dateRange, onBack, onSh
           onPress={onBack}
           hitSlop={12}
           style={{
-            width: 40, height: 40, borderRadius: 12,
+            width: 40, height: 40, borderRadius: 999,
             backgroundColor: 'rgba(0,0,0,0.4)',
             alignItems: 'center', justifyContent: 'center',
           }}
@@ -54,7 +54,7 @@ export function TripHero({ imageUrl, title, destination, dateRange, onBack, onSh
           onPress={onShare}
           hitSlop={12}
           style={{
-            width: 40, height: 40, borderRadius: 12,
+            width: 40, height: 40, borderRadius: 999,
             backgroundColor: 'rgba(0,0,0,0.4)',
             alignItems: 'center', justifyContent: 'center',
           }}
@@ -68,7 +68,7 @@ export function TripHero({ imageUrl, title, destination, dateRange, onBack, onSh
         <Text style={{ color: colors.text, fontSize: 26, fontFamily: fonts.display, marginBottom: 4 }}>
           {title}
         </Text>
-        <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sansMedium }}>
           {destination} · {dateRange}
         </Text>
       </View>

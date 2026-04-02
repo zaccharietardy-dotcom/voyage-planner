@@ -44,7 +44,7 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
 
         {/* Visibility selector */}
         <View style={{ gap: 8 }}>
-          <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 }}>
+          <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>
             Visibilité
           </Text>
           {VISIBILITY_OPTIONS.map((opt) => {
@@ -56,16 +56,16 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
                 style={{
                   flexDirection: 'row', alignItems: 'center', gap: 12,
                   backgroundColor: selected ? colors.goldBg : colors.surface,
-                  borderRadius: radius.lg, padding: 14,
+                  borderRadius: radius.card, padding: 14,
                   borderWidth: 1, borderColor: selected ? colors.goldBorder : colors.borderSubtle,
                 }}
               >
                 <opt.icon size={18} color={selected ? colors.gold : colors.textMuted} />
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: selected ? colors.gold : colors.text, fontSize: 14, fontWeight: '600' }}>
+                  <Text style={{ color: selected ? colors.gold : colors.text, fontSize: 14, fontFamily: fonts.sansSemiBold }}>
                     {opt.label}
                   </Text>
-                  <Text style={{ color: colors.textMuted, fontSize: 11 }}>{opt.desc}</Text>
+                  <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans }}>{opt.desc}</Text>
                 </View>
               </Pressable>
             );

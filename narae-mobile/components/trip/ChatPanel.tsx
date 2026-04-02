@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, Pressable, FlatList, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Send, Bot, Sparkles } from 'lucide-react-native';
-import { colors, fonts } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { supabase } from '@/lib/supabase/client';
 import { SITE_URL } from '@/lib/constants';
@@ -107,7 +107,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
           ListEmptyComponent={
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
               <Bot size={40} color={colors.textMuted} />
-              <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: 'center' }}>
+              <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: fonts.sans, textAlign: 'center' }}>
                 Demandez-moi de modifier{'\n'}votre itinéraire
               </Text>
               {/* Suggestions */}
@@ -117,11 +117,11 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
                     key={s}
                     onPress={() => sendMessage(s)}
                     style={{
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12,
+                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999,
                       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderSubtle,
                     }}
                   >
-                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{s}</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansMedium }}>{s}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -139,7 +139,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
             }}>
               <Text style={{
                 color: item.role === 'user' ? colors.bg : colors.text,
-                fontSize: 14, lineHeight: 20,
+                fontSize: 14, fontFamily: fonts.sans, lineHeight: 20,
               }}>
                 {item.content}
               </Text>
@@ -155,9 +155,9 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
         }}>
           <TextInput
             style={{
-              flex: 1, backgroundColor: colors.surface, borderRadius: 16,
+              flex: 1, backgroundColor: colors.surface, borderRadius: radius.button,
               paddingHorizontal: 16, paddingVertical: 12,
-              color: colors.text, fontSize: 14,
+              color: colors.text, fontSize: 14, fontFamily: fonts.sans,
               borderWidth: 1, borderColor: colors.borderSubtle,
             }}
             placeholder="Modifier mon itinéraire..."
@@ -171,7 +171,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
             onPress={() => sendMessage(input)}
             disabled={!input.trim() || sending}
             style={{
-              width: 44, height: 44, borderRadius: 14,
+              width: 44, height: 44, borderRadius: radius.button,
               backgroundColor: input.trim() ? colors.gold : colors.surface,
               alignItems: 'center', justifyContent: 'center',
               opacity: !input.trim() || sending ? 0.5 : 1,

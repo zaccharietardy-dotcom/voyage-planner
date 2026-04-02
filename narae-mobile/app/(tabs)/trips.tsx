@@ -14,7 +14,7 @@ import { TripCard } from '@/components/trip/TripCard';
 import { TripCardSkeleton } from '@/components/ui/Skeleton';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
-import { colors } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 type Filter = 'all' | 'upcoming' | 'active' | 'past';
@@ -105,15 +105,15 @@ export default function TripsScreen() {
               key={f.key}
               onPress={() => { Haptics.selectionAsync(); setFilter(f.key); }}
               style={{
-                paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10,
+                paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
                 backgroundColor: filter === f.key ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
                 borderWidth: 1,
-                borderColor: filter === f.key ? '#c5a059' : 'transparent',
+                borderColor: filter === f.key ? 'rgba(197,160,89,0.3)' : 'rgba(255,255,255,0.08)',
               }}
             >
               <Text style={{
-                color: filter === f.key ? '#c5a059' : '#94a3b8',
-                fontSize: 13, fontWeight: '600',
+                color: filter === f.key ? colors.gold : colors.textSecondary,
+                fontSize: 13, fontWeight: '700', fontFamily: fonts.sansSemiBold,
               }}>
                 {f.label}
               </Text>
@@ -160,7 +160,7 @@ export default function TripsScreen() {
           height={0.3}
         >
           <View style={{ padding: 20, gap: 12 }}>
-            <Text style={{ color: '#f8fafc', fontSize: 17, fontWeight: '700', marginBottom: 4 }}>
+            <Text style={{ color: colors.text, fontSize: 17, fontFamily: fonts.sansBold, marginBottom: 4 }}>
               {selectedTrip?.title || selectedTrip?.destination}
             </Text>
             <Button

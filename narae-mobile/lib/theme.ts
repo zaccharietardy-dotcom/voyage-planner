@@ -57,19 +57,23 @@ export const fonts = {
   displaySemiBold: 'PlayfairDisplay_600SemiBold',
   displayMedium: 'PlayfairDisplay_500Medium',
   displayRegular: 'PlayfairDisplay_400Regular',
-  // System font as body (Geist not available on expo-google-fonts, system SF Pro is close enough on iOS)
-  sans: undefined as string | undefined, // uses system default
+  sans: 'Inter_400Regular',
+  sansMedium: 'Inter_500Medium',
+  sansSemiBold: 'Inter_600SemiBold',
+  sansBold: 'Inter_700Bold',
   mono: undefined as string | undefined,
 } as const;
 
 export const radius = {
-  sm: 8,
+  sm: 10,
   md: 12,
   lg: 14,
   xl: 18,
   '2xl': 22,
-  '3xl': 25, // rounded-[2.5rem] equivalent
+  '3xl': 26,
   '4xl': 30,
+  button: 32,  // pill-shaped buttons (web rounded-2xl/full)
+  card: 25,    // card corners (web 2.5rem)
   full: 999,
 } as const;
 

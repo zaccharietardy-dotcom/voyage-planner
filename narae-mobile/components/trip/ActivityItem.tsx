@@ -4,7 +4,7 @@ import {
   Star, Luggage, Coffee, ParkingCircle, MoreHorizontal,
 } from 'lucide-react-native';
 import { TRIP_ITEM_COLORS, type TripItem, type TripItemType } from '@/lib/types/trip';
-import { colors, radius } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import type { LucideIcon } from 'lucide-react-native';
 
 interface Props {
@@ -68,7 +68,7 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress }: Pr
       <View style={{
         flex: 1,
         backgroundColor: colors.card,
-        borderRadius: radius.xl,
+        borderRadius: radius.card,
         marginBottom: 6,
         borderWidth: 1,
         borderColor: colors.borderSubtle,
@@ -87,7 +87,7 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress }: Pr
           {/* Time + type icon */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <Clock size={11} color={colors.textMuted} />
-            <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '600' }}>
+            <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sansMedium }}>
               {item.startTime} – {item.endTime}
             </Text>
             <View style={{ marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -97,13 +97,13 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress }: Pr
           </View>
 
           {/* Title */}
-          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', marginBottom: 2 }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.sansSemiBold, marginBottom: 2 }}>
             {item.title}
           </Text>
 
           {/* Location */}
           {item.locationName && item.type !== 'free_time' && (
-            <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 3 }} numberOfLines={1}>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sans, marginBottom: 3 }} numberOfLines={1}>
               {item.locationName}
             </Text>
           )}
@@ -113,7 +113,7 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress }: Pr
             {item.rating !== undefined && item.rating > 0 && (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                 <Star size={11} color={colors.gold} fill={colors.gold} />
-                <Text style={{ color: colors.gold, fontSize: 11, fontWeight: '700' }}>
+                <Text style={{ color: colors.gold, fontSize: 11, fontFamily: fonts.sansBold }}>
                   {item.rating.toFixed(1)}
                 </Text>
               </View>

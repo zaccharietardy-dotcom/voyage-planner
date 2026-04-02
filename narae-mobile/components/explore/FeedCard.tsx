@@ -1,7 +1,9 @@
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Image, Pressable, Platform } from 'react-native';
 import { Heart, Copy, Calendar } from 'lucide-react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
 import { Avatar } from '@/components/ui/Avatar';
+import { fonts, radius } from '@/lib/theme';
 import type { FeedTrip } from '@/lib/api/feed';
 
 interface Props {
@@ -52,8 +54,12 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        borderRadius: 16, overflow: 'hidden', marginBottom: 16,
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: radius.card,
+        overflow: 'hidden',
+        marginBottom: 16,
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
         opacity: pressed ? 0.95 : 1,
       })}
     >
@@ -67,25 +73,59 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
         {/* Gradient */}
         <View style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
-          backgroundColor: 'rgba(2,6,23,0.7)',
+          backgroundColor: 'rgba(2,6,23,0.85)',
         }} />
-        {/* Duration badge */}
-        <View style={{
-          position: 'absolute', top: 12, right: 12,
-          backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 10, paddingVertical: 5,
-          borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 4,
-        }}>
-          <Calendar size={12} color="#f8fafc" />
-          <Text style={{ color: '#f8fafc', fontSize: 11, fontWeight: '600' }}>
-            {trip.duration_days}j
-          </Text>
-        </View>
+        {/* Duration badge — pill with backdrop blur */}
+        {Platform.OS === 'ios' ? (
+          <BlurView
+            intensity={24}
+            tint="dark"
+            style={{
+              position: 'absolute', top: 12, right: 12,
+              borderRadius: 999,
+              overflow: 'hidden',
+            }}
+          >
+            <View style={{
+              backgroundColor: 'rgba(0,0,0,0.35)',
+              paddingHorizontal: 12, paddingVertical: 5,
+              flexDirection: 'row', alignItems: 'center', gap: 4,
+            }}>
+              <Calendar size={11} color="#f8fafc" />
+              <Text style={{
+                color: '#f8fafc', fontSize: 9, fontWeight: '800',
+                fontFamily: fonts.sansBold, letterSpacing: 1, textTransform: 'uppercase',
+              }}>
+                {trip.duration_days}j
+              </Text>
+            </View>
+          </BlurView>
+        ) : (
+          <View style={{
+            position: 'absolute', top: 12, right: 12,
+            backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 12, paddingVertical: 5,
+            borderRadius: 999, flexDirection: 'row', alignItems: 'center', gap: 4,
+          }}>
+            <Calendar size={11} color="#f8fafc" />
+            <Text style={{
+              color: '#f8fafc', fontSize: 9, fontWeight: '800',
+              fontFamily: fonts.sansBold, letterSpacing: 1, textTransform: 'uppercase',
+            }}>
+              {trip.duration_days}j
+            </Text>
+          </View>
+        )}
         {/* Destination overlay */}
         <View style={{ position: 'absolute', bottom: 12, left: 14 }}>
-          <Text style={{ color: '#f8fafc', fontSize: 18, fontWeight: '800' }}>
+          <Text style={{
+            color: '#f8fafc', fontSize: 18, fontWeight: '800',
+            fontFamily: fonts.display,
+          }}>
             {trip.title || trip.destination}
           </Text>
-          <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 2 }}>{trip.destination}</Text>
+          <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 2, fontFamily: fonts.sans }}>
+            {trip.destination}
+          </Text>
         </View>
       </View>
 
@@ -97,7 +137,10 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
         {/* Owner */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
           <Avatar url={trip.owner.avatar_url} name={trip.owner.display_name} size="sm" />
-          <Text style={{ color: '#e2e8f0', fontSize: 13, fontWeight: '600' }} numberOfLines={1}>
+          <Text style={{
+            color: '#e2e8f0', fontSize: 13, fontWeight: '600',
+            fontFamily: fonts.sansSemiBold,
+          }} numberOfLines={1}>
             {trip.owner.display_name}
           </Text>
         </View>

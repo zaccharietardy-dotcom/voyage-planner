@@ -26,12 +26,12 @@ export function DayHeader({ dayNumber, date, theme, isDayTrip }: Props) {
           <Text style={{
             color: isDayTrip ? colors.upcoming : colors.gold,
             fontSize: 14,
-            fontFamily: fonts.display,
+            fontFamily: fonts.sansBold,
           }}>
             Jour {dayNumber}
           </Text>
         </View>
-        <Text style={{ color: colors.textSecondary, fontSize: 13, textTransform: 'capitalize' }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: fonts.sansMedium, textTransform: 'capitalize' }}>
           {formatDayDate(date)}
         </Text>
       </View>

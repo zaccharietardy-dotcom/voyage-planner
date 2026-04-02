@@ -162,11 +162,11 @@ export default function TripDetailScreen() {
         ].map((p, i) => (
           <View key={i} style={{
             flexDirection: 'row', alignItems: 'center', gap: 6,
-            backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.md,
+            backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999,
             borderWidth: 1, borderColor: colors.borderSubtle,
           }}>
             <p.icon size={14} color={colors.textSecondary} />
-            <Text style={{ color: '#e2e8f0', fontSize: 12, fontWeight: '600' }}>{p.label}</Text>
+            <Text style={{ color: '#e2e8f0', fontSize: 12, fontFamily: fonts.sansSemiBold }}>{p.label}</Text>
           </View>
         ))}
       </ScrollView>
@@ -205,7 +205,7 @@ export default function TripDetailScreen() {
             <t.icon size={15} color={activeTab === t.key ? colors.gold : colors.textMuted} />
             <Text style={{
               color: activeTab === t.key ? colors.gold : colors.textMuted,
-              fontSize: 13, fontWeight: '600',
+              fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1,
             }}>
               {t.label}
             </Text>
@@ -336,7 +336,7 @@ function BudgetTab({ trip }: { trip: Trip }) {
   if (!breakdown) {
     return (
       <View style={{ padding: 20 }}>
-        <Text style={{ color: colors.textMuted, fontSize: 14 }}>Pas de données budget.</Text>
+        <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: fonts.sans }}>Pas de données budget.</Text>
       </View>
     );
   }
@@ -376,7 +376,7 @@ function BudgetTab({ trip }: { trip: Trip }) {
                 <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: item.color }} />
                 <Text style={{ color: colors.text, fontSize: 14 }}>{item.label}</Text>
               </View>
-              <Text style={{ color: colors.text, fontSize: 14, fontWeight: '700' }}>{Math.round(item.value)}€</Text>
+              <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.sansBold }}>{Math.round(item.value)}€</Text>
             </View>
             <View style={{ height: 6, backgroundColor: colors.border, borderRadius: 3 }}>
               <View style={{
@@ -391,7 +391,7 @@ function BudgetTab({ trip }: { trip: Trip }) {
       {/* Carbon footprint */}
       {trip.carbonFootprint && (
         <View style={{
-          backgroundColor: colors.surface, borderRadius: radius['3xl'], padding: 18,
+          backgroundColor: colors.surface, borderRadius: radius.card, padding: 18,
           borderWidth: 1, borderColor: colors.borderSubtle, gap: 8,
         }}>
           <Text style={{ color: colors.text, fontSize: 15, fontFamily: fonts.display }}>
@@ -406,7 +406,7 @@ function BudgetTab({ trip }: { trip: Trip }) {
               marginLeft: 8, backgroundColor: colors.goldBg,
               paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
             }}>
-              <Text style={{ color: colors.gold, fontSize: 12, fontWeight: '800' }}>
+              <Text style={{ color: colors.gold, fontSize: 12, fontFamily: fonts.sansBold }}>
                 {trip.carbonFootprint.rating}
               </Text>
             </View>
@@ -424,7 +424,7 @@ function BudgetTab({ trip }: { trip: Trip }) {
               backgroundColor: colors.surface, borderRadius: radius.md, padding: 12,
             }}>
               <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Jour {day.dayNumber}</Text>
-              <Text style={{ color: colors.text, fontSize: 13, fontWeight: '600' }}>
+              <Text style={{ color: colors.text, fontSize: 13, fontFamily: fonts.sansSemiBold }}>
                 {Math.round(day.dailyBudget.total)}€
               </Text>
             </View>
@@ -483,7 +483,7 @@ function InfoTab({ trip }: { trip: Trip }) {
       )}
 
       {!tips && (
-        <Text style={{ color: colors.textMuted, fontSize: 14 }}>Aucune info disponible.</Text>
+        <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: fonts.sans }}>Aucune info disponible.</Text>
       )}
     </View>
   );
@@ -492,7 +492,7 @@ function InfoTab({ trip }: { trip: Trip }) {
 function InfoSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{
-      backgroundColor: colors.surface, borderRadius: radius['3xl'], padding: 18,
+      backgroundColor: colors.surface, borderRadius: radius.card, padding: 18,
       borderWidth: 1, borderColor: colors.borderSubtle, gap: 4,
     }}>
       <Text style={{ color: colors.text, fontSize: 15, fontFamily: fonts.display, marginBottom: 8 }}>{title}</Text>
@@ -505,7 +505,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 }}>
       <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{label}</Text>
-      <Text style={{ color: '#e2e8f0', fontSize: 13, fontWeight: '600' }}>{value}</Text>
+      <Text style={{ color: '#e2e8f0', fontSize: 13, fontFamily: fonts.sansSemiBold }}>{value}</Text>
     </View>
   );
 }

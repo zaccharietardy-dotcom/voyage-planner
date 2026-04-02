@@ -99,7 +99,7 @@ export default function ProfileScreen() {
               <Avatar url={profile?.avatar_url} name={displayName} size="lg" />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
-              <Text style={{ color: colors.text, fontSize: 26, fontFamily: fonts.display, fontWeight: 'bold' }}>
+              <Text style={{ color: colors.text, fontSize: 26, fontFamily: fonts.display }}>
                 {displayName}
               </Text>
               {isPro && (
@@ -108,7 +108,7 @@ export default function ProfileScreen() {
                 </View>
               )}
             </View>
-            <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4 }}>{user?.email}</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: fonts.sans, marginTop: 4 }}>{user?.email}</Text>
 
             {/* Stats bar */}
             <View style={{ flexDirection: 'row', gap: 32, marginTop: 24, backgroundColor: 'rgba(255,255,255,0.03)', paddingHorizontal: 32, paddingVertical: 16, borderRadius: radius['2xl'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
@@ -138,7 +138,7 @@ export default function ProfileScreen() {
                 <tab.icon size={16} color={activeTab === tab.key ? colors.gold : colors.textMuted} />
                 <Text style={{
                   color: activeTab === tab.key ? colors.gold : colors.textMuted,
-                  fontSize: 13, fontWeight: '700',
+                  fontSize: 13, fontFamily: fonts.sansSemiBold,
                 }}>
                   {tab.label}
                 </Text>
@@ -172,8 +172,8 @@ export default function ProfileScreen() {
               {/* Referral */}
               {profile?.referral_code && (
                 <Card variant="premium" style={{ gap: 8 }}>
-                  <Text style={{ color: colors.gold, fontSize: 16, fontFamily: fonts.display, fontWeight: 'bold' }}>Parrainage</Text>
-                  <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Partagez votre code pour gagner des voyages gratuits</Text>
+                  <Text style={{ color: colors.gold, fontSize: 16, fontFamily: fonts.sansBold, fontWeight: 'bold' }}>Parrainage</Text>
+                  <Text style={{ color: colors.textMuted, fontSize: 13, fontFamily: fonts.sans }}>Partagez votre code pour gagner des voyages gratuits</Text>
                   <View style={{
                     backgroundColor: 'rgba(2,6,23,0.3)', borderRadius: radius.md,
                     padding: 14, alignItems: 'center', marginTop: 4, borderWidth: 1, borderColor: 'rgba(197,160,89,0.2)'
@@ -204,10 +204,10 @@ export default function ProfileScreen() {
                 }}>
                   {isPro ? <Crown size={30} color={colors.gold} /> : <CreditCard size={30} color={colors.textMuted} />}
                 </View>
-                <Text style={{ color: colors.text, fontSize: 20, fontFamily: fonts.display, fontWeight: 'bold' }}>
+                <Text style={{ color: colors.text, fontSize: 20, fontFamily: fonts.sansBold, fontWeight: 'bold' }}>
                   {isPro ? 'Membre Privilège' : 'Accès Standard'}
                 </Text>
-                <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: 'center' }}>
+                <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: fonts.sans, textAlign: 'center' }}>
                   {isPro ? 'Voyages illimités & fonctionnalités exclusives' : 'Passez à Pro pour débloquer toutes les fonctionnalités'}
                 </Text>
               </Card>
@@ -223,12 +223,12 @@ export default function ProfileScreen() {
                       { icon: Award, label: 'Badge exclusif' },
                     ].map((f) => (
                       <View key={f.label} style={{
-                        width: '48%', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius.xl,
+                        width: '48%', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius.card,
                         padding: 18, alignItems: 'center', gap: 10,
                         borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
                       }}>
                         <f.icon size={24} color={colors.gold} />
-                        <Text style={{ color: colors.textSecondary, fontSize: 12, textAlign: 'center', fontWeight: '700' }}>
+                        <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansSemiBold, textAlign: 'center' }}>
                           {f.label}
                         </Text>
                       </View>
@@ -258,10 +258,10 @@ export default function ProfileScreen() {
 function StatItem({ value, label, gold }: { value: string | number; label: string; gold?: boolean }) {
   return (
     <View style={{ alignItems: 'center' }}>
-      <Text style={{ color: gold ? colors.gold : colors.text, fontSize: 24, fontFamily: fonts.display, fontWeight: 'bold' }}>
+      <Text style={{ color: gold ? colors.gold : colors.text, fontSize: 22, fontFamily: fonts.display, fontWeight: 'bold' }}>
         {value}
       </Text>
-      <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 4, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
+      <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 }}>{label}</Text>
     </View>
   );
 }
@@ -274,8 +274,8 @@ function MenuItem({ icon: Icon, label, danger, onPress }: {
       onPress={onPress}
       style={({ pressed }) => ({
         flexDirection: 'row', alignItems: 'center', gap: 14,
-        backgroundColor: pressed ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)',
-        borderRadius: radius.xl, padding: 18,
+        backgroundColor: pressed ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
+        borderRadius: radius.card, padding: 20,
         borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
       })}
     >
@@ -286,7 +286,7 @@ function MenuItem({ icon: Icon, label, danger, onPress }: {
       }}>
         <Icon size={20} color={danger ? colors.danger : colors.gold} />
       </View>
-      <Text style={{ color: danger ? colors.danger : colors.text, fontSize: 15, fontWeight: '700', flex: 1 }}>
+      <Text style={{ color: danger ? colors.danger : colors.text, fontSize: 15, fontFamily: fonts.sansMedium, flex: 1 }}>
         {label}
       </Text>
       {!danger && <ChevronRight size={20} color={colors.textDim} />}

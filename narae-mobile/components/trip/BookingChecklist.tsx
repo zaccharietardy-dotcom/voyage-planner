@@ -117,7 +117,7 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
           <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display }}>
             Réservations
           </Text>
-          <Text style={{ color: colors.gold, fontSize: 13, fontWeight: '700' }}>
+          <Text style={{ color: colors.gold, fontSize: 13, fontFamily: fonts.sansBold }}>
             {bookedCount}/{totalItems}
           </Text>
         </View>
@@ -136,7 +136,7 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
         contentContainerStyle={{ paddingBottom: 40 }}
         renderSectionHeader={({ section }) => (
           <Text style={{
-            color: colors.textSecondary, fontSize: 12, fontWeight: '700',
+            color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansBold,
             paddingHorizontal: 20, paddingTop: 16, paddingBottom: 6,
             textTransform: 'uppercase', letterSpacing: 1,
           }}>
@@ -152,7 +152,7 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
                 flexDirection: 'row', alignItems: 'center', gap: 12,
                 marginHorizontal: 20, marginVertical: 4,
                 backgroundColor: item.booked ? 'rgba(34,197,94,0.05)' : colors.surface,
-                borderRadius: radius.lg, padding: 14,
+                borderRadius: radius.card, padding: 14,
                 borderWidth: 1, borderColor: item.booked ? 'rgba(34,197,94,0.2)' : colors.borderSubtle,
               }}
             >
@@ -176,7 +176,7 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
               <View style={{ flex: 1 }}>
                 <Text style={{
                   color: item.booked ? colors.active : colors.text,
-                  fontSize: 13, fontWeight: '600',
+                  fontSize: 13, fontFamily: fonts.sansMedium,
                   textDecorationLine: item.booked ? 'line-through' : 'none',
                 }} numberOfLines={1}>
                   {item.title}
@@ -187,7 +187,7 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
               </View>
 
               {item.price && (
-                <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '600' }}>
+                <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansSemiBold }}>
                   {item.price}€
                 </Text>
               )}

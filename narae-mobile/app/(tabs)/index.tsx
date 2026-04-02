@@ -12,6 +12,7 @@ import { colors, fonts, radius, goldGradient } from '@/lib/theme';
 import { TripCard } from '@/components/trip/TripCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
+import { Button } from '@/components/ui/Button';
 
 export default function HomeScreen() {
   const { user, profile, isLoading: authLoading } = useAuth();
@@ -23,90 +24,109 @@ export default function HomeScreen() {
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
         <SafeAreaView style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 50, paddingBottom: 60 }}>
-            {/* Logo */}
-            <View style={{ alignItems: 'center', marginBottom: 36 }}>
-              <View style={{
-                width: 76, height: 76, borderRadius: 22,
-                backgroundColor: colors.gold,
-                justifyContent: 'center', alignItems: 'center',
-                shadowColor: colors.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16,
-              }}>
-                <Plane size={38} color={colors.bg} />
+          <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 40, paddingBottom: 100 }}>
+            {/* Premium Logo */}
+            <View style={{ alignItems: 'center', marginBottom: 48 }}>
+              <View style={{ alignItems: 'center', gap: 8 }}>
+                <View style={{
+                  width: 64, height: 64, borderRadius: 24,
+                  backgroundColor: colors.gold,
+                  justifyContent: 'center', alignItems: 'center',
+                  shadowColor: colors.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 20,
+                  borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
+                }}>
+                  <Plane size={32} color={colors.bg} strokeWidth={2.5} />
+                </View>
+                <Text style={{
+                  color: colors.gold,
+                  fontFamily: fonts.display,
+                  fontSize: 24,
+                  letterSpacing: 4,
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                  marginTop: 8,
+                }}>
+                  VOYAGES
+                </Text>
               </View>
             </View>
 
             {/* Hero text */}
-            <Text style={{
-              color: colors.text, fontSize: 34, textAlign: 'center', lineHeight: 42,
-              fontFamily: fonts.display,
-            }}>
-              Ton agence de voyage{'\n'}
-              <Text style={{ color: colors.gold, fontStyle: 'italic' }}>personnelle</Text>
-            </Text>
+            <View style={{ marginBottom: 40 }}>
+              <Text style={{
+                color: colors.text, fontSize: 38, textAlign: 'center', lineHeight: 46,
+                fontFamily: fonts.display, fontWeight: 'bold'
+              }}>
+                L&apos;excellence du{'\n'}
+                <Text style={{ color: colors.gold, fontStyle: 'italic' }}>voyage sur-mesure</Text>
+              </Text>
 
-            <Text style={{
-              color: colors.textSecondary, fontSize: 15, textAlign: 'center',
-              marginTop: 16, lineHeight: 22, paddingHorizontal: 16,
-            }}>
-              Narae génère un itinéraire sur-mesure en 2 minutes.{'\n'}Activités, restos, hôtels — tout est planifié.
-            </Text>
+              <Text style={{
+                color: colors.textSecondary, fontSize: 16, textAlign: 'center',
+                marginTop: 20, lineHeight: 24, paddingHorizontal: 12,
+                fontFamily: fonts.sans,
+              }}>
+                Narae conçoit votre itinéraire idéal en quelques secondes. Expériences exclusives et logistique parfaite.
+              </Text>
+            </View>
 
-            {/* Value props */}
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 32 }}>
+            {/* Value props - Glassy Cards */}
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 48 }}>
               {[
-                { icon: Compass, label: 'Exploration\nillimitée' },
-                { icon: MapPin, label: 'Adaptation\nprécise' },
-                { icon: Users, label: 'Partage\nprivilégié' },
+                { icon: Compass, label: 'Exploration\nIllimitée' },
+                { icon: MapPin, label: 'Adaptation\nPrécise' },
+                { icon: Users, label: 'Partage\nPrivilégié' },
               ].map((item, i) => (
                 <View key={i} style={{
-                  flex: 1, alignItems: 'center', padding: 16, gap: 10,
-                  backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius['3xl'],
-                  borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
+                  flex: 1, alignItems: 'center', paddingVertical: 20, paddingHorizontal: 10,
+                  backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: radius.card,
+                  borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
                 }}>
                   <View style={{
-                    width: 44, height: 44, borderRadius: 14,
-                    backgroundColor: colors.goldBg,
+                    width: 48, height: 48, borderRadius: 16,
+                    backgroundColor: 'rgba(197,160,89,0.15)',
                     alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 12,
                   }}>
-                    <item.icon size={20} color={colors.gold} />
+                    <item.icon size={22} color={colors.gold} />
                   </View>
-                  <Text style={{ color: colors.textSecondary, fontSize: 11, textAlign: 'center', lineHeight: 15, fontWeight: '600' }}>
+                  <Text style={{ 
+                    color: colors.textSecondary, 
+                    fontSize: 10, 
+                    textAlign: 'center', 
+                    lineHeight: 14, 
+                    fontFamily: fonts.sansBold,
+                    textTransform: 'uppercase',
+                    letterSpacing: 1,
+                  }}>
                     {item.label}
                   </Text>
                 </View>
               ))}
             </View>
 
-            {/* CTA */}
-            <Pressable
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push('/(auth)/login'); }}
-              style={{ marginTop: 32 }}
-            >
-              <LinearGradient
-                colors={goldGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  borderRadius: radius.xl, paddingVertical: 18,
-                  flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10,
-                  shadowColor: colors.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12,
+            {/* CTAs */}
+            <View style={{ gap: 16 }}>
+              <Button
+                size="lg"
+                icon={ArrowRight}
+                iconPosition="right"
+                onPress={() => { 
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); 
+                  router.push('/(auth)/login'); 
                 }}
               >
-                <Text style={{ color: colors.bg, fontSize: 16, fontWeight: '800' }}>Commencer gratuitement</Text>
-                <ArrowRight size={20} color={colors.bg} />
-              </LinearGradient>
-            </Pressable>
+                Commencer gratuitement
+              </Button>
 
-            <Pressable
-              onPress={() => router.push('/(auth)/register')}
-              style={{
-                borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: radius.xl, paddingVertical: 16,
-                marginTop: 12, alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '700' }}>Créer un compte</Text>
-            </Pressable>
+              <Button
+                variant="outline"
+                size="lg"
+                onPress={() => router.push('/(auth)/register')}
+              >
+                Créer un compte
+              </Button>
+            </View>
           </ScrollView>
         </SafeAreaView>
       </View>
@@ -145,37 +165,44 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
 
   return (
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }}>
-      {/* Greeting */}
-      <View style={{ padding: 20, paddingTop: 16 }}>
+      {/* Premium Header */}
+      <View style={{ padding: 24, paddingTop: 20 }}>
+        <Text style={{
+          color: colors.gold, fontSize: 14,
+          fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 3,
+          marginBottom: 8
+        }}>
+          Tableau de bord
+        </Text>
         <Text style={{
           color: colors.text, fontSize: 32,
           fontFamily: fonts.display, fontWeight: 'bold'
         }}>
           {greeting}{name ? `, ${name}` : ''} !
         </Text>
-        <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 16, marginTop: 6, fontFamily: fonts.sans }}>
           Prêt pour votre prochaine aventure ?
         </Text>
       </View>
 
-      {/* Quick search bar */}
+      {/* Enhanced search bar */}
       <Pressable
         onPress={() => { Haptics.selectionAsync(); router.push('/(tabs)/plan'); }}
         style={{
-          flexDirection: 'row', alignItems: 'center', gap: 10,
-          marginHorizontal: 20, backgroundColor: 'rgba(255,255,255,0.05)',
-          borderRadius: radius.xl, paddingHorizontal: 16, paddingVertical: 14,
-          borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+          flexDirection: 'row', alignItems: 'center', gap: 12,
+          marginHorizontal: 24, backgroundColor: 'rgba(255,255,255,0.05)',
+          borderRadius: radius.button, paddingHorizontal: 20, height: 60,
+          borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
         }}
       >
-        <Search size={18} color={colors.textMuted} />
-        <Text style={{ color: colors.textMuted, fontSize: 15 }}>Où souhaitez-vous aller ?</Text>
+        <Search size={20} color={colors.gold} />
+        <Text style={{ color: colors.textMuted, fontSize: 16, fontFamily: fonts.sans }}>Où souhaitez-vous aller ?</Text>
       </Pressable>
 
-      {/* Plan CTA */}
+      {/* Plan CTA Card - More Premium */}
       <Pressable
         onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/plan'); }}
-        style={{ marginHorizontal: 20, marginTop: 20 }}
+        style={{ marginHorizontal: 24, marginTop: 24 }}
       >
         <LinearGradient
           colors={goldGradient}
@@ -183,51 +210,52 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
           end={{ x: 1, y: 1 }}
           style={{
             flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-            borderRadius: radius['3xl'],
-            padding: 24,
-            shadowColor: colors.gold, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15,
+            borderRadius: radius.card,
+            padding: 28,
+            shadowColor: colors.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.35, shadowRadius: 20,
+            borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
           }}
         >
           <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.bg, fontSize: 20, fontFamily: fonts.display, fontWeight: 'bold' }}>
-              Planifier un voyage
+            <Text style={{ color: colors.bg, fontSize: 22, fontFamily: fonts.display, fontWeight: 'bold' }}>
+              Créer un voyage
             </Text>
-            <Text style={{ color: 'rgba(2,6,23,0.6)', fontSize: 13, marginTop: 4, fontWeight: '600' }}>
+            <Text style={{ color: 'rgba(2,6,23,0.7)', fontSize: 14, marginTop: 6, fontFamily: fonts.sansSemiBold }}>
               Itinéraire sur-mesure en 2 min
             </Text>
           </View>
           <View style={{
-            width: 52, height: 52, borderRadius: 18,
-            backgroundColor: 'rgba(2,6,23,0.1)',
+            width: 56, height: 56, borderRadius: 20,
+            backgroundColor: 'rgba(2,6,23,0.12)',
             alignItems: 'center', justifyContent: 'center',
-            borderWidth: 1, borderColor: 'rgba(2,6,23,0.05)'
+            borderWidth: 1, borderColor: 'rgba(2,6,23,0.08)'
           }}>
-            <Plane size={26} color={colors.bg} strokeWidth={2.5} />
+            <Plane size={28} color={colors.bg} strokeWidth={2.5} />
           </View>
         </LinearGradient>
       </Pressable>
 
       {/* Recent trips */}
       {isLoading ? (
-        <View style={{ padding: 20, gap: 12 }}>
-          <Skeleton width={140} height={18} />
-          <Skeleton height={160} radius={radius['3xl']} />
+        <View style={{ padding: 24, gap: 14 }}>
+          <Skeleton width={160} height={20} />
+          <Skeleton height={180} radius={radius.card} />
         </View>
       ) : recentTrips.length > 0 ? (
-        <View style={{ marginTop: 28 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 14 }}>
-            <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.display }}>
+        <View style={{ marginTop: 32 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 }}>
+            <Text style={{ color: colors.text, fontSize: 20, fontFamily: fonts.sansBold }}>
               Derniers voyages
             </Text>
             <Pressable onPress={() => router.push('/(tabs)/trips')}>
-              <Text style={{ color: colors.gold, fontSize: 13, fontWeight: '600' }}>Tout voir</Text>
+              <Text style={{ color: colors.gold, fontSize: 14, fontFamily: fonts.sansSemiBold }}>Tout voir</Text>
             </Pressable>
           </View>
           <FlatList
             data={recentTrips}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 14 }}
+            contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
             keyExtractor={(t) => t.id}
             renderItem={({ item }) => (
               <TripCard trip={item} compact onPress={() => router.push(`/trip/${item.id}`)} />
@@ -237,10 +265,10 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
       ) : null}
 
       {/* Popular destinations */}
-      <View style={{ marginTop: 28 }}>
+      <View style={{ marginTop: 32 }}>
         <Text style={{
-          color: colors.text, fontSize: 18, paddingHorizontal: 20, marginBottom: 14,
-          fontFamily: fonts.display,
+          color: colors.text, fontSize: 20, paddingHorizontal: 24, marginBottom: 16,
+          fontFamily: fonts.sansBold,
         }}>
           Destinations populaires
         </Text>
@@ -248,23 +276,24 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
           data={DESTINATIONS.slice(0, 6)}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
+          contentContainerStyle={{ paddingHorizontal: 24, gap: 14 }}
           keyExtractor={(d) => d.slug}
           renderItem={({ item }) => (
             <Pressable
               onPress={() => router.push({ pathname: '/(tabs)/plan', params: { destination: item.name } })}
               style={{
-                width: 140, borderRadius: radius['3xl'], overflow: 'hidden',
+                width: 160, borderRadius: radius.card, overflow: 'hidden',
                 backgroundColor: colors.card,
                 borderWidth: 1, borderColor: colors.borderSubtle,
+                shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10,
               }}
             >
-              <Image source={{ uri: item.image }} style={{ width: 140, height: 100 }} resizeMode="cover" />
-              <View style={{ padding: 10 }}>
-                <Text style={{ color: colors.text, fontSize: 14, fontWeight: '700' }}>
+              <Image source={{ uri: item.image }} style={{ width: 160, height: 110 }} resizeMode="cover" />
+              <View style={{ padding: 12 }}>
+                <Text style={{ color: colors.text, fontSize: 15, fontFamily: fonts.sansBold }}>
                   {item.emoji} {item.name}
                 </Text>
-                <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 2 }}>{item.idealDuration}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 4, fontFamily: fonts.sans }}>{item.idealDuration}</Text>
               </View>
             </Pressable>
           )}
@@ -273,3 +302,4 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
     </ScrollView>
   );
 }
+

@@ -6,6 +6,7 @@ import {
 import { openBrowserAsync } from 'expo-web-browser';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { colors, fonts, radius } from '@/lib/theme';
 import type { TripItem } from '@/lib/types/trip';
 
 interface Props {
@@ -37,13 +38,13 @@ export function ActivityDetail({ item }: Props) {
     >
       {/* Header */}
       <View>
-        <Text style={{ color: '#f8fafc', fontSize: 20, fontWeight: '800', marginBottom: 6 }}>
+        <Text style={{ color: '#f8fafc', fontSize: 20, fontFamily: fonts.display, marginBottom: 6 }}>
           {item.title}
         </Text>
         {item.locationName && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <MapPin size={14} color="#94a3b8" />
-            <Text style={{ color: '#94a3b8', fontSize: 13, flex: 1 }}>{item.locationName}</Text>
+            <Text style={{ color: '#94a3b8', fontSize: 13, fontFamily: fonts.sans, flex: 1 }}>{item.locationName}</Text>
           </View>
         )}
       </View>
@@ -75,7 +76,7 @@ export function ActivityDetail({ item }: Props) {
         {item.rating && item.rating > 0 && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <Star size={14} color="#c5a059" fill="#c5a059" />
-            <Text style={{ color: '#c5a059', fontSize: 13, fontWeight: '700' }}>
+            <Text style={{ color: '#c5a059', fontSize: 13, fontFamily: fonts.sansBold }}>
               {item.rating.toFixed(1)}
             </Text>
             {item.reviewCount && (
@@ -98,7 +99,7 @@ export function ActivityDetail({ item }: Props) {
 
       {/* Description */}
       {item.description && (
-        <Text style={{ color: '#94a3b8', fontSize: 14, lineHeight: 20 }}>
+        <Text style={{ color: '#94a3b8', fontSize: 14, fontFamily: fonts.sans, lineHeight: 20 }}>
           {item.description}
         </Text>
       )}
@@ -106,12 +107,12 @@ export function ActivityDetail({ item }: Props) {
       {/* Restaurant details */}
       {item.restaurant && (
         <View style={{
-          backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 14,
+          backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius.card,
           padding: 14, gap: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <UtensilsCrossed size={14} color="#F97316" />
-            <Text style={{ color: '#f8fafc', fontSize: 14, fontWeight: '600' }}>
+            <Text style={{ color: '#f8fafc', fontSize: 14, fontFamily: fonts.sansSemiBold }}>
               {item.restaurant.name}
             </Text>
           </View>
@@ -132,7 +133,7 @@ export function ActivityDetail({ item }: Props) {
       {/* Restaurant alternatives */}
       {item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && (
         <View style={{ gap: 8 }}>
-          <Text style={{ color: '#64748b', fontSize: 12, fontWeight: '600' }}>Alternatives</Text>
+          <Text style={{ color: '#64748b', fontSize: 12, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>Alternatives</Text>
           {item.restaurantAlternatives.map((alt) => (
             <Pressable
               key={alt.id}

@@ -18,13 +18,14 @@ export function ScreenHeader({ title, subtitle, rightAction }: Props) {
         <View style={{ flex: 1 }}>
           <Text style={{
             color: colors.text,
-            fontSize: 28,
+            fontSize: 34,
+            fontWeight: 'bold',
             fontFamily: fonts.display,
           }}>
             {title}
           </Text>
           {subtitle && (
-            <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 4 }}>{subtitle}</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 4, fontFamily: fonts.sans }}>{subtitle}</Text>
           )}
         </View>
         {rightAction}

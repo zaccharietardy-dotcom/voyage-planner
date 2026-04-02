@@ -13,6 +13,12 @@ import {
   PlayfairDisplay_600SemiBold,
   PlayfairDisplay_700Bold,
 } from '@expo-google-fonts/playfair-display';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 
 import { AuthProvider } from '@/hooks/useAuth';
 
@@ -42,6 +48,10 @@ export default function RootLayout() {
     PlayfairDisplay_500Medium,
     PlayfairDisplay_600SemiBold,
     PlayfairDisplay_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
   });
 
   useEffect(() => {
