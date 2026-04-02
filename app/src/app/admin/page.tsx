@@ -1,10 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-
-// Admin emails whitelist
-const ADMIN_EMAILS = ['zaccharietardy@gmail.com'];
 
 type PipelineEvent = {
   type: 'step_start' | 'step_done' | 'api_call' | 'api_done' | 'info' | 'warning' | 'error';
@@ -19,7 +15,6 @@ type PipelineEvent = {
 type EventEntry = PipelineEvent & { id: number };
 
 export default function AdminPage() {
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [events, setEvents] = useState<EventEntry[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [destination, setDestination] = useState('Rome');
@@ -32,20 +27,6 @@ export default function AdminPage() {
   const eventIdRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number>(0);
-
-  // Check admin access
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && ADMIN_EMAILS.includes(user.email || '')) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    checkAdmin();
-  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -139,21 +120,6 @@ export default function AdminPage() {
   const apiDone = events.filter(e => e.type === 'api_done');
   const apiErrors = apiDone.filter(e => e.detail?.startsWith('ERROR'));
   const steps = events.filter(e => e.type === 'step_done');
-
-  if (isAdmin === null) {
-    return <div className="flex items-center justify-center min-h-screen text-gray-400">Chargement...</div>;
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-2">Acces refuse</h1>
-          <p className="text-gray-400">Cette page est reservee aux administrateurs.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 p-6">

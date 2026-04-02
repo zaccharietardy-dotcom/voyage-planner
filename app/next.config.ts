@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
 import withSerwistInit from "@serwist/next";
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "node:path";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -11,9 +12,19 @@ const withSerwist = withSerwistInit({
   swSrc: "src/app/sw.ts",
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV !== "production",
+  maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 });
 
+const workspaceRoot = path.resolve(__dirname, "..");
+const enableExternalMarketingScript =
+  process.env.NEXT_PUBLIC_ENABLE_EXTERNAL_MARKETING_SCRIPT === "true"
+  || process.env.NEXT_PUBLIC_ENABLE_EXTERNAL_MARKETING_SCRIPT === "1";
+
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: workspaceRoot,
+  turbopack: {
+    root: workspaceRoot,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production"
       ? { exclude: ["error", "warn", "info"] }
@@ -36,11 +47,11 @@ const nextConfig: NextConfig = {
   async headers() {
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://emrldtp.com https://*.sentry.io https://*.vercel-scripts.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://*.vercel-scripts.com${enableExternalMarketingScript ? ' https://emrldtp.com' : ''}`,
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://images.unsplash.com https://i.pravatar.cc https://*.googleapis.com https://*.gstatic.com https://*.basemaps.cartocdn.com https://*.sentry.io",
-      "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://*.googleapis.com https://*.sentry.io https://serpapi.com https://*.basemaps.cartocdn.com https://nominatim.openstreetmap.org https://overpass-api.de https://*.stripe.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://emrldtp.com",
+      "font-src 'self' data:",
+      `connect-src 'self' https://*.supabase.co https://*.googleapis.com https://*.sentry.io https://serpapi.com https://*.basemaps.cartocdn.com https://nominatim.openstreetmap.org https://overpass-api.de https://*.stripe.com https://vitals.vercel-insights.com https://va.vercel-scripts.com${enableExternalMarketingScript ? ' https://emrldtp.com' : ''}`,
       "frame-src 'self' https://*.stripe.com",
       "worker-src 'self' blob:",
       "media-src 'self'",

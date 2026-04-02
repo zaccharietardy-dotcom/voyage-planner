@@ -163,7 +163,7 @@ function RegisterContent() {
           <p className="text-slate-400 mb-8 leading-relaxed">
             Un lien de confirmation a été envoyé à <br />
             <span className="text-gold font-bold">{formData.email}</span>. <br />
-            L'aventure commence dans quelques instants.
+            L&apos;aventure commence dans quelques instants.
           </p>
           <Button variant="outline" className="h-14 rounded-2xl border-white/10 hover:bg-white/5 transition-all text-white px-8" asChild>
             <Link href="/login">Retour à la connexion</Link>
@@ -213,7 +213,7 @@ function RegisterContent() {
                 <span className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
-                <span className="bg-[#020617] px-4 text-slate-500">Ou s'inscrire avec email</span>
+                <span className="bg-[#020617] px-4 text-slate-500">Ou s&apos;inscrire avec email</span>
               </div>
             </div>
 
@@ -316,7 +316,7 @@ function RegisterContent() {
                   onCheckedChange={(checked) => handleChange('acceptTerms', checked as boolean)}
                 />
                 <label htmlFor="terms" className="text-[11px] text-slate-400 leading-relaxed">
-                  J'accepte les{' '}
+                  J&apos;accepte les{' '}
                   <Link href="/cgu" className="text-gold hover:underline">conditions</Link>{' '}
                   et la{' '}
                   <Link href="/privacy" className="text-gold hover:underline">politique de confidentialité</Link>.
@@ -375,7 +375,7 @@ function RegisterContent() {
           >
             <div className="w-20 h-1 bg-gold mb-8 rounded-full shadow-[0_0_15px_rgba(197,160,89,0.5)] ml-auto" />
             <h2 className="font-display text-6xl font-bold text-white leading-tight mb-6">
-              L'exceptionnel <br />
+              L&apos;exceptionnel <br />
               est à votre <span className="text-gold-gradient italic">portée</span>.
             </h2>
             <p className="text-xl text-white/70 max-w-md leading-relaxed ml-auto">

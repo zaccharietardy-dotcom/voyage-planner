@@ -75,7 +75,7 @@ function SocialProof() {
         {/* Testimonials */}
         <div className="text-center mb-12">
           <h2 className="text-sm uppercase tracking-[0.3em] text-gold font-bold mb-4">Ils nous font confiance</h2>
-          <p className="text-3xl md:text-4xl font-display font-bold">Ce qu'en disent nos voyageurs</p>
+          <p className="text-3xl md:text-4xl font-display font-bold">Ce qu&apos;en disent nos voyageurs</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -89,7 +89,7 @@ function SocialProof() {
               className="rounded-2xl border border-white/10 bg-white/[0.02] p-6"
             >
               <Quote className="h-6 w-6 text-gold/30 mb-4" />
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">"{t.text}"</p>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">&quot;{t.text}&quot;</p>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold">{t.name}</p>
@@ -110,15 +110,19 @@ function SocialProof() {
 }
 
 function LandingPage() {
-  // A/B test: CTA variant stored in cookie for consistency
-  const [ctaVariant] = useState<'default' | 'action'>(() => {
-    if (typeof window === 'undefined') return 'default';
+  const [ctaVariant, setCtaVariant] = useState<'default' | 'action'>('default');
+
+  useEffect(() => {
     const stored = document.cookie.match(/narae-cta=(\w+)/)?.[1];
-    if (stored === 'action' || stored === 'default') return stored as 'default' | 'action';
+    if (stored === 'action' || stored === 'default') {
+      setCtaVariant(stored);
+      return;
+    }
+
     const variant = Math.random() > 0.5 ? 'action' : 'default';
-    document.cookie = `narae-cta=${variant};path=/;max-age=${60 * 60 * 24 * 30}`;
-    return variant as 'default' | 'action';
-  });
+    document.cookie = `narae-cta=${variant};path=/;max-age=${60 * 60 * 24 * 30};SameSite=Lax`;
+    setCtaVariant(variant);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,7 +135,7 @@ function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-sm uppercase tracking-[0.3em] text-gold font-bold mb-4">
-              L'excellence du voyage
+              L&apos;excellence du voyage
             </h2>
             <p className="text-4xl md:text-5xl font-display font-bold leading-tight">
               Une expérience sur-mesure, à chaque étape
@@ -148,7 +152,7 @@ function LandingPage() {
               </div>
               <h3 className="text-2xl font-display font-bold mb-4">Exploration Illimitée</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Parcourez des milliers d'itinéraires créés par notre communauté de voyageurs experts. L'inspiration n'a plus de limites.
+                Parcourez des milliers d&apos;itinéraires créés par notre communauté de voyageurs experts. L&apos;inspiration n&apos;a plus de limites.
               </p>
             </motion.div>
 
@@ -174,7 +178,7 @@ function LandingPage() {
               </div>
               <h3 className="text-2xl font-display font-bold mb-4">Partage Privilégié</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Invitez vos proches, collaborez sur l'itinéraire et centralisez tous vos documents de voyage en un seul lieu sécurisé.
+                Invitez vos proches, collaborez sur l&apos;itinéraire et centralisez tous vos documents de voyage en un seul lieu sécurisé.
               </p>
             </motion.div>
           </div>

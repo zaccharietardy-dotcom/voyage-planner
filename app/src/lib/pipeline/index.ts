@@ -573,7 +573,7 @@ async function runPipelineFromClusters(
   );
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
 
-  let scheduledDays = repairResult.days;
+  const scheduledDays = repairResult.days;
 
   // Step 11b: Inject transport items (outbound + return) into day schedule
   if (scheduledDays.length > 0) {

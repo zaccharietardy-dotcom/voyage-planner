@@ -98,29 +98,6 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Cache Google Fonts CSS with stale-while-revalidate
-    {
-      matcher: /^https?:\/\/fonts\.googleapis\.com\/.*/i,
-      handler: new StaleWhileRevalidate({
-        cacheName: "google-fonts-stylesheets",
-      }),
-    },
-    // Cache Google Fonts files with cache-first strategy
-    {
-      matcher: /^https?:\/\/fonts\.gstatic\.com\/.*/i,
-      handler: new CacheFirst({
-        cacheName: "google-fonts-webfonts",
-        plugins: [
-          new ExpirationPlugin({
-            maxEntries: 30,
-            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
-          }),
-          new CacheableResponsePlugin({
-            statuses: [0, 200],
-          }),
-        ],
-      }),
-    },
   ],
   fallbacks: {
     entries: [

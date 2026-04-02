@@ -114,6 +114,7 @@ import { cacheTripById, readCachedTripById } from '@/lib/mobile/offline-cache';
 import { generateFeedbackCards } from '@/lib/generateFeedbackCards';
 import type { FeedbackCard } from '@/lib/types/pipelineQuestions';
 import { TripFeedbackCards } from '@/components/trip/TripFeedbackCards';
+import { TripQualitySummary } from '@/components/trip/TripQualitySummary';
 import { generateTripStream } from '@/lib/generateTrip';
 import { safeGetItem, safeSetItem } from '@/lib/storage';
 
@@ -1537,6 +1538,12 @@ export default function TripPage() {
           <div className="rounded-xl border border-amber-300/50 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
             Mode hors ligne: certaines actions (Calculs, collaboration, paiements) sont indisponibles.
           </div>
+        </div>
+      )}
+
+      {trip && (
+        <div className="container mx-auto px-4 pt-3">
+          <TripQualitySummary trip={trip} />
         </div>
       )}
 

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -15,28 +14,11 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair-display",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+import {
+  getPublicEnv,
+  isExternalMarketingScriptEnabled,
+  isFeedbackWidgetEnabled,
+} from "@/lib/runtime-config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -115,10 +97,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publicEnv = getPublicEnv();
+  const enableExternalMarketingScript = isExternalMarketingScriptEnabled();
+  const enableFeedbackWidget = isFeedbackWidgetEnabled();
+
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        <script
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('voyage-theme');var d=document.documentElement;if(t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches)){d.classList.add('dark')}else{d.classList.add('light')}}catch(e){}})()`,
           }}
@@ -207,40 +195,42 @@ export default function RootLayout({
             `,
           }}
         />
-        <Script
-          src="https://emrldtp.com/NDk0NDIw.js?t=494420"
-          strategy="afterInteractive"
-        />
+        {enableExternalMarketingScript && (
+          <Script
+            src="https://emrldtp.com/NDk0NDIw.js?t=494420"
+            strategy="afterInteractive"
+          />
+        )}
         <JsonLd
+          id="jsonld-organization"
           data={{
             "@context": "https://schema.org",
             "@type": "Organization",
             name: SITE_NAME,
-            url: SITE_URL,
-            logo: `${SITE_URL}/logo-narae.png`,
+            url: publicEnv.NEXT_PUBLIC_SITE_URL,
+            logo: `${publicEnv.NEXT_PUBLIC_SITE_URL}/logo-narae.png`,
             description: SITE_DESCRIPTION,
             sameAs: [],
           }}
         />
         <JsonLd
+          id="jsonld-website"
           data={{
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: SITE_NAME,
-            url: SITE_URL,
+            url: publicEnv.NEXT_PUBLIC_SITE_URL,
             inLanguage: "fr",
             description: SITE_DESCRIPTION,
             potentialAction: {
               "@type": "SearchAction",
-              target: `${SITE_URL}/explore?q={search_term_string}`,
+              target: `${publicEnv.NEXT_PUBLIC_SITE_URL}/explore?q={search_term_string}`,
               "query-input": "required name=search_term_string",
             },
           }}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${playfair.variable} antialiased`}
-      >
+      <body className="antialiased">
         <ThemeProvider defaultTheme="system" storageKey="voyage-theme">
           <I18nProvider>
             <AuthProvider>
@@ -267,7 +257,7 @@ export default function RootLayout({
         <Analytics />
         <SpeedInsights />
         <CookieConsentBanner />
-        <FeedbackWidget />
+        {enableFeedbackWidget && <FeedbackWidget />}
       </body>
     </html>
   );

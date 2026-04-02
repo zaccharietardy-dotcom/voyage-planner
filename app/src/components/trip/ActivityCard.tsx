@@ -638,7 +638,7 @@ export const ActivityCard = memo(function ActivityCard({
                     onClick={(e) => { e.stopPropagation(); onSwapClick(); setShowActionsDrawer(false); hapticImpactMedium(); }}
                   >
                     <ArrowLeftRight className="h-5 w-5 text-gold" />
-                    Remplacer l'activité
+                    Remplacer l&apos;activité
                   </button>
                 )}
                 
@@ -648,7 +648,7 @@ export const ActivityCard = memo(function ActivityCard({
                     onClick={(e) => { e.stopPropagation(); setShowTimeEdit(true); setShowActionsDrawer(false); hapticImpactLight(); }}
                   >
                     <Clock className="h-5 w-5 text-gold" />
-                    Modifier l'horaire
+                    Modifier l&apos;horaire
                   </button>
                 )}
                 
@@ -682,7 +682,7 @@ export const ActivityCard = memo(function ActivityCard({
         <DrawerContent>
           <DrawerHandle />
           <DrawerHeader>
-            <DrawerTitle className="text-white">Modifier l'horaire</DrawerTitle>
+            <DrawerTitle className="text-white">Modifier l&apos;horaire</DrawerTitle>
           </DrawerHeader>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-4">

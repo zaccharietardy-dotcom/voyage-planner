@@ -1,14 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
-
-function getAdminEmails(): Set<string> {
-  const fromEnv = (process.env.ADMIN_EMAILS || '')
-    .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  return new Set(fromEnv);
-}
+import { getAdminEmails, isAdminEmail } from '@/lib/runtime-config';
 
 export interface AdminUser {
   id: string;
@@ -40,7 +32,7 @@ export async function requireAdmin():
   }
 
   const email = (user.email || '').toLowerCase();
-  if (!email || !adminEmails.has(email)) {
+  if (!isAdminEmail(email)) {
     return {
       ok: false,
       response: NextResponse.json({ error: 'Accès administrateur requis' }, { status: 403 }),

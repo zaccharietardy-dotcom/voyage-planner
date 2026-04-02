@@ -320,7 +320,7 @@ export default function MesVoyagesPage() {
                             </span>
                           </div>
                           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1 pl-5">
-                            {trip.duration_days} Jours d'évasion
+                            {trip.duration_days} Jours d&apos;évasion
                           </p>
                         </div>
 

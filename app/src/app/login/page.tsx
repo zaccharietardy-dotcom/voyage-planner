@@ -119,7 +119,7 @@ function LoginContent() {
               <span className="text-gold-gradient italic">odyssée</span> commence ici.
             </h2>
             <p className="text-xl text-white/70 max-w-md leading-relaxed">
-              Reconnectez-vous à vos envies d'évasion et planifiez des moments qui resteront gravés.
+              Reconnectez-vous à vos envies d&apos;évasion et planifiez des moments qui resteront gravés.
             </p>
           </motion.div>
         </div>
@@ -159,7 +159,7 @@ function LoginContent() {
               </Link>
             </div>
             <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">Bon retour parmi nous</h1>
-            <p className="text-slate-400 text-sm md:text-base">Accédez à vos carnets de route et vos projets d'évasion.</p>
+            <p className="text-slate-400 text-sm md:text-base">Accédez à vos carnets de route et vos projets d&apos;évasion.</p>
           </div>
 
           {/* Reason banner (from preflight redirect) */}

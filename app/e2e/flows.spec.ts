@@ -1,8 +1,18 @@
 import { test, expect } from '@playwright/test';
 
+async function dismissCookieBanner(page: Parameters<typeof test>[0]['page']) {
+  const refuseButton = page.getByRole('button', { name: 'Refuser' });
+  await refuseButton.waitFor({ state: 'visible', timeout: 1500 }).catch(() => null);
+  if (await refuseButton.isVisible().catch(() => false)) {
+    await refuseButton.click();
+    await expect(refuseButton).toBeHidden();
+  }
+}
+
 test.describe('User flows', () => {
   test('login form shows validation on empty submit', async ({ page }) => {
     await page.goto('/login');
+    await dismissCookieBanner(page);
     // Click submit without filling the form
     await page.getByRole('button', { name: 'Se connecter' }).click();
     // Browser native validation should prevent submit (required fields)
@@ -14,6 +24,7 @@ test.describe('User flows', () => {
 
   test('login form shows error on bad credentials', async ({ page }) => {
     await page.goto('/login');
+    await dismissCookieBanner(page);
     await page.getByLabel('Email').fill('fake@test.com');
     await page.getByLabel('Mot de passe').fill('wrongpassword123');
     await page.getByRole('button', { name: 'Se connecter' }).click();
@@ -21,16 +32,11 @@ test.describe('User flows', () => {
     await expect(page.getByText(/incorrect|erreur|tentatives/i)).toBeVisible({ timeout: 10000 });
   });
 
-  test('plan wizard loads all 4 steps', async ({ page }) => {
+  test('plan route gates unauthenticated users toward auth', async ({ page }) => {
     await page.goto('/plan');
-    // Step 1: Destination
-    await expect(page.getByText('Planifiez votre voyage')).toBeVisible();
-
-    // Check step indicators exist
-    await expect(page.getByText('Où')).toBeVisible();
-    await expect(page.getByText('Quand')).toBeVisible();
-    await expect(page.getByText('Style')).toBeVisible();
-    await expect(page.getByText('Résumé')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Créez votre compte' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Créer un compte gratuitement' })).toBeVisible();
   });
 
   test('plan wizard preflight blocks unauthenticated users', async ({ request }) => {
@@ -58,7 +64,7 @@ test.describe('User flows', () => {
   test('CGU page loads', async ({ page }) => {
     await page.goto('/cgu');
     await expect(page.locator('body')).not.toBeEmpty();
-    await expect(page.getByText(/conditions/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Conditions Générales d'Utilisation/i })).toBeVisible();
   });
 
   test('dynamic OG image endpoint works', async ({ request }) => {

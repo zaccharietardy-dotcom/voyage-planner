@@ -121,7 +121,7 @@ export function TravelGuides() {
       <section className="py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-display font-bold">Destinations d'exception</h2>
+            <h2 className="text-2xl font-display font-bold">Destinations d&apos;exception</h2>
             <p className="text-sm text-muted-foreground mt-1">Inspirations pour votre prochain départ</p>
           </div>
           <div className="hidden gap-3 md:flex">

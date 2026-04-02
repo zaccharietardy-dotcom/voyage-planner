@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const CONSENT_KEY = 'narae-cookie-consent';
 
@@ -17,6 +17,7 @@ export function hasAnalyticsConsent(): boolean {
 
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const consent = getConsentStatus();
@@ -24,6 +25,32 @@ export function CookieConsentBanner() {
       setVisible(true);
     }
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    if (!visible || !containerRef.current) {
+      root.style.setProperty('--cookie-consent-offset', '0px');
+      return;
+    }
+
+    const updateOffset = () => {
+      const height = containerRef.current?.offsetHeight ?? 0;
+      root.style.setProperty('--cookie-consent-offset', `${height + 24}px`);
+    };
+
+    updateOffset();
+
+    const resizeObserver = new ResizeObserver(updateOffset);
+    resizeObserver.observe(containerRef.current);
+    window.addEventListener('resize', updateOffset);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateOffset);
+      root.style.setProperty('--cookie-consent-offset', '0px');
+    };
+  }, [visible]);
 
   function handleAccept() {
     localStorage.setItem(CONSENT_KEY, 'accepted');
@@ -40,8 +67,11 @@ export function CookieConsentBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] p-4 md:p-6">
-      <div className="mx-auto max-w-lg rounded-xl border border-border bg-background/95 backdrop-blur-sm p-4 shadow-lg">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[9999] flex justify-end p-4 md:p-6">
+      <div
+        ref={containerRef}
+        className="pointer-events-auto w-full max-w-lg rounded-xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur-sm"
+      >
         <p className="text-sm text-muted-foreground mb-3">
           Nous utilisons des cookies analytiques pour améliorer votre expérience.
           Les cookies essentiels (connexion, préférences) sont toujours actifs.{' '}

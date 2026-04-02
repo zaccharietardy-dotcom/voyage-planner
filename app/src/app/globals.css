@@ -52,6 +52,11 @@
 }
 
 :root {
+  --cookie-consent-offset: 0px;
+  --font-geist-sans: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --font-geist-mono: "SFMono-Regular", "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-playfair-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --font-playfair: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
   --radius: 0.85rem;
   /* Narae Light Theme - Ultra Premium */
   --background: #fdfdfd;
@@ -185,10 +190,10 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist-sans);
+    font-family: var(--font-sans);
     -webkit-touch-callout: none;
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--cookie-consent-offset));
     -webkit-tap-highlight-color: transparent;
     background-image:
       radial-gradient(circle at 10% 10%, rgba(197, 160, 89, 0.03), transparent 30%),

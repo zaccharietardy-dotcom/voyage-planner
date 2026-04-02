@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { DESTINATIONS } from '@/lib/destinations';
+import { getPublicEnv, hasConfiguredSupabase } from '@/lib/runtime-config';
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://naraevoyage.com';
+const SITE_URL = getPublicEnv().NEXT_PUBLIC_SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Routes statiques
@@ -55,7 +55,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Routes dynamiques : voyages publics
   let tripRoutes: MetadataRoute.Sitemap = [];
 
-  try {
+  if (hasConfiguredSupabase()) {
+    try {
     const supabase = await createServerSupabaseClient();
     const { data: trips } = await supabase
       .from('trips')
@@ -70,9 +71,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }));
-  } catch {
-    // Silencieux en cas d'erreur Supabase — on retourne les routes statiques
-    console.warn('[sitemap] Erreur lors de la récupération des voyages publics');
+    } catch {
+      // Silencieux en cas d'erreur Supabase — on retourne les routes statiques
+    }
   }
 
   // Routes destinations
