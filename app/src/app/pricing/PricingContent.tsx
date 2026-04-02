@@ -29,7 +29,7 @@ export function PricingContent() {
       {success && (
         <div className="mb-8 rounded-xl border border-green-500/30 bg-green-500/5 p-4 flex items-center gap-3">
           <CheckCircle className="h-5 w-5 text-green-500" />
-          <p className="text-sm font-medium">Abonnement activé ! Profitez de toutes les fonctionnalités Pro.</p>
+          <p className="text-sm font-medium">Paiement confirmé ! Vous pouvez maintenant planifier votre voyage.</p>
         </div>
       )}
 
