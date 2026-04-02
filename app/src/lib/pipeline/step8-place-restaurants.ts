@@ -104,7 +104,7 @@ export async function placeRestaurants(
       const nearbyCount = restaurants.filter(r =>
         calculateDistance(centroid.lat, centroid.lng, r.latitude, r.longitude) <= 0.8
       ).length;
-      if (nearbyCount >= 5) return [];
+      if (nearbyCount >= 3) return []; // 3 restaurants within 800m is enough
       try {
         const nearby = await searchRestaurantsNearbyWithFallback(centroid, options.destination!, {
           mealType: 'lunch',
@@ -295,11 +295,12 @@ const PASSES: PassConfig[] = [
   { maxDist: 0.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
   // Pass 2: standard (800m), rating >= 3.5
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+  // Pass 3: 800m, any rating
   { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
-  { maxDist: 1.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
-  { maxDist: 5.0, checkMealType: false, checkDietary: 'relaxed', checkHours: true,  checkRating: false, allowReuse: true  },
-  { maxDist: 5.0, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
-  { maxDist: 5.0, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
+  // Pass 4: 1.2km, relaxed meal type
+  { maxDist: 1.2, checkMealType: false, checkDietary: 'relaxed', checkHours: true,  checkRating: false, allowReuse: false },
+  // Pass 5: 1.5km, any restaurant (absolute max — no more 5km fallback)
+  { maxDist: 1.5, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
 ];
 
 function filterAndScoreCandidates(
