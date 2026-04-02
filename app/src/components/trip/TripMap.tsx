@@ -463,11 +463,16 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
   const [filterDay, setFilterDay] = useState<number | null>(null);
   const [showNeighbourhoods, setShowNeighbourhoods] = useState(false);
 
-  // Auto-switch day filter when selected item belongs to a different day
+  // Auto-switch day filter when a NEW item is selected from a different day
+  const prevSelectedRef = useRef(selectedItemId);
   useEffect(() => {
-    if (!selectedItemId || filterDay === null) return;
+    if (!selectedItemId || selectedItemId === prevSelectedRef.current) {
+      prevSelectedRef.current = selectedItemId;
+      return;
+    }
+    prevSelectedRef.current = selectedItemId;
     const item = items.find(i => i.id === selectedItemId);
-    if (item?.dayNumber && item.dayNumber !== filterDay) {
+    if (item?.dayNumber && filterDay !== null && item.dayNumber !== filterDay) {
       setFilterDay(item.dayNumber);
     }
   }, [selectedItemId, items, filterDay]);
