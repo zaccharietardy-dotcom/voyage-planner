@@ -1,0 +1,48 @@
+name: Native Beta Checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'narae-mobile/**'
+      - '.github/workflows/native-beta.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'narae-mobile/**'
+      - '.github/workflows/native-beta.yml'
+
+concurrency:
+  group: native-beta-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Expo Beta Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: narae-mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: narae-mobile/package-lock.json
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Jest smoke tests
+        run: npm test
+
+      - name: TypeScript type check
+        run: npm run typecheck
+
+      - name: Expo doctor
+        run: npm run doctor
