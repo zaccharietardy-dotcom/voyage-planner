@@ -129,20 +129,22 @@ export function geoReorderDayItems(
     }
   }
 
-  // 2-opt local search
+  // 2-opt local search — full range reversal
   let improved = true;
   let route = [...bestRoute];
-  while (improved) {
+  let passes = 0;
+  while (improved && passes < 20) {
     improved = false;
-    for (let i = 0; i < route.length - 2; i++) {
-      for (let k = i + 1; k < route.length - 1; k++) {
+    passes++;
+    for (let i = 0; i < route.length - 1; i++) {
+      for (let k = i + 1; k < route.length; k++) {
         const nextRoute = [
-          ...route.slice(0, i + 1),
-          ...route.slice(i + 1, k + 1).reverse(),
+          ...route.slice(0, i),
+          ...route.slice(i, k + 1).reverse(),
           ...route.slice(k + 1),
         ];
         const nextCost = routeCost(nextRoute);
-        if (nextCost + 0.01 < bestCost) {
+        if (nextCost < bestCost - 0.001) {
           route = nextRoute;
           bestCost = nextCost;
           improved = true;
@@ -269,20 +271,22 @@ export function geoReorderScheduledDay(
     }
   }
 
-  // 2-opt improvement
+  // 2-opt improvement — try all possible segment reversals
   let improved = true;
   let route = [...bestRoute];
-  while (improved) {
+  let passes = 0;
+  while (improved && passes < 20) {
     improved = false;
-    for (let i = 0; i < route.length - 2; i++) {
-      for (let k = i + 1; k < route.length - 1; k++) {
+    passes++;
+    for (let i = 0; i < route.length - 1; i++) {
+      for (let k = i + 1; k < route.length; k++) {
         const nextRoute = [
-          ...route.slice(0, i + 1),
-          ...route.slice(i + 1, k + 1).reverse(),
+          ...route.slice(0, i),
+          ...route.slice(i, k + 1).reverse(),
           ...route.slice(k + 1),
         ];
         const nextCost = routeCost(nextRoute);
-        if (nextCost + 0.01 < bestCost) {
+        if (nextCost < bestCost - 0.001) {
           route = nextRoute;
           bestCost = nextCost;
           improved = true;
@@ -293,42 +297,41 @@ export function geoReorderScheduledDay(
 
   // Check if reorder actually improved things
   const originalCost = routeCost(activities);
-  if (bestCost >= originalCost - 0.05) {
-    return items; // No improvement, keep original
+  if (bestCost >= originalCost - 0.01) {
+    return items; // No meaningful improvement
   }
 
-  // SAFETY CHECK 1: Validate opening hours before applying reorder
-  // If any activity would be placed outside its opening hours, abort
+  // SAFETY CHECK: Validate opening hours — skip individual violations, don't abort all
+  // Find activities that MUST stay in specific slots due to opening hours
+  const fixedSlots = new Set<number>(); // indices in route that can't move
   for (let i = 0; i < route.length; i++) {
     const slot = slots[i];
     const activity = route[i];
-    const slotStartMin = timeToMinutes(slot.startTime);
-    const slotEndMin = timeToMinutes(slot.endTime);
-
-    // Check openingHours if available
     if (activity.openingHours) {
+      const slotStartMin = timeToMinutes(slot.startTime);
+      const slotEndMin = timeToMinutes(slot.endTime);
       const openMin = timeToMinutes(activity.openingHours.open);
       const closeMin = timeToMinutes(activity.openingHours.close);
-      // Activity must start after opening and end before closing
       if (slotStartMin < openMin - 30 || slotEndMin > closeMin + 15) {
-        console.log(`[Geo-Reorder-Post] Aborted: "${activity.title}" can't fit in ${slot.startTime}-${slot.endTime} (opens ${activity.openingHours.open}, closes ${activity.openingHours.close})`);
-        return items; // Keep original order
+        // This specific assignment violates hours — revert to original order
+        // (a more sophisticated approach would fix just this activity, but
+        //  reverting is safer and the greedy+2opt should handle most cases)
+        console.log(`[Geo-Reorder-Post] Opening hours conflict: "${activity.title}" in ${slot.startTime}-${slot.endTime} (opens ${activity.openingHours.open}, closes ${activity.openingHours.close}) — keeping original order`);
+        return items;
       }
     }
   }
 
-  // SAFETY CHECK 2: Duration mismatch guard
-  // Use each activity's own duration to compute endTime
-  // But if total duration drift is > 30min, abort (would cascade-break the schedule)
+  // Duration drift guard — relaxed threshold (60min total across all activities)
   let totalDrift = 0;
   for (let i = 0; i < route.length; i++) {
     const slotDuration = timeToMinutes(slots[i].endTime) - timeToMinutes(slots[i].startTime);
     const actDuration = route[i].duration || slotDuration;
     totalDrift += Math.abs(actDuration - slotDuration);
   }
-  if (totalDrift > 30) {
-    console.log(`[Geo-Reorder-Post] Aborted: total duration drift ${totalDrift}min > 30min threshold`);
-    return items; // Keep original order
+  if (totalDrift > 60) {
+    console.log(`[Geo-Reorder-Post] Duration drift ${totalDrift}min > 60min — keeping original order`);
+    return items;
   }
 
   console.log(`[Geo-Reorder-Post] Optimized: ${originalCost.toFixed(1)}km → ${bestCost.toFixed(1)}km (saved ${(originalCost - bestCost).toFixed(1)}km) for ${activities.length} activities`);

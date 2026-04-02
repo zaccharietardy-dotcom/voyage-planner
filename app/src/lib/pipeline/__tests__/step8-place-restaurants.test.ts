@@ -56,10 +56,10 @@ describe('step8-place-restaurants strict placement', () => {
     totalIntraDistance: 0.2,
   };
 
-  it('places far restaurants via relaxed passes rather than leaving gaps', async () => {
+  it('skips restaurants beyond 1.5km cap rather than placing far-away ones', async () => {
     const farRestaurant = makeRestaurant({
       id: 'far-1',
-      latitude: 41.4151, // ~3.3km north
+      latitude: 41.4151, // ~3.3km north — beyond 1.5km cap
       longitude: 2.1734,
     });
 
@@ -76,11 +76,9 @@ describe('step8-place-restaurants strict placement', () => {
     );
 
     expect(plans[0]).toBeDefined();
-    // All 3 meals should be placed (breakfast fallback + far restaurant via relaxed passes)
-    expect(plans[0].meals.length).toBe(3);
+    // Only breakfast (hotel fallback) — lunch/dinner skipped because restaurant is 3.3km away
+    expect(plans[0].meals.length).toBe(1);
     expect(plans[0].meals.find(m => m.mealType === 'breakfast')).toBeDefined();
-    expect(plans[0].meals.find(m => m.mealType === 'lunch')).toBeDefined();
-    expect(plans[0].meals.find(m => m.mealType === 'dinner')).toBeDefined();
   });
 
   it('places restaurants even when closed on that day via ultimate fallback', async () => {
