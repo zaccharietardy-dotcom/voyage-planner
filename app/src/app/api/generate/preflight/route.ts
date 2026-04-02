@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 
-const FREE_MONTHLY_LIMIT = 2;
+const FREE_LIFETIME_LIMIT = 1;
 
 /**
  * Lightweight pre-check before trip generation.
@@ -34,23 +34,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ allowed: true });
     }
 
-    // Check monthly quota for free users
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
+    // Check lifetime quota for free users (1 free trip ever + extra_trips from purchases)
     const { count } = await supabase
       .from('trips')
       .select('*', { count: 'exact', head: true })
-      .eq('owner_id', user.id)
-      .gte('created_at', startOfMonth.toISOString());
+      .eq('owner_id', user.id);
 
-    const totalAllowed = FREE_MONTHLY_LIMIT + (profile?.extra_trips || 0);
+    const totalAllowed = FREE_LIFETIME_LIMIT + (profile?.extra_trips || 0);
 
     if (count !== null && count >= totalAllowed) {
       return NextResponse.json({
         allowed: false,
-        reason: `Vous avez atteint votre limite de ${totalAllowed} voyage${totalAllowed > 1 ? 's' : ''} gratuit${totalAllowed > 1 ? 's' : ''} ce mois-ci`,
+        reason: 'Votre voyage gratuit a été utilisé. Achetez un voyage ou passez à Pro pour des voyages illimités.',
         action: 'upgrade',
         used: count,
         limit: totalAllowed,

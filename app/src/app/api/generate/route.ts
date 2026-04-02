@@ -12,7 +12,7 @@ import { generateTripSchema } from '@/lib/validations/generate';
 
 export const maxDuration = 300; // 5 minutes max
 
-const FREE_MONTHLY_LIMIT = 2;
+const FREE_LIFETIME_LIMIT = 1;
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,22 +74,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (billingState.status !== 'pro') {
-      // --- Quota par compte : max FREE_MONTHLY_LIMIT trips/mois ---
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-
+      // --- Quota par compte : 1 trip gratuit à vie + extra_trips (achats unitaires) ---
       const { count: userCount } = await supabase
         .from('trips')
         .select('*', { count: 'exact', head: true })
-        .eq('owner_id', user.id)
-        .gte('created_at', startOfMonth.toISOString());
+        .eq('owner_id', user.id);
 
-      const totalAllowed = FREE_MONTHLY_LIMIT + (profile?.extra_trips || 0);
+      const totalAllowed = FREE_LIFETIME_LIMIT + (profile?.extra_trips || 0);
 
       if (userCount !== null && userCount >= totalAllowed) {
         return NextResponse.json(
-          { error: 'Limite de voyages gratuits atteinte. Passez à Pro pour des voyages illimités.', code: 'QUOTA_EXCEEDED' },
+          { error: 'Votre voyage gratuit a été utilisé. Achetez un voyage ou passez à Pro.', code: 'QUOTA_EXCEEDED' },
           { status: 403 }
         );
       }

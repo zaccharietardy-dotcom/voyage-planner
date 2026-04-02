@@ -130,7 +130,15 @@ export default function ProfilPage() {
       }
       const res = await fetch('/api/billing/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Checkout failed:', data);
+        toast.error(data.error || 'Erreur lors de la création du paiement');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Erreur de connexion au serveur');
     } finally { setCheckoutLoading(null); }
   };
 
@@ -192,7 +200,7 @@ export default function ProfilPage() {
               </div>
               {profileData?.bio && (
                 <p className="text-slate-400 text-sm mt-4 max-w-sm italic leading-relaxed">
-                  "{profileData.bio}"
+                  &quot;{profileData.bio}&quot;
                 </p>
               )}
             </div>
@@ -319,7 +327,7 @@ export default function ProfilPage() {
                         className="h-16 rounded-2xl bg-gold-gradient text-[#020617] font-bold text-lg shadow-xl shadow-gold/20"
                         disabled={!!checkoutLoading}
                       >
-                        {checkoutLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `Devenir Pro — ${billingPeriod === 'yearly' ? '9.99€/an' : '1.99€/mois'}`}
+                        {checkoutLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : `Devenir Pro — ${billingPeriod === 'yearly' ? '29.99€/an' : '4.99€/mois'}`}
                       </Button>
                     </div>
                   )}
@@ -414,11 +422,10 @@ export default function ProfilPage() {
             onClick={handleSignOut}
             className="w-full h-16 rounded-2xl mt-4 border-red-500/20 bg-red-500/5 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-red-500 hover:text-white transition-all"
           >
-            <LogOut className="h-4 w-4 mr-2" /> Quitter l'application
+            <LogOut className="h-4 w-4 mr-2" /> Quitter l&apos;application
           </Button>
         </div>
       </div>
     </div>
   );
 }
-

@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 const freePlan = {
   name: 'Gratuit',
   features: [
-    '2 voyages par mois',
+    '1 voyage gratuit',
     'Itinéraire Expert',
     'Réseau social complet',
     'Carte interactive',
@@ -194,7 +194,7 @@ export function PricingCards() {
           <div className="rounded-2xl border p-6 flex flex-col">
             <h3 className="text-xl font-bold">À l&apos;unité</h3>
             <div className="mt-4 mb-6">
-              <span className="text-4xl font-bold">0.99€</span>
+              <span className="text-4xl font-bold">1.99€</span>
               <span className="text-muted-foreground">/voyage</span>
             </div>
             <ul className="space-y-3 flex-1">

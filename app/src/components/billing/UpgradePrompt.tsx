@@ -12,7 +12,7 @@ interface UpgradePromptProps {
   message?: string;
 }
 
-export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/mois.' }: UpgradePromptProps) {
+export function UpgradePrompt({ message = 'Ton voyage gratuit a été utilisé.' }: UpgradePromptProps) {
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const { user } = useAuth();
@@ -93,7 +93,7 @@ export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/
             onClick={handleOneTime}
             disabled={!!loading}
           >
-            {loading === 'one-time' ? <Loader2 className="h-4 w-4 animate-spin" /> : '0.99€ ce voyage'}
+            {loading === 'one-time' ? <Loader2 className="h-4 w-4 animate-spin" /> : '1.99€ ce voyage'}
           </Button>
         )}
         <Button
@@ -106,7 +106,7 @@ export function UpgradePrompt({ message = 'Tu as atteint la limite de 2 voyages/
             ? <Loader2 className="h-4 w-4 animate-spin" />
             : nativeApp
               ? 'Achat in-app'
-              : '9.99€/an'}
+              : '29.99€/an'}
         </Button>
       </div>
       <button
