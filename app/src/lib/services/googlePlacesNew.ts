@@ -765,9 +765,9 @@ export async function searchRestaurantsNearbyGooglePlaces(
   const {
     mealType = 'lunch',
     maxDistance = 800,
-    minRating = 4.0,
-    minReviews = 80,
-    limit = 5,
+    minRating = 3.5,
+    minReviews = 10,
+    limit = 10,
   } = options;
 
   // Build types filter

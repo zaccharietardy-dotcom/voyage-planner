@@ -390,11 +390,13 @@ export async function findBestRestaurantWithSearch(
   // Nothing within 200m in pool — fire targeted API search near this anchor
   let newRestaurants: Restaurant[] = [];
   try {
-    console.log(`[Place Restaurants] No ${mealType} within 500m of anchor — searching API near [${anchor.lat.toFixed(4)}, ${anchor.lng.toFixed(4)}]`);
+    console.log(`[Place Restaurants] No ${mealType} within 200m of anchor — searching API near [${anchor.lat.toFixed(4)}, ${anchor.lng.toFixed(4)}]`);
     const nearby = await searchRestaurantsNearbyWithFallback(anchor, destination, {
       mealType: mealType === 'breakfast' ? 'breakfast' : mealType === 'lunch' ? 'lunch' : 'dinner',
-      maxDistance: 600, // 600m radius
-      limit: 8,
+      maxDistance: 500, // 500m — tight search to find truly nearby restaurants
+      minRating: 3.5,
+      minReviews: 10,
+      limit: 15,
     });
     const existingIds = new Set(allRestaurants.map(r => r.id));
     newRestaurants = nearby.filter(r => !existingIds.has(r.id));
