@@ -55,27 +55,37 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = getSupabaseClient();
-    let resolved = false;
 
-    // Listen for PASSWORD_RECOVERY event (triggered when Supabase processes hash fragment)
+    const verifyToken = async () => {
+      // Check URL params for token_hash (our custom reset flow)
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get('token_hash');
+      const type = params.get('type');
+
+      if (tokenHash && type === 'recovery') {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        });
+        setIsValidSession(!error);
+        return;
+      }
+
+      // Fallback: check if already has a valid session (e.g. page refresh after verification)
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsValidSession(!!session);
+    };
+
+    // Listen for PASSWORD_RECOVERY event (hash fragment flow)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-        resolved = true;
+      if (event === 'PASSWORD_RECOVERY') {
         setIsValidSession(true);
       }
     });
 
-    // Fallback: if no auth event fires within 3s, check session manually
-    const timeout = setTimeout(async () => {
-      if (resolved) return;
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsValidSession(!!session);
-    }, 3000);
+    verifyToken();
 
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleChange = (field: string, value: string) => {

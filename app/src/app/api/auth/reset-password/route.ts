@@ -59,12 +59,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const resetUrl = linkData.properties?.action_link;
+    const actionLink = linkData.properties?.action_link;
 
-    if (!resetUrl) {
-      // Ne pas révéler l'erreur pour des raisons de sécurité
+    if (!actionLink) {
       return NextResponse.json({ success: true });
     }
+
+    // Extract token_hash from Supabase action_link and build our own reset URL
+    // This bypasses Supabase's redirect chain which loses params
+    const actionUrl = new URL(actionLink);
+    const tokenHash = actionUrl.searchParams.get('token');
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const resetUrl = tokenHash
+      ? `${baseUrl}/reset-password?token_hash=${tokenHash}&type=recovery`
+      : actionLink;
 
     await sendResetEmail(email, resetUrl);
 
