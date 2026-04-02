@@ -1026,40 +1026,44 @@ function getAdaptiveQueries(
   destination: string,
   activities?: ActivityType[]
 ): { query: string; priority: number }[] {
-  const base = [
-    { query: 'top tourist attractions must see landmarks', priority: 1 },
-    { query: 'best museums art galleries historical sites', priority: 2 },
-    { query: 'famous viewpoints markets food streets', priority: 2 },
+  // 1 comprehensive base query (was 3 separate ones — saves ~€0.07/trip)
+  const queries: { query: string; priority: number }[] = [
+    { query: 'top tourist attractions landmarks museums viewpoints markets', priority: 1 },
   ];
 
+  // 1 activity-specific query max (merge all matching interests into one)
   const archetypes = getDestinationArchetypes(destination);
+  const extras: string[] = [];
 
   const religiousCities = ['rome', 'istanbul', 'kyoto', 'bangkok', 'jerusalem', 'bali', 'varanasi', 'cairo', 'seville', 'florence'];
   if (religiousCities.some(c => destination.toLowerCase().includes(c)) || archetypes.includes('cultural')) {
-    base.push({ query: 'famous temples shrines churches monuments', priority: 2 });
+    extras.push('temples churches monuments');
   }
-
   if (archetypes.includes('beach') || activities?.includes('beach')) {
-    base.push({ query: 'best beaches swimming spots coastal walks seaside', priority: 2 });
+    extras.push('beaches coastal walks');
   }
   if (activities?.includes('nature') || archetypes.includes('nature')) {
-    base.push({ query: 'parks gardens botanical hiking trails nature reserves', priority: 2 });
+    extras.push('parks gardens hiking trails');
   }
   if (activities?.includes('nightlife') || archetypes.includes('nightlife')) {
-    base.push({ query: 'best nightlife areas rooftop bars evening entertainment', priority: 3 });
+    extras.push('nightlife rooftop bars');
   }
   if (activities?.includes('gastronomy') || archetypes.includes('gastronomy')) {
-    base.push({ query: 'food markets street food districts local cuisine', priority: 2 });
+    extras.push('food markets street food');
   }
   if (activities?.includes('adventure') || archetypes.includes('adventure')) {
-    base.push({ query: 'outdoor activities water sports adventure experiences', priority: 2 });
+    extras.push('outdoor activities water sports');
   }
   if (activities?.includes('wellness') || archetypes.includes('wellness')) {
-    base.push({ query: 'spas thermal baths wellness retreats hot springs', priority: 3 });
+    extras.push('spas thermal baths');
   }
   if (activities?.includes('shopping')) {
-    base.push({ query: 'best shopping districts markets boutiques crafts', priority: 3 });
+    extras.push('shopping districts boutiques');
   }
 
-  return base;
+  if (extras.length > 0) {
+    queries.push({ query: extras.join(' '), priority: 2 });
+  }
+
+  return queries;
 }

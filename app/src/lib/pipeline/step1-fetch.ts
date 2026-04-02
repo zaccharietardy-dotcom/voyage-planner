@@ -23,7 +23,7 @@ import { searchAirbnbListings } from '../services/airbnb';
 import { generateTravelTips } from '../services/travelTips';
 import { resolveBudget, generateBudgetStrategy } from '../services/budgetResolver';
 import { findBestFlights, selectFlightByBudget } from '../tripFlights';
-import { searchGooglePlacesAttractions, enrichAttractionsWithPlaceDetails } from './services/googlePlacesAttractions';
+import { searchGooglePlacesAttractions } from './services/googlePlacesAttractions';
 import { getMustSeeAttractions, type Attraction } from '../services/attractions';
 import { resolveCoordinates } from '../services/coordsResolver';
 import { fetchWeatherForecast } from '../services/weather';
@@ -189,9 +189,8 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
 
   // Phase 1: Everything in parallel (tracked for monitoring)
   const results = await Promise.allSettled([
-    // 0: Google Places Text Search — attractions with popularity (with retry)
-    tracked('Google Places', withRetry(() => searchGooglePlacesAttractions(destination, destCoords))),
-    // 1: Google Places (New) → SerpAPI fallback — attractions with GPS + rating (with retry)
+    // 0: Google Places (New) → SerpAPI fallback — attractions with GPS + rating (with retry)
+    // Legacy Google Places search removed — New API returns same data (saves ~€0.16/trip)
     tracked('Places attractions', withRetry(() => searchAttractionsMultiQueryWithFallback(destination, destCoords, {
           types: activityTypes,
           limit: 40,
@@ -267,30 +266,22 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     return fallback;
   };
 
-  const googlePlacesAttractions = extract(0, []);
-  const serpApiAttractions = extract(1, []);
-  const overpassAttractions = extract(2, []);
-  const viatorActivities = extract(3, []);
-  const mustSeeAttractions: Attraction[] = extract(4, [] as Attraction[]);
-  const tripAdvisorRestaurants = extract(5, []);
-  const serpApiRestaurants = extract(6, []);
-  const bookingHotels = extract(7, []);
-  const transportOptions = extract(8, []);
-  const travelTips = extract(9, null);
-  const budgetStrategy = extract(10, null as any);
-  const weatherForecasts = extract(11, []);
-  const airbnbListings: import('../types').Accommodation[] = extract(12, []);
+  const googlePlacesAttractions: Attraction[] = []; // Legacy search removed (cost optimization)
+  const serpApiAttractions = extract(0, []);
+  const overpassAttractions = extract(1, []);
+  const viatorActivities = extract(2, []);
+  const mustSeeAttractions: Attraction[] = extract(3, [] as Attraction[]);
+  const tripAdvisorRestaurants = extract(4, []);
+  const serpApiRestaurants = extract(5, []);
+  const bookingHotels = extract(6, []);
+  const transportOptions = extract(7, []);
+  const travelTips = extract(8, null);
+  const budgetStrategy = extract(9, null as any);
+  const weatherForecasts = extract(10, []);
+  const airbnbListings: import('../types').Accommodation[] = extract(11, []);
 
-  // ── Enrich Google Places attractions with real opening hours (Place Details API) ──
-  // Non-blocking: wrapped in try/catch + timeout so pipeline never stalls
-  try {
-    await Promise.race([
-      enrichAttractionsWithPlaceDetails(googlePlacesAttractions, 20),
-      new Promise<void>((resolve) => setTimeout(resolve, 10000)), // 10s timeout
-    ]);
-  } catch (e) {
-    console.warn('[Pipeline V2] Place Details enrichment failed (non-critical):', e);
-  }
+  // Place Details enrichment removed — Google Places (New) already returns
+  // regularOpeningHours in field mask (saves ~€0.10/trip, 20 API calls)
 
   // ── Resolve GPS for Viator activities (they default to city-center coords) ──
   const viatorEstimated = viatorActivities.filter(

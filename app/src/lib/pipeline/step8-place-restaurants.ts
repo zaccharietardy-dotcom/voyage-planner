@@ -594,10 +594,10 @@ export async function enrichRestaurantPool(
   const clusterSearches = clusters.map(async (cluster) => {
     const centroid = getClusterCentroid(cluster.activities);
     if (!centroid) return [];
-    const nearbyCount = restaurants.filter(r =>
+    const nearbyCount = enrichedRestaurants.filter(r =>
       calculateDistance(centroid.lat, centroid.lng, r.latitude, r.longitude) <= SEARCH_RADIUS.nearbyCheck
     ).length;
-    if (nearbyCount >= 5) return [];
+    if (nearbyCount >= 3) return []; // 3 is enough for meals (was 5 — saves API calls)
     try {
       const nearby = await searchRestaurantsNearbyWithFallback(centroid, destination, {
         mealType: 'lunch',
