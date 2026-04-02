@@ -594,6 +594,13 @@ export default function TripPage() {
 
   const handleSelectItem = useCallback((item: TripItem) => {
     setSelectedItemId(item.id);
+    // Auto-switch active day when selecting an item from a different day (mobile timeline)
+    if (item.dayNumber) {
+      setActiveDay((prev) => {
+        const dayStr = item.dayNumber.toString();
+        return prev !== dayStr ? dayStr : prev;
+      });
+    }
   }, []);
 
   const handleEditItem = useCallback((item: TripItem) => {

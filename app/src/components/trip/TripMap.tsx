@@ -83,7 +83,7 @@ const TYPE_LABELS: Record<string, string> = {
 const TYPE_EMOJIS: Record<string, string> = {
   activity:   '🏛️',
   restaurant: '🍴',
-  hotel:      '🏨',
+  hotel:      '🛏️',
   checkin:    '🔑',
   checkout:   '🧳',
   transport:  '🚇',
@@ -463,6 +463,15 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
   const [filterDay, setFilterDay] = useState<number | null>(null);
   const [showNeighbourhoods, setShowNeighbourhoods] = useState(false);
 
+  // Auto-switch day filter when selected item belongs to a different day
+  useEffect(() => {
+    if (!selectedItemId || filterDay === null) return;
+    const item = items.find(i => i.id === selectedItemId);
+    if (item?.dayNumber && item.dayNumber !== filterDay) {
+      setFilterDay(item.dayNumber);
+    }
+  }, [selectedItemId, items, filterDay]);
+
   // Compute stable items key to detect real changes
   const itemsKey = useMemo(() => items.map(i => i.id).sort().join(','), [items]);
   // Track last itemsKey that triggered fitBounds — prevents re-centering on unrelated effect re-runs
@@ -619,17 +628,30 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     }
 
     const bounds = L.latLngBounds([]);
-    let globalIndex = 1;
 
     // Add markers — only activities get sequential numbers
     // Transport, checkin, checkout, luggage, free_time, parking are hidden from map to reduce clutter
     const HIDDEN_TYPES = new Set(['transport', 'flight', 'checkin', 'checkout', 'luggage', 'free_time', 'parking']);
+
+    // Pre-compute per-day activity numbering (1-based within each day)
+    // so markers show 1, 2, 3 per day instead of global indices across the trip
+    const activityNumberMap = new Map<string, number>();
+    const perDayCounter = new Map<number, number>();
+    displayItems.forEach((item) => {
+      if (!item.latitude || !item.longitude) return;
+      if (item.type !== 'activity') return;
+      const day = item.dayNumber || 0;
+      const count = (perDayCounter.get(day) || 0) + 1;
+      perDayCounter.set(day, count);
+      activityNumberMap.set(item.id, count);
+    });
+
     displayItems.forEach((item) => {
       if (!item.latitude || !item.longitude) return;
       if (HIDDEN_TYPES.has(item.type)) return;
-      // Activities get sequential numbers, restaurants/hotels get emoji-only (num=0)
+      // Activities get sequential per-day numbers, restaurants/hotels get emoji-only (num=0)
       const isNumbered = item.type === 'activity';
-      const num = isNumbered ? (mapNumbers?.get(item.id) ?? globalIndex++) : 0;
+      const num = isNumbered ? (activityNumberMap.get(item.id) ?? 0) : 0;
       const icon = isNumbered
         ? createNumberedIcon(L, num, item.type, item.dayNumber, false)
         : createEmojiIcon(L, item.type, item.dayNumber);
@@ -660,7 +682,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       const icon = createEmojiIcon(L, 'hotel', item.dayNumber);
       const name = acc.name || item.title || 'Hôtel';
       const marker = L.marker([acc.latitude, acc.longitude], { icon, interactive: true })
-        .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">🏨 ${name}</div>`, {
+        .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">🛏️ ${name}</div>`, {
           maxWidth: 220,
           className: 'clean-popup',
         });
