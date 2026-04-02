@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platfor
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ArrowRight } from 'lucide-react-native';
-import Animated, { SlideInRight, SlideInLeft } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
 import { generateTrip, type GenerateProgress } from '@/lib/api/trips';
@@ -53,7 +53,6 @@ export default function PlanScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState<1 | -1>(1);
   const [prefs, setPrefs] = useState<Partial<TripPreferences>>({
     ...DEFAULT_PREFS,
     ...(params.destination ? { destination: params.destination } : {}),
@@ -89,7 +88,6 @@ export default function PlanScreen() {
   const goTo = (target: number) => {
     Haptics.selectionAsync();
     Keyboard.dismiss();
-    setDirection(target > step ? 1 : -1);
     setStep(target);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
@@ -152,7 +150,7 @@ export default function PlanScreen() {
     );
   }
 
-  const entering = direction === 1 ? SlideInRight.springify().damping(18) : SlideInLeft.springify().damping(18);
+  const entering = FadeIn.duration(200);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
