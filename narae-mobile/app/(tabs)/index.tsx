@@ -133,7 +133,7 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
 
       {/* Quick search bar */}
       <Pressable
-        onPress={() => { Haptics.selectionAsync(); router.push('/(tabs)/plan'); }}
+        onPress={() => { Haptics.selectionAsync(); router.push('/plan'); }}
         style={styles.searchBar}
       >
         <Search size={18} color={colors.textMuted} />
@@ -142,7 +142,7 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
 
       {/* Plan CTA */}
       <Pressable
-        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/plan'); }}
+        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/plan'); }}
         style={styles.planCta}
       >
         <LinearGradient
@@ -207,7 +207,7 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
           keyExtractor={(d) => d.slug}
           renderItem={({ item }) => (
             <Pressable
-              onPress={() => router.push({ pathname: '/(tabs)/plan', params: { destination: item.name } })}
+              onPress={() => router.push({ pathname: '/plan', params: { destination: item.name } })}
               style={styles.destinationCard}
             >
               <Image source={{ uri: item.image }} style={styles.destinationImage} resizeMode="cover" />

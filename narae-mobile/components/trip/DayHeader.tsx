@@ -1,5 +1,5 @@
-import { View, Text } from 'react-native';
-import { colors, fonts } from '@/lib/theme';
+import { View, Text, StyleSheet } from 'react-native';
+import { colors, fonts, radius } from '@/lib/theme';
 
 interface Props {
   dayNumber: number;
@@ -15,37 +15,63 @@ function formatDayDate(date: Date | string): string {
 
 export function DayHeader({ dayNumber, date, theme, isDayTrip }: Props) {
   return (
-    <View style={{ paddingHorizontal: 20, paddingTop: 28, paddingBottom: 12 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <View style={{
-          backgroundColor: isDayTrip ? colors.upcomingBg : colors.goldBg,
-          paddingHorizontal: 14,
-          paddingVertical: 7,
-          borderRadius: 12,
-        }}>
-          <Text style={{
-            color: isDayTrip ? colors.upcoming : colors.gold,
-            fontSize: 14,
-            fontFamily: fonts.sansBold,
-          }}>
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <View style={[styles.badge, isDayTrip ? styles.dayTripBadge : styles.defaultBadge]}>
+          <Text style={[styles.badgeText, { color: isDayTrip ? colors.upcoming : colors.gold }]}>
             Jour {dayNumber}
           </Text>
         </View>
-        <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: fonts.sansMedium, textTransform: 'capitalize' }}>
-          {formatDayDate(date)}
-        </Text>
+        <Text style={styles.date}>{formatDayDate(date)}</Text>
       </View>
-      {theme && (
-        <Text style={{
-          color: '#e2e8f0',
-          fontSize: 15,
-          fontFamily: fonts.displayMedium,
-          marginTop: 8,
-          marginLeft: 2,
-        }}>
-          {theme}
-        </Text>
-      )}
+      {theme ? <Text style={styles.theme}>{theme}</Text> : null}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    paddingBottom: 14,
+    gap: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  badge: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    borderWidth: 1,
+  },
+  defaultBadge: {
+    backgroundColor: colors.goldBg,
+    borderColor: colors.goldBorder,
+  },
+  dayTripBadge: {
+    backgroundColor: colors.upcomingBg,
+    borderColor: 'rgba(96,165,250,0.2)',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  date: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sansMedium,
+    textTransform: 'capitalize',
+  },
+  theme: {
+    color: colors.text,
+    fontSize: 18,
+    fontFamily: fonts.displayMedium,
+    marginLeft: 2,
+  },
+});

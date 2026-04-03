@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Alert, Platform } from 'react-native';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { supabase } from '@/lib/supabase/client';
@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getSafeRedirectPath } from '@/lib/redirect';
 
 function AppleLogo() {
   return (
@@ -34,10 +36,13 @@ function GoogleLogo() {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ redirect?: string }>();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const redirectPath = getSafeRedirectPath(params.redirect, '/(tabs)');
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
@@ -65,7 +70,7 @@ export default function LoginScreen() {
         }
         return;
       }
-      router.replace('/(tabs)');
+      router.replace(redirectPath as Href);
     } catch {
       setError('Une erreur est survenue');
     } finally {
@@ -84,7 +89,7 @@ export default function LoginScreen() {
       if (credential.identityToken) {
         const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken });
         if (error) throw error;
-        router.replace('/(tabs)');
+        router.replace(redirectPath as Href);
       }
     } catch (e: any) {
       if (e.code === 'ERR_REQUEST_CANCELED') return;
@@ -108,7 +113,7 @@ export default function LoginScreen() {
         const refreshToken = hashParams.get('refresh_token');
         if (accessToken && refreshToken) {
           await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-          router.replace('/(tabs)');
+          router.replace(redirectPath as Href);
         }
       }
     } catch {
@@ -118,9 +123,19 @@ export default function LoginScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <PremiumBackground />
-        <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <PremiumBackground />
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <ScrollView
+            contentInsetAdjustmentBehavior="never"
+            contentContainerStyle={[
+              styles.container,
+              {
+                paddingTop: insets.top + 28,
+                paddingBottom: insets.bottom + 32,
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.header}>
               <Text style={styles.title}>Bon retour</Text>
               <Text style={styles.subtitle}>Connectez-vous pour retrouver vos voyages</Text>
@@ -152,9 +167,9 @@ export default function LoginScreen() {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>MOT DE PASSE</Text>
                 <Input value={password} onChangeText={(t) => { setPassword(t); setError(null); }} placeholder="••••••••" secureTextEntry />
-                <Pressable onPress={() => router.push('/(auth)/forgot-password')} style={styles.forgotPassword}>
-                  <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
-                </Pressable>
+                  <Pressable onPress={() => router.push('/(auth)/forgot-password')} style={styles.forgotPassword}>
+                    <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
+                  </Pressable>
               </View>
 
               {error && (
@@ -170,7 +185,7 @@ export default function LoginScreen() {
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Pas de compte ? </Text>
-              <Pressable onPress={() => router.push('/(auth)/register')}>
+              <Pressable onPress={() => router.push({ pathname: '/(auth)/register', params: { redirect: redirectPath } })}>
                 <Text style={styles.footerLink}>Créer un compte</Text>
               </Pressable>
             </View>

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { View, Text, FlatList, Pressable, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Compass } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -13,7 +13,7 @@ import { TripCardSkeleton } from '@/components/ui/Skeleton';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { FeedCard } from '@/components/explore/FeedCard';
-import { colors } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 type Tab = 'discover' | 'following';
@@ -51,13 +51,15 @@ export default function ExploreScreen() {
       setAllTrips((prev) => [...prev, ...res.trips]);
       setHasMore(res.hasMore);
       setPage(nextPage);
-    } catch { /* ignore pagination errors */ }
+    } catch {}
   }, [hasMore, isLoading, page, tab, sort]);
 
   const handleLike = useCallback(async (trip: FeedTrip) => {
-    if (!user) { router.push('/(auth)/login'); return; }
+    if (!user) {
+      router.push('/(auth)/login');
+      return;
+    }
 
-    // Optimistic update
     setAllTrips((prev) => prev.map((t) =>
       t.id === trip.id
         ? { ...t, user_liked: !t.user_liked, likes_count: t.user_liked ? t.likes_count - 1 : t.likes_count + 1 }
@@ -68,7 +70,6 @@ export default function ExploreScreen() {
       if (trip.user_liked) await unlikeTrip(trip.id);
       else await likeTrip(trip.id);
     } catch {
-      // Revert on error
       setAllTrips((prev) => prev.map((t) =>
         t.id === trip.id
           ? { ...t, user_liked: trip.user_liked, likes_count: trip.likes_count }
@@ -92,32 +93,32 @@ export default function ExploreScreen() {
   }, [cloneTarget, user, router]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View style={styles.container}>
       <PremiumBackground />
-      <View style={{ flex: 1 }}>
-        <ScreenHeader title="Explorer" subtitle="Voyages de la communauté" />
+      <View style={styles.content}>
+        <ScreenHeader title="Explorer" subtitle="Découvrez les départs, les inspirations et les itinéraires de la communauté." />
 
-        {/* Tab bar */}
-        <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 8, marginBottom: 4 }}>
-          <TabButton label="Découvrir" active={tab === 'discover'} onPress={() => { Haptics.selectionAsync(); setTab('discover'); }} />
-          {user && <TabButton label="Suivis" active={tab === 'following'} onPress={() => { Haptics.selectionAsync(); setTab('following'); }} />}
-          <View style={{ flex: 1 }} />
+        <View style={styles.controlsRow}>
+          <View style={styles.tabsWrap}>
+            <TabButton label="Découvrir" active={tab === 'discover'} onPress={() => { Haptics.selectionAsync(); setTab('discover'); }} />
+            {user ? <TabButton label="Suivis" active={tab === 'following'} onPress={() => { Haptics.selectionAsync(); setTab('following'); }} /> : null}
+          </View>
+
           <Pressable
-            onPress={() => { Haptics.selectionAsync(); setSort(sort === 'recent' ? 'trending' : 'recent'); }}
-            style={{
-              paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderCurve: 'continuous',
-              backgroundColor: 'rgba(255,255,255,0.05)',
+            onPress={() => {
+              Haptics.selectionAsync();
+              setSort(sort === 'recent' ? 'trending' : 'recent');
             }}
+            style={styles.sortPill}
           >
-            <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: '600' }}>
+            <Text style={styles.sortText}>
               {sort === 'recent' ? 'Récents' : 'Tendances'}
             </Text>
           </Pressable>
         </View>
 
-        {/* Feed */}
         {isLoading && allTrips.length === 0 ? (
-          <View style={{ padding: 20 }}>
+          <View style={styles.skeletonWrap}>
             <TripCardSkeleton />
             <TripCardSkeleton />
           </View>
@@ -126,15 +127,15 @@ export default function ExploreScreen() {
             icon={Compass}
             title={tab === 'discover' ? 'Aucun voyage public' : 'Aucun voyage de vos abonnements'}
             description={tab === 'discover'
-              ? 'Soyez le premier à partager un voyage !'
-              : 'Suivez des voyageurs pour voir leurs trips ici'}
+              ? 'Soyez le premier à partager un voyage.'
+              : 'Suivez des voyageurs pour voir leurs trips ici.'}
           />
         ) : (
           <FlatList
             data={allTrips}
             contentInsetAdjustmentBehavior="automatic"
             keyExtractor={(t) => t.id}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
+            contentContainerStyle={styles.listContent}
             refreshing={false}
             onRefresh={refetch}
             onEndReached={loadMore}
@@ -142,11 +143,20 @@ export default function ExploreScreen() {
             renderItem={({ item }) => (
               <FeedCard
                 trip={item}
-                onPress={() => { Haptics.selectionAsync(); router.push(`/trip/${item.id}`); }}
-                onLike={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleLike(item); }}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.push(`/trip/${item.id}`);
+                }}
+                onLike={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleLike(item);
+                }}
                 onClone={() => {
                   Haptics.selectionAsync();
-                  if (!user) { router.push('/(auth)/login'); return; }
+                  if (!user) {
+                    router.push('/(auth)/login');
+                    return;
+                  }
                   setCloneTarget(item);
                 }}
               />
@@ -154,20 +164,21 @@ export default function ExploreScreen() {
           />
         )}
 
-        {/* Clone confirmation */}
-        <BottomSheet
-          isOpen={!!cloneTarget}
-          onClose={() => setCloneTarget(null)}
-          height={0.25}
-        >
-          <View style={{ padding: 20, gap: 14 }}>
-            <Text style={{ color: '#f8fafc', fontSize: 17, fontWeight: '700' }}>
-              Dupliquer ce voyage ?
-            </Text>
-            <Text style={{ color: '#94a3b8', fontSize: 13 }}>
+        <BottomSheet isOpen={!!cloneTarget} onClose={() => setCloneTarget(null)} height={0.25}>
+          <View style={styles.sheetContent}>
+            <Text style={styles.sheetTitle}>Dupliquer ce voyage ?</Text>
+            <Text style={styles.sheetDescription}>
               Une copie de &quot;{cloneTarget?.title || cloneTarget?.destination}&quot; sera ajoutée à vos voyages.
             </Text>
-            <Button isLoading={cloning} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleClone(); }}>Dupliquer</Button>
+            <Button
+              isLoading={cloning}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                handleClone();
+              }}
+            >
+              Dupliquer
+            </Button>
           </View>
         </BottomSheet>
       </View>
@@ -177,17 +188,94 @@ export default function ExploreScreen() {
 
 function TabButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, borderCurve: 'continuous',
-        backgroundColor: active ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
-        borderWidth: 1, borderColor: active ? '#c5a059' : 'transparent',
-      }}
-    >
-      <Text style={{ color: active ? '#c5a059' : '#94a3b8', fontSize: 13, fontWeight: '600' }}>
-        {label}
-      </Text>
+    <Pressable onPress={onPress} style={styles.tabButton}>
+      <Text style={[styles.tabLabel, active ? styles.tabLabelActive : null]}>{label}</Text>
+      <View style={[styles.tabIndicator, active ? styles.tabIndicatorActive : null]} />
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  content: {
+    flex: 1,
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  tabsWrap: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 18,
+    flex: 1,
+  },
+  tabButton: {
+    gap: 8,
+    paddingBottom: 2,
+  },
+  tabLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
+  },
+  tabLabelActive: {
+    color: colors.gold,
+  },
+  tabIndicator: {
+    height: 2,
+    borderRadius: radius.full,
+    backgroundColor: 'transparent',
+  },
+  tabIndicatorActive: {
+    backgroundColor: colors.gold,
+  },
+  sortPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  sortText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+  },
+  skeletonWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 124,
+  },
+  sheetContent: {
+    padding: 20,
+    gap: 14,
+  },
+  sheetTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontFamily: fonts.display,
+  },
+  sheetDescription: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sans,
+    lineHeight: 20,
+  },
+});

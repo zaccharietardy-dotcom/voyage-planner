@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { View, Text, FlatList, Pressable, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Map, Plus, Trash2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -78,51 +78,47 @@ export default function TripsScreen() {
   }, [selectedTrip, refetch]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View style={styles.container}>
       <PremiumBackground />
-      <View style={{ flex: 1 }}>
+      <View style={styles.content}>
         <ScreenHeader
           title="Mes Voyages"
-          rightAction={
+          subtitle="Retrouvez vos départs, vos souvenirs et vos prochains itinéraires."
+          rightAction={(
             <Pressable
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/plan'); }}
-              style={{
-                width: 40, height: 40, borderRadius: 12, borderCurve: 'continuous',
-                backgroundColor: 'rgba(197,160,89,0.15)',
-                alignItems: 'center', justifyContent: 'center',
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/plan');
               }}
+              style={styles.createButton}
             >
-              <Plus size={20} color="#c5a059" />
+              <Plus size={20} color={colors.gold} />
             </Pressable>
-          }
+          )}
         />
 
-        {/* Filters */}
-        <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 8, marginBottom: 16 }}>
-          {FILTERS.map((f) => (
-            <Pressable
-              key={f.key}
-              onPress={() => { Haptics.selectionAsync(); setFilter(f.key); }}
-              style={{
-                paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, borderCurve: 'continuous',
-                backgroundColor: filter === f.key ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
-                borderWidth: 1,
-                borderColor: filter === f.key ? 'rgba(197,160,89,0.3)' : 'rgba(255,255,255,0.08)',
-              }}
-            >
-              <Text style={{
-                color: filter === f.key ? colors.gold : colors.textSecondary,
-                fontSize: 13, fontWeight: '700', fontFamily: fonts.sansSemiBold,
-              }}>
-                {f.label}
-              </Text>
-            </Pressable>
-          ))}
+        <View style={styles.filtersRow}>
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <Pressable
+                key={f.key}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setFilter(f.key);
+                }}
+                style={[styles.filterPill, active ? styles.filterPillActive : null]}
+              >
+                <Text style={[styles.filterText, active ? styles.filterTextActive : null]}>
+                  {f.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
-        {/* List */}
         {isLoading ? (
-          <View style={{ padding: 20 }}>
+          <View style={styles.skeletonWrap}>
             <TripCardSkeleton />
             <TripCardSkeleton />
             <TripCardSkeleton />
@@ -134,35 +130,39 @@ export default function TripsScreen() {
             description={filter === 'all'
               ? 'Planifiez votre premier voyage en appuyant sur le bouton +'
               : 'Aucun voyage dans cette catégorie'}
-            action={filter === 'all' ? { label: 'Créer un voyage', onPress: () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push('/(tabs)/plan'); } } : undefined}
+            action={filter === 'all'
+              ? {
+                  label: 'Créer un voyage',
+                  onPress: () => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    router.push('/plan');
+                  },
+                }
+              : undefined}
           />
         ) : (
           <FlatList
             data={filtered}
             contentInsetAdjustmentBehavior="automatic"
             keyExtractor={(t) => t.id}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
+            contentContainerStyle={styles.listContent}
             refreshing={false}
             onRefresh={refetch}
             renderItem={({ item }) => (
               <TripCard
                 trip={item}
-                onPress={() => { Haptics.selectionAsync(); router.push(`/trip/${item.id}`); }}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  router.push(`/trip/${item.id}`);
+                }}
               />
             )}
           />
         )}
 
-        {/* Actions bottom sheet */}
-        <BottomSheet
-          isOpen={!!selectedTrip}
-          onClose={() => setSelectedTrip(null)}
-          height={0.3}
-        >
-          <View style={{ padding: 20, gap: 12 }}>
-            <Text style={{ color: colors.text, fontSize: 17, fontFamily: fonts.sansBold, marginBottom: 4 }}>
-              {selectedTrip?.title || selectedTrip?.destination}
-            </Text>
+        <BottomSheet isOpen={!!selectedTrip} onClose={() => setSelectedTrip(null)} height={0.3}>
+          <View style={styles.sheetContent}>
+            <Text style={styles.sheetTitle}>{selectedTrip?.title || selectedTrip?.destination}</Text>
             <Button
               variant="outline"
               onPress={() => {
@@ -179,7 +179,10 @@ export default function TripsScreen() {
               variant="danger"
               icon={Trash2}
               isLoading={deleting}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); handleDelete(); }}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                handleDelete();
+              }}
             >
               Supprimer
             </Button>
@@ -189,3 +192,70 @@ export default function TripsScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  content: {
+    flex: 1,
+  },
+  createButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    backgroundColor: colors.goldBg,
+    borderWidth: 1,
+    borderColor: colors.goldBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+    gap: 8,
+    marginBottom: 14,
+  },
+  filterPill: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  filterPillActive: {
+    backgroundColor: colors.goldBg,
+    borderColor: colors.goldBorder,
+  },
+  filterText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sansSemiBold,
+  },
+  filterTextActive: {
+    color: colors.gold,
+  },
+  skeletonWrap: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 124,
+  },
+  sheetContent: {
+    padding: 20,
+    gap: 12,
+  },
+  sheetTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontFamily: fonts.display,
+    marginBottom: 4,
+  },
+});

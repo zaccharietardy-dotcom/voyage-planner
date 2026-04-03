@@ -1,8 +1,10 @@
-import { View, Text, Pressable, Share } from 'react-native';
-import { Link2, Globe, Lock, Users, Share2 } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, Pressable, Share, StyleSheet } from 'react-native';
+import { Link2, Globe, Lock, Users, Share2, ChevronDown } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
+import { SelectionSheet, type SelectionSheetOption } from '@/components/ui/SelectionSheet';
 
 interface Props {
   isOpen: boolean;
@@ -20,10 +22,20 @@ const VISIBILITY_OPTIONS = [
 ];
 
 export function SharePanel({ isOpen, onClose, tripId, destination, visibility, onVisibilityChange }: Props) {
+  const [visibilityOpen, setVisibilityOpen] = useState(false);
   const shareUrl = `https://naraevoyage.com/trip/${tripId}`;
+  const selectedVisibility = useMemo(
+    () => VISIBILITY_OPTIONS.find((option) => option.value === visibility) || VISIBILITY_OPTIONS[0],
+    [visibility],
+  );
+  const sheetOptions: SelectionSheetOption[] = VISIBILITY_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+    description: option.desc,
+    searchText: `${option.label} ${option.desc}`,
+  }));
 
   const handleCopyLink = () => {
-    // Copy to clipboard via Share API
     Share.share({ message: shareUrl });
   };
 
@@ -36,52 +48,140 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} height={0.55}>
-      <View style={{ padding: 20, gap: 20 }}>
-        <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.display }}>
-          Partager
-        </Text>
+    <>
+      <BottomSheet isOpen={isOpen} onClose={onClose} height={0.55}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Partager</Text>
 
-        {/* Visibility selector */}
-        <View style={{ gap: 8 }}>
-          <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>
-            Visibilité
-          </Text>
-          {VISIBILITY_OPTIONS.map((opt) => {
-            const selected = visibility === opt.value;
-            return (
-              <Pressable
-                key={opt.value}
-                onPress={() => onVisibilityChange?.(opt.value)}
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 12,
-                  backgroundColor: selected ? colors.goldBg : colors.surface,
-                  borderRadius: radius.card, padding: 14,
-                  borderWidth: 1, borderColor: selected ? colors.goldBorder : colors.borderSubtle,
-                }}
-              >
-                <opt.icon size={18} color={selected ? colors.gold : colors.textMuted} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: selected ? colors.gold : colors.text, fontSize: 14, fontFamily: fonts.sansSemiBold }}>
-                    {opt.label}
-                  </Text>
-                  <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans }}>{opt.desc}</Text>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Visibilité</Text>
+            <Pressable onPress={() => setVisibilityOpen(true)} style={styles.visibilityCard}>
+              <View style={styles.visibilityIcon}>
+                <selectedVisibility.icon size={18} color={colors.gold} />
+              </View>
+              <View style={styles.visibilityCopy}>
+                <Text style={styles.visibilityTitle}>{selectedVisibility.label}</Text>
+                <Text style={styles.visibilityDescription}>{selectedVisibility.desc}</Text>
+              </View>
+              <ChevronDown size={16} color={colors.textMuted} />
+            </Pressable>
+          </View>
 
-        {/* Share actions */}
-        <View style={{ gap: 10 }}>
-          <Button icon={Link2} variant="outline" onPress={handleCopyLink}>
-            Copier le lien
-          </Button>
-          <Button icon={Share2} onPress={handleNativeShare}>
-            Partager
-          </Button>
+          <View style={styles.actions}>
+            <Button icon={Link2} variant="outline" onPress={handleCopyLink}>
+              Copier le lien
+            </Button>
+            <Button icon={Share2} onPress={handleNativeShare}>
+              Partager
+            </Button>
+          </View>
         </View>
-      </View>
-    </BottomSheet>
+      </BottomSheet>
+
+      <SelectionSheet
+        isOpen={visibilityOpen}
+        onClose={() => setVisibilityOpen(false)}
+        title="Visibilité du voyage"
+        subtitle="Choisissez qui peut voir ce voyage dans l’app."
+        options={sheetOptions}
+        selectedValue={visibility}
+        onSelect={(value) => onVisibilityChange?.(value as 'public' | 'friends' | 'private')}
+        renderOption={(option, { selected }) => {
+          const current = VISIBILITY_OPTIONS.find((entry) => entry.value === option.value) || VISIBILITY_OPTIONS[0];
+          return (
+            <View style={styles.optionRow}>
+              <current.icon size={18} color={selected ? colors.gold : colors.textMuted} />
+              <View style={styles.optionCopy}>
+                <Text style={[styles.optionTitle, selected ? styles.optionTitleSelected : null]}>
+                  {current.label}
+                </Text>
+                <Text style={styles.optionDescription}>{current.desc}</Text>
+              </View>
+            </View>
+          );
+        }}
+      />
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    padding: 20,
+    gap: 20,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 22,
+    fontFamily: fonts.display,
+  },
+  section: {
+    gap: 8,
+  },
+  sectionLabel: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  visibilityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(10,17,40,0.92)',
+    borderRadius: radius.card,
+    borderCurve: 'continuous',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  visibilityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    backgroundColor: colors.goldBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  visibilityCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  visibilityTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: fonts.sansSemiBold,
+  },
+  visibilityDescription: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sans,
+  },
+  actions: {
+    gap: 10,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  optionCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  optionTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: fonts.sansSemiBold,
+  },
+  optionTitleSelected: {
+    color: colors.gold,
+  },
+  optionDescription: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sans,
+  },
+});

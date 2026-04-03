@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Alert, Platform } from 'react-native';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
 import Svg, { Path } from 'react-native-svg';
 import { Check } from 'lucide-react-native';
@@ -15,6 +15,8 @@ import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { goldGradient } from '@/lib/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getSafeRedirectPath } from '@/lib/redirect';
 
 function AppleLogo() {
   return (
@@ -37,6 +39,8 @@ function GoogleLogo() {
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ redirect?: string }>();
+  const insets = useSafeAreaInsets();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -44,6 +48,7 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const redirectPath = getSafeRedirectPath(params.redirect, '/(tabs)');
 
   const passwordCriteria = [
     { label: '8 caractères minimum', met: password.length >= 8 },
@@ -63,7 +68,7 @@ export default function RegisterScreen() {
       if (credential.identityToken) {
         const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken });
         if (error) throw error;
-        router.replace('/(tabs)');
+        router.replace(redirectPath as Href);
       }
     } catch (e: any) {
       if (e.code === 'ERR_REQUEST_CANCELED') return;
@@ -87,7 +92,7 @@ export default function RegisterScreen() {
         const refreshToken = hashParams.get('refresh_token');
         if (accessToken && refreshToken) {
           await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-          router.replace('/(tabs)');
+          router.replace(redirectPath as Href);
         }
       }
     } catch {
@@ -154,7 +159,7 @@ export default function RegisterScreen() {
             Un lien de confirmation a été envoyé à{'\n'}
             <Text style={{ color: colors.gold, fontFamily: fonts.sansBold }}>{email}</Text>
           </Text>
-          <Pressable onPress={() => router.replace('/(auth)/login')} style={{ marginTop: 40, width: '100%' }}>
+          <Pressable onPress={() => router.replace({ pathname: '/(auth)/login', params: { redirect: redirectPath } })} style={{ marginTop: 40, width: '100%' }}>
             <LinearGradient colors={goldGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.button, borderCurve: 'continuous', paddingVertical: 20, alignItems: 'center' }}>
               <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold }}>Retour à la connexion</Text>
             </LinearGradient>
@@ -166,9 +171,19 @@ export default function RegisterScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <PremiumBackground />
-        <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <PremiumBackground />
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <ScrollView
+            contentInsetAdjustmentBehavior="never"
+            contentContainerStyle={[
+              styles.container,
+              {
+                paddingTop: insets.top + 28,
+                paddingBottom: insets.bottom + 32,
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.header}>
               <Text style={styles.title}>Créer un compte</Text>
               <Text style={styles.subtitle}>Rejoignez Narae et commencez à planifier vos aventures</Text>
@@ -234,7 +249,7 @@ export default function RegisterScreen() {
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>Déjà un compte ? </Text>
-              <Pressable onPress={() => router.push('/(auth)/login')}>
+              <Pressable onPress={() => router.push({ pathname: '/(auth)/login', params: { redirect: redirectPath } })}>
                 <Text style={styles.footerLink}>Se connecter</Text>
               </Pressable>
             </View>

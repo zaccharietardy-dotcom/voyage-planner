@@ -1,10 +1,10 @@
 import { View, Text, Pressable } from 'react-native';
-import { Plane, Train, Bus, Car, Ship, Zap, Clock, Leaf, ChevronDown, Check } from 'lucide-react-native';
+import { Plane, Train, Bus, Car, Ship, Zap, Clock, Leaf, ChevronDown } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
-import { BottomSheet } from '@/components/ui/BottomSheet';
 import { useState } from 'react';
 import type { TransportOptionSummary } from '@/lib/types/trip';
 import type { LucideIcon } from 'lucide-react-native';
+import { SelectionSheet, type SelectionSheetOption } from '@/components/ui/SelectionSheet';
 
 interface Props {
   options: TransportOptionSummary[];
@@ -34,6 +34,13 @@ export function TransportSelector({ options, selectedId, onSelect }: Props) {
 
   const selected = options.find((o) => o.id === selectedId) || options.find((o) => o.recommended) || options[0];
   const Icon = MODE_ICONS[selected.mode] || Train;
+  const sheetOptions: Array<SelectionSheetOption & { option: TransportOptionSummary }> = options.map((option) => ({
+    value: option.id,
+    label: option.mode.charAt(0).toUpperCase() + option.mode.slice(1),
+    description: `${formatDuration(option.totalDuration)} · ${option.totalPrice}€`,
+    searchText: `${option.mode} ${option.totalPrice} ${option.totalDuration}`,
+    option,
+  }));
 
   return (
     <>
@@ -53,68 +60,57 @@ export function TransportSelector({ options, selectedId, onSelect }: Props) {
         <ChevronDown size={16} color={colors.textMuted} />
       </Pressable>
 
-      <BottomSheet isOpen={open} onClose={() => setOpen(false)} height={0.65}>
-        <View style={{ padding: 20, gap: 10 }}>
-          <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.display, marginBottom: 8 }}>
-            Options de transport
-          </Text>
-          {options.map((opt) => {
-            const OptIcon = MODE_ICONS[opt.mode] || Train;
-            const isSelected = opt.id === selected.id;
-            return (
-              <Pressable
-                key={opt.id}
-                onPress={() => { onSelect?.(opt.id); setOpen(false); }}
-                style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 12,
-                  backgroundColor: isSelected ? colors.goldBg : colors.surface,
-                  borderRadius: radius.lg, padding: 14,
-                  borderWidth: 1, borderColor: isSelected ? colors.goldBorder : colors.borderSubtle,
-                }}
-              >
-                <OptIcon size={20} color={isSelected ? colors.gold : colors.textSecondary} />
-                <View style={{ flex: 1, gap: 4 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600' }}>
-                      {opt.mode.charAt(0).toUpperCase() + opt.mode.slice(1)}
-                    </Text>
-                    {opt.recommended && (
-                      <View style={{ backgroundColor: colors.goldBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
-                        <Text style={{ color: colors.gold, fontSize: 9, fontWeight: '700' }}>MEILLEUR</Text>
-                      </View>
-                    )}
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                      <Clock size={11} color={colors.textMuted} />
-                      <Text style={{ color: colors.textMuted, fontSize: 11 }}>{formatDuration(opt.totalDuration)}</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                      <Leaf size={11} color={colors.textMuted} />
-                      <Text style={{ color: colors.textMuted, fontSize: 11 }}>{opt.totalCO2}kg CO₂</Text>
-                    </View>
-                  </View>
-                </View>
-                {/* Score */}
-                <View style={{
-                  width: 36, height: 36, borderRadius: 18,
-                  borderWidth: 2, borderColor: getScoreColor(opt.score),
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Text style={{ color: getScoreColor(opt.score), fontSize: 12, fontWeight: '800' }}>
-                    {opt.score.toFixed(0)}
+      <SelectionSheet
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Options de transport"
+        subtitle={`${options.length} options comparées pour ce voyage.`}
+        options={sheetOptions}
+        selectedValue={selected.id}
+        onSelect={(value) => onSelect?.(value)}
+        renderOption={({ option }, { selected: isSelected }) => {
+          const OptIcon = MODE_ICONS[option.mode] || Train;
+          return (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <OptIcon size={20} color={isSelected ? colors.gold : colors.textSecondary} />
+              <View style={{ flex: 1, gap: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.sansSemiBold }}>
+                    {option.mode.charAt(0).toUpperCase() + option.mode.slice(1)}
                   </Text>
+                  {option.recommended ? (
+                    <View style={{ backgroundColor: colors.goldBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                      <Text style={{ color: colors.gold, fontSize: 9, fontFamily: fonts.sansBold }}>MEILLEUR</Text>
+                    </View>
+                  ) : null}
                 </View>
-                {/* Price */}
-                <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', minWidth: 50, textAlign: 'right' }}>
-                  {opt.totalPrice}€
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                    <Clock size={11} color={colors.textMuted} />
+                    <Text style={{ color: colors.textMuted, fontSize: 11 }}>{formatDuration(option.totalDuration)}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                    <Leaf size={11} color={colors.textMuted} />
+                    <Text style={{ color: colors.textMuted, fontSize: 11 }}>{option.totalCO2}kg CO₂</Text>
+                  </View>
+                </View>
+              </View>
+              <View style={{
+                width: 36, height: 36, borderRadius: 18,
+                borderWidth: 2, borderColor: getScoreColor(option.score),
+                alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Text style={{ color: getScoreColor(option.score), fontSize: 12, fontFamily: fonts.sansBold }}>
+                  {option.score.toFixed(0)}
                 </Text>
-                {isSelected && <Check size={16} color={colors.gold} />}
-              </Pressable>
-            );
-          })}
-        </View>
-      </BottomSheet>
+              </View>
+              <Text style={{ color: colors.text, fontSize: 15, fontFamily: fonts.sansBold, minWidth: 52, textAlign: 'right' }}>
+                {option.totalPrice}€
+              </Text>
+            </View>
+          );
+        }}
+      />
     </>
   );
 }

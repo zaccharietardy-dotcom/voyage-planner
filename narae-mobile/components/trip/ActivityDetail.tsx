@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, Linking, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable, Linking, Image, StyleSheet } from 'react-native';
 import {
   Star, Clock, MapPin, ExternalLink, Navigation,
   UtensilsCrossed, Ticket,
@@ -32,148 +32,276 @@ export function ActivityDetail({ item }: Props) {
   };
 
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 16 }}
-    >
-      {/* Header */}
-      <View>
-        <Text style={{ color: '#f8fafc', fontSize: 20, fontFamily: fonts.display, marginBottom: 6 }}>
-          {item.title}
-        </Text>
-        {item.locationName && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <MapPin size={14} color="#94a3b8" />
-            <Text style={{ color: '#94a3b8', fontSize: 13, fontFamily: fonts.sans, flex: 1 }}>{item.locationName}</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{item.title}</Text>
+        {item.locationName ? (
+          <View style={styles.locationRow}>
+            <MapPin size={14} color={colors.textSecondary} />
+            <Text style={styles.location}>{item.locationName}</Text>
           </View>
-        )}
+        ) : null}
       </View>
 
-      {/* Photo gallery */}
-      {item.photoGallery && item.photoGallery.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20 }}>
-          <View style={{ flexDirection: 'row', paddingHorizontal: 20, gap: 8 }}>
+      {item.photoGallery && item.photoGallery.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll}>
+          <View style={styles.galleryRow}>
             {item.photoGallery.slice(0, 5).map((url, i) => (
-              <Image
-                key={i}
-                source={{ uri: url }}
-                style={{ width: 160, height: 110, borderRadius: 12 }}
-                resizeMode="cover"
-              />
+              <Image key={i} source={{ uri: url }} style={styles.galleryImage} resizeMode="cover" />
             ))}
           </View>
         </ScrollView>
-      )}
+      ) : null}
 
-      {/* Stats row */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <Clock size={14} color="#64748b" />
-          <Text style={{ color: '#e2e8f0', fontSize: 13 }}>
+      <View style={styles.statsRow}>
+        <View style={styles.statChip}>
+          <Clock size={14} color={colors.textMuted} />
+          <Text style={styles.statText}>
             {item.startTime} – {item.endTime}
           </Text>
         </View>
-        {item.rating && item.rating > 0 && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Star size={14} color="#c5a059" fill="#c5a059" />
-            <Text style={{ color: '#c5a059', fontSize: 13, fontFamily: fonts.sansBold }}>
-              {item.rating.toFixed(1)}
-            </Text>
-            {item.reviewCount && (
-              <Text style={{ color: '#64748b', fontSize: 12 }}>({item.reviewCount})</Text>
-            )}
+        {item.rating && item.rating > 0 ? (
+          <View style={styles.statChip}>
+            <Star size={14} color={colors.gold} fill={colors.gold} />
+            <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
+            {item.reviewCount ? <Text style={styles.reviewCount}>({item.reviewCount})</Text> : null}
           </View>
-        )}
-        {item.duration && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Clock size={14} color="#64748b" />
-            <Text style={{ color: '#e2e8f0', fontSize: 13 }}>
+        ) : null}
+        {item.duration ? (
+          <View style={styles.statChip}>
+            <Clock size={14} color={colors.textMuted} />
+            <Text style={styles.statText}>
               {item.duration >= 60 ? `${Math.floor(item.duration / 60)}h${item.duration % 60 > 0 ? String(item.duration % 60).padStart(2, '0') : ''}` : `${item.duration}min`}
             </Text>
           </View>
-        )}
-        {item.estimatedCost !== undefined && item.estimatedCost > 0 && (
-          <Badge variant="gold" label={`~${item.estimatedCost}€`} />
-        )}
+        ) : null}
+        {item.estimatedCost !== undefined && item.estimatedCost > 0 ? <Badge variant="gold" label={`~${item.estimatedCost}€`} /> : null}
       </View>
 
-      {/* Description */}
-      {item.description && (
-        <Text style={{ color: '#94a3b8', fontSize: 14, fontFamily: fonts.sans, lineHeight: 20 }}>
-          {item.description}
-        </Text>
-      )}
+      {item.description ? <Text style={styles.description}>{item.description}</Text> : null}
 
-      {/* Restaurant details */}
-      {item.restaurant && (
-        <View style={{
-          backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius.card,
-          padding: 14, gap: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <UtensilsCrossed size={14} color="#F97316" />
-            <Text style={{ color: '#f8fafc', fontSize: 14, fontFamily: fonts.sansSemiBold }}>
-              {item.restaurant.name}
-            </Text>
+      {item.restaurant ? (
+        <View style={styles.card}>
+          <View style={styles.restaurantHeader}>
+            <UtensilsCrossed size={14} color={colors.restaurant} />
+            <Text style={styles.restaurantTitle}>{item.restaurant.name}</Text>
           </View>
-          {item.restaurant.cuisineTypes?.length > 0 && (
-            <Text style={{ color: '#94a3b8', fontSize: 12 }}>
-              {item.restaurant.cuisineTypes.join(', ')}
-            </Text>
-          )}
-          {item.restaurant.rating > 0 && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Star size={12} color="#c5a059" fill="#c5a059" />
-              <Text style={{ color: '#c5a059', fontSize: 12 }}>{item.restaurant.rating.toFixed(1)}</Text>
+          {item.restaurant.cuisineTypes?.length > 0 ? (
+            <Text style={styles.restaurantCuisine}>{item.restaurant.cuisineTypes.join(', ')}</Text>
+          ) : null}
+          {item.restaurant.rating > 0 ? (
+            <View style={styles.restaurantRating}>
+              <Star size={12} color={colors.gold} fill={colors.gold} />
+              <Text style={styles.restaurantRatingText}>{item.restaurant.rating.toFixed(1)}</Text>
             </View>
-          )}
+          ) : null}
         </View>
-      )}
+      ) : null}
 
-      {/* Restaurant alternatives */}
-      {item.restaurantAlternatives && item.restaurantAlternatives.length > 0 && (
-        <View style={{ gap: 8 }}>
-          <Text style={{ color: '#64748b', fontSize: 12, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>Alternatives</Text>
+      {item.restaurantAlternatives && item.restaurantAlternatives.length > 0 ? (
+        <View style={styles.alternativesWrap}>
+          <Text style={styles.sectionLabel}>Alternatives</Text>
           {item.restaurantAlternatives.map((alt) => (
             <Pressable
               key={alt.id}
               onPress={() => alt.googleMapsUrl && Linking.openURL(alt.googleMapsUrl)}
-              style={{
-                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-                backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: 12,
-              }}
+              style={styles.alternativeRow}
             >
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: '#e2e8f0', fontSize: 13 }}>{alt.name}</Text>
-                <Text style={{ color: '#64748b', fontSize: 11 }}>{alt.cuisineTypes?.join(', ')}</Text>
+              <View style={styles.alternativeCopy}>
+                <Text style={styles.alternativeName}>{alt.name}</Text>
+                <Text style={styles.alternativeCuisine}>{alt.cuisineTypes?.join(', ')}</Text>
               </View>
-              {alt.rating > 0 && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                  <Star size={10} color="#c5a059" fill="#c5a059" />
-                  <Text style={{ color: '#c5a059', fontSize: 11 }}>{alt.rating.toFixed(1)}</Text>
+              {alt.rating > 0 ? (
+                <View style={styles.alternativeRating}>
+                  <Star size={10} color={colors.gold} fill={colors.gold} />
+                  <Text style={styles.alternativeRatingText}>{alt.rating.toFixed(1)}</Text>
                 </View>
-              )}
+              ) : null}
             </Pressable>
           ))}
         </View>
-      )}
+      ) : null}
 
-      {/* Action buttons */}
-      <View style={{ gap: 10, marginTop: 4 }}>
+      <View style={styles.actions}>
         <Button icon={Navigation} onPress={openInMaps}>Ouvrir dans Maps</Button>
 
-        {item.bookingUrl && (
+        {item.bookingUrl ? (
           <Button variant="secondary" icon={Ticket} onPress={() => openBooking(item.bookingUrl!)}>
             Réserver
           </Button>
-        )}
+        ) : null}
 
-        {item.viatorUrl && (
+        {item.viatorUrl ? (
           <Button variant="outline" icon={ExternalLink} onPress={() => openBooking(item.viatorUrl!)}>
             Voir sur Viator
           </Button>
-        )}
+        ) : null}
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  header: {
+    gap: 6,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 24,
+    fontFamily: fonts.display,
+    lineHeight: 30,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  location: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sans,
+    flex: 1,
+  },
+  galleryScroll: {
+    marginHorizontal: -20,
+  },
+  galleryRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  galleryImage: {
+    width: 168,
+    height: 112,
+    borderRadius: 14,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  statChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  statText: {
+    color: colors.text,
+    fontSize: 13,
+    fontFamily: fonts.sansMedium,
+  },
+  ratingText: {
+    color: colors.gold,
+    fontSize: 13,
+    fontFamily: fonts.sansBold,
+  },
+  reviewCount: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontFamily: fonts.sans,
+  },
+  description: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontFamily: fonts.sans,
+    lineHeight: 22,
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: radius.card,
+    borderCurve: 'continuous',
+    padding: 16,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  restaurantHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  restaurantTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontFamily: fonts.sansSemiBold,
+  },
+  restaurantCuisine: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontFamily: fonts.sans,
+  },
+  restaurantRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  restaurantRatingText: {
+    color: colors.gold,
+    fontSize: 12,
+    fontFamily: fonts.sansBold,
+  },
+  alternativesWrap: {
+    gap: 8,
+  },
+  sectionLabel: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  alternativeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  alternativeCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  alternativeName: {
+    color: colors.text,
+    fontSize: 13,
+    fontFamily: fonts.sansMedium,
+  },
+  alternativeCuisine: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sans,
+  },
+  alternativeRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  alternativeRatingText: {
+    color: colors.gold,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+  },
+  actions: {
+    gap: 10,
+    marginTop: 4,
+  },
+});

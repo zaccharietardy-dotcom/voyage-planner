@@ -160,7 +160,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
       {/* Visual Cards (Group & Budget) */}
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <Pressable
-          onPress={() => handleEdit(2)}
+          onPress={() => handleEdit(3)}
           style={{
             flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
             backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: radius.xl,
@@ -180,7 +180,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
         </Pressable>
 
         <Pressable
-          onPress={() => handleEdit(4)}
+          onPress={() => handleEdit(5)}
           style={{
             flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
             backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: radius.xl,
@@ -201,7 +201,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
       </View>
 
       {/* Activities Chips */}
-      <Pressable onPress={() => handleEdit(3)} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <Pressable onPress={() => handleEdit(4)} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {prefs.activities?.map((act) => (
           <View key={act} style={{
             backgroundColor: 'rgba(197,160,89,0.15)', paddingHorizontal: 12, paddingVertical: 6,

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import {
-  View, Text, TextInput, Pressable, FlatList, KeyboardAvoidingView, Platform,
+  View, Text, TextInput, Pressable, FlatList, KeyboardAvoidingView, Platform, StyleSheet,
 } from 'react-native';
 import { Send, Bot, Sparkles } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -79,87 +79,53 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} height={0.85}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={40}
       >
-        {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingBottom: 12 }}>
-          <View style={{
-            width: 36, height: 36, borderRadius: 12,
-            backgroundColor: colors.goldBg, alignItems: 'center', justifyContent: 'center',
-          }}>
+        <View style={styles.header}>
+          <View style={styles.headerIcon}>
             <Sparkles size={18} color={colors.gold} />
           </View>
-          <View>
-            <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display }}>Assistant Narae</Text>
-            <Text style={{ color: colors.textMuted, fontSize: 11 }}>Modifiez votre voyage par chat</Text>
+          <View style={styles.headerCopy}>
+            <Text style={styles.headerTitle}>Assistant Narae</Text>
+            <Text style={styles.headerSubtitle}>Modifiez votre voyage par chat</Text>
           </View>
         </View>
 
-        {/* Messages */}
         <FlatList
           ref={flatListRef}
           data={messages}
           keyExtractor={(m) => m.id}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 20, gap: 12, flexGrow: 1 }}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+            <View style={styles.emptyState}>
               <Bot size={40} color={colors.textMuted} />
-              <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: fonts.sans, textAlign: 'center' }}>
+              <Text style={styles.emptyCopy}>
                 Demandez-moi de modifier{'\n'}votre itinéraire
               </Text>
-              {/* Suggestions */}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
+              <View style={styles.suggestionsWrap}>
                 {SUGGESTIONS.map((s) => (
-                  <Pressable
-                    key={s}
-                    onPress={() => sendMessage(s)}
-                    style={{
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999,
-                      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderSubtle,
-                    }}
-                  >
-                    <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansMedium }}>{s}</Text>
+                  <Pressable key={s} onPress={() => sendMessage(s)} style={styles.suggestionChip}>
+                    <Text style={styles.suggestionText}>{s}</Text>
                   </Pressable>
                 ))}
               </View>
             </View>
           }
           renderItem={({ item }) => (
-            <View style={{
-              alignSelf: item.role === 'user' ? 'flex-end' : 'flex-start',
-              maxWidth: '80%',
-              backgroundColor: item.role === 'user' ? colors.gold : colors.surface,
-              borderRadius: 18,
-              borderBottomRightRadius: item.role === 'user' ? 4 : 18,
-              borderBottomLeftRadius: item.role === 'assistant' ? 4 : 18,
-              padding: 14,
-            }}>
-              <Text style={{
-                color: item.role === 'user' ? colors.bg : colors.text,
-                fontSize: 14, fontFamily: fonts.sans, lineHeight: 20,
-              }}>
+            <View style={[styles.messageBubble, item.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
+              <Text style={[styles.messageText, item.role === 'user' ? styles.userMessageText : null]}>
                 {item.content}
               </Text>
             </View>
           )}
         />
 
-        {/* Input */}
-        <View style={{
-          flexDirection: 'row', alignItems: 'center', gap: 10,
-          paddingHorizontal: 16, paddingVertical: 12,
-          borderTopWidth: 1, borderTopColor: colors.border,
-        }}>
+        <View style={styles.inputRow}>
           <TextInput
-            style={{
-              flex: 1, backgroundColor: colors.surface, borderRadius: radius.button,
-              paddingHorizontal: 16, paddingVertical: 12,
-              color: colors.text, fontSize: 14, fontFamily: fonts.sans,
-              borderWidth: 1, borderColor: colors.borderSubtle,
-            }}
+            style={styles.input}
             placeholder="Modifier mon itinéraire..."
             placeholderTextColor={colors.textDim}
             value={input}
@@ -170,12 +136,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
           <Pressable
             onPress={() => sendMessage(input)}
             disabled={!input.trim() || sending}
-            style={{
-              width: 44, height: 44, borderRadius: radius.button,
-              backgroundColor: input.trim() ? colors.gold : colors.surface,
-              alignItems: 'center', justifyContent: 'center',
-              opacity: !input.trim() || sending ? 0.5 : 1,
-            }}
+            style={[styles.sendButton, input.trim() ? styles.sendButtonActive : null, (!input.trim() || sending) ? styles.sendButtonDisabled : null]}
           >
             <Send size={20} color={input.trim() ? colors.bg : colors.textMuted} />
           </Pressable>
@@ -184,3 +145,143 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
     </BottomSheet>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+  },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    backgroundColor: colors.goldBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCopy: {
+    gap: 3,
+  },
+  headerTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontFamily: fonts.display,
+  },
+  headerSubtitle: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    padding: 20,
+    gap: 12,
+    flexGrow: 1,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  emptyCopy: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontFamily: fonts.sans,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  suggestionsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  suggestionChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  suggestionText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontFamily: fonts.sansMedium,
+  },
+  messageBubble: {
+    maxWidth: '82%',
+    borderRadius: 22,
+    padding: 14,
+  },
+  userBubble: {
+    alignSelf: 'flex-end',
+    backgroundColor: colors.gold,
+    borderBottomRightRadius: 6,
+  },
+  assistantBubble: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    borderBottomLeftRadius: 6,
+  },
+  messageText: {
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: fonts.sans,
+    lineHeight: 20,
+  },
+  userMessageText: {
+    color: colors.bg,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: radius.button,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: colors.text,
+    fontSize: 14,
+    fontFamily: fonts.sans,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  sendButton: {
+    width: 46,
+    height: 46,
+    borderRadius: radius.button,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
+  sendButtonActive: {
+    backgroundColor: colors.gold,
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
+  },
+});

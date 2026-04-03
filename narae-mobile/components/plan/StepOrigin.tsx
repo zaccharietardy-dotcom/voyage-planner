@@ -20,8 +20,22 @@ export function StepOrigin({ prefs, onChange }: Props) {
   };
 
   return (
-    <View style={{ gap: 32 }}>
-      <View>
+    <View style={{ gap: 24 }}>
+      <View style={{ gap: 10 }}>
+        <View style={{
+          alignSelf: 'flex-start',
+          paddingHorizontal: 12,
+          paddingVertical: 7,
+          borderRadius: radius.full,
+          borderCurve: 'continuous',
+          backgroundColor: 'rgba(96,165,250,0.12)',
+          borderWidth: 1,
+          borderColor: 'rgba(96,165,250,0.18)',
+        }}>
+          <Text style={{ color: '#93c5fd', fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+            Logistique de départ
+          </Text>
+        </View>
         <Text style={{ color: colors.text, fontSize: 24, fontFamily: fonts.display }}>
           D&apos;où partez-vous ?
         </Text>
@@ -53,7 +67,14 @@ export function StepOrigin({ prefs, onChange }: Props) {
       </View>
 
       {/* Popular origins */}
-      <View>
+      <View style={{
+        padding: 16,
+        borderRadius: radius['2xl'],
+        borderCurve: 'continuous',
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.06)',
+      }}>
         <Text style={{
           color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold,
           textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12,

@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { View, Text, Platform, StyleSheet } from 'react-native';
 import { Map, Compass, Plus, Globe, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -54,6 +54,7 @@ function TabIcon({ icon: Icon, label, focused, isCentral }: {
 }
 
 export default function TabLayout() {
+  const router = useRouter();
   const { bottom } = useSafeAreaInsets();
 
   return (
@@ -62,10 +63,10 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: Math.max(bottom, 8) + 8,
+          bottom: Math.max(bottom, 8),
           left: 16,
           right: 16,
-          height: 68,
+          height: 72,
           backgroundColor: Platform.OS === 'ios' ? 'rgba(2,6,23,0.4)' : colors.card,
           borderTopWidth: 0,
           borderRadius: 34,
@@ -74,7 +75,7 @@ export default function TabLayout() {
           borderColor: 'rgba(255,255,255,0.12)',
           paddingBottom: 0,
           paddingTop: 0,
-          boxShadow: '0 12px 24px rgba(0,0,0,0.5)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.55)',
           overflow: 'visible',
         },
         tabBarBackground: () => (
@@ -114,7 +115,11 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => <TabIcon icon={Plus} label="Creer" focused={focused} isCentral />,
         }}
         listeners={{
-          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),
+          tabPress: (event) => {
+            event.preventDefault();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            router.push('/plan');
+          },
         }}
       />
       <Tabs.Screen
@@ -179,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     borderCurve: 'continuous',
     backgroundColor: 'rgba(197,160,89,0.25)',
-    transform: [{ translateY: -12 }],
+    transform: [{ translateY: -10 }],
   },
   centralButton: {
     width: 64,
@@ -188,7 +193,7 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     justifyContent: 'center',
     alignItems: 'center',
-    transform: [{ translateY: -18 }],
+    transform: [{ translateY: -12 }],
     boxShadow: '0 8px 15px rgba(197,160,89,0.5)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',

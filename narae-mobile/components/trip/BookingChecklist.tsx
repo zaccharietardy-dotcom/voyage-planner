@@ -1,11 +1,11 @@
-import { View, Text, Pressable, SectionList } from 'react-native';
+import { View, Text, Pressable, SectionList, StyleSheet } from 'react-native';
 import {
   Plane, Hotel, MapPin, UtensilsCrossed, Check, ExternalLink,
 } from 'lucide-react-native';
 import { openBrowserAsync } from 'expo-web-browser';
+import type { LucideIcon } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { Trip } from '@/lib/types/trip';
-import type { LucideIcon } from 'lucide-react-native';
 
 interface Props {
   trip: Trip;
@@ -31,7 +31,6 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
 function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean }>) {
   const sections: { title: string; data: BookingItem[] }[] = [];
 
-  // Outbound flight
   if (trip.outboundFlight) {
     sections.push({
       title: 'Vol aller',
@@ -47,7 +46,6 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
     });
   }
 
-  // Accommodation
   if (trip.accommodation) {
     sections.push({
       title: 'Hébergement',
@@ -58,12 +56,11 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
         price: trip.accommodation.totalPrice,
         bookingUrl: trip.accommodation.bookingUrl,
         type: 'hotel',
-        booked: bookedItems['accommodation']?.booked ?? false,
+        booked: bookedItems.accommodation?.booked ?? false,
       }],
     });
   }
 
-  // Per-day activities that need booking
   trip.days?.forEach((day) => {
     const bookable = day.items.filter((item) =>
       item.type === 'activity' && item.estimatedCost && item.estimatedCost > 0,
@@ -84,7 +81,6 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
     }
   });
 
-  // Return flight
   if (trip.returnFlight) {
     sections.push({
       title: 'Vol retour',
@@ -110,22 +106,17 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
   const progress = totalItems > 0 ? bookedCount / totalItems : 0;
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Progress header */}
-      <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display }}>
-            Réservations
-          </Text>
-          <Text style={{ color: colors.gold, fontSize: 13, fontFamily: fonts.sansBold }}>
+    <View style={styles.container}>
+      <View style={styles.progressWrap}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.title}>Réservations</Text>
+          <Text style={styles.progressCount}>
             {bookedCount}/{totalItems}
           </Text>
         </View>
-        <View style={{ height: 4, backgroundColor: colors.border, borderRadius: 2 }}>
-          <View style={{
-            height: 4, backgroundColor: colors.gold, borderRadius: 2,
-            width: `${progress * 100}%`,
-          }} />
+        <Text style={styles.subtitle}>Suivez vos réservations essentielles avant le départ.</Text>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressValue, { width: `${progress * 100}%` }]} />
         </View>
       </View>
 
@@ -133,76 +124,47 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
         sections={sections}
         keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={styles.listContent}
         renderSectionHeader={({ section }) => (
-          <Text style={{
-            color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansBold,
-            paddingHorizontal: 20, paddingTop: 16, paddingBottom: 6,
-            textTransform: 'uppercase', letterSpacing: 1,
-          }}>
-            {section.title}
-          </Text>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
         )}
         renderItem={({ item }) => {
           const Icon = TYPE_ICONS[item.type] || MapPin;
           return (
-            <Pressable
-              onPress={() => onToggle(item.id)}
-              style={{
-                flexDirection: 'row', alignItems: 'center', gap: 12,
-                marginHorizontal: 20, marginVertical: 4,
-                backgroundColor: item.booked ? 'rgba(34,197,94,0.05)' : colors.surface,
-                borderRadius: radius.card, padding: 14,
-                borderWidth: 1, borderColor: item.booked ? 'rgba(34,197,94,0.2)' : colors.borderSubtle,
-              }}
-            >
-              {/* Checkbox */}
+            <Pressable onPress={() => onToggle(item.id)} style={[styles.itemCard, item.booked ? styles.itemBooked : null]}>
               {item.booked ? (
-                <View style={{
-                  width: 24, height: 24, borderRadius: 8,
-                  backgroundColor: colors.active, alignItems: 'center', justifyContent: 'center',
-                }}>
+                <View style={styles.checkboxActive}>
                   <Check size={14} color="#fff" strokeWidth={3} />
                 </View>
               ) : (
-                <View style={{
-                  width: 24, height: 24, borderRadius: 8,
-                  borderWidth: 2, borderColor: colors.border,
-                }} />
+                <View style={styles.checkbox} />
               )}
 
               <Icon size={16} color={item.booked ? colors.active : colors.textMuted} />
 
-              <View style={{ flex: 1 }}>
-                <Text style={{
-                  color: item.booked ? colors.active : colors.text,
-                  fontSize: 13, fontFamily: fonts.sansMedium,
-                  textDecorationLine: item.booked ? 'line-through' : 'none',
-                }} numberOfLines={1}>
+              <View style={styles.itemCopy}>
+                <Text style={[styles.itemTitle, item.booked ? styles.itemTitleBooked : null]} numberOfLines={1}>
                   {item.title}
                 </Text>
-                {item.subtitle && (
-                  <Text style={{ color: colors.textMuted, fontSize: 11 }}>{item.subtitle}</Text>
-                )}
+                {item.subtitle ? <Text style={styles.itemSubtitle}>{item.subtitle}</Text> : null}
               </View>
 
-              {item.price && (
-                <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sansSemiBold }}>
-                  {item.price}€
-                </Text>
-              )}
+              {item.price ? <Text style={styles.price}>{item.price}€</Text> : null}
 
-              {item.bookingUrl && !item.booked && (
+              {item.bookingUrl && !item.booked ? (
                 <Pressable
                   onPress={async (e) => {
                     e.stopPropagation?.();
-                    try { await openBrowserAsync(item.bookingUrl!); } catch {}
+                    try {
+                      await openBrowserAsync(item.bookingUrl!);
+                    } catch {}
                   }}
                   hitSlop={8}
+                  style={styles.linkButton}
                 >
                   <ExternalLink size={16} color={colors.gold} />
                 </Pressable>
-              )}
+              ) : null}
             </Pressable>
           );
         }}
@@ -210,3 +172,130 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  progressWrap: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 8,
+    padding: 18,
+    borderRadius: radius.card,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(10,17,40,0.9)',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    gap: 10,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  title: {
+    color: colors.text,
+    fontSize: 18,
+    fontFamily: fonts.display,
+  },
+  subtitle: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sans,
+    lineHeight: 20,
+  },
+  progressCount: {
+    color: colors.gold,
+    fontSize: 13,
+    fontFamily: fonts.sansBold,
+  },
+  progressTrack: {
+    height: 6,
+    backgroundColor: colors.border,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+  },
+  progressValue: {
+    height: 6,
+    backgroundColor: colors.gold,
+    borderRadius: radius.full,
+  },
+  listContent: {
+    paddingBottom: 48,
+  },
+  sectionTitle: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  itemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: 20,
+    marginVertical: 4,
+    backgroundColor: 'rgba(10,17,40,0.94)',
+    borderRadius: radius.card,
+    borderCurve: 'continuous',
+    padding: 15,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+  itemBooked: {
+    backgroundColor: 'rgba(34,197,94,0.06)',
+    borderColor: 'rgba(34,197,94,0.18)',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  checkboxActive: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    backgroundColor: colors.active,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  itemTitle: {
+    color: colors.text,
+    fontSize: 13,
+    fontFamily: fonts.sansMedium,
+  },
+  itemTitleBooked: {
+    color: colors.active,
+    textDecorationLine: 'line-through',
+  },
+  itemSubtitle: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontFamily: fonts.sans,
+  },
+  price: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontFamily: fonts.sansSemiBold,
+  },
+  linkButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    backgroundColor: colors.goldBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

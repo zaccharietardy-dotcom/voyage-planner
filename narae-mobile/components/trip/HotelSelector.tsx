@@ -1,8 +1,9 @@
-import { View, Text, Image, FlatList, Pressable, Linking } from 'react-native';
-import { Star, MapPin, Check, Coffee, ExternalLink } from 'lucide-react-native';
-import { openBrowserAsync } from 'expo-web-browser';
+import { useMemo, useState } from 'react';
+import { View, Text, Image, Pressable } from 'react-native';
+import { Star, Coffee, ChevronDown } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { Accommodation } from '@/lib/types/trip';
+import { SelectionSheet, type SelectionSheetOption } from '@/components/ui/SelectionSheet';
 
 interface Props {
   options: Accommodation[];
@@ -17,138 +18,146 @@ const TIER_CONFIG: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export function HotelSelector({ options, selectedId, onSelect }: Props) {
+  const [open, setOpen] = useState(false);
   if (!options?.length) return null;
 
-  return (
-    <View style={{ marginTop: 8 }}>
-      <Text style={{
-        color: colors.text, fontSize: 17, fontFamily: fonts.display,
-        paddingHorizontal: 20, marginBottom: 14,
-      }}>
-        Hébergement
-      </Text>
-      <FlatList
-        data={options}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={292}
-        decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
-        keyExtractor={(h) => h.id}
-        renderItem={({ item }) => <HotelCard hotel={item} isSelected={item.id === selectedId} onSelect={onSelect} />}
-      />
-    </View>
+  const selected = options.find((hotel) => hotel.id === selectedId) || options[0];
+  const tier = TIER_CONFIG[selected.distanceTier || 'comfortable'];
+  const sheetOptions: Array<SelectionSheetOption & { hotel: Accommodation }> = useMemo(
+    () => options.map((hotel) => ({
+      value: hotel.id,
+      label: hotel.name,
+      description: hotel.address,
+      searchText: `${hotel.name} ${hotel.address} ${hotel.distanceTier || ''}`,
+      hotel,
+    })),
+    [options],
   );
-}
-
-function HotelCard({ hotel, isSelected, onSelect }: { hotel: Accommodation; isSelected: boolean; onSelect?: (id: string) => void }) {
-  const tier = TIER_CONFIG[hotel.distanceTier || 'comfortable'];
-
-  const openBooking = async () => {
-    if (hotel.bookingUrl) {
-      try { await openBrowserAsync(hotel.bookingUrl); } catch { Linking.openURL(hotel.bookingUrl); }
-    }
-  };
 
   return (
-    <Pressable
-      onPress={() => onSelect?.(hotel.id)}
-      style={{
-        width: 280, borderRadius: radius['3xl'], overflow: 'hidden',
-        backgroundColor: colors.card,
-        borderWidth: 2,
-        borderColor: isSelected ? colors.gold : colors.borderSubtle,
-      }}
-    >
-      {/* Photo */}
-      {hotel.photos?.[0] ? (
-        <Image source={{ uri: hotel.photos[0] }} style={{ width: '100%', height: 140 }} resizeMode="cover" />
-      ) : (
-        <View style={{ width: '100%', height: 140, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontSize: 32 }}>🏨</Text>
-        </View>
-      )}
-
-      {/* Selected check */}
-      {isSelected && (
-        <View style={{
-          position: 'absolute', top: 12, right: 12,
-          width: 28, height: 28, borderRadius: 14,
-          backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Check size={16} color={colors.bg} strokeWidth={3} />
-        </View>
-      )}
-
-      {/* Tier badge */}
-      {tier && (
-        <View style={{
-          position: 'absolute', top: 12, left: 12,
-          backgroundColor: tier.bg, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
-        }}>
-          <Text style={{ color: tier.color, fontSize: 11, fontWeight: '700' }}>{tier.label}</Text>
-        </View>
-      )}
-
-      {/* Info */}
-      <View style={{ padding: 14, gap: 8 }}>
-        <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700' }} numberOfLines={1}>
-          {hotel.name}
+    <View style={{ marginTop: 8, paddingHorizontal: 20, gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ color: colors.text, fontSize: 17, fontFamily: fonts.display }}>
+          Hébergement
         </Text>
-
-        {/* Stars + rating */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {hotel.stars && (
-            <View style={{ flexDirection: 'row', gap: 2 }}>
-              {Array.from({ length: hotel.stars }).map((_, i) => (
-                <Star key={i} size={11} color={colors.gold} fill={colors.gold} />
-              ))}
-            </View>
-          )}
-          {hotel.rating > 0 && (
-            <Text style={{ color: colors.gold, fontSize: 12, fontWeight: '700' }}>
-              {hotel.rating}/10
-            </Text>
-          )}
-        </View>
-
-        {/* Distance */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          <MapPin size={12} color={colors.textMuted} />
-          <Text style={{ color: colors.textMuted, fontSize: 11 }}>
-            {hotel.distanceToCenter ? `${hotel.distanceToCenter.toFixed(1)} km du centre` : hotel.address}
+        {options.length > 1 ? (
+          <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sansMedium }}>
+            {options.length} options
           </Text>
-        </View>
+        ) : null}
+      </View>
 
-        {/* Breakfast */}
-        {hotel.breakfastIncluded && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Coffee size={12} color={colors.active} />
-            <Text style={{ color: colors.active, fontSize: 11, fontWeight: '600' }}>Petit-déj inclus</Text>
+      <Pressable
+        onPress={() => setOpen(true)}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 14,
+          padding: 14,
+          borderRadius: radius['2xl'],
+          borderCurve: 'continuous',
+          backgroundColor: colors.card,
+          borderWidth: 1,
+          borderColor: colors.borderSubtle,
+        }}
+      >
+        {selected.photos?.[0] ? (
+          <Image source={{ uri: selected.photos[0] }} style={{ width: 72, height: 72, borderRadius: radius.lg }} resizeMode="cover" />
+        ) : (
+          <View style={{ width: 72, height: 72, borderRadius: radius.lg, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 28 }}>🏨</Text>
           </View>
         )}
 
-        {/* Price + booking */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-          <View>
-            <Text style={{ color: colors.text, fontSize: 18, fontWeight: '800' }}>
-              {hotel.pricePerNight}€<Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '400' }}>/nuit</Text>
+        <View style={{ flex: 1, gap: 6 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ color: colors.text, fontSize: 15, fontFamily: fonts.sansBold, flex: 1 }} numberOfLines={1}>
+              {selected.name}
             </Text>
-            {hotel.totalPrice && (
-              <Text style={{ color: colors.textMuted, fontSize: 11 }}>Total: {hotel.totalPrice}€</Text>
-            )}
+            {tier ? (
+              <View style={{ backgroundColor: tier.bg, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
+                <Text style={{ color: tier.color, fontSize: 10, fontFamily: fonts.sansBold }}>{tier.label}</Text>
+              </View>
+            ) : null}
           </View>
-          {hotel.bookingUrl && (
-            <Pressable onPress={openBooking} style={{
-              flexDirection: 'row', alignItems: 'center', gap: 4,
-              backgroundColor: colors.goldBg, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
-            }}>
-              <ExternalLink size={13} color={colors.gold} />
-              <Text style={{ color: colors.gold, fontSize: 12, fontWeight: '700' }}>Réserver</Text>
-            </Pressable>
-          )}
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {selected.stars ? (
+              <View style={{ flexDirection: 'row', gap: 2 }}>
+                {Array.from({ length: selected.stars }).map((_, index) => (
+                  <Star key={index} size={11} color={colors.gold} fill={colors.gold} />
+                ))}
+              </View>
+            ) : null}
+            {selected.rating > 0 ? (
+              <Text style={{ color: colors.gold, fontSize: 12, fontFamily: fonts.sansBold }}>
+                {selected.rating}/10
+              </Text>
+            ) : null}
+          </View>
+
+          <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sans }} numberOfLines={1}>
+            {selected.distanceToCenter ? `${selected.distanceToCenter.toFixed(1)} km du centre` : selected.address}
+          </Text>
+
+          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.sansBold }}>
+            {selected.pricePerNight}€<Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sans }}>/nuit</Text>
+          </Text>
         </View>
-      </View>
-    </Pressable>
+
+        <ChevronDown size={18} color={colors.textMuted} />
+      </Pressable>
+
+      <SelectionSheet
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Hébergements suggérés"
+        subtitle="Comparez les options retenues par le planificateur."
+        options={sheetOptions}
+        selectedValue={selected.id}
+        onSelect={(value) => onSelect?.(value)}
+        searchPlaceholder="Rechercher un hôtel"
+        height={0.72}
+        renderOption={({ hotel }, { selected: isSelected }) => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            {hotel.photos?.[0] ? (
+              <Image source={{ uri: hotel.photos[0] }} style={{ width: 60, height: 60, borderRadius: radius.lg }} resizeMode="cover" />
+            ) : (
+              <View style={{ width: 60, height: 60, borderRadius: radius.lg, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 24 }}>🏨</Text>
+              </View>
+            )}
+            <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ color: isSelected ? colors.gold : colors.text, fontSize: 14, fontFamily: fonts.sansSemiBold, flex: 1 }} numberOfLines={1}>
+                  {hotel.name}
+                </Text>
+                {hotel.distanceTier ? (
+                  <View style={{ backgroundColor: TIER_CONFIG[hotel.distanceTier].bg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                    <Text style={{ color: TIER_CONFIG[hotel.distanceTier].color, fontSize: 9, fontFamily: fonts.sansBold }}>
+                      {TIER_CONFIG[hotel.distanceTier].label}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+              <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans }}>
+                {hotel.distanceToCenter ? `${hotel.distanceToCenter.toFixed(1)} km du centre` : hotel.address}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.sansBold }}>
+                  {hotel.pricePerNight}€
+                </Text>
+                {hotel.breakfastIncluded ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Coffee size={11} color={colors.active} />
+                    <Text style={{ color: colors.active, fontSize: 11, fontFamily: fonts.sansSemiBold }}>Petit-déj</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          </View>
+        )}
+      />
+    </View>
   );
 }

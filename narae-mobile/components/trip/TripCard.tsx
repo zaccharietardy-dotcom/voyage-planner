@@ -1,5 +1,6 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Calendar, Users, MapPin } from 'lucide-react-native';
 import { Badge } from '@/components/ui/Badge';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -55,88 +56,154 @@ export function TripCard({ trip, onPress, compact }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({
-        borderRadius: radius.card,
-        borderCurve: 'continuous',
-        overflow: 'hidden',
-        backgroundColor: colors.card,
-        borderWidth: 1,
-        borderColor: pressed ? colors.goldBorder : colors.borderSubtle,
-        opacity: pressed ? 0.95 : 1,
-        marginBottom: compact ? 0 : 16,
-        width: compact ? 260 : undefined,
-        boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-      })}
+      style={({ pressed }) => [
+        styles.card,
+        compact ? styles.cardCompact : styles.cardFull,
+        pressed ? styles.cardPressed : null,
+      ]}
     >
-      {/* Image */}
-      <View style={{ height: imageHeight, position: 'relative' }}>
-        <Image
-          source={{ uri: imageUrl }}
-          style={{ width: '100%', height: '100%' }}
-          resizeMode="cover"
+      <View style={[styles.imageWrap, { height: imageHeight }]}>
+        <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+        <LinearGradient
+          colors={['transparent', 'rgba(2,6,23,0.3)', 'rgba(2,6,23,0.95)']}
+          style={[styles.imageOverlay, { height: imageHeight * 0.72 }]}
         />
-        {/* Gradient overlay — transparent to #020617 over bottom half */}
-        <View style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: imageHeight * 0.5,
-          backgroundColor: 'rgba(2,6,23,0.85)',
-        }} />
-        {/* Badge */}
-        <View style={{ position: 'absolute', top: 14, right: 14 }}>
+        <View style={styles.badgeWrap}>
           <Badge variant={status.variant} label={status.label} />
         </View>
-        {/* Destination overlay */}
-        <View style={{ position: 'absolute', bottom: 14, left: 18, right: 18 }}>
-          <Text style={{
-            color: colors.text,
-            fontSize: compact ? 17 : 20,
-            fontFamily: fonts.display,
-            fontWeight: 'bold',
-          }}>
+        <View style={styles.destinationWrap}>
+          <Text style={styles.kicker}>Voyage sur mesure</Text>
+          <Text style={[styles.title, compact ? styles.titleCompact : null]}>
             {trip.title || trip.destination}
           </Text>
         </View>
       </View>
 
-      {/* Subtle divider between image area and info section */}
-      <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+      <View style={styles.divider} />
 
-      {/* Info */}
-      <View style={{ padding: 16, gap: 10 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={styles.content}>
+        <View style={styles.locationRow}>
           <MapPin size={13} color={colors.textSecondary} />
-          <Text style={{
-            color: colors.textSecondary,
-            fontSize: 13,
-            fontFamily: fonts.sansMedium,
-          }}>
-            {trip.destination}
-          </Text>
+          <Text style={styles.locationText}>{trip.destination}</Text>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+        <View style={styles.metaRow}>
+          <View style={styles.metaGroup}>
             <Calendar size={13} color={colors.textSecondary} />
-            <Text style={{
-              color: colors.textSecondary,
-              fontSize: 13,
-              fontFamily: fonts.sansMedium,
-            }}>
+            <Text style={styles.metaText}>
               {formatDate(trip.start_date)} · {trip.duration_days}j
             </Text>
           </View>
-          {trip.preferences?.groupSize && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          {trip.preferences?.groupSize ? (
+            <View style={styles.metaGroup}>
               <Users size={13} color={colors.textSecondary} />
-              <Text style={{
-                color: colors.textSecondary,
-                fontSize: 13,
-                fontFamily: fonts.sansMedium,
-              }}>
-                {trip.preferences.groupSize}
-              </Text>
+              <Text style={styles.metaText}>{trip.preferences.groupSize}</Text>
             </View>
-          )}
+          ) : null}
         </View>
       </View>
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: radius.card,
+    borderCurve: 'continuous',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(10,17,40,0.96)',
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.24,
+    shadowRadius: 26,
+    elevation: 10,
+  },
+  cardFull: {
+    marginBottom: 16,
+  },
+  cardCompact: {
+    width: 260,
+  },
+  cardPressed: {
+    opacity: 0.96,
+    borderColor: colors.goldBorder,
+    transform: [{ scale: 0.99 }],
+  },
+  imageWrap: {
+    position: 'relative',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  imageOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  badgeWrap: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+  },
+  destinationWrap: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 16,
+    gap: 4,
+  },
+  kicker: {
+    color: colors.goldLight,
+    fontSize: 10,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.8,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 24,
+    fontFamily: fonts.display,
+    lineHeight: 30,
+  },
+  titleCompact: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  content: {
+    padding: 16,
+    gap: 12,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  locationText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sansMedium,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    flexWrap: 'wrap',
+  },
+  metaGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  metaText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontFamily: fonts.sansMedium,
+  },
+});

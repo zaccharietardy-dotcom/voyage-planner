@@ -42,7 +42,10 @@ export function StepDestination({ prefs, onChange }: Props) {
 
   return (
     <View style={{ gap: 24 }}>
-      <View>
+      <View style={{ gap: 10 }}>
+        <View style={s.eyebrow}>
+          <Text style={s.eyebrowText}>Destination signature</Text>
+        </View>
         <Text style={s.title}>Où allez-vous ?</Text>
         <Text style={s.subtitle}>Choisissez votre prochaine destination</Text>
       </View>
@@ -59,7 +62,7 @@ export function StepDestination({ prefs, onChange }: Props) {
         />
       </View>
 
-      <View style={{ gap: 12 }}>
+      <View style={s.sectionShell}>
         <Text style={s.sectionLabel}>Suggestions populaires</Text>
         <FlatList
           data={DESTINATIONS.slice(0, 6)}
@@ -83,23 +86,52 @@ export function StepDestination({ prefs, onChange }: Props) {
 }
 
 const s = StyleSheet.create({
+  eyebrow: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(197,160,89,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(197,160,89,0.2)',
+  },
+  eyebrowText: {
+    color: colors.gold,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
   title: { color: colors.text, fontSize: 24, fontFamily: fonts.display },
   subtitle: { color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sans, marginTop: 4 },
   sectionLabel: { color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 },
+  sectionShell: {
+    gap: 12,
+    padding: 16,
+    borderRadius: radius['2xl'],
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
   searchBar: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)', borderRadius: radius.xl, borderCurve: 'continuous',
     paddingHorizontal: 16, height: 56,
   },
-  searchBarActive: { borderColor: colors.gold, boxShadow: '0 0 8px rgba(197,160,89,0.15)' },
+  searchBarActive: {
+    borderColor: colors.gold,
+    backgroundColor: 'rgba(197,160,89,0.08)',
+  },
   searchInput: { flex: 1, color: colors.text, fontSize: 16, fontFamily: fonts.sansMedium },
   destCard: {
-    width: 130, borderRadius: radius.xl, borderCurve: 'continuous', overflow: 'hidden',
+    width: 138, borderRadius: radius.xl, borderCurve: 'continuous', overflow: 'hidden',
     backgroundColor: 'rgba(255,255,255,0.03)',
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
   },
-  destImage: { width: 130, height: 85 },
+  destImage: { width: 138, height: 92 },
   destInfo: { padding: 10 },
   destName: { color: colors.text, fontSize: 13, fontFamily: fonts.sansSemiBold },
   destCountry: { color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans, marginTop: 2 },

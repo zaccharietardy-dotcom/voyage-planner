@@ -1,6 +1,6 @@
-import { View, Text, Platform } from 'react-native';
+import { View, Text, Platform, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { fonts } from '@/lib/theme';
+import { fonts, radius } from '@/lib/theme';
 
 type Variant = 'upcoming' | 'active' | 'past' | 'gold';
 
@@ -20,37 +20,15 @@ export function Badge({ variant, label }: Props) {
   const c = COLORS[variant];
 
   const innerContent = (
-    <Text style={{
-      color: c.text,
-      fontSize: 9,
-      fontWeight: '800',
-      fontFamily: fonts.sansBold,
-      letterSpacing: 1.5,
-      textTransform: 'uppercase',
-    }}>
+    <Text style={[styles.label, { color: c.text }]}>
       {label}
     </Text>
   );
 
-  // BlurView works well on iOS; on Android fall back to a plain View
   if (Platform.OS === 'ios') {
     return (
-      <BlurView
-        intensity={24}
-        tint="dark"
-        style={{
-          borderRadius: 999,
-          borderCurve: 'continuous',
-          overflow: 'hidden',
-          borderWidth: 1,
-          borderColor: c.border,
-        }}
-      >
-        <View style={{
-          backgroundColor: c.bg,
-          paddingHorizontal: 12,
-          paddingVertical: 5,
-        }}>
+      <BlurView intensity={24} tint="dark" style={[styles.container, { borderColor: c.border }]}>
+        <View style={[styles.inner, { backgroundColor: c.bg }]}>
           {innerContent}
         </View>
       </BlurView>
@@ -58,16 +36,27 @@ export function Badge({ variant, label }: Props) {
   }
 
   return (
-    <View style={{
-      backgroundColor: c.bg,
-      paddingHorizontal: 12,
-      paddingVertical: 5,
-      borderRadius: 999,
-      borderCurve: 'continuous',
-      borderWidth: 1,
-      borderColor: c.border,
-    }}>
+    <View style={[styles.container, styles.inner, { backgroundColor: c.bg, borderColor: c.border }]}>
       {innerContent}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: radius.full,
+    borderCurve: 'continuous',
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  inner: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  label: {
+    fontSize: 9,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+});

@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withRepeat, 
-  withTiming, 
+import Animated, {
+  Easing,
   interpolate,
-  Easing
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
 } from 'react-native-reanimated';
 
 export function PremiumBackground() {
@@ -24,74 +24,77 @@ export function PremiumBackground() {
 
   const blob1Style = useAnimatedStyle(() => ({
     transform: [
-      { translateX: interpolate(anim.value, [0, 1], [-width * 0.2, width * 0.3]) },
-      { translateY: interpolate(anim.value, [0, 1], [-height * 0.1, height * 0.2]) },
-      { scale: interpolate(anim.value, [0, 1], [1, 1.4]) },
-      { rotate: `${interpolate(anim.value, [0, 1], [0, 45])}deg` },
+      { translateX: interpolate(anim.value, [0, 1], [-width * 0.08, width * 0.12]) },
+      { translateY: interpolate(anim.value, [0, 1], [-height * 0.04, height * 0.06]) },
+      { scale: interpolate(anim.value, [0, 1], [1, 1.14]) },
     ],
   }));
 
   const blob2Style = useAnimatedStyle(() => ({
     transform: [
-      { translateX: interpolate(anim.value, [0, 1], [width * 0.4, -width * 0.2]) },
-      { translateY: interpolate(anim.value, [0, 1], [height * 0.3, -height * 0.1]) },
-      { scale: interpolate(anim.value, [0, 1], [1.2, 0.8]) },
-      { rotate: `${interpolate(anim.value, [0, 1], [0, -30])}deg` },
-    ],
-  }));
-
-  const blob3Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: interpolate(anim.value, [0, 1], [-width * 0.1, width * 0.1]) },
-      { translateY: interpolate(anim.value, [0, 1], [height * 0.6, height * 0.4]) },
-      { scale: interpolate(anim.value, [0, 1], [0.8, 1.2]) },
+      { translateX: interpolate(anim.value, [0, 1], [width * 0.1, -width * 0.08]) },
+      { translateY: interpolate(anim.value, [0, 1], [height * 0.06, -height * 0.04]) },
+      { scale: interpolate(anim.value, [0, 1], [1.05, 0.92]) },
     ],
   }));
 
   return (
     <View style={styles.container}>
-      {/* Base Deep Night Blue */}
-      <View style={[styles.absolute, { backgroundColor: '#020617' }]} />
+      <LinearGradient
+        colors={['#020617', '#040b19', '#020617']}
+        style={styles.absolute}
+      />
 
-      {/* Animated Blobs for Depth */}
-      <Animated.View style={[styles.blob, { width: width * 1.5, height: width * 1.5, top: -width * 0.5, left: -width * 0.3 }, blob1Style]}>
+      <Animated.View
+        style={[
+          styles.blob,
+          {
+            width: width * 1.35,
+            height: width * 1.35,
+            top: -width * 0.42,
+            right: -width * 0.2,
+          },
+          blob1Style,
+        ]}
+      >
         <LinearGradient
-          colors={['rgba(197,160,89,0.12)', 'transparent']}
+          colors={['rgba(197,160,89,0.16)', 'rgba(197,160,89,0.02)', 'transparent']}
           style={styles.fill}
         />
       </Animated.View>
 
-      <Animated.View style={[styles.blob, { width: width * 1.2, height: width * 1.2, bottom: -width * 0.3, right: -width * 0.2 }, blob2Style]}>
+      <Animated.View
+        style={[
+          styles.blob,
+          {
+            width: width * 1.3,
+            height: width * 1.3,
+            bottom: -width * 0.45,
+            left: -width * 0.35,
+          },
+          blob2Style,
+        ]}
+      >
         <LinearGradient
-          colors={['rgba(59,130,246,0.08)', 'transparent']}
+          colors={['rgba(56,189,248,0.12)', 'rgba(56,189,248,0.02)', 'transparent']}
           style={styles.fill}
         />
       </Animated.View>
 
-      <Animated.View style={[styles.blob, { width, height: width, bottom: height * 0.1, left: -width * 0.4 }, blob3Style]}>
+      <View style={[styles.absolute, { top: -height * 0.35, left: -width * 0.35 }]}>
         <LinearGradient
-          colors={['rgba(139,92,246,0.06)', 'transparent']}
-          style={styles.fill}
-        />
-      </Animated.View>
-
-      {/* Surface Glow */}
-      <View style={[styles.absolute, { top: -height * 0.5, left: -width * 0.5 }]}>
-        <LinearGradient
-          colors={['rgba(197,160,89,0.05)', 'transparent']}
-          style={{ width: width * 2, height: height }}
+          colors={['rgba(255,255,255,0.03)', 'transparent']}
+          style={{ width: width * 1.4, height: height * 0.8 }}
         />
       </View>
 
-      {/* Vignette Overlay for Premium Feel */}
       <LinearGradient
-        colors={['rgba(2,6,23,0.2)', 'rgba(2,6,23,0.7)', '#020617']}
+        colors={['rgba(2,6,23,0.08)', 'rgba(2,6,23,0.58)', 'rgba(2,6,23,0.94)']}
         style={styles.absolute}
       />
-      
-      {/* Subtle Noise/Grain (Simulated via very faint pattern or gradient) */}
+
       <LinearGradient
-        colors={['rgba(255,255,255,0.01)', 'transparent']}
+        colors={['rgba(255,255,255,0.015)', 'transparent', 'rgba(255,255,255,0.008)']}
         style={styles.absolute}
       />
     </View>
@@ -116,4 +119,3 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
   },
 });
-

@@ -1,5 +1,11 @@
 import { supabase } from '@/lib/supabase/client';
-import { api } from './client';
+import { SITE_URL } from '@/lib/constants';
+import type {
+  PipelineMapSnapshot,
+  PipelineProgressEvent,
+  PipelineQuestion,
+} from '@/lib/types/pipeline';
+import { api, getAuthHeaders } from './client';
 import type { Trip, TripPreferences } from '@/lib/types/trip';
 
 // ---------- Types for list items (DB row shape) ----------
@@ -64,11 +70,118 @@ export interface GenerateProgress {
   step: number;
   label: string;
   total: number;
+  detail?: string;
+}
+
+export interface GenerateAccessCheck {
+  allowed: boolean;
+  reason?: string;
+  action?: 'login' | 'upgrade';
+  remaining?: number;
+  used?: number;
+  limit?: number;
+}
+
+interface GenerateCallbacks {
+  onProgress?: (progress: GenerateProgress) => void;
+  onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
+  onQuestion?: (question: PipelineQuestion) => Promise<string>;
+}
+
+interface SSEBufferResult {
+  error?: string;
+  remaining: string;
+  sessionId: string | null;
+  trip?: Trip;
+}
+
+const PIPELINE_TOTAL_STEPS = 8;
+
+export function buildProgressFromEvent(event: PipelineProgressEvent): GenerateProgress | null {
+  if (event.type === 'step_start' && event.stepName) {
+    return {
+      step: event.step ?? 0,
+      total: PIPELINE_TOTAL_STEPS,
+      label: event.step ? `${event.step}/${PIPELINE_TOTAL_STEPS} — ${event.stepName}` : event.stepName,
+      detail: event.detail,
+    };
+  }
+
+  if (event.type === 'api_call' && event.label) {
+    return {
+      step: event.step ?? 0,
+      total: PIPELINE_TOTAL_STEPS,
+      label: event.label,
+      detail: event.detail,
+    };
+  }
+
+  if (event.label) {
+    return {
+      step: event.step ?? 0,
+      total: PIPELINE_TOTAL_STEPS,
+      label: event.label,
+      detail: event.detail,
+    };
+  }
+
+  return null;
+}
+
+export async function checkGenerateAccess(): Promise<GenerateAccessCheck> {
+  const response = await fetch(`${SITE_URL}/api/generate/preflight`, {
+    headers: await getAuthHeaders(),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok && typeof payload?.allowed !== 'boolean') {
+    throw new Error(payload.error || `Preflight failed (${response.status})`);
+  }
+
+  return payload as GenerateAccessCheck;
+}
+
+export async function answerGenerateQuestion(
+  sessionId: string,
+  questionId: string,
+  selectedOptionId: string,
+): Promise<void> {
+  const response = await fetch(`${SITE_URL}/api/generate/answer`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(await getAuthHeaders()),
+    },
+    body: JSON.stringify({
+      sessionId,
+      questionId,
+      selectedOptionId,
+    }),
+  });
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error || 'Impossible d’envoyer votre réponse');
+  }
+}
+
+async function requestGenerate(
+  payload: Record<string, unknown>,
+  accessToken: string,
+): Promise<Response> {
+  return fetch(`${SITE_URL}/api/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function generateTrip(
   preferences: TripPreferences,
-  onProgress?: (p: GenerateProgress) => void,
+  callbacks: GenerateCallbacks = {},
 ): Promise<Trip> {
   // Serialize dates for JSON transport
   const payload = {
@@ -87,14 +200,7 @@ export async function generateTrip(
     throw new Error('Session expirée. Veuillez vous reconnecter.');
   }
 
-  const res = await fetch(`https://naraevoyage.com/api/generate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(payload),
-  });
+  const res = await requestGenerate(payload, token);
 
   if (!res.ok) {
     // 401 = token expired/invalid → try refresh once
@@ -104,17 +210,10 @@ export async function generateTrip(
         const { data: { session: newSession } } = await supabase.auth.getSession();
         if (newSession?.access_token) {
           // Retry with fresh token
-          const retry = await fetch(`https://naraevoyage.com/api/generate`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${newSession.access_token}`,
-            },
-            body: JSON.stringify(payload),
-          });
+          const retry = await requestGenerate(payload, newSession.access_token);
           if (retry.ok) {
             const ct = retry.headers.get('content-type') ?? '';
-            if (ct.includes('text/event-stream')) return parseSSEStream(retry, onProgress);
+            if (ct.includes('text/event-stream')) return parseSSEStream(retry, callbacks);
             return retry.json() as Promise<Trip>;
           }
         }
@@ -130,54 +229,144 @@ export async function generateTrip(
   const contentType = res.headers.get('content-type') ?? '';
 
   if (contentType.includes('text/event-stream')) {
-    return parseSSEStream(res, onProgress);
+    return parseSSEStream(res, callbacks);
   }
 
   // Plain JSON response
   return res.json() as Promise<Trip>;
 }
 
+export async function processSSEBuffer(
+  buffer: string,
+  callbacks: GenerateCallbacks,
+  currentSessionId: string | null,
+): Promise<SSEBufferResult> {
+  const parts = buffer.split('\n\n');
+  const remaining = parts.pop() ?? '';
+  let sessionId = currentSessionId;
+
+  for (const part of parts) {
+    if (!part.trim()) continue;
+
+    const dataLines: string[] = [];
+    for (const line of part.split('\n')) {
+      const match = line.match(/^data:\s?(.*)/);
+      if (match) dataLines.push(match[1]);
+    }
+
+    if (dataLines.length === 0) continue;
+
+    const jsonStr = dataLines.join('');
+
+    try {
+      const msg = JSON.parse(jsonStr);
+
+      if (msg.status === 'session' && msg.sessionId) {
+        sessionId = msg.sessionId;
+        continue;
+      }
+
+      if (msg.status === 'generating') {
+        continue;
+      }
+
+      if (msg.status === 'progress' && msg.event) {
+        const progress = buildProgressFromEvent(msg.event as PipelineProgressEvent);
+        if (progress) {
+          callbacks.onProgress?.(progress);
+        }
+        continue;
+      }
+
+      if (msg.status === 'snapshot' && msg.snapshot) {
+        callbacks.onSnapshot?.(msg.snapshot as PipelineMapSnapshot);
+        continue;
+      }
+
+      if (msg.status === 'question' && msg.question) {
+        const question = msg.question as PipelineQuestion;
+        const defaultOption = question.options.find((option) => option.isDefault) ?? question.options[0];
+        const selectedOptionId = callbacks.onQuestion
+          ? await callbacks.onQuestion(question)
+          : defaultOption?.id;
+
+        if (selectedOptionId) {
+          await answerGenerateQuestion(
+            sessionId ?? question.sessionId,
+            question.questionId,
+            selectedOptionId,
+          );
+        }
+        continue;
+      }
+
+      if (msg.status === 'done' && msg.trip) {
+        return {
+          remaining: '',
+          sessionId,
+          trip: msg.trip as Trip,
+        };
+      }
+
+      if (msg.status === 'error') {
+        return {
+          error: msg.error || 'Erreur de génération',
+          remaining: '',
+          sessionId,
+        };
+      }
+    } catch {
+      // Ignore malformed or partial events and keep consuming the stream.
+    }
+  }
+
+  return {
+    remaining,
+    sessionId,
+  };
+}
+
 async function parseSSEStream(
   res: Response,
-  onProgress?: (p: GenerateProgress) => void,
+  callbacks: GenerateCallbacks,
 ): Promise<Trip> {
   const reader = res.body?.getReader();
   if (!reader) throw new Error('No response body');
 
   const decoder = new TextDecoder();
   let buffer = '';
-  let result: Trip | null = null;
+  let sessionId: string | null = null;
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() ?? '';
+    const processed = await processSSEBuffer(buffer, callbacks, sessionId);
+    if (processed.trip) return processed.trip;
+    if (processed.error) throw new Error(processed.error);
+    buffer = processed.remaining;
+    sessionId = processed.sessionId;
+  }
 
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const raw = line.slice(6).trim();
-      if (raw === '[DONE]') continue;
+  if (buffer.trim()) {
+    const processed = await processSSEBuffer(`${buffer}\n\n`, callbacks, sessionId);
+    if (processed.trip) return processed.trip;
+    if (processed.error) throw new Error(processed.error);
+    buffer = processed.remaining;
+    sessionId = processed.sessionId;
+  }
 
-      try {
-        const event = JSON.parse(raw);
-        if (event.type === 'progress' && onProgress) {
-          onProgress({ step: event.step, label: event.label, total: event.total });
-        }
-        if (event.type === 'complete' && event.trip) {
-          result = event.trip as Trip;
-        }
-        if (event.type === 'result' && event.data) {
-          result = event.data as Trip;
-        }
-      } catch {
-        // skip malformed events
+  if (buffer.trim()) {
+    try {
+      const msg = JSON.parse(buffer);
+      if (msg.status === 'done' && msg.trip) {
+        return msg.trip as Trip;
       }
+    } catch {
+      // Ignore final malformed fragment.
     }
   }
 
-  if (!result) throw new Error('Generation produced no result');
-  return result;
+  throw new Error('Generation produced no result');
 }

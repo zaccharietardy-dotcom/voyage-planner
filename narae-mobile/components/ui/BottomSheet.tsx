@@ -8,6 +8,8 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import type { ReactNode } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors, radius } from '@/lib/theme';
 
 interface Props {
   isOpen: boolean;
@@ -21,7 +23,8 @@ const SPRING = { damping: 20, stiffness: 200, mass: 0.8 };
 
 export function BottomSheet({ isOpen, onClose, children, height = 0.5 }: Props) {
   const { height: screenH } = useWindowDimensions();
-  const sheetH = screenH * height;
+  const insets = useSafeAreaInsets();
+  const sheetH = Math.min(screenH * height, screenH - insets.top - 20);
   const translateY = useSharedValue(sheetH);
   const backdropOpacity = useSharedValue(0);
 
@@ -58,10 +61,13 @@ export function BottomSheet({ isOpen, onClose, children, height = 0.5 }: Props) 
     left: 0,
     right: 0,
     height: sheetH,
-    backgroundColor: '#0f172a',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: colors.card,
+    borderTopLeftRadius: radius['3xl'],
+    borderTopRightRadius: radius['3xl'],
     paddingTop: 8,
+    paddingBottom: insets.bottom,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
     overflow: 'hidden',
   };
 
@@ -69,7 +75,7 @@ export function BottomSheet({ isOpen, onClose, children, height = 0.5 }: Props) 
     <Modal transparent visible={isOpen} animationType="none" onRequestClose={handleClose}>
       <View style={{ flex: 1 }}>
         {/* Backdrop */}
-        <Animated.View style={[{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }, backdropStyle]}>
+        <Animated.View style={[{ flex: 1, backgroundColor: 'rgba(2,6,23,0.74)' }, backdropStyle]}>
           <Pressable style={{ flex: 1 }} onPress={handleClose} />
         </Animated.View>
 
@@ -77,7 +83,7 @@ export function BottomSheet({ isOpen, onClose, children, height = 0.5 }: Props) 
         <Animated.View style={[sheetContainer, sheetStyle]}>
           {/* Handle */}
           <View style={{ alignItems: 'center', paddingBottom: 8 }}>
-            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: '#334155' }} />
+            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: 'rgba(148,163,184,0.45)' }} />
           </View>
           {children}
         </Animated.View>
