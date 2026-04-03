@@ -1,5 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import Svg, { Path } from 'react-native-svg';
@@ -120,9 +119,8 @@ export default function LoginScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
               <Text style={styles.title}>Bon retour</Text>
               <Text style={styles.subtitle}>Connectez-vous pour retrouver vos voyages</Text>
@@ -178,7 +176,6 @@ export default function LoginScreen() {
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
     </View>
   );
 }
@@ -189,9 +186,9 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 36, fontFamily: fonts.display, marginBottom: 8 },
   subtitle: { color: colors.textSecondary, fontSize: 16, fontFamily: fonts.sans, lineHeight: 24 },
   socialContainer: { gap: 12, marginBottom: 32 },
-  appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: '#FFFFFF', borderRadius: 18 },
+  appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: '#FFFFFF', borderRadius: 18, borderCurve: 'continuous' },
   appleButtonText: { color: '#000000', fontSize: 16, fontFamily: fonts.sansSemiBold },
-  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 18, borderCurve: 'continuous', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
   googleButtonText: { color: colors.text, fontSize: 16, fontFamily: fonts.sansSemiBold },
   dividerContainer: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 32 },
   dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' },
@@ -201,7 +198,7 @@ const styles = StyleSheet.create({
   label: { color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, letterSpacing: 1.5, marginLeft: 4 },
   forgotPassword: { alignSelf: 'flex-end', marginTop: 4 },
   forgotPasswordText: { color: colors.gold, fontSize: 12, fontFamily: fonts.sansSemiBold },
-  errorContainer: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: radius.xl, padding: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
+  errorContainer: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: radius.xl, borderCurve: 'continuous', padding: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
   errorText: { color: '#f87171', fontSize: 14, fontFamily: fonts.sansMedium },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 40 },
   footerText: { color: colors.textSecondary, fontSize: 15, fontFamily: fonts.sans },

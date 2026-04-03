@@ -1,4 +1,5 @@
-import { View, Text, Image, Pressable, Platform } from 'react-native';
+import { View, Text, Pressable, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { Heart, Copy, Calendar } from 'lucide-react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
@@ -55,6 +56,7 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
       onPress={onPress}
       style={({ pressed }) => ({
         borderRadius: radius.card,
+        borderCurve: 'continuous',
         overflow: 'hidden',
         marginBottom: 16,
         backgroundColor: 'rgba(255,255,255,0.03)',
@@ -83,6 +85,7 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
             style={{
               position: 'absolute', top: 12, right: 12,
               borderRadius: 999,
+              borderCurve: 'continuous',
               overflow: 'hidden',
             }}
           >
@@ -104,7 +107,7 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
           <View style={{
             position: 'absolute', top: 12, right: 12,
             backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 12, paddingVertical: 5,
-            borderRadius: 999, flexDirection: 'row', alignItems: 'center', gap: 4,
+            borderRadius: 999, borderCurve: 'continuous', flexDirection: 'row', alignItems: 'center', gap: 4,
           }}>
             <Calendar size={11} color="#f8fafc" />
             <Text style={{

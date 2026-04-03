@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Settings, CreditCard, LogOut, ChevronRight, Crown, Plane, Trophy,
@@ -35,10 +34,9 @@ export default function ProfileScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+        <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 }}>
             <View style={{
-              width: 72, height: 72, borderRadius: 20,
+              width: 72, height: 72, borderRadius: 20, borderCurve: 'continuous',
               backgroundColor: colors.goldBg,
               alignItems: 'center', justifyContent: 'center', marginBottom: 20,
             }}>
@@ -51,8 +49,7 @@ export default function ProfileScreen() {
               Accédez à votre profil et vos voyages
             </Text>
             <Button onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push('/(auth)/login'); }}>Se connecter</Button>
-          </View>
-        </SafeAreaView>
+        </ScrollView>
       </View>
     );
   }
@@ -61,13 +58,11 @@ export default function ProfileScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={{ padding: 20, gap: 16, alignItems: 'center', paddingTop: 60 }}>
+        <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ padding: 20, gap: 16, alignItems: 'center', paddingTop: 60 }}>
             <Skeleton width={72} height={72} radius={36} />
             <Skeleton width={140} height={20} />
             <Skeleton width={200} height={14} />
-          </View>
-        </SafeAreaView>
+        </ScrollView>
       </View>
     );
   }
@@ -87,15 +82,14 @@ export default function ProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
           {/* Cover + Avatar */}
           <View style={{ height: 120, backgroundColor: 'rgba(255,255,255,0.02)' }}>
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(197,160,89,0.08)' }} />
           </View>
 
           <View style={{ alignItems: 'center', marginTop: -40, paddingHorizontal: 20 }}>
-            <View style={{ borderWidth: 3, borderColor: colors.gold, borderRadius: 44, padding: 2, backgroundColor: colors.bg }}>
+            <View style={{ borderWidth: 3, borderColor: colors.gold, borderRadius: 44, borderCurve: 'continuous', padding: 2, backgroundColor: colors.bg }}>
               <Avatar url={profile?.avatar_url} name={displayName} size="lg" />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 }}>
@@ -103,7 +97,7 @@ export default function ProfileScreen() {
                 {displayName}
               </Text>
               {isPro && (
-                <View style={{ backgroundColor: colors.goldBg, padding: 4, borderRadius: 8 }}>
+                <View style={{ backgroundColor: colors.goldBg, padding: 4, borderRadius: 8, borderCurve: 'continuous' }}>
                   <Crown size={16} color={colors.gold} />
                 </View>
               )}
@@ -111,7 +105,7 @@ export default function ProfileScreen() {
             <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: fonts.sans, marginTop: 4 }}>{user?.email}</Text>
 
             {/* Stats bar */}
-            <View style={{ flexDirection: 'row', gap: 32, marginTop: 24, backgroundColor: 'rgba(255,255,255,0.03)', paddingHorizontal: 32, paddingVertical: 16, borderRadius: radius['2xl'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
+            <View style={{ flexDirection: 'row', gap: 32, marginTop: 24, backgroundColor: 'rgba(255,255,255,0.03)', paddingHorizontal: 32, paddingVertical: 16, borderRadius: radius['2xl'], borderCurve: 'continuous', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
               <StatItem value={tripCount} label="Voyages" />
               <View style={{ width: 1, backgroundColor: 'rgba(255,255,255,0.1)' }} />
               <StatItem value={isPro ? 'Pro' : 'Free'} label="Abonnement" gold={isPro} />
@@ -130,7 +124,7 @@ export default function ProfileScreen() {
                 onPress={() => { Haptics.selectionAsync(); setActiveTab(tab.key); }}
                 style={{
                   flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  paddingVertical: 12, borderRadius: radius.lg,
+                  paddingVertical: 12, borderRadius: radius.lg, borderCurve: 'continuous',
                   backgroundColor: activeTab === tab.key ? colors.goldBg : 'transparent',
                   borderWidth: 1, borderColor: activeTab === tab.key ? 'rgba(197,160,89,0.2)' : 'transparent',
                 }}
@@ -175,7 +169,7 @@ export default function ProfileScreen() {
                   <Text style={{ color: colors.gold, fontSize: 16, fontFamily: fonts.sansBold, fontWeight: 'bold' }}>Parrainage</Text>
                   <Text style={{ color: colors.textMuted, fontSize: 13, fontFamily: fonts.sans }}>Partagez votre code pour gagner des voyages gratuits</Text>
                   <View style={{
-                    backgroundColor: 'rgba(2,6,23,0.3)', borderRadius: radius.md,
+                    backgroundColor: 'rgba(2,6,23,0.3)', borderRadius: radius.md, borderCurve: 'continuous',
                     padding: 14, alignItems: 'center', marginTop: 4, borderWidth: 1, borderColor: 'rgba(197,160,89,0.2)'
                   }}>
                     <Text style={{ color: colors.gold, fontSize: 22, fontWeight: '800', letterSpacing: 6 }}>
@@ -198,7 +192,7 @@ export default function ProfileScreen() {
               {/* Status card */}
               <Card variant={isPro ? 'premium' : 'default'} style={{ alignItems: 'center', paddingVertical: 28, gap: 12, backgroundColor: isPro ? undefined : 'rgba(255,255,255,0.03)' }}>
                 <View style={{
-                  width: 60, height: 60, borderRadius: 18,
+                  width: 60, height: 60, borderRadius: 18, borderCurve: 'continuous',
                   backgroundColor: isPro ? colors.goldBg : 'rgba(255,255,255,0.05)',
                   alignItems: 'center', justifyContent: 'center',
                 }}>
@@ -223,7 +217,7 @@ export default function ProfileScreen() {
                       { icon: Award, label: 'Badge exclusif' },
                     ].map((f) => (
                       <View key={f.label} style={{
-                        width: '48%', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius.card,
+                        width: '48%', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: radius.card, borderCurve: 'continuous',
                         padding: 18, alignItems: 'center', gap: 10,
                         borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
                       }}>
@@ -250,7 +244,6 @@ export default function ProfileScreen() {
             <MenuItem icon={LogOut} label="Se déconnecter" danger onPress={handleSignOut} />
           </View>
         </ScrollView>
-      </SafeAreaView>
     </View>
   );
 }
@@ -275,12 +268,12 @@ function MenuItem({ icon: Icon, label, danger, onPress }: {
       style={({ pressed }) => ({
         flexDirection: 'row', alignItems: 'center', gap: 14,
         backgroundColor: pressed ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
-        borderRadius: radius.card, padding: 20,
+        borderRadius: radius.card, borderCurve: 'continuous', padding: 20,
         borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)',
       })}
     >
       <View style={{
-        width: 44, height: 44, borderRadius: 14,
+        width: 44, height: 44, borderRadius: 14, borderCurve: 'continuous',
         backgroundColor: danger ? colors.dangerBg : colors.goldBg,
         alignItems: 'center', justifyContent: 'center',
       }}>

@@ -51,7 +51,8 @@
         {
           "calendarPermission": "Narae Voyage a besoin d'accéder à votre calendrier pour y ajouter vos activités de voyage."
         }
-      ]
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

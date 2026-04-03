@@ -40,6 +40,7 @@ export function Badge({ variant, label }: Props) {
         tint="dark"
         style={{
           borderRadius: 999,
+          borderCurve: 'continuous',
           overflow: 'hidden',
           borderWidth: 1,
           borderColor: c.border,
@@ -62,6 +63,7 @@ export function Badge({ variant, label }: Props) {
       paddingHorizontal: 12,
       paddingVertical: 5,
       borderRadius: 999,
+      borderCurve: 'continuous',
       borderWidth: 1,
       borderColor: c.border,
     }}>

@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { View, Text, FlatList, Pressable, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Map, Plus, Trash2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -81,14 +80,14 @@ export default function TripsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <ScreenHeader
           title="Mes Voyages"
           rightAction={
             <Pressable
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/plan'); }}
               style={{
-                width: 40, height: 40, borderRadius: 12,
+                width: 40, height: 40, borderRadius: 12, borderCurve: 'continuous',
                 backgroundColor: 'rgba(197,160,89,0.15)',
                 alignItems: 'center', justifyContent: 'center',
               }}
@@ -105,7 +104,7 @@ export default function TripsScreen() {
               key={f.key}
               onPress={() => { Haptics.selectionAsync(); setFilter(f.key); }}
               style={{
-                paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
+                paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, borderCurve: 'continuous',
                 backgroundColor: filter === f.key ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
                 borderWidth: 1,
                 borderColor: filter === f.key ? 'rgba(197,160,89,0.3)' : 'rgba(255,255,255,0.08)',
@@ -140,6 +139,7 @@ export default function TripsScreen() {
         ) : (
           <FlatList
             data={filtered}
+            contentInsetAdjustmentBehavior="automatic"
             keyExtractor={(t) => t.id}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
             refreshing={false}
@@ -185,7 +185,7 @@ export default function TripsScreen() {
             </Button>
           </View>
         </BottomSheet>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

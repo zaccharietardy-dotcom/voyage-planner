@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { View, Text, Pressable, Image, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
 import { Pencil, Users, Wallet, Compass } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Button } from '@/components/ui/Button';
-import { colors, fonts } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import {
   BUDGET_LABELS, GROUP_TYPE_LABELS, ACTIVITY_LABELS,
   type TripPreferences, type ActivityType,
@@ -97,29 +98,32 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
   return (
     <View style={{ gap: 20 }}>
       <View>
-        <Text style={{ color: colors.text, fontSize: 24, fontFamily: fonts.display, marginBottom: 4 }}>
+        <Text style={{ color: colors.text, fontSize: 24, fontFamily: fonts.display }}>
           Résumé
         </Text>
-        <Text style={{ color: colors.textMuted, fontSize: 14 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sans, marginTop: 4 }}>
           Vérifiez et lancez la génération
         </Text>
       </View>
 
       {/* Hero Destination Card */}
-      <Pressable 
+      <Pressable
         onPress={() => handleEdit(0)}
         style={{
           height: 200,
-          borderRadius: 24,
+          borderRadius: radius['2xl'],
+          borderCurve: 'continuous',
           overflow: 'hidden',
-          backgroundColor: '#1E293B',
+          backgroundColor: colors.surface,
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.1)',
+          borderColor: 'rgba(255,255,255,0.08)',
         }}
       >
         <Image
           source={{ uri: imageUrl }}
           style={{ width: '100%', height: '100%', opacity: imageLoading ? 0 : 1 }}
+          contentFit="cover"
+          transition={300}
           onLoadEnd={() => setImageLoading(false)}
         />
         {imageLoading && (
@@ -132,17 +136,17 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
           style={{ position: 'absolute', inset: 0 }}
         />
         <View style={{ position: 'absolute', bottom: 16, left: 20, right: 20 }}>
-          <Text style={{ color: 'white', fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold' }}>
+          <Text style={{ color: colors.text, fontSize: 24, fontFamily: fonts.display }}>
             {destination || 'Destination'}
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-            <View style={{ backgroundColor: 'rgba(197,160,89,0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, borderWidth: 1, borderColor: 'rgba(197,160,89,0.3)' }}>
-              <Text style={{ color: 'white', fontSize: 13, fontWeight: 'bold' }}>
+            <View style={{ backgroundColor: 'rgba(197,160,89,0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm, borderCurve: 'continuous', borderWidth: 1, borderColor: 'rgba(197,160,89,0.3)' }}>
+              <Text style={{ color: colors.text, fontSize: 12, fontFamily: fonts.sansBold }}>
                 {prefs.durationDays || 3} jours
               </Text>
             </View>
             {!!dateStr && (
-              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '600' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, fontFamily: fonts.sansMedium }}>
                 · {dateStr}
               </Text>
             )}
@@ -155,39 +159,41 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
 
       {/* Visual Cards (Group & Budget) */}
       <View style={{ flexDirection: 'row', gap: 12 }}>
-        <Pressable 
+        <Pressable
           onPress={() => handleEdit(2)}
           style={{
             flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
-            backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: 20,
-            borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)'
+            backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: radius.xl,
+            borderCurve: 'continuous',
+            borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)'
           }}
         >
-          <View style={{ backgroundColor: 'rgba(59,130,246,0.15)', padding: 10, borderRadius: 50 }}>
+          <View style={{ backgroundColor: 'rgba(59,130,246,0.15)', padding: 10, borderRadius: radius.full }}>
             <Users size={18} color="#60A5FA" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.textMuted, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>Groupe</Text>
-            <Text style={{ color: 'white', fontSize: 13, fontWeight: '600', marginTop: 2 }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 }}>Groupe</Text>
+            <Text style={{ color: colors.text, fontSize: 13, fontFamily: fonts.sansMedium, marginTop: 2 }}>
               {GROUP_TYPE_LABELS[prefs.groupType ?? 'couple']} ({prefs.groupSize})
             </Text>
           </View>
         </Pressable>
 
-        <Pressable 
+        <Pressable
           onPress={() => handleEdit(4)}
           style={{
             flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
-            backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: 20,
-            borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)'
+            backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: radius.xl,
+            borderCurve: 'continuous',
+            borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)'
           }}
         >
-          <View style={{ backgroundColor: 'rgba(34,197,94,0.15)', padding: 10, borderRadius: 50 }}>
+          <View style={{ backgroundColor: 'rgba(34,197,94,0.15)', padding: 10, borderRadius: radius.full }}>
             <Wallet size={18} color="#4ADE80" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.textMuted, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>Confort</Text>
-            <Text style={{ color: 'white', fontSize: 13, fontWeight: '600', marginTop: 2 }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 }}>Confort</Text>
+            <Text style={{ color: colors.text, fontSize: 13, fontFamily: fonts.sansMedium, marginTop: 2 }}>
               {BUDGET_LABELS[prefs.budgetLevel ?? 'moderate']?.label}
             </Text>
           </View>
@@ -197,11 +203,12 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
       {/* Activities Chips */}
       <Pressable onPress={() => handleEdit(3)} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {prefs.activities?.map((act) => (
-          <View key={act} style={{ 
-            backgroundColor: 'rgba(197,160,89,0.1)', paddingHorizontal: 12, paddingVertical: 6, 
-            borderRadius: 20, borderWidth: 1, borderColor: 'rgba(197,160,89,0.2)' 
+          <View key={act} style={{
+            backgroundColor: 'rgba(197,160,89,0.15)', paddingHorizontal: 12, paddingVertical: 6,
+            borderRadius: radius.lg, borderCurve: 'continuous',
+            borderWidth: 1, borderColor: 'rgba(197,160,89,0.2)',
           }}>
-            <Text style={{ color: colors.gold, fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            <Text style={{ color: colors.gold, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               {ACTIVITY_LABELS[act as ActivityType] || act}
             </Text>
           </View>
@@ -209,11 +216,11 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
       </Pressable>
 
       <View style={{ marginTop: 10 }}>
-        <Button 
-          icon={isGenerating ? undefined : Compass} 
-          isLoading={isGenerating} 
+        <Button
+          icon={isGenerating ? undefined : Compass}
+          isLoading={isGenerating}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onGenerate(); }}
-          style={{ height: 56, borderRadius: 20 }}
+          style={{ height: 56, borderRadius: radius.xl }}
         >
           {isGenerating ? 'Création de l\'itinéraire...' : 'Générer mon voyage'}
         </Button>

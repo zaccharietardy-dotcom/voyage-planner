@@ -1,4 +1,5 @@
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import { Calendar, Users, MapPin } from 'lucide-react-native';
 import { Badge } from '@/components/ui/Badge';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -56,6 +57,7 @@ export function TripCard({ trip, onPress, compact }: Props) {
       onPress={onPress}
       style={({ pressed }) => ({
         borderRadius: radius.card,
+        borderCurve: 'continuous',
         overflow: 'hidden',
         backgroundColor: colors.card,
         borderWidth: 1,
@@ -63,11 +65,7 @@ export function TripCard({ trip, onPress, compact }: Props) {
         opacity: pressed ? 0.95 : 1,
         marginBottom: compact ? 0 : 16,
         width: compact ? 260 : undefined,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-        elevation: 4,
+        boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
       })}
     >
       {/* Image */}

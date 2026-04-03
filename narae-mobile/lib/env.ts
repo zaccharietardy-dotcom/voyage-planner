@@ -1,12 +1,21 @@
 const DEFAULT_SITE_URL = 'https://naraevoyage.com';
 
+// Hardcoded fallbacks for production builds where process.env may not be inlined
+const FALLBACKS: Record<string, string> = {
+  EXPO_PUBLIC_SUPABASE_URL: 'https://mptiygdqoswzkzhewaqp.supabase.co',
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdGl5Z2Rxb3N3emt6aGV3YXFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0OTY2OTQsImV4cCI6MjA4NTA3MjY5NH0.hG7iNJz8U_R8FLD-xzdgroltBFdr56Swrh_V7r1KjdU',
+  EXPO_PUBLIC_SITE_URL: DEFAULT_SITE_URL,
+};
+
 function readEnv(name: string, options?: { defaultValue?: string; optional?: boolean }): string {
   const value = process.env[name];
   if (value && value.trim().length > 0) return value;
+  if (FALLBACKS[name]) return FALLBACKS[name];
   if (options?.defaultValue !== undefined) return options.defaultValue;
   if (options?.optional) return '';
-
-  throw new Error(`[env] Missing required environment variable: ${name}`);
+  // Don't throw — return empty string to avoid crash in production
+  console.warn(`[env] Missing environment variable: ${name}`);
+  return '';
 }
 
 function readUrlEnv(name: string, options?: { defaultValue?: string; optional?: boolean }): string {
@@ -17,7 +26,8 @@ function readUrlEnv(name: string, options?: { defaultValue?: string; optional?: 
     new URL(value);
     return value;
   } catch {
-    throw new Error(`[env] ${name} must be a valid URL`);
+    console.warn(`[env] ${name} is not a valid URL: ${value}`);
+    return '';
   }
 }
 

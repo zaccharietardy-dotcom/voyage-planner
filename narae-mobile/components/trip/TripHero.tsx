@@ -1,4 +1,5 @@
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Share2 } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -43,7 +44,7 @@ export function TripHero({ imageUrl, title, destination, dateRange, onBack, onSh
           onPress={onBack}
           hitSlop={12}
           style={{
-            width: 40, height: 40, borderRadius: 999,
+            width: 40, height: 40, borderRadius: 999, borderCurve: 'continuous',
             backgroundColor: 'rgba(0,0,0,0.4)',
             alignItems: 'center', justifyContent: 'center',
           }}
@@ -54,7 +55,7 @@ export function TripHero({ imageUrl, title, destination, dateRange, onBack, onSh
           onPress={onShare}
           hitSlop={12}
           style={{
-            width: 40, height: 40, borderRadius: 999,
+            width: 40, height: 40, borderRadius: 999, borderCurve: 'continuous',
             backgroundColor: 'rgba(0,0,0,0.4)',
             alignItems: 'center', justifyContent: 'center',
           }}

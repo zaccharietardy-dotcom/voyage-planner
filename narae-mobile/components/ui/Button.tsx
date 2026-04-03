@@ -139,6 +139,7 @@ export function Button({
 const styles = StyleSheet.create({
   base: {
     borderRadius: radius.button,
+    borderCurve: 'continuous',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -171,10 +172,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   shadow: {
-    shadowColor: colors.gold,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    boxShadow: '0 6px 12px rgba(197,160,89,0.35)',
   },
 });

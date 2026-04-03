@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { 
   useAnimatedStyle, 
@@ -10,9 +10,8 @@ import Animated, {
   Easing
 } from 'react-native-reanimated';
 
-const { width, height } = Dimensions.get('window');
-
 export function PremiumBackground() {
+  const { width, height } = useWindowDimensions();
   const anim = useSharedValue(0);
 
   React.useEffect(() => {
@@ -55,21 +54,21 @@ export function PremiumBackground() {
       <View style={[styles.absolute, { backgroundColor: '#020617' }]} />
 
       {/* Animated Blobs for Depth */}
-      <Animated.View style={[styles.blob, styles.blob1, blob1Style]}>
+      <Animated.View style={[styles.blob, { width: width * 1.5, height: width * 1.5, top: -width * 0.5, left: -width * 0.3 }, blob1Style]}>
         <LinearGradient
           colors={['rgba(197,160,89,0.12)', 'transparent']}
           style={styles.fill}
         />
       </Animated.View>
 
-      <Animated.View style={[styles.blob, styles.blob2, blob2Style]}>
+      <Animated.View style={[styles.blob, { width: width * 1.2, height: width * 1.2, bottom: -width * 0.3, right: -width * 0.2 }, blob2Style]}>
         <LinearGradient
           colors={['rgba(59,130,246,0.08)', 'transparent']}
           style={styles.fill}
         />
       </Animated.View>
 
-      <Animated.View style={[styles.blob, styles.blob3, blob3Style]}>
+      <Animated.View style={[styles.blob, { width, height: width, bottom: height * 0.1, left: -width * 0.4 }, blob3Style]}>
         <LinearGradient
           colors={['rgba(139,92,246,0.06)', 'transparent']}
           style={styles.fill}
@@ -114,24 +113,7 @@ const styles = StyleSheet.create({
   blob: {
     position: 'absolute',
     borderRadius: 1000,
-  },
-  blob1: {
-    width: width * 1.5,
-    height: width * 1.5,
-    top: -width * 0.5,
-    left: -width * 0.3,
-  },
-  blob2: {
-    width: width * 1.2,
-    height: width * 1.2,
-    bottom: -width * 0.3,
-    right: -width * 0.2,
-  },
-  blob3: {
-    width: width,
-    height: width,
-    bottom: height * 0.1,
-    left: -width * 0.4,
+    borderCurve: 'continuous',
   },
 });
 

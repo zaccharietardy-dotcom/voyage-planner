@@ -18,6 +18,7 @@ export function Card({ variant = 'default', children, style, ...rest }: Props) {
       ? 'rgba(197,160,89,0.2)'
       : 'rgba(255,255,255,0.1)',
     borderRadius: radius.card,
+    borderCurve: 'continuous',
     padding: 16,
     overflow: 'hidden',
   };
@@ -25,19 +26,11 @@ export function Card({ variant = 'default', children, style, ...rest }: Props) {
   const shadow: ViewStyle =
     variant === 'elevated'
       ? {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 4,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
         }
       : variant === 'premium'
         ? {
-            shadowColor: colors.gold,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.05,
-            shadowRadius: 12,
-            elevation: 4,
+            boxShadow: '0 4px 12px rgba(197,160,89,0.05)',
           }
         : {};
 

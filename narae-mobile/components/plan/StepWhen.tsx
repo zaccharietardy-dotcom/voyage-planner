@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { colors, fonts } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import type { TripPreferences } from '@/lib/types/trip';
 
 interface Props {
@@ -65,28 +65,28 @@ export function StepWhen({ prefs, onChange }: Props) {
   return (
     <View style={{ gap: 32 }}>
       <View>
-        <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold' }}>
+        <Text style={{ color: colors.text, fontSize: 24, fontFamily: fonts.display }}>
           Quand partez-vous ?
         </Text>
-        <Text style={{ color: colors.textSecondary, fontSize: 15, marginTop: 4 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sans, marginTop: 4 }}>
           Définissez vos dates et la durée
         </Text>
       </View>
 
       {/* Calendar */}
-      <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 24, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Date de départ</Text>
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: radius.xl, borderCurve: 'continuous', padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 }}>Date de départ</Text>
 
         {/* Month navigation */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Pressable onPress={prevMonth} hitSlop={12}>
-            <ChevronLeft size={22} color="#94a3b8" />
+            <ChevronLeft size={22} color={colors.textSecondary} />
           </Pressable>
-          <Text style={{ color: colors.text, fontSize: 17, fontFamily: fonts.display }}>
+          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.displaySemiBold }}>
             {MONTH_NAMES[viewMonth]} {viewYear}
           </Text>
           <Pressable onPress={nextMonth} hitSlop={12}>
-            <ChevronRight size={22} color="#94a3b8" />
+            <ChevronRight size={22} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -94,7 +94,7 @@ export function StepWhen({ prefs, onChange }: Props) {
         <View style={{ flexDirection: 'row', marginBottom: 8 }}>
           {DAYS.map((d, i) => (
             <View key={i} style={{ flex: 1, alignItems: 'center' }}>
-              <Text style={{ color: '#64748b', fontSize: 12, fontWeight: '600' }}>{d}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sansSemiBold }}>{d}</Text>
             </View>
           ))}
         </View>
@@ -109,14 +109,14 @@ export function StepWhen({ prefs, onChange }: Props) {
                   disabled={isPast(day)}
                   style={{
                     flex: 1, alignItems: 'center', justifyContent: 'center',
-                    borderRadius: 10,
-                    backgroundColor: isSelected(day) ? '#c5a059' : 'transparent',
+                    borderRadius: radius.sm, borderCurve: 'continuous',
+                    backgroundColor: isSelected(day) ? colors.gold : 'transparent',
                     opacity: isPast(day) ? 0.3 : 1,
                   }}
                 >
                   <Text style={{
-                    color: isSelected(day) ? '#020617' : '#f8fafc',
-                    fontSize: 14, fontWeight: isSelected(day) ? '800' : '500',
+                    color: isSelected(day) ? colors.bg : colors.text,
+                    fontSize: 14, fontFamily: isSelected(day) ? fonts.sansBold : fonts.sansMedium,
                   }}>
                     {day}
                   </Text>
@@ -128,8 +128,8 @@ export function StepWhen({ prefs, onChange }: Props) {
       </View>
 
       {/* Duration */}
-      <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 24, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 20, textAlign: 'center' }}>Durée du voyage</Text>
+      <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: radius.xl, borderCurve: 'continuous', padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 20, textAlign: 'center' }}>Durée du voyage</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
           <Pressable
             onPress={() => {
@@ -139,18 +139,19 @@ export function StepWhen({ prefs, onChange }: Props) {
               }
             }}
             style={{
-              width: 56, height: 56, borderRadius: 20,
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              width: 56, height: 56, borderRadius: radius.xl,
+              borderCurve: 'continuous',
+              backgroundColor: 'rgba(255,255,255,0.06)',
               alignItems: 'center', justifyContent: 'center',
-              borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
               opacity: duration <= 1 ? 0.3 : 1,
             }}
           >
-            <Minus size={24} color="#f8fafc" />
+            <Minus size={24} color={colors.text} />
           </Pressable>
           <View style={{ alignItems: 'center', minWidth: 80 }}>
-            <Text style={{ color: colors.gold, fontSize: 52, fontFamily: fonts.display, fontWeight: 'bold' }}>{duration}</Text>
-            <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>{duration === 1 ? 'jour' : 'jours'}</Text>
+            <Text style={{ color: colors.gold, fontSize: 48, fontFamily: fonts.display }}>{duration}</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sansMedium }}>{duration === 1 ? 'jour' : 'jours'}</Text>
           </View>
           <Pressable
             onPress={() => {
@@ -160,14 +161,15 @@ export function StepWhen({ prefs, onChange }: Props) {
               }
             }}
             style={{
-              width: 56, height: 56, borderRadius: 20,
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              width: 56, height: 56, borderRadius: radius.xl,
+              borderCurve: 'continuous',
+              backgroundColor: 'rgba(255,255,255,0.06)',
               alignItems: 'center', justifyContent: 'center',
-              borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
               opacity: duration >= 21 ? 0.3 : 1,
             }}
           >
-            <Plus size={24} color="#f8fafc" />
+            <Plus size={24} color={colors.text} />
           </Pressable>
         </View>
       </View>

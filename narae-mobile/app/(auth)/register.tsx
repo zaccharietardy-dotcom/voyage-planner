@@ -1,5 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import Svg, { Path } from 'react-native-svg';
@@ -144,8 +143,8 @@ export default function RegisterScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
-        <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: 'rgba(34,197,94,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+        <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <View style={{ width: 80, height: 80, borderRadius: 24, borderCurve: 'continuous', backgroundColor: 'rgba(34,197,94,0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
             <Text style={{ fontSize: 40 }}>✉️</Text>
           </View>
           <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, textAlign: 'center', marginBottom: 12 }}>
@@ -156,11 +155,11 @@ export default function RegisterScreen() {
             <Text style={{ color: colors.gold, fontFamily: fonts.sansBold }}>{email}</Text>
           </Text>
           <Pressable onPress={() => router.replace('/(auth)/login')} style={{ marginTop: 40, width: '100%' }}>
-            <LinearGradient colors={goldGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.button, paddingVertical: 20, alignItems: 'center' }}>
+            <LinearGradient colors={goldGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.button, borderCurve: 'continuous', paddingVertical: 20, alignItems: 'center' }}>
               <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold }}>Retour à la connexion</Text>
             </LinearGradient>
           </Pressable>
-        </SafeAreaView>
+        </ScrollView>
       </View>
     );
   }
@@ -168,9 +167,8 @@ export default function RegisterScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
               <Text style={styles.title}>Créer un compte</Text>
               <Text style={styles.subtitle}>Rejoignez Narae et commencez à planifier vos aventures</Text>
@@ -242,7 +240,6 @@ export default function RegisterScreen() {
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
     </View>
   );
 }
@@ -253,9 +250,9 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 36, fontFamily: fonts.display, marginBottom: 8 },
   subtitle: { color: colors.textSecondary, fontSize: 16, fontFamily: fonts.sans, lineHeight: 24 },
   socialContainer: { gap: 12, marginBottom: 32 },
-  appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: '#FFFFFF', borderRadius: 18 },
+  appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: '#FFFFFF', borderRadius: 18, borderCurve: 'continuous' },
   appleButtonText: { color: '#000000', fontSize: 16, fontFamily: fonts.sansSemiBold },
-  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, height: 56, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 18, borderCurve: 'continuous', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
   googleButtonText: { color: colors.text, fontSize: 16, fontFamily: fonts.sansSemiBold },
   dividerContainer: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 32 },
   dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.08)' },
@@ -266,9 +263,9 @@ const styles = StyleSheet.create({
   label: { color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, letterSpacing: 1.5, marginLeft: 4 },
   criteriaContainer: { marginTop: 8, gap: 6 },
   criteriaItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  criteriaDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.1)' },
+  criteriaDot: { width: 12, height: 12, borderRadius: 6, borderCurve: 'continuous', backgroundColor: 'rgba(255,255,255,0.1)' },
   criteriaText: { fontSize: 13, fontFamily: fonts.sans },
-  errorContainer: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: radius.xl, padding: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
+  errorContainer: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: radius.xl, borderCurve: 'continuous', padding: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
   errorText: { color: '#f87171', fontSize: 14, fontFamily: fonts.sansMedium },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 40 },
   footerText: { color: colors.textSecondary, fontSize: 15, fontFamily: fonts.sans },

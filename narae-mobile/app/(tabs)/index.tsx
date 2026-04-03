@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, Pressable, FlatList, Image, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Plane, ArrowRight, Search, Compass, MapPin, Users } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,8 +22,7 @@ export default function HomeScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
-        <SafeAreaView style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={styles.landingContent}>
+          <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.landingContent}>
             {/* Logo Section */}
             <View style={styles.landingLogoContainer}>
               <View style={styles.landingLogoBox}>
@@ -84,7 +82,6 @@ export default function HomeScreen() {
               </Button>
             </View>
           </ScrollView>
-        </SafeAreaView>
       </View>
     );
   }
@@ -102,9 +99,7 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
         <AuthenticatedHome greeting={greeting} name={name} router={router} userId={user?.id} />
-      </SafeAreaView>
     </View>
   );
 }
@@ -120,8 +115,9 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
   const recentTrips = (trips ?? []).slice(0, 5);
 
   return (
-    <ScrollView 
-      style={{ flex: 1 }} 
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
@@ -244,14 +240,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
+    borderCurve: 'continuous',
     backgroundColor: colors.gold,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.gold,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+    boxShadow: '0 6px 16px rgba(197,160,89,0.4)',
   },
   heroSection: {
     marginBottom: 40,
@@ -285,6 +278,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: radius.card,
+    borderCurve: 'continuous',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
@@ -292,6 +286,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
+    borderCurve: 'continuous',
     backgroundColor: colors.goldBg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -331,6 +326,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: radius.button,
+    borderCurve: 'continuous',
     paddingHorizontal: 20,
     height: 56,
     borderWidth: 1,
@@ -350,12 +346,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: radius.card,
+    borderCurve: 'continuous',
     padding: 24,
-    shadowColor: colors.gold,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
-    elevation: 8,
+    boxShadow: '0 8px 15px rgba(197,160,89,0.3)',
   },
   planCtaTitle: {
     color: colors.bg,
@@ -372,6 +365,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 18,
+    borderCurve: 'continuous',
     backgroundColor: 'rgba(2,6,23,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -398,6 +392,7 @@ const styles = StyleSheet.create({
   destinationCard: {
     width: 150,
     borderRadius: radius.card,
+    borderCurve: 'continuous',
     overflow: 'hidden',
     backgroundColor: colors.card,
     borderWidth: 1,

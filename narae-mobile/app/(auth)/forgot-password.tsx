@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase/client';
 import { ArrowLeft } from 'lucide-react-native';
@@ -28,10 +27,9 @@ export default function ForgotPasswordScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+        <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
             <View style={{
-              width: 80, height: 80, borderRadius: 24,
+              width: 80, height: 80, borderRadius: 24, borderCurve: 'continuous',
               backgroundColor: 'rgba(34,197,94,0.15)',
               alignItems: 'center', justifyContent: 'center', marginBottom: 24,
             }}>
@@ -52,15 +50,14 @@ export default function ForgotPasswordScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
-                  borderRadius: radius.button, paddingVertical: 20, alignItems: 'center',
-                  shadowColor: colors.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12,
+                  borderRadius: radius.button, borderCurve: 'continuous', paddingVertical: 20, alignItems: 'center',
+                  boxShadow: '0 6px 12px rgba(197,160,89,0.35)',
                 }}
               >
                 <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold, fontWeight: '800' }}>Retour à la connexion</Text>
               </LinearGradient>
             </Pressable>
-          </View>
-        </SafeAreaView>
+        </ScrollView>
       </View>
     );
   }
@@ -68,8 +65,7 @@ export default function ForgotPasswordScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={{ padding: 24, paddingTop: 20 }}>
+      <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ padding: 24, paddingTop: 20 }}>
           <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }} style={{ marginBottom: 32, alignSelf: 'flex-start' }}>
             <ArrowLeft size={24} color="#94a3b8" />
           </Pressable>
@@ -91,7 +87,7 @@ export default function ForgotPasswordScreen() {
             autoCapitalize="none"
             autoComplete="email"
             style={{
-              backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: radius.xl, paddingVertical: 18, paddingHorizontal: 20,
+              backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: radius.xl, borderCurve: 'continuous', paddingVertical: 18, paddingHorizontal: 20,
               color: '#f8fafc', fontSize: 16, fontFamily: fonts.sans, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', marginBottom: 24,
             }}
           />
@@ -105,15 +101,14 @@ export default function ForgotPasswordScreen() {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{
-                borderRadius: radius.button, paddingVertical: 20, alignItems: 'center', opacity: isLoading ? 0.7 : 1,
-                shadowColor: colors.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12,
+                borderRadius: radius.button, borderCurve: 'continuous', paddingVertical: 20, alignItems: 'center', opacity: isLoading ? 0.7 : 1,
+                boxShadow: '0 6px 12px rgba(197,160,89,0.35)',
               }}
             >
               {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold, fontWeight: '800' }}>Envoyer le lien</Text>}
             </LinearGradient>
           </Pressable>
-        </View>
-      </SafeAreaView>
+      </ScrollView>
     </View>
   );
 }

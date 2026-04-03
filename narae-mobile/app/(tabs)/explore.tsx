@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { View, Text, FlatList, Pressable, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Compass } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -95,7 +94,7 @@ export default function ExploreScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <ScreenHeader title="Explorer" subtitle="Voyages de la communauté" />
 
         {/* Tab bar */}
@@ -106,7 +105,7 @@ export default function ExploreScreen() {
           <Pressable
             onPress={() => { Haptics.selectionAsync(); setSort(sort === 'recent' ? 'trending' : 'recent'); }}
             style={{
-              paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
+              paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderCurve: 'continuous',
               backgroundColor: 'rgba(255,255,255,0.05)',
             }}
           >
@@ -133,6 +132,7 @@ export default function ExploreScreen() {
         ) : (
           <FlatList
             data={allTrips}
+            contentInsetAdjustmentBehavior="automatic"
             keyExtractor={(t) => t.id}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
             refreshing={false}
@@ -170,7 +170,7 @@ export default function ExploreScreen() {
             <Button isLoading={cloning} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleClone(); }}>Dupliquer</Button>
           </View>
         </BottomSheet>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }
@@ -180,7 +180,7 @@ function TabButton({ label, active, onPress }: { label: string; active: boolean;
     <Pressable
       onPress={onPress}
       style={{
-        paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10,
+        paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, borderCurve: 'continuous',
         backgroundColor: active ? 'rgba(197,160,89,0.15)' : 'rgba(255,255,255,0.05)',
         borderWidth: 1, borderColor: active ? '#c5a059' : 'transparent',
       }}

@@ -78,8 +78,14 @@ export async function generateTrip(
       : preferences.startDate,
   };
 
+  // Refresh session to ensure valid token before long-running API call
+  await supabase.auth.refreshSession();
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
+
+  if (!token) {
+    throw new Error('Session expirée. Veuillez vous reconnecter.');
+  }
 
   const res = await fetch(`https://naraevoyage.com/api/generate`, {
     method: 'POST',
@@ -91,6 +97,30 @@ export async function generateTrip(
   });
 
   if (!res.ok) {
+    // 401 = token expired/invalid → try refresh once
+    if (res.status === 401) {
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (!refreshError) {
+        const { data: { session: newSession } } = await supabase.auth.getSession();
+        if (newSession?.access_token) {
+          // Retry with fresh token
+          const retry = await fetch(`https://naraevoyage.com/api/generate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${newSession.access_token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+          if (retry.ok) {
+            const ct = retry.headers.get('content-type') ?? '';
+            if (ct.includes('text/event-stream')) return parseSSEStream(retry, onProgress);
+            return retry.json() as Promise<Trip>;
+          }
+        }
+      }
+      throw new Error('Session expirée. Déconnectez-vous et reconnectez-vous.');
+    }
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || `Generation failed (${res.status})`);
   }

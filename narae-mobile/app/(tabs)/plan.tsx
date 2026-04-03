@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -152,8 +151,7 @@ export default function PlanScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={process.env.EXPO_OS === 'ios' ? 'padding' : undefined}>
           {/* Header + Step indicator */}
           <View style={styles.header}>
             <Text style={styles.title}>{STEP_TITLES[step]}</Text>
@@ -177,6 +175,7 @@ export default function PlanScreen() {
           {/* Step content */}
           <ScrollView
             ref={scrollRef}
+            contentInsetAdjustmentBehavior="automatic"
             style={{ flex: 1 }}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
@@ -224,7 +223,6 @@ export default function PlanScreen() {
             </View>
           )}
         </KeyboardAvoidingView>
-      </SafeAreaView>
     </View>
   );
 }
@@ -251,16 +249,13 @@ const styles = StyleSheet.create({
     height: 8,
     width: 8,
     borderRadius: 4,
+    borderCurve: 'continuous',
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
   dotActive: {
     width: 32,
     backgroundColor: colors.gold,
-    shadowColor: colors.gold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 4,
+    boxShadow: '0 0 6px rgba(197,160,89,0.8)',
   },
   dotCompleted: {
     backgroundColor: 'rgba(197,160,89,0.5)',
@@ -275,10 +270,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 120,
+    paddingBottom: 200,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 30,
+    borderCurve: 'continuous',
     backgroundColor: 'rgba(2,6,23,0.4)',
     marginHorizontal: 4,
   },
@@ -297,5 +293,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 54,
     borderRadius: 32,
+    borderCurve: 'continuous',
   },
 });

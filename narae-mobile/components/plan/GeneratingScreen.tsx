@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeInDown, withRepeat, withTiming, useAnimatedStyle, useSharedValue, Easing } from 'react-native-reanimated';
 import { Plane, Check, Compass, Info } from 'lucide-react-native';
-import { colors, fonts } from '@/lib/theme';
+import { colors, fonts, radius } from '@/lib/theme';
 import type { GenerateProgress } from '@/lib/api/trips';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
@@ -60,24 +60,26 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
       <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 40 }}>
         <PremiumBackground />
         <View style={{
-          width: 80, height: 80, borderRadius: 24,
+          width: 80, height: 80, borderRadius: radius['2xl'],
+          borderCurve: 'continuous',
           backgroundColor: 'rgba(239,68,68,0.1)',
           alignItems: 'center', justifyContent: 'center', marginBottom: 24,
         }}>
           <Text style={{ fontSize: 40 }}>😞</Text>
         </View>
-        <Text style={{ color: '#f8fafc', fontSize: 24, fontFamily: fonts.display, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
+        <Text style={{ color: colors.text, fontSize: 24, fontFamily: fonts.display, textAlign: 'center', marginBottom: 12 }}>
           Oups, un imprévu...
         </Text>
-        <Text style={{ color: '#94a3b8', fontSize: 16, textAlign: 'center', marginBottom: 32, lineHeight: 22 }}>
+        <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sans, textAlign: 'center', marginBottom: 32, lineHeight: 22 }}>
           {error}
         </Text>
         <Pressable onPress={onRetry} style={{ width: '100%' }}>
           <View style={{
-            paddingVertical: 18, borderRadius: 18,
+            paddingVertical: 18, borderRadius: radius.xl,
+            borderCurve: 'continuous',
             backgroundColor: colors.gold, alignItems: 'center',
           }}>
-            <Text style={{ color: colors.bg, fontSize: 16, fontWeight: '800' }}>
+            <Text style={{ color: colors.bg, fontSize: 16, fontFamily: fonts.sansBold }}>
               Réessayer la génération
             </Text>
           </View>
@@ -89,12 +91,13 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
       <PremiumBackground />
-      
+
       <View style={{ width: '100%', padding: 32, alignItems: 'center' }}>
         {/* Animated plane icon */}
         <Animated.View style={[planeStyle, { marginBottom: 40 }]}>
           <View style={{
-            width: 100, height: 100, borderRadius: 32,
+            width: 100, height: 100, borderRadius: radius['4xl'],
+            borderCurve: 'continuous',
             backgroundColor: colors.gold,
             alignItems: 'center', justifyContent: 'center',
             shadowColor: colors.gold, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 20,
@@ -104,20 +107,20 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
         </Animated.View>
 
         {/* Title */}
-        <Text style={{ color: colors.text, fontSize: 32, fontFamily: fonts.display, fontWeight: 'bold', textAlign: 'center' }}>
+        <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, textAlign: 'center' }}>
           Conception Narae
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8, marginBottom: 40 }}>
           <Compass size={16} color={colors.gold} />
-          <Text style={{ color: colors.gold, fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 2 }}>
+          <Text style={{ color: colors.gold, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 2 }}>
             {destination}
           </Text>
         </View>
 
         {/* Status card */}
-        <View style={{ 
-          width: '100%', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 32, padding: 32, 
-          borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+        <View style={{
+          width: '100%', backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: radius['3xl'], borderCurve: 'continuous', padding: 32,
+          borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
           shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.5, shadowRadius: 40,
         }}>
           <View style={{ gap: 12, marginBottom: 32 }}>
@@ -131,7 +134,7 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
               return (
                 <Animated.View key={i} entering={FadeInDown} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                   <View style={{
-                    width: 28, height: 28, borderRadius: 14,
+                    width: 28, height: 28, borderRadius: radius.full,
                     backgroundColor: isDone ? 'rgba(34,197,94,0.2)' : colors.goldBg,
                     alignItems: 'center', justifyContent: 'center',
                   }}>
@@ -142,8 +145,8 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
                     )}
                   </View>
                   <Text style={{
-                    color: isDone ? '#4ade80' : 'white',
-                    fontSize: 15, fontWeight: isCurrent ? '700' : '400',
+                    color: isDone ? '#4ade80' : colors.text,
+                    fontSize: 14, fontFamily: isCurrent ? fonts.sansSemiBold : fonts.sans,
                   }}>
                     {displayLabel}
                   </Text>
@@ -153,15 +156,15 @@ export function GeneratingScreen({ destination, progress, error, onRetry }: Prop
           </View>
 
           {/* Fun fact area */}
-          <View style={{ borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', paddingTop: 24 }}>
+          <View style={{ borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)', paddingTop: 24 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Info size={14} color={colors.gold} />
-              <Text style={{ color: colors.gold, fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              <Text style={{ color: colors.gold, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 }}>
                 Le saviez-vous ?
               </Text>
             </View>
             <Animated.View key={factIndex} entering={FadeIn} style={{ minHeight: 60 }}>
-              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, lineHeight: 22, fontWeight: '500' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontFamily: fonts.sansMedium, lineHeight: 22 }}>
                 {FUN_FACTS[factIndex]}
               </Text>
             </Animated.View>
