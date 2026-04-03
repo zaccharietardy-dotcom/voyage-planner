@@ -1,8 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ArrowRight } from 'lucide-react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +10,7 @@ import { api } from '@/lib/api/client';
 import type { TripPreferences } from '@/lib/types/trip';
 import { colors, fonts, radius } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { StepDestination } from '@/components/plan/StepDestination';
 import { StepOrigin } from '@/components/plan/StepOrigin';
 import { StepWhen } from '@/components/plan/StepWhen';
@@ -19,14 +19,13 @@ import { StepPreferences } from '@/components/plan/StepPreferences';
 import { StepBudget } from '@/components/plan/StepBudget';
 import { StepSummary } from '@/components/plan/StepSummary';
 import { GeneratingScreen } from '@/components/plan/GeneratingScreen';
-import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 const STEP_TITLES = [
   'Destination',
   'Ville de départ',
   'Quand ?',
   'Voyageurs',
-  'Centres d’intérêt',
+  'Centres d\u2019intérêt',
   'Quel budget ?',
   'Résumé',
 ];
@@ -68,16 +67,16 @@ export default function PlanScreen() {
 
   const validate = (): string | null => {
     switch (step) {
-      case 0: // Destination
+      case 0:
         if (!prefs.destination?.trim()) return 'Veuillez choisir une destination';
         return null;
-      case 1: // Origin
+      case 1:
         if (!prefs.origin?.trim()) return 'Indiquez votre ville de départ';
         return null;
-      case 2: // When
+      case 2:
         if (!prefs.startDate) return 'Veuillez choisir une date de départ';
         return null;
-      case 4: // Preferences
+      case 4:
         if (!prefs.activities?.length) return 'Sélectionnez au moins une activité';
         return null;
       default:
@@ -150,37 +149,27 @@ export default function PlanScreen() {
     );
   }
 
-  const entering = FadeIn.duration(200);
-
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          {/* Header */}
-          <View style={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 20 }}>
-            <Text style={{ color: colors.text, fontSize: 36, fontFamily: fonts.display, fontWeight: 'bold', letterSpacing: -0.5 }}>
-              {STEP_TITLES[step]}
-            </Text>
-            {/* Premium Step dots */}
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 18, alignItems: 'center' }}>
+          {/* Header + Step indicator */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{STEP_TITLES[step]}</Text>
+            <View style={styles.dotsRow}>
               {STEP_TITLES.map((_, i) => (
                 <View
                   key={i}
-                  style={{
-                    height: 8,
-                    width: i === step ? 32 : 8,
-                    borderRadius: 4,
-                    backgroundColor: i === step ? colors.gold : i < step ? 'rgba(197,160,89,0.4)' : 'rgba(255,255,255,0.1)',
-                    shadowColor: i === step ? colors.gold : 'transparent',
-                    shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: i === step ? 0.8 : 0,
-                    shadowRadius: i === step ? 10 : 0,
-                  }}
+                  style={[
+                    styles.dot,
+                    i === step && styles.dotActive,
+                    i < step && styles.dotCompleted,
+                  ]}
                 />
               ))}
             </View>
-            <Text style={{ color: colors.textMuted, fontFamily: fonts.sansBold, fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, marginTop: 10 }}>
+            <Text style={styles.stepLabel}>
               Étape {step + 1} / {STEP_TITLES.length}
             </Text>
           </View>
@@ -189,13 +178,13 @@ export default function PlanScreen() {
           <ScrollView
             ref={scrollRef}
             style={{ flex: 1 }}
-            contentContainerStyle={{ padding: 20, paddingBottom: 100, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: radius['4xl'], backgroundColor: 'rgba(2,6,23,0.4)', marginHorizontal: 4 }}
+            contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
             <Pressable onPress={Keyboard.dismiss} style={{ flex: 1 }}>
-              <Animated.View key={step} entering={entering}>
+              <Animated.View key={step} entering={FadeIn.duration(200)}>
                 {step === 0 && <StepDestination prefs={prefs} onChange={updatePrefs} />}
                 {step === 1 && <StepOrigin prefs={prefs} onChange={updatePrefs} />}
                 {step === 2 && <StepWhen prefs={prefs} onChange={updatePrefs} />}
@@ -216,18 +205,19 @@ export default function PlanScreen() {
 
           {/* Navigation buttons */}
           {step < 6 && (
-            <View style={{
-              flexDirection: 'row', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 90,
-              gap: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)',
-              backgroundColor: colors.bg,
-            }}>
-              {step > 0 && (
-                <Button variant="outline" icon={ArrowLeft} onPress={prev} style={{ borderRadius: radius.button, height: 54 }} textStyle={{ fontFamily: fonts.sansMedium }}>
-                  Retour
-                </Button>
-              )}
-              <View style={{ flex: 1 }}>
-                <Button icon={ArrowRight} iconPosition="right" onPress={next} style={{ borderRadius: radius.button, height: 54, backgroundColor: 'white' }} textStyle={{ color: 'black', fontFamily: fonts.sansSemiBold }}>
+            <View style={styles.navContainer}>
+              <View style={styles.navRow}>
+                {step > 0 ? (
+                  <Button variant="outline" onPress={prev} style={styles.navButton}>
+                    Retour
+                  </Button>
+                ) : <View style={styles.navButton} />}
+                <Button
+                  variant="primary"
+                  onPress={next}
+                  style={{ ...styles.navButton, backgroundColor: '#fff' }}
+                  textStyle={{ color: '#000', fontFamily: fonts.sansSemiBold }}
+                >
                   {step === 5 ? 'Récapitulatif' : 'Suivant'}
                 </Button>
               </View>
@@ -238,3 +228,74 @@ export default function PlanScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 36,
+    fontFamily: fonts.display,
+    letterSpacing: -0.5,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 18,
+    alignItems: 'center',
+  },
+  dot: {
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  dotActive: {
+    width: 32,
+    backgroundColor: colors.gold,
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  dotCompleted: {
+    backgroundColor: 'rgba(197,160,89,0.5)',
+  },
+  stepLabel: {
+    color: colors.textMuted,
+    fontFamily: fonts.sansBold,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginTop: 10,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 120,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 30,
+    backgroundColor: 'rgba(2,6,23,0.4)',
+    marginHorizontal: 4,
+  },
+  navContainer: {
+    position: 'absolute',
+    bottom: 90,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+  },
+  navRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  navButton: {
+    flex: 1,
+    height: 54,
+    borderRadius: 32,
+  },
+});

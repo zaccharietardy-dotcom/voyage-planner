@@ -1,52 +1,37 @@
-import { View, Text, TextInput, type TextInputProps } from 'react-native';
-import { useState } from 'react';
-import type { LucideIcon } from 'lucide-react-native';
+import { TextInput, View, StyleSheet, Platform, type TextInputProps } from 'react-native';
+import { colors, fonts, radius } from '@/lib/theme';
 
 interface Props extends TextInputProps {
-  label?: string;
-  error?: string;
-  icon?: LucideIcon;
+  containerStyle?: any;
 }
 
-export function Input({ label, error, icon: Icon, style, ...rest }: Props) {
-  const [focused, setFocused] = useState(false);
-
-  const borderColor = error ? '#ef4444' : focused ? '#c5a059' : '#1e293b';
-
+export function Input({ containerStyle, ...props }: Props) {
   return (
-    <View style={{ gap: 6 }}>
-      {label && (
-        <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '600' }}>{label}</Text>
-      )}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: '#0f172a',
-          borderWidth: 1,
-          borderColor,
-          borderRadius: 12,
-          paddingHorizontal: 14,
-          height: 48,
-          gap: 10,
-        }}
-      >
-        {Icon && <Icon size={18} color={focused ? '#c5a059' : '#64748b'} />}
-        <TextInput
-          style={[{
-            flex: 1,
-            color: '#f8fafc',
-            fontSize: 15,
-          }, style]}
-          placeholderTextColor="#475569"
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          {...rest}
-        />
-      </View>
-      {error && (
-        <Text style={{ color: '#ef4444', fontSize: 12 }}>{error}</Text>
-      )}
+    <View style={[styles.container, containerStyle]}>
+      <TextInput
+        placeholderTextColor={colors.textDim}
+        style={styles.input}
+        selectionColor={colors.gold}
+        {...props}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    height: 56,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+  },
+  input: {
+    color: colors.text,
+    fontSize: 16,
+    fontFamily: fonts.sans,
+    paddingTop: Platform.OS === 'ios' ? 0 : 2, // Minor alignment fix
+  },
+});
