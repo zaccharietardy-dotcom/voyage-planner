@@ -129,14 +129,29 @@ export function buildProgressFromEvent(event: PipelineProgressEvent): GeneratePr
 }
 
 export async function checkGenerateAccess(): Promise<GenerateAccessCheck> {
-  const response = await fetchWithAuth(`${SITE_URL}/api/generate/preflight`);
+  try {
+    const response = await fetchWithAuth(`${SITE_URL}/api/generate/preflight`);
+    const payload = await response.json().catch(() => ({}));
 
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok && typeof payload?.allowed !== 'boolean') {
-    throw new Error(payload.error || `Preflight failed (${response.status})`);
+    // If server returned a proper access check, use it
+    if (typeof payload?.allowed === 'boolean') {
+      return payload as GenerateAccessCheck;
+    }
+
+    // 401 or malformed response — don't block, let the actual generate handle auth
+    if (response.status === 401) {
+      return { allowed: true };
+    }
+
+    if (!response.ok) {
+      return { allowed: true }; // Assume OK, generate will catch real errors
+    }
+
+    return { allowed: true };
+  } catch {
+    // Network error — don't block generation
+    return { allowed: true };
   }
-
-  return payload as GenerateAccessCheck;
 }
 
 export async function answerGenerateQuestion(
