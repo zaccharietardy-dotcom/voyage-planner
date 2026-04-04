@@ -1,9 +1,10 @@
-import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/supabase/types';
 import { sendEmail } from '@/lib/email/send';
 import { tripReadyEmail } from '@/lib/email/templates';
+import { resolveRequestAuth } from '@/lib/server/requestAuth';
+import { persistTripPhotos } from '@/lib/services/photoStorage';
 
 function getServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -29,10 +30,9 @@ function generateShareCode(): string {
 }
 
 // GET /api/trips - Liste tous les voyages de l'utilisateur
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user } = await resolveRequestAuth(request);
 
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -119,8 +119,7 @@ export async function GET() {
 // POST /api/trips - Créer un nouveau voyage
 export async function POST(request: Request) {
   try {
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase, user } = await resolveRequestAuth(request);
 
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
@@ -184,6 +183,17 @@ export async function POST(request: Request) {
         { error: 'Erreur lors de la création du voyage' },
         { status: 500 }
       );
+    }
+
+    // Persist photos to Supabase Storage (non-blocking, best effort)
+    try {
+      const updatedData = await persistTripPhotos(trip.id, trip.data);
+      if (updatedData !== trip.data) {
+        await supabase.from('trips').update({ data: updatedData }).eq('id', trip.id);
+        trip.data = updatedData;
+      }
+    } catch (e) {
+      console.error('[trips] Photo persistence failed (non-blocking):', e);
     }
 
     // Ajouter le créateur comme membre owner
