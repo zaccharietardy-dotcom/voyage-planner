@@ -151,7 +151,7 @@ export default function TripDetailScreen() {
         <Pressable
           onPress={() => {
             Haptics.selectionAsync();
-            router.back();
+            router.canGoBack() ? router.back() : router.replace('/(tabs)');
           }}
         >
           <Text style={styles.errorLink}>Retour</Text>
@@ -174,7 +174,7 @@ export default function TripDetailScreen() {
         title={row.title || row.destination}
         destination={row.destination}
         dateRange={dateRange}
-        onBack={() => router.back()}
+        onBack={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}
         onShare={handleShare}
       />
 

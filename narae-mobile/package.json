@@ -10,7 +10,8 @@
     "test": "jest --runInBand",
     "typecheck": "tsc --noEmit",
     "doctor": "npx expo-doctor",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "smoke": "npm run test && npm run typecheck"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

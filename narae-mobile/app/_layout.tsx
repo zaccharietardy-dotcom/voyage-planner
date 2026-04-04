@@ -72,7 +72,6 @@ export default function RootLayout() {
         <ThemeProvider value={NaraeTheme}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="plan" />
             <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
             <Stack.Screen name="trip/[id]" />
             <Stack.Screen name="preferences" options={{ presentation: 'modal' }} />

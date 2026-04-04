@@ -55,7 +55,7 @@ export default function PreferencesScreen() {
         budget_level: budgetLevel,
         pace,
       });
-      router.back();
+      router.canGoBack() ? router.back() : router.replace("/(tabs)");
     } catch {
       Alert.alert('Erreur', 'Impossible de sauvegarder vos préférences');
     } finally {
@@ -66,7 +66,7 @@ export default function PreferencesScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 12 }}>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
+        <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)")} hitSlop={12}>
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
         <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.sansBold }}>Préférences de voyage</Text>

@@ -13,6 +13,8 @@ jest.mock('@/lib/api/client', () => ({
   api: {
     post: jest.fn(),
   },
+  fetchWithAuth: jest.fn(),
+  getValidSession: jest.fn(),
   getAuthHeaders: jest.fn(),
 }));
 

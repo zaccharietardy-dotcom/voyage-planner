@@ -66,7 +66,7 @@ export default function ForgotPasswordScreen() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
       <ScrollView contentInsetAdjustmentBehavior="automatic" style={{ flex: 1 }} contentContainerStyle={{ padding: 24, paddingTop: 20 }}>
-          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }} style={{ marginBottom: 32, alignSelf: 'flex-start' }}>
+          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.canGoBack() ? router.back() : router.replace("/(tabs)"); }} style={{ marginBottom: 32, alignSelf: 'flex-start' }}>
             <ArrowLeft size={24} color="#94a3b8" />
           </Pressable>
 

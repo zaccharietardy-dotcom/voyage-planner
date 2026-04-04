@@ -7,10 +7,10 @@ jest.mock('@/components/plan/PlanWizardScreen', () => ({
   },
 }));
 
-import PlanScreen from '@/app/plan';
+import PlanScreen from '@/app/(tabs)/plan';
 
 describe('plan route smoke', () => {
-  it('renders the full-screen plan wizard route', () => {
+  it('renders the plan wizard tab route', () => {
     const screen = render(<PlanScreen />);
 
     expect(screen.getByText('plan-wizard-screen')).toBeTruthy();

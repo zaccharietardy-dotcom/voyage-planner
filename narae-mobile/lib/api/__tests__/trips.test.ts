@@ -2,6 +2,8 @@ jest.mock('@/lib/api/client', () => ({
   api: {
     post: jest.fn(),
   },
+  fetchWithAuth: jest.fn((...args: unknown[]) => (global.fetch as jest.Mock)(...args)),
+  getValidSession: jest.fn(),
   getAuthHeaders: jest.fn().mockResolvedValue({
     Authorization: 'Bearer test-token',
   }),
@@ -17,7 +19,10 @@ jest.mock('@/lib/supabase/client', () => ({
   },
 }));
 
-import { buildProgressFromEvent, processSSEBuffer } from '@/lib/api/trips';
+import { buildProgressFromEvent, checkGenerateAccess, processSSEBuffer } from '@/lib/api/trips';
+import { fetchWithAuth } from '@/lib/api/client';
+
+const mockFetchWithAuth = fetchWithAuth as jest.MockedFunction<typeof fetchWithAuth>;
 
 describe('mobile generate SSE parsing', () => {
   beforeEach(() => {
@@ -26,6 +31,7 @@ describe('mobile generate SSE parsing', () => {
       ok: true,
       json: async () => ({ ok: true }),
     }) as jest.Mock;
+    mockFetchWithAuth.mockImplementation((...args: Parameters<typeof fetchWithAuth>) => (global.fetch as jest.Mock)(...args));
   });
 
   it('maps progress events from the web pipeline format', () => {
@@ -133,6 +139,19 @@ describe('mobile generate SSE parsing', () => {
       expect.objectContaining({
         method: 'POST',
       }),
+    );
+  });
+
+  it('uses the authenticated fetch helper for generation preflight', async () => {
+    mockFetchWithAuth.mockResolvedValue({
+      ok: true,
+      json: async () => ({ allowed: true, remaining: 1 }),
+    } as Response);
+
+    await expect(checkGenerateAccess()).resolves.toEqual({ allowed: true, remaining: 1 });
+
+    expect(mockFetchWithAuth).toHaveBeenCalledWith(
+      expect.stringContaining('/api/generate/preflight'),
     );
   });
 });

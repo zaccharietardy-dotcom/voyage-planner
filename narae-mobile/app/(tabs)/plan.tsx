@@ -1,5 +1,5 @@
-import { Redirect } from 'expo-router';
+import { PlanWizardScreen } from '@/components/plan/PlanWizardScreen';
 
-export default function PlanTabRedirect() {
-  return <Redirect href="/plan" />;
+export default function PlanTabScreen() {
+  return <PlanWizardScreen />;
 }

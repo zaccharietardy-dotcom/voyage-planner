@@ -1,7 +1,7 @@
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { SITE_URL } from '@/lib/constants';
-import { getAuthHeaders } from './client';
+import { fetchWithAuth } from './client';
 
 function buildExportFilename() {
   const date = new Date().toISOString().slice(0, 10);
@@ -9,9 +9,7 @@ function buildExportFilename() {
 }
 
 export async function exportAccountData(): Promise<void> {
-  const response = await fetch(`${SITE_URL}/api/account`, {
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetchWithAuth(`${SITE_URL}/api/account`);
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
@@ -37,9 +35,8 @@ export async function exportAccountData(): Promise<void> {
 }
 
 export async function deleteAccount(): Promise<void> {
-  const response = await fetch(`${SITE_URL}/api/account`, {
+  const response = await fetchWithAuth(`${SITE_URL}/api/account`, {
     method: 'DELETE',
-    headers: await getAuthHeaders(),
   });
 
   if (!response.ok) {
