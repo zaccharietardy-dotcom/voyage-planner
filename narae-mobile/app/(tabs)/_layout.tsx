@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { View, Text, Platform, StyleSheet } from 'react-native';
 import { Map, Compass, Plus, Globe, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -54,7 +54,6 @@ function TabIcon({ icon: Icon, label, focused, isCentral }: {
 }
 
 export default function TabLayout() {
-  const router = useRouter();
   const { bottom } = useSafeAreaInsets();
 
   return (
@@ -89,7 +88,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="trips"
         options={{
           title: 'Voyages',
           tabBarIcon: ({ focused }) => <TabIcon icon={Map} label="Voyages" focused={focused} />,
@@ -113,17 +112,14 @@ export default function TabLayout() {
         options={{
           title: 'Creer',
           tabBarIcon: ({ focused }) => <TabIcon icon={Plus} label="Creer" focused={focused} isCentral />,
+          tabBarStyle: { display: 'none' },
         }}
         listeners={{
-          tabPress: (event) => {
-            event.preventDefault();
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            router.push('/plan');
-          },
+          tabPress: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),
         }}
       />
       <Tabs.Screen
-        name="trips"
+        name="index"
         options={{
           title: 'Globe',
           tabBarIcon: ({ focused }) => <TabIcon icon={Globe} label="Globe" focused={focused} />,

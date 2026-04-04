@@ -187,13 +187,13 @@ export default function TripDetailScreen() {
         ))}
       </ScrollView>
 
-      {trip?.transportOptions && trip.transportOptions.length > 0 ? (
+      {activeTab === 'itinerary' && trip?.transportOptions && trip.transportOptions.length > 0 ? (
         <View style={styles.selectorWrap}>
           <TransportSelector options={trip.transportOptions} selectedId={trip.selectedTransport?.id} />
         </View>
       ) : null}
 
-      {trip?.accommodationOptions && trip.accommodationOptions.length > 0 ? (
+      {activeTab === 'itinerary' && trip?.accommodationOptions && trip.accommodationOptions.length > 0 ? (
         <View style={styles.hotelWrap}>
           <HotelSelector options={trip.accommodationOptions} selectedId={trip.accommodation?.id} />
         </View>
