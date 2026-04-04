@@ -5,7 +5,7 @@ import type {
   PipelineProgressEvent,
   PipelineQuestion,
 } from '@/lib/types/pipeline';
-import { api, getAuthHeaders } from './client';
+import { api, fetchWithAuth } from './client';
 import type { Trip, TripPreferences } from '@/lib/types/trip';
 
 // ---------- Types for list items (DB row shape) ----------
@@ -129,9 +129,7 @@ export function buildProgressFromEvent(event: PipelineProgressEvent): GeneratePr
 }
 
 export async function checkGenerateAccess(): Promise<GenerateAccessCheck> {
-  const response = await fetch(`${SITE_URL}/api/generate/preflight`, {
-    headers: await getAuthHeaders(),
-  });
+  const response = await fetchWithAuth(`${SITE_URL}/api/generate/preflight`);
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok && typeof payload?.allowed !== 'boolean') {
@@ -146,11 +144,10 @@ export async function answerGenerateQuestion(
   questionId: string,
   selectedOptionId: string,
 ): Promise<void> {
-  const response = await fetch(`${SITE_URL}/api/generate/answer`, {
+  const response = await fetchWithAuth(`${SITE_URL}/api/generate/answer`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(await getAuthHeaders()),
     },
     body: JSON.stringify({
       sessionId,
@@ -167,14 +164,10 @@ export async function answerGenerateQuestion(
 
 async function requestGenerate(
   payload: Record<string, unknown>,
-  accessToken: string,
 ): Promise<Response> {
-  return fetch(`${SITE_URL}/api/generate`, {
+  return fetchWithAuth(`${SITE_URL}/api/generate`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
@@ -191,35 +184,10 @@ export async function generateTrip(
       : preferences.startDate,
   };
 
-  // Refresh session to ensure valid token before long-running API call
-  await supabase.auth.refreshSession();
-  const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token;
-
-  if (!token) {
-    throw new Error('Session expirée. Veuillez vous reconnecter.');
-  }
-
-  const res = await requestGenerate(payload, token);
+  // fetchWithAuth handles token injection + automatic 401 retry with refresh
+  const res = await requestGenerate(payload);
 
   if (!res.ok) {
-    // 401 = token expired/invalid → try refresh once
-    if (res.status === 401) {
-      const { error: refreshError } = await supabase.auth.refreshSession();
-      if (!refreshError) {
-        const { data: { session: newSession } } = await supabase.auth.getSession();
-        if (newSession?.access_token) {
-          // Retry with fresh token
-          const retry = await requestGenerate(payload, newSession.access_token);
-          if (retry.ok) {
-            const ct = retry.headers.get('content-type') ?? '';
-            if (ct.includes('text/event-stream')) return parseSSEStream(retry, callbacks);
-            return retry.json() as Promise<Trip>;
-          }
-        }
-      }
-      throw new Error('Session expirée. Déconnectez-vous et reconnectez-vous.');
-    }
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || `Generation failed (${res.status})`);
   }
