@@ -19,9 +19,17 @@
 
 import type { Trip, TripPreferences, TransportOptionSummary, Restaurant, Accommodation } from '../types';
 import type { PipelineQuestion } from '../types/pipelineQuestions';
-import type { ActivityCluster, FetchedData, OnPipelineEvent, ScoredActivity, DayTripPack, CityDensityProfile } from './types';
+import type {
+  ActivityCluster,
+  FetchedData,
+  OnPipelineEvent,
+  PipelineMapSnapshot,
+  ScoredActivity,
+  DayTripPack,
+  CityDensityProfile,
+} from './types';
 import type { DayTimeWindow } from './step4-anchor-transport';
-export type { PipelineEvent, OnPipelineEvent, FetchedData } from './types';
+export type { PipelineEvent, OnPipelineEvent, FetchedData, PipelineMapSnapshot } from './types';
 
 // ---------------------------------------------------------------------------
 // AskUser — pause/resume callback for pipeline smart questions
@@ -30,6 +38,7 @@ export type AskUserFn = (question: Omit<PipelineQuestion, 'sessionId'>) => Promi
 
 export interface GenerateTripV2Options {
   askUser?: AskUserFn;
+  onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
 }
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -54,6 +63,7 @@ import { optimizeClusterRouting } from './intra-day-router';
 import { stripPlanningMetaFromDays } from './planning-meta';
 import { rebalanceClustersWithLLM, type LLMRebalanceResult } from './step3b-llm-rebalance';
 import { detectQuestions, applyQuestionAnswers } from './questionDetectors';
+import { buildClusteredMapSnapshot, buildFetchedMapSnapshot } from './snapshots';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -218,9 +228,14 @@ export async function generateTripV2(
   v2Options?: GenerateTripV2Options,
 ): Promise<Trip> {
   if (preferences.cityPlan && preferences.cityPlan.length > 1) {
-    return generateTripV3MultiCity(preferences, onEvent);
+    return generateTripV3MultiCity(preferences, onEvent, v2Options);
   }
-  return generateTripV3(preferences, onEvent, undefined, v2Options?.askUser);
+  return generateTripV3(
+    preferences,
+    onEvent,
+    { onSnapshot: v2Options?.onSnapshot },
+    v2Options?.askUser,
+  );
 }
 
 // ============================================
@@ -248,6 +263,8 @@ export interface GenerateTripV3Options {
   fixtureData?: FetchedData;
   /** Callback to capture FetchedData after step 1 (for fixture recording) */
   onFetchedData?: (data: FetchedData) => void;
+  /** Lightweight cartographic snapshot for streaming clients */
+  onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
 }
 
 export async function generateTripV3(
@@ -281,6 +298,7 @@ export async function generateTripV3(
 
   // Notify caller with FetchedData (for fixture capture)
   options?.onFetchedData?.(data);
+  options?.onSnapshot?.(buildFetchedMapSnapshot(data));
 
   // Step 2: Score and rank activities
   t = Date.now();
@@ -419,6 +437,17 @@ export async function generateTripV3(
   stageTimes['cluster'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created (${dayTripPacks.length} day trip packs)`);
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
+
+  const previewHotels = selectTopHotelsByBarycenter(
+    clusters,
+    data.bookingHotels || [],
+    preferences.budgetLevel || 'medium',
+    undefined,
+    preferences.durationDays,
+    { destination: preferences.destination },
+    3,
+  );
+  options?.onSnapshot?.(buildClusteredMapSnapshot(clusters, previewHotels[0] || null, data));
 
   // Step 3b: LLM rebalance attempt
   const llmResult = await rebalanceClustersWithLLM(
@@ -930,11 +959,16 @@ async function runPipelineFromClusters(
  */
 export async function generateTripV3MultiCity(
   preferences: TripPreferences,
-  onEvent?: OnPipelineEvent
+  onEvent?: OnPipelineEvent,
+  options?: GenerateTripV2Options,
 ): Promise<Trip> {
   const cityPlan = preferences.cityPlan;
   if (!cityPlan || cityPlan.length <= 1) {
-    return generateTripV3(preferences, onEvent);
+    return generateTripV3(
+      preferences,
+      onEvent,
+      { onSnapshot: options?.onSnapshot },
+    );
   }
 
   console.log(`[Pipeline V3] Multi-city trip: ${cityPlan.map(c => `${c.city} (${c.days}d)`).join(' → ')}`);
@@ -959,7 +993,11 @@ export async function generateTripV3MultiCity(
       timestamp: Date.now(),
     });
 
-    const segment = await generateTripV3(cityPrefs, onEvent);
+    const segment = await generateTripV3(
+      cityPrefs,
+      onEvent,
+      { onSnapshot: options?.onSnapshot },
+    );
     segments.push(segment);
 
     // Advance date

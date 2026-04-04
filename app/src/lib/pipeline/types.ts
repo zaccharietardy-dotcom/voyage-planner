@@ -30,6 +30,41 @@ export type PipelineEvent = {
 
 export type OnPipelineEvent = (event: PipelineEvent) => void;
 
+export type PipelineMapMarkerKind =
+  | 'origin'
+  | 'destination'
+  | 'activity'
+  | 'hotel'
+  | 'restaurant'
+  | 'day_trip';
+
+export interface PipelineMapCoordinate {
+  latitude: number;
+  longitude: number;
+}
+
+export interface PipelineMapMarker extends PipelineMapCoordinate {
+  id: string;
+  title: string;
+  kind: PipelineMapMarkerKind;
+  dayNumber?: number;
+  score?: number;
+}
+
+export interface PipelineMapPolyline {
+  id: string;
+  kind: 'day_route';
+  dayNumber?: number;
+  coordinates: PipelineMapCoordinate[];
+}
+
+export interface PipelineMapSnapshot {
+  stage: 'fetched' | 'clustered';
+  center: PipelineMapCoordinate;
+  markers: PipelineMapMarker[];
+  polylines?: PipelineMapPolyline[];
+}
+
 // ============================================
 // Step 1: Fetched Data
 // ============================================
