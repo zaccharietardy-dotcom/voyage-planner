@@ -19,7 +19,7 @@ jest.mock('@/lib/supabase/client', () => ({
   },
 }));
 
-import { buildProgressFromEvent, checkGenerateAccess, processSSEBuffer } from '@/lib/api/trips';
+import { buildProgressFromEvent, checkGenerateAccess, generateTrip, processSSEBuffer } from '@/lib/api/trips';
 import { fetchWithAuth } from '@/lib/api/client';
 
 const mockFetchWithAuth = fetchWithAuth as jest.MockedFunction<typeof fetchWithAuth>;
@@ -153,5 +153,61 @@ describe('mobile generate SSE parsing', () => {
     expect(mockFetchWithAuth).toHaveBeenCalledWith(
       expect.stringContaining('/api/generate/preflight'),
     );
+  });
+
+  it('falls back to buffered SSE parsing when the native response has no readable stream body', async () => {
+    mockFetchWithAuth.mockResolvedValue({
+      ok: true,
+      headers: {
+        get: (name: string) => (name === 'content-type' ? 'text/event-stream' : null),
+      },
+      body: null,
+      text: async () => 'data: {"status":"done","trip":{"id":"trip-buffered","days":[]}}\n\n',
+    } as unknown as Response);
+
+    const trip = await generateTrip({
+      destination: 'Rome',
+      origin: 'Paris',
+      startDate: new Date('2026-04-10T00:00:00.000Z'),
+      durationDays: 3,
+      groupSize: 1,
+      groupType: 'solo',
+      budgetLevel: 'moderate',
+      transport: 'train',
+      activities: ['culture'],
+      dietary: ['none'],
+      mustSee: '',
+      carRental: false,
+      pace: 'moderate',
+    } as any);
+
+    expect(trip).toMatchObject({ id: 'trip-buffered' });
+  });
+
+  it('surfaces buffered SSE error events when stream reading is unavailable', async () => {
+    mockFetchWithAuth.mockResolvedValue({
+      ok: true,
+      headers: {
+        get: (name: string) => (name === 'content-type' ? 'text/event-stream' : null),
+      },
+      body: null,
+      text: async () => 'data: {"status":"error","error":"Session expirée"}\n\n',
+    } as unknown as Response);
+
+    await expect(generateTrip({
+      destination: 'Rome',
+      origin: 'Paris',
+      startDate: new Date('2026-04-10T00:00:00.000Z'),
+      durationDays: 3,
+      groupSize: 1,
+      groupType: 'solo',
+      budgetLevel: 'moderate',
+      transport: 'train',
+      activities: ['culture'],
+      dietary: ['none'],
+      mustSee: '',
+      carRental: false,
+      pace: 'moderate',
+    } as any)).rejects.toThrow('Session expirée');
   });
 });

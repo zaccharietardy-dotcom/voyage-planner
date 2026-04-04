@@ -56,8 +56,9 @@ export async function exportTripToAppleCalendar(trip: Trip): Promise<number> {
   let count = 0;
 
   for (const day of trip.days || []) {
-    for (const item of day.items) {
+    for (const item of day.items ?? []) {
       if (item.type === 'free_time') continue;
+      if (!item.startTime || !item.endTime) continue;
 
       try {
         await Calendar.createEventAsync(calendarId, {
@@ -85,8 +86,8 @@ export async function exportTripToAppleCalendar(trip: Trip): Promise<number> {
 // Google Calendar URL generator
 export function getGoogleCalendarUrl(item: TripItem, day: TripDay): string {
   const dayDate = day.date instanceof Date ? day.date : new Date(day.date);
-  const [startH, startM] = item.startTime.split(':').map(Number);
-  const [endH, endM] = item.endTime.split(':').map(Number);
+  const [startH, startM] = (item.startTime ?? '09:00').split(':').map(Number);
+  const [endH, endM] = (item.endTime ?? '10:00').split(':').map(Number);
 
   const start = new Date(dayDate);
   start.setHours(startH, startM, 0, 0);

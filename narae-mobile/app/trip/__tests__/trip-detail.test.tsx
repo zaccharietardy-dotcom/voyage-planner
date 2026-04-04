@@ -6,7 +6,7 @@ const mockUseApi = jest.fn();
 const mockCacheTripLocally = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ back: mockBack, push: mockPush }),
+  useRouter: () => ({ back: mockBack, push: mockPush, canGoBack: () => true, replace: jest.fn() }),
   useLocalSearchParams: () => ({ id: 'trip-1' }),
 }));
 

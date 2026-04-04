@@ -30,7 +30,7 @@ function getStatus(trip: TripListItem): 'upcoming' | 'active' | 'past' {
   const start = new Date(trip.start_date);
   const end = new Date(trip.end_date);
   if (now < start) return 'upcoming';
-  if (now >= start && now <= end) return 'active';
+  if (now >= start && now < end) return 'active';
   return 'past';
 }
 

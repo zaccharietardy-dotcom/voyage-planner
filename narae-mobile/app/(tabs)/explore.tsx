@@ -75,6 +75,7 @@ export default function ExploreScreen() {
           ? { ...t, user_liked: trip.user_liked, likes_count: trip.likes_count }
           : t,
       ));
+      Alert.alert('Erreur', 'Action impossible');
     }
   }, [user, router]);
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import {
-  View, Text, TextInput, Pressable, FlatList, KeyboardAvoidingView, Platform, StyleSheet,
+  View, Text, TextInput, Pressable, FlatList, KeyboardAvoidingView, StyleSheet,
 } from 'react-native';
 import { Send, Bot, Sparkles } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -80,7 +80,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
     <BottomSheet isOpen={isOpen} onClose={onClose} height={0.85}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={process.env.EXPO_OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={40}
       >
         <View style={styles.header}>

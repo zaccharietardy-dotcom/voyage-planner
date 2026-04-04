@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { View, Text, Pressable, Share, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Share, Alert, StyleSheet } from 'react-native';
 import { Link2, Globe, Lock, Users, Share2, ChevronDown } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
@@ -35,8 +35,11 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
     searchText: `${option.label} ${option.desc}`,
   }));
 
-  const handleCopyLink = () => {
-    Share.share({ message: shareUrl });
+  const handleCopyLink = async () => {
+    try {
+      await Share.share({ message: shareUrl });
+      Alert.alert('Lien copié', shareUrl);
+    } catch {}
   };
 
   const handleNativeShare = async () => {

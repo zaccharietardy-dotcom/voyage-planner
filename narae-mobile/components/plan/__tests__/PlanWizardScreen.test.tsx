@@ -153,6 +153,7 @@ describe('PlanWizardScreen', () => {
   });
 
   it('routes to login from the generation gate when auth is required', async () => {
+    mockUser = null;
     mockCheckGenerateAccess.mockResolvedValue({
       allowed: false,
       action: 'login',

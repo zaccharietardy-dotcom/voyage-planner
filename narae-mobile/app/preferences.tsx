@@ -36,7 +36,7 @@ export default function PreferencesScreen() {
         setBudgetLevel((p.budget_level as BudgetLevel) ?? null);
         setPace((p.pace as PaceLevel) ?? null);
       }
-    });
+    }).catch(() => {});
   }, [user]);
 
   const toggleActivity = (a: ActivityType) =>

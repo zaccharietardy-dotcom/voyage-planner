@@ -47,7 +47,7 @@ describe('mobile API auth helpers', () => {
     });
   });
 
-  it('retries an authenticated fetch once after a 401 using a refreshed session', async () => {
+  it('refreshes before the first authenticated request and retries once after a 401', async () => {
     mockSupabase.auth.getSession.mockResolvedValue({
       data: {
         session: {
@@ -76,7 +76,7 @@ describe('mobile API auth helpers', () => {
       1,
       'https://naraevoyage.com/api/generate/preflight',
       expect.objectContaining({
-        headers: { Authorization: 'Bearer token-a' },
+        headers: { Authorization: 'Bearer token-b' },
       }),
     );
     expect(global.fetch).toHaveBeenNthCalledWith(

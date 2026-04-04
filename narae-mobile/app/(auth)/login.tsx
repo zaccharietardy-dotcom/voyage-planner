@@ -111,10 +111,12 @@ export default function LoginScreen() {
         const hashParams = new URLSearchParams(new URL(result.url).hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
-        if (accessToken && refreshToken) {
-          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-          router.replace(redirectPath as Href);
+        if (!accessToken || !refreshToken) {
+          Alert.alert('Erreur', 'La connexion Google n\'a pas retourné de session valide.');
+          return;
         }
+        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        router.replace(redirectPath as Href);
       }
     } catch {
       Alert.alert('Erreur', 'Connexion Google impossible');
