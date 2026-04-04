@@ -20,10 +20,10 @@ function extractBearerToken(request: Request | NextRequest): string | null {
   return match?.[1]?.trim() || null;
 }
 
-function createBearerClient(accessToken: string): SupabaseClient<Database> {
+async function createBearerClient(accessToken: string): Promise<SupabaseClient<Database>> {
   const publicEnv = getPublicEnv();
 
-  return createClient<Database>(
+  const client = createClient<Database>(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
     publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
@@ -31,25 +31,25 @@ function createBearerClient(accessToken: string): SupabaseClient<Database> {
         autoRefreshToken: false,
         persistSession: false,
       },
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
     },
   );
+
+  // Inject the access token into the client's internal session state.
+  // This is necessary because getUser() reads from internal state, NOT from global.headers.
+  await client.auth.setSession({
+    access_token: accessToken,
+    refresh_token: '',
+  });
+
+  return client;
 }
 
 export async function resolveRequestAuth(request: Request | NextRequest): Promise<RequestAuthResult> {
   const bearerToken = extractBearerToken(request);
 
   if (bearerToken) {
-    const supabase = createBearerClient(bearerToken);
-    const { data, error } = await supabase.auth.getUser(bearerToken);
-
-    if (error) {
-      console.error('[requestAuth] Bearer getUser failed:', error.message, '| token prefix:', bearerToken.substring(0, 20));
-    }
+    const supabase = await createBearerClient(bearerToken);
+    const { data, error } = await supabase.auth.getUser();
 
     if (!error && data.user) {
       return {
@@ -59,11 +59,14 @@ export async function resolveRequestAuth(request: Request | NextRequest): Promis
       };
     }
 
-    // Bearer failed — try cookie as fallback (mobile might have stale token but valid cookie)
+    if (error) {
+      console.error('[requestAuth] Bearer auth failed:', error.message);
+    }
+
+    // Bearer failed — try cookie fallback
     const cookieSupabase = await createRouteHandlerClient();
     const { data: cookieData } = await cookieSupabase.auth.getUser();
     if (cookieData.user) {
-      console.log('[requestAuth] Bearer failed but cookie auth succeeded for user:', cookieData.user.id);
       return {
         authMethod: 'cookie',
         supabase: cookieSupabase,

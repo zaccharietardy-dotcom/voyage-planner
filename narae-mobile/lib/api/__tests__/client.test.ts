@@ -47,7 +47,7 @@ describe('mobile API auth helpers', () => {
     });
   });
 
-  it('refreshes before the first authenticated request and retries once after a 401', async () => {
+  it('uses current token first, then refreshes and retries on 401', async () => {
     mockSupabase.auth.getSession.mockResolvedValue({
       data: {
         session: {
@@ -72,13 +72,15 @@ describe('mobile API auth helpers', () => {
     const response = await fetchWithAuth('https://naraevoyage.com/api/generate/preflight');
 
     expect(response.status).toBe(200);
+    // First call uses current token (no pre-refresh)
     expect(global.fetch).toHaveBeenNthCalledWith(
       1,
       'https://naraevoyage.com/api/generate/preflight',
       expect.objectContaining({
-        headers: { Authorization: 'Bearer token-b' },
+        headers: { Authorization: 'Bearer token-a' },
       }),
     );
+    // After 401, refreshes and retries with new token
     expect(global.fetch).toHaveBeenNthCalledWith(
       2,
       'https://naraevoyage.com/api/generate/preflight',

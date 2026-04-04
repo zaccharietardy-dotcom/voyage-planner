@@ -80,8 +80,7 @@ export async function fetchWithAuth(
     if (!error && data.session?.access_token) {
       return fetchWithAuth(input, init, true, data.session.access_token);
     }
-    // If refresh fails, sign out to clear corrupted session
-    await supabase.auth.signOut();
+    // Don't sign out — let the UI handle the 401
   }
 
   return response;
