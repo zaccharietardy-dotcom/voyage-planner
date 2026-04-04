@@ -45,14 +45,29 @@ export async function resolveRequestAuth(request: Request | NextRequest): Promis
 
   if (bearerToken) {
     const supabase = createBearerClient(bearerToken);
-    // Pass token explicitly — getUser() without args may not use the global header
     const { data, error } = await supabase.auth.getUser(bearerToken);
+
+    if (error) {
+      console.error('[requestAuth] Bearer getUser failed:', error.message, '| token prefix:', bearerToken.substring(0, 20));
+    }
 
     if (!error && data.user) {
       return {
         authMethod: 'bearer',
         supabase,
         user: data.user,
+      };
+    }
+
+    // Bearer failed — try cookie as fallback (mobile might have stale token but valid cookie)
+    const cookieSupabase = await createRouteHandlerClient();
+    const { data: cookieData } = await cookieSupabase.auth.getUser();
+    if (cookieData.user) {
+      console.log('[requestAuth] Bearer failed but cookie auth succeeded for user:', cookieData.user.id);
+      return {
+        authMethod: 'cookie',
+        supabase: cookieSupabase,
+        user: cookieData.user,
       };
     }
 
