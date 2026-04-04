@@ -129,11 +129,12 @@ export default function RegisterScreen() {
         return;
       }
 
-      await fetch(`${SITE_URL}/api/auth/send-verification`, {
+      // Best-effort email send — don't block registration if it fails
+      fetch(`${SITE_URL}/api/auth/send-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, firstName }),
-      });
+      }).catch(() => {});
 
       setSuccess(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

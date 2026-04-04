@@ -5,7 +5,7 @@ import {
 import { Send, Bot, Sparkles } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { supabase } from '@/lib/supabase/client';
+import { fetchWithAuth } from '@/lib/api/client';
 import { SITE_URL } from '@/lib/constants';
 
 interface Props {
@@ -34,39 +34,39 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
   const [sending, setSending] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
+  const msgIdRef = useRef(0);
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || sending) return;
 
-    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', content: text.trim() };
+    const userMsgId = `msg-${++msgIdRef.current}`;
+    const userMsg: ChatMessage = { id: userMsgId, role: 'user', content: text.trim() };
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setSending(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      const res = await fetch(`${SITE_URL}/api/trips/${tripId}/chat`, {
+      const res = await fetchWithAuth(`${SITE_URL}/api/trips/${tripId}/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ message: text.trim(), history: messages }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text.trim(),
+          // Use functional access to get latest messages
+          history: [...messages, userMsg],
+        }),
       });
 
       if (!res.ok) throw new Error('Erreur de réponse');
 
       const data = await res.json();
-      const assistantMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+      setMessages((prev) => [...prev, {
+        id: `msg-${++msgIdRef.current}`,
         role: 'assistant',
         content: data.response || data.message || 'Je n\'ai pas pu traiter votre demande.',
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
+      }]);
     } catch {
       setMessages((prev) => [...prev, {
-        id: (Date.now() + 1).toString(),
+        id: `msg-${++msgIdRef.current}`,
         role: 'assistant',
         content: 'Désolé, une erreur est survenue. Réessayez.',
       }]);

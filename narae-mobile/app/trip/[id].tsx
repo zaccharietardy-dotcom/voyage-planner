@@ -100,18 +100,22 @@ export default function TripDetailScreen() {
   };
 
   const handleBookingToggle = useCallback(async (itemId: string) => {
+    if (!trip) return;
     Haptics.selectionAsync();
-    setBookedItems((prev) => {
-      const current = prev[itemId]?.booked ?? false;
-      return { ...prev, [itemId]: { booked: !current } };
-    });
+    const oldBooked = bookedItems[itemId]?.booked ?? false;
+    const newBooked = !oldBooked;
+
+    // Optimistic update
+    setBookedItems((prev) => ({ ...prev, [itemId]: { booked: newBooked } }));
 
     try {
-      const updated = { ...bookedItems, [itemId]: { booked: !(bookedItems[itemId]?.booked ?? false) } };
       await supabase.from('trips').update({
-        data: { ...trip, bookedItems: updated },
+        booked_items: { ...bookedItems, [itemId]: { booked: newBooked } },
       }).eq('id', id);
-    } catch {}
+    } catch {
+      // Rollback on failure
+      setBookedItems((prev) => ({ ...prev, [itemId]: { booked: oldBooked } }));
+    }
   }, [bookedItems, trip, id]);
 
   const handleVisibilityChange = useCallback(async (nextVisibility: 'public' | 'friends' | 'private') => {
