@@ -15,72 +15,75 @@ export interface RequestAuthResult {
 function extractBearerToken(request: Request | NextRequest): string | null {
   const header = request.headers.get('authorization');
   if (!header) return null;
-
   const match = header.match(/^Bearer\s+(.+)$/i);
   return match?.[1]?.trim() || null;
 }
 
-async function createBearerClient(accessToken: string): Promise<SupabaseClient<Database>> {
+/**
+ * Validate a bearer token by calling the Supabase auth API directly.
+ * This bypasses all SDK client state management issues.
+ */
+async function validateBearerToken(accessToken: string): Promise<User | null> {
   const publicEnv = getPublicEnv();
 
-  const client = createClient<Database>(
+  try {
+    const response = await fetch(`${publicEnv.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        apikey: publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      console.error('[requestAuth] Bearer validation failed:', response.status, body.substring(0, 100));
+      return null;
+    }
+
+    const user = await response.json();
+    return user as User;
+  } catch (error) {
+    console.error('[requestAuth] Bearer validation network error:', error);
+    return null;
+  }
+}
+
+function createAuthedClient(accessToken: string): SupabaseClient<Database> {
+  const publicEnv = getPublicEnv();
+  return createClient<Database>(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
     publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
     },
   );
-
-  // Inject the access token into the client's internal session state.
-  // This is necessary because getUser() reads from internal state, NOT from global.headers.
-  await client.auth.setSession({
-    access_token: accessToken,
-    refresh_token: '',
-  });
-
-  return client;
 }
 
 export async function resolveRequestAuth(request: Request | NextRequest): Promise<RequestAuthResult> {
   const bearerToken = extractBearerToken(request);
 
   if (bearerToken) {
-    const supabase = await createBearerClient(bearerToken);
-    const { data, error } = await supabase.auth.getUser();
+    // Validate token directly against Supabase auth API — no SDK quirks
+    const user = await validateBearerToken(bearerToken);
 
-    if (!error && data.user) {
-      return {
-        authMethod: 'bearer',
-        supabase,
-        user: data.user,
-      };
-    }
-
-    if (error) {
-      console.error('[requestAuth] Bearer auth failed:', error.message);
+    if (user) {
+      // Create a client with the token for subsequent DB queries
+      const supabase = createAuthedClient(bearerToken);
+      return { authMethod: 'bearer', supabase, user };
     }
 
     // Bearer failed — try cookie fallback
     const cookieSupabase = await createRouteHandlerClient();
     const { data: cookieData } = await cookieSupabase.auth.getUser();
     if (cookieData.user) {
-      return {
-        authMethod: 'cookie',
-        supabase: cookieSupabase,
-        user: cookieData.user,
-      };
+      return { authMethod: 'cookie', supabase: cookieSupabase, user: cookieData.user };
     }
 
-    return {
-      authMethod: 'none',
-      supabase,
-      user: null,
-    };
+    return { authMethod: 'none', supabase: createAuthedClient(bearerToken), user: null };
   }
 
+  // No bearer token — cookie auth
   const supabase = await createRouteHandlerClient();
   const { data } = await supabase.auth.getUser();
 
