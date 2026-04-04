@@ -197,7 +197,7 @@ export function PlanWizardScreen() {
 
     try {
       const access = await checkGenerateAccess();
-      if (!access.allowed) {
+      if (!access.allowed && !(access.action === 'login' && user)) {
         setGate({ action: access.action, reason: access.reason });
         setIsGenerating(false);
         return;
@@ -283,7 +283,7 @@ export function PlanWizardScreen() {
     }
   }, [goTo, handleGenerate, isGenerating, prefs, step, updatePrefs]);
 
-  if (gate && gateChecked) {
+  if (gate && gateChecked && !(gate.action === 'login' && user)) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <PremiumBackground />
