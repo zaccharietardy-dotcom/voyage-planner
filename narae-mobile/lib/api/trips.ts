@@ -133,20 +133,23 @@ export async function checkGenerateAccess(): Promise<GenerateAccessCheck> {
     const response = await fetchWithAuth(`${SITE_URL}/api/generate/preflight`);
     const payload = await response.json().catch(() => ({}));
 
-    // If server returned a proper access check, use it
+    // Server returned a proper access check (allowed/upgrade/login) — use it
     if (typeof payload?.allowed === 'boolean') {
       return payload as GenerateAccessCheck;
     }
 
-    // 401 or malformed response — don't block, let the actual generate handle auth
+    // 401 without proper payload — check if user has a session
     if (response.status === 401) {
-      return { allowed: true };
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        // User is authenticated but preflight rejected token — skip preflight, let generate handle it
+        return { allowed: true };
+      }
+      // No session — user needs to log in
+      return { allowed: false, action: 'login', reason: 'Connectez-vous pour générer un voyage.' };
     }
 
-    if (!response.ok) {
-      return { allowed: true }; // Assume OK, generate will catch real errors
-    }
-
+    // Other errors — don't block
     return { allowed: true };
   } catch {
     // Network error — don't block generation
