@@ -58,10 +58,10 @@ export async function fetchWithAuth(
   retried = false,
   accessToken?: string,
 ): Promise<Response> {
-  // On first call, always try to get a fresh token
+  // Use current token as-is — don't force refresh (can invalidate valid tokens)
   if (!accessToken && !retried) {
-    const fresh = await getValidSession({ forceRefresh: true, minTtlSeconds: 30 });
-    accessToken = fresh?.access_token ?? undefined;
+    const current = await getValidSession({ forceRefresh: false, minTtlSeconds: 30 });
+    accessToken = current?.access_token ?? undefined;
   }
 
   const response = await fetch(input, {

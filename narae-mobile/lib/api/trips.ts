@@ -250,24 +250,7 @@ export async function generateTrip(
       : preferences.startDate,
   };
 
-  // Verify we have a valid session before calling generate
-  const { data: { session: preCheckSession } } = await supabase.auth.getSession();
-  if (!preCheckSession?.access_token) {
-    // No local session at all — need to login
-    throw new Error('Veuillez vous reconnecter — aucune session active.');
-  }
-
-  // Validate token with Supabase directly before sending to our API
-  const { data: userData, error: userError } = await supabase.auth.getUser(preCheckSession.access_token);
-  if (userError || !userData.user) {
-    // Token exists but Supabase rejects it — try refresh
-    const { data: refreshed } = await supabase.auth.refreshSession();
-    if (!refreshed.session?.access_token) {
-      throw new Error('Session corrompue. Déconnectez-vous puis reconnectez-vous.');
-    }
-  }
-
-  // Now call generate with fetchWithAuth (which also handles 401 retry)
+  // fetchWithAuth handles auth: sends current token, retries on 401 with refresh
   const res = await requestGenerate(payload);
 
   if (!res.ok) {
