@@ -190,6 +190,54 @@ async function requestGenerate(
   });
 }
 
+function extractTripFromRawSSE(raw: string): Trip | null {
+  const tripKeyIndex = raw.indexOf('"trip"');
+  if (tripKeyIndex === -1) return null;
+
+  const wrapperStart = raw.lastIndexOf('{', tripKeyIndex);
+  if (wrapperStart === -1) return null;
+
+  try {
+    const message = JSON.parse(raw.slice(wrapperStart));
+    if (message.status === 'done' && message.trip) {
+      return message.trip as Trip;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+async function parseSSETextFallback(
+  res: Response,
+  callbacks: GenerateCallbacks,
+): Promise<Trip> {
+  const raw = await res.text();
+  const normalized = raw.endsWith('\n\n') ? raw : `${raw}\n\n`;
+  const processed = await processSSEBuffer(normalized, {
+    onProgress: callbacks.onProgress,
+    onSnapshot: callbacks.onSnapshot,
+    // A buffered fallback cannot ask questions interactively.
+    onQuestion: undefined,
+  }, null);
+
+  if (processed.trip) {
+    return processed.trip;
+  }
+
+  if (processed.error) {
+    throw new Error(processed.error);
+  }
+
+  const extractedTrip = extractTripFromRawSSE(raw);
+  if (extractedTrip) {
+    return extractedTrip;
+  }
+
+  throw new Error('Generation produced no readable result');
+}
+
 export async function generateTrip(
   preferences: TripPreferences,
   callbacks: GenerateCallbacks = {},
@@ -202,12 +250,33 @@ export async function generateTrip(
       : preferences.startDate,
   };
 
-  // fetchWithAuth handles token injection + automatic 401 retry with refresh
+  // Verify we have a valid session before calling generate
+  const { data: { session: preCheckSession } } = await supabase.auth.getSession();
+  if (!preCheckSession?.access_token) {
+    // No local session at all — need to login
+    throw new Error('Veuillez vous reconnecter — aucune session active.');
+  }
+
+  // Validate token with Supabase directly before sending to our API
+  const { data: userData, error: userError } = await supabase.auth.getUser(preCheckSession.access_token);
+  if (userError || !userData.user) {
+    // Token exists but Supabase rejects it — try refresh
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    if (!refreshed.session?.access_token) {
+      throw new Error('Session corrompue. Déconnectez-vous puis reconnectez-vous.');
+    }
+  }
+
+  // Now call generate with fetchWithAuth (which also handles 401 retry)
   const res = await requestGenerate(payload);
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || `Generation failed (${res.status})`);
+    const status = res.status;
+    if (status === 401) {
+      throw new Error('Le serveur a rejeté votre session. Déconnectez-vous de l\'app puis reconnectez-vous.');
+    }
+    throw new Error(err.error || `Erreur génération (${status})`);
   }
 
   // The generate endpoint may stream SSE or return JSON directly.
@@ -215,6 +284,10 @@ export async function generateTrip(
   const contentType = res.headers.get('content-type') ?? '';
 
   if (contentType.includes('text/event-stream')) {
+    const body = res.body as { getReader?: () => ReadableStreamDefaultReader<Uint8Array> } | null;
+    if (!body?.getReader) {
+      return parseSSETextFallback(res, callbacks);
+    }
     return parseSSEStream(res, callbacks);
   }
 
