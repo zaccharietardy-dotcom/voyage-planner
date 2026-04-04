@@ -26,21 +26,26 @@ function extractBearerToken(request: Request | NextRequest): string | null {
 async function validateBearerToken(accessToken: string): Promise<User | null> {
   const publicEnv = getPublicEnv();
 
+  const supabaseUrl = publicEnv.NEXT_PUBLIC_SUPABASE_URL;
+  const apiKey = publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  console.log('[requestAuth] validateBearerToken called, supabaseUrl:', supabaseUrl, 'tokenPrefix:', accessToken.substring(0, 20));
+
   try {
-    const response = await fetch(`${publicEnv.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`, {
+    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        apikey: publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        apikey: apiKey,
       },
     });
 
+    const body = await response.text();
+    console.log('[requestAuth] Supabase /auth/v1/user response:', response.status, body.substring(0, 200));
+
     if (!response.ok) {
-      const body = await response.text().catch(() => '');
-      console.error('[requestAuth] Bearer validation failed:', response.status, body.substring(0, 100));
       return null;
     }
 
-    const user = await response.json();
+    const user = JSON.parse(body);
     return user as User;
   } catch (error) {
     console.error('[requestAuth] Bearer validation network error:', error);

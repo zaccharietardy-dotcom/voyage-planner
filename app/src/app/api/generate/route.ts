@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { generateTripV2, type PipelineEvent } from '@/lib/pipeline';
+import { generateTripV2, type PipelineEvent, type PipelineMapSnapshot } from '@/lib/pipeline';
 import { TripPreferences } from '@/lib/types';
 import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
 import { normalizeCity } from '@/lib/services/cityNormalization';
-import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 import { checkAndIncrementRateLimit } from '@/lib/server/dbRateLimit';
+import { resolveRequestAuth } from '@/lib/server/requestAuth';
 import { registerQuestion, cleanupSession } from './sessionStore';
 import { generateTripSchema } from '@/lib/validations/generate';
 
@@ -29,12 +29,15 @@ export async function POST(request: NextRequest) {
     const validatedBody = parsed.data;
 
     // Check subscription quota
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const authHeader = request.headers.get('authorization');
+    console.log('[generate] Auth header present:', !!authHeader, authHeader ? `prefix: ${authHeader.substring(0, 30)}...` : 'none');
+
+    const { supabase, user, authMethod } = await resolveRequestAuth(request);
+    console.log('[generate] Auth result:', { authMethod, userId: user?.id ?? 'null', hasUser: !!user });
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Non authentifié' },
+        { error: 'Non authentifié', debug: { authMethod, headerPresent: !!authHeader } },
         { status: 401 }
       );
     }
@@ -143,6 +146,14 @@ export async function POST(request: NextRequest) {
             } catch { /* stream closed */ }
           };
 
+          const onSnapshot = (snapshot: PipelineMapSnapshot) => {
+            try {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ status: 'snapshot', snapshot })}\n\n`)
+              );
+            } catch { /* stream closed */ }
+          };
+
           // askUser: pause pipeline, emit question via SSE, wait for answer
           const askUser = (question: Omit<PipelineQuestion, 'sessionId'>): Promise<string> => {
             const fullQuestion: PipelineQuestion = { ...question, sessionId };
@@ -169,7 +180,7 @@ export async function POST(request: NextRequest) {
           };
 
           const trip = await Promise.race([
-            generateTripV2(preferences, onEvent, { askUser }),
+            generateTripV2(preferences, onEvent, { askUser, onSnapshot }),
             timeoutPromise
           ]);
 
