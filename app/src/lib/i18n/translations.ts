@@ -215,6 +215,9 @@ export const translations = {
     'generating.selectAddresses': 'Sélection des adresses de qualité...',
     'generating.buildPlanning': 'Construction du planning jour par jour...',
     'generating.finalizing': 'Finalisation de votre voyage...',
+    'generating.errorTitle': 'Oups, quelque chose s\'est mal passé',
+    'generating.errorDesc': 'La génération de votre voyage a rencontré un problème. Vous pouvez réessayer.',
+    'generating.retry': 'Réessayer',
 
     // Landing - Hero
     'hero.badge': 'Planification experte haut de gamme, en français',
@@ -823,6 +826,9 @@ export const translations = {
     'generating.selectAddresses': 'Selecting quality addresses...',
     'generating.buildPlanning': 'Building the day-by-day schedule...',
     'generating.finalizing': 'Finalizing your trip...',
+    'generating.errorTitle': 'Oops, something went wrong',
+    'generating.errorDesc': 'Your trip generation encountered a problem. You can try again.',
+    'generating.retry': 'Try again',
 
     // Landing - Hero
     'hero.badge': 'Premium expert travel planning',
@@ -1431,6 +1437,9 @@ export const translations = {
     'generating.selectAddresses': 'Seleccionando direcciones de calidad...',
     'generating.buildPlanning': 'Construyendo la planificación día a día...',
     'generating.finalizing': 'Finalizando tu viaje...',
+    'generating.errorTitle': 'Ups, algo salió mal',
+    'generating.errorDesc': 'La generación de tu viaje encontró un problema. Puedes intentarlo de nuevo.',
+    'generating.retry': 'Intentar de nuevo',
 
     // Landing - Hero
     'hero.badge': 'Planificación premium expert',
@@ -2039,6 +2048,9 @@ export const translations = {
     'generating.selectAddresses': 'Wähle Qualitätsadressen aus...',
     'generating.buildPlanning': 'Erstelle die Tagesplanung...',
     'generating.finalizing': 'Schließe deine Reise ab...',
+    'generating.errorTitle': 'Ups, etwas ist schiefgelaufen',
+    'generating.errorDesc': 'Bei der Erstellung deiner Reise ist ein Problem aufgetreten. Du kannst es erneut versuchen.',
+    'generating.retry': 'Erneut versuchen',
 
     // Landing - Hero
     'hero.badge': 'Premium-KI-Reiseplanung',
@@ -2647,6 +2659,9 @@ export const translations = {
     'generating.selectAddresses': 'Selezione degli indirizzi di qualità...',
     'generating.buildPlanning': 'Costruzione della pianificazione giorno per giorno...',
     'generating.finalizing': 'Finalizzazione del tuo viaggio...',
+    'generating.errorTitle': 'Ops, qualcosa è andato storto',
+    'generating.errorDesc': 'La generazione del tuo viaggio ha riscontrato un problema. Puoi riprovare.',
+    'generating.retry': 'Riprova',
 
     // Landing - Hero
     'hero.badge': 'Pianificazione viaggi premium expert',
@@ -3255,6 +3270,9 @@ export const translations = {
     'generating.selectAddresses': 'Selecionando endereços de qualidade...',
     'generating.buildPlanning': 'Construindo o planejamento dia a dia...',
     'generating.finalizing': 'Finalizando sua viagem...',
+    'generating.errorTitle': 'Ops, algo deu errado',
+    'generating.errorDesc': 'A geração da sua viagem encontrou um problema. Você pode tentar novamente.',
+    'generating.retry': 'Tentar novamente',
 
     // Landing - Hero
     'hero.badge': 'Planejamento de viagens premium expert',

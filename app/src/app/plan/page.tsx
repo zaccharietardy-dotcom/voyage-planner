@@ -69,6 +69,7 @@ export default function PlanPage() {
   const questionResolverRef = useRef<((optionId: string) => void) | null>(null);
   const [gate, setGate] = useState<null | 'login' | 'upgrade'>(null);
   const [gateMessage, setGateMessage] = useState('');
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const STEPS = STEP_KEYS.map((key, i) => ({ id: i + 1, label: t(key) }));
   const [gateChecked, setGateChecked] = useState(false);
@@ -407,12 +408,18 @@ export default function PlanPage() {
       } else if (message.includes('QUOTA_EXCEEDED') || message.includes('Limite') || message.includes('RATE_LIMIT') || message.includes('Trop de génération')) {
         router.push('/pricing?reason=' + encodeURIComponent(t('plan.error.upgradePro')));
       } else {
-        toast.error(t('plan.error.generic'));
+        setGenerationError(message);
       }
     } finally {
       setIsGenerating(false);
     }
   };
+
+  const handleRetry = useCallback(() => {
+    setGenerationError(null);
+    // Re-trigger generation
+    handleGenerate();
+  }, []);
 
   const renderedStep = useMemo(() => {
     switch (currentStep) {
@@ -527,13 +534,15 @@ export default function PlanPage() {
   return (
     <div className="min-h-screen bg-[#020617] relative">
       <PremiumBackground />
-      {isGenerating && (
+      {(isGenerating || generationError) && (
         <GeneratingScreen
           destination={generatingDestination}
           durationDays={generatingDuration}
           pipelineStep={pipelineStep}
           question={currentQuestion}
           onAnswer={handleQuestionAnswer}
+          error={generationError ?? undefined}
+          onRetry={handleRetry}
         />
       )}
 

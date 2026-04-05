@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Plane, Globe, Utensils, Landmark, Languages, Info, Banknote, Sun, Compass } from 'lucide-react';
+import { Loader2, Plane, Globe, Utensils, Landmark, Languages, Info, Banknote, Sun, Compass, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { QuestionCard } from './QuestionCard';
@@ -405,9 +406,13 @@ interface GeneratingScreenProps {
   question?: import('@/lib/types/pipelineQuestions').PipelineQuestion | null;
   /** Called when user answers a question */
   onAnswer?: (questionId: string, selectedOptionId: string) => void;
+  /** Error message — when set, renders error UI instead of loading animation */
+  error?: string;
+  /** Called when user clicks retry */
+  onRetry?: () => void;
 }
 
-export function GeneratingScreen({ destination, durationDays, pipelineStep, question, onAnswer }: GeneratingScreenProps) {
+export function GeneratingScreen({ destination, durationDays, pipelineStep, question, onAnswer, error, onRetry }: GeneratingScreenProps) {
   const { t } = useTranslation();
   const [factIndex, setFactIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
@@ -477,6 +482,52 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep, ques
 
   const progressPercent = pipelineProgress ?? Math.min((stepIndex / (PIPELINE_STEPS.length - 1)) * 100, 95);
   const displayedStep = pipelineStep || PIPELINE_STEPS[stepIndex];
+
+  // ── Error state ──
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#020617]"
+        role="alert"
+      >
+        <PremiumBackground />
+        <div className="mx-auto w-full max-w-lg px-6 relative z-10 text-center space-y-6">
+          {/* Error icon */}
+          <div className="mx-auto w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+            <AlertTriangle className="h-9 w-9 text-red-400" />
+          </div>
+
+          {/* Title */}
+          <h2 className="font-display text-2xl font-bold text-white">
+            {t('generating.errorTitle')}
+          </h2>
+
+          {/* Description */}
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+            {t('generating.errorDesc')}
+          </p>
+
+          {/* Error detail */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl px-5 py-4 text-left">
+            <p className="text-xs text-muted-foreground font-mono break-words">{error}</p>
+          </div>
+
+          {/* Retry button */}
+          {onRetry && (
+            <Button
+              onClick={onRetry}
+              className="h-14 px-8 rounded-2xl bg-gold hover:bg-gold/90 text-black font-bold text-base gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              {t('generating.retry')}
+            </Button>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

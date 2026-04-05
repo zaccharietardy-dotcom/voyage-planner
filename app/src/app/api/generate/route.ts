@@ -14,7 +14,11 @@ export const maxDuration = 300; // 5 minutes max
 
 const FREE_LIFETIME_LIMIT = 1;
 
+// Concurrency guard: one generation per user at a time (in-memory, per-instance)
+const activeGenerations = new Set<string>();
+
 export async function POST(request: NextRequest) {
+  let activeUserId: string | null = null;
   try {
     const body = await request.json();
 
@@ -93,6 +97,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Concurrency guard: one generation at a time per user
+    if (activeGenerations.has(user.id)) {
+      return NextResponse.json(
+        { error: 'Une génération est déjà en cours. Veuillez patienter.' },
+        { status: 429 }
+      );
+    }
+    activeGenerations.add(user.id);
+    activeUserId = user.id;
+
     // Normaliser les noms de villes
     const normalizedOrigin = await normalizeCity(validatedBody.origin);
     const normalizedDestination = await normalizeCity(validatedBody.destination);
@@ -126,6 +140,15 @@ export async function POST(request: NextRequest) {
             clearInterval(keepAlive);
           }
         }, 10_000);
+
+        // Warning SSE at 3 minutes (before the hard 4m45 timeout)
+        const warningTimeout = setTimeout(() => {
+          try {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ type: 'api_call', step: 99, label: 'Génération longue — veuillez patienter...', timestamp: Date.now() })}\n\n`)
+            );
+          } catch { /* stream may be closed */ }
+        }, 180_000);
 
         try {
           // Timeout explicite de 4min45 (avant le timeout Vercel de 5 min)
@@ -185,6 +208,8 @@ export async function POST(request: NextRequest) {
           ]);
 
           clearInterval(keepAlive);
+          clearTimeout(warningTimeout);
+          activeGenerations.delete(user.id);
 
           // Sérialiser le trip — peut être gros (100KB+), log la taille
           let tripJson: string;
@@ -207,6 +232,8 @@ export async function POST(request: NextRequest) {
           controller.close();
         } catch (error) {
           clearInterval(keepAlive);
+          clearTimeout(warningTimeout);
+          activeGenerations.delete(user.id);
           cleanupSession(sessionId);
           const message = error instanceof Error ? error.message : String(error);
           const stack = error instanceof Error ? error.stack : '';
@@ -240,6 +267,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (activeUserId) activeGenerations.delete(activeUserId);
     const message = error instanceof Error ? error.message : String(error);
     console.error('Erreur de génération:', message);
     Sentry.captureException(error);
