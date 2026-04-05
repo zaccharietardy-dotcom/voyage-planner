@@ -1,12 +1,16 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, Text, SectionList, ScrollView, Pressable, useWindowDimensions, StyleSheet } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  MapPin, Info, PieChart, Ticket, Map as MapIcon, MessageCircle, Calendar, Users, Wallet, CalendarPlus,
+  MapPin, Info, PieChart, Ticket, Map as MapIcon, MessageCircle, Calendar, Users, Wallet, CalendarPlus, CreditCard,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/hooks/useAuth';
+import { usePresence } from '@/hooks/usePresence';
+import { useProposals } from '@/hooks/useProposals';
 import { fetchTrip } from '@/lib/api/trips';
 import { supabase } from '@/lib/supabase/client';
 import { cacheTripLocally } from '@/lib/offline/tripCache';
@@ -16,8 +20,11 @@ import { colors, fonts, radius } from '@/lib/theme';
 import { TripHero } from '@/components/trip/TripHero';
 import { DayHeader } from '@/components/trip/DayHeader';
 import { ActivityItem } from '@/components/trip/ActivityItem';
-import { ActivityActions } from '@/components/trip/ActivityActions';
+import { ActivityActions, MoveToDaySheet } from '@/components/trip/ActivityActions';
 import { ActivityDetail } from '@/components/trip/ActivityDetail';
+import { ActivityEditSheet } from '@/components/trip/ActivityEditSheet';
+import { AddActivitySheet } from '@/components/trip/AddActivitySheet';
+import { updateTripData } from '@/lib/api/trips';
 import { TripMap } from '@/components/trip/TripMap';
 import { HotelSelector } from '@/components/trip/HotelSelector';
 import { TransportSelector } from '@/components/trip/TransportSelector';
@@ -25,7 +32,15 @@ import { BookingChecklist } from '@/components/trip/BookingChecklist';
 import { ChatPanel } from '@/components/trip/ChatPanel';
 import { SharePanel } from '@/components/trip/SharePanel';
 import { CalendarExport } from '@/components/trip/CalendarExport';
+import { ExpensesPanel } from '@/components/trip/ExpensesPanel';
+import { CommentsSection } from '@/components/trip/CommentsSection';
+import { ProposalsList } from '@/components/trip/ProposalsList';
+import { PackingList } from '@/components/trip/PackingList';
+import { ImportBooking } from '@/components/trip/ImportBooking';
+import { ImportPlaces } from '@/components/trip/ImportPlaces';
+import { Avatar } from '@/components/ui/Avatar';
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { TripSheet } from '@/components/trip/TripSheet';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
@@ -50,14 +65,14 @@ function getImage(dest: string): string {
   return DEFAULT_IMAGE;
 }
 
-type Tab = 'itinerary' | 'map' | 'booking' | 'budget' | 'info';
+type Tab = 'itinerary' | 'booking' | 'budget' | 'expenses' | 'info';
 
 const TABS: { key: Tab; label: string; icon: typeof MapPin }[] = [
-  { key: 'itinerary', label: 'Itinéraire', icon: MapPin },
-  { key: 'map', label: 'Carte', icon: MapIcon },
-  { key: 'booking', label: 'Réserver', icon: Ticket },
-  { key: 'budget', label: 'Budget', icon: PieChart },
-  { key: 'info', label: 'Infos', icon: Info },
+  { key: 'itinerary', label: 'ITINÉRAIRE', icon: MapPin },
+  { key: 'expenses', label: 'DÉPENSES', icon: CreditCard },
+  { key: 'booking', label: 'RÉSERVER', icon: Ticket },
+  { key: 'budget', label: 'BUDGET', icon: PieChart },
+  { key: 'info', label: 'INFOS', icon: Info },
 ];
 
 export default function TripDetailScreen() {
@@ -66,14 +81,28 @@ export default function TripDetailScreen() {
   const insets = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
   const [activeTab, setActiveTab] = useState<Tab>('itinerary');
+  const [activeDay, setActiveDay] = useState<number | null>(null);
   const [modalItem, setModalItem] = useState<TripItem | null>(null);
-  const [openModal, setOpenModal] = useState<null | 'detail' | 'actions' | 'chat' | 'share' | 'calendar'>(null);
+  const [openModal, setOpenModal] = useState<null | 'detail' | 'actions' | 'chat' | 'share' | 'calendar' | 'edit' | 'add' | 'move'>(null);
   const [bookedItems, setBookedItems] = useState<Record<string, { booked: boolean }>>({});
+  const [localTrip, setLocalTrip] = useState<Trip | null>(null);
+  const [addTargetDay, setAddTargetDay] = useState(1);
   const [visibility, setVisibility] = useState<'public' | 'friends' | 'private'>('private');
 
+  const { user, profile } = useAuth();
   const { data: row, isLoading, error } = useApi(() => fetchTrip(id!), [id]);
 
-  const trip: Trip | null = row?.data ?? null;
+  // Presence & collaboration
+  const presenceUser = useMemo(() => user && profile ? { id: user.id, displayName: profile.display_name, avatarUrl: profile.avatar_url } : null, [user, profile]);
+  const { onlineUsers } = usePresence(id, presenceUser);
+  const { proposals, pendingCount, vote: voteProposal, decide: decideProposal } = useProposals(id);
+
+  const serverTrip: Trip | null = row?.data ?? null;
+  const trip = localTrip ?? serverTrip;
+
+  useEffect(() => {
+    if (serverTrip && !localTrip) setLocalTrip(serverTrip);
+  }, [serverTrip]);
 
   useEffect(() => {
     if (trip?.bookedItems) setBookedItems(trip.bookedItems);
@@ -91,8 +120,9 @@ export default function TripDetailScreen() {
 
   const sections = useMemo(() => {
     if (!trip?.days) return [];
-    return trip.days.map((day: TripDay) => ({ day, data: day.items }));
-  }, [trip]);
+    const days = activeDay !== null ? trip.days.filter((d: TripDay) => d.dayNumber === activeDay) : trip.days;
+    return days.map((day: TripDay) => ({ day, data: day.items }));
+  }, [trip, activeDay]);
 
   const handleShare = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -128,6 +158,87 @@ export default function TripDetailScreen() {
       setVisibility(row?.visibility ?? 'private');
     }
   }, [id, row?.visibility]);
+
+  // ─── Editing handlers ───
+  const saveTripUpdate = useCallback(async (updated: Trip) => {
+    setLocalTrip(updated);
+    try {
+      await updateTripData(id!, updated);
+    } catch {
+      // Silently fail — local state is already updated
+    }
+  }, [id]);
+
+  const handleEditItem = useCallback((updatedItem: TripItem) => {
+    if (!trip) return;
+    const updatedDays = trip.days.map((day: TripDay) => ({
+      ...day,
+      items: day.items.map((i: TripItem) => i.id === updatedItem.id ? updatedItem : i),
+    }));
+    saveTripUpdate({ ...trip, days: updatedDays });
+  }, [trip, saveTripUpdate]);
+
+  const handleDeleteItem = useCallback((itemId: string) => {
+    if (!trip) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    const updatedDays = trip.days.map((day: TripDay) => ({
+      ...day,
+      items: day.items.filter((i: TripItem) => i.id !== itemId),
+    }));
+    saveTripUpdate({ ...trip, days: updatedDays });
+  }, [trip, saveTripUpdate]);
+
+  const handleAddItem = useCallback((newItem: Omit<TripItem, 'id' | 'orderIndex'>, dayNumber: number) => {
+    if (!trip) return;
+    const itemWithId: TripItem = {
+      ...newItem,
+      id: `manual-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      orderIndex: 999,
+    } as TripItem;
+    const updatedDays = trip.days.map((day: TripDay) => {
+      if (day.dayNumber !== dayNumber) return day;
+      return { ...day, items: [...day.items, itemWithId] };
+    });
+    saveTripUpdate({ ...trip, days: updatedDays });
+  }, [trip, saveTripUpdate]);
+
+  const handleSwapRestaurant = useCallback((item: TripItem, alternative: any) => {
+    if (!trip) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const updatedDays = trip.days.map((day: TripDay) => ({
+      ...day,
+      items: day.items.map((i: TripItem) => {
+        if (i.id !== item.id) return i;
+        return {
+          ...i,
+          title: alternative.name,
+          restaurant: alternative,
+          locationName: alternative.address || i.locationName,
+          latitude: alternative.latitude || i.latitude,
+          longitude: alternative.longitude || i.longitude,
+          rating: alternative.rating,
+          imageUrl: alternative.photos?.[0] || i.imageUrl,
+          googleMapsPlaceUrl: alternative.googleMapsUrl || i.googleMapsPlaceUrl,
+          restaurantAlternatives: item.restaurantAlternatives?.filter((a: any) => a.id !== alternative.id),
+        };
+      }),
+    }));
+    saveTripUpdate({ ...trip, days: updatedDays });
+  }, [trip, saveTripUpdate]);
+
+  const handleMoveToDay = useCallback((item: TripItem, targetDayNumber: number) => {
+    if (!trip || item.dayNumber === targetDayNumber) return;
+    const updatedDays = trip.days.map((day: TripDay) => {
+      if (day.dayNumber === item.dayNumber) {
+        return { ...day, items: day.items.filter((i: TripItem) => i.id !== item.id) };
+      }
+      if (day.dayNumber === targetDayNumber) {
+        return { ...day, items: [...day.items, { ...item, dayNumber: targetDayNumber }] };
+      }
+      return day;
+    });
+    saveTripUpdate({ ...trip, days: updatedDays });
+  }, [trip, saveTripUpdate]);
 
   if (isLoading) {
     return (
@@ -167,118 +278,191 @@ export default function TripDetailScreen() {
   const prefs = trip?.preferences ?? row.preferences;
   const floatingBottom = Math.max(insets.bottom + 18, 28);
 
-  const headerContent = (
-    <>
-      <TripHero
-        imageUrl={getImage(row.destination)}
-        title={row.title || row.destination}
-        destination={row.destination}
-        dateRange={dateRange}
-        onBack={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}
-        onShare={handleShare}
-      />
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsPillsContent}>
-        {[
-          { icon: Calendar, label: `${row.duration_days} jours` },
-          ...(prefs?.groupSize ? [{ icon: Users, label: `${prefs.groupSize} pers.` }] : []),
-          ...(prefs?.budgetLevel ? [{ icon: Wallet, label: BUDGET_LABELS[prefs.budgetLevel as keyof typeof BUDGET_LABELS]?.label ?? '' }] : []),
-        ].map((p, i) => (
-          <View key={i} style={styles.statPill}>
-            <p.icon size={14} color={colors.textSecondary} />
-            <Text style={styles.statPillText}>{p.label}</Text>
-          </View>
-        ))}
-      </ScrollView>
-
-      {activeTab === 'itinerary' && trip?.transportOptions && trip.transportOptions.length > 0 ? (
-        <View style={styles.selectorWrap}>
-          <TransportSelector options={trip.transportOptions} selectedId={trip.selectedTransport?.id} />
-        </View>
-      ) : null}
-
-      {activeTab === 'itinerary' && trip?.accommodationOptions && trip.accommodationOptions.length > 0 ? (
-        <View style={styles.hotelWrap}>
-          <HotelSelector options={trip.accommodationOptions} selectedId={trip.accommodation?.id} />
-        </View>
-      ) : null}
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContent}>
-        {TABS.map((t) => (
+  // Day selector pills — shared with map
+  const dayPills = trip?.days ? (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12, gap: 8, paddingVertical: 8 }}>
+      <Pressable
+        onPress={() => { Haptics.selectionAsync(); setActiveDay(null); }}
+        style={{
+          paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12,
+          backgroundColor: activeDay === null ? colors.gold : 'rgba(15,23,42,0.9)',
+          borderWidth: 1, borderColor: activeDay === null ? colors.gold : 'rgba(255,255,255,0.1)',
+        }}
+      >
+        <Text style={{ color: activeDay === null ? colors.bg : colors.text, fontSize: 12, fontFamily: fonts.sansBold }}>Tous</Text>
+      </Pressable>
+      {trip.days.map((day) => {
+        const isActive = activeDay === day.dayNumber;
+        return (
           <Pressable
-            key={t.key}
-            onPress={() => {
-              Haptics.selectionAsync();
-              setActiveTab(t.key);
+            key={day.dayNumber}
+            onPress={() => { Haptics.selectionAsync(); setActiveDay(isActive ? null : day.dayNumber); }}
+            style={{
+              paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12,
+              backgroundColor: isActive ? colors.gold : 'rgba(15,23,42,0.9)',
+              borderWidth: 1, borderColor: isActive ? colors.gold : 'rgba(255,255,255,0.1)',
             }}
-            style={[styles.tabButton, activeTab === t.key ? styles.tabButtonActive : null]}
           >
-            <t.icon size={15} color={activeTab === t.key ? colors.gold : colors.textMuted} />
-            <Text style={[styles.tabButtonLabel, activeTab === t.key ? styles.tabButtonLabelActive : null]}>
-              {t.label}
-            </Text>
+            <Text style={{ color: isActive ? colors.bg : colors.textSecondary, fontSize: 12, fontFamily: fonts.sansBold }}>J{day.dayNumber}</Text>
           </Pressable>
-        ))}
-      </ScrollView>
-    </>
-  );
+        );
+      })}
+    </ScrollView>
+  ) : null;
 
   return (
     <View style={styles.screen}>
-      <PremiumBackground />
+      {/* Map ALWAYS visible as background */}
+      {trip ? (
+        <View style={StyleSheet.absoluteFillObject}>
+          <TripMap days={trip.days || []} activeDay={activeDay} onDayChange={setActiveDay} onMarkerPress={(item) => { setModalItem(item); setOpenModal('detail'); }} />
+        </View>
+      ) : <PremiumBackground />}
 
-      {activeTab === 'itinerary' && trip ? (
-        <SectionList
-          sections={sections}
-          keyExtractor={(item) => item.id}
-          stickySectionHeadersEnabled={false}
-          ListHeaderComponent={headerContent}
-          renderSectionHeader={({ section }) => (
-            <DayHeader
-              dayNumber={section.day.dayNumber}
-              date={section.day.date}
-              theme={section.day.theme}
-              isDayTrip={section.day.isDayTrip}
-            />
-          )}
-          renderItem={({ item, index, section }) => (
-            <ActivityItem
-              item={item}
-              isFirst={index === 0}
-              isLast={index === section.data.length - 1}
+      {/* Back + Share buttons over map */}
+      <View style={[styles.mapOverlayButtons, { top: insets.top + 8 }]}>
+        <Pressable
+          onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')}
+          style={styles.mapButton}
+        >
+          <Text style={{ color: colors.text, fontSize: 20 }}>←</Text>
+        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {/* Presence avatars */}
+          {onlineUsers.slice(0, 3).map((u, i) => (
+            <View key={u.userId} style={{ marginLeft: i > 0 ? -8 : 0, borderWidth: 2, borderColor: colors.bg, borderRadius: 14 }}>
+              <Avatar url={u.avatarUrl} name={u.displayName} size="sm" />
+            </View>
+          ))}
+          {onlineUsers.length > 3 ? (
+            <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(197,160,89,0.3)', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: colors.gold, fontSize: 10, fontFamily: fonts.sansBold }}>+{onlineUsers.length - 3}</Text>
+            </View>
+          ) : null}
+          {pendingCount > 0 ? (
+            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#a78bfa', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: '#fff', fontSize: 10, fontFamily: fonts.sansBold }}>{pendingCount}</Text>
+            </View>
+          ) : null}
+          <Pressable onPress={handleShare} style={styles.mapButton}>
+            <Text style={{ color: colors.text, fontSize: 16 }}>↗</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Bottom Sheet with tabs + content */}
+      <TripSheet>
+        {/* Tabs inside sheet */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContent}>
+          {TABS.map((t) => (
+            <Pressable
+              key={t.key}
               onPress={() => {
                 Haptics.selectionAsync();
-                setModalItem(item);
-                setOpenModal('detail');
+                setActiveTab(t.key);
               }}
-              onLongPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setModalItem(item);
-                setOpenModal('actions');
-              }}
-            />
-          )}
-          contentContainerStyle={styles.sectionListContent}
-        />
-      ) : activeTab === 'map' && trip ? (
-        <View style={styles.flex}>
-          {headerContent}
-          <View style={[styles.mapPanel, { minHeight: screenH * 0.52 }]}>
-            <TripMap days={trip.days || []} onMarkerPress={(item) => { setModalItem(item); setOpenModal('detail'); }} />
-          </View>
-        </View>
-      ) : activeTab === 'booking' && trip ? (
-        <ScrollView contentContainerStyle={styles.scrollTabContent}>
-          {headerContent}
-          <BookingChecklist trip={trip} bookedItems={bookedItems} onToggle={handleBookingToggle} />
+              style={[styles.tabButton, activeTab === t.key ? styles.tabButtonActive : null]}
+            >
+              <t.icon size={15} color={activeTab === t.key ? '#000' : colors.textMuted} />
+              <Text style={[styles.tabButtonLabel, activeTab === t.key ? styles.tabButtonLabelActive : null]}>
+                {t.label}
+              </Text>
+            </Pressable>
+          ))}
         </ScrollView>
-      ) : (
-        <ScrollView contentContainerStyle={styles.scrollTabContent}>
-          {headerContent}
-          {activeTab === 'budget' && trip ? <BudgetTab trip={trip} /> : null}
-          {activeTab === 'info' && trip ? <InfoTab trip={trip} /> : null}
-        </ScrollView>
-      )}
+
+        {/* Tab content */}
+        {activeTab === 'itinerary' && trip ? (
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item.id}
+            stickySectionHeadersEnabled={false}
+            ListHeaderComponent={dayPills}
+            renderSectionHeader={({ section }) => (
+              <DayHeader
+                dayNumber={section.day.dayNumber}
+                date={section.day.date}
+                theme={section.day.theme}
+                onAdd={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setAddTargetDay(section.day.dayNumber);
+                  setOpenModal('add');
+                }}
+              />
+            )}
+            renderItem={({ item, index, section }) => (
+              <ActivityItem
+                item={item}
+                isFirst={index === 0}
+                isLast={index === section.data.length - 1}
+                onSwapRestaurant={handleSwapRestaurant}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setModalItem(item);
+                  setOpenModal('detail');
+                }}
+                onLongPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setModalItem(item);
+                  setOpenModal('actions');
+                }}
+              />
+            )}
+            contentContainerStyle={styles.sectionListContent}
+          />
+        ) : activeTab === 'expenses' ? (
+          <Animated.View key="expenses" entering={FadeIn.duration(200)} style={{ flex: 1 }}>
+            <ExpensesPanel tripId={id!} />
+          </Animated.View>
+        ) : activeTab === 'booking' && trip ? (
+          <ScrollView contentContainerStyle={styles.scrollTabContent}>
+            <BookingChecklist trip={trip} bookedItems={bookedItems} onToggle={handleBookingToggle} />
+            <View style={{ marginTop: 16, gap: 16 }}>
+              <ImportBooking
+                onImport={(booking) => {
+                  // Add parsed booking to trip
+                  setOpenModal(null);
+                }}
+                onClose={() => {}}
+              />
+            </View>
+          </ScrollView>
+        ) : (
+          <ScrollView contentContainerStyle={styles.scrollTabContent}>
+            {activeTab === 'budget' && trip ? <BudgetTab trip={trip} /> : null}
+            {activeTab === 'info' && trip ? (
+              <View style={{ gap: 20 }}>
+                <InfoTab trip={trip} />
+
+                {/* Proposals */}
+                {proposals.length > 0 ? (
+                  <View style={{ paddingHorizontal: 4 }}>
+                    <ProposalsList
+                      proposals={proposals}
+                      isOwner={row?.owner_id === user?.id}
+                      onVote={voteProposal}
+                      onDecide={decideProposal}
+                    />
+                  </View>
+                ) : null}
+
+                {/* Packing List */}
+                <View style={{ paddingHorizontal: 4 }}>
+                  <PackingList
+                    tripId={id!}
+                    packingItems={trip.travelTips?.packing?.essentials?.map((e) => e.item)}
+                  />
+                </View>
+
+                {/* Comments */}
+                <View style={{ paddingHorizontal: 4 }}>
+                  <CommentsSection tripId={id!} />
+                </View>
+              </View>
+            ) : null}
+          </ScrollView>
+        )}
+      </TripSheet>
 
       <View style={[styles.floatingActions, { bottom: floatingBottom }]}>
         <Pressable
@@ -308,7 +492,40 @@ export default function TripDetailScreen() {
 
       <ChatPanel isOpen={openModal === 'chat'} onClose={() => setOpenModal(null)} tripId={id!} />
 
-      <ActivityActions item={modalItem} isOpen={openModal === 'actions'} onClose={() => setOpenModal(null)} />
+      <ActivityActions
+        item={modalItem}
+        isOpen={openModal === 'actions'}
+        onClose={() => setOpenModal(null)}
+        onEdit={(item) => { setModalItem(item); setOpenModal('edit'); }}
+        onDelete={handleDeleteItem}
+        onMove={(item) => { setModalItem(item); setOpenModal('move'); }}
+      />
+
+      <ActivityEditSheet
+        item={modalItem}
+        isOpen={openModal === 'edit'}
+        onClose={() => setOpenModal(null)}
+        onSave={handleEditItem}
+        onDelete={handleDeleteItem}
+      />
+
+      {trip ? (
+        <AddActivitySheet
+          isOpen={openModal === 'add'}
+          onClose={() => setOpenModal(null)}
+          onAdd={handleAddItem}
+          trip={trip}
+          targetDay={addTargetDay}
+        />
+      ) : null}
+
+      <MoveToDaySheet
+        item={modalItem}
+        isOpen={openModal === 'move'}
+        onClose={() => setOpenModal(null)}
+        onMoveToDay={handleMoveToDay}
+        availableDays={trip?.days?.map((d: TripDay) => d.dayNumber) ?? []}
+      />
 
       {trip ? <CalendarExport isOpen={openModal === 'calendar'} onClose={() => setOpenModal(null)} trip={trip} /> : null}
 
@@ -527,26 +744,27 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tabsContent: {
-    paddingHorizontal: 16,
-    gap: 6,
-    paddingVertical: 8,
+    paddingHorizontal: 4,
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 14,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    padding: 3,
   },
   tabButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    borderRadius: radius.full,
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
     borderCurve: 'continuous',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
   },
   tabButtonActive: {
-    backgroundColor: colors.goldBg,
-    borderColor: colors.goldBorder,
+    backgroundColor: colors.gold,
   },
   tabButtonLabel: {
     color: colors.textMuted,
@@ -556,7 +774,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.4,
   },
   tabButtonLabelActive: {
-    color: colors.gold,
+    color: '#000',
   },
   sectionListContent: {
     paddingBottom: 126,
@@ -574,11 +792,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderSubtle,
   },
+  mapOverlayButtons: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    zIndex: 10,
+  },
+  mapButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(2,6,23,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
   floatingActions: {
     position: 'absolute',
     right: 20,
     gap: 12,
     alignItems: 'center',
+    zIndex: 20,
   },
   secondaryFab: {
     width: 50,

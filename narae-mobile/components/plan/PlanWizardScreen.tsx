@@ -357,6 +357,7 @@ export function PlanWizardScreen() {
       <GeneratingScreen
         origin={prefs.origin ?? ''}
         destination={prefs.destination ?? 'votre destination'}
+        durationDays={prefs.durationDays ?? 3}
         progress={progress}
         snapshot={mapSnapshot}
         error={genError}
@@ -396,7 +397,7 @@ export function PlanWizardScreen() {
           </Text>
 
           <View style={styles.dotsRow}>
-            {STEP_TITLES.map((_, index) => {
+            {STEP_TITLES.map((label, index) => {
               const isActive = index === step;
               const isDone = index < step;
 
@@ -409,12 +410,16 @@ export function PlanWizardScreen() {
                     }
                   }}
                   disabled={index >= step}
-                  style={[
-                    styles.dot,
-                    isActive ? styles.dotActive : null,
-                    isDone ? styles.dotCompleted : null,
-                  ]}
-                />
+                  style={styles.dotWrap}
+                >
+                  <View
+                    style={[
+                      styles.dot,
+                      isActive ? styles.dotActive : null,
+                      isDone ? styles.dotCompleted : null,
+                    ]}
+                  />
+                </Pressable>
               );
             })}
           </View>
@@ -529,44 +534,71 @@ const styles = StyleSheet.create({
   },
   dotsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
+  },
+  dotWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 16,
+    width: 48,
   },
   dot: {
-    width: 8,
-    height: 8,
+    height: 6,
     borderRadius: radius.full,
     borderCurve: 'continuous',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    // default pending state
+    width: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
   dotActive: {
-    width: 28,
+    width: 32,
     backgroundColor: colors.gold,
+    // gold glow
+    shadowColor: '#c5a059',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
   },
   dotCompleted: {
-    backgroundColor: 'rgba(197,160,89,0.55)',
+    width: 8,
+    backgroundColor: 'rgba(197,160,89,0.5)',
+  },
+  dotLabel: {
+    position: 'absolute',
+    bottom: -18,
+    fontSize: 9,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    color: 'rgba(255,255,255,0.2)',
+  },
+  dotLabelActive: {
+    color: colors.gold,
   },
   contentArea: {
     flex: 1,
   },
   contentShell: {
-    borderRadius: radius.card,
+    borderRadius: 40,
     borderCurve: 'continuous',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(6,16,31,0.72)',
-    padding: 20,
+    backgroundColor: 'rgba(2,6,23,0.4)',
+    padding: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.24,
-    shadowRadius: 28,
+    shadowOpacity: 0.3,
+    shadowRadius: 50,
   },
   contentScroll: {
     paddingBottom: 8,
   },
   contentShellCompact: {
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   bottomFade: {
     position: 'absolute',
@@ -599,15 +631,14 @@ const styles = StyleSheet.create({
   navCard: {
     flexDirection: 'row',
     gap: 12,
-    padding: 12,
-    borderRadius: 28,
-    borderCurve: 'continuous',
-    backgroundColor: 'rgba(6,16,31,0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
   },
   navButton: {
     flex: 1,
-    minHeight: 58,
+    minHeight: 56,
+    borderRadius: 999,
+    borderWidth: 0,
   },
 });

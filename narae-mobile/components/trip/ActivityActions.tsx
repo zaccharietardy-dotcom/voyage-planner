@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Alert } from 'react-native';
-import { Edit3, Trash2, ArrowUpDown, Repeat } from 'lucide-react-native';
+import { Edit3, Trash2, ArrowUpDown, Repeat, Calendar } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { TripItem } from '@/lib/types/trip';
@@ -8,21 +9,25 @@ interface Props {
   item: TripItem | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: (item: TripItem) => void;
   onDelete?: (id: string) => void;
+  onMove?: (item: TripItem) => void;
   onSwapRestaurant?: (item: TripItem) => void;
+  availableDays?: number[];
 }
 
-export function ActivityActions({ item, isOpen, onClose, onDelete, onSwapRestaurant }: Props) {
+export function ActivityActions({ item, isOpen, onClose, onEdit, onDelete, onMove, onSwapRestaurant, availableDays }: Props) {
   if (!item) return null;
 
   const actions = [
     {
       icon: Edit3,
-      label: 'Modifier les horaires',
+      label: 'Modifier',
       color: colors.gold,
       onPress: () => {
         onClose();
-        Alert.alert('Modifier', 'Fonctionnalité disponible prochainement');
+        Haptics.selectionAsync();
+        onEdit?.(item);
       },
     },
     ...(item.type === 'restaurant' && item.restaurantAlternatives?.length
@@ -39,7 +44,10 @@ export function ActivityActions({ item, isOpen, onClose, onDelete, onSwapRestaur
       color: colors.upcoming,
       onPress: () => {
         onClose();
-        Alert.alert('Déplacer', 'Fonctionnalité disponible prochainement');
+        Haptics.selectionAsync();
+        if (onMove) {
+          onMove(item);
+        }
       },
     },
     {
@@ -53,7 +61,14 @@ export function ActivityActions({ item, isOpen, onClose, onDelete, onSwapRestaur
           `Retirer "${item.title}" de l'itinéraire ?`,
           [
             { text: 'Annuler', style: 'cancel' },
-            { text: 'Supprimer', style: 'destructive', onPress: () => onDelete?.(item.id) },
+            {
+              text: 'Supprimer',
+              style: 'destructive',
+              onPress: () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                onDelete?.(item.id);
+              },
+            },
           ],
         );
       },
@@ -86,6 +101,63 @@ export function ActivityActions({ item, isOpen, onClose, onDelete, onSwapRestaur
             </View>
             <Text style={{ color: action.color === colors.danger ? colors.danger : colors.text, fontSize: 14, fontWeight: '600' }}>
               {action.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+    </BottomSheet>
+  );
+}
+
+// Separate sheet for moving to another day
+interface MoveDayProps {
+  item: TripItem | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onMoveToDay: (item: TripItem, dayNumber: number) => void;
+  availableDays: number[];
+}
+
+export function MoveToDaySheet({ item, isOpen, onClose, onMoveToDay, availableDays }: MoveDayProps) {
+  if (!item) return null;
+
+  return (
+    <BottomSheet isOpen={isOpen} onClose={onClose} height={0.45}>
+      <View style={{ padding: 20, gap: 12 }}>
+        <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.display }}>
+          Déplacer vers...
+        </Text>
+        <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 8 }}>
+          {item.title}
+        </Text>
+        {availableDays.map((day) => (
+          <Pressable
+            key={day}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              onMoveToDay(item, day);
+              onClose();
+            }}
+            disabled={day === item.dayNumber}
+            style={({ pressed }) => ({
+              flexDirection: 'row', alignItems: 'center', gap: 12,
+              backgroundColor: day === item.dayNumber ? 'rgba(197,160,89,0.1)' : pressed ? 'rgba(255,255,255,0.05)' : colors.surface,
+              borderRadius: radius.lg, padding: 14,
+              borderWidth: 1,
+              borderColor: day === item.dayNumber ? colors.gold : colors.borderSubtle,
+              opacity: day === item.dayNumber ? 0.5 : 1,
+            })}
+          >
+            <View style={{
+              width: 36, height: 36, borderRadius: 10,
+              backgroundColor: day === item.dayNumber ? colors.goldBg : colors.surface,
+              alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1, borderColor: colors.borderSubtle,
+            }}>
+              <Calendar size={16} color={day === item.dayNumber ? colors.gold : colors.textSecondary} />
+            </View>
+            <Text style={{ color: day === item.dayNumber ? colors.gold : colors.text, fontSize: 14, fontFamily: fonts.sansBold }}>
+              Jour {day}{day === item.dayNumber ? ' (actuel)' : ''}
             </Text>
           </Pressable>
         ))}

@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View, Text, Platform, StyleSheet } from 'react-native';
-import { Map, Compass, Plus, Globe, User } from 'lucide-react-native';
+import { Home, Compass, Plus, Globe, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -88,10 +88,10 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="trips"
+        name="index"
         options={{
-          title: 'Voyages',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Map} label="Voyages" focused={focused} />,
+          title: 'Accueil',
+          tabBarIcon: ({ focused }) => <TabIcon icon={Home} label="Accueil" focused={focused} />,
         }}
         listeners={{
           tabPress: () => Haptics.selectionAsync(),
@@ -119,7 +119,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="globe"
         options={{
           title: 'Globe',
           tabBarIcon: ({ focused }) => <TabIcon icon={Globe} label="Globe" focused={focused} />,
@@ -138,6 +138,7 @@ export default function TabLayout() {
           tabPress: () => Haptics.selectionAsync(),
         }}
       />
+      <Tabs.Screen name="trips" options={{ href: null }} />
     </Tabs>
   );
 }

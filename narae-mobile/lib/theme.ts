@@ -5,15 +5,30 @@ export const colors = {
   // Backgrounds
   bg: '#020617',
   card: '#0a1128',
+  cardDark: '#0e1220',
+  cardHover: '#0f1629',
   surface: '#0f172a',
   border: '#1e293b',
   borderSubtle: 'rgba(255,255,255,0.05)',
+  borderWhite8: 'rgba(255,255,255,0.08)',
+  borderWhite10: 'rgba(255,255,255,0.10)',
+  borderWhite20: 'rgba(255,255,255,0.20)',
 
   // Text
   text: '#f8fafc',
   textSecondary: '#94a3b8',
   textMuted: '#64748b',
   textDim: '#475569',
+  textWhite60: 'rgba(255,255,255,0.6)',
+  textWhite40: 'rgba(255,255,255,0.4)',
+  textWhite20: 'rgba(255,255,255,0.2)',
+
+  // Whitealpha
+  white2: 'rgba(255,255,255,0.02)',
+  white3: 'rgba(255,255,255,0.03)',
+  white5: 'rgba(255,255,255,0.05)',
+  white8: 'rgba(255,255,255,0.08)',
+  white10: 'rgba(255,255,255,0.10)',
 
   // Gold (primary)
   gold: '#c5a059',

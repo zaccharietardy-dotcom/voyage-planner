@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, FlatList, Pressable, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Compass } from 'lucide-react-native';
+import { Compass, Search } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
 import { useApi } from '@/hooks/useApi';
@@ -13,6 +13,8 @@ import { TripCardSkeleton } from '@/components/ui/Skeleton';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { FeedCard } from '@/components/explore/FeedCard';
+import { RecommendedUsers } from '@/components/social/RecommendedUsers';
+import { UserSearch } from '@/components/social/UserSearch';
 import { colors, fonts, radius } from '@/lib/theme';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
@@ -29,6 +31,7 @@ export default function ExploreScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [cloneTarget, setCloneTarget] = useState<FeedTrip | null>(null);
   const [cloning, setCloning] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   const { isLoading, refetch } = useApi(
     async () => {
@@ -97,7 +100,17 @@ export default function ExploreScreen() {
     <View style={styles.container}>
       <PremiumBackground />
       <View style={styles.content}>
-        <ScreenHeader title="Explorer" subtitle="Découvrez les départs, les inspirations et les itinéraires de la communauté." />
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingRight: 20 }}>
+          <View style={{ flex: 1 }}>
+            <ScreenHeader title="Explorer" subtitle="Découvrez les départs, les inspirations et les itinéraires de la communauté." />
+          </View>
+          <Pressable
+            onPress={() => { Haptics.selectionAsync(); setShowSearch(true); }}
+            style={styles.searchBtn}
+          >
+            <Search size={20} color={colors.gold} />
+          </Pressable>
+        </View>
 
         <View style={styles.controlsRow}>
           <View style={styles.tabsWrap}>
@@ -117,6 +130,8 @@ export default function ExploreScreen() {
             </Text>
           </Pressable>
         </View>
+
+        <RecommendedUsers />
 
         {isLoading && allTrips.length === 0 ? (
           <View style={styles.skeletonWrap}>
@@ -164,6 +179,10 @@ export default function ExploreScreen() {
             )}
           />
         )}
+
+        <BottomSheet isOpen={showSearch} onClose={() => setShowSearch(false)} height={0.7}>
+          <UserSearch onClose={() => setShowSearch(false)} />
+        </BottomSheet>
 
         <BottomSheet isOpen={!!cloneTarget} onClose={() => setCloneTarget(null)} height={0.25}>
           <View style={styles.sheetContent}>
@@ -224,10 +243,10 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     color: colors.textMuted,
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: fonts.sansBold,
     textTransform: 'uppercase',
-    letterSpacing: 1.4,
+    letterSpacing: 2,
   },
   tabLabelActive: {
     color: colors.gold,
@@ -255,6 +274,18 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
+  },
+  searchBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
   },
   skeletonWrap: {
     paddingHorizontal: 20,

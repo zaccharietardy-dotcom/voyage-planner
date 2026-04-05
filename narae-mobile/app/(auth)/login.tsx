@@ -139,8 +139,8 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.header}>
-              <Text style={styles.title}>Bon retour</Text>
-              <Text style={styles.subtitle}>Connectez-vous pour retrouver vos voyages</Text>
+              <Text style={styles.title}>Bon retour parmi nous</Text>
+              <Text style={styles.subtitle}>Accédez à vos carnets de route et itinéraires sur-mesure</Text>
             </View>
 
             <View style={styles.socialContainer}>

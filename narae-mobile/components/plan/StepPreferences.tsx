@@ -1,7 +1,7 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import {
-  ACTIVITY_LABELS, DIETARY_LABELS,
   type ActivityType, type DietaryType, type PaceLevel, type TripPreferences,
+  DIETARY_LABELS,
 } from '@/lib/types/trip';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius } from '@/lib/theme';
@@ -11,10 +11,22 @@ interface Props {
   onChange: (update: Partial<TripPreferences>) => void;
 }
 
+// Web-exact activity pills: emoji + short uppercase label
+const ACTIVITY_OPTIONS: { key: ActivityType; emoji: string; label: string }[] = [
+  { key: 'culture', emoji: '🏛️', label: 'CULTURE' },
+  { key: 'nature', emoji: '🌳', label: 'NATURE' },
+  { key: 'gastronomy', emoji: '🍽️', label: 'FOODIE' },
+  { key: 'adventure', emoji: '⛰️', label: 'AVENTURE' },
+  { key: 'beach', emoji: '🏖️', label: 'PLAGE' },
+  { key: 'shopping', emoji: '🛍️', label: 'SHOPPING' },
+  { key: 'nightlife', emoji: '🍹', label: 'NIGHTLIFE' },
+  { key: 'wellness', emoji: '🧘', label: 'WELLNESS' },
+];
+
 const PACE_OPTIONS: { value: PaceLevel; label: string; emoji: string; desc: string }[] = [
-  { value: 'relaxed', label: 'Relaxé', emoji: '🧘', desc: 'Tranquille' },
-  { value: 'moderate', label: 'Modéré', emoji: '🚶', desc: 'Équilibré' },
-  { value: 'intensive', label: 'Intensif', emoji: '🏃', desc: 'On voit tout' },
+  { value: 'relaxed', label: 'CHILL', emoji: '🐢', desc: 'Tranquille' },
+  { value: 'moderate', label: 'ÉQUI.', emoji: '⚖️', desc: 'Équilibré' },
+  { value: 'intensive', label: 'RUSH', emoji: '🚀', desc: 'Intensif' },
 ];
 
 export function StepPreferences({ prefs, onChange }: Props) {
@@ -35,36 +47,53 @@ export function StepPreferences({ prefs, onChange }: Props) {
     onChange({ dietary: next });
   };
 
+  const handleSkip = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Pick 3 random activities
+    const all = ACTIVITY_OPTIONS.map((a) => a.key);
+    const shuffled = [...all].sort(() => Math.random() - 0.5);
+    onChange({ activities: shuffled.slice(0, 3) });
+  };
+
   return (
-    <View style={{ gap: 28 }}>
-      <View>
+    <View style={{ gap: 32 }}>
+      {/* Title */}
+      <View style={{ alignItems: 'center' }}>
         <Text style={s.title}>Qu'aimez-vous ?</Text>
         <Text style={s.subtitle}>Pour un itinéraire qui vous ressemble</Text>
       </View>
 
       {/* Activities */}
-      <View>
-        <Text style={s.sectionLabel}>Activités préférées</Text>
-        <View style={s.chipGrid}>
-          {(Object.entries(ACTIVITY_LABELS) as [ActivityType, string][]).map(([key, label]) => {
+      <View style={{ gap: 16 }}>
+        <Text style={s.sectionLabel}>ACTIVITÉS PRÉFÉRÉES</Text>
+        <View style={s.pillGrid}>
+          {ACTIVITY_OPTIONS.map(({ key, emoji, label }) => {
             const selected = activities.includes(key);
             return (
               <Pressable
                 key={key}
                 onPress={() => toggleActivity(key)}
-                style={[s.chip, selected && s.chipSelected]}
+                style={[s.pill, selected && s.pillSelected]}
               >
-                <Text style={[s.chipText, selected && s.chipTextSelected]}>{label}</Text>
+                <Text style={[s.pillEmoji, selected && s.pillEmojiSelected]}>{emoji}</Text>
+                <Text style={[s.pillLabel, selected && s.pillLabelSelected]}>{label}</Text>
               </Pressable>
             );
           })}
         </View>
+
+        <Pressable onPress={handleSkip} style={{ alignSelf: 'center', paddingVertical: 8 }}>
+          <Text style={s.skipText}>PASSER, SURPRENEZ-MOI !</Text>
+        </Pressable>
       </View>
 
-      {/* Pace */}
-      <View>
-        <Text style={s.sectionLabel}>Rythme</Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+      {/* Divider */}
+      <View style={s.divider} />
+
+      {/* Pace / Rythme */}
+      <View style={{ gap: 16 }}>
+        <Text style={s.sectionLabel}>RYTHME DU VOYAGE</Text>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {PACE_OPTIONS.map((opt) => {
             const selected = pace === opt.value;
             return (
@@ -73,8 +102,10 @@ export function StepPreferences({ prefs, onChange }: Props) {
                 onPress={() => { Haptics.selectionAsync(); onChange({ pace: opt.value }); }}
                 style={[s.paceCard, selected && s.paceCardSelected]}
               >
-                <Text style={{ fontSize: 22, marginBottom: 4 }}>{opt.emoji}</Text>
-                <Text style={[s.paceLabel, selected && { color: colors.gold }]}>{opt.label}</Text>
+                <Text style={[s.paceEmoji, selected && { transform: [{ scale: 1.1 }] }]}>
+                  {opt.emoji}
+                </Text>
+                <Text style={[s.paceLabel, selected && s.paceLabelSelected]}>{opt.label}</Text>
                 <Text style={s.paceDesc}>{opt.desc}</Text>
               </Pressable>
             );
@@ -82,17 +113,24 @@ export function StepPreferences({ prefs, onChange }: Props) {
         </View>
       </View>
 
+      {/* Divider */}
+      <View style={s.divider} />
+
       {/* Dietary */}
-      <View>
-        <Text style={s.sectionLabel}>Restrictions alimentaires</Text>
-        <View style={s.chipGrid}>
+      <View style={{ gap: 16 }}>
+        <Text style={s.sectionLabel}>RESTRICTIONS ALIMENTAIRES</Text>
+        <View style={s.pillGrid}>
           {(Object.entries(DIETARY_LABELS) as [DietaryType, string][])
             .filter(([k]) => k !== 'none')
             .map(([key, label]) => {
               const selected = dietary.includes(key);
               return (
-                <Pressable key={key} onPress={() => toggleDietary(key)} style={[s.chip, selected && s.chipSelected]}>
-                  <Text style={[s.chipText, selected && s.chipTextSelected]}>{label}</Text>
+                <Pressable
+                  key={key}
+                  onPress={() => toggleDietary(key)}
+                  style={[s.pill, selected && s.pillSelected]}
+                >
+                  <Text style={[s.pillLabel, selected && s.pillLabelSelected]}>{label}</Text>
                 </Pressable>
               );
             })}
@@ -100,12 +138,12 @@ export function StepPreferences({ prefs, onChange }: Props) {
       </View>
 
       {/* Must-see */}
-      <View>
-        <Text style={s.sectionLabel}>Incontournables (optionnel)</Text>
+      <View style={{ gap: 12 }}>
+        <Text style={s.sectionLabel}>INCONTOURNABLES (OPTIONNEL)</Text>
         <TextInput
           style={s.textArea}
           placeholder="Ex: Sagrada Familia, Parc Güell..."
-          placeholderTextColor={colors.textDim}
+          placeholderTextColor="rgba(255,255,255,0.3)"
           multiline
           value={mustSee}
           onChangeText={(t) => onChange({ mustSee: t })}
@@ -116,30 +154,147 @@ export function StepPreferences({ prefs, onChange }: Props) {
 }
 
 const s = StyleSheet.create({
-  title: { color: colors.text, fontSize: 24, fontFamily: fonts.display },
-  subtitle: { color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sans, marginTop: 4 },
-  sectionLabel: { color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
-  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 14, paddingVertical: 10, borderRadius: radius.full,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
+  // Title section — matches web text-4xl font-serif font-bold
+  title: {
+    color: colors.text,
+    fontSize: 36,
+    fontFamily: fonts.display,
+    letterSpacing: -0.5,
+    textAlign: 'center',
   },
-  chipSelected: { backgroundColor: 'rgba(197,160,89,0.15)', borderColor: colors.gold },
-  chipText: { color: colors.text, fontSize: 13, fontFamily: fonts.sansMedium },
-  chipTextSelected: { color: colors.gold },
+  subtitle: {
+    color: colors.textSecondary,
+    fontSize: 17,
+    fontFamily: fonts.sans,
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  // Section label — matches web text-[10px] font-black uppercase tracking-[0.3em] text-white/40
+  sectionLabel: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 10,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+    textAlign: 'center',
+  },
+  // Activity pills — matches web px-6 py-4 rounded-full border-2
+  pillGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  pillSelected: {
+    borderColor: colors.gold,
+    backgroundColor: 'rgba(197,160,89,0.1)',
+    // gold glow shadow
+    shadowColor: '#c5a059',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 30,
+  },
+  // Emoji — matches web text-2xl
+  pillEmoji: {
+    fontSize: 24,
+    opacity: 0.5,
+  },
+  pillEmojiSelected: {
+    opacity: 1,
+    transform: [{ scale: 1.1 }],
+  },
+  // Label — matches web text-sm font-black uppercase tracking-widest
+  pillLabel: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  pillLabelSelected: {
+    color: colors.text,
+  },
+  // Skip link — matches web gold text
+  skipText: {
+    color: colors.gold,
+    fontSize: 12,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  // Divider
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    marginHorizontal: 20,
+  },
+  // Pace cards — matches web rounded-3xl border-2 p-6
   paceCard: {
-    flex: 1, alignItems: 'center', padding: 14, borderRadius: radius.xl,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)',
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    gap: 4,
+    borderRadius: 22,
+    borderCurve: 'continuous',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
   },
-  paceCardSelected: { backgroundColor: 'rgba(197,160,89,0.15)', borderColor: colors.gold },
-  paceLabel: { color: colors.text, fontSize: 13, fontFamily: fonts.sansSemiBold },
-  paceDesc: { color: colors.textMuted, fontSize: 10, fontFamily: fonts.sans, marginTop: 2, textAlign: 'center' },
+  paceCardSelected: {
+    borderColor: colors.gold,
+    backgroundColor: 'rgba(197,160,89,0.1)',
+    shadowColor: '#c5a059',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 30,
+  },
+  // Pace emoji
+  paceEmoji: {
+    fontSize: 28,
+  },
+  // Pace label
+  paceLabel: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+  },
+  paceLabelSelected: {
+    color: colors.gold,
+  },
+  // Pace desc
+  paceDesc: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 9,
+    fontFamily: fonts.sansMedium,
+    textAlign: 'center',
+  },
+  // TextArea
   textArea: {
-    backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
-    borderRadius: radius.xl, padding: 14, color: colors.text, fontSize: 14, fontFamily: fonts.sans,
-    height: 80, textAlignVertical: 'top',
+    backgroundColor: 'rgba(14,18,32,0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 19,
+    borderCurve: 'continuous',
+    padding: 16,
+    color: colors.text,
+    fontSize: 15,
+    fontFamily: fonts.sans,
+    height: 80,
+    textAlignVertical: 'top',
   },
 });

@@ -1,12 +1,15 @@
-import { useState } from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { useState, useRef, useEffect } from 'react';
+import { View, Text, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
-import { colors } from '@/lib/theme';
+import { ChevronRight } from 'lucide-react-native';
+import { colors, fonts } from '@/lib/theme';
 import type { TripDay, TripItem, TripItemType } from '@/lib/types/trip';
 
 interface Props {
   days: TripDay[];
   onMarkerPress?: (item: TripItem) => void;
+  activeDay?: number | null;
+  onDayChange?: (day: number | null) => void;
 }
 
 const TYPE_COLORS: Record<TripItemType, string> = {
@@ -24,19 +27,37 @@ const TYPE_COLORS: Record<TripItemType, string> = {
 
 const DAY_COLORS = ['#c5a059', '#60a5fa', '#f472b6', '#4ade80', '#a78bfa', '#fb923c', '#22d3ee', '#e879f9'];
 
-export function TripMap({ days, onMarkerPress }: Props) {
-  const [activeDay, setActiveDay] = useState<number | null>(null);
+function bearing(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+    Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+export function TripMap({ days, onMarkerPress, activeDay: controlledDay, onDayChange }: Props) {
+  const [localDay, setLocalDay] = useState<number | null>(null);
+  const activeDay = controlledDay !== undefined ? controlledDay : localDay;
+  const setActiveDay = (day: number | null) => {
+    if (onDayChange) onDayChange(day);
+    else setLocalDay(day);
+  };
+  const { height: screenH } = useWindowDimensions();
 
   const visibleDays = activeDay !== null ? days.filter((d) => d.dayNumber === activeDay) : days;
 
-  // Collect all markers
-  const markers = visibleDays.flatMap((day) =>
-    day.items
+  let activityIndex = 0;
+  const markers = visibleDays.flatMap((day) => {
+    let dayIdx = 0;
+    return day.items
       .filter((item) => item.latitude && item.longitude && item.latitude !== 0)
-      .map((item) => ({ ...item, _dayNumber: day.dayNumber })),
-  );
+      .map((item) => {
+        dayIdx++;
+        activityIndex++;
+        return { ...item, _dayNumber: day.dayNumber, _activityIndex: activeDay !== null ? dayIdx : activityIndex };
+      });
+  });
 
-  // Calculate initial region
   const lats = markers.map((m) => m.latitude);
   const lngs = markers.map((m) => m.longitude);
   const initialRegion = markers.length > 0 ? {
@@ -46,14 +67,42 @@ export function TripMap({ days, onMarkerPress }: Props) {
     longitudeDelta: Math.max(0.02, (Math.max(...lngs) - Math.min(...lngs)) * 1.3),
   } : { latitude: 48.8566, longitude: 2.3522, latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
-  // Polyline for active day
   const polylineCoords = activeDay !== null
     ? markers.map((m) => ({ latitude: m.latitude, longitude: m.longitude }))
     : [];
 
+  // Direction arrows — every other segment
+  const arrowMarkers = polylineCoords.length > 1
+    ? polylineCoords.slice(0, -1)
+        .filter((_, i) => i % 2 === 0)
+        .map((coord, i) => {
+          const idx = i * 2;
+          const next = polylineCoords[idx + 1];
+          const midLat = (coord.latitude + next.latitude) / 2;
+          const midLng = (coord.longitude + next.longitude) / 2;
+          const angle = bearing(coord.latitude, coord.longitude, next.latitude, next.longitude);
+          return { key: `arrow-${idx}`, latitude: midLat, longitude: midLng, angle };
+        })
+    : [];
+
+  const mapRef = useRef<MapView>(null);
+
+  // Animate to fit markers with proper padding for bottom sheet
+  useEffect(() => {
+    if (!mapRef.current || markers.length === 0) return;
+    const coords = markers.map((m) => ({ latitude: m.latitude, longitude: m.longitude }));
+    // Bottom padding accounts for bottom sheet (~52% of screen)
+    const bottomPad = Math.round(screenH * 0.52);
+    mapRef.current.fitToCoordinates(coords, {
+      edgePadding: { top: 80, right: 40, bottom: bottomPad, left: 40 },
+      animated: true,
+    });
+  }, [activeDay, markers.length, screenH]);
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
+        ref={mapRef}
         provider={PROVIDER_DEFAULT}
         style={{ flex: 1 }}
         initialRegion={initialRegion}
@@ -68,14 +117,14 @@ export function TripMap({ days, onMarkerPress }: Props) {
               onPress={() => onMarkerPress?.(item)}
             >
               <View style={{
-                width: 28, height: 28, borderRadius: 8,
+                width: 30, height: 30, borderRadius: 10, borderCurve: 'continuous',
                 backgroundColor: TYPE_COLORS[item.type] || colors.activity,
-                borderWidth: 3, borderColor: dayColor,
+                borderWidth: 2.5, borderColor: dayColor,
                 alignItems: 'center', justifyContent: 'center',
-                shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4,
+                shadowColor: dayColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 6,
               }}>
-                <Text style={{ color: '#fff', fontSize: 9, fontWeight: '800' }}>
-                  {item._dayNumber}
+                <Text style={{ color: '#fff', fontSize: 11, fontWeight: '900', fontFamily: fonts.sansBold }}>
+                  {item._activityIndex}
                 </Text>
               </View>
             </Marker>
@@ -86,16 +135,34 @@ export function TripMap({ days, onMarkerPress }: Props) {
           <Polyline
             coordinates={polylineCoords}
             strokeColor={colors.gold}
-            strokeWidth={2}
-            lineDashPattern={[6, 4]}
+            strokeWidth={3}
+            lineDashPattern={[10, 6]}
           />
         )}
+
+        {/* Direction arrows */}
+        {arrowMarkers.map((arrow) => (
+          <Marker
+            key={arrow.key}
+            coordinate={{ latitude: arrow.latitude, longitude: arrow.longitude }}
+            anchor={{ x: 0.5, y: 0.5 }}
+            flat
+          >
+            <View style={{
+              width: 22, height: 22, borderRadius: 11,
+              backgroundColor: 'rgba(2,6,23,0.85)',
+              borderWidth: 1.5, borderColor: colors.gold,
+              alignItems: 'center', justifyContent: 'center',
+              transform: [{ rotate: `${arrow.angle - 90}deg` }],
+            }}>
+              <ChevronRight size={12} color={colors.gold} strokeWidth={3} />
+            </View>
+          </Marker>
+        ))}
       </MapView>
 
       {/* Day selector overlay */}
-      <View style={{
-        position: 'absolute', bottom: 16, left: 0, right: 0,
-      }}>
+      <View style={{ position: 'absolute', bottom: '52%', left: 0, right: 0 }}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}

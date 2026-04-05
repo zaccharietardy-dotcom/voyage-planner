@@ -1,11 +1,13 @@
-import { View, Text, Pressable, Alert, Linking } from 'react-native';
-import { Apple, Globe, FileDown } from 'lucide-react-native';
+import { View, Text, Pressable, Alert, Linking, ScrollView, StyleSheet } from 'react-native';
+import { Calendar, Globe, FileDown, FileText, ChevronRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
 import { exportTripToAppleCalendar, getGoogleCalendarUrl } from '@/lib/calendar';
 import { shareICSFile } from '@/lib/ics';
+import { exportTripPdf } from '@/lib/exportPdf';
 import type { Trip } from '@/lib/types/trip';
+import type { LucideIcon } from 'lucide-react-native';
 
 interface Props {
   isOpen: boolean;
@@ -20,7 +22,7 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
       const count = await exportTripToAppleCalendar(trip);
       onClose();
       if (count > 0) {
-        Alert.alert('Exporté !', `${count} événement${count > 1 ? 's' : ''} ajouté${count > 1 ? 's' : ''} à votre calendrier Apple.`);
+        Alert.alert('Export\u00e9 !', `${count} \u00e9v\u00e9nement${count > 1 ? 's' : ''} ajout\u00e9${count > 1 ? 's' : ''} \u00e0 votre calendrier Apple.`);
       }
     } catch {
       Alert.alert('Erreur', 'Impossible d\'exporter vers Apple Calendar');
@@ -29,7 +31,6 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
 
   const handleGoogle = () => {
     Haptics.selectionAsync();
-    // Open first day's first activity in Google Calendar as example
     const firstItem = trip.days?.[0]?.items?.[0];
     const firstDay = trip.days?.[0];
     if (firstItem && firstDay) {
@@ -45,67 +46,137 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
       await shareICSFile(trip);
       onClose();
     } catch {
-      Alert.alert('Erreur', 'Impossible de générer le fichier .ics');
+      Alert.alert('Erreur', 'Impossible de g\u00e9n\u00e9rer le fichier .ics');
+    }
+  };
+
+  const handlePdf = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await exportTripPdf(trip);
+      onClose();
+    } catch {
+      Alert.alert('Erreur', 'Impossible de g\u00e9n\u00e9rer le PDF');
     }
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} height={0.42}>
-      <View style={{ padding: 20, gap: 12 }}>
-        <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.display, marginBottom: 4 }}>
-          Ajouter au calendrier
-        </Text>
-        <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 8 }}>
-          Exportez votre itinéraire vers votre calendrier
-        </Text>
+    <BottomSheet isOpen={isOpen} onClose={onClose} height={0.48}>
+      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <Text style={s.title}>Exporter</Text>
 
-        <ExportOption
-          icon={Apple}
-          label="Apple Calendar"
-          desc="Ajoute tous les événements dans votre calendrier iOS"
-          onPress={handleApple}
-        />
-        <ExportOption
-          icon={Globe}
-          label="Google Calendar"
-          desc="Ouvre Google Calendar avec l'itinéraire"
-          onPress={handleGoogle}
-        />
-        <ExportOption
-          icon={FileDown}
-          label="Fichier .ics"
-          desc="Téléchargez un fichier compatible tous calendriers"
-          onPress={handleICS}
-        />
-      </View>
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>CALENDRIER</Text>
+          <ExportRow
+            icon={Calendar}
+            iconColor="#f87171"
+            label="Apple Calendar"
+            desc="Ajoute les événements à iOS"
+            onPress={handleApple}
+          />
+          <ExportRow
+            icon={Globe}
+            iconColor="#60a5fa"
+            label="Google Calendar"
+            desc="Ouvre Google Calendar"
+            onPress={handleGoogle}
+          />
+          <ExportRow
+            icon={FileDown}
+            iconColor="#4ade80"
+            label="Fichier .ics"
+            desc="Outlook, Thunderbird, etc."
+            onPress={handleICS}
+            isLast
+          />
+        </View>
+
+        <View style={s.section}>
+          <Text style={s.sectionLabel}>DOCUMENT</Text>
+          <ExportRow
+            icon={FileText}
+            iconColor={colors.gold}
+            label="Exporter en PDF"
+            desc="Itinéraire complet avec budget"
+            onPress={handlePdf}
+            isLast
+          />
+        </View>
+      </ScrollView>
     </BottomSheet>
   );
 }
 
-function ExportOption({ icon: Icon, label, desc, onPress }: {
-  icon: typeof Apple; label: string; desc: string; onPress: () => void;
+function ExportRow({ icon: Icon, iconColor, label, desc, onPress, isLast }: {
+  icon: LucideIcon; iconColor: string; label: string; desc: string; onPress: () => void; isLast?: boolean;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({
-        flexDirection: 'row', alignItems: 'center', gap: 14,
-        backgroundColor: pressed ? 'rgba(255,255,255,0.06)' : colors.surface,
-        borderRadius: radius.xl, padding: 16,
-        borderWidth: 1, borderColor: colors.borderSubtle,
-      })}
+      style={({ pressed }) => [s.row, pressed && s.rowPressed, !isLast && s.rowBorder]}
     >
-      <View style={{
-        width: 42, height: 42, borderRadius: 14,
-        backgroundColor: colors.goldBg,
-        alignItems: 'center', justifyContent: 'center',
-      }}>
-        <Icon size={20} color={colors.gold} />
+      <View style={[s.iconWrap, { backgroundColor: `${iconColor}15` }]}>
+        <Icon size={18} color={iconColor} />
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700' }}>{label}</Text>
-        <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 2 }}>{desc}</Text>
+      <View style={s.rowContent}>
+        <Text style={s.rowLabel}>{label}</Text>
+        <Text style={s.rowDesc}>{desc}</Text>
       </View>
+      <ChevronRight size={16} color={colors.textDim} />
     </Pressable>
   );
 }
+
+const s = StyleSheet.create({
+  content: {
+    padding: 20,
+    gap: 18,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 20,
+    fontFamily: fonts.display,
+  },
+  section: {
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    overflow: 'hidden',
+  },
+  sectionLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontFamily: fonts.sansBold,
+    letterSpacing: 1.5,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  rowPressed: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  rowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.04)',
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderCurve: 'continuous',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowContent: { flex: 1, gap: 1 },
+  rowLabel: { color: colors.text, fontSize: 14, fontFamily: fonts.sansSemiBold },
+  rowDesc: { color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans },
+});

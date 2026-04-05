@@ -8,8 +8,8 @@ interface Props {
   size?: Size;
 }
 
-const DIMS: Record<Size, number> = { sm: 32, md: 44, lg: 72 };
-const FONT: Record<Size, number> = { sm: 13, md: 17, lg: 28 };
+const DIMS: Record<Size, number> = { sm: 32, md: 44, lg: 84 };
+const FONT: Record<Size, number> = { sm: 13, md: 17, lg: 32 };
 
 export function Avatar({ url, name, size = 'md' }: Props) {
   const dim = DIMS[size];

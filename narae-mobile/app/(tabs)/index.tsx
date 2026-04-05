@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable, FlatList, Image, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Plane, ArrowRight, Search, Compass, MapPin, Users } from 'lucide-react-native';
+import { Plane, ArrowRight, Search, Compass, MapPin, Users, Bell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useAuth } from '@/hooks/useAuth';
@@ -86,26 +86,21 @@ export default function HomeScreen() {
     );
   }
 
-  // ─── Authenticated Dashboard ───
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Bonjour';
-    if (h < 18) return 'Bon après-midi';
-    return 'Bonsoir';
-  })();
-
+  // ─── Authenticated: Home Dashboard ───
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
   const name = profile?.display_name?.split(' ')[0] || '';
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <PremiumBackground />
-        <AuthenticatedHome greeting={greeting} name={name} router={router} userId={user?.id} />
+      <AuthenticatedHome greeting={greeting} name={name} router={router} userId={user?.id} isAuthenticated />
     </View>
   );
 }
 
-function AuthenticatedHome({ greeting, name, router, userId }: {
-  greeting: string; name: string; router: any; userId?: string;
+function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: {
+  greeting: string; name: string; router: any; userId?: string; isAuthenticated?: boolean;
 }) {
   const { data: trips, isLoading } = useApi(
     () => (userId ? fetchMyTrips() : Promise.resolve([])),
@@ -121,14 +116,22 @@ function AuthenticatedHome({ greeting, name, router, userId }: {
       contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* Greeting */}
+      {/* Greeting + Bell */}
       <View style={styles.dashboardHeader}>
-        <Text style={styles.greetingTitle}>
-          {greeting}{name ? `, ${name}` : ''} !
-        </Text>
-        <Text style={styles.greetingSubtitle}>
-          Prêt pour votre prochaine aventure ?
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.greetingTitle}>
+            {greeting}{name ? `, ${name}` : ''} !
+          </Text>
+          <Text style={styles.greetingSubtitle}>
+            Prêt pour votre prochaine aventure ?
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => { Haptics.selectionAsync(); router.push('/notifications' as any); }}
+          style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Bell size={20} color={colors.textSecondary} />
+        </Pressable>
       </View>
 
       {/* Quick search bar */}
@@ -251,10 +254,11 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     color: colors.text,
-    fontSize: 34,
+    fontSize: 36,
     textAlign: 'center',
-    lineHeight: 42,
+    lineHeight: 44,
     fontFamily: fonts.display,
+    letterSpacing: -0.5,
   },
   heroSubtitle: {
     color: colors.textSecondary,
@@ -305,13 +309,17 @@ const styles = StyleSheet.create({
 
   // Dashboard Styles
   dashboardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 24,
     paddingTop: 16,
+    gap: 12,
   },
   greetingTitle: {
     color: colors.text,
-    fontSize: 26,
+    fontSize: 32,
     fontFamily: fonts.display,
+    letterSpacing: -0.5,
   },
   greetingSubtitle: {
     color: colors.textSecondary,

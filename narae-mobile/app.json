@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.naraevoyage.app",
-      "buildNumber": "15",
+      "buildNumber": "34",
       "usesAppleSignIn": true,
       "infoPlist": {
         "CFBundleDisplayName": "Narae Voyage",

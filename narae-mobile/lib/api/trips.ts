@@ -64,6 +64,11 @@ export async function deleteTrip(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function updateTripData(id: string, data: Trip): Promise<void> {
+  const { error } = await supabase.from('trips').update({ data }).eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 // ---------- Generation (API route — needs server-side pipeline) ----------
 
 export interface GenerateProgress {
