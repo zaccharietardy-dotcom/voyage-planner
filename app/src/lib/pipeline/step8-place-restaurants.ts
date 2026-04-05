@@ -403,7 +403,7 @@ export async function findBestRestaurantWithSearch(
 
   // Nothing within 500m in pool — progressive API search
   // Tier 1: 800m search with relaxed filters (minReviews: 2 for non-European cities)
-  let allNewRestaurants: Restaurant[] = [];
+  const allNewRestaurants: Restaurant[] = [];
   const existingIds = new Set(allRestaurants.map(r => r.id));
 
   const apiSearch = async (radius: number, label: string): Promise<Restaurant[]> => {

@@ -348,7 +348,7 @@ export function DraggableTimeline({
       console.error('Delete error:', err);
     }
     setDeleteTarget(null);
-  }, [localDays, applyUpdate, deleteTarget]);
+  }, [localDays, applyUpdate, deleteTarget, t]);
 
   const handleSwapDays = useCallback((dayIndexA: number, dayIndexB: number) => {
     try {
@@ -362,7 +362,7 @@ export function DraggableTimeline({
     } catch (err) {
       console.error('Swap error:', err);
     }
-  }, [localDays, applyUpdate]);
+  }, [localDays, applyUpdate, t]);
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {

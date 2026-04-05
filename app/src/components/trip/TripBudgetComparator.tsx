@@ -17,7 +17,6 @@ import {
   AlertCircle,
   PieChart,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { Trip, TripCostSummary } from '@/lib/types';
 import { motion } from 'framer-motion';
@@ -52,7 +51,7 @@ export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
         { label: t('budget.category.food'), value: breakdown.food, color: '#F97316', icon: Utensils },
         { label: t('budget.category.localTransport'), value: breakdown.transport, color: '#10B981', icon: Bus },
       ].filter((c) => c.value > 0),
-    [breakdown]
+    [breakdown, t]
   );
 
   const total = useMemo(
