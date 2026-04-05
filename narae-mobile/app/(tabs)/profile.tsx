@@ -23,6 +23,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useApi } from '@/hooks/useApi';
 import { fetchMyTrips } from '@/lib/api/trips';
 import { deleteAccount, exportAccountData } from '@/lib/api/account';
+import { fetchUserStats, type UserStats } from '@/lib/api/social';
+import { BadgeShowcase } from '@/components/profile/BadgeShowcase';
+import { LevelProgress } from '@/components/profile/LevelProgress';
+import { StreakCounter } from '@/components/profile/StreakCounter';
 import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -53,6 +57,11 @@ export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState<ProfileTab>('voyages');
   const [exporting, setExporting] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const { data: stats } = useApi(
+    () => (user ? fetchUserStats(user.id) : Promise.resolve(null)),
+    [user?.id ?? null],
+  );
 
   const { data: trips, isLoading: tripsLoading } = useApi(
     () => (user ? fetchMyTrips() : Promise.resolve([])),
@@ -167,70 +176,52 @@ export default function ProfileScreen() {
           { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 136 },
         ]}
       >
+        {/* Profile card — centered layout like web */}
         <View style={styles.heroCard}>
-          <LinearGradient
-            colors={['rgba(197,160,89,0.34)', 'rgba(197,160,89,0.08)', 'rgba(10,17,40,0.18)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cover}
-          />
-
           <View style={styles.heroBody}>
-            <View style={styles.identityRow}>
+            {/* Centered avatar */}
+            <View style={{ alignItems: 'center', gap: 4 }}>
               <View style={styles.avatarRing}>
                 <Avatar url={profile?.avatar_url} name={displayName} size="lg" />
               </View>
-
-              <View style={styles.identityCopy}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.displayName}>{displayName}</Text>
-                  {isPro ? (
-                    <View style={styles.proBadge}>
-                      <Crown size={16} color={colors.gold} />
-                    </View>
-                  ) : null}
+              {isPro ? (
+                <View style={styles.proBadge}>
+                  <Crown size={14} color={colors.gold} />
                 </View>
-                <Text style={styles.email}>{user?.email}</Text>
-              </View>
+              ) : null}
             </View>
 
+            {/* Name centered */}
+            <View style={{ alignItems: 'center', gap: 4 }}>
+              <Text style={styles.displayName}>{displayName}</Text>
+              <Text style={styles.username}>@{displayName.toLowerCase().replace(/\s+/g, '_')}</Text>
+              <Text style={styles.email}>{user?.email}</Text>
+            </View>
+
+            {/* Divider */}
+            <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.06)', marginHorizontal: 20 }} />
+
+            {/* Stats — 3 columns */}
             <View style={styles.statsCard}>
               <Stat value={tripCount} label="Voyages" />
               <View style={styles.statsDivider} />
-              <Stat value={isPro ? 'Pro' : 'Free'} label="Abonnement" gold={isPro} />
+              <Stat value={stats?.followerCount ?? 0} label="Abonnés" />
+              <View style={styles.statsDivider} />
+              <Stat value={stats?.followingCount ?? 0} label="Suivis" />
             </View>
           </View>
         </View>
 
-        <View style={styles.actionsSection}>
-          <Text style={styles.sectionLabel}>Compte</Text>
-          <MenuItem
-            icon={Settings}
-            label="Préférences de voyage"
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push('/preferences');
-            }}
-          />
-          <MenuItem
-            icon={Download}
-            label={exporting ? 'Export en cours...' : 'Exporter mes données'}
-            disabled={exporting}
-            loading={exporting}
-            onPress={() => {
-              Haptics.selectionAsync();
-              void handleExport();
-            }}
-          />
-          <MenuItem icon={LogOut} label="Se déconnecter" danger onPress={handleSignOut} />
-          <MenuItem
-            icon={Trash2}
-            label={deletingAccount ? 'Suppression en cours...' : 'Supprimer mon compte'}
-            danger
-            disabled={deletingAccount}
-            loading={deletingAccount}
-            onPress={handleDeleteAccount}
-          />
+        {/* Compact action row */}
+        <View style={styles.actionsRow}>
+          <Pressable onPress={() => { Haptics.selectionAsync(); router.push('/preferences'); }} style={styles.actionButton}>
+            <Settings size={18} color={colors.gold} />
+            <Text style={styles.actionLabel}>Réglages</Text>
+          </Pressable>
+          <Pressable onPress={handleSignOut} style={styles.actionButton}>
+            <LogOut size={18} color="rgba(255,255,255,0.5)" />
+            <Text style={styles.actionLabel}>Déconnexion</Text>
+          </Pressable>
         </View>
 
         <View style={styles.tabsRow}>
@@ -292,6 +283,14 @@ export default function ProfileScreen() {
               <Stat value={(trips ?? []).filter((trip) => new Date(trip.end_date) < new Date()).length} label="Terminés" />
               <Stat value={(trips ?? []).filter((trip) => new Date(trip.start_date) > new Date()).length} label="À venir" />
             </Card>
+
+            {stats ? (
+              <>
+                <LevelProgress level={stats.level} totalXp={stats.totalXp} />
+                <StreakCounter currentStreak={stats.currentStreak} longestStreak={stats.longestStreak} />
+                <BadgeShowcase earnedBadgeIds={stats.badges} />
+              </>
+            ) : null}
           </View>
         ) : null}
 
@@ -329,7 +328,17 @@ export default function ProfileScreen() {
                   Devenir Pro
                 </Button>
               </>
-            ) : null}
+            ) : (
+              <Button
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/pricing');
+                }}
+                variant="outline"
+              >
+                Gérer mon abonnement
+              </Button>
+            )}
           </View>
         ) : null}
       </ScrollView>
@@ -443,59 +452,76 @@ const styles = StyleSheet.create({
     borderColor: colors.goldBorder,
     overflow: 'hidden',
   },
-  cover: {
-    height: 120,
-  },
   heroBody: {
     paddingHorizontal: 22,
-    paddingBottom: 22,
-    marginTop: -44,
-    gap: 20,
-  },
-  identityRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    paddingVertical: 28,
     gap: 16,
+    alignItems: 'center',
   },
   avatarRing: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderCurve: 'continuous',
-    padding: 8,
+    padding: 4,
     backgroundColor: colors.bg,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: 'rgba(197,160,89,0.35)',
-  },
-  identityCopy: {
-    flex: 1,
-    gap: 4,
-    paddingBottom: 6,
-  },
-  nameRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
   },
   displayName: {
     color: colors.text,
-    fontSize: 26,
+    fontSize: 28,
     fontFamily: fonts.display,
-    flexShrink: 1,
+    letterSpacing: -0.5,
+    textAlign: 'center',
+  },
+  username: {
+    color: colors.gold,
+    fontSize: 11,
+    fontFamily: fonts.sansBold,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   email: {
-    color: colors.textSecondary,
-    fontSize: 13,
+    color: colors.textMuted,
+    fontSize: 12,
     fontFamily: fonts.sans,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   proBadge: {
     width: 32,
     height: 32,
-    borderRadius: 12,
+    borderRadius: 16,
     borderCurve: 'continuous',
     backgroundColor: colors.goldBg,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: -16,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  actionButton: {
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    minWidth: 80,
+  },
+  actionLabel: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontFamily: fonts.sansSemiBold,
   },
   statsCard: {
     flexDirection: 'row',
@@ -516,8 +542,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    color: colors.text,
-    fontSize: 22,
+    color: colors.gold,
+    fontSize: 24,
     fontFamily: fonts.display,
   },
   statValueGold: {
