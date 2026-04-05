@@ -124,7 +124,7 @@ export default function PricingScreen() {
                 <Text style={{ color: colors.gold, fontSize: 44, fontFamily: fonts.display }}>
                   {selectedPkg?.product?.priceString || '29.99€'}
                 </Text>
-                <Text style={{ color: colors.gold, fontSize: 16 }}>/{annualPkg ? 'an' : 'mois'}</Text>
+                <Text style={{ color: colors.gold, fontSize: 16 }}>/{annualPkg || !selectedPkg ? 'an' : 'mois'}</Text>
               </View>
               {subtitleLabel ? (
                 <Text style={{ color: colors.textMuted, fontSize: 13 }}>{subtitleLabel}</Text>
