@@ -380,37 +380,56 @@ export async function findBestRestaurantWithSearch(
   dayDate: Date | null,
   destination: string,
 ): Promise<{ result: Omit<MealPlacement, 'anchorName'> | null; newRestaurants: Restaurant[] }> {
-  // First try: ultra-close (200m) from existing pool
-  const tightPass = { ...PASSES[0] };
-  const tightResults = filterAndScoreCandidates(allRestaurants, anchor, mealType, tightPass, usedIds, dietary, dayDate, minRating);
-  if (tightResults.length > 0) {
-    return { result: scoreAndSelect(tightResults, anchor, mealType, altCount), newRestaurants: [] };
-  }
-
-  // Nothing within 200m in pool — fire targeted API search near this anchor
-  let newRestaurants: Restaurant[] = [];
-  try {
-    console.log(`[Place Restaurants] No ${mealType} within 200m of anchor — searching API near [${anchor.lat.toFixed(4)}, ${anchor.lng.toFixed(4)}]`);
-    const nearby = await searchRestaurantsNearbyWithFallback(anchor, destination, {
-      mealType: mealType === 'breakfast' ? 'breakfast' : mealType === 'lunch' ? 'lunch' : 'dinner',
-      maxDistance: 500, // 500m — tight search to find truly nearby restaurants
-      minRating: 3.5,
-      minReviews: 10,
-      limit: 15,
-    });
-    const existingIds = new Set(allRestaurants.map(r => r.id));
-    newRestaurants = nearby.filter(r => !existingIds.has(r.id));
-    if (newRestaurants.length > 0) {
-      console.log(`[Place Restaurants] API found ${newRestaurants.length} new restaurants near anchor`);
+  // First try: ultra-close (200m, 500m) from existing pool
+  for (const pass of [PASSES[0], PASSES[1]]) {
+    const results = filterAndScoreCandidates(allRestaurants, anchor, mealType, pass, usedIds, dietary, dayDate, minRating);
+    if (results.length > 0) {
+      return { result: scoreAndSelect(results, anchor, mealType, altCount), newRestaurants: [] };
     }
-  } catch (e) {
-    console.warn(`[Place Restaurants] Targeted search failed:`, e);
   }
 
-  // Retry all passes with merged pool
-  const merged = [...allRestaurants, ...newRestaurants];
-  const result = findBestRestaurant(merged, anchor, mealType, maxDistKm, minRating, altCount, dietary, usedIds, dayDate);
-  return { result, newRestaurants };
+  // Nothing within 500m in pool — progressive API search
+  // Tier 1: 800m search with relaxed filters (minReviews: 2 for non-European cities)
+  let allNewRestaurants: Restaurant[] = [];
+  const existingIds = new Set(allRestaurants.map(r => r.id));
+
+  const apiSearch = async (radius: number, label: string): Promise<Restaurant[]> => {
+    try {
+      console.log(`[Place Restaurants] No ${mealType} in pool — ${label} API search (${radius}m) near [${anchor.lat.toFixed(4)}, ${anchor.lng.toFixed(4)}]`);
+      const nearby = await searchRestaurantsNearbyWithFallback(anchor, destination, {
+        mealType: mealType === 'breakfast' ? 'breakfast' : mealType === 'lunch' ? 'lunch' : 'dinner',
+        maxDistance: radius,
+        minRating: 3.0,
+        minReviews: 2,
+        limit: 15,
+      });
+      const fresh = nearby.filter(r => !existingIds.has(r.id));
+      for (const r of fresh) existingIds.add(r.id);
+      if (fresh.length > 0) {
+        console.log(`[Place Restaurants] ${label}: found ${fresh.length} new restaurants`);
+      }
+      return fresh;
+    } catch (e) {
+      console.warn(`[Place Restaurants] ${label} search failed:`, e);
+      return [];
+    }
+  };
+
+  // Tier 1: 800m
+  const tier1 = await apiSearch(800, 'Tier 1 (800m)');
+  allNewRestaurants.push(...tier1);
+
+  let merged = [...allRestaurants, ...allNewRestaurants];
+  let result = findBestRestaurant(merged, anchor, mealType, maxDistKm, minRating, altCount, dietary, usedIds, dayDate);
+  if (result) return { result, newRestaurants: allNewRestaurants };
+
+  // Tier 2: 1.5km — wider search if 800m found nothing
+  const tier2 = await apiSearch(1500, 'Tier 2 (1.5km)');
+  allNewRestaurants.push(...tier2);
+
+  merged = [...allRestaurants, ...allNewRestaurants];
+  result = findBestRestaurant(merged, anchor, mealType, maxDistKm, minRating, altCount, dietary, usedIds, dayDate);
+  return { result, newRestaurants: allNewRestaurants };
 }
 
 function scoreAndSelect(

@@ -67,7 +67,7 @@ interface ExtractedPlaceRaw {
   originalMention?: string;
 }
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 const SOCIAL_FETCH_TIMEOUT_MS = 10000;
 const SOCIAL_FETCH_REDIRECT_LIMIT = 3;
 const SOCIAL_USER_AGENT = 'Mozilla/5.0 (compatible; NaraeVoyage/1.0; +https://naraevoyage.com)';

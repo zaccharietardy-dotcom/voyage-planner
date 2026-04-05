@@ -79,7 +79,8 @@ export function repairPass(
   days: TripDay[],
   startDate: string,
   activityPool: ScoredActivity[],
-  destCoords: { lat: number; lng: number }
+  destCoords: { lat: number; lng: number },
+  densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): RepairResult {
   const repairs: RepairAction[] = [];
   const unresolvedViolations: string[] = [];
@@ -100,7 +101,7 @@ export function repairPass(
   fillGapsByExtension(repairedDays, startDate, repairs);
 
   // Pass 5: Fill remaining large gaps (>90min) — try unassigned activities first, then free_time
-  fillLargeGapsWithFreeTime(repairedDays, activityPool, startDate, repairs);
+  fillLargeGapsWithFreeTime(repairedDays, activityPool, startDate, repairs, densityCategory);
 
   // Log summary
   console.log(`[Repair] ${repairs.length} repairs performed, ${unresolvedViolations.length} unresolved`);
@@ -354,6 +355,9 @@ export function ensureMustSees(
     let injected = false;
 
     for (const day of days) {
+      // Never inject must-sees into transit-only days (no activity window)
+      if ((day as any).isTransitOnly) continue;
+
       if (rescueStageAtLeast(rescueStage, 1)) {
         const role = getDayPlannerRole(day);
         if (role === 'day_trip' || role === 'arrival' || role === 'departure') continue;
@@ -736,9 +740,12 @@ export function fillLargeGapsWithFreeTime(
   // Sort unassigned by score descending so we insert the best candidates first
   unassigned.sort((a, b) => (b.score || 0) - (a.score || 0));
 
-  const MIN_CANDIDATE_SCORE = 5; // Minimum quality threshold
+  // Lower threshold for dense cities (many valid activities score 3-5 due to competition)
+  const MIN_CANDIDATE_SCORE = densityCategory === 'dense' ? 3 : 5;
 
   for (const day of days) {
+    // Never fill gaps on transit-only days (no activity window)
+    if ((day as any).isTransitOnly) continue;
     const insertions: Array<{ index: number; item: TripItem }> = [];
 
     for (let i = 0; i < day.items.length - 1; i++) {
@@ -776,9 +783,9 @@ export function fillLargeGapsWithFreeTime(
 
         // Progressive distance: prefer nearby, widen only if needed. Tiers adapt to city density.
         const DISTANCE_TIERS_KM =
-          densityCategory === 'dense'  ? [0.8, 1.2, 2.0] :
+          densityCategory === 'dense'  ? [0.8, 1.2, 2.0, 3.5] :
           densityCategory === 'spread' ? [2.0, 4.0, 8.0] :
-                                         [1.0, 1.5, 2.5];  // medium (default)
+                                         [1.0, 1.5, 2.5, 4.0];  // medium (default)
 
         for (const maxDistKm of DISTANCE_TIERS_KM) {
           if (filled) break;

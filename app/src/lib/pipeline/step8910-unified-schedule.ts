@@ -248,13 +248,15 @@ export function unifiedScheduleV3Days(
     const isTransitOnly = dayStartTime === dayEndTime;
     if (isTransitOnly) {
       console.log(`[Unified] Day ${cluster.dayNumber}: transit-only (${dayStartTime} == ${dayEndTime}), skipping all scheduling`);
-      days.push({
+      const transitDay: TripDay = {
         dayNumber: cluster.dayNumber,
         date: dayDate,
         items: [],
         theme: '',
         dayNarrative: '',
-      });
+      };
+      (transitDay as any).isTransitOnly = true;
+      days.push(transitDay);
       continue;
     }
 
@@ -1215,6 +1217,9 @@ export function unifiedScheduleV3Days(
 
   // 14. Empty day rescue: steal from busiest day
   for (const day of days) {
+    // Never rescue transit-only days — they have no activity window
+    if ((day as any).isTransitOnly) continue;
+
     const activityCount = day.items.filter(i => i.type === 'activity').length;
     if (activityCount > 0) continue;
 

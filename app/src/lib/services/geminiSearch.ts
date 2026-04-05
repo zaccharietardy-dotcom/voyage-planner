@@ -13,7 +13,7 @@ import { Flight } from '../types';
 import { generateFlightLink } from './linkGenerator';
 
 function getGeminiApiKey() { return process.env.GOOGLE_AI_API_KEY; }
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
 /**
  * Fetch Gemini with automatic retry on 429 (quota exceeded).

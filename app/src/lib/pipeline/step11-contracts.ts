@@ -14,6 +14,8 @@
  *   P0.6: No POI cross-country (distance > 100km from dest)
  *   P0.7: Activity durations within min/max bounds
  *   P0.8: All must-sees present in final plan
+ *   P0.9: No activity/restaurant on transit-only days
+ *   P0.10: No activity ends after departure transport minus buffer
  */
 
 import type { TripDay, TripItem } from '../types';
@@ -324,6 +326,32 @@ export function validateContracts(
   metrics.avgRestaurantDistance = restaurantDistCount > 0
     ? totalRestaurantDist / restaurantDistCount
     : 0;
+
+  // P0.9: No activity/restaurant on transit-only days
+  for (const day of days) {
+    if (!(day as any).isTransitOnly) continue;
+    const nonTransportItems = day.items.filter(i =>
+      i.type !== 'flight' && i.type !== 'transport' && i.type !== 'checkin' && i.type !== 'checkout'
+    );
+    if (nonTransportItems.length > 0) {
+      violations.push(`P0.9: Transit-only Day ${day.dayNumber} has ${nonTransportItems.length} non-transport items: ${nonTransportItems.map(i => i.title).join(', ')}`);
+    }
+  }
+
+  // P0.10: No activity ends after departure transport minus buffer
+  if (timeWindows) {
+    for (const day of days) {
+      const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
+      if (!tw?.hasDepartureTransport) continue;
+      const cutoffMin = toMinutes(tw.activityEndTime);
+      for (const item of day.items) {
+        if (item.type === 'flight' || item.type === 'transport' || item.type === 'checkout') continue;
+        if (item.endTime && toMinutes(item.endTime) > cutoffMin + 15) { // 15min grace
+          violations.push(`P0.10: "${item.title}" on Day ${day.dayNumber} ends at ${item.endTime} past departure cutoff ${tw.activityEndTime}`);
+        }
+      }
+    }
+  }
 
   // ── Distribution & routing quality metrics ──
   const LOGISTICS_TYPES = new Set(['flight', 'transport', 'checkin', 'checkout', 'parking', 'luggage', 'free_time']);

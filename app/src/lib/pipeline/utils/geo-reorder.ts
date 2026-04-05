@@ -193,6 +193,7 @@ export function geoReorderScheduledDay(
   items: TripItem[],
   hotelLat?: number,
   hotelLng?: number,
+  departureEndTime?: string,
 ): TripItem[] {
   // Extract only activities with valid coords
   const activityIndices: number[] = [];
@@ -317,6 +318,20 @@ export function geoReorderScheduledDay(
         // (a more sophisticated approach would fix just this activity, but
         //  reverting is safer and the greedy+2opt should handle most cases)
         console.log(`[Geo-Reorder-Post] Opening hours conflict: "${activity.title}" in ${slot.startTime}-${slot.endTime} (opens ${activity.openingHours.open}, closes ${activity.openingHours.close}) — keeping original order`);
+        return items;
+      }
+    }
+  }
+
+  // Departure window guard — reject reorder if any activity would end past departure cutoff
+  if (departureEndTime) {
+    const cutoffMin = timeToMinutes(departureEndTime);
+    for (let i = 0; i < route.length; i++) {
+      const slotStartMin = timeToMinutes(slots[i].startTime);
+      const actDuration = route[i].duration || (timeToMinutes(slots[i].endTime) - slotStartMin);
+      const actEndMin = slotStartMin + actDuration;
+      if (actEndMin > cutoffMin) {
+        console.log(`[Geo-Reorder-Post] "${route[i].title}" would end at ${minutesToTime(actEndMin)} past departure cutoff ${departureEndTime} — keeping original order`);
         return items;
       }
     }

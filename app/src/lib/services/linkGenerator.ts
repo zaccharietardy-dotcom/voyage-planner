@@ -10,6 +10,7 @@
  */
 
 import { buildDirectBookingHotelUrl } from './bookingLinks';
+import { normalizeCitySync } from './cityNormalization';
 
 /**
  * Mapping ville → code IATA principal.
@@ -109,7 +110,20 @@ export function cityToIata(cityOrCode: string): string {
     }
   }
 
-  // Fallback: first 3 characters uppercased
+  // Try city normalization (resolves suburbs: "igny" → "paris" → CDG)
+  const cityNorm = normalizeCitySync(trimmed);
+  if (cityNorm.confidence !== 'low') {
+    const normKey = cityNorm.normalized
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    if (CITY_TO_IATA[normKey]) {
+      return CITY_TO_IATA[normKey];
+    }
+  }
+
+  // Fallback: first 3 characters uppercased (likely wrong — log a warning)
+  console.warn(`[LinkGenerator] No IATA code for "${trimmed}" — using fallback "${trimmed.substring(0, 3).toUpperCase()}"`);
   return trimmed.substring(0, 3).toUpperCase();
 }
 

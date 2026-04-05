@@ -57,6 +57,7 @@ import { unifiedScheduleV3Days } from './step8910-unified-schedule';
 import { validateContracts } from './step11-contracts';
 import { geoReorderScheduledDay } from './utils/geo-reorder';
 import { decorateTrip } from './step12-decorate';
+import { llmReviewTrip, applyLLMCorrections } from './step13-llm-review';
 import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
@@ -630,17 +631,12 @@ async function runPipelineFromClusters(
         if (item.type === 'transport' && (item as any).transportRole === 'longhaul') return true;
         const startMin = timeToMin(item.startTime || '00:00');
         if (startMin >= cutoffMin) {
-          if (item.mustSee) {
-            console.warn(`[Pipeline V3] Post-injection sweep: keeping must-see "${item.title}" on Day ${lastDay.dayNumber} despite departure cutoff`);
-            return true;
-          }
+          // Must-sees past departure cutoff are physically impossible — drop them
+          console.warn(`[Pipeline V3] Post-injection sweep: removing "${item.title}" on Day ${lastDay.dayNumber} (starts at/after departure cutoff)`);
           return false;
         }
         if (item.endTime && timeToMin(item.endTime) > cutoffMin) {
-          if (item.mustSee) {
-            console.warn(`[Pipeline V3] Post-injection sweep: keeping must-see "${item.title}" on Day ${lastDay.dayNumber} despite end past departure cutoff`);
-            return true;
-          }
+          console.warn(`[Pipeline V3] Post-injection sweep: removing "${item.title}" on Day ${lastDay.dayNumber} (ends past departure cutoff)`);
           return false;
         }
         return true;
@@ -670,11 +666,9 @@ async function runPipelineFromClusters(
             item.endTime = minToTime(activityStartMin + 15);
             return true;
           }
-          // Protect must-sees — dropping them causes P0.8 violations
-          if (item.mustSee) {
-            console.warn(`[Pipeline V3] Post-injection sweep: keeping must-see "${item.title}" on Day ${day1.dayNumber} despite pre-arrival time`);
-            return true;
-          }
+          // Must-sees before arrival flight are physically impossible — drop them.
+          // They'll be rescheduled to a valid day by ensureMustSees on next run.
+          console.warn(`[Pipeline V3] Post-injection sweep: removing "${item.title}" on Day ${day1.dayNumber} (before arrival)`);
           return false;
         }
         return true;
@@ -686,16 +680,36 @@ async function runPipelineFromClusters(
     }
   }
 
+  // Step 13: LLM Review (safety net) — Gemini 3 Flash reviews for logical errors
+  if (process.env.PIPELINE_LLM_REVIEW === 'on') {
+    try {
+      const review = await llmReviewTrip(scheduledDays, preferences, timeWindows);
+      if (review.corrections.length > 0) {
+        const applied = applyLLMCorrections(scheduledDays, review.corrections);
+        console.log(`[Pipeline V3] Step 13: LLM review applied ${applied}/${review.corrections.length} corrections (confidence: ${review.confidence})`);
+        onEvent?.({ step: 'llm-review', message: `${review.corrections.length} issues found, ${applied} fixed`, data: { corrections: review.corrections.length, applied } } as any);
+      } else {
+        console.log(`[Pipeline V3] Step 13: LLM review passed — no issues (confidence: ${review.confidence})`);
+      }
+    } catch (e) {
+      console.warn('[Pipeline V3] Step 13: LLM review failed (non-blocking):', e);
+    }
+  }
+
   // Step 10b: Post-scheduler geographic reorder (reduce zigzag)
   // Swap activity time slots to minimize total travel distance per day
   {
     for (const day of scheduledDays) {
       const actCount = day.items.filter((i) => i.type === 'activity').length;
       if (actCount > 2) {
+        // Pass departure end time so geo-reorder won't push activities past flight
+        const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
+        const depEnd = tw?.hasDepartureTransport ? tw.activityEndTime : undefined;
         day.items = geoReorderScheduledDay(
           day.items,
           hotel?.latitude,
           hotel?.longitude,
+          depEnd,
         );
         // Re-assign orderIndex after reorder
         day.items.forEach((item, idx) => { item.orderIndex = idx; });
