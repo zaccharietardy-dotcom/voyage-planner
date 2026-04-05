@@ -959,14 +959,17 @@ function computeScore(
   maxPricePerActivity?: number,
   weatherForecasts?: Array<{ tempMin: number; tempMax: number; weatherCode?: number }>
 ): number {
-  // Must-see bonus: user-specified get full +100, OSM auto-detected get +50
-  // This ensures user must-sees always rank above OSM auto-detected ones
+  // Must-see bonus: user-specified/curated get +200, OSM auto-detected get +50
+  // +200 guarantees must-sees always beat high-review-count generic attractions
   const mustSeeBonus = activity.mustSee
-    ? (activity.source === 'overpass' ? 50 : 100)
+    ? (activity.source === 'overpass' ? 50 : 200)
     : 0;
 
   // Combined popularity: (rating/5)^2 * log10(reviews+1) — penalizes bad ratings exponentially
-  const popularityScore = computePopularityScore(activity.rating || 0, activity.reviewCount || 0);
+  // Capped at 8.0 to prevent high-volume generic venues (Tokyo Dome City: 15K reviews)
+  // from dominating over curated must-sees
+  const rawPopularity = computePopularityScore(activity.rating || 0, activity.reviewCount || 0);
+  const popularityScore = Math.min(rawPopularity, 8.0);
   const ratingScore = 0; // Absorbed into popularityScore
 
   // Type match: bonus if activity type matches user preferences, penalty if contradictory
@@ -1126,8 +1129,13 @@ function computeScore(
   // Weather penalty: outdoor activities in bad weather, beach in cold weather
   const weatherPenalty = computeWeatherPenalty(activity, weatherForecasts || []);
 
+  // Entertainment venue penalty: generic amusement parks and shopping malls
+  // should not compete with cultural landmarks
+  const nameLC = (activity.name || '').toLowerCase();
+  const entertainmentPenalty = /\b(dome city|amusement|theme park|shopping mall|shopping center|water park|arcade|game center|bowling)\b/i.test(nameLC) ? -3 : 0;
+
   return mustSeeBonus + popularityScore + ratingScore + typeMatchBonus + viatorBonus
-    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + personalizationBonus + proximityPenalty + budgetPenalty + stadiumPenalty + weatherPenalty;
+    + reliabilityBonus + distancePenalty + contextFitBonus + preferenceDepthBonus + personalizationBonus + proximityPenalty + budgetPenalty + stadiumPenalty + weatherPenalty + entertainmentPenalty;
 }
 
 // ─── Contextual scoring helpers ─────────────────────────────────────────────

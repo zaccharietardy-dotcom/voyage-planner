@@ -1035,7 +1035,7 @@ function getAdaptiveQueries(
   const archetypes = getDestinationArchetypes(destination);
   const extras: string[] = [];
 
-  const religiousCities = ['rome', 'istanbul', 'kyoto', 'bangkok', 'jerusalem', 'bali', 'varanasi', 'cairo', 'seville', 'florence'];
+  const religiousCities = ['rome', 'istanbul', 'kyoto', 'bangkok', 'jerusalem', 'bali', 'varanasi', 'cairo', 'seville', 'florence', 'tokyo', 'osaka', 'nara', 'singapore', 'hanoi', 'ho chi minh', 'mumbai', 'delhi', 'kathmandu', 'chiang mai', 'luang prabang', 'fez', 'marrakech', 'petra', 'angkor', 'siem reap', 'lhasa', 'cusco'];
   if (religiousCities.some(c => destination.toLowerCase().includes(c)) || archetypes.includes('cultural')) {
     extras.push('temples churches monuments');
   }

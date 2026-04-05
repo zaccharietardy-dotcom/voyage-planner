@@ -58,6 +58,7 @@ import { validateContracts } from './step11-contracts';
 import { geoReorderScheduledDay } from './utils/geo-reorder';
 import { decorateTrip } from './step12-decorate';
 import { llmReviewTrip, applyLLMCorrections } from './step13-llm-review';
+import { getDestinationIntel, type DestinationIntel } from './step0-destination-intel';
 import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
@@ -286,9 +287,20 @@ export async function generateTripV3(
     console.log('[Pipeline V3] Step 1: Using fixture data (no API calls)');
     onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data (fixture)', durationMs: 0, timestamp: Date.now() });
   } else {
+    // Step 0: Destination Intelligence — get expert knowledge to guide fetch
+    let destinationIntel: DestinationIntel | null = null;
+    try {
+      destinationIntel = await getDestinationIntel(preferences.destination, preferences);
+      if (destinationIntel) {
+        onEvent?.({ type: 'step_done', step: 0, stepName: 'Destination intelligence', durationMs: 0, timestamp: Date.now() } as any);
+      }
+    } catch (e) {
+      console.warn('[Pipeline V3] Step 0 failed (non-blocking):', e);
+    }
+
     onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
     try {
-      data = await fetchAllData(preferences, onEvent);
+      data = await fetchAllData(preferences, onEvent, destinationIntel);
     } catch (err) {
       console.error('[Pipeline V3] Step 1 failed:', err);
       throw new Error(`[Pipeline V3] Data fetch failed: ${(err as Error).message}`);

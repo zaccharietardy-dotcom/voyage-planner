@@ -80,7 +80,7 @@ function buildViatorLocationCandidates(activityName: string, destination: string
  */
 import type { OnPipelineEvent } from './types';
 
-export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent): Promise<FetchedData> {
+export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent, destinationIntel?: import('./step0-destination-intel').DestinationIntel | null): Promise<FetchedData> {
   const T0 = Date.now();
   const { origin, destination } = preferences;
 
@@ -431,6 +431,40 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     if (injectedCount > 0) {
       console.log(`[Pipeline V2] Injected ${injectedCount} curated must-see attractions for "${destination}" from local database`);
       console.log(`[Pipeline V2]   → ${curatedMustSees.map(a => a.name).join(', ')}`);
+    }
+  }
+
+  // ── Step 0 Intelligence: inject LLM-curated must-sees ──────────────────
+  // When destination intel is available (cache or LLM), merge its must-see attractions
+  // into the pool. These are expert-curated and should always be present.
+  if (destinationIntel?.mustSeeAttractions?.length) {
+    const normalizeFuzzy = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    const existingNormalized = mustSeeAttractions.map((a: any) => normalizeFuzzy(a.name));
+    let intelInjected = 0;
+    for (const intel of destinationIntel.mustSeeAttractions) {
+      const intelNorm = normalizeFuzzy(intel.name);
+      const isDuplicate = existingNormalized.some(n => n === intelNorm || n.includes(intelNorm) || intelNorm.includes(n));
+      if (!isDuplicate) {
+        mustSeeAttractions.push({
+          id: `intel-${intelNorm.substring(0, 20)}`,
+          name: intel.name,
+          type: intel.type as any,
+          description: intel.whyImportant,
+          mustSee: true,
+          latitude: 0,
+          longitude: 0,
+          duration: intel.estimatedDuration,
+          estimatedCost: 0,
+          rating: 4.5,
+          bookingRequired: false,
+          openingHours: { open: '09:00', close: '18:00' },
+        });
+        existingNormalized.push(intelNorm);
+        intelInjected++;
+      }
+    }
+    if (intelInjected > 0) {
+      console.log(`[Pipeline V2] Step 0 Intel: injected ${intelInjected} must-sees for "${destination}"`);
     }
   }
 

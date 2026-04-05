@@ -378,6 +378,14 @@ const HARD_EXCLUDED_FOR_MEALS = [
   'hard rock', 'mcdonald', 'burger king', 'kfc', 'subway', 'pizza hut',
   'domino\'s', 'starbucks', 'taco bell', 'chipotle', 'five guys',
   'panda express', 'nando\'s', 'wagamama', 'paul', 'flunch',
+  'olive garden', 'outback', 'applebee', 'ihop', 'chili\'s', 'denny\'s',
+  'tim hortons', 'dunkin', 'costa coffee', 'pret a manger',
+  // Japanese chains — tourist traps
+  'saizeriya', 'matsuya', 'yoshinoya', 'sukiya', 'gusto', 'joyfull',
+  'coco ichibanya', 'mos burger', 'freshness burger', 'lotteria',
+  'genki sushi', 'kura sushi', 'sushiro', 'hamazushi', 'kappa sushi',
+  // Other Asian chains
+  'jollibee', 'chowking', 'bonchon',
   // Non-restaurants: supermarkets, convenience stores, etc.
   'carrefour', 'monoprix', 'franprix', 'auchan', 'leclerc', 'lidl', 'aldi',
   'supermarket', 'supermarché', 'supermercado', 'grocery', 'épicerie',
