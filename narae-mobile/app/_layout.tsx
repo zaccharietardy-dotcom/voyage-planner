@@ -22,6 +22,7 @@ import {
 } from '@expo-google-fonts/inter';
 
 import { AuthProvider } from '@/hooks/useAuth';
+import { initPurchases } from '@/lib/purchases';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -62,6 +63,10 @@ export default function RootLayout() {
     }
   }, [loaded, error]);
 
+  useEffect(() => {
+    initPurchases();
+  }, []);
+
   if (!loaded && !error) {
     return null;
   }
@@ -76,6 +81,9 @@ export default function RootLayout() {
             <Stack.Screen name="trip/[id]" />
             <Stack.Screen name="preferences" options={{ presentation: 'modal' }} />
             <Stack.Screen name="user/[id]" />
+            <Stack.Screen name="messages/index" />
+            <Stack.Screen name="messages/[id]" />
+            <Stack.Screen name="notifications" />
             <Stack.Screen name="pricing" options={{ presentation: 'modal' }} />
           </Stack>
           <StatusBar style="light" />

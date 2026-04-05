@@ -1,9 +1,12 @@
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Crown, Plane, Zap, FileDown, Award, Check, Star } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Crown, Plane, Zap, FileDown, Award, Check, Star, RotateCcw } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { getPackages, purchasePackage, restorePurchases } from '@/lib/purchases';
+import type { PurchasesPackage } from 'react-native-purchases';
 
 const FEATURES = [
   { icon: Plane, label: 'Voyages illimités', desc: 'Créez autant de voyages que vous voulez' },
@@ -15,6 +18,70 @@ const FEATURES = [
 
 export default function PricingScreen() {
   const router = useRouter();
+  const [packages, setPackages] = useState<PurchasesPackage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  useEffect(() => {
+    getPackages().then((pkgs) => {
+      setPackages(pkgs);
+      setLoading(false);
+    });
+  }, []);
+
+  const annualPkg = packages.find(p => p.packageType === 'ANNUAL');
+  const monthlyPkg = packages.find(p => p.packageType === 'MONTHLY');
+  const selectedPkg = annualPkg || monthlyPkg || packages[0];
+
+  const handlePurchase = async () => {
+    if (!selectedPkg) {
+      Alert.alert('Erreur', 'Aucune offre disponible. Réessayez plus tard.');
+      return;
+    }
+    setPurchasing(true);
+    try {
+      const info = await purchasePackage(selectedPkg);
+      if (info) {
+        Alert.alert('Bienvenue Pro !', 'Votre abonnement est activé.', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+      }
+    } catch {
+      Alert.alert('Erreur', 'L\'achat a échoué. Veuillez réessayer.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    try {
+      const info = await restorePurchases();
+      const isPro = info?.entitlements.active['pro'] !== undefined;
+      if (isPro) {
+        Alert.alert('Restauré', 'Votre abonnement Pro a été restauré.', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+      } else {
+        Alert.alert('Aucun abonnement', 'Aucun achat précédent trouvé.');
+      }
+    } catch {
+      Alert.alert('Erreur', 'La restauration a échoué.');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  const priceLabel = selectedPkg?.product?.priceString
+    ? `S'abonner — ${selectedPkg.product.priceString}/${annualPkg ? 'an' : 'mois'}`
+    : 'S\'abonner — 9.99€/an';
+
+  const subtitleLabel = selectedPkg?.product?.price
+    ? annualPkg
+      ? `soit ${(selectedPkg.product.price / 12).toFixed(2)}€/mois`
+      : ''
+    : 'soit 0.83€/mois';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -49,11 +116,21 @@ export default function PricingScreen() {
           borderWidth: 1, borderColor: colors.goldBorder, padding: 24,
           alignItems: 'center', gap: 8,
         }}>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
-            <Text style={{ color: colors.gold, fontSize: 44, fontFamily: fonts.display }}>9.99</Text>
-            <Text style={{ color: colors.gold, fontSize: 16 }}>€/an</Text>
-          </View>
-          <Text style={{ color: colors.textMuted, fontSize: 13 }}>soit 0.83€/mois</Text>
+          {loading ? (
+            <ActivityIndicator color={colors.gold} />
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+                <Text style={{ color: colors.gold, fontSize: 44, fontFamily: fonts.display }}>
+                  {selectedPkg?.product?.priceString || '9.99€'}
+                </Text>
+                <Text style={{ color: colors.gold, fontSize: 16 }}>/{annualPkg ? 'an' : 'mois'}</Text>
+              </View>
+              {subtitleLabel ? (
+                <Text style={{ color: colors.textMuted, fontSize: 13 }}>{subtitleLabel}</Text>
+              ) : null}
+            </>
+          )}
         </View>
 
         {/* Features */}
@@ -79,7 +156,19 @@ export default function PricingScreen() {
           ))}
         </View>
 
-        <Button onPress={() => {}}>S&apos;abonner — 9.99€/an</Button>
+        <Button onPress={handlePurchase} disabled={purchasing || loading}>
+          {purchasing ? 'Traitement...' : priceLabel}
+        </Button>
+
+        <Pressable onPress={handleRestore} disabled={restoring} style={{ alignItems: 'center', paddingVertical: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <RotateCcw size={14} color={colors.textMuted} />
+            <Text style={{ color: colors.textMuted, fontSize: 13 }}>
+              {restoring ? 'Restauration...' : 'Restaurer un achat'}
+            </Text>
+          </View>
+        </Pressable>
+
         <Text style={{ color: colors.textDim, fontSize: 11, textAlign: 'center' }}>
           Annulation possible à tout moment. Pas d&apos;engagement.
         </Text>
