@@ -75,13 +75,13 @@ export default function PricingScreen() {
 
   const priceLabel = selectedPkg?.product?.priceString
     ? `S'abonner — ${selectedPkg.product.priceString}/${annualPkg ? 'an' : 'mois'}`
-    : 'S\'abonner — 9.99€/an';
+    : 'S\'abonner — 29.99€/an';
 
   const subtitleLabel = selectedPkg?.product?.price
     ? annualPkg
       ? `soit ${(selectedPkg.product.price / 12).toFixed(2)}€/mois`
       : ''
-    : 'soit 0.83€/mois';
+    : 'soit 2.49€/mois — 58% d\'économie';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -122,7 +122,7 @@ export default function PricingScreen() {
             <>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
                 <Text style={{ color: colors.gold, fontSize: 44, fontFamily: fonts.display }}>
-                  {selectedPkg?.product?.priceString || '9.99€'}
+                  {selectedPkg?.product?.priceString || '29.99€'}
                 </Text>
                 <Text style={{ color: colors.gold, fontSize: 16 }}>/{annualPkg ? 'an' : 'mois'}</Text>
               </View>
