@@ -439,11 +439,31 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   // into the pool. These are expert-curated and should always be present.
   if (destinationIntel?.mustSeeAttractions?.length) {
     const normalizeFuzzy = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    // Extract words from original name (before full normalization) — handles reordered names
+    const extractWords = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[a-z0-9]+/g) || [];
+    const STOP_WORDS = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'et', 'the', 'of', 'and', 'a', 'an', 'di', 'del', 'il']);
+    const wordsOverlap = (wordsA: string[], wordsB: string[]): boolean => {
+      const filterWords = (ws: string[]) => ws.filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+      const fA = filterWords(wordsA);
+      const fB = filterWords(wordsB);
+      if (fA.length === 0 || fB.length === 0) return false;
+      const setA = new Set(fA);
+      const setB = new Set(fB);
+      const smaller = setA.size <= setB.size ? setA : setB;
+      const larger = setA.size <= setB.size ? setB : setA;
+      let overlap = 0;
+      for (const w of smaller) { if (larger.has(w)) overlap++; }
+      return overlap >= 2 && overlap >= Math.ceil(smaller.size * 0.5);
+    };
     const existingNormalized = mustSeeAttractions.map((a: any) => normalizeFuzzy(a.name));
+    const existingWords = mustSeeAttractions.map((a: any) => extractWords(a.name));
     let intelInjected = 0;
     for (const intel of destinationIntel.mustSeeAttractions) {
       const intelNorm = normalizeFuzzy(intel.name);
-      const isDuplicate = existingNormalized.some(n => n === intelNorm || n.includes(intelNorm) || intelNorm.includes(n));
+      const intelWords = extractWords(intel.name);
+      const isDuplicate = existingNormalized.some((n, i) =>
+        n === intelNorm || n.includes(intelNorm) || intelNorm.includes(n) || wordsOverlap(existingWords[i], intelWords)
+      );
       if (!isDuplicate) {
         mustSeeAttractions.push({
           id: `intel-${intelNorm.substring(0, 20)}`,
@@ -460,11 +480,56 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
           openingHours: { open: '09:00', close: '18:00' },
         });
         existingNormalized.push(intelNorm);
+        existingWords.push(intelWords);
         intelInjected++;
       }
     }
     if (intelInjected > 0) {
       console.log(`[Pipeline V2] Step 0 Intel: injected ${intelInjected} must-sees for "${destination}"`);
+    }
+  }
+
+  // ── Resolve GPS for Step 0 intel must-sees (injected with lat=0, lng=0) ──
+  const unresolvedIntel = mustSeeAttractions.filter(
+    (a: Attraction) => a.id?.startsWith('intel-') && a.latitude === 0 && a.longitude === 0
+  );
+  if (unresolvedIntel.length > 0) {
+    console.log(`[Pipeline V2] Resolving GPS for ${unresolvedIntel.length} Step 0 intel must-sees...`);
+    const resolveResults = await Promise.allSettled(
+      unresolvedIntel.map(async (activity: Attraction) => {
+        const coords = await resolveCoordinates(
+          activity.name,
+          destination,
+          destCoords,
+          'attraction'
+        );
+        if (coords) {
+          activity.latitude = coords.lat;
+          activity.longitude = coords.lng;
+          activity.dataReliability = 'verified' as any;
+          (activity as any).geoSource = coords.source;
+          (activity as any).geoConfidence = 'high';
+          return true;
+        }
+        return false;
+      })
+    );
+
+    const resolved = resolveResults.filter(r => r.status === 'fulfilled' && r.value).length;
+    console.log(`[Pipeline V2] Step 0 Intel GPS: ${resolved}/${unresolvedIntel.length} resolved`);
+
+    // Drop items where GPS resolution failed — never inject lat=0 items into the pool
+    const stillUnresolved = unresolvedIntel.filter(
+      (a: Attraction) => a.latitude === 0 && a.longitude === 0
+    );
+    if (stillUnresolved.length > 0) {
+      const failedIds = new Set(stillUnresolved.map((a: Attraction) => a.id));
+      for (let i = mustSeeAttractions.length - 1; i >= 0; i--) {
+        if (failedIds.has(mustSeeAttractions[i].id)) {
+          mustSeeAttractions.splice(i, 1);
+        }
+      }
+      console.log(`[Pipeline V2] Dropped ${stillUnresolved.length} unresolvable Step 0 items: ${stillUnresolved.map(a => a.name).join(', ')}`);
     }
   }
 
