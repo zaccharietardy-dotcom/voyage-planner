@@ -125,6 +125,9 @@ export function validateContracts(
   let restaurantDistCount = 0;
 
   for (const day of days) {
+    // Skip transit-only days entirely — no meals expected
+    if ((day as any).isTransitOnly) continue;
+
     const dayDate = getDayDate(startDate, day.dayNumber);
     let hasLunch = false;
     let hasDinner = false;

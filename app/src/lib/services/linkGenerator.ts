@@ -75,6 +75,22 @@ const CITY_TO_IATA: Record<string, string> = {
   sydney: 'SYD', melbourne: 'MEL', auckland: 'AKL',
   // Russia / Central Asia
   moscow: 'SVO', moscou: 'SVO', 'saint petersburg': 'LED', 'saint-petersbourg': 'LED',
+  // Paris suburbs
+  igny: 'CDG', versailles: 'CDG', evry: 'CDG', massy: 'CDG', palaiseau: 'CDG',
+  boulogne: 'CDG', 'boulogne-billancourt': 'CDG', neuilly: 'CDG', 'neuilly-sur-seine': 'CDG',
+  'saint-denis': 'CDG', montreuil: 'CDG', creteil: 'CDG', nanterre: 'CDG',
+  antony: 'CDG', 'villejuif': 'CDG', 'vitry-sur-seine': 'CDG', argenteuil: 'CDG',
+  'rueil-malmaison': 'CDG', colombes: 'CDG', 'levallois-perret': 'CDG',
+  // London suburbs
+  croydon: 'LHR', bromley: 'LHR', greenwich: 'LHR', richmond: 'LHR',
+  wimbledon: 'LHR', kingston: 'LHR', ealing: 'LHR', barnet: 'LHR',
+  // Tokyo districts
+  shinjuku: 'HND', shibuya: 'HND', ikebukuro: 'HND', roppongi: 'HND',
+  akihabara: 'HND', asakusa: 'HND', ginza: 'HND', ueno: 'HND',
+  // Lyon suburbs
+  villeurbanne: 'LYS', venissieux: 'LYS', 'saint-priest': 'LYS',
+  // Marseille suburbs
+  'aix-en-provence': 'MRS', aubagne: 'MRS',
 };
 
 /**

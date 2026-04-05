@@ -58,14 +58,27 @@ const DEFAULT_MAX_DISTANCE_KM = 0.8; // 800m hard cap (P0.2)
 const DEFAULT_MIN_RATING = 3.5;
 const DEFAULT_ALTERNATIVES = 2;
 
-// Dietary keyword matching
+// Dietary keyword matching — enriched patterns (multilingual)
 const DIETARY_KEYWORDS: Record<string, RegExp> = {
-  vegan: /vegan|plant[- ]?based|végétalien/i,
-  vegetarian: /vegetarian|végétarien|veggie/i,
-  halal: /halal/i,
-  kosher: /kosher|casher/i,
-  'gluten-free': /gluten[- ]?free|sans gluten|celiac/i,
-  gluten_free: /gluten[- ]?free|sans gluten|celiac/i,
+  vegan: /vegan|plant[- ]?based|végétalien|100%.*vegetal|raw food|pflanzlich/i,
+  vegetarian: /vegetarian|végétarien|veggie|lacto[- ]?ovo|ovo[- ]?lacto|vegetarisch/i,
+  halal: /halal|حلال|muslim[- ]?friendly/i,
+  kosher: /kosher|casher|cacher|כשר/i,
+  'gluten-free': /gluten[- ]?free|sans gluten|celiac|coeliaque|no gluten|glutenfrei/i,
+  gluten_free: /gluten[- ]?free|sans gluten|celiac|coeliaque|no gluten|glutenfrei/i,
+};
+
+// Cuisine types that are inherently compatible with certain dietary preferences
+const CUISINE_DIETARY_AFFINITY: Record<string, string[]> = {
+  indian: ['vegetarian'],
+  falafel: ['vegan', 'vegetarian'],
+  middle_eastern: ['halal'],
+  turkish: ['halal'],
+  lebanese: ['halal'],
+  moroccan: ['halal'],
+  egyptian: ['halal'],
+  pakistani: ['halal'],
+  afghan: ['halal'],
 };
 
 // ============================================
@@ -499,18 +512,31 @@ function isBreakfastCandidate(r: Restaurant): boolean {
 
 function matchesDietary(r: Restaurant, dietary: string[], strict: boolean = true): boolean {
   if (dietary.length === 0) return true;
-  // In relaxed mode, only filter for restrictions with actual health consequences
-  // (e.g. gluten-free, allergies). Skip halal/kosher/vegan in relaxed mode since
-  // in many destinations these are implicit or restaurants don't label themselves.
   if (!strict) return true;
 
   const text = `${r.name || ''} ${(r.cuisineTypes || []).join(' ')} ${r.description || ''}`.toLowerCase();
+  const cuisines = (r.cuisineTypes || []).map(c => c.toLowerCase());
 
-  // At least one dietary preference should match
   return dietary.some(pref => {
-    const pattern = DIETARY_KEYWORDS[pref.toLowerCase()];
-    if (!pattern) return true; // Unknown dietary preference — don't filter
-    return pattern.test(text);
+    const prefKey = pref.toLowerCase();
+
+    // 1. Keyword match in name/cuisine/description
+    const pattern = DIETARY_KEYWORDS[prefKey];
+    if (pattern && pattern.test(text)) return true;
+
+    // 2. Cuisine affinity — certain cuisines are inherently compatible
+    for (const cuisine of cuisines) {
+      for (const [affinityCuisine, compatibleDiets] of Object.entries(CUISINE_DIETARY_AFFINITY)) {
+        if (cuisine.includes(affinityCuisine) && compatibleDiets.includes(prefKey)) {
+          return true;
+        }
+      }
+    }
+
+    // Unknown dietary preference — don't filter
+    if (!pattern) return true;
+
+    return false;
   });
 }
 
