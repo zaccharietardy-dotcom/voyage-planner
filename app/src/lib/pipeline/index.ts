@@ -685,9 +685,9 @@ async function runPipelineFromClusters(
     try {
       const review = await llmReviewTrip(scheduledDays, preferences, timeWindows);
       if (review.corrections.length > 0) {
-        const applied = applyLLMCorrections(scheduledDays, review.corrections);
-        console.log(`[Pipeline V3] Step 13: LLM review applied ${applied}/${review.corrections.length} corrections (confidence: ${review.confidence})`);
-        onEvent?.({ step: 'llm-review', message: `${review.corrections.length} issues found, ${applied} fixed`, data: { corrections: review.corrections.length, applied } } as any);
+        const { applied, warnings } = applyLLMCorrections(scheduledDays, review.corrections);
+        console.log(`[Pipeline V3] Step 13: LLM review — ${applied} fixes applied, ${warnings.length} warnings (confidence: ${review.confidence})`);
+        onEvent?.({ step: 'llm-review', message: `${applied} fixes, ${warnings.length} warnings`, data: { applied, warnings } } as any);
       } else {
         console.log(`[Pipeline V3] Step 13: LLM review passed — no issues (confidence: ${review.confidence})`);
       }

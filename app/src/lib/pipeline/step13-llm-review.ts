@@ -52,9 +52,10 @@ export async function llmReviewTrip(
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.1,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 4096,
         responseMimeType: 'application/json',
-      },
+        thinkingConfig: { thinkingBudget: 0 },
+      } as any,
     });
 
     if (!response.ok) {
@@ -63,13 +64,38 @@ export async function llmReviewTrip(
     }
 
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const candidate = data?.candidates?.[0];
+    const parts = candidate?.content?.parts || [];
+
+    // Extract text from all parts
+    const text = parts.map((p: any) => p.text || '').join('').trim();
     if (!text) {
       console.warn('[LLM Review] Empty response — skipping review');
       return { corrections: [], confidence: 0, reviewSummary: 'Empty response' };
     }
 
-    const parsed = JSON.parse(text) as LLMReviewResult;
+    // Try to parse as the expected object format
+    let parsed = extractJson<LLMReviewResult>(text);
+
+    // Handle case where LLM returns just an array of corrections
+    if (!parsed) {
+      const arr = extractJson<LLMCorrection[]>(text);
+      if (Array.isArray(arr)) {
+        parsed = { corrections: arr, confidence: 0.7, reviewSummary: 'Parsed from array' };
+      }
+    }
+
+    if (!parsed) {
+      console.warn('[LLM Review] Could not extract valid JSON from response');
+      console.warn('[LLM Review] Raw text (first 500 chars):', text.substring(0, 500));
+      return { corrections: [], confidence: 0, reviewSummary: 'Parse error' };
+    }
+
+    // Normalize corrections array
+    if (!Array.isArray(parsed.corrections)) parsed.corrections = [];
+    parsed.confidence = typeof parsed.confidence === 'number' ? parsed.confidence : 0;
+    parsed.reviewSummary = parsed.reviewSummary || '';
+
     console.log(`[LLM Review] ${parsed.corrections.length} corrections, confidence: ${parsed.confidence}`);
     for (const c of parsed.corrections) {
       console.log(`  [${c.severity}] Day ${c.dayNumber}: ${c.description} — ${c.reason}`);
@@ -77,8 +103,8 @@ export async function llmReviewTrip(
 
     return parsed;
   } catch (e) {
-    console.warn('[LLM Review] Failed to parse response:', e);
-    return { corrections: [], confidence: 0, reviewSummary: 'Parse error' };
+    console.warn('[LLM Review] Failed:', e);
+    return { corrections: [], confidence: 0, reviewSummary: 'Error' };
   }
 }
 
@@ -86,36 +112,66 @@ export async function llmReviewTrip(
 // Apply Corrections
 // ============================================
 
-export function applyLLMCorrections(days: TripDay[], corrections: LLMCorrection[]): number {
+export function applyLLMCorrections(days: TripDay[], corrections: LLMCorrection[]): { applied: number; warnings: string[] } {
   let applied = 0;
+  const warnings: string[] = [];
 
   for (const correction of corrections) {
-    if (correction.severity !== 'error') continue; // Only apply errors, log warnings
-
     const day = days.find(d => d.dayNumber === correction.dayNumber);
-    if (!day) continue;
 
-    if (correction.type === 'remove' && correction.itemId) {
-      const idx = day.items.findIndex(i => i.id === correction.itemId);
-      if (idx !== -1) {
-        console.log(`[LLM Review] Removing "${day.items[idx].title}" from Day ${day.dayNumber}: ${correction.reason}`);
-        day.items.splice(idx, 1);
+    // Log warnings but don't apply them
+    if (correction.severity === 'warning') {
+      const msg = `Day ${correction.dayNumber}: ${correction.description}`;
+      warnings.push(msg);
+      console.log(`[LLM Review] Warning: ${msg}`);
+      continue;
+    }
+
+    if (!day) {
+      console.warn(`[LLM Review] Day ${correction.dayNumber} not found — skipping correction`);
+      continue;
+    }
+
+    // Find item by ID or by title substring (LLM may not return exact UUID)
+    const findItem = (itemId?: string): { item: TripItem; idx: number } | null => {
+      if (!itemId) return null;
+      // Try exact ID match first
+      const idxById = day.items.findIndex(i => i.id === itemId);
+      if (idxById !== -1) return { item: day.items[idxById], idx: idxById };
+      // Fallback: match by title substring (LLM may reference by name)
+      const normalized = itemId.toLowerCase();
+      const idxByTitle = day.items.findIndex(i =>
+        i.title?.toLowerCase().includes(normalized) || normalized.includes(i.title?.toLowerCase() || '___')
+      );
+      if (idxByTitle !== -1) return { item: day.items[idxByTitle], idx: idxByTitle };
+      return null;
+    };
+
+    if (correction.type === 'remove') {
+      const found = findItem(correction.itemId);
+      if (found) {
+        console.log(`[LLM Review] Removing "${found.item.title}" from Day ${day.dayNumber}: ${correction.reason}`);
+        day.items.splice(found.idx, 1);
         day.items.forEach((item, i) => { item.orderIndex = i; });
         applied++;
+      } else {
+        console.warn(`[LLM Review] Item "${correction.itemId}" not found on Day ${day.dayNumber}`);
       }
-    } else if (correction.type === 'truncate' && correction.itemId && correction.newDuration) {
-      const item = day.items.find(i => i.id === correction.itemId);
-      if (item && item.startTime) {
-        const startMin = timeToMin(item.startTime);
-        item.duration = correction.newDuration;
-        item.endTime = minToTime(startMin + correction.newDuration);
-        console.log(`[LLM Review] Truncated "${item.title}" to ${correction.newDuration}min: ${correction.reason}`);
+    } else if (correction.type === 'truncate' && correction.newDuration) {
+      const found = findItem(correction.itemId);
+      if (found?.item.startTime) {
+        const startMin = timeToMin(found.item.startTime);
+        found.item.duration = correction.newDuration;
+        found.item.endTime = minToTime(startMin + correction.newDuration);
+        console.log(`[LLM Review] Truncated "${found.item.title}" to ${correction.newDuration}min: ${correction.reason}`);
         applied++;
       }
+    } else if (correction.type === 'flag') {
+      warnings.push(`Day ${day.dayNumber}: ${correction.description}`);
     }
   }
 
-  return applied;
+  return { applied, warnings };
 }
 
 // ============================================
@@ -201,6 +257,37 @@ Ne signale que les vrais problèmes logiques, pas les préférences subjectives.
 // ============================================
 // Helpers
 // ============================================
+
+/**
+ * Extract JSON from LLM response that may contain markdown fences,
+ * thinking tokens, or other wrapper text.
+ */
+function extractJson<T>(text: string): T | null {
+  // 1. Try direct parse
+  try { return JSON.parse(text) as T; } catch { /* continue */ }
+
+  // 2. Try extracting from ```json ... ``` markdown fence
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenceMatch) {
+    try { return JSON.parse(fenceMatch[1].trim()) as T; } catch { /* continue */ }
+  }
+
+  // 3. Try finding first { ... } block (object)
+  const braceStart = text.indexOf('{');
+  const braceEnd = text.lastIndexOf('}');
+  if (braceStart !== -1 && braceEnd > braceStart) {
+    try { return JSON.parse(text.substring(braceStart, braceEnd + 1)) as T; } catch { /* continue */ }
+  }
+
+  // 4. Try finding first [ ... ] block (array)
+  const bracketStart = text.indexOf('[');
+  const bracketEnd = text.lastIndexOf(']');
+  if (bracketStart !== -1 && bracketEnd > bracketStart) {
+    try { return JSON.parse(text.substring(bracketStart, bracketEnd + 1)) as T; } catch { /* continue */ }
+  }
+
+  return null;
+}
 
 function timeToMin(time: string): number {
   const [h, m] = time.split(':').map(Number);
