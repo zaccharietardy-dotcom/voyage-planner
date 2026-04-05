@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 import { generatePackingList } from '@/lib/services/packingListGenerator';
 
 interface PackingListProps {
@@ -41,15 +42,17 @@ interface PackingItem {
 }
 
 const CATEGORY_CONFIG = [
-  { id: 'essentials', label: 'Essentiels', icon: Backpack, color: 'text-blue-500' },
-  { id: 'clothes', label: 'Vêtements', icon: Shirt, color: 'text-purple-500' },
-  { id: 'toiletries', label: 'Toilette', icon: Droplet, color: 'text-cyan-500' },
-  { id: 'electronics', label: 'Électronique', icon: Zap, color: 'text-yellow-500' },
-  { id: 'health', label: 'Santé', icon: Heart, color: 'text-red-500' },
-  { id: 'activities', label: 'Activités', icon: Mountain, color: 'text-green-500' },
+  { id: 'essentials', labelKey: 'packing.essentials' as const, icon: Backpack, color: 'text-blue-500' },
+  { id: 'clothes', labelKey: 'packing.clothes' as const, icon: Shirt, color: 'text-purple-500' },
+  { id: 'toiletries', labelKey: 'packing.toiletries' as const, icon: Droplet, color: 'text-cyan-500' },
+  { id: 'electronics', labelKey: 'packing.electronics' as const, icon: Zap, color: 'text-yellow-500' },
+  { id: 'health', labelKey: 'packing.health' as const, icon: Heart, color: 'text-red-500' },
+  { id: 'activities', labelKey: 'packing.activities' as const, icon: Mountain, color: 'text-green-500' },
 ];
 
 export function PackingList({ trip, onUpdate, className }: PackingListProps) {
+  const { t } = useTranslation();
+
   const [items, setItems] = useState<PackingItem[]>(() => {
     if (trip.packingList?.items && trip.packingList.items.length > 0) {
       return trip.packingList.items;
@@ -102,12 +105,12 @@ export function PackingList({ trip, onUpdate, className }: PackingListProps) {
   const checkedItems = items.filter((item) => item.checked).length;
   const progress = totalItems > 0 ? (checkedItems / totalItems) * 100 : 0;
 
-  const itemsByCategory = CATEGORY_CONFIG.map(({ id, label, icon: Icon, color }) => {
+  const itemsByCategory = CATEGORY_CONFIG.map(({ id, labelKey, icon: Icon, color }) => {
     const categoryItems = items.filter((item) => item.category === id);
     const categoryChecked = categoryItems.filter((item) => item.checked).length;
     return {
       id,
-      label,
+      label: t(labelKey),
       icon: Icon,
       color,
       items: categoryItems,
@@ -126,9 +129,9 @@ export function PackingList({ trip, onUpdate, className }: PackingListProps) {
               <Backpack className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <h3 className="font-semibold">Liste de bagages</h3>
+              <h3 className="font-semibold">{t('packing.title')}</h3>
               <p className="text-xs text-muted-foreground">
-                {checkedItems}/{totalItems} préparés
+                {checkedItems}/{totalItems} {t('packing.prepared')}
               </p>
             </div>
           </div>
@@ -206,12 +209,12 @@ export function PackingList({ trip, onUpdate, className }: PackingListProps) {
           >
             {CATEGORY_CONFIG.map((cat) => (
               <option key={cat.id} value={cat.id}>
-                {cat.label}
+                {t(cat.labelKey)}
               </option>
             ))}
           </select>
           <Input
-            placeholder="Ajouter un item..."
+            placeholder={t('packing.addPlaceholder')}
             value={newItemLabel}
             onChange={(e) => setNewItemLabel(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, X, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import type { FeedbackCard } from '@/lib/types/pipelineQuestions';
+import { useTranslation } from '@/lib/i18n';
 import { hapticImpactLight, hapticImpactMedium } from '@/lib/mobile/haptics';
 
 interface TripFeedbackCardsProps {
@@ -14,6 +15,7 @@ interface TripFeedbackCardsProps {
 }
 
 export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: TripFeedbackCardsProps) {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answered, setAnswered] = useState<Set<number>>(new Set());
 
@@ -58,13 +60,13 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
       <div className="flex items-center justify-between px-6 pb-3">
         <div>
           <h3 className="text-base font-bold text-white">
-            Personnalisez votre voyage
+            {t('feedback.title')}
           </h3>
           <p className="text-[11px] text-white/50 mt-0.5">
-            Choisissez entre les options proposées pour chaque étape
+            {t('feedback.subtitle')}
           </p>
           <p className="text-xs text-white/60 mt-1">
-            {currentIndex + 1}/{cards.length} — Remplacer {card.slotLabel}
+            {t('feedback.counter').replace('{current}', String(currentIndex + 1)).replace('{total}', String(cards.length)).replace('{slot}', card.slotLabel)}
           </p>
         </div>
         <button
@@ -80,16 +82,16 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
+            exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.25 }}
             className="grid grid-cols-2 gap-3"
           >
             {/* Option A — current choice */}
             <OptionButton
               option={card.optionA}
-              label="Actuel"
+              label={t('feedback.current')}
               isSelected={answered.has(currentIndex)}
               onClick={handleSelectA}
             />
@@ -97,7 +99,7 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
             {/* Option B — alternative */}
             <OptionButton
               option={card.optionB}
-              label="Alternative"
+              label={t('feedback.alternative')}
               isSelected={false}
               onClick={handleSelectB}
               highlight
@@ -114,7 +116,7 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
           className="h-9 px-3 rounded-xl bg-white/5 text-white/60 text-sm font-medium flex items-center gap-1 disabled:opacity-30 hover:bg-white/10 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          Précédent
+          {t('common.previous')}
         </button>
 
         {allAnswered || isLast ? (
@@ -123,14 +125,14 @@ export function TripFeedbackCards({ cards, onSelectA, onSelectB, onDismiss }: Tr
             className="h-9 px-5 rounded-xl bg-gold/20 text-gold text-sm font-bold flex items-center gap-1.5 hover:bg-gold/30 transition-colors"
           >
             <Check className="h-4 w-4" />
-            Terminer
+            {t('feedback.finish')}
           </button>
         ) : (
           <button
             onClick={() => { hapticImpactLight(); setCurrentIndex(i => Math.min(cards.length - 1, i + 1)); }}
             className="h-9 px-3 rounded-xl bg-white/5 text-white/60 text-sm font-medium flex items-center gap-1 hover:bg-white/10 transition-colors"
           >
-            Suivant
+            {t('common.next')}
             <ChevronRight className="h-4 w-4" />
           </button>
         )}

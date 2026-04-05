@@ -1,6 +1,7 @@
 'use client';
 
 import { Accommodation } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 import { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Check, Archive, Star, ExternalLink, MapPin, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,10 +20,10 @@ interface HotelCarouselSelectorProps {
   };
 }
 
-const TIER_CONFIG: Record<string, { label: string; className: string }> = {
-  central: { label: 'Central', className: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
-  comfortable: { label: 'Confort', className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
-  value: { label: 'Bon plan', className: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+const TIER_CONFIG: Record<string, { labelKey: string; className: string }> = {
+  central: { labelKey: 'hotel.tier.central', className: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
+  comfortable: { labelKey: 'hotel.tier.comfort', className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
+  value: { labelKey: 'hotel.tier.budget', className: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
 };
 
 export function HotelCarouselSelector({
@@ -33,6 +34,7 @@ export function HotelCarouselSelector({
   nights,
   searchLinks,
 }: HotelCarouselSelectorProps) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set());
 
@@ -79,7 +81,7 @@ export function HotelCarouselSelector({
     const lower = bookingUrl?.toLowerCase() || '';
     if (lower.includes('airbnb.com')) return 'Airbnb';
     if (lower.includes('booking.com')) return 'Booking';
-    return 'Réserver';
+    return t('hotel.book');
   };
 
   return (
@@ -87,8 +89,8 @@ export function HotelCarouselSelector({
       {/* Header avec titre et navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
         <div>
-          <h3 className="text-lg font-bold text-foreground">Choisir votre hôtel</h3>
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{visibleHotels.length} hôtels disponibles pour {nights} nuit{nights > 1 ? 's' : ''}</p>
+          <h3 className="text-lg font-bold text-foreground">{t('hotel.chooseYour')}</h3>
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{t('hotel.available', { n: visibleHotels.length, nights, nightLabel: nights > 1 ? t('hotel.nights') : t('hotel.night') })}</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -129,14 +131,14 @@ export function HotelCarouselSelector({
             <button
               onClick={() => scroll('left')}
               className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
-              aria-label="Défiler à gauche"
+              aria-label={t('hotel.scrollLeft')}
             >
               <ChevronLeft className="h-4 w-4 text-foreground" />
             </button>
             <button
               onClick={() => scroll('right')}
               className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
-              aria-label="Défiler à droite"
+              aria-label={t('hotel.scrollRight')}
             >
               <ChevronRight className="h-4 w-4 text-foreground" />
             </button>
@@ -173,13 +175,13 @@ export function HotelCarouselSelector({
             {/* Badge tier (si disponible) */}
             {hotel.distanceTier && TIER_CONFIG[hotel.distanceTier] && (
               <div className={`absolute -top-2 -left-2 z-10 text-xs px-2 py-0.5 rounded-full shadow-md font-medium ${TIER_CONFIG[hotel.distanceTier].className}`}>
-                {TIER_CONFIG[hotel.distanceTier].label}
+                {t(TIER_CONFIG[hotel.distanceTier].labelKey as any)}
               </div>
             )}
             {/* Fallback: Recommandé si pas de tier */}
             {!hotel.distanceTier && index === 0 && selectedId !== hotel.id && (
               <div className="absolute -top-2 -left-2 z-10 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full shadow-md">
-                Recommandé
+                {t('hotel.recommended')}
               </div>
             )}
 
@@ -187,7 +189,7 @@ export function HotelCarouselSelector({
             <button
               onClick={(e) => handleArchive(e, hotel.id)}
               className="absolute top-2 right-2 p-1.5 rounded-full bg-card/90 hover:bg-card shadow-sm transition-colors z-10"
-              title="Masquer cet hôtel"
+              title={t('hotel.hideHotel')}
             >
               <Archive className="h-4 w-4 text-muted-foreground hover:text-foreground" />
             </button>
@@ -220,7 +222,7 @@ export function HotelCarouselSelector({
                 )}
                 {hotel.reviewCount && hotel.reviewCount > 0 && (
                   <span className="text-xs text-muted-foreground/60">
-                    ({hotel.reviewCount} avis)
+                    ({hotel.reviewCount} {t('hotel.reviews')})
                   </span>
                 )}
               </div>
@@ -231,7 +233,7 @@ export function HotelCarouselSelector({
                 <p className="text-xs text-muted-foreground line-clamp-2">
                   {hotel.address && hotel.address !== 'Adresse non disponible'
                     ? hotel.address
-                    : 'Centre-ville'}
+                    : t('hotel.cityCenter')}
                 </p>
               </div>
 
@@ -239,8 +241,8 @@ export function HotelCarouselSelector({
               {hotel.distanceToCenter != null && hotel.distanceToCenter > 0 && (
                 <p className="text-xs text-muted-foreground/70 mt-1 ml-4">
                   {hotel.distanceToCenter < 1
-                    ? `${Math.round(hotel.distanceToCenter * 1000)}m du centre`
-                    : `${hotel.distanceToCenter.toFixed(1)} km du centre`
+                    ? `${Math.round(hotel.distanceToCenter * 1000)}m ${t('hotel.fromCenter')}`
+                    : `${hotel.distanceToCenter.toFixed(1)} km ${t('hotel.fromCenter')}`
                   }
                 </p>
               )}
@@ -249,7 +251,7 @@ export function HotelCarouselSelector({
               {hotel.breakfastIncluded && (
                 <div className="mt-2">
                   <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                    Petit-déj inclus
+                    {t('hotel.breakfastIncluded')}
                   </span>
                 </div>
               )}
@@ -258,11 +260,11 @@ export function HotelCarouselSelector({
               <div className="mt-3 pt-3 border-t border-border flex justify-between items-end">
                 <div>
                   <span className="text-xl font-bold text-foreground">{formatPrice(hotel.pricePerNight)}</span>
-                  <span className="text-sm text-muted-foreground">/nuit</span>
+                  <span className="text-sm text-muted-foreground">/{t('hotel.night')}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-sm font-semibold text-foreground/80">
-                    Total: {formatPrice((hotel.pricePerNight || 0) * nights)}
+                    {t('hotel.total')}: {formatPrice((hotel.pricePerNight || 0) * nights)}
                   </span>
                 </div>
               </div>
@@ -287,7 +289,7 @@ export function HotelCarouselSelector({
       {/* Compteur d'hôtels supplémentaires */}
       {visibleHotels.length > 10 && (
         <p className="text-sm text-muted-foreground text-center">
-          +{visibleHotels.length - 10} autres hôtels disponibles
+          {t('hotel.moreHotels', { n: visibleHotels.length - 10 })}
         </p>
       )}
 
@@ -298,7 +300,7 @@ export function HotelCarouselSelector({
             onClick={() => setArchivedIds(new Set())}
             className="text-sm text-muted-foreground hover:text-foreground underline"
           >
-            Afficher les {archivedIds.size} hôtel{archivedIds.size > 1 ? 's' : ''} masqué{archivedIds.size > 1 ? 's' : ''}
+            {archivedIds.size === 1 ? t('hotel.showHiddenOne') : t('hotel.showHidden', { n: archivedIds.size })}
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import {
   Dialog,
   DialogContent,
@@ -52,17 +53,6 @@ interface ActivityEditModalProps {
   onDelete?: (item: TripItem) => void;
 }
 
-const TYPE_OPTIONS: { value: TripItemType; label: string }[] = [
-  { value: 'activity', label: 'Activité' },
-  { value: 'restaurant', label: 'Restaurant' },
-  { value: 'hotel', label: 'Hébergement' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'flight', label: 'Vol' },
-  { value: 'parking', label: 'Parking' },
-  { value: 'checkin', label: 'Check-in' },
-  { value: 'checkout', label: 'Check-out' },
-  { value: 'luggage', label: 'Consigne bagages' },
-];
 
 export function ActivityEditModal({
   item,
@@ -72,9 +62,22 @@ export function ActivityEditModal({
   onReplace,
   onDelete,
 }: ActivityEditModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<Partial<TripItem>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const typeOptions: { value: TripItemType; label: string }[] = [
+    { value: 'activity', label: t('tripItem.type.activity') },
+    { value: 'restaurant', label: t('tripItem.type.restaurant') },
+    { value: 'hotel', label: t('tripItem.type.accommodation') },
+    { value: 'transport', label: t('tripItem.type.transport') },
+    { value: 'flight', label: t('tripItem.type.flight') },
+    { value: 'parking', label: t('tripItem.type.parking') },
+    { value: 'checkin', label: t('tripItem.type.checkin') },
+    { value: 'checkout', label: t('tripItem.type.checkout') },
+    { value: 'luggage', label: t('tripItem.type.luggage') },
+  ];
 
   useEffect(() => {
     if (item) {
@@ -140,7 +143,7 @@ export function ActivityEditModal({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TYPE_OPTIONS.map((option) => (
+                {typeOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>

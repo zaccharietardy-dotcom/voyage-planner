@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth';
+import { useTranslation } from '@/lib/i18n';
 import { MapPin, Calendar, ChevronRight, LogIn } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -41,6 +42,7 @@ function getImageForDestination(destination?: string): string {
 
 export function MyTrips() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [trips, setTrips] = useState<TripSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,12 +79,12 @@ export function MyTrips() {
   if (!user) {
     return (
       <section>
-        <h2 className="text-lg font-semibold mb-4">Mes voyages</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('myTrips.title')}</h2>
         <div className="rounded-2xl border border-border/60 bg-card/80 p-6 text-center">
           <LogIn className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground mb-3">Connectez-vous pour retrouver vos voyages</p>
+          <p className="text-sm text-muted-foreground mb-3">{t('myTrips.loginPrompt')}</p>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/login">Se connecter</Link>
+            <Link href="/login">{t('myTrips.login')}</Link>
           </Button>
         </div>
       </section>
@@ -92,7 +94,7 @@ export function MyTrips() {
   if (loading) {
     return (
       <section>
-        <h2 className="text-lg font-semibold mb-4">Mes voyages</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('myTrips.title')}</h2>
         <div className="space-y-3">
           {[1, 2].map((i) => (
             <div key={i} className="h-20 rounded-2xl bg-muted animate-pulse" />
@@ -105,12 +107,12 @@ export function MyTrips() {
   if (trips.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold mb-4">Mes voyages</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('myTrips.title')}</h2>
         <div className="rounded-2xl border border-border/60 bg-card/80 p-6 text-center">
           <MapPin className="h-8 w-8 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground mb-3">Aucun voyage pour le moment</p>
+          <p className="text-sm text-muted-foreground mb-3">{t('myTrips.empty')}</p>
           <Button size="sm" asChild>
-            <Link href="/plan">Créer un voyage</Link>
+            <Link href="/plan">{t('myTrips.create')}</Link>
           </Button>
         </div>
       </section>
@@ -120,9 +122,9 @@ export function MyTrips() {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Mes voyages</h2>
+        <h2 className="text-lg font-semibold">{t('myTrips.title')}</h2>
         <Link href="/mes-voyages" className="text-xs text-primary font-medium">
-          Voir tout
+          {t('myTrips.viewAll')}
         </Link>
       </div>
       <div className="space-y-2.5">
@@ -148,7 +150,7 @@ export function MyTrips() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate">
-                  {trip.title || trip.destination || 'Voyage'}
+                  {trip.title || trip.destination || t('myTrips.defaultTitle')}
                 </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                   {dateStr && (
@@ -158,7 +160,7 @@ export function MyTrips() {
                     </span>
                   )}
                   {trip.durationDays && (
-                    <span>{trip.durationDays}j</span>
+                    <span>{trip.durationDays}{t('myTrips.durationSuffix')}</span>
                   )}
                 </div>
               </div>

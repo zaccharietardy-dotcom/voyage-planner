@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { TripPreferences, BudgetLevel, BUDGET_LABELS } from '@/lib/types';
 import { Wallet, Coins, CreditCard, Gem, ChefHat, UtensilsCrossed, Shuffle, Settings2, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface StepBudgetProps {
   data: Partial<TripPreferences>;
@@ -21,21 +22,22 @@ const BUDGET_ICONS: Record<BudgetLevel, React.ReactNode> = {
 const BUDGET_OPTIONS: BudgetLevel[] = ['economic', 'moderate', 'comfort', 'luxury'];
 
 export function StepBudget({ data, onChange }: StepBudgetProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-12 max-w-[600px] mx-auto w-full">
       <div className="text-center space-y-4">
         <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
-          Quel budget prévoir ?
+          {t('plan.budget.title')}
         </h2>
         <p className="text-[17px] text-[#94a3b8] font-light">
-          Pour adapter le choix des hébergements et des restaurants.
+          {t('plan.budget.subtitle')}
         </p>
       </div>
 
       <div className="space-y-10">
         {/* Niveaux de budget */}
         <div className="space-y-4">
-          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Niveau de confort</p>
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">{t('plan.budget.comfortLevel')}</p>
           <div className="grid grid-cols-2 gap-4">
             {BUDGET_OPTIONS.map((budget) => (
               <button
@@ -63,7 +65,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
                   'text-lg font-bold tracking-tight transition-colors',
                   data.budgetLevel === budget && !data.budgetCustom ? 'text-white' : 'text-white/70 group-hover:text-white/90'
                 )}>
-                  {BUDGET_LABELS[budget].label}
+                  {t(`plan.budgetLevels.${budget === 'economic' ? 'budget' : budget}`)}
                 </span>
                 <span className="text-xs font-medium text-white/40 mt-1">
                   {BUDGET_LABELS[budget].range}
@@ -79,7 +81,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
           <span className="w-full border-t border-white/[0.05]" />
         </div>
         <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
-          <span className="bg-[#050814] px-4 text-white/30">ou budget précis</span>
+          <span className="bg-[#050814] px-4 text-white/30">{t('plan.budget.orPrecise')}</span>
         </div>
       </div>
 
@@ -91,7 +93,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
             <Input
               id="custom-budget"
               type="number"
-              placeholder="Ex: 2000"
+              placeholder={t('plan.budget.placeholder')}
               min="0"
               value={data.budgetCustom || ''}
               onChange={(e) => {
@@ -126,7 +128,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
                 : 'text-white/50 hover:text-white/80 hover:bg-white/5'
             )}
           >
-            Total
+            {t('plan.budget.total')}
           </button>
           <button
             type="button"
@@ -138,7 +140,7 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
                 : 'text-white/50 hover:text-white/80 hover:bg-white/5'
             )}
           >
-            Par personne
+            {t('plan.budget.perPerson')}
           </button>
         </div>
 
@@ -154,14 +156,14 @@ export function StepBudget({ data, onChange }: StepBudgetProps) {
 
       {/* Préférence repas */}
       <div className="space-y-4 pt-6 border-t border-white/[0.05]">
-        <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Préférence pour les repas</p>
+        <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">{t('plan.budget.mealPreference')}</p>
         <div className="grid grid-cols-2 gap-4">
           {([
-            { value: 'auto', label: 'Automatique', desc: 'Selon votre budget', icon: <Zap className="h-5 w-5" /> },
-            { value: 'mostly_cooking', label: 'Plutôt cuisiner', desc: 'Plus économique', icon: <ChefHat className="h-5 w-5" /> },
-            { value: 'mostly_restaurants', label: 'Plutôt restaurants', desc: 'Découverte locale', icon: <UtensilsCrossed className="h-5 w-5" /> },
-            { value: 'balanced', label: 'Équilibré', desc: 'Mix des deux', icon: <Shuffle className="h-5 w-5" /> },
-          ] as const).map((option) => (
+            { value: 'auto', label: t('plan.budget.mealAuto'), desc: t('plan.budget.mealAutoDesc'), icon: <Zap className="h-5 w-5" /> },
+            { value: 'mostly_cooking', label: t('plan.budget.mealCooking'), desc: t('plan.budget.mealCookingDesc'), icon: <ChefHat className="h-5 w-5" /> },
+            { value: 'mostly_restaurants', label: t('plan.budget.mealRestaurants'), desc: t('plan.budget.mealRestaurantsDesc'), icon: <UtensilsCrossed className="h-5 w-5" /> },
+            { value: 'balanced', label: t('plan.budget.mealBalanced'), desc: t('plan.budget.mealBalancedDesc'), icon: <Shuffle className="h-5 w-5" /> },
+          ] as { value: 'auto' | 'mostly_cooking' | 'mostly_restaurants' | 'balanced'; label: string; desc: string; icon: React.ReactNode }[]).map((option) => (
             <button
               key={option.value}
               type="button"

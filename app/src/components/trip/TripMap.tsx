@@ -68,17 +68,6 @@ const TYPE_SHAPES: Record<string, { containerCss: string; innerCss: string }> = 
   free_time:  { containerCss: 'border-radius:50%;border-style:dashed !important;', innerCss: '' },
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  activity: 'Activité',
-  restaurant: 'Restaurant',
-  hotel: 'Hôtel',
-  transport: 'Transport',
-  flight: 'Vol',
-  parking: 'Parking',
-  checkin: 'Check-in',
-  checkout: 'Check-out',
-  luggage: 'Bagages',
-};
 
 const TYPE_EMOJIS: Record<string, string> = {
   activity:   '🏛️',

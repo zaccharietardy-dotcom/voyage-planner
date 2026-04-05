@@ -18,6 +18,7 @@ import {
   PieChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 import { Trip, TripCostSummary } from '@/lib/types';
 import { motion } from 'framer-motion';
 
@@ -30,6 +31,8 @@ interface TripBudgetBreakdownProps {
 }
 
 export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
+  const { t } = useTranslation();
+
   const breakdown = trip.costBreakdown || {
     flights: 0,
     accommodation: 0,
@@ -43,11 +46,11 @@ export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
   const categories = useMemo(
     () =>
       [
-        { label: 'Vols', value: breakdown.flights, color: '#EC4899', icon: Plane },
-        { label: 'Hébergement', value: breakdown.accommodation, color: '#8B5CF6', icon: Bed },
-        { label: 'Activités', value: breakdown.activities, color: '#3B82F6', icon: MapPin },
-        { label: 'Repas', value: breakdown.food, color: '#F97316', icon: Utensils },
-        { label: 'Transport local', value: breakdown.transport, color: '#10B981', icon: Bus },
+        { label: t('budget.category.flights'), value: breakdown.flights, color: '#EC4899', icon: Plane },
+        { label: t('budget.category.accommodation'), value: breakdown.accommodation, color: '#8B5CF6', icon: Bed },
+        { label: t('budget.category.activities'), value: breakdown.activities, color: '#3B82F6', icon: MapPin },
+        { label: t('budget.category.food'), value: breakdown.food, color: '#F97316', icon: Utensils },
+        { label: t('budget.category.localTransport'), value: breakdown.transport, color: '#10B981', icon: Bus },
       ].filter((c) => c.value > 0),
     [breakdown]
   );
@@ -96,16 +99,16 @@ export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
           <div className="p-1.5 rounded-lg bg-primary/10">
             <PieChart className="h-4 w-4 text-primary" />
           </div>
-          <h3 className="font-semibold">Budget estimé</h3>
+          <h3 className="font-semibold">{t('budget.title')}</h3>
         </div>
 
         {/* Total */}
         <div className="text-center">
           <p className="text-3xl font-bold">{total.toLocaleString('fr-FR')}&euro;</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {perPerson.toLocaleString('fr-FR')}&euro;/pers.
+            {perPerson.toLocaleString('fr-FR')}&euro;{t('budget.perPerson')}
             {' · '}
-            {perDay.toLocaleString('fr-FR')}&euro;/jour
+            {perDay.toLocaleString('fr-FR')}&euro;{t('budget.perDay')}
           </p>
         </div>
 
@@ -143,7 +146,7 @@ export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
             return (
               <motion.div
                 key={cat.label}
-                initial={{ opacity: 0, x: -12 }}
+                initial={{ opacity: 0, x: -4 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.07 }}
                 className="flex items-center gap-2"
@@ -175,7 +178,7 @@ export function TripBudgetBreakdown({ trip }: TripBudgetBreakdownProps) {
         {/* Per-day cost bars */}
         {dailyCosts.length > 1 && (
           <div>
-            <p className="text-xs font-medium mb-2 text-muted-foreground">Coût par jour</p>
+            <p className="text-xs font-medium mb-2 text-muted-foreground">{t('budget.costPerDay')}</p>
             <div className="flex items-end gap-1 h-16">
               {dailyCosts.map((day) => (
                 <div
@@ -206,6 +209,7 @@ interface TripBudgetComparatorProps {
 }
 
 export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState<TripCostSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -226,14 +230,14 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors du calcul du budget');
+        throw new Error(t('budget.errorCalc'));
       }
 
       const { data } = await response.json();
       setSummary(data);
     } catch (err) {
       console.error('Error loading trip budget summary:', err);
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      setError(err instanceof Error ? err.message : t('budget.unknownError'));
     } finally {
       setLoading(false);
     }
@@ -244,7 +248,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
       <Card className="p-6">
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Calcul du budget optimisé...</span>
+          <span>{t('budget.calculating')}</span>
         </div>
       </Card>
     );
@@ -268,7 +272,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
   const categories = [
     {
       icon: Bed,
-      label: 'Hébergement',
+      label: t('budget.category.accommodation'),
       current: summary.accommodation.total,
       best: summary.accommodation.bestTotal,
       savings: summary.accommodation.savings,
@@ -276,7 +280,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
     },
     {
       icon: Plane,
-      label: 'Vols',
+      label: t('budget.category.flights'),
       current: summary.flights.total,
       best: summary.flights.bestTotal,
       savings: summary.flights.savings,
@@ -284,7 +288,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
     },
     {
       icon: MapPin,
-      label: 'Activités',
+      label: t('budget.category.activities'),
       current: summary.activities.total,
       best: summary.activities.bestTotal,
       savings: summary.activities.savings,
@@ -292,7 +296,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
     },
     {
       icon: Utensils,
-      label: 'Restauration',
+      label: t('budget.category.dining'),
       current: summary.estimatedFood,
       best: summary.estimatedFood,
       savings: 0,
@@ -300,7 +304,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
     },
     {
       icon: Bus,
-      label: 'Transport local',
+      label: t('budget.category.localTransport'),
       current: summary.estimatedTransport,
       best: summary.estimatedTransport,
       savings: 0,
@@ -321,17 +325,17 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-emerald-600" />
-              Comparaison de budget
+              {t('budget.comparison')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Trouvez les meilleures offres pour votre voyage
+              {t('budget.findBestDeals')}
             </p>
           </div>
 
           {summary.totalSavings > 0 && (
             <Badge className="bg-emerald-500 text-white text-base px-4 py-2">
               <TrendingDown className="h-4 w-4 mr-2" />
-              Économisez {summary.totalSavings}€ ({summary.savingsPercent}%)
+              {t('budget.save')} {summary.totalSavings}&euro; ({summary.savingsPercent}%)
             </Badge>
           )}
         </div>
@@ -339,25 +343,25 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
         {/* Budget summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
           <div className="bg-background rounded-lg p-4 border">
-            <div className="text-xs text-muted-foreground mb-1">Budget actuel</div>
-            <div className="text-2xl font-bold text-foreground">{summary.grandTotal}€</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('budget.currentBudget')}</div>
+            <div className="text-2xl font-bold text-foreground">{summary.grandTotal}&euro;</div>
             <div className="text-xs text-muted-foreground mt-1">
-              {perPersonBudget}€/pers · {perDayBudget}€/jour
+              {perPersonBudget}&euro;{t('budget.perPerson')} · {perDayBudget}&euro;{t('budget.perDay')}
             </div>
           </div>
 
           <div className="bg-background rounded-lg p-4 border border-emerald-500/30">
-            <div className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Budget optimisé</div>
+            <div className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">{t('budget.optimizedBudget')}</div>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {summary.bestGrandTotal}€
+              {summary.bestGrandTotal}&euro;
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {perPersonBestBudget}€/pers · {Math.round(perPersonBestBudget / trip.preferences.durationDays)}€/jour
+              {perPersonBestBudget}&euro;{t('budget.perPerson')} · {Math.round(perPersonBestBudget / trip.preferences.durationDays)}&euro;{t('budget.perDay')}
             </div>
           </div>
 
           <div className="bg-background rounded-lg p-4 border">
-            <div className="text-xs text-muted-foreground mb-1">Économies possibles</div>
+            <div className="text-xs text-muted-foreground mb-1">{t('budget.possibleSavings')}</div>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {summary.totalSavings}€
             </div>
@@ -370,7 +374,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
 
       {/* Per-category breakdown */}
       <Card className="p-6">
-        <h3 className="font-semibold mb-4">Détail par catégorie</h3>
+        <h3 className="font-semibold mb-4">{t('budget.categoryDetail')}</h3>
         <div className="space-y-4">
           {categories.map((cat, idx) => {
             const Icon = cat.icon;
@@ -379,7 +383,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
             return (
               <motion.div
                 key={cat.label}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -4 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 className="space-y-2"
@@ -446,7 +450,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
 
       {/* Per-day breakdown */}
       <Card className="p-6">
-        <h3 className="font-semibold mb-4">Répartition par jour</h3>
+        <h3 className="font-semibold mb-4">{t('budget.dailyBreakdown')}</h3>
         <div className="space-y-2">
           {trip.days.map((day, idx) => {
             const dayBudget = day.dailyBudget || {
@@ -462,7 +466,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
             return (
               <div key={day.dayNumber} className="flex items-center gap-3">
                 <div className="w-16 text-xs text-muted-foreground">
-                  Jour {day.dayNumber}
+                  {t('budget.day')} {day.dayNumber}
                 </div>
                 <div className="flex-1">
                   <Progress value={percentage} className="h-2" />
@@ -484,7 +488,7 @@ export function TripBudgetComparator({ trip }: TripBudgetComparatorProps) {
               <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold mb-2">Conseils d&apos;économies</h3>
+              <h3 className="font-semibold mb-2">{t('budget.savingsTips')}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {summary.accommodation.savings > 0 && (
                   <li className="flex items-start gap-2">

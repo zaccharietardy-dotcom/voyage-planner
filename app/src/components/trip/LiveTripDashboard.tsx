@@ -14,6 +14,7 @@ import {
   Map,
 } from 'lucide-react';
 import { LiveTripState, Trip } from '@/lib/types';
+import { useTranslation, type TranslationKey } from '@/lib/i18n';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -30,6 +31,7 @@ export function LiveTripDashboard({
   trip,
   onNavigateToActivity,
 }: LiveTripDashboardProps) {
+  const { t } = useTranslation();
   const dayStats = getDayStats(trip);
   const emergencyNumbers = trip.travelTips?.emergency;
 
@@ -40,19 +42,19 @@ export function LiveTripDashboard({
         {/* Progress Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Progression du voyage</CardTitle>
+            <CardTitle className="text-sm">{t('dashboard.progress')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Jour {liveState.currentDay}</span>
+                <span>{t('dashboard.day').replace('{n}', String(liveState.currentDay))}</span>
                 <span className="text-muted-foreground">
-                  sur {trip.preferences?.durationDays}
+                  {t('dashboard.outOf').replace('{n}', String(trip.preferences?.durationDays))}
                 </span>
               </div>
               <Progress value={liveState.dayProgress} className="h-2" />
               <p className="text-xs text-muted-foreground">
-                {liveState.dayProgress}% du voyage complété
+                {t('dashboard.percentComplete').replace('{n}', String(liveState.dayProgress))}
               </p>
             </div>
           </CardContent>
@@ -61,7 +63,7 @@ export function LiveTripDashboard({
         {/* Activities Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Activités aujourd&apos;hui</CardTitle>
+            <CardTitle className="text-sm">{t('dashboard.activitiesToday')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-3">
@@ -70,7 +72,7 @@ export function LiveTripDashboard({
               </div>
               <div>
                 <p className="text-2xl font-bold">{dayStats?.activitiesRemaining || 0}</p>
-                <p className="text-xs text-muted-foreground">restantes</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.remaining')}</p>
               </div>
             </div>
           </CardContent>
@@ -79,7 +81,7 @@ export function LiveTripDashboard({
         {/* Distance Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Distance à parcourir</CardTitle>
+            <CardTitle className="text-sm">{t('dashboard.distance')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-3">
@@ -89,7 +91,7 @@ export function LiveTripDashboard({
               <div>
                 <p className="text-2xl font-bold">{dayStats?.totalDistance || 0} km</p>
                 <p className="text-xs text-muted-foreground">
-                  ~{dayStats?.estimatedWalkingTime || 0} min à pied
+                  {t('dashboard.walkingTime').replace('{n}', String(dayStats?.estimatedWalkingTime || 0))}
                 </p>
               </div>
             </div>
@@ -101,7 +103,7 @@ export function LiveTripDashboard({
         {/* Timeline */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Votre journée</CardTitle>
+            <CardTitle>{t('dashboard.yourDay')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -115,6 +117,7 @@ export function LiveTripDashboard({
                       ? () => onNavigateToActivity(event.id)
                       : undefined
                   }
+                  t={t}
                 />
               ))}
             </div>
@@ -128,14 +131,14 @@ export function LiveTripDashboard({
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
                 <Thermometer className="w-4 h-4" />
-                Météo
+                {t('dashboard.weather')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-center py-4">
                 <div className="text-5xl mb-2">☀️</div>
                 <p className="text-2xl font-bold">24°C</p>
-                <p className="text-sm text-muted-foreground">Ensoleillé</p>
+                <p className="text-sm text-muted-foreground">{t('dashboard.sunny')}</p>
                 <p className="text-xs text-muted-foreground mt-2">
                   Min 18° • Max 26°
                 </p>
@@ -149,17 +152,17 @@ export function LiveTripDashboard({
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Car className="w-4 h-4" />
-                  Prochain trajet
+                  {t('dashboard.nextTrip')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <p className="font-medium">
-                    {formatTransportMode(liveState.nextActivity.transportToPrevious)}
+                    {formatTransportMode(liveState.nextActivity.transportToPrevious, t)}
                   </p>
                   {liveState.nextActivity.timeFromPrevious && (
                     <p className="text-sm text-muted-foreground">
-                      ~{liveState.nextActivity.timeFromPrevious} minutes
+                      {t('dashboard.minutes').replace('{n}', String(liveState.nextActivity.timeFromPrevious))}
                     </p>
                   )}
                   {liveState.nextActivity.distanceFromPrevious && (
@@ -178,14 +181,14 @@ export function LiveTripDashboard({
               <CardHeader>
                 <CardTitle className="text-sm flex items-center gap-2 text-red-600 dark:text-red-400">
                   <Phone className="w-4 h-4" />
-                  Urgences
+                  {t('dashboard.emergency')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
                   {emergencyNumbers.generalEmergency && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Urgences:</span>
+                      <span className="text-muted-foreground">{t('dashboard.emergencyLabel')}</span>
                       <a
                         href={`tel:${emergencyNumbers.generalEmergency}`}
                         className="font-medium hover:underline"
@@ -196,7 +199,7 @@ export function LiveTripDashboard({
                   )}
                   {emergencyNumbers.police && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Police:</span>
+                      <span className="text-muted-foreground">{t('dashboard.police')}</span>
                       <a
                         href={`tel:${emergencyNumbers.police}`}
                         className="font-medium hover:underline"
@@ -207,7 +210,7 @@ export function LiveTripDashboard({
                   )}
                   {emergencyNumbers.ambulance && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Ambulance:</span>
+                      <span className="text-muted-foreground">{t('dashboard.ambulance')}</span>
                       <a
                         href={`tel:${emergencyNumbers.ambulance}`}
                         className="font-medium hover:underline"
@@ -241,9 +244,10 @@ interface TimelineItemProps {
   };
   isLast: boolean;
   onNavigate?: () => void;
+  t: (key: TranslationKey) => string;
 }
 
-function TimelineItem({ event, isLast, onNavigate }: TimelineItemProps) {
+function TimelineItem({ event, isLast, onNavigate, t }: TimelineItemProps) {
   const statusConfig = {
     completed: {
       icon: CheckCircle2,
@@ -281,7 +285,7 @@ function TimelineItem({ event, isLast, onNavigate }: TimelineItemProps) {
       {/* Content */}
       <motion.div
         className="flex-1 pb-6"
-        initial={{ opacity: 0, x: -20 }}
+        initial={{ opacity: 0, x: -4 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
       >
@@ -291,9 +295,9 @@ function TimelineItem({ event, isLast, onNavigate }: TimelineItemProps) {
               {event.startTime}
             </span>
             <Badge variant={event.status === 'in_progress' ? 'default' : 'outline'}>
-              {event.status === 'completed' && 'Terminé'}
-              {event.status === 'in_progress' && 'En cours'}
-              {event.status === 'upcoming' && 'À venir'}
+              {event.status === 'completed' && t('dashboard.status.completed')}
+              {event.status === 'in_progress' && t('dashboard.status.inProgress')}
+              {event.status === 'upcoming' && t('dashboard.status.upcoming')}
             </Badge>
           </div>
           <span className="text-sm text-muted-foreground">{event.endTime}</span>
@@ -314,7 +318,7 @@ function TimelineItem({ event, isLast, onNavigate }: TimelineItemProps) {
             className="text-sm text-blue-600 hover:underline flex items-center gap-1 mt-2"
           >
             <Navigation className="w-3 h-3" />
-            Itinéraire
+            {t('dashboard.navigate')}
           </button>
         )}
       </motion.div>
@@ -325,16 +329,17 @@ function TimelineItem({ event, isLast, onNavigate }: TimelineItemProps) {
 /**
  * Formate le mode de transport
  */
-function formatTransportMode(mode: string): string {
-  const modes: Record<string, string> = {
-    walk: 'À pied',
-    car: 'En voiture',
-    public: 'Transport en commun',
-    taxi: 'Taxi',
-    bus: 'Bus',
-    metro: 'Métro',
-    train: 'Train',
+function formatTransportMode(mode: string, t: (key: TranslationKey) => string): string {
+  const modeKeys: Record<string, TranslationKey> = {
+    walk: 'dashboard.transport.walk',
+    car: 'dashboard.transport.car',
+    public: 'dashboard.transport.public',
+    taxi: 'dashboard.transport.taxi',
+    bus: 'dashboard.transport.bus',
+    metro: 'dashboard.transport.metro',
+    train: 'dashboard.transport.train',
   };
 
-  return modes[mode] || 'Transport';
+  const key = modeKeys[mode] ?? 'dashboard.transport.default' as const;
+  return t(key);
 }

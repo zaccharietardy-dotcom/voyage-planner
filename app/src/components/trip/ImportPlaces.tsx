@@ -28,6 +28,8 @@ import { parseImportedPlaces, ImportedPlace, detectCategory } from '@/lib/servic
 import { geocodeAddress } from '@/lib/services/geocoding';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 interface ImportPlacesProps {
   open: boolean;
@@ -59,30 +61,31 @@ const CATEGORY_ICONS: Record<string, string> = {
   unknown: '❓',
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  restaurant: 'Restaurant',
-  cafe: 'Café',
-  bar: 'Bar',
-  museum: 'Musée',
-  monument: 'Monument',
-  church: 'Lieu de culte',
-  park: 'Parc',
-  beach: 'Plage',
-  viewpoint: 'Point de vue',
-  shopping: 'Shopping',
-  market: 'Marché',
-  hotel: 'Hébergement',
-  theater: 'Théâtre',
-  cinema: 'Cinéma',
-  stadium: 'Stade',
-  zoo: 'Zoo / Aquarium',
-  attraction: 'Attraction',
-  castle: 'Château',
-  other: 'Autre',
-  unknown: 'Non catégorisé',
+const CATEGORY_LABEL_KEYS: Record<string, TranslationKey> = {
+  restaurant: 'places.category.restaurant',
+  cafe: 'places.category.cafe',
+  bar: 'places.category.bar',
+  museum: 'places.category.museum',
+  monument: 'places.category.monument',
+  church: 'places.category.church',
+  park: 'places.category.park',
+  beach: 'places.category.beach',
+  viewpoint: 'places.category.viewpoint',
+  shopping: 'places.category.shopping',
+  market: 'places.category.market',
+  hotel: 'places.category.hotel',
+  theater: 'places.category.theater',
+  cinema: 'places.category.cinema',
+  stadium: 'places.category.stadium',
+  zoo: 'places.category.zoo',
+  attraction: 'places.category.attraction',
+  castle: 'places.category.castle',
+  other: 'places.category.other',
+  unknown: 'places.category.unknown',
 };
 
 export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }: ImportPlacesProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [places, setPlaces] = useState<ImportedPlace[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -124,16 +127,16 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
       const parsed = parseImportedPlaces(content, file.name);
 
       if (parsed.length === 0) {
-        setError('Aucun lieu trouvé dans le fichier');
+        setError(t('places.noPlaceFound'));
         return;
       }
 
       setPlaces(parsed);
       // Sélectionner tous par défaut
       setSelectedIds(new Set(parsed.map((_, i) => i)));
-      toast.success(`${parsed.length} lieu${parsed.length > 1 ? 'x' : ''} trouvé${parsed.length > 1 ? 's' : ''}`);
+      toast.success(parsed.length > 1 ? t('places.foundPlural').replace('{n}', String(parsed.length)) : t('places.found').replace('{n}', String(parsed.length)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de la lecture du fichier';
+      const message = err instanceof Error ? err.message : t('places.readError');
       setError(message);
       toast.error(message);
     } finally {
@@ -173,7 +176,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
 
   const handleParseURLs = () => {
     if (!urlsText.trim()) {
-      toast.error('Veuillez coller au moins une URL Google Maps');
+      toast.error(t('places.pasteUrl'));
       return;
     }
 
@@ -184,15 +187,15 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
       const parsed = parseImportedPlaces(urlsText, undefined);
 
       if (parsed.length === 0) {
-        setError('Aucun lieu trouvé dans les URLs');
+        setError(t('places.noPlaceInUrls'));
         return;
       }
 
       setPlaces(parsed);
       setSelectedIds(new Set(parsed.map((_, i) => i)));
-      toast.success(`${parsed.length} lieu${parsed.length > 1 ? 'x' : ''} trouvé${parsed.length > 1 ? 's' : ''}`);
+      toast.success(parsed.length > 1 ? t('places.foundPlural').replace('{n}', String(parsed.length)) : t('places.found').replace('{n}', String(parsed.length)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erreur lors du parsing des URLs';
+      const message = err instanceof Error ? err.message : t('places.parseError');
       setError(message);
       toast.error(message);
     } finally {
@@ -202,12 +205,12 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
 
   const handleManualAdd = async () => {
     if (!manualName.trim()) {
-      toast.error('Veuillez saisir un nom de lieu');
+      toast.error(t('places.enterName'));
       return;
     }
 
     if (!manualAddress.trim()) {
-      toast.error('Veuillez saisir une adresse');
+      toast.error(t('places.enterAddress'));
       return;
     }
 
@@ -218,7 +221,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
       const result = await geocodeAddress(manualAddress);
 
       if (!result) {
-        toast.error('Adresse introuvable. Vérifiez l\'orthographe.');
+        toast.error(t('places.addressNotFound'));
         return;
       }
 
@@ -238,9 +241,9 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
       setManualName('');
       setManualAddress('');
 
-      toast.success('Lieu ajouté');
+      toast.success(t('places.placeAdded'));
     } catch (err) {
-      toast.error('Erreur lors du géocodage');
+      toast.error(t('places.geocodeError'));
     } finally {
       setManualLoading(false);
     }
@@ -267,12 +270,12 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
   const handleImport = () => {
     const selected = places.filter((_, i) => selectedIds.has(i));
     if (selected.length === 0) {
-      toast.error('Sélectionnez au moins un lieu');
+      toast.error(t('places.selectAtLeast'));
       return;
     }
 
     onImport(selected);
-    toast.success(`${selected.length} lieu${selected.length > 1 ? 'x' : ''} ajouté${selected.length > 1 ? 's' : ''} au voyage`);
+    toast.success(selected.length > 1 ? t('places.addedToTripPlural').replace('{n}', String(selected.length)) : t('places.addedToTrip').replace('{n}', String(selected.length)));
     resetState();
     onOpenChange(false);
   };
@@ -283,7 +286,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
 
   const handleSocialExtract = async () => {
     if (!socialInput.trim()) {
-      toast.error('Veuillez coller une URL ou du texte');
+      toast.error(t('places.pasteUrlOrText'));
       return;
     }
 
@@ -319,23 +322,23 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Erreur lors de l\'extraction');
-        toast.error(data.error || 'Erreur lors de l\'extraction');
+        setError(data.error || t('places.extractError'));
+        toast.error(data.error || t('places.extractError'));
         return;
       }
 
       if (data.places.length === 0) {
-        setError('Aucun lieu trouvé dans ce contenu');
-        toast.warning('Aucun lieu trouvé. Vérifiez que le contenu mentionne des lieux spécifiques.');
+        setError(t('places.noPlaceInContent'));
+        toast.warning(t('places.noPlaceWarning'));
         return;
       }
 
       setPlaces(data.places);
       setSelectedIds(new Set(data.places.map((_: any, i: number) => i)));
       setSocialPlatform(data.platform || detectedPlatform);
-      toast.success(`${data.places.length} lieu${data.places.length > 1 ? 'x' : ''} extrait${data.places.length > 1 ? 's' : ''} par Narae`);
+      toast.success(data.places.length > 1 ? t('places.extractedByNaraePlural').replace('{n}', String(data.places.length)) : t('places.extractedByNarae').replace('{n}', String(data.places.length)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de l\'extraction';
+      const message = err instanceof Error ? err.message : t('places.extractError');
       setError(message);
       toast.error(message);
     } finally {
@@ -347,9 +350,9 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Importer des lieux sauvegardés</DialogTitle>
+          <DialogTitle>{t('places.importTitle')}</DialogTitle>
           <DialogDescription>
-            Importez vos lieux favoris depuis Google Maps, My Maps, ou ajoutez-les manuellement.
+            {t('places.importDesc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -357,19 +360,19 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="social" className="flex items-center gap-1.5">
               <Share2 className="h-3.5 w-3.5" />
-              Réseaux sociaux
+              {t('places.socialTab')}
             </TabsTrigger>
             <TabsTrigger value="file" className="flex items-center gap-1.5">
               <Upload className="h-3.5 w-3.5" />
-              Fichier
+              {t('places.fileTab')}
             </TabsTrigger>
             <TabsTrigger value="urls" className="flex items-center gap-1.5">
               <LinkIcon className="h-3.5 w-3.5" />
-              Liens
+              {t('places.linksTab')}
             </TabsTrigger>
             <TabsTrigger value="manual" className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5" />
-              Manuel
+              {t('places.manualTab')}
             </TabsTrigger>
           </TabsList>
 
@@ -378,19 +381,19 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Compass className="h-4 w-4 text-primary" />
-                <span>Extraction automatique par expertise</span>
+                <span>{t('places.autoExtract')}</span>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">URL ou texte</label>
+                <label className="text-sm font-medium">{t('places.urlOrText')}</label>
                 <Textarea
                   value={socialInput}
                   onChange={(e) => setSocialInput(e.target.value)}
-                  placeholder="Collez une URL (Instagram, TikTok, YouTube, blog) ou directement le texte d'une légende/description..."
+                  placeholder={t('places.urlPlaceholder')}
                   className="min-h-[180px] font-mono text-xs"
                 />
                 <div className="flex flex-wrap gap-2 items-center">
-                  <p className="text-xs text-muted-foreground">Plateformes supportées:</p>
+                  <p className="text-xs text-muted-foreground">{t('places.supportedPlatforms')}</p>
                   <div className="flex gap-1.5">
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Instagram className="h-3 w-3" />
@@ -421,12 +424,12 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 {socialLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Extraction en cours avec Narae...
+                    {t('places.extracting')}
                   </>
                 ) : (
                   <>
                     <Compass className="mr-2 h-4 w-4" />
-                    Extraire les lieux
+                    {t('places.extractPlaces')}
                   </>
                 )}
               </Button>
@@ -434,7 +437,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
               {socialPlatform !== 'unknown' && socialPlatform !== 'text' && !socialLoading && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 text-xs">
                   <Share2 className="h-3.5 w-3.5 text-primary" />
-                  <span>Plateforme détectée: <strong className="capitalize">{socialPlatform}</strong></span>
+                  <span>{t('places.detectedPlatform')} <strong className="capitalize">{socialPlatform}</strong></span>
                 </div>
               )}
 
@@ -446,7 +449,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
               )}
 
               <div className="text-xs text-muted-foreground space-y-1 bg-muted/30 p-3 rounded-lg">
-                <p className="font-medium">Comment ça marche:</p>
+                <p className="font-medium">{t('places.howItWorks')}</p>
                 <ul className="list-disc list-inside space-y-0.5 ml-2">
                   <li>Collez un lien Instagram, TikTok, YouTube ou d&apos;un blog de voyage</li>
                   <li>Ou copiez-collez directement le texte d&apos;une légende/description</li>
@@ -485,10 +488,10 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 )}
                 <div>
                   <p className="font-medium">
-                    Glissez-déposez un fichier ou cliquez pour parcourir
+                    {t('places.dragDrop')}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Formats supportés: GeoJSON (.geojson), KML (.kml)
+                    {t('places.supportedFormats')}
                   </p>
                 </div>
                 <div className="flex gap-2 mt-2">
@@ -512,7 +515,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
             )}
 
             <div className="text-xs text-muted-foreground space-y-1 bg-muted/30 p-3 rounded-lg">
-              <p className="font-medium">Comment obtenir vos données Google Maps:</p>
+              <p className="font-medium">{t('places.howToExport')}</p>
               <ul className="list-disc list-inside space-y-0.5 ml-2">
                 <li><strong>Google Takeout:</strong> takeout.google.com → Lieux sauvegardés → Format GeoJSON</li>
                 <li><strong>Google My Maps:</strong> Ouvrez votre carte → Menu (⋮) → Exporter en KML</li>
@@ -523,7 +526,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
           {/* Tab 3: URLs */}
           <TabsContent value="urls" className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">URLs Google Maps (une par ligne)</label>
+              <label className="text-sm font-medium">{t('places.urlsLabel')}</label>
               <Textarea
                 value={urlsText}
                 onChange={(e) => setUrlsText(e.target.value)}
@@ -531,7 +534,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 className="min-h-[200px] font-mono text-xs"
               />
               <p className="text-xs text-muted-foreground">
-                Collez vos liens Google Maps. Formats acceptés: liens directs, liens avec coordonnées, liens courts (goo.gl).
+                {t('places.urlsHint')}
               </p>
             </div>
 
@@ -539,12 +542,12 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyse en cours...
+                  {t('places.analyzing')}
                 </>
               ) : (
                 <>
                   <MapIconLucide className="mr-2 h-4 w-4" />
-                  Analyser les URLs
+                  {t('places.analyzeUrls')}
                 </>
               )}
             </Button>
@@ -561,7 +564,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
           <TabsContent value="manual" className="space-y-4">
             <div className="space-y-3">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Nom du lieu</label>
+                <label className="text-sm font-medium">{t('places.placeName')}</label>
                 <Input
                   value={manualName}
                   onChange={(e) => setManualName(e.target.value)}
@@ -570,14 +573,14 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Adresse ou ville</label>
+                <label className="text-sm font-medium">{t('places.addressOrCity')}</label>
                 <Input
                   value={manualAddress}
                   onChange={(e) => setManualAddress(e.target.value)}
                   placeholder="Champ de Mars, Paris"
                 />
                 <p className="text-xs text-muted-foreground">
-                  L&apos;adresse sera géocodée automatiquement
+                  {t('places.addressAutoGeocode')}
                 </p>
               </div>
 
@@ -589,12 +592,12 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 {manualLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Géocodage...
+                    {t('places.geocoding')}
                   </>
                 ) : (
                   <>
                     <MapPin className="mr-2 h-4 w-4" />
-                    Ajouter le lieu
+                    {t('places.addPlace')}
                   </>
                 )}
               </Button>
@@ -614,12 +617,12 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                 {selectedIds.size === places.length ? (
                   <>
                     <X className="mr-1.5 h-3.5 w-3.5" />
-                    Tout désélectionner
+                    {t('places.deselectAll')}
                   </>
                 ) : (
                   <>
                     <Check className="mr-1.5 h-3.5 w-3.5" />
-                    Tout sélectionner
+                    {t('places.selectAll')}
                   </>
                 )}
               </Button>
@@ -664,9 +667,9 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                           onClick={(e) => e.stopPropagation()}
                           className="text-xs border rounded px-2 py-1 bg-background"
                         >
-                          {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                          {Object.entries(CATEGORY_LABEL_KEYS).map(([key, labelKey]) => (
                             <option key={key} value={key}>
-                              {CATEGORY_ICONS[key]} {label}
+                              {CATEGORY_ICONS[key]} {t(labelKey)}
                             </option>
                           ))}
                         </select>
@@ -683,7 +686,7 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
                             onClick={(e) => e.stopPropagation()}
                             className="text-xs text-primary hover:underline"
                           >
-                            Voir sur Maps
+                            {t('places.viewOnMaps')}
                           </a>
                         )}
                       </div>
@@ -699,11 +702,11 @@ export function ImportPlaces({ open, onOpenChange, onImport, destinationCoords }
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={resetState} className="flex-1">
-                Annuler
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleImport} disabled={selectedIds.size === 0} className="flex-1">
                 <Check className="mr-2 h-4 w-4" />
-                Ajouter {selectedIds.size} lieu{selectedIds.size > 1 ? 'x' : ''} au voyage
+                {selectedIds.size > 1 ? t('places.addToTripPlural').replace('{n}', String(selectedIds.size)) : t('places.addToTrip').replace('{n}', String(selectedIds.size))}
               </Button>
             </div>
           </div>

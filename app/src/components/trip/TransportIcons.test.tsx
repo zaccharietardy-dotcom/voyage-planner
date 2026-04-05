@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { I18nProvider } from '../../lib/i18n/context';
 import { ActivityCard } from './ActivityCard';
 import { MobileDayList } from './MobileDayList';
 import type { TripDay, TripItem, Restaurant } from '../../lib/types';
@@ -74,25 +75,25 @@ function makeRestaurantItem(overrides: Partial<TripItem> = {}): TripItem {
 describe('Transport mode icons', () => {
   it('ActivityCard renders train icon for train transport item', () => {
     const item = makeTransportItem({ transportMode: 'train', title: 'Train vers Milan' });
-    const { container } = render(<ActivityCard item={item} />);
+    const { container } = render(<I18nProvider><ActivityCard item={item} /></I18nProvider>);
     expect(container.querySelector('svg.lucide-train-front')).toBeInTheDocument();
   });
 
   it('ActivityCard renders bus icon for bus transport item', () => {
     const item = makeTransportItem({ transportMode: 'bus', title: 'Bus vers Milan' });
-    const { container } = render(<ActivityCard item={item} />);
+    const { container } = render(<I18nProvider><ActivityCard item={item} /></I18nProvider>);
     expect(container.querySelector('svg.lucide-bus')).toBeInTheDocument();
   });
 
   it('MobileDayList renders train icon for train transport item', () => {
     const day = makeDay(makeTransportItem({ transportMode: 'train', title: 'Train vers Milan' }));
-    const { getByTestId } = render(<MobileDayList day={day} />);
+    const { getByTestId } = render(<I18nProvider><MobileDayList day={day} /></I18nProvider>);
     expect(getByTestId('transport-icon-train')).toBeInTheDocument();
   });
 
   it('MobileDayList renders bus icon for bus transport item', () => {
     const day = makeDay(makeTransportItem({ transportMode: 'bus', title: 'Bus vers Milan' }));
-    const { getByTestId } = render(<MobileDayList day={day} />);
+    const { getByTestId } = render(<I18nProvider><MobileDayList day={day} /></I18nProvider>);
     expect(getByTestId('transport-icon-bus')).toBeInTheDocument();
   });
 
@@ -101,7 +102,7 @@ describe('Transport mode icons', () => {
       imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
       restaurant: makeRestaurant({ photos: ['https://serpapi.com/some-image.jpg'] }),
     });
-    const { container } = render(<ActivityCard item={item} />);
+    const { container } = render(<I18nProvider><ActivityCard item={item} /></I18nProvider>);
     expect(container.querySelector('img[src*=\"unsplash\"]')).not.toBeInTheDocument();
     expect(container.querySelector('img[src*=\"serpapi.com\"]')).not.toBeInTheDocument();
   });
@@ -112,7 +113,7 @@ describe('Transport mode icons', () => {
       imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
       restaurant: makeRestaurant({ photos: [googlePhoto] }),
     });
-    const { container } = render(<ActivityCard item={item} />);
+    const { container } = render(<I18nProvider><ActivityCard item={item} /></I18nProvider>);
     expect(container.querySelector(`img[src=\"${googlePhoto}\"]`)).toBeInTheDocument();
   });
 });

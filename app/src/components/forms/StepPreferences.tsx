@@ -1,6 +1,8 @@
 'use client';
 
 import { TripPreferences, PaceLevel } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n';
 
 interface StepPreferencesProps {
   data: Partial<TripPreferences>;
@@ -9,24 +11,25 @@ interface StepPreferencesProps {
 
 type ActivityType = 'beach' | 'nature' | 'culture' | 'gastronomy' | 'nightlife' | 'shopping' | 'adventure' | 'wellness';
 
-const PACE_OPTIONS: { id: PaceLevel; emoji: string; label: string; description: string }[] = [
-  { id: 'relaxed', emoji: '\u{1F422}', label: 'Tranquille', description: 'Peu d\u2019activités, du temps libre' },
-  { id: 'moderate', emoji: '\u2696\uFE0F', label: 'Équilibré', description: 'Un bon mix activités et repos' },
-  { id: 'intensive', emoji: '\u{1F680}', label: 'Intensif', description: 'Maximum de découvertes' },
+const PACE_IDS: { id: PaceLevel; emoji: string; labelKey: TranslationKey; descKey: TranslationKey }[] = [
+  { id: 'relaxed', emoji: '\u{1F422}', labelKey: 'plan.pref.paceRelaxed', descKey: 'plan.pref.paceRelaxedDesc' },
+  { id: 'moderate', emoji: '\u2696\uFE0F', labelKey: 'plan.pref.paceModerate', descKey: 'plan.pref.paceModerateDesc' },
+  { id: 'intensive', emoji: '\u{1F680}', labelKey: 'plan.pref.paceIntensive', descKey: 'plan.pref.paceIntensiveDesc' },
 ];
 
-const PREFERENCE_OPTIONS: { id: ActivityType; emoji: string; label: string }[] = [
-  { id: 'culture', emoji: '\u{1F3DB}\u{FE0F}', label: 'Culture' },
-  { id: 'nature', emoji: '\u{1F333}', label: 'Nature' },
-  { id: 'gastronomy', emoji: '\u{1F37D}\u{FE0F}', label: 'Foodie' },
-  { id: 'adventure', emoji: '\u{26F0}\u{FE0F}', label: 'Aventure' },
-  { id: 'beach', emoji: '\u{1F3D6}\u{FE0F}', label: 'Plage' },
-  { id: 'shopping', emoji: '\u{1F6CD}\u{FE0F}', label: 'Shopping' },
-  { id: 'nightlife', emoji: '\u{1F378}', label: 'Nightlife' },
-  { id: 'wellness', emoji: '\u{1F9D8}', label: 'Wellness' },
+const ACTIVITY_IDS: { id: ActivityType; emoji: string; labelKey: TranslationKey }[] = [
+  { id: 'culture', emoji: '\u{1F3DB}\u{FE0F}', labelKey: 'plan.pref.culture' },
+  { id: 'nature', emoji: '\u{1F333}', labelKey: 'plan.pref.nature' },
+  { id: 'gastronomy', emoji: '\u{1F37D}\u{FE0F}', labelKey: 'plan.pref.foodie' },
+  { id: 'adventure', emoji: '\u{26F0}\u{FE0F}', labelKey: 'plan.pref.adventure' },
+  { id: 'beach', emoji: '\u{1F3D6}\u{FE0F}', labelKey: 'plan.pref.beach' },
+  { id: 'shopping', emoji: '\u{1F6CD}\u{FE0F}', labelKey: 'plan.pref.shopping' },
+  { id: 'nightlife', emoji: '\u{1F378}', labelKey: 'plan.pref.nightlife' },
+  { id: 'wellness', emoji: '\u{1F9D8}', labelKey: 'plan.pref.wellness' },
 ];
 
 export function StepPreferences({ data, onChange }: StepPreferencesProps) {
+  const { t } = useTranslation();
   const selected = data.activities || [];
 
   const toggle = (id: ActivityType) => {
@@ -42,65 +45,81 @@ export function StepPreferences({ data, onChange }: StepPreferencesProps) {
   };
 
   return (
-    <div className="space-y-12 max-w-[600px] mx-auto w-full">
+    <div className="space-y-12 max-w-[650px] mx-auto w-full">
       <div className="text-center space-y-4">
-        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
-          Qu&apos;aimez-vous faire ?
+        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight text-white">
+          {t('plan.pref.title')}
         </h2>
-        <p className="text-[17px] text-[#94a3b8] font-light">
-          Sélectionnez vos centres d&apos;intérêt pour un voyage qui vous ressemble.
+        <p className="text-lg text-muted-foreground font-light">
+          {t('plan.pref.subtitle')}
         </p>
       </div>
 
-      <div className="space-y-10">
-        <div className="space-y-4">
-          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Activités favorites</p>
-          <div className="grid grid-cols-2 gap-4">
-            {PREFERENCE_OPTIONS.map((opt) => {
+      <div className="space-y-12">
+        <div className="space-y-6">
+          <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{t('plan.pref.activities')}</p>
+          
+          <div className="flex flex-wrap justify-center gap-3">
+            {ACTIVITY_IDS.map((opt) => {
               const isSelected = selected.includes(opt.id);
               return (
                 <button
                   key={opt.id}
-                  className={`flex items-center gap-4 rounded-[1.5rem] border p-5 text-left transition-all duration-300 active:scale-[0.97] group ${
-                    isSelected
-                      ? 'border-gold bg-[#0e1220] shadow-[0_10px_30px_rgba(197,160,89,0.15)] scale-[1.02]'
-                      : 'border-white/[0.08] bg-[#0e1220]/50 hover:bg-[#0f1429] hover:border-white/20'
-                  }`}
+                  className={`
+                    flex items-center gap-3 px-6 py-4 rounded-full border-2 transition-all duration-500 active:scale-[0.95] group
+                    ${isSelected
+                      ? 'border-gold bg-gold/10 text-white shadow-[0_0_30px_rgba(197,160,89,0.2)]'
+                      : 'border-white/[0.08] bg-white/[0.02] text-white/60 hover:border-white/20 hover:bg-white/[0.05]'
+                    }
+                  `}
                   onClick={() => toggle(opt.id)}
                 >
-                  <span className={`text-3xl transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110 opacity-60 group-hover:opacity-100'}`}>{opt.emoji}</span>
-                  <span className={`text-lg font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/70 group-hover:text-white/90'}`}>{opt.label}</span>
+                  <span className={`text-2xl transition-transform duration-500 ${isSelected ? 'scale-110' : 'group-hover:scale-110 grayscale group-hover:grayscale-0'}`}>
+                    {opt.emoji}
+                  </span>
+                  <span className="text-sm font-black uppercase tracking-widest leading-none">
+                    {t(opt.labelKey)}
+                  </span>
                 </button>
               );
             })}
           </div>
 
           <button
-            className="w-full text-center text-sm font-black uppercase tracking-[0.2em] text-gold/60 py-6 hover:text-gold transition-colors"
+            className="w-full text-center text-[10px] font-black uppercase tracking-[0.3em] text-gold/40 py-4 hover:text-gold transition-colors"
             onClick={skipAll}
           >
-            Passer, surprenez-moi !
+            {t('plan.pref.skipSurprise')}
           </button>
         </div>
 
-        <div className="space-y-4 pt-6 border-t border-white/[0.05]">
-          <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Rythme du voyage</p>
+        <div className="space-y-6 pt-10 border-t border-white/[0.05]">
+          <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{t('plan.pref.pace')}</p>
+          
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {PACE_OPTIONS.map((opt) => {
+            {PACE_IDS.map((opt) => {
               const isSelected = (data.pace || 'moderate') === opt.id;
               return (
                 <button
                   key={opt.id}
-                  className={`flex flex-col items-center gap-2 rounded-[1.5rem] border p-6 text-center transition-all duration-300 active:scale-[0.97] group ${
-                    isSelected
-                      ? 'border-gold bg-[#0e1220] shadow-[0_10px_30px_rgba(197,160,89,0.15)] scale-[1.02]'
-                      : 'border-white/[0.08] bg-[#0e1220]/50 hover:bg-[#0f1429] hover:border-white/20'
-                  }`}
+                  className={`
+                    flex flex-col items-center gap-3 rounded-3xl border-2 p-6 text-center transition-all duration-500 active:scale-[0.95] group
+                    ${isSelected
+                      ? 'border-gold bg-gold/10 shadow-[0_0_30px_rgba(197,160,89,0.2)]'
+                      : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]'
+                    }
+                  `}
                   onClick={() => onChange({ pace: opt.id })}
                 >
-                  <span className={`text-4xl mb-2 transition-transform duration-300 ${isSelected ? 'scale-110' : 'group-hover:scale-110 opacity-60 group-hover:opacity-100'}`}>{opt.emoji}</span>
-                  <span className={`text-[15px] font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/70 group-hover:text-white/90'}`}>{opt.label}</span>
-                  <span className="text-[11px] font-medium text-white/40 leading-tight mt-1">{opt.description}</span>
+                  <span className={`text-4xl mb-1 transition-transform duration-500 ${isSelected ? 'scale-110' : 'grayscale group-hover:grayscale-0'}`}>
+                    {opt.emoji}
+                  </span>
+                  <span className={`text-sm font-black uppercase tracking-widest transition-colors ${isSelected ? 'text-gold' : 'text-white/70'}`}>
+                    {t(opt.labelKey)}
+                  </span>
+                  <span className="text-[10px] font-bold text-white/40 leading-tight uppercase tracking-wider">
+                    {t(opt.descKey)}
+                  </span>
                 </button>
               );
             })}

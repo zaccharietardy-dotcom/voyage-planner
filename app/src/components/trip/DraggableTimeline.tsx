@@ -55,6 +55,8 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
+import type { TranslationKey } from '@/lib/i18n';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -79,18 +81,18 @@ interface DraggableTimelineProps {
 }
 
 // Day summary for reorder panel
-function getDaySummary(day: TripDay): string {
+function getDaySummary(day: TripDay, t: (key: TranslationKey, params?: Record<string, string | number>) => string): string {
   if (day.theme) return day.theme;
   const types = day.items.map((i) => i.type);
-  if (types.includes('checkin')) return 'Arrivée & Check-in';
-  if (types.includes('checkout')) return 'Check-out & Départ';
-  if (types.includes('flight')) return 'Vol';
+  if (types.includes('checkin')) return t('trip.arrivalCheckin');
+  if (types.includes('checkout')) return t('trip.checkoutDeparture');
+  if (types.includes('flight')) return t('trip.flight');
   const activities = day.items.filter((i) => i.type === 'activity').length;
   const restaurants = day.items.filter((i) => i.type === 'restaurant').length;
   const parts: string[] = [];
-  if (activities > 0) parts.push(`${activities} activité${activities > 1 ? 's' : ''}`);
-  if (restaurants > 0) parts.push(`${restaurants} restaurant${restaurants > 1 ? 's' : ''}`);
-  return parts.join(', ') || `${day.items.length} items`;
+  if (activities > 0) parts.push(`${activities} ${activities > 1 ? t('trip.activityPlural') : t('trip.activity')}`);
+  if (restaurants > 0) parts.push(`${restaurants} ${restaurants > 1 ? t('trip.restaurantPlural') : t('trip.restaurant')}`);
+  return parts.join(', ') || t('trip.items', { n: day.items.length });
 }
 
 // Reorder panel showing all days at once
@@ -103,13 +105,14 @@ function DayReorderPanel({
   onSwap: (a: number, b: number) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <ArrowUpDown className="h-4 w-4" />
-            Réorganiser les jours
+            {t('trip.reorderDays')}
           </CardTitle>
           <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Fermer" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -151,7 +154,7 @@ function DayReorderPanel({
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate">
-                  {getDaySummary(day)}
+                  {getDaySummary(day, t)}
                 </p>
               </div>
 
@@ -185,7 +188,7 @@ function DayReorderPanel({
           );
         })}
         <p className="text-xs text-muted-foreground pt-1">
-          Les jours avec transport, check-in ou check-out sont verrouillés.
+          {t('trip.lockedDays')}
         </p>
       </CardContent>
     </Card>
@@ -204,6 +207,7 @@ function DroppableDay({
   children: React.ReactNode;
   onAddItem?: () => void;
 }) {
+  const { t } = useTranslation();
   const { isOver, setNodeRef } = useDroppable({
     id: `day-${day.dayNumber}`,
     disabled: !isEditable,
@@ -236,7 +240,7 @@ function DroppableDay({
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
               {getDayPeriodIcon()}
-              {day.items.length} activité{day.items.length > 1 ? 's' : ''}
+              {day.items.length} {day.items.length > 1 ? t('trip.activityPlural') : t('trip.activity')}
             </Badge>
             {day.date && (
               <Badge variant="outline" className="text-xs">
@@ -257,7 +261,7 @@ function DroppableDay({
           <div className="space-y-2 min-h-[60px]">
             {day.items.length === 0 ? (
               <div className="h-[60px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground text-sm">
-                Glissez une activité ici
+                {t('trip.dragHere')}
               </div>
             ) : (
               children
@@ -273,7 +277,7 @@ function DroppableDay({
             onClick={onAddItem}
           >
             <Plus className="h-4 w-4" />
-            Ajouter une activité
+            {t('trip.addActivity')}
           </Button>
         )}
       </CardContent>
@@ -291,6 +295,7 @@ export function DraggableTimeline({
   onAddItem,
   hotelSelectorData,
 }: DraggableTimelineProps) {
+  const { t } = useTranslation();
   const [activeItem, setActiveItem] = useState<TripItem | null>(null);
   const [showReorder, setShowReorder] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ dayIndex: number; itemIndex: number; title: string } | null>(null);
@@ -338,7 +343,7 @@ export function DraggableTimeline({
     try {
       const newDays = removeItem(localDays, deleteTarget.dayIndex, deleteTarget.itemIndex);
       applyUpdate(newDays);
-      toast.success(`"${deleteTarget.title}" supprimé`);
+      toast.success(t('trip.deleted', { title: deleteTarget.title }));
     } catch (err) {
       console.error('Delete error:', err);
     }
@@ -349,11 +354,11 @@ export function DraggableTimeline({
     try {
       const newDays = swapDays(localDays, dayIndexA, dayIndexB);
       if (newDays === localDays) {
-        toast.error('Ce jour ne peut pas être déplacé (transport/checkin/checkout)');
+        toast.error(t('trip.cannotMove'));
         return;
       }
       applyUpdate(newDays);
-      toast.success(`Jour ${dayIndexA + 1} ↔ Jour ${dayIndexB + 1}`);
+      toast.success(t('trip.daySwap', { a: dayIndexA + 1, b: dayIndexB + 1 }));
     } catch (err) {
       console.error('Swap error:', err);
     }
@@ -439,7 +444,7 @@ export function DraggableTimeline({
               onClick={() => setShowReorder(true)}
             >
               <ArrowUpDown className="h-4 w-4" />
-              Réorganiser les jours
+              {t('trip.reorderDays')}
             </Button>
           ) : (
             <DayReorderPanel
@@ -496,15 +501,15 @@ export function DraggableTimeline({
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cette activité ?</AlertDialogTitle>
+            <AlertDialogTitle>{t('trip.deleteActivity')}</AlertDialogTitle>
             <AlertDialogDescription>
-              &laquo; {deleteTarget?.title} &raquo; sera retiré de votre itinéraire.
+              {t('trip.deleteActivityDesc', { title: deleteTarget?.title || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Supprimer
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,13 +56,6 @@ interface SearchResult {
   source: string;
 }
 
-const ACTIVITY_TYPES: { value: TripItemType; label: string; icon: React.ReactNode }[] = [
-  { value: 'activity', label: 'Activité', icon: <Camera className="h-4 w-4" /> },
-  { value: 'restaurant', label: 'Restaurant', icon: <Utensils className="h-4 w-4" /> },
-  { value: 'hotel', label: 'Hébergement', icon: <Hotel className="h-4 w-4" /> },
-  { value: 'transport', label: 'Transport', icon: <Car className="h-4 w-4" /> },
-  { value: 'luggage', label: 'Bagage', icon: <Package className="h-4 w-4" /> },
-];
 
 export function AddActivityModal({
   isOpen,
@@ -73,6 +67,16 @@ export function AddActivityModal({
   defaultEndTime,
   attractionPool,
 }: AddActivityModalProps) {
+  const { t } = useTranslation();
+
+  const activityTypes: { value: TripItemType; label: string; icon: React.ReactNode }[] = [
+    { value: 'activity', label: t('tripItem.type.activity'), icon: <Camera className="h-4 w-4" /> },
+    { value: 'restaurant', label: t('tripItem.type.restaurant'), icon: <Utensils className="h-4 w-4" /> },
+    { value: 'hotel', label: t('tripItem.type.accommodation'), icon: <Hotel className="h-4 w-4" /> },
+    { value: 'transport', label: t('tripItem.type.transport'), icon: <Car className="h-4 w-4" /> },
+    { value: 'luggage', label: t('tripItem.type.luggage'), icon: <Package className="h-4 w-4" /> },
+  ];
+
   const [tab, setTab] = useState<'search' | 'manual'>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -407,11 +411,11 @@ export function AddActivityModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ACTIVITY_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
+                      {activityTypes.map((at) => (
+                        <SelectItem key={at.value} value={at.value}>
                           <span className="flex items-center gap-2">
-                            {t.icon}
-                            {t.label}
+                            {at.icon}
+                            {at.label}
                           </span>
                         </SelectItem>
                       ))}

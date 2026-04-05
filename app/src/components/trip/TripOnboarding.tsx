@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useTranslation, type TranslationKey } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
 
@@ -15,45 +16,48 @@ interface TourStep {
   desktopOnly?: boolean;
 }
 
-const TOUR_STEPS: TourStep[] = [
-  {
-    target: 'view-toggle',
-    title: 'Vue planning',
-    description: 'Basculez entre la vue timeline et calendrier pour organiser votre itinéraire.',
-  },
-  {
-    target: 'edit-mode',
-    title: 'Mode édition',
-    description: 'Activez le mode édition pour réorganiser vos activités par glisser-déposer.',
-  },
-  {
-    target: 'map-panel',
-    title: 'Carte interactive',
-    description: 'Visualisez toutes vos activités sur la carte interactive.',
-    desktopOnly: true,
-  },
-  {
-    target: 'chat-button',
-    title: 'Concierge Narae',
-    description: 'Demandez au Concierge de modifier votre voyage en langage naturel.',
-  },
-  {
-    target: 'tabs',
-    title: 'Onglets',
-    description: 'Retrouvez vos réservations, photos et informations pratiques ici.',
-  },
-  {
-    target: 'share-button',
-    title: 'Partager',
-    description: 'Partagez votre voyage ou invitez des amis à collaborer.',
-  },
-];
+function getTourSteps(t: (key: TranslationKey) => string): TourStep[] {
+  return [
+    {
+      target: 'view-toggle',
+      title: t('onboarding.step1.title'),
+      description: t('onboarding.step1.desc'),
+    },
+    {
+      target: 'edit-mode',
+      title: t('onboarding.step2.title'),
+      description: t('onboarding.step2.desc'),
+    },
+    {
+      target: 'map-panel',
+      title: t('onboarding.step3.title'),
+      description: t('onboarding.step3.desc'),
+      desktopOnly: true,
+    },
+    {
+      target: 'chat-button',
+      title: t('onboarding.step4.title'),
+      description: t('onboarding.step4.desc'),
+    },
+    {
+      target: 'tabs',
+      title: t('onboarding.step5.title'),
+      description: t('onboarding.step5.desc'),
+    },
+    {
+      target: 'share-button',
+      title: t('onboarding.step6.title'),
+      description: t('onboarding.step6.desc'),
+    },
+  ];
+}
 
 const STORAGE_KEY = 'voyage-onboarding-trip-done';
 
 // ─── Component ──────────────────────────────────────────────
 
 export function TripOnboarding() {
+  const { t } = useTranslation();
   const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
@@ -64,8 +68,10 @@ export function TripOnboarding() {
     return () => mql.removeEventListener('change', handler);
   }, []);
 
+  const tourSteps = getTourSteps(t);
+
   // Filter steps based on device
-  const filteredSteps = TOUR_STEPS.filter(
+  const filteredSteps = tourSteps.filter(
     (step) => !step.desktopOnly || isDesktop
   );
 
@@ -266,7 +272,7 @@ export function TripOnboarding() {
                   className="h-7 text-xs"
                   onClick={dismiss}
                 >
-                  Passer
+                  {t('onboarding.skip')}
                 </Button>
                 {!isFirst && (
                   <Button
@@ -283,7 +289,7 @@ export function TripOnboarding() {
                   className="h-7 text-xs gap-1"
                   onClick={next}
                 >
-                  {isLast ? 'Terminer' : 'Suivant'}
+                  {isLast ? t('onboarding.finish') : t('common.next')}
                   {!isLast && <ChevronRight className="h-3 w-3" />}
                 </Button>
               </div>

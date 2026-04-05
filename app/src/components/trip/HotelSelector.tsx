@@ -1,6 +1,7 @@
 'use client';
 
 import { Hotel, Search, ExternalLink, Star, Check, ChevronDown, Bed } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Accommodation } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -38,13 +39,14 @@ export function HotelSelector({
   searchLinks,
   nights,
 }: HotelSelectorProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const selectedHotel = hotels.find(h => h.id === selectedId) || hotels[0];
   const selectedProviderLabel = (() => {
     const bookingUrl = selectedHotel?.bookingUrl?.toLowerCase() || '';
     if (bookingUrl.includes('airbnb.com')) return 'Airbnb';
     if (bookingUrl.includes('booking.com')) return 'Booking';
-    return 'Réserver';
+    return t('hotel.book');
   })();
 
   return (
@@ -55,9 +57,9 @@ export function HotelSelector({
             <Bed className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{selectedHotel?.name || 'Choisir un hébergement'}</p>
+            <p className="text-sm font-medium truncate">{selectedHotel?.name || t('hotel.choose')}</p>
             <p className="text-xs text-muted-foreground">
-              {selectedHotel?.pricePerNight}€/nuit · {nights} nuit{nights > 1 ? 's' : ''} · Total {selectedHotel?.totalPrice || (selectedHotel?.pricePerNight || 0) * nights}€
+              {selectedHotel?.pricePerNight}€/{t('hotel.night')} · {nights} {nights > 1 ? t('hotel.nights') : t('hotel.night')} · {t('hotel.total')} {selectedHotel?.totalPrice || (selectedHotel?.pricePerNight || 0) * nights}€
               {selectedHotel?.stars ? ` · ${'★'.repeat(selectedHotel.stars)}` : ''}
             </p>
           </div>
@@ -68,9 +70,9 @@ export function HotelSelector({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Hotel className="h-5 w-5" />
-            Hébergement
+            {t('hotel.title')}
             <span className="text-sm font-normal text-muted-foreground">
-              ({nights} nuit{nights > 1 ? 's' : ''})
+              ({nights} {nights > 1 ? t('hotel.nights') : t('hotel.night')})
             </span>
           </DialogTitle>
         </DialogHeader>
@@ -99,7 +101,7 @@ export function HotelSelector({
                         <h4 className="font-medium text-sm truncate">{hotel.name}</h4>
                         {hotel.breakfastIncluded && (
                           <span className="text-[10px] px-1.5 py-0 bg-green-100 text-green-700 rounded">
-                            Petit-déj
+                            {t('hotel.breakfast')}
                           </span>
                         )}
                         {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
@@ -116,16 +118,16 @@ export function HotelSelector({
                           <span className="font-medium">{hotel.rating.toFixed(1)}/10</span>
                         )}
                         {hotel.reviewCount && hotel.reviewCount > 0 && (
-                          <span>({hotel.reviewCount} avis)</span>
+                          <span>({hotel.reviewCount} {t('hotel.reviews')})</span>
                         )}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-semibold text-sm">
-                        {hotel.pricePerNight}€<span className="text-[10px] font-normal text-muted-foreground">/nuit</span>
+                        {hotel.pricePerNight}€<span className="text-[10px] font-normal text-muted-foreground">/{t('hotel.night')}</span>
                       </p>
                       <p className="text-[10px] text-muted-foreground">
-                        Total: {hotel.totalPrice || hotel.pricePerNight * nights}€
+                        {t('hotel.total')}: {hotel.totalPrice || hotel.pricePerNight * nights}€
                       </p>
                     </div>
                   </div>
@@ -146,7 +148,7 @@ export function HotelSelector({
           <Button variant="outline" size="sm" className="gap-1 text-xs flex-1" asChild>
             <a href={searchLinks.booking} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3 w-3" />
-              Recherche Booking
+              {t('hotel.searchBooking')}
             </a>
           </Button>
           {selectedHotel?.bookingUrl && (

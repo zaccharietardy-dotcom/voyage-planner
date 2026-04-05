@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from '@/lib/i18n';
 import { TripDay, TripItem, TRIP_ITEM_COLORS } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import {
@@ -81,17 +82,6 @@ function getTransportModeForItem(item: TripItem): TripItem['transportMode'] {
   return 'transit';
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  activity: 'Activité',
-  restaurant: 'Restaurant',
-  hotel: 'Hôtel',
-  transport: 'Transport',
-  flight: 'Vol',
-  parking: 'Parking',
-  checkin: 'Check-in',
-  checkout: 'Check-out',
-  luggage: 'Bagages',
-};
 
 interface MobileDayListProps {
   day: TripDay;
@@ -99,6 +89,7 @@ interface MobileDayListProps {
 }
 
 export function MobileDayList({ day, onClickItem }: MobileDayListProps) {
+  const { t } = useTranslation();
   const sortedItems = [...day.items].sort((a, b) => {
     const aTime = a.startTime || '00:00';
     const bTime = b.startTime || '00:00';
@@ -172,7 +163,7 @@ export function MobileDayList({ day, onClickItem }: MobileDayListProps) {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{item.title}</p>
               <p className="text-xs text-muted-foreground truncate">
-                {TYPE_LABELS[item.type] || item.type}
+                {t(`tripItem.type.${item.type}` as any) || item.type}
                 {item.estimatedCost ? ` · ~${item.estimatedCost}€` : ''}
                 {item.rating ? ` · ${item.rating.toFixed(1)}★` : ''}
               </p>

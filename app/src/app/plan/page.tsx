@@ -28,16 +28,17 @@ import { trackEvent } from '@/lib/analytics';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 import { hapticImpactLight, hapticSuccess } from '@/lib/utils/haptics';
+import { useTranslation } from '@/lib/i18n';
 
-const STEPS = [
-  { id: 1, label: 'Destination' },
-  { id: 2, label: 'Départ' },
-  { id: 3, label: 'Dates' },
-  { id: 4, label: 'Voyageurs' },
-  { id: 5, label: 'Centres d’intérêt' },
-  { id: 6, label: 'Budget' },
-  { id: 7, label: 'Résumé' },
-];
+const STEP_KEYS = [
+  'plan.steps.destination',
+  'plan.steps.origin',
+  'plan.steps.dates',
+  'plan.steps.travelers',
+  'plan.steps.interests',
+  'plan.steps.budget',
+  'plan.steps.summary',
+] as const;
 
 const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
   durationDays: 4,
@@ -54,6 +55,7 @@ const DEFAULT_PREFERENCES: Partial<TripPreferences> = {
 
 export default function PlanPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { preferences: userPrefs, isLoading: prefsLoading } = useUserPreferences();
   const [currentStep, setCurrentStep] = useState(1);
@@ -67,6 +69,8 @@ export default function PlanPage() {
   const questionResolverRef = useRef<((optionId: string) => void) | null>(null);
   const [gate, setGate] = useState<null | 'login' | 'upgrade'>(null);
   const [gateMessage, setGateMessage] = useState('');
+
+  const STEPS = STEP_KEYS.map((key, i) => ({ id: i + 1, label: t(key) }));
   const [gateChecked, setGateChecked] = useState(false);
 
   // Gate: check auth + quota IMMEDIATELY on page load
@@ -78,10 +82,10 @@ export default function PlanPage() {
         if (!check.allowed) {
           if (check.action === 'login') {
             setGate('login');
-            setGateMessage('Connectez-vous pour planifier votre voyage');
+            setGateMessage(t('plan.loginRequired'));
           } else if (check.action === 'upgrade') {
             setGate('upgrade');
-            setGateMessage(check.reason || 'Votre voyage gratuit a été utilisé. Achetez un voyage ou passez à Pro.');
+            setGateMessage(check.reason || t('plan.limitDefault'));
           }
         }
       } catch {
@@ -100,41 +104,44 @@ export default function PlanPage() {
       try {
         const templatePrefs = JSON.parse(stored);
         setPreferences((prev) => ({ ...prev, ...templatePrefs }));
-        toast.success('Modèle chargé — personnalisez et lancez !');
+        toast.success(t('plan.templateLoaded'));
       } catch { /* ignore */ }
     }
   }, []);
 
   const stepVariants: any = {
     enter: (dir: number) => ({ 
-      x: dir > 0 ? 100 : -100, 
-      y: 10,
+      y: dir > 0 ? 10 : -10, 
       opacity: 0,
-      scale: 0.98
+      filter: 'blur(10px)',
+      scale: 1,
     }),
     center: { 
-      x: 0, 
       y: 0, 
       opacity: 1,
+      filter: 'blur(0px)',
       scale: 1,
       transition: {
-        x: { type: "spring", stiffness: 300, damping: 30 },
-        opacity: { duration: 0.2 },
-        scale: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+        y: { type: "spring", stiffness: 200, damping: 25 },
+        opacity: { duration: 0.3 },
+        filter: { duration: 0.4 },
+        scale: { duration: 0.4, ease: [0.25, 1, 0.5, 1] }
       }
     },
     exit: (dir: number) => ({ 
-      x: dir > 0 ? -100 : 100, 
-      y: -10,
+      y: dir > 0 ? -10 : 10, 
       opacity: 0,
-      scale: 0.98,
+      filter: 'blur(10px)',
+      scale: 1,
       transition: {
-        x: { duration: 0.3 },
+        y: { duration: 0.2, ease: [0.5, 0, 0.75, 0] },
         opacity: { duration: 0.2 },
-        scale: { duration: 0.3 }
+        filter: { duration: 0.2 },
+        scale: { duration: 0.2 }
       }
     }),
   };
+
 
   const applyUserPreferences = () => {
     if (!userPrefs) return;
@@ -180,7 +187,7 @@ export default function PlanPage() {
 
     setPreferences(updatedPrefs);
     setPreferencesApplied(true);
-    toast.success('Préférences appliquées !');
+    toast.success(t('plan.preferencesApplied'));
   };
 
   const updatePreferences = useCallback((data: Partial<TripPreferences>) => {
@@ -193,33 +200,33 @@ export default function PlanPage() {
         // Step 1: Destination only
         const stages = preferences.cityPlan || [];
         if (stages.length === 0 || !stages.every(s => s.city.trim().length > 0)) {
-          return ['Renseignez au moins une destination'];
+          return [t('plan.validation.destination')];
         }
         return [];
       }
       case 2: {
         // Step 2: Origin
-        if (!preferences.origin) return ['Indiquez votre ville de départ'];
+        if (!preferences.origin) return [t('plan.validation.origin')];
         return [];
       }
       case 3: {
         // Step 3: When
-        if (!preferences.startDate) return ['Choisissez une date de départ'];
+        if (!preferences.startDate) return [t('plan.validation.startDate')];
         return [];
       }
       case 4: {
         // Step 4: Group
-        if (!preferences.groupType) return ['Précisez le type de groupe'];
+        if (!preferences.groupType) return [t('plan.validation.groupType')];
         return [];
       }
       case 5:
         // Step 5: Style
         return (preferences.activities && preferences.activities.length > 0)
           ? []
-          : ['Sélectionnez au moins un centre d\'intérêt'];
+          : [t('plan.validation.interests')];
       case 6: {
         // Step 6: Budget
-        if (!preferences.budgetLevel && !preferences.budgetCustom) return ['Définissez un budget'];
+        if (!preferences.budgetLevel && !preferences.budgetCustom) return [t('plan.validation.budget')];
         return [];
       }
       case 7:
@@ -269,12 +276,12 @@ export default function PlanPage() {
 
       if (!check.allowed) {
         if (check.action === 'login') {
-          const msg = encodeURIComponent(check.reason || 'Connectez-vous pour générer votre voyage');
+          const msg = encodeURIComponent(check.reason || t('plan.error.loginToGenerate'));
           router.push(`/login?redirect=/plan&reason=${msg}`);
           return;
         }
         if (check.action === 'upgrade') {
-          const msg = encodeURIComponent(check.reason || 'Passez à Pro pour créer plus de voyages');
+          const msg = encodeURIComponent(check.reason || t('plan.error.upgradePro'));
           router.push(`/pricing?reason=${msg}`);
           return;
         }
@@ -375,10 +382,10 @@ export default function PlanPage() {
 
           const errorData = await saveResponse.json().catch(() => ({}));
           console.error('[Plan] Save failed:', saveResponse.status, JSON.stringify(errorData));
-          toast.error('Sauvegarde échouée. Voyage stocké localement.');
+          toast.error(t('plan.error.saveFailed'));
         } catch (saveError) {
           console.error('[Plan] Save exception:', saveError);
-          toast.error('Erreur sauvegarde. Voyage stocké localement.');
+          toast.error(t('plan.error.saveException'));
         }
       }
 
@@ -395,12 +402,12 @@ export default function PlanPage() {
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
 
       if (message.includes('authentifié') || message.includes('Non authentifié')) {
-        toast.error('Connectez-vous pour générer votre voyage');
+        toast.error(t('plan.error.loginToGenerate'));
         router.push('/login?redirect=/plan');
       } else if (message.includes('QUOTA_EXCEEDED') || message.includes('Limite') || message.includes('RATE_LIMIT') || message.includes('Trop de génération')) {
-        router.push('/pricing?reason=' + encodeURIComponent('Passez à Pro pour des voyages illimités'));
+        router.push('/pricing?reason=' + encodeURIComponent(t('plan.error.upgradePro')));
       } else {
-        toast.error(`Une erreur est survenue. Réessayez.`);
+        toast.error(t('plan.error.generic'));
       }
     } finally {
       setIsGenerating(false);
@@ -465,7 +472,7 @@ export default function PlanPage() {
             </div>
             <div className="space-y-2">
               <h2 className="font-display text-2xl font-bold text-white">
-                {gate === 'login' ? 'Créez votre compte' : 'Limite atteinte'}
+                {gate === 'login' ? t('plan.createAccount') : t('plan.limitReached')}
               </h2>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 {gateMessage}
@@ -477,14 +484,14 @@ export default function PlanPage() {
                   onClick={() => router.push('/login?redirect=/plan')}
                   className="w-full h-14 rounded-2xl bg-gold hover:bg-gold/90 text-black font-bold text-base"
                 >
-                  Se connecter
+                  {t('plan.signIn')}
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => router.push('/register?redirect=/plan')}
                   className="w-full h-12 rounded-xl text-muted-foreground"
                 >
-                  Créer un compte gratuitement
+                  {t('plan.createAccountFree')}
                 </Button>
               </div>
             ) : (
@@ -493,21 +500,21 @@ export default function PlanPage() {
                   onClick={() => router.push('/pricing')}
                   className="w-full h-14 rounded-2xl bg-gold hover:bg-gold/90 text-black font-bold text-base"
                 >
-                  Voyages illimités — Narae Pro
+                  {t('plan.unlimitedPro')}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => router.push('/pricing')}
                   className="w-full h-12 rounded-xl border-white/10 text-white hover:bg-white/5"
                 >
-                  Acheter 1 voyage — 1.99€
+                  {t('plan.buyOne')}
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => router.push('/')}
                   className="w-full h-10 rounded-xl text-muted-foreground text-xs"
                 >
-                  Retour à l&apos;accueil
+                  {t('plan.backToHome')}
                 </Button>
               </div>
             )}
@@ -537,7 +544,7 @@ export default function PlanPage() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
               <div className="flex items-center gap-2">
                 <UserCog className="h-4 w-4 text-primary" />
-                <p className="text-sm">Charger mes préférences</p>
+                <p className="text-sm">{t('plan.loadPreferences')}</p>
               </div>
               <Button
                 variant="outline"
@@ -545,7 +552,7 @@ export default function PlanPage() {
                 onClick={applyUserPreferences}
                 className="text-primary border-primary/30 hover:bg-primary/10 h-7 text-xs"
               >
-                Appliquer
+                {t('plan.apply')}
               </Button>
             </div>
           </div>
@@ -609,7 +616,7 @@ export default function PlanPage() {
                 className="gap-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-full px-6 h-14"
               >
                 <X className="h-4 w-4" />
-                Quitter
+                {t('plan.quit')}
               </Button>
             ) : (
               <Button
@@ -618,12 +625,12 @@ export default function PlanPage() {
                 className="gap-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-full px-6 h-14"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Retour
+                {t('common.back')}
               </Button>
             )}
 
             <Button onClick={handleNext} className="gap-2 h-14 px-8 rounded-full font-bold bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all hover:scale-105 active:scale-95">
-              Suivant
+              {t('common.next')}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -656,7 +663,7 @@ export default function PlanPage() {
               className="gap-2 text-muted-foreground hover:text-white hover:bg-white/5 rounded-full px-6 h-14"
             >
               <ArrowLeft className="h-4 w-4" />
-              Retour
+              {t('common.back')}
             </Button>
           </div>
         )}

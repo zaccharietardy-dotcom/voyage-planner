@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useEffect, useRef } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { TripDay, TripItem, Accommodation } from '@/lib/types';
 import { FeedbackCard } from '@/lib/types/pipelineQuestions';
 import { ActivityCard } from './ActivityCard';
@@ -117,13 +118,14 @@ function HotelBoundaryMiniConnector({
   duration?: number;
   distance?: number;
 }) {
+  const { t } = useTranslation();
   const distanceLabel = formatBoundaryDistance(distance);
 
   return (
     <div className="my-2 ml-2 flex items-center gap-3 rounded-2xl border border-gold/20 bg-white/40 dark:bg-white/5 px-4 py-2 text-[11px] font-bold text-muted-foreground backdrop-blur-sm shadow-sm">
       <Bed className="h-4 w-4 shrink-0 text-gold" />
       <span className="rounded-lg bg-gold/10 px-2 py-0.5 text-[9px] font-bold text-gold uppercase tracking-widest border border-gold/20">
-        {type === 'depart' ? 'Aller' : 'Retour'}
+        {type === 'depart' ? t('trip.hotelOutbound') : t('trip.hotelReturn')}
       </span>
       <span className="truncate text-foreground/80">
         {fromLabel} → {toLabel}
@@ -173,6 +175,7 @@ export const DayTimeline = memo(function DayTimeline({
   feedbackCards,
   onSwapAlternative,
 }: DayTimelineProps) {
+  const { t } = useTranslation();
   const timelineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -275,7 +278,7 @@ export const DayTimeline = memo(function DayTimeline({
         variants={{
           visible: {
             transition: {
-              staggerChildren: 0.12,
+              staggerChildren: 0.05,
             },
           },
         }}
@@ -303,13 +306,13 @@ export const DayTimeline = memo(function DayTimeline({
               data-item-id={item.id}
               className="relative pl-10"
               variants={{
-                hidden: { opacity: 0, x: -20, scale: 0.95 },
+                hidden: { opacity: 0, x: -4, scale: 0.99 },
                 visible: {
                   opacity: 1,
                   x: 0,
                   scale: 1,
                   transition: {
-                    duration: 0.6,
+                    duration: 0.4,
                     ease: [0.22, 1, 0.36, 1],
                   },
                 },
@@ -322,7 +325,7 @@ export const DayTimeline = memo(function DayTimeline({
                 <div className="mb-4 -ml-2">
                   <HotelBoundaryMiniConnector
                     type="depart"
-                    fromLabel="Hôtel"
+                    fromLabel={t('trip.hotel')}
                     toLabel={item.locationName || item.title}
                     duration={departureBoundary.duration}
                     distance={departureBoundary.distanceFromPrevious}
@@ -396,7 +399,7 @@ export const DayTimeline = memo(function DayTimeline({
                   <HotelBoundaryMiniConnector
                     type="return"
                     fromLabel={item.locationName || item.title}
-                    toLabel={returnBoundary.locationName || "Hôtel"}
+                    toLabel={returnBoundary.locationName || t('trip.hotel')}
                     duration={returnBoundary.duration}
                     distance={returnBoundary.distanceFromPrevious}
                   />
@@ -413,14 +416,14 @@ export const DayTimeline = memo(function DayTimeline({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
-            <p>Aucune activité pour ce jour</p>
+            <p>{t('trip.noActivity')}</p>
             {onAddItem && (
               <Button
                 variant="link"
                 className="mt-2"
                 onClick={() => onAddItem(day.dayNumber)}
               >
-                Ajouter une activité
+                {t('trip.addActivity')}
               </Button>
             )}
           </motion.div>

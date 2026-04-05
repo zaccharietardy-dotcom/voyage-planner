@@ -20,6 +20,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { StyleMatchBadge } from '@/components/trip/StyleMatchBadge';
 
 import { hapticSelection } from '@/lib/utils/haptics';
+import { useTranslation } from '@/lib/i18n';
 
 interface StepDestinationProps {
   data: Partial<TripPreferences>;
@@ -83,6 +84,7 @@ const TYPE_LABELS: Record<DestinationSuggestion['type'], { label: string; icon: 
 };
 
 export function StepDestination({ data, onChange }: StepDestinationProps) {
+  const { t } = useTranslation();
   const mode = data.tripMode || 'precise';
   const stages = data.cityPlan || [{ city: '', days: 7 }];
   const [inspireQuery, setInspireQuery] = useState('');
@@ -197,14 +199,14 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     const silentErrors = options?.silentErrors === true;
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
       if (!silentErrors) {
-        setGeoError('La géolocalisation n’est pas disponible sur cet appareil.');
+        setGeoError("La géolocalisation n'est pas disponible sur cet appareil.");
       }
       return;
     }
 
     if (typeof window !== 'undefined' && !window.isSecureContext) {
       if (!silentErrors) {
-        setGeoError('La géolocalisation nécessite une connexion HTTPS sécurisée.');
+        setGeoError("La géolocalisation nécessite une connexion HTTPS sécurisée.");
       }
       return;
     }
@@ -249,12 +251,12 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         setGeoLoading(false);
         if (error.code === error.PERMISSION_DENIED) {
           if (!silentErrors) {
-            setGeoError('Autorisez la géolocalisation dans Safari (Réglages du site > Localisation) puis réessayez.');
+            setGeoError("Autorisez la géolocalisation dans Safari (Réglages du site > Localisation) puis réessayez.");
           }
           return;
         }
         if (!silentErrors) {
-          setGeoError('Impossible de récupérer votre position actuelle.');
+          setGeoError("Impossible de récupérer votre position actuelle.");
         }
       },
       {
@@ -362,10 +364,10 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     <div className="space-y-12 max-w-[600px] mx-auto w-full">
       <div className="text-center space-y-4">
         <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
-          Où allez-vous ?
+          {t('plan.dest.title')}
         </h2>
         <p className="text-[17px] text-[#94a3b8] font-light">
-          Explorez le monde, nous planifions le reste.
+          {t('plan.dest.subtitle')}
         </p>
       </div>
 
@@ -379,7 +381,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                 <div className="flex-1 relative group">
                   <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-white/50 group-focus-within:text-white transition-colors z-10" strokeWidth={2} />
                   <Input
-                    placeholder={index === 0 ? 'Ex: Tokyo, Barcelone, Marrakech...' : `Étape ${index + 1}`}
+                    placeholder={index === 0 ? t('plan.dest.placeholder') : t('plan.dest.stagePlaceholder').replace('{n}', String(index + 1))}
                     value={stage.city}
                     onChange={(e) => {
                       updateStage(index, { city: e.target.value });
@@ -400,7 +402,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                         {destSuggestionsLoading ? (
                           <div className="px-6 py-4 text-sm text-muted-foreground flex items-center gap-3">
                             <Loader2 className="h-5 w-5 animate-spin" />
-                            Recherche des villes...
+                            {t('plan.dest.searchingCities')}
                           </div>
                         ) : destSuggestions.length > 0 ? (
                           destSuggestions.map((suggestion, si) => (
@@ -419,7 +421,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                           ))
                         ) : (
                           <div className="px-6 py-4 text-sm text-muted-foreground">
-                            Aucune ville trouvée.
+                            {t('plan.dest.noCityFound')}
                           </div>
                         )}
                       </div>
@@ -478,26 +480,30 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
             className="w-full h-[52px] rounded-[1.2rem] border border-dashed border-white/[0.15] bg-transparent text-white/90 hover:text-white hover:border-white/30 hover:bg-white/[0.03] transition-all gap-3"
           >
             <Plus className="h-4 w-4" strokeWidth={1.5} />
-            <span className="font-medium tracking-wide">Ajouter une étape</span>
+            <span className="font-medium tracking-wide">{t('plan.dest.addStage')}</span>
           </Button>
         </div>
 
         <p className="text-[13px] text-muted-foreground/60 text-center font-light pt-2">
-          Fonctionne dans toutes les langues (français, anglais, chinois, arabe...)
+          {t('plan.dest.allLanguages')}
         </p>
 
         {/* Popular destinations */}
         {!stages[0]?.city && (
-          <div className="space-y-6 pt-10">
-            <h3 className="text-[11px] font-bold text-white/50 uppercase tracking-[0.2em] mb-4">Destinations populaires</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="space-y-10 pt-16">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">{t('plan.dest.popular')}</h3>
+              <div className="h-px flex-1 bg-white/[0.05] ml-6" />
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {[
-                { name: 'Paris', emoji: '🗼', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=400&fit=crop' },
-                { name: 'Rome', emoji: '🏛️', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&h=400&fit=crop' },
-                { name: 'Barcelona', emoji: '🏖️', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600&h=400&fit=crop' },
-                { name: 'Tokyo', emoji: '🏯', img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&h=400&fit=crop' },
-                { name: 'Amsterdam', emoji: '🚲', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&h=400&fit=crop' },
-                { name: 'Marrakech', emoji: '🕌', img: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=600&h=400&fit=crop' },
+                { name: 'Paris', country: 'France', emoji: '🗼', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=400&fit=crop' },
+                { name: 'Rome', country: 'Italie', emoji: '🏛️', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&h=400&fit=crop' },
+                { name: 'Barcelone', country: 'Espagne', emoji: '🏖️', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600&h=400&fit=crop' },
+                { name: 'Tokyo', country: 'Japon', emoji: '🏯', img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&h=400&fit=crop' },
+                { name: 'Amsterdam', country: 'Pays-Bas', emoji: '🚲', img: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&h=400&fit=crop' },
+                { name: 'Marrakech', country: 'Maroc', emoji: '🕌', img: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=600&h=400&fit=crop' },
               ].map((dest) => (
                 <button
                   key={dest.name}
@@ -506,12 +512,20 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
                     hapticSelection();
                     updateStage(0, { city: dest.name, days: getSuggestedDuration(dest.name, data.origin) });
                   }}
-                  className="relative overflow-hidden rounded-[20px] aspect-[1.4] group transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(197,160,89,0.2)]"
+                  className="group relative overflow-hidden rounded-[2.5rem] aspect-[0.9] transition-all duration-700 hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(197,160,89,0.15)] active:scale-[0.98] border border-white/[0.05]"
                 >
-                  <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-black/20 to-transparent opacity-80" />
-                  <div className="absolute inset-x-0 bottom-4 flex justify-center items-center gap-2">
-                    <span className="text-white font-bold text-[15px] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">{dest.emoji} {dest.name}</span>
+                  <img src={dest.img} alt={dest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                  
+                  {/* Premium overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/20 to-[#020617] opacity-90 transition-opacity duration-500 group-hover:opacity-80" />
+                  <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end items-start gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl drop-shadow-md">{dest.emoji}</span>
+                      <span className="text-white font-black text-lg tracking-tight leading-tight group-hover:text-gold transition-colors duration-300">{dest.name}</span>
+                    </div>
+                    <span className="text-[10px] text-white/50 font-bold uppercase tracking-widest pl-8">{dest.country}</span>
                   </div>
                 </button>
               ))}
@@ -534,6 +548,7 @@ function DurationSuggestionCard({
   onApply: (days: number) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const highlightEntries = Object.entries(suggestion.highlights);
 
   return (
@@ -544,10 +559,10 @@ function DurationSuggestionCard({
             <Compass className="h-4 w-4 text-primary shrink-0" />
             <div>
               <p className="text-sm font-semibold">
-                {suggestion.optimal} jours recommandés
+                {t('plan.dest.daysRecommended').replace('{n}', String(suggestion.optimal))}
               </p>
               <p className="text-xs text-muted-foreground">
-                entre {suggestion.minimum} et {suggestion.maximum} jours
+                {t('plan.dest.betweenDays').replace('{min}', String(suggestion.minimum)).replace('{max}', String(suggestion.maximum))}
               </p>
             </div>
           </div>

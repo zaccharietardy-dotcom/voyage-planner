@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { X, Maximize2, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface DirectionsEmbedProps {
   from: { lat: number; lng: number; name?: string };
@@ -25,6 +26,7 @@ export function DirectionsEmbed({
   className,
   compact = false,
 }: DirectionsEmbedProps) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -45,7 +47,7 @@ export function DirectionsEmbed({
         <div className="relative bg-muted/50 flex items-center justify-center" style={{ height: compact ? '120px' : '200px' }}>
           <div className="text-center p-4">
             <p className="text-sm text-muted-foreground mb-2">
-              {from.name || 'Départ'} → {to.name || 'Arrivée'}
+              {from.name || t('directions.departure')} → {to.name || t('directions.arrival')}
             </p>
             <a
               href={googleMapsUrl}
@@ -54,7 +56,7 @@ export function DirectionsEmbed({
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
               <ExternalLink className="h-4 w-4" />
-              Ouvrir dans Google Maps
+              {t('directions.openMaps')}
             </a>
           </div>
         </div>
@@ -129,7 +131,7 @@ export function DirectionsEmbed({
 
             <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
               <div className="bg-white/90 rounded-lg px-3 py-1.5 text-sm">
-                {from.name || 'Départ'} → {to.name || 'Arrivée'}
+                {from.name || t('directions.departure')} → {to.name || t('directions.arrival')}
               </div>
               <a
                 href={googleMapsUrl}
@@ -138,7 +140,7 @@ export function DirectionsEmbed({
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
                 <ExternalLink className="h-4 w-4" />
-                Ouvrir dans l&apos;app
+                {t('directions.openApp')}
               </a>
             </div>
           </div>
@@ -160,6 +162,7 @@ export function DirectionsMiniMap({
   to: { lat: number; lng: number };
   mode?: 'transit' | 'walking' | 'driving';
 }) {
+  const { t } = useTranslation();
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lng}&destination=${to.lat},${to.lng}&travelmode=${mode}`;
 
   // Image statique de la carte (gratuit jusqu'à certaines limites)
@@ -178,12 +181,12 @@ export function DirectionsMiniMap({
       {staticMapUrl ? (
         <img
           src={staticMapUrl}
-          alt="Itinéraire"
+          alt={t('directions.viewRoute')}
           className="w-full h-16 object-cover"
         />
       ) : (
         <div className="w-full h-16 bg-blue-50 flex items-center justify-center text-xs text-blue-600">
-          Voir l&apos;itinéraire →
+          {t('directions.viewRoute')} →
         </div>
       )}
     </a>

@@ -16,6 +16,7 @@ import {
   Thermometer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 import type { TravelIntelligenceData } from '@/lib/services/travelIntelligence';
 
@@ -85,13 +86,15 @@ function Section({
 }
 
 export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className={cn('p-4', className)}>
-      <h3 className="font-semibold mb-2">Infos pratiques</h3>
+      <h3 className="font-semibold mb-2">{t('tips.title')}</h3>
 
       {/* Devise */}
       {intelligence?.currency && (
-        <Section icon={Banknote} title={`Devise — ${intelligence.currency.code}`} iconColor="text-emerald-500">
+        <Section icon={Banknote} title={`${t('tips.currency')} — ${intelligence.currency.code}`} iconColor="text-emerald-500">
           <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-3">
             <div className="flex items-center gap-3">
               <span className="text-2xl font-bold text-emerald-600">{intelligence.currency.symbol}</span>
@@ -111,18 +114,18 @@ export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
 
       {/* Climat */}
       {intelligence?.weatherSummary && (
-        <Section icon={Thermometer} title="Climat moyen du séjour" iconColor="text-blue-500">
+        <Section icon={Thermometer} title={t('tips.climate')} iconColor="text-blue-500">
           <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium capitalize">{intelligence.weatherSummary.mainCondition}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Condition dominante sur le séjour</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t('tips.climateCondition')}</p>
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold text-blue-600">
                   {intelligence.weatherSummary.avgTempMin}° / {intelligence.weatherSummary.avgTempMax}°
                 </p>
-                <p className="text-[10px] text-muted-foreground">min / max moyen</p>
+                <p className="text-[10px] text-muted-foreground">{t('tips.climateMinMax')}</p>
               </div>
             </div>
           </div>
@@ -130,7 +133,7 @@ export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
       )}
 
       {/* Vocabulaire */}
-      <Section icon={Languages} title={`Vocabulaire (${data.vocabulary.language})`} defaultOpen iconColor="text-blue-500">
+      <Section icon={Languages} title={`${t('tips.vocabulary')} (${data.vocabulary.language})`} defaultOpen iconColor="text-blue-500">
         <div className="space-y-2">
           {data.vocabulary.phrases.map((phrase, idx) => (
             <div key={idx} className="bg-muted/50 rounded-lg p-2">
@@ -152,13 +155,13 @@ export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
       </Section>
 
       {/* Bagages */}
-      <Section icon={Backpack} title="Quoi emporter" iconColor="text-orange-500">
+      <Section icon={Backpack} title={t('tips.packing')} iconColor="text-orange-500">
         {(data.packing.plugType || data.packing.voltage) && (
           <div className="flex gap-3 mb-3 p-2 bg-amber-50 rounded-lg">
             {data.packing.plugType && (
               <div className="flex items-center gap-1.5">
                 <Plug className="h-3.5 w-3.5 text-amber-600" />
-                <span className="text-xs font-medium">Prise : {data.packing.plugType}</span>
+                <span className="text-xs font-medium">{t('tips.plugType')} : {data.packing.plugType}</span>
               </div>
             )}
             {data.packing.voltage && (
@@ -183,17 +186,17 @@ export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
       </Section>
 
       {/* Légal */}
-      <Section icon={Scale} title="Législation & Visa" iconColor="text-purple-500">
+      <Section icon={Scale} title={t('tips.legal')} iconColor="text-purple-500">
         <div className="space-y-3">
           {data.legal.visaInfo.map((info, idx) => (
             <div key={idx} className="text-sm">
-              <span className="font-medium">Depuis {info.originCountry} :</span>{' '}
+              <span className="font-medium">{t('tips.legalFrom').replace('{country}', info.originCountry)} :</span>{' '}
               <span className="text-muted-foreground">{info.requirement}</span>
             </div>
           ))}
           {data.legal.importantLaws.length > 0 && (
             <div>
-              <p className="text-xs font-medium mb-1">Lois locales importantes :</p>
+              <p className="text-xs font-medium mb-1">{t('tips.localLaws')} :</p>
               <ul className="space-y-1">
                 {data.legal.importantLaws.map((law, idx) => (
                   <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
@@ -212,23 +215,23 @@ export function TravelTips({ data, intelligence, className }: TravelTipsProps) {
       </Section>
 
       {/* Urgences */}
-      <Section icon={Phone} title="Numéros d'urgence" iconColor="text-red-500">
+      <Section icon={Phone} title={t('tips.emergency')} iconColor="text-red-500">
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-red-50 rounded-lg p-2 text-center">
             <p className="text-lg font-bold text-red-600">{data.emergency.generalEmergency}</p>
-            <p className="text-[10px] text-muted-foreground">Urgence générale</p>
+            <p className="text-[10px] text-muted-foreground">{t('tips.emergencyGeneral')}</p>
           </div>
           <div className="bg-blue-50 rounded-lg p-2 text-center">
             <p className="text-lg font-bold text-blue-600">{data.emergency.police}</p>
-            <p className="text-[10px] text-muted-foreground">Police</p>
+            <p className="text-[10px] text-muted-foreground">{t('tips.emergencyPolice')}</p>
           </div>
           <div className="bg-orange-50 rounded-lg p-2 text-center">
             <p className="text-lg font-bold text-orange-600">{data.emergency.ambulance}</p>
-            <p className="text-[10px] text-muted-foreground">Ambulance</p>
+            <p className="text-[10px] text-muted-foreground">{t('tips.emergencyAmbulance')}</p>
           </div>
           <div className="bg-yellow-50 rounded-lg p-2 text-center">
             <p className="text-lg font-bold text-yellow-600">{data.emergency.fire}</p>
-            <p className="text-[10px] text-muted-foreground">Pompiers</p>
+            <p className="text-[10px] text-muted-foreground">{t('tips.emergencyFire')}</p>
           </div>
         </div>
         {data.emergency.otherNumbers && data.emergency.otherNumbers.length > 0 && (

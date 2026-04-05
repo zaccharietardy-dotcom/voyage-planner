@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, memo } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { TripItem, TripItemType, Flight, Restaurant, Accommodation, TRIP_ITEM_COLORS } from '@/lib/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -130,18 +131,6 @@ const TRANSPORT_UI_V2_ENABLED = !['0', 'false', 'off'].includes(
   String(process.env.NEXT_PUBLIC_PIPELINE_TRANSPORT_UI_V2 || 'true').toLowerCase()
 );
 
-const TYPE_LABELS: Record<TripItemType, string> = {
-  activity: 'Activité',
-  restaurant: 'Restaurant',
-  hotel: 'Hébergement',
-  transport: 'Transport',
-  flight: 'Vol',
-  parking: 'Parking',
-  checkin: 'Check-in',
-  checkout: 'Check-out',
-  luggage: 'Consigne',
-  free_time: 'Temps libre',
-};
 
 const TRANSIT_MODE_ICONS: Record<string, SvgIconComponent> = {
   bus: Bus,
@@ -362,6 +351,7 @@ export const ActivityCard = memo(function ActivityCard({
   alternative,
   onSwapAlternative,
 }: ActivityCardProps) {
+  const { t } = useTranslation();
   const [showPriceComparisonDrawer, setShowPriceComparisonDrawer] = useState(false);
   const [showActionsDrawer, setShowActionsDrawer] = useState(false);
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
@@ -490,7 +480,7 @@ export const ActivityCard = memo(function ActivityCard({
             <div className="min-w-0">
               <div className="flex items-center justify-between gap-2 mb-0.5">
                 <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
-                  {TYPE_LABELS[item.type]}
+                  {t(`tripItem.type.${item.type}` as any)}
                 </span>
                 {item.estimatedCost && (
                   <span className="text-xs font-bold text-white/60">{item.estimatedCost}€</span>
