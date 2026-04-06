@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput, Alert, FlatList } from 'react-native';
 import {
-  Plus, Wallet, ArrowRight, Check, Trash2, DollarSign,
+  Plus, Check, Trash2, DollarSign,
 } from 'lucide-react-native';
+import { ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Avatar } from '@/components/ui/Avatar';
@@ -78,23 +79,31 @@ export function ExpensesPanel({ tripId }: Props) {
     );
   };
 
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+        <ActivityIndicator color={colors.gold} size="small" />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       {/* Header */}
-      <View style={{ padding: 20, gap: 12 }}>
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, gap: 10 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View>
             <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 }}>
               Total dépenses
             </Text>
-            <Text style={{ color: colors.gold, fontSize: 32, fontFamily: fonts.display, marginTop: 4 }}>
+            <Text style={{ color: colors.gold, fontSize: 28, fontFamily: fonts.display, marginTop: 2 }}>
               {Math.round(totalExpenses)}€
             </Text>
           </View>
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowAdd(true); }}
             style={{
-              width: 48, height: 48, borderRadius: 16, backgroundColor: colors.gold,
+              width: 42, height: 42, borderRadius: 14, backgroundColor: colors.gold,
               alignItems: 'center', justifyContent: 'center',
             }}
           >
