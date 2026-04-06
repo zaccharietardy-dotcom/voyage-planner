@@ -71,17 +71,15 @@ export function TripMap({ days, onMarkerPress, activeDay: controlledDay, onDayCh
     ? markers.map((m) => ({ latitude: m.latitude, longitude: m.longitude }))
     : [];
 
-  // Direction arrows — every other segment
+  // Direction arrows — at 40% along each segment for proper alignment with polyline
   const arrowMarkers = polylineCoords.length > 1
-    ? polylineCoords.slice(0, -1)
-        .filter((_, i) => i % 2 === 0)
-        .map((coord, i) => {
-          const idx = i * 2;
+    ? polylineCoords.slice(0, -1).map((coord, idx) => {
           const next = polylineCoords[idx + 1];
-          const midLat = (coord.latitude + next.latitude) / 2;
-          const midLng = (coord.longitude + next.longitude) / 2;
+          const t = 0.4;
+          const lat = coord.latitude + (next.latitude - coord.latitude) * t;
+          const lng = coord.longitude + (next.longitude - coord.longitude) * t;
           const angle = bearing(coord.latitude, coord.longitude, next.latitude, next.longitude);
-          return { key: `arrow-${idx}`, latitude: midLat, longitude: midLng, angle };
+          return { key: `arrow-${idx}`, latitude: lat, longitude: lng, angle };
         })
     : [];
 

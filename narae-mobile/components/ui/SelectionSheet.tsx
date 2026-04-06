@@ -85,7 +85,7 @@ export function SelectionSheet<T extends SelectionSheetOption>({
           </View>
         ) : null}
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+        <ScrollView showsVerticalScrollIndicator={false} nestedScrollEnabled bounces contentContainerStyle={styles.list}>
           {filteredOptions.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>{emptyText}</Text>

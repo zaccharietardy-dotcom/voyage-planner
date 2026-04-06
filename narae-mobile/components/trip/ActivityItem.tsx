@@ -158,12 +158,12 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress, onSw
               ) : null}
             </View>
 
-            <Text style={s.title} numberOfLines={2}>{item.title}</Text>
+            <Text style={s.title} numberOfLines={2} ellipsizeMode="tail">{item.title}</Text>
 
             {item.description ? (
-              <Text style={s.description} numberOfLines={2}>{item.description}</Text>
+              <Text style={s.description} numberOfLines={2} ellipsizeMode="tail">{item.description}</Text>
             ) : item.locationName && item.type !== 'free_time' ? (
-              <Text style={s.description} numberOfLines={1}>{item.locationName}</Text>
+              <Text style={s.description} numberOfLines={1} ellipsizeMode="tail">{item.locationName}</Text>
             ) : null}
 
             {/* Action buttons row */}

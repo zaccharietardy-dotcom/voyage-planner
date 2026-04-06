@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(197,160,89,0.35)',
   },
   danger: {
     backgroundColor: colors.danger,

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { View, Text, Pressable, Share, Alert, StyleSheet } from 'react-native';
-import { Link2, Globe, Lock, Users, Share2, ChevronDown } from 'lucide-react-native';
+import { Link2, Globe, Lock, Users, Share2, ChevronDown, UserPlus } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { SelectionSheet, type SelectionSheetOption } from '@/components/ui/SelectionSheet';
+import { UserSearch } from '@/components/social/UserSearch';
 
 interface Props {
   isOpen: boolean;
@@ -23,6 +24,7 @@ const VISIBILITY_OPTIONS = [
 
 export function SharePanel({ isOpen, onClose, tripId, destination, visibility, onVisibilityChange }: Props) {
   const [visibilityOpen, setVisibilityOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const shareUrl = `https://naraevoyage.com/trip/${tripId}`;
   const selectedVisibility = useMemo(
     () => VISIBILITY_OPTIONS.find((option) => option.value === visibility) || VISIBILITY_OPTIONS[0],
@@ -52,7 +54,7 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
 
   return (
     <>
-      <BottomSheet isOpen={isOpen} onClose={onClose} height={0.55}>
+      <BottomSheet isOpen={isOpen} onClose={onClose} height={0.62}>
         <View style={styles.content}>
           <Text style={styles.title}>Partager</Text>
 
@@ -70,6 +72,13 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
             </Pressable>
           </View>
 
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Collaborateurs</Text>
+            <Button icon={UserPlus} variant="outline" onPress={() => setInviteOpen(true)}>
+              Inviter des amis
+            </Button>
+          </View>
+
           <View style={styles.actions}>
             <Button icon={Link2} variant="outline" onPress={handleCopyLink}>
               Copier le lien
@@ -79,6 +88,10 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
             </Button>
           </View>
         </View>
+      </BottomSheet>
+
+      <BottomSheet isOpen={inviteOpen} onClose={() => setInviteOpen(false)} height={0.7}>
+        <UserSearch onClose={() => setInviteOpen(false)} />
       </BottomSheet>
 
       <SelectionSheet

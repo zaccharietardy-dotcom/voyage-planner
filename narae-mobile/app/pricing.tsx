@@ -135,11 +135,8 @@ export default function PricingScreen() {
           </Text>
 
           <View style={{ width: '100%', gap: 12, marginTop: 16 }}>
-            <Button onPress={handleManageSubscription}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Settings size={18} color={colors.bg} />
-                <Text style={{ color: colors.bg, fontSize: 15, fontWeight: '700' }}>Gérer mon abonnement</Text>
-              </View>
+            <Button icon={Settings} onPress={handleManageSubscription}>
+              Gérer mon abonnement
             </Button>
             <Text style={{ color: colors.textDim, fontSize: 12, textAlign: 'center' }}>
               Modifiez, changez de formule ou annulez depuis les réglages Apple.
