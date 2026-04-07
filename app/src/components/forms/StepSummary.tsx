@@ -20,80 +20,101 @@ interface StepSummaryProps {
   onJumpToStep?: (step: number) => void;
 }
 
-const PRESET_IMAGES: Record<string, string> = {
-  'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=600&fit=crop',
-  'New York': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1200&h=600&fit=crop',
-  'Barcelona': 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&h=600&fit=crop',
-  'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=600&fit=crop',
-  'Rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&h=600&fit=crop',
-  'Amsterdam': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=1200&h=600&fit=crop',
-  'Lisbonne': 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=1200&h=600&fit=crop',
-  'Marrakech': 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&h=600&fit=crop',
-  'London': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1200&h=600&fit=crop',
-  'Nice': 'https://images.unsplash.com/photo-1491166617655-0723a0999cfc?w=1200&h=600&fit=crop',
-  'Annecy': 'https://images.unsplash.com/photo-1558231011-3e91760cbb34?w=1200&h=600&fit=crop',
-};
+const BAD_IMAGE_KEYWORDS = ['flag', 'drapeau', 'blason', 'coat_of_arms', 'armoiries', 'logo', 'emblem', 'banner', 'gwenn', 'seal_of', 'escudo', 'wappen', 'bandiera', 'carte_', 'map_of', 'location_'];
 
-function getFallbackImage(destination?: string): string {
-  if (!destination) return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop';
-  for (const [city, url] of Object.entries(PRESET_IMAGES)) {
-    if (destination.toLowerCase().includes(city.toLowerCase())) return url;
+function isGoodImage(url: string): boolean {
+  return !BAD_IMAGE_KEYWORDS.some(kw => url.toLowerCase().includes(kw));
+}
+
+function extractWikiImage(json: any): string | null {
+  const imgUrl = json?.originalimage?.source || json?.thumbnail?.source;
+  if (!imgUrl || !isGoodImage(imgUrl)) return null;
+  return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
+}
+
+/**
+ * Multi-strategy image fetch:
+ * 1. Wikipedia fr/en for exact name (filter flags/emblems)
+ * 2. Wikipedia "Tourisme_en_{name}"
+ * 3. Nominatim → bbox → find major city → Wikipedia for that city
+ * 4. null → caller shows gradient (never a random stock photo)
+ */
+async function fetchDestinationImage(destination: string): Promise<string | null> {
+  const encoded = encodeURIComponent(destination.replace(/ /g, '_'));
+
+  // Strategy 1: Wikipedia fr + en
+  for (const lang of ['fr', 'en']) {
+    try {
+      const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encoded}`);
+      if (!res.ok) continue;
+      const img = extractWikiImage(await res.json());
+      if (img) return img;
+    } catch { continue; }
   }
-  return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop';
+
+  // Strategy 2: "Tourisme en {destination}"
+  try {
+    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/Tourisme_en_${encoded}`);
+    if (res.ok) {
+      const img = extractWikiImage(await res.json());
+      if (img) return img;
+    }
+  } catch { /* ignore */ }
+
+  // Strategy 3: Nominatim → bbox → first city → Wikipedia image
+  try {
+    const nRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
+    );
+    if (nRes.ok) {
+      const results = await nRes.json();
+      if (results.length > 0 && results[0].boundingbox) {
+        const [south, north, west, east] = results[0].boundingbox;
+        const cityRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=city&format=json&limit=3&bounded=1&viewbox=${west},${north},${east},${south}&featuretype=city`,
+          { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
+        );
+        if (cityRes.ok) {
+          const cities = await cityRes.json();
+          for (const city of cities) {
+            const name = city.name || city.display_name?.split(',')[0];
+            if (!name) continue;
+            try {
+              const wRes = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
+              if (!wRes.ok) continue;
+              const img = extractWikiImage(await wRes.json());
+              if (img) return img;
+            } catch { continue; }
+          }
+        }
+      }
+    }
+  } catch { /* ignore */ }
+
+  return null;
 }
 
 export function StepSummary({ data, onChange, onGenerate, isGenerating, onJumpToStep }: StepSummaryProps) {
   const [showMore, setShowMore] = useState(false);
   const destination = data.cityPlan?.[0]?.city || data.destination || '';
-  const [imageUrl, setImageUrl] = useState<string>(getFallbackImage(destination));
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
 
   useEffect(() => {
-    if (!destination) {
-      setImageLoading(false);
-      return;
-    }
-    
-    const fetchImage = async () => {
+    if (!destination) { setImageLoading(false); return; }
+    let cancelled = false;
+
+    (async () => {
       setImageLoading(true);
-      try {
-        const lang = /paris|lyon|marseille|bordeaux|nice|strasbourg|lille|toulouse|nantes|montpellier|annecy|marrakech|tunis|bruxelles|genève|québec|montréal/i.test(destination) ? 'fr' : 'en';
-        const title = encodeURIComponent(destination.replace(/ /g, '_'));
-        const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${title}`);
-        if (!res.ok) {
-          setImageLoading(false);
-          return;
-        }
-        const json = await res.json();
-        if (json.thumbnail?.source) {
-          const betterUrl = json.thumbnail.source.replace(/\/\d+px-/, '/1000px-');
-          
-          const img = new Image();
-          img.src = betterUrl;
-          img.onload = () => {
-            setImageUrl(betterUrl);
-            setImageLoading(false);
-          };
-          img.onerror = () => setImageLoading(false);
-        } else {
-          setImageLoading(false);
-        }
-      } catch (e) {
+      const url = await fetchDestinationImage(destination);
+      if (!cancelled) {
+        setImageUrl(url); // null = gradient placeholder
         setImageLoading(false);
       }
-    };
-    
-    let hasPreset = false;
-    for (const city of Object.keys(PRESET_IMAGES)) {
-      if (destination.toLowerCase().includes(city.toLowerCase())) hasPreset = true;
-    }
-    
-    if (!hasPreset) {
-      fetchImage();
-    } else {
-      setImageUrl(getFallbackImage(destination));
-      setImageLoading(false);
-    }
+    })();
+
+    return () => { cancelled = true; };
   }, [destination]);
 
   const dateStr = data.startDate
@@ -123,15 +144,19 @@ export function StepSummary({ data, onChange, onGenerate, isGenerating, onJumpTo
             <Compass className="h-10 w-10 text-gold animate-spin" />
           </div>
         )}
-        <img
-          src={imageUrl}
-          alt={destination}
-          onLoad={() => setImageLoading(false)}
-          className={cn(
-            "w-full h-full object-cover transition-all duration-1000",
-            imageLoading ? "scale-110 blur-sm opacity-0" : "scale-100 blur-0 opacity-100"
-          )}
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={destination}
+            onLoad={() => setImageLoading(false)}
+            className={cn(
+              "w-full h-full object-cover transition-all duration-1000",
+              imageLoading ? "scale-110 blur-sm opacity-0" : "scale-100 blur-0 opacity-100"
+            )}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1a2744] via-[#0d1b2a] to-[#020617]" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent" />
         <div className="absolute bottom-6 left-8 right-8 z-10">
           <h3 className="text-white text-4xl font-serif font-bold drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] tracking-tight mb-2">{destination || 'Destination'}</h3>
