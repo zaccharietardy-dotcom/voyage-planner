@@ -94,7 +94,7 @@ export function StepGroup({ data, onChange }: StepGroupProps) {
         <div className="space-y-4">
           <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Nombre de voyageurs</p>
           <div className="flex items-center justify-center gap-8 p-10 rounded-[2.5rem] border border-white/[0.08] bg-[#0e1220]/50 shadow-inner relative overflow-hidden">
-            <div className="absolute inset-0 bg-gold/5 blur-3xl opacity-20" />
+            <div className="absolute inset-0 bg-gold/5 blur-3xl opacity-20 pointer-events-none" />
             <Button
               type="button"
               variant="ghost"
