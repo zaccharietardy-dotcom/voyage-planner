@@ -6,6 +6,7 @@ import { openBrowserAsync } from 'expo-web-browser';
 import type { LucideIcon } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { Trip } from '@/lib/types/trip';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   trip: Trip;
@@ -28,12 +29,12 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   checkin: Hotel, checkout: Hotel, transport: Plane,
 };
 
-function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean }>) {
+function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean }>, t: (key: any, params?: Record<string, string | number>) => string) {
   const sections: { title: string; data: BookingItem[] }[] = [];
 
   if (trip.outboundFlight) {
     sections.push({
-      title: 'Vol aller',
+      title: t('booking.outbound'),
       data: [{
         id: 'outbound-flight',
         title: `${trip.outboundFlight.departureAirportCode} → ${trip.outboundFlight.arrivalAirportCode}`,
@@ -48,7 +49,7 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
 
   if (trip.accommodation) {
     sections.push({
-      title: 'Hébergement',
+      title: t('booking.accommodation'),
       data: [{
         id: 'accommodation',
         title: trip.accommodation.name,
@@ -67,7 +68,7 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
     );
     if (bookable.length > 0) {
       sections.push({
-        title: `Jour ${day.dayNumber}`,
+        title: t('trip.day', { n: day.dayNumber }),
         data: bookable.map((item) => ({
           id: item.id,
           title: item.title,
@@ -83,7 +84,7 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
 
   if (trip.returnFlight) {
     sections.push({
-      title: 'Vol retour',
+      title: t('booking.return'),
       data: [{
         id: 'return-flight',
         title: `${trip.returnFlight.departureAirportCode} → ${trip.returnFlight.arrivalAirportCode}`,
@@ -100,7 +101,8 @@ function buildSections(trip: Trip, bookedItems: Record<string, { booked: boolean
 }
 
 export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
-  const sections = buildSections(trip, bookedItems);
+  const { t } = useTranslation();
+  const sections = buildSections(trip, bookedItems, t);
   const totalItems = sections.reduce((s, sec) => s + sec.data.length, 0);
   const bookedCount = sections.reduce((s, sec) => s + sec.data.filter((i) => i.booked).length, 0);
   const progress = totalItems > 0 ? bookedCount / totalItems : 0;
@@ -109,12 +111,12 @@ export function BookingChecklist({ trip, bookedItems, onToggle }: Props) {
     <View style={styles.container}>
       <View style={styles.progressWrap}>
         <View style={styles.progressHeader}>
-          <Text style={styles.title}>Réservations</Text>
+          <Text style={styles.title}>{t('booking.title')}</Text>
           <Text style={styles.progressCount}>
             {bookedCount}/{totalItems}
           </Text>
         </View>
-        <Text style={styles.subtitle}>Suivez vos réservations essentielles avant le départ.</Text>
+        <Text style={styles.subtitle}>{t('booking.subtitle')}</Text>
         <View style={styles.progressTrack}>
           <View style={[styles.progressValue, { width: `${progress * 100}%` }]} />
         </View>

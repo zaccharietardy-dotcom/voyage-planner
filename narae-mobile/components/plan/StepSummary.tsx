@@ -34,6 +34,17 @@ const ACTIVITY_DISPLAY: Record<string, string> = {
 const CACHE_KEY_PREFIX = 'dest_img_';
 const BAD_IMAGE_KEYWORDS = ['flag', 'drapeau', 'blason', 'coat_of_arms', 'armoiries', 'logo', 'emblem', 'banner', 'gwenn', 'seal_of', 'escudo', 'wappen', 'bandiera', 'carte_', 'map_of', 'location_'];
 
+interface WikiSummaryPayload {
+  originalimage?: { source?: string };
+  thumbnail?: { source?: string };
+}
+
+interface NominatimRegionResult {
+  boundingbox?: string[];
+  name?: string;
+  display_name?: string;
+}
+
 async function getCachedImage(destination: string): Promise<string | null> {
   try {
     const key = CACHE_KEY_PREFIX + destination.toLowerCase();
@@ -53,13 +64,21 @@ async function setCachedImage(destination: string, url: string): Promise<void> {
   } catch { /* ignore */ }
 }
 
+async function clearCachedImage(destination: string): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(CACHE_KEY_PREFIX + destination.toLowerCase());
+  } catch { /* ignore */ }
+}
+
 function isGoodImage(url: string): boolean {
   const lower = url.toLowerCase();
   return !BAD_IMAGE_KEYWORDS.some(kw => lower.includes(kw));
 }
 
-function extractWikiImage(json: any): string | null {
-  const imgUrl = json?.originalimage?.source || json?.thumbnail?.source;
+function extractWikiImage(json: unknown): string | null {
+  if (!json || typeof json !== 'object') return null;
+  const payload = json as WikiSummaryPayload;
+  const imgUrl = payload.originalimage?.source || payload.thumbnail?.source;
   if (!imgUrl || !isGoodImage(imgUrl)) return null;
   return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
 }
@@ -100,16 +119,19 @@ async function fetchDestinationImage(destination: string): Promise<string | null
       { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
     );
     if (nRes.ok) {
-      const results = await nRes.json();
-      if (results.length > 0 && results[0].boundingbox) {
-        const [south, north, west, east] = results[0].boundingbox;
+      const rawResults: unknown = await nRes.json();
+      const results = Array.isArray(rawResults) ? (rawResults as NominatimRegionResult[]) : [];
+      if (results.length > 0 && Array.isArray(results[0].boundingbox)) {
+        const [south, north, west, east] = results[0].boundingbox || [];
+        if (!south || !north || !west || !east) return null;
         // Search for cities in the bounding box
         const cityRes = await fetch(
           `https://nominatim.openstreetmap.org/search?q=city&format=json&limit=3&bounded=1&viewbox=${west},${north},${east},${south}&featuretype=city`,
           { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
         );
         if (cityRes.ok) {
-          const cities = await cityRes.json();
+          const rawCities: unknown = await cityRes.json();
+          const cities = Array.isArray(rawCities) ? (rawCities as NominatimRegionResult[]) : [];
           // Try Wikipedia for each city until we get a good image
           for (const city of cities) {
             const cityName = city.name || city.display_name?.split(',')[0];
@@ -179,6 +201,11 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
             contentFit="cover"
             transition={300}
             onLoadEnd={() => setImageLoading(false)}
+            onError={() => {
+              void clearCachedImage(destination);
+              setImageUrl(null);
+              setImageLoading(false);
+            }}
           />
         ) : (
           <LinearGradient

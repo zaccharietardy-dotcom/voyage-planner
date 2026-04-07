@@ -16,6 +16,7 @@ import { isOpenAtTime, isActivityOpenOnDay, DAY_NAMES_EN } from './utils/opening
 import { calculateDistance } from '../services/geocoding';
 import { getMinDuration, getMaxDuration } from './utils/constants';
 import { normalizeForMatching } from './utils/dedup';
+import { getDensityThresholds } from './utils/density-config';
 import { timeToMin, addMinutes, estimateTravelBuffer } from './utils/time';
 import { normalizeActivityTitle, getActivityCloseTime } from './step9-schedule';
 import {
@@ -91,8 +92,8 @@ export function repairPass(
   // Pass 1: Fix opening hours violations (cross-day swap)
   fixOpeningHoursViolations(repairedDays, startDate, repairs, unresolvedViolations, { rescueStage, changedDays });
 
-  // Pass 2: Validate restaurant distances (>800m from anchor → unresolved violation)
-  validateRestaurantDistances(repairedDays, repairs, unresolvedViolations);
+  // Pass 2: Validate restaurant distances with density-aware thresholds
+  validateRestaurantDistances(repairedDays, repairs, unresolvedViolations, densityCategory);
 
   // Pass 3: Ensure must-sees are present
   ensureMustSees(repairedDays, activityPool, startDate, repairs, unresolvedViolations, undefined, { rescueStage, changedDays });
@@ -251,9 +252,11 @@ export function fixOpeningHoursViolations(
 function validateRestaurantDistances(
   days: TripDay[],
   repairs: RepairAction[],
-  unresolvedViolations: string[]
+  unresolvedViolations: string[],
+  densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): void {
-  const MAX_RESTAURANT_DISTANCE_KM = 0.8; // 800m P0.2
+  const thresholds = getDensityThresholds(densityCategory);
+  const MAX_RESTAURANT_DISTANCE_KM = thresholds.p02ContractDist;
 
   for (const day of days) {
     for (const item of day.items) {

@@ -1,7 +1,7 @@
 import { POST } from '@/app/api/generate/route';
-import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 import { checkAndIncrementRateLimit } from '@/lib/server/dbRateLimit';
+import { resolveRequestAuth } from '@/lib/server/requestAuth';
 
 jest.mock('@/lib/pipeline', () => ({
   generateTripV2: jest.fn(),
@@ -11,8 +11,8 @@ jest.mock('@/lib/services/cityNormalization', () => ({
   normalizeCity: jest.fn(),
 }));
 
-jest.mock('@/lib/supabase/server', () => ({
-  createRouteHandlerClient: jest.fn(),
+jest.mock('@/lib/server/requestAuth', () => ({
+  resolveRequestAuth: jest.fn(),
 }));
 
 jest.mock('@/lib/server/billingEntitlements', () => ({
@@ -24,7 +24,7 @@ jest.mock('@/lib/server/dbRateLimit', () => ({
   checkAndIncrementRateLimit: jest.fn(),
 }));
 
-const createRouteHandlerClientMock = createRouteHandlerClient as jest.Mock;
+const resolveRequestAuthMock = resolveRequestAuth as jest.Mock;
 const deriveBillingStateMock = deriveBillingState as jest.Mock;
 const fetchEntitlementsForUserMock = fetchEntitlementsForUser as jest.Mock;
 const checkAndIncrementRateLimitMock = checkAndIncrementRateLimit as jest.Mock;
@@ -64,7 +64,11 @@ describe('/api/generate DB-backed rate limit', () => {
   });
 
   it('returns 429 with Retry-After when hourly limit is exceeded', async () => {
-    createRouteHandlerClientMock.mockResolvedValue(buildSupabaseClient());
+    resolveRequestAuthMock.mockResolvedValue({
+      authMethod: 'cookie',
+      supabase: buildSupabaseClient(),
+      user: { id: 'user-1' },
+    });
     fetchEntitlementsForUserMock.mockResolvedValue({});
     deriveBillingStateMock.mockReturnValue({ status: 'pro' });
     checkAndIncrementRateLimitMock.mockResolvedValue({

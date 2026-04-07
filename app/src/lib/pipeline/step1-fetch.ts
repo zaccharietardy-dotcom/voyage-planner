@@ -13,7 +13,7 @@ import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQueryWithFallback, searchMustSeeWithFallback, searchRestaurantsWithFallback } from '../services/serpApiPlaces';
 // canUseSerpApi no longer needed — Google Places (New) handles quota automatically
 // SerpAPI is only used as fallback via the wrapper functions
-import { suggestDayTrips, generateDayTripsWithAI, DAY_TRIP_DATABASE, type DayTripSuggestion } from '../services/dayTripSuggestions';
+import { suggestDayTrips, generateDayTripsWithAI, matchDayTripDatabaseEntries, type DayTripSuggestion } from '../services/dayTripSuggestions';
 import { searchAttractionsOverpass } from '../services/overpassAttractions';
 import { searchViatorActivities, getViatorProductCoordinates } from '../services/viator';
 import { findKnownViatorProduct } from '../services/viatorKnownProducts';
@@ -160,10 +160,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     const mustSeeStr = preferences.mustSee || '';
     if (mustSeeStr) {
       const mustSeeNames = mustSeeStr.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-      const normalizedDest = destination.toLowerCase().trim();
-      const allDestMatches = DAY_TRIP_DATABASE.filter(t =>
-        normalizedDest.includes(t.fromCity) || t.fromCity.includes(normalizedDest)
-      );
+      const allDestMatches = matchDayTripDatabaseEntries(destination, destCoords);
       for (const ms of mustSeeNames) {
         const alreadyIncluded = dayTripSuggestions.some(s =>
           s.name.toLowerCase().includes(ms) || s.destination.toLowerCase().includes(ms) ||

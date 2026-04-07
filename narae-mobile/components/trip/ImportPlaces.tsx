@@ -4,6 +4,7 @@ import { MapPin, Plus, Check, Globe } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { api } from '@/lib/api/client';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 interface ImportedPlace {
   name: string;
@@ -27,6 +28,7 @@ export function ImportPlaces({ onImport, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [places, setPlaces] = useState<(ImportedPlace & { selected: boolean })[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const handleAnalyze = async () => {
     if (!input.trim() || loading) return;
@@ -58,7 +60,7 @@ export function ImportPlaces({ onImport, onClose }: Props) {
     <View style={s.container}>
       <View style={s.header}>
         <Globe size={20} color={colors.gold} />
-        <Text style={s.title}>Importer des lieux</Text>
+        <Text style={s.title}>{t('import.places.title')}</Text>
       </View>
 
       <View style={s.sourceTabs}>
@@ -66,21 +68,21 @@ export function ImportPlaces({ onImport, onClose }: Props) {
           onPress={() => setSource('url')}
           style={[s.sourceTab, source === 'url' && s.sourceTabActive]}
         >
-          <Text style={[s.sourceTabText, source === 'url' && s.sourceTabTextActive]}>URL</Text>
+          <Text style={[s.sourceTabText, source === 'url' && s.sourceTabTextActive]}>{t('import.places.tab.url')}</Text>
         </Pressable>
         <Pressable
           onPress={() => setSource('text')}
           style={[s.sourceTab, source === 'text' && s.sourceTabActive]}
         >
-          <Text style={[s.sourceTabText, source === 'text' && s.sourceTabTextActive]}>Texte</Text>
+          <Text style={[s.sourceTabText, source === 'text' && s.sourceTabTextActive]}>{t('import.places.tab.text')}</Text>
         </Pressable>
       </View>
 
       <TextInput
         style={source === 'text' ? s.textArea : s.input}
         placeholder={source === 'url'
-          ? 'Lien Instagram, TikTok, Google Maps...'
-          : 'Collez une liste de lieux, un article de blog...'}
+          ? t('import.places.url.placeholder')
+          : t('import.places.text.placeholder')}
         placeholderTextColor={colors.textMuted}
         value={input}
         onChangeText={setInput}
@@ -99,7 +101,7 @@ export function ImportPlaces({ onImport, onClose }: Props) {
           {loading ? (
             <ActivityIndicator size="small" color={colors.bg} />
           ) : (
-            <Text style={s.btnText}>Analyser</Text>
+            <Text style={s.btnText}>{t('import.places.analyze')}</Text>
           )}
         </Pressable>
       ) : null}
@@ -108,7 +110,7 @@ export function ImportPlaces({ onImport, onClose }: Props) {
 
       {places.length > 0 ? (
         <>
-          <Text style={s.resultsTitle}>{places.filter((p) => p.selected).length} lieux sélectionnés</Text>
+          <Text style={s.resultsTitle}>{t('import.places.selected', { count: places.filter((p) => p.selected).length })}</Text>
           <FlatList
             data={places}
             keyExtractor={(_, i) => String(i)}
@@ -128,7 +130,7 @@ export function ImportPlaces({ onImport, onClose }: Props) {
           />
           <Pressable onPress={handleImport} style={[s.btn, s.btnActive]}>
             <Plus size={16} color={colors.bg} />
-            <Text style={s.btnText}>Ajouter au pool</Text>
+            <Text style={s.btnText}>{t('import.places.import')}</Text>
           </Pressable>
         </>
       ) : null}

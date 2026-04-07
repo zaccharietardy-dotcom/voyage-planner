@@ -4,6 +4,7 @@ import { FileText, Check, AlertTriangle } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { api } from '@/lib/api/client';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 interface ParsedBooking {
   type: 'flight' | 'hotel' | 'activity' | 'transport';
@@ -30,6 +31,7 @@ export function ImportBooking({ onImport, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ParsedBooking | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const handleAnalyze = async () => {
     if (!text.trim() || loading) return;
@@ -50,16 +52,16 @@ export function ImportBooking({ onImport, onClose }: Props) {
     <View style={s.container}>
       <View style={s.header}>
         <FileText size={20} color={colors.gold} />
-        <Text style={s.title}>Importer une réservation</Text>
+        <Text style={s.title}>{t('import.booking.title')}</Text>
       </View>
 
       <Text style={s.hint}>
-        Collez le texte de votre email de confirmation (vol, hôtel, activité).
+        {t('import.booking.hint')}
       </Text>
 
       <TextInput
         style={s.textArea}
-        placeholder="Collez votre confirmation ici..."
+        placeholder={t('import.booking.placeholder')}
         placeholderTextColor={colors.textMuted}
         value={text}
         onChangeText={setText}
@@ -77,7 +79,7 @@ export function ImportBooking({ onImport, onClose }: Props) {
           {loading ? (
             <ActivityIndicator size="small" color={colors.bg} />
           ) : (
-            <Text style={s.btnText}>Analyser</Text>
+            <Text style={s.btnText}>{t('import.booking.analyze')}</Text>
           )}
         </Pressable>
       ) : null}
@@ -93,9 +95,9 @@ export function ImportBooking({ onImport, onClose }: Props) {
         <View style={s.resultCard}>
           <Text style={s.resultType}>{result.type.toUpperCase()}</Text>
           <Text style={s.resultName}>{result.name}</Text>
-          {result.date ? <Text style={s.resultMeta}>Date : {result.date}</Text> : null}
-          {result.price ? <Text style={s.resultMeta}>Prix : {result.price} {result.currency || '€'}</Text> : null}
-          {result.confirmationCode ? <Text style={s.resultMeta}>Réf : {result.confirmationCode}</Text> : null}
+          {result.date ? <Text style={s.resultMeta}>{t('import.booking.date', { date: result.date })}</Text> : null}
+          {result.price ? <Text style={s.resultMeta}>{t('import.booking.price', { price: result.price, currency: result.currency || '€' })}</Text> : null}
+          {result.confirmationCode ? <Text style={s.resultMeta}>{t('import.booking.ref', { code: result.confirmationCode })}</Text> : null}
 
           <View style={s.resultActions}>
             <Pressable
@@ -103,7 +105,7 @@ export function ImportBooking({ onImport, onClose }: Props) {
               style={s.importBtn}
             >
               <Check size={16} color={colors.bg} />
-              <Text style={s.importBtnText}>Ajouter au voyage</Text>
+              <Text style={s.importBtnText}>{t('import.booking.import')}</Text>
             </Pressable>
           </View>
         </View>

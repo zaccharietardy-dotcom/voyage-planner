@@ -56,6 +56,7 @@ import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { isOpenAtTime } from './utils/opening-hours';
 import { enrichWithTicketingLinks } from '../services/officialTicketing';
 import { isNightlifeActivity } from './step2-score';
+import { getDensityThresholds } from './utils/density-config';
 import {
   getV31RescueStage,
   isProtectedTripItem,
@@ -90,18 +91,15 @@ function findBestRestaurantTight(
   dayDate: Date | null,
   densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): ReturnType<typeof findBestRestaurant> {
-  // Try tight radius first (400m) — less zigzag
-  const tight = findBestRestaurant(restaurants, anchor, mealType, 0.4, 3.5, 2, dietary, usedIds, dayDate);
+  const thresholds = getDensityThresholds(densityCategory);
+  // Try tight radius first — less zigzag
+  const tight = findBestRestaurant(restaurants, anchor, mealType, thresholds.restaurantTightDist, 3.5, 2, dietary, usedIds, dayDate);
   if (tight) return tight;
-  // Fallback to standard radius (800m)
-  const standard = findBestRestaurant(restaurants, anchor, mealType, 0.8, 3.5, 2, dietary, usedIds, dayDate);
+  // Fallback to standard radius
+  const standard = findBestRestaurant(restaurants, anchor, mealType, thresholds.restaurantStandardDist, 3.5, 2, dietary, usedIds, dayDate);
   if (standard) return standard;
-  // Extended radius for non-dense cities (medium: 1.2km, spread: 1.5km)
-  if (densityCategory !== 'dense') {
-    const extendedRadius = densityCategory === 'spread' ? 1.5 : 1.2;
-    return findBestRestaurant(restaurants, anchor, mealType, extendedRadius, 3.5, 2, dietary, usedIds, dayDate);
-  }
-  return null;
+  // Extended radius as last attempt
+  return findBestRestaurant(restaurants, anchor, mealType, thresholds.restaurantExtendedDist, 3.5, 2, dietary, usedIds, dayDate);
 }
 
 function stampDayPlanningMeta(day: TripDay, role?: PlannerRole): void {
@@ -1368,9 +1366,10 @@ export function unifiedScheduleV3Days(
     }
   }
 
-  // 21. P0.2 distance sweep: replace restaurants >1.5km from nearest activity with self-meal fallback
+  // 21. P0.2 distance sweep: replace distant restaurants based on density thresholds
   // Runs AFTER repairs (cross-day swaps + must-see injection can change which activities are on each day)
-  const P02_MAX_KM = 1.5;
+  const p02Thresholds = getDensityThresholds(density);
+  const P02_MAX_KM = p02Thresholds.p02ContractDist;
   const anchorTypes = new Set(['activity', 'checkin', 'checkout', 'hotel']);
   for (const day of days) {
     for (let i = 0; i < day.items.length; i++) {
@@ -1405,10 +1404,10 @@ export function unifiedScheduleV3Days(
         const dayDateForSearch = new Date(new Date(startDateStr).getTime() + (day.dayNumber - 1) * 86400000);
         const replacement = reAnchor ? findBestRestaurant(
           dayPool, reAnchor, mealType as 'lunch' | 'dinner',
-          1.5, 3.5, 2, dietary, usedRestaurantIds, dayDateForSearch
+          p02Thresholds.restaurantMaxDist, 3.5, 2, dietary, usedRestaurantIds, dayDateForSearch
         ) : null;
-        // Check if replacement is actually close enough (< 1km from anchor)
-        const SELF_MEAL_THRESHOLD_KM = 2.0;
+        // Check if replacement is close enough to keep meal quality
+        const SELF_MEAL_THRESHOLD_KM = Math.max(p02Thresholds.p02ContractDist, p02Thresholds.restaurantStandardDist);
         const replacementDist = replacement && reAnchor
           ? calculateDistance(replacement.primary.latitude, replacement.primary.longitude, reAnchor.lat, reAnchor.lng)
           : Infinity;

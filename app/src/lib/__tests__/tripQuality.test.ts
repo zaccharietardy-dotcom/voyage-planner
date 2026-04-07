@@ -15,7 +15,7 @@ function buildTrip(overrides?: Partial<Trip>): Trip {
       carRental: false,
       groupSize: 2,
       groupType: 'couple',
-      budgetLevel: 'medium',
+      budgetLevel: 'moderate',
       activities: ['culture'],
       dietary: [],
       mustSee: '',

@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   base: {
     borderRadius: radius.button,
     borderCurve: 'continuous',
+    borderWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -156,14 +157,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   secondary: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.20)',
+    borderColor: 'rgba(255,255,255,0.28)',
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(197,160,89,0.50)',
+    borderColor: 'rgba(197,160,89,0.72)',
   },
   danger: {
     backgroundColor: colors.danger,

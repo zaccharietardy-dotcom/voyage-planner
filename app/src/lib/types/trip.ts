@@ -651,6 +651,36 @@ export interface Trip {
     llmRebalanceThemes?: string[];
     llmRebalanceLatencyMs?: number;
   };
+  reliabilitySummary?: {
+    validatedCount: number;
+    replacedCount: number;
+    rejectedCount: number;
+    ratioIconicLocal: {
+      iconic: number;
+      localGem: number;
+    };
+  };
+  generationDiagnostics?: {
+    validationLatencyMs: number;
+    providerCallBreakdown: Record<string, {
+      scheduled: number;
+      executed: number;
+      deduped: number;
+      succeeded: number;
+      failed: number;
+      retries: number;
+    }>;
+    parallelismStats: {
+      scheduled: number;
+      deduped: number;
+      settled: number;
+      fulfilled: number;
+      rejected: number;
+      retries: number;
+      maxInFlight: number;
+      maxInFlightByProvider: Record<string, number>;
+    };
+  };
 
   // État des réservations
   bookedItems?: Record<string, {

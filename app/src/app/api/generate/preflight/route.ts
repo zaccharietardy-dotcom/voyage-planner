@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
+import { resolveRequestAuth } from '@/lib/server/requestAuth';
 
 const FREE_LIFETIME_LIMIT = 1;
 
@@ -10,8 +10,7 @@ const FREE_LIFETIME_LIMIT = 1;
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase, user } = await resolveRequestAuth(request);
 
     if (!user) {
       return NextResponse.json({

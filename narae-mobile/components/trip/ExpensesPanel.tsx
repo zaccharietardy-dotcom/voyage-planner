@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { colors, fonts, radius } from '@/lib/theme';
 import { useExpenses } from '@/hooks/useExpenses';
 import { CATEGORY_LABELS, type ExpenseCategory } from '@/lib/types/expenses';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   tripId: string;
@@ -23,6 +24,7 @@ export function ExpensesPanel({ tripId }: Props) {
   const { expenses, members, balances, suggestions, settlements, isLoading, addExpense, deleteExpense, addSettlement } = useExpenses(tripId);
   const [tab, setTab] = useState<Tab>('expenses');
   const [showAdd, setShowAdd] = useState(false);
+  const { t } = useTranslation();
 
   // Add form state
   const [title, setTitle] = useState('');
@@ -56,10 +58,10 @@ export function ExpensesPanel({ tripId }: Props) {
   };
 
   const handleDelete = (expenseId: string, expenseTitle: string) => {
-    Alert.alert('Supprimer', `Supprimer "${expenseTitle}" ?`, [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('expenses.delete.title'), t('expenses.delete.confirm', { title: expenseTitle }), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Supprimer', style: 'destructive',
+        text: t('common.delete'), style: 'destructive',
         onPress: () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); deleteExpense(expenseId); },
       },
     ]);
@@ -67,12 +69,12 @@ export function ExpensesPanel({ tripId }: Props) {
 
   const handleSettle = (fromId: string, fromName: string, toId: string, toName: string, settleAmount: number) => {
     Alert.alert(
-      'Confirmer le remboursement',
-      `${fromName} a payé ${settleAmount.toFixed(2)}€ à ${toName} ?`,
+      t('expenses.settle.title'),
+      t('expenses.settle.confirm', { from: fromName, amount: settleAmount.toFixed(2), to: toName }),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Confirmer',
+          text: t('common.confirm'),
           onPress: () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); addSettlement(fromId, toId, settleAmount); },
         },
       ],
@@ -94,7 +96,7 @@ export function ExpensesPanel({ tripId }: Props) {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View>
             <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1.5 }}>
-              Total dépenses
+              {t('expenses.total')}
             </Text>
             <Text style={{ color: colors.gold, fontSize: 28, fontFamily: fonts.display, marginTop: 2 }}>
               {Math.round(totalExpenses)}€
@@ -113,7 +115,7 @@ export function ExpensesPanel({ tripId }: Props) {
 
         {/* Tab pills */}
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          {([['expenses', 'Dépenses'], ['balances', 'Soldes']] as [Tab, string][]).map(([key, label]) => (
+          {([['expenses', t('expenses.tab.expenses')], ['balances', t('expenses.tab.balances')]] as [Tab, string][]).map(([key, label]) => (
             <Pressable
               key={key}
               onPress={() => { Haptics.selectionAsync(); setTab(key); }}
@@ -138,7 +140,7 @@ export function ExpensesPanel({ tripId }: Props) {
           contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingBottom: 20 }}
           ListEmptyComponent={
             <Text style={{ color: colors.textMuted, textAlign: 'center', paddingVertical: 40, fontSize: 14 }}>
-              Aucune dépense enregistrée
+              {t('expenses.empty')}
             </Text>
           }
           renderItem={({ item: expense }) => {
@@ -160,7 +162,7 @@ export function ExpensesPanel({ tripId }: Props) {
                     {expense.title}
                   </Text>
                   <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 2 }}>
-                    Payé par {expense.payerName} · {expense.splits.length} pers.
+                    {t('expenses.item.paidBy', { name: expense.payerName, count: expense.splits.length })}
                   </Text>
                 </View>
                 <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.sansBold }}>
@@ -176,7 +178,7 @@ export function ExpensesPanel({ tripId }: Props) {
       ) : (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 20 }}>
           {/* Balances */}
-          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display }}>Soldes</Text>
+          <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display }}>{t('expenses.balances.title')}</Text>
           {balances.map((b) => (
             <View key={b.userId} style={{
               flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -199,7 +201,7 @@ export function ExpensesPanel({ tripId }: Props) {
           {/* Settlement suggestions */}
           {suggestions.length > 0 ? (
             <>
-              <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display, marginTop: 8 }}>Remboursements</Text>
+              <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display, marginTop: 8 }}>{t('expenses.settlements.title')}</Text>
               {suggestions.map((s, i) => (
                 <Pressable
                   key={i}
@@ -232,7 +234,7 @@ export function ExpensesPanel({ tripId }: Props) {
           {/* Past settlements */}
           {settlements.length > 0 ? (
             <>
-              <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display, marginTop: 8 }}>Historique</Text>
+              <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.display, marginTop: 8 }}>{t('expenses.settlements.history')}</Text>
               {settlements.map((s) => (
                 <View key={s.id} style={{
                   flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -257,27 +259,27 @@ export function ExpensesPanel({ tripId }: Props) {
       <BottomSheet isOpen={showAdd} onClose={() => setShowAdd(false)} height={0.7}>
         <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }} keyboardShouldPersistTaps="handled">
           <Text style={{ color: colors.text, fontSize: 20, fontFamily: fonts.display }}>
-            Nouvelle dépense
+            {t('expenses.add.title')}
           </Text>
 
           {/* Title */}
           <View style={{ gap: 6 }}>
             <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Description
+              {t('expenses.add.description')}
             </Text>
             <TextInput
               value={title}
               onChangeText={setTitle}
               style={inputStyle}
               placeholderTextColor={colors.textMuted}
-              placeholder="Dîner, musée, taxi..."
+              placeholder={t('expenses.add.description.placeholder')}
             />
           </View>
 
           {/* Amount */}
           <View style={{ gap: 6 }}>
             <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Montant (€)
+              {t('expenses.add.amount')}
             </Text>
             <TextInput
               value={amount}
@@ -292,7 +294,7 @@ export function ExpensesPanel({ tripId }: Props) {
           {/* Category */}
           <View style={{ gap: 6 }}>
             <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Catégorie
+              {t('expenses.add.category')}
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
               {CATEGORIES.map((cat) => {
@@ -321,20 +323,20 @@ export function ExpensesPanel({ tripId }: Props) {
           {/* Notes */}
           <View style={{ gap: 6 }}>
             <Text style={{ color: colors.textSecondary, fontSize: 11, fontFamily: fonts.sansBold, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Notes (optionnel)
+              {t('expenses.add.notes')}
             </Text>
             <TextInput
               value={notes}
               onChangeText={setNotes}
               style={[inputStyle, { minHeight: 60, textAlignVertical: 'top' }]}
               placeholderTextColor={colors.textMuted}
-              placeholder="Détails..."
+              placeholder={t('expenses.add.notes.placeholder')}
               multiline
             />
           </View>
 
           <Text style={{ color: colors.textMuted, fontSize: 11, textAlign: 'center' }}>
-            Partagé équitablement entre {members.length} membre{members.length > 1 ? 's' : ''}
+            {t('expenses.add.split', { count: members.length, plural: members.length > 1 ? 's' : '' })}
           </Text>
 
           {/* Add button */}
@@ -343,7 +345,7 @@ export function ExpensesPanel({ tripId }: Props) {
             backgroundColor: colors.gold, borderRadius: radius.lg, paddingVertical: 16,
           }}>
             <DollarSign size={18} color="#000" />
-            <Text style={{ color: '#000', fontSize: 14, fontFamily: fonts.sansBold }}>Ajouter la dépense</Text>
+            <Text style={{ color: '#000', fontSize: 14, fontFamily: fonts.sansBold }}>{t('expenses.add.submit')}</Text>
           </Pressable>
         </ScrollView>
       </BottomSheet>

@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { TripItem, TripItemType, Trip } from '@/lib/types/trip';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   isOpen: boolean;
@@ -14,16 +15,17 @@ interface Props {
   targetDay: number;
 }
 
-const TYPES: { key: TripItemType; label: string }[] = [
-  { key: 'activity', label: 'Activité' },
-  { key: 'restaurant', label: 'Restaurant' },
-  { key: 'hotel', label: 'Hébergement' },
-  { key: 'free_time', label: 'Temps libre' },
-];
-
 type Tab = 'pool' | 'manual';
 
 export function AddActivitySheet({ isOpen, onClose, onAdd, trip, targetDay }: Props) {
+  const { t } = useTranslation();
+
+  const TYPES: { key: TripItemType; label: string }[] = [
+    { key: 'activity', label: t('activity.type.activity') },
+    { key: 'restaurant', label: t('activity.type.restaurant') },
+    { key: 'hotel', label: t('activity.type.hotel') },
+    { key: 'free_time', label: t('activity.type.free_time') },
+  ];
   const [tab, setTab] = useState<Tab>('pool');
   const [search, setSearch] = useState('');
 
@@ -104,12 +106,12 @@ export function AddActivitySheet({ isOpen, onClose, onAdd, trip, targetDay }: Pr
     <BottomSheet isOpen={isOpen} onClose={() => { onClose(); resetForm(); }} height={0.85}>
       <View style={{ flex: 1, padding: 20, gap: 16 }}>
         <Text style={{ color: colors.text, fontSize: 20, fontFamily: fonts.display }}>
-          Ajouter au Jour {targetDay}
+          {t('activity.add.title', { n: targetDay })}
         </Text>
 
         {/* Tab pills */}
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          {([['pool', 'Pool'], ['manual', 'Manuel']] as [Tab, string][]).map(([key, label]) => (
+          {([['pool', t('activity.add.tab.pool')], ['manual', t('activity.add.tab.manual')]] as [Tab, string][]).map(([key, label]) => (
             <Pressable
               key={key}
               onPress={() => { Haptics.selectionAsync(); setTab(key); }}
@@ -140,14 +142,14 @@ export function AddActivitySheet({ isOpen, onClose, onAdd, trip, targetDay }: Pr
                 onChangeText={setSearch}
                 style={{ flex: 1, paddingVertical: 12, color: colors.text, fontSize: 14 }}
                 placeholderTextColor={colors.textMuted}
-                placeholder="Rechercher dans le pool..."
+                placeholder={t('activity.add.search')}
               />
             </View>
 
             {filteredPool.length === 0 ? (
               <View style={{ alignItems: 'center', paddingVertical: 40 }}>
                 <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: fonts.sans }}>
-                  {pool.length === 0 ? 'Aucune activité dans le pool' : 'Aucun résultat'}
+                  {pool.length === 0 ? t('activity.add.empty.pool') : t('activity.add.empty.search')}
                 </Text>
               </View>
             ) : (
@@ -205,13 +207,13 @@ export function AddActivitySheet({ isOpen, onClose, onAdd, trip, targetDay }: Pr
           <ScrollView contentContainerStyle={{ gap: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
             {/* Title */}
             <View style={{ gap: 6 }}>
-              <Label icon={FileText} text="Titre" />
-              <TextInput value={title} onChangeText={setTitle} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder="Nom de l'activité" />
+              <Label icon={FileText} text={t('activity.add.field.title')} />
+              <TextInput value={title} onChangeText={setTitle} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder={t('activity.add.field.title.placeholder')} />
             </View>
 
             {/* Type */}
             <View style={{ gap: 6 }}>
-              <Label icon={Tag} text="Type" />
+              <Label icon={Tag} text={t('activity.add.field.type')} />
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
                 {TYPES.map((t) => (
                   <Pressable
@@ -233,32 +235,32 @@ export function AddActivitySheet({ isOpen, onClose, onAdd, trip, targetDay }: Pr
 
             {/* Location */}
             <View style={{ gap: 6 }}>
-              <Label icon={MapPin} text="Lieu" />
-              <TextInput value={locationName} onChangeText={setLocationName} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder="Adresse ou nom" />
+              <Label icon={MapPin} text={t('activity.add.field.location')} />
+              <TextInput value={locationName} onChangeText={setLocationName} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder={t('activity.add.field.location.placeholder')} />
             </View>
 
             {/* Time + Duration */}
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <View style={{ flex: 1, gap: 6 }}>
-                <Label icon={Clock} text="Heure" />
+                <Label icon={Clock} text={t('activity.add.field.time')} />
                 <TextInput value={startTime} onChangeText={setStartTime} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder="10:00" keyboardType="numbers-and-punctuation" />
               </View>
               <View style={{ flex: 1, gap: 6 }}>
-                <Label icon={Clock} text="Durée (min)" />
+                <Label icon={Clock} text={t('activity.add.field.duration')} />
                 <TextInput value={duration} onChangeText={setDuration} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder="60" keyboardType="numeric" />
               </View>
             </View>
 
             {/* Cost */}
             <View style={{ gap: 6 }}>
-              <Label icon={DollarSign} text="Coût (€)" />
+              <Label icon={DollarSign} text={t('activity.add.field.cost')} />
               <TextInput value={cost} onChangeText={setCost} style={inputStyle} placeholderTextColor={colors.textMuted} placeholder="0" keyboardType="numeric" />
             </View>
 
             {/* Description */}
             <View style={{ gap: 6 }}>
-              <Label icon={FileText} text="Description" />
-              <TextInput value={description} onChangeText={setDescription} style={[inputStyle, { minHeight: 70, textAlignVertical: 'top' }]} placeholderTextColor={colors.textMuted} placeholder="Notes..." multiline />
+              <Label icon={FileText} text={t('activity.add.field.description')} />
+              <TextInput value={description} onChangeText={setDescription} style={[inputStyle, { minHeight: 70, textAlignVertical: 'top' }]} placeholderTextColor={colors.textMuted} placeholder={t('activity.add.field.description.placeholder')} multiline />
             </View>
 
             {/* Add button */}
@@ -267,7 +269,7 @@ export function AddActivitySheet({ isOpen, onClose, onAdd, trip, targetDay }: Pr
               backgroundColor: colors.gold, borderRadius: radius.lg, paddingVertical: 16, marginTop: 8,
             }}>
               <Plus size={18} color="#000" />
-              <Text style={{ color: '#000', fontSize: 14, fontFamily: fonts.sansBold }}>Ajouter au Jour {targetDay}</Text>
+              <Text style={{ color: '#000', fontSize: 14, fontFamily: fonts.sansBold }}>{t('activity.add.submit', { n: targetDay })}</Text>
             </Pressable>
           </ScrollView>
         )}

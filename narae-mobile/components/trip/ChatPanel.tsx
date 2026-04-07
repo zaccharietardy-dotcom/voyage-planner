@@ -7,6 +7,7 @@ import { colors, fonts, radius } from '@/lib/theme';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { fetchWithAuth } from '@/lib/api/client';
 import { SITE_URL } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   isOpen: boolean;
@@ -20,15 +21,16 @@ interface ChatMessage {
   content: string;
 }
 
-const SUGGESTIONS = [
-  'Ajouter une activité culturelle',
-  'Changer le restaurant du déjeuner',
-  'Plus de temps libre',
-  'Ajouter une visite guidée',
-  'Trouver un meilleur hôtel',
-];
-
 export function ChatPanel({ isOpen, onClose, tripId }: Props) {
+  const { t } = useTranslation();
+
+  const SUGGESTIONS = [
+    t('chat.suggestion1'),
+    t('chat.suggestion2'),
+    t('chat.suggestion3'),
+    t('chat.suggestion4'),
+    t('chat.suggestion5'),
+  ];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -62,13 +64,13 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
       setMessages((prev) => [...prev, {
         id: `msg-${++msgIdRef.current}`,
         role: 'assistant',
-        content: data.response || data.message || 'Je n\'ai pas pu traiter votre demande.',
+        content: data.response || data.message || t('chat.error.parse'),
       }]);
     } catch {
       setMessages((prev) => [...prev, {
         id: `msg-${++msgIdRef.current}`,
         role: 'assistant',
-        content: 'Désolé, une erreur est survenue. Réessayez.',
+        content: t('chat.error.generic'),
       }]);
     } finally {
       setSending(false);
@@ -88,8 +90,8 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
             <Sparkles size={18} color={colors.gold} />
           </View>
           <View style={styles.headerCopy}>
-            <Text style={styles.headerTitle}>Assistant Narae</Text>
-            <Text style={styles.headerSubtitle}>Modifiez votre voyage par chat</Text>
+            <Text style={styles.headerTitle}>{t('chat.title')}</Text>
+            <Text style={styles.headerSubtitle}>{t('chat.subtitle')}</Text>
           </View>
         </View>
 
@@ -103,7 +105,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
             <View style={styles.emptyState}>
               <Bot size={40} color={colors.textMuted} />
               <Text style={styles.emptyCopy}>
-                Demandez-moi de modifier{'\n'}votre itinéraire
+                {t('chat.empty')}
               </Text>
               <View style={styles.suggestionsWrap}>
                 {SUGGESTIONS.map((s) => (
@@ -126,7 +128,7 @@ export function ChatPanel({ isOpen, onClose, tripId }: Props) {
         <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
-            placeholder="Modifier mon itinéraire..."
+            placeholder={t('chat.input')}
             placeholderTextColor={colors.textDim}
             value={input}
             onChangeText={setInput}

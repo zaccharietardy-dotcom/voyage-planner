@@ -16,7 +16,10 @@
     "debug:analyze": "npx tsx scripts/debug-pipeline/analyze-trip.ts",
     "debug:run": "npx tsx scripts/debug-pipeline/generate-trip.ts --all-and-analyze",
     "debug:campaign": "npx tsx scripts/debug-pipeline/run-campaign.ts",
-    "smoke:collab": "node --import tsx scripts/smoke-collaboration-api.ts"
+    "smoke:collab": "node --import tsx scripts/smoke-collaboration-api.ts",
+    "health:dependencies": "node --import tsx scripts/audit-external-integrations.ts --mode=health",
+    "smoke:external": "node --import tsx scripts/audit-external-integrations.ts --mode=smoke",
+    "smoke:billing-sandbox": "node --import tsx scripts/audit-external-integrations.ts --mode=billing-sandbox"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

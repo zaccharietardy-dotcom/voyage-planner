@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api/client';
 import { Avatar } from '@/components/ui/Avatar';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 interface Comment {
   id: string;
@@ -26,21 +27,22 @@ interface Props {
   tripId: string;
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'maintenant';
-  if (mins < 60) return `${mins}min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}j`;
-  return `${Math.floor(days / 30)}mo`;
-}
-
 export function CommentsSection({ tripId }: Props) {
   const { user, profile } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
+
+  function timeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t('comments.time.now');
+    if (mins < 60) return t('comments.time.min', { n: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t('comments.time.hours', { n: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 30) return t('comments.time.days', { n: days });
+    return t('comments.time.months', { n: Math.floor(days / 30) });
+  }
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState('');
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
@@ -84,11 +86,11 @@ export function CommentsSection({ tripId }: Props) {
     <View style={s.container}>
       <View style={s.header}>
         <MessageCircle size={16} color={colors.gold} />
-        <Text style={s.headerText}>Commentaires ({comments.length})</Text>
+        <Text style={s.headerText}>{t('comments.title', { count: comments.length })}</Text>
       </View>
 
       {roots.length === 0 ? (
-        <Text style={s.empty}>Aucun commentaire pour le moment.</Text>
+        <Text style={s.empty}>{t('comments.empty')}</Text>
       ) : null}
 
       {roots.map((comment) => {
@@ -99,6 +101,7 @@ export function CommentsSection({ tripId }: Props) {
               comment={comment}
               onReply={() => setReplyTo(comment)}
               onUserPress={(userId) => router.push(`/user/${userId}`)}
+              timeAgoFn={timeAgo}
             />
             {childReplies.map((reply) => (
               <View key={reply.id} style={s.replyIndent}>
@@ -107,6 +110,7 @@ export function CommentsSection({ tripId }: Props) {
                   comment={reply}
                   onReply={() => setReplyTo(comment)}
                   onUserPress={(userId) => router.push(`/user/${userId}`)}
+                  timeAgoFn={timeAgo}
                 />
               </View>
             ))}
@@ -119,7 +123,7 @@ export function CommentsSection({ tripId }: Props) {
         {replyTo ? (
           <Pressable onPress={() => setReplyTo(null)} style={s.replyBanner}>
             <Text style={s.replyBannerText}>
-              Réponse à {replyTo.user?.display_name || 'un voyageur'}
+              {t('comments.replyTo', { name: replyTo.user?.display_name || t('comments.author.anon') })}
             </Text>
             <Text style={s.replyCancel}>✕</Text>
           </Pressable>
@@ -127,7 +131,7 @@ export function CommentsSection({ tripId }: Props) {
         <View style={s.inputRow}>
           <TextInput
             style={s.input}
-            placeholder="Ajouter un commentaire..."
+            placeholder={t('comments.input')}
             placeholderTextColor={colors.textMuted}
             value={text}
             onChangeText={setText}
@@ -151,11 +155,14 @@ function CommentRow({
   comment,
   onReply,
   onUserPress,
+  timeAgoFn,
 }: {
   comment: Comment;
   onReply: () => void;
   onUserPress: (userId: string) => void;
+  timeAgoFn: (dateStr: string) => string;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={s.commentRow}>
       <Pressable onPress={() => onUserPress(comment.user_id)}>
@@ -164,13 +171,13 @@ function CommentRow({
       <View style={s.commentBody}>
         <View style={s.commentTop}>
           <Text style={s.commentAuthor} numberOfLines={1}>
-            {comment.user?.display_name || 'Voyageur'}
+            {comment.user?.display_name || t('comments.author.anon')}
           </Text>
-          <Text style={s.commentTime}>{timeAgo(comment.created_at)}</Text>
+          <Text style={s.commentTime}>{timeAgoFn(comment.created_at)}</Text>
         </View>
         <Text style={s.commentText}>{comment.content}</Text>
         <Pressable onPress={onReply} hitSlop={8}>
-          <Text style={s.replyBtn}>Répondre</Text>
+          <Text style={s.replyBtn}>{t('comments.reply')}</Text>
         </Pressable>
       </View>
     </View>

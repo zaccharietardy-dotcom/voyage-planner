@@ -4,6 +4,7 @@ import { Star, Coffee, ChevronDown } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { Accommodation } from '@/lib/types/trip';
 import { SelectionSheet, type SelectionSheetOption } from '@/components/ui/SelectionSheet';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   options: Accommodation[];
@@ -11,14 +12,15 @@ interface Props {
   onSelect?: (id: string) => void;
 }
 
-const TIER_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  central: { label: 'Central', color: '#4ade80', bg: 'rgba(34,197,94,0.15)' },
-  comfortable: { label: 'Confort', color: '#60a5fa', bg: 'rgba(59,130,246,0.15)' },
-  value: { label: 'Bon plan', color: '#fbbf24', bg: 'rgba(251,191,36,0.15)' },
-};
-
 export function HotelSelector({ options, selectedId, onSelect }: Props) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const TIER_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    central: { label: t('hotel.tier.central'), color: '#4ade80', bg: 'rgba(34,197,94,0.15)' },
+    comfortable: { label: t('hotel.tier.comfortable'), color: '#60a5fa', bg: 'rgba(59,130,246,0.15)' },
+    value: { label: t('hotel.tier.value'), color: '#fbbf24', bg: 'rgba(251,191,36,0.15)' },
+  };
   if (!options?.length) return null;
 
   const selected = options.find((hotel) => hotel.id === selectedId) || options[0];
@@ -38,11 +40,11 @@ export function HotelSelector({ options, selectedId, onSelect }: Props) {
     <View style={{ marginTop: 8, paddingHorizontal: 20, gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={{ color: colors.text, fontSize: 17, fontFamily: fonts.display }}>
-          Hébergement
+          {t('hotel.title')}
         </Text>
         {options.length > 1 ? (
           <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sansMedium }}>
-            {options.length} options
+            {t('hotel.options', { count: options.length })}
           </Text>
         ) : null}
       </View>
@@ -97,11 +99,11 @@ export function HotelSelector({ options, selectedId, onSelect }: Props) {
           </View>
 
           <Text style={{ color: colors.textSecondary, fontSize: 12, fontFamily: fonts.sans }} numberOfLines={1}>
-            {selected.distanceToCenter ? `${selected.distanceToCenter.toFixed(1)} km du centre` : selected.address}
+            {selected.distanceToCenter ? t('hotel.distance', { distance: selected.distanceToCenter.toFixed(1) }) : selected.address}
           </Text>
 
           <Text style={{ color: colors.text, fontSize: 16, fontFamily: fonts.sansBold }}>
-            {selected.pricePerNight}€<Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sans }}>/nuit</Text>
+            {selected.pricePerNight}€<Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sans }}>{t('hotel.perNight')}</Text>
           </Text>
         </View>
 
@@ -111,12 +113,12 @@ export function HotelSelector({ options, selectedId, onSelect }: Props) {
       <SelectionSheet
         isOpen={open}
         onClose={() => setOpen(false)}
-        title="Hébergements suggérés"
-        subtitle="Comparez les options retenues par le planificateur."
+        title={t('hotel.selection.title')}
+        subtitle={t('hotel.selection.subtitle')}
         options={sheetOptions}
         selectedValue={selected.id}
         onSelect={(value) => onSelect?.(value)}
-        searchPlaceholder="Rechercher un hôtel"
+        searchPlaceholder={t('hotel.selection.search')}
         height={0.72}
         renderOption={({ hotel }, { selected: isSelected }) => (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -141,7 +143,7 @@ export function HotelSelector({ options, selectedId, onSelect }: Props) {
                 ) : null}
               </View>
               <Text style={{ color: colors.textMuted, fontSize: 11, fontFamily: fonts.sans }}>
-                {hotel.distanceToCenter ? `${hotel.distanceToCenter.toFixed(1)} km du centre` : hotel.address}
+                {hotel.distanceToCenter ? t('hotel.distance', { distance: hotel.distanceToCenter.toFixed(1) }) : hotel.address}
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Text style={{ color: colors.text, fontSize: 14, fontFamily: fonts.sansBold }}>
@@ -150,7 +152,7 @@ export function HotelSelector({ options, selectedId, onSelect }: Props) {
                 {hotel.breakfastIncluded ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <Coffee size={11} color={colors.active} />
-                    <Text style={{ color: colors.active, fontSize: 11, fontFamily: fonts.sansSemiBold }}>Petit-déj</Text>
+                    <Text style={{ color: colors.active, fontSize: 11, fontFamily: fonts.sansSemiBold }}>{t('hotel.breakfast')}</Text>
                   </View>
                 ) : null}
               </View>

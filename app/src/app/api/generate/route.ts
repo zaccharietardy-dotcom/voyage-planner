@@ -5,9 +5,10 @@ import { TripPreferences } from '@/lib/types';
 import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
 import { normalizeCity } from '@/lib/services/cityNormalization';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
-import { checkAndIncrementRateLimit } from '@/lib/server/dbRateLimit';
+import { checkAndIncrementRateLimit, type RateLimitSupabaseLike } from '@/lib/server/dbRateLimit';
 import { resolveRequestAuth } from '@/lib/server/requestAuth';
 import { registerQuestion, cleanupSession } from './sessionStore';
+import { upsertGenerationSession } from './sessionDb';
 import { generateTripSchema } from '@/lib/validations/generate';
 
 export const maxDuration = 300; // 5 minutes max
@@ -16,6 +17,25 @@ const FREE_LIFETIME_LIMIT = 1;
 
 // Concurrency guard: one generation per user at a time (in-memory, per-instance)
 const activeGenerations = new Set<string>();
+
+interface SessionPersistPayload {
+  status: 'running' | 'question' | 'done' | 'error' | 'interrupted';
+  progress?: unknown;
+  question?: unknown;
+  trip?: unknown;
+  error?: string | null;
+  heartbeat?: boolean;
+}
+
+function buildProgressPayloadFromEvent(event: PipelineEvent, now: number): Record<string, unknown> {
+  return {
+    step: event.step ?? null,
+    type: event.type ?? null,
+    label: event.stepName || event.label || null,
+    detail: event.detail || null,
+    timestamp: event.timestamp || now,
+  };
+}
 
 export async function POST(request: NextRequest) {
   let activeUserId: string | null = null;
@@ -62,7 +82,7 @@ export async function POST(request: NextRequest) {
     const rateLimitKey = `generate:${user.id}:${ip}`;
 
     const rateLimit = await checkAndIncrementRateLimit(
-      supabase as any,
+      supabase as unknown as RateLimitSupabaseLike,
       rateLimitKey,
       hourlyLimit,
       3600
@@ -124,17 +144,34 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        const persistSession = async (payload: SessionPersistPayload) => {
+          try {
+            await upsertGenerationSession(supabase, user.id, sessionId, payload);
+          } catch (err) {
+            console.warn('[Generate] Failed to persist generation session:', err);
+          }
+        };
+
         // Emit sessionId as the very first event
         try {
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ status: 'session', sessionId })}\n\n`)
           );
         } catch { /* stream closed */ }
+        await persistSession({
+          status: 'running',
+          progress: { step: 0, label: 'initializing' },
+        });
 
         // Envoyer un ping toutes les 10s pour garder la connexion vivante
         const keepAlive = setInterval(() => {
           try {
             controller.enqueue(encoder.encode(`data: {"status":"generating"}\n\n`));
+            void persistSession({
+              status: 'running',
+              progress: { label: 'stream-alive' },
+              heartbeat: true,
+            });
           } catch {
             // stream already closed
             clearInterval(keepAlive);
@@ -147,6 +184,11 @@ export async function POST(request: NextRequest) {
             controller.enqueue(
               encoder.encode(`data: ${JSON.stringify({ type: 'api_call', step: 99, label: 'Génération longue — veuillez patienter...', timestamp: Date.now() })}\n\n`)
             );
+            void persistSession({
+              status: 'running',
+              progress: { step: 99, label: 'long-running' },
+              heartbeat: true,
+            });
           } catch { /* stream may be closed */ }
         }, 180_000);
 
@@ -159,6 +201,7 @@ export async function POST(request: NextRequest) {
 
           const configuredPipeline = process.env.PIPELINE_VERSION || 'v3';
           console.debug(`[Generate] Using pipeline ${configuredPipeline}`);
+          let lastProgressPersistAt = 0;
 
           // Stream pipeline events to the client for real-time monitoring
           const onEvent = (event: PipelineEvent) => {
@@ -167,6 +210,15 @@ export async function POST(request: NextRequest) {
                 encoder.encode(`data: ${JSON.stringify({ status: 'progress', event })}\n\n`)
               );
             } catch { /* stream closed */ }
+            const now = Date.now();
+            if (now - lastProgressPersistAt >= 1500) {
+              lastProgressPersistAt = now;
+              void persistSession({
+                status: 'running',
+                progress: buildProgressPayloadFromEvent(event, now),
+                heartbeat: true,
+              });
+            }
           };
 
           const onSnapshot = (snapshot: PipelineMapSnapshot) => {
@@ -183,10 +235,24 @@ export async function POST(request: NextRequest) {
             const defaultOption = question.options.find(o => o.isDefault) || question.options[0];
 
             return new Promise<string>((resolve) => {
+              void persistSession({
+                status: 'question',
+                progress: { label: 'awaiting-answer', questionId: question.questionId },
+                question: fullQuestion,
+                heartbeat: true,
+              });
               registerQuestion(
                 sessionId,
                 question.questionId,
-                resolve,
+                (selectedOptionId) => {
+                  void persistSession({
+                    status: 'running',
+                    progress: { label: 'question-answered', questionId: question.questionId },
+                    question: null,
+                    heartbeat: true,
+                  });
+                  resolve(selectedOptionId);
+                },
                 question.timeoutMs,
                 defaultOption.id,
               );
@@ -226,6 +292,13 @@ export async function POST(request: NextRequest) {
           // Envoyer le résultat final
           const finalMessage = `data: {"status":"done","trip":${tripJson}}\n\n`;
           controller.enqueue(encoder.encode(finalMessage));
+          await persistSession({
+            status: 'done',
+            progress: { label: 'completed' },
+            question: null,
+            trip,
+            heartbeat: true,
+          });
           // Petit délai pour s'assurer que le message est bien flush avant de fermer
           await new Promise(resolve => setTimeout(resolve, 100));
           cleanupSession(sessionId);
@@ -251,6 +324,13 @@ export async function POST(request: NextRequest) {
               .replace(/\n/g, ' ')
               .substring(0, 500);
             controller.enqueue(encoder.encode(`data: {"status":"error","error":"${safeMessage}"}\n\n`));
+            await persistSession({
+              status: 'error',
+              progress: { label: 'failed' },
+              error: safeMessage,
+              question: null,
+              heartbeat: true,
+            });
           } catch (e) {
             console.error('[Generate] ❌ Erreur envoi message erreur:', e);
           }

@@ -46,6 +46,7 @@ import { batchFetchWikipediaSummaries, getWikiLanguageForDestination } from '../
 import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { selectTieredHotels, selectTopHotelsByBarycenter } from './step5-hotel';
 import { calculateDistance } from '../services/geocoding';
+import { resolveCoordinates } from '../services/coordsResolver';
 import { addOutboundTransportItem, addReturnTransportItem } from './utils/transport-items';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
@@ -59,6 +60,12 @@ import { geoReorderScheduledDay } from './utils/geo-reorder';
 import { decorateTrip } from './step12-decorate';
 import { llmReviewTrip, applyLLMCorrections } from './step13-llm-review';
 import { getDestinationIntel, resolveDestination, type DestinationIntel } from './step0-destination-intel';
+import {
+  planRegionalBlueprint,
+  extractBlueprintMustSeeSeedItems,
+  extractBlueprintMustSeeSeeds,
+  type RegionalBlueprint,
+} from './step0-regional-architect';
 import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
@@ -67,6 +74,14 @@ import { rebalanceClustersWithLLM, type LLMRebalanceResult } from './step3b-llm-
 import { detectQuestions, applyQuestionAnswers, detectPreFetchQuestions, applyEffects } from './questionDetectors';
 import type { DestinationAnalysis } from './step0-destination-intel';
 import { buildClusteredMapSnapshot, buildFetchedMapSnapshot } from './snapshots';
+import { getApiCostSummary, resetApiCostTracker, setRunBudgetProfile } from '../services/apiCostGuard';
+import {
+  mergeValidationParallelismStats,
+  mergeValidationProviderBreakdowns,
+  runValidationTasks,
+  type ValidationParallelismStats,
+  type ValidationProviderCallStats,
+} from './utils/validation-orchestrator';
 
 // ---------------------------------------------------------------------------
 // Pipeline Event System — emit helper
@@ -108,6 +123,82 @@ function normalizePlannerText(value?: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
+}
+
+function mergeMustSeeSeedsIntoPreferences(
+  preferences: TripPreferences,
+  seeds: string[],
+): void {
+  const normalizedExisting = new Set(
+    (preferences.mustSee || '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map((value) => normalizePlannerText(value))
+  );
+  const merged: string[] = (preferences.mustSee || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  for (const seed of seeds) {
+    const normalized = normalizePlannerText(seed);
+    if (!normalized || normalizedExisting.has(normalized)) continue;
+    merged.push(seed);
+    normalizedExisting.add(normalized);
+    if (merged.join(', ').length > 1800) break;
+  }
+
+  preferences.mustSee = merged.join(', ');
+}
+
+function mapResolutionSourceToGeoSource(
+  source: string
+): 'place' | 'known_product' | 'geocode' | 'city_fallback' {
+  if (source === 'google_places') return 'place';
+  if (source === 'cache') return 'place';
+  return 'geocode';
+}
+
+interface ValidationDiagnosticsSnapshot {
+  validationLatencyMs: number;
+  providerCallBreakdown: Record<string, ValidationProviderCallStats>;
+  parallelismStats: ValidationParallelismStats;
+}
+
+function emptyValidationDiagnosticsSnapshot(): ValidationDiagnosticsSnapshot {
+  return {
+    validationLatencyMs: 0,
+    providerCallBreakdown: {},
+    parallelismStats: {
+      scheduled: 0,
+      deduped: 0,
+      settled: 0,
+      fulfilled: 0,
+      rejected: 0,
+      retries: 0,
+      maxInFlight: 0,
+      maxInFlightByProvider: {},
+    },
+  };
+}
+
+function applyRegionalBlueprintToPreferences(
+  preferences: TripPreferences,
+  blueprint: RegionalBlueprint,
+): void {
+  if (blueprint.hubs.length > 1) {
+    preferences.cityPlan = blueprint.hubs.map((hub) => ({ city: hub.city, days: hub.days }));
+    preferences.travelStyle = 'road_trip';
+  } else if (blueprint.hubs.length === 1) {
+    preferences.destination = blueprint.hubs[0].city;
+    preferences.cityPlan = undefined;
+    preferences.travelStyle = 'single_base';
+  }
+  const mustSeeSeeds = extractBlueprintMustSeeSeeds(blueprint);
+  if (mustSeeSeeds.length > 0) {
+    mergeMustSeeSeedsIntoPreferences(preferences, mustSeeSeeds);
+  }
 }
 
 function inferPoiFamilyFromItem(item: { title?: string; description?: string; type?: string }): string {
@@ -230,14 +321,25 @@ export async function generateTripV2(
   onEvent?: OnPipelineEvent,
   v2Options?: GenerateTripV2Options,
 ): Promise<Trip> {
+  resetApiCostTracker();
+  setRunBudgetProfile('dense');
+
   let regionAnalysis: DestinationAnalysis | null = null;
+  let regionalBlueprint: RegionalBlueprint | null = null;
 
   // Step 0a: Region resolver — classify destination, resolve regions to cities
   if (!preferences.cityPlan && preferences.travelStyle !== 'single_base') {
     try {
       regionAnalysis = await resolveDestination(preferences);
-      if (regionAnalysis) {
-        if (regionAnalysis.inputType !== 'city' && regionAnalysis.resolvedCities.length > 1) {
+      if (regionAnalysis?.inputType && regionAnalysis.inputType !== 'city') {
+        regionalBlueprint = await planRegionalBlueprint(preferences, { analysis: regionAnalysis });
+        applyRegionalBlueprintToPreferences(preferences, regionalBlueprint);
+        setRunBudgetProfile('spread');
+        console.log(
+          `[Pipeline] Regional blueprint (${regionalBlueprint.source}): mode=${regionalBlueprint.mode}, hubs=${regionalBlueprint.hubs.map((hub) => `${hub.city}(${hub.days}j)`).join(' → ')}`
+        );
+      } else if (regionAnalysis) {
+        if (regionAnalysis.resolvedCities.length > 1) {
           preferences.cityPlan = regionAnalysis.resolvedCities.map(c => ({
             city: c.name,
             days: c.stayDuration,
@@ -251,6 +353,12 @@ export async function generateTripV2(
     } catch (e) {
       console.warn('[Pipeline] Region resolver failed, continuing with original destination:', e);
     }
+  }
+
+  if (preferences.travelStyle === 'road_trip' || (preferences.cityPlan?.length || 0) > 1) {
+    setRunBudgetProfile('spread');
+  } else if (preferences.durationDays >= 6) {
+    setRunBudgetProfile('medium');
   }
 
   // Step 0b: Pre-fetch LLM questions — contextual questions before the main pipeline
@@ -293,7 +401,7 @@ export async function generateTripV2(
   return generateTripV3(
     preferences,
     onEvent,
-    { onSnapshot: v2Options?.onSnapshot, cachedIntel },
+    { onSnapshot: v2Options?.onSnapshot, cachedIntel, regionalBlueprint },
     v2Options?.askUser,
   );
 }
@@ -327,6 +435,8 @@ export interface GenerateTripV3Options {
   onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
   /** Pre-fetched destination intel — avoids double LLM call when already resolved in generateTripV2 */
   cachedIntel?: DestinationIntel | null;
+  /** Optional regional blueprint (LLM architect) to seed must-sees and diagnostics */
+  regionalBlueprint?: RegionalBlueprint | null;
 }
 
 export async function generateTripV3(
@@ -380,8 +490,96 @@ export async function generateTripV3(
   // Step 2: Score and rank activities
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 2, stepName: 'Scoring activities', timestamp: Date.now() });
-  const selectedActivities = scoreAndSelectActivities(data, preferences);
-  const allActivities = selectedActivities; // For repair pass
+  let selectedActivities = scoreAndSelectActivities(data, preferences);
+  let allActivities = [...selectedActivities]; // For repair pass
+  let activeBlueprint: RegionalBlueprint | null = options?.regionalBlueprint || null;
+  let sparseRescueValidation = emptyValidationDiagnosticsSnapshot();
+
+  // Sparse pool activation: use regional architect as a blueprint seeding layer.
+  const sparseThreshold = Math.max(12, preferences.durationDays * 3);
+  if (selectedActivities.length < sparseThreshold) {
+    try {
+      const sparseBlueprint = options?.regionalBlueprint || await planRegionalBlueprint(preferences, { forceForSparse: true });
+      activeBlueprint = sparseBlueprint;
+      const mustSeeSeedItems = extractBlueprintMustSeeSeedItems(sparseBlueprint, Math.max(12, preferences.durationDays * 4));
+      const mustSeeSeeds = mustSeeSeedItems.map((seed) => seed.name);
+      if (mustSeeSeeds.length > 0) {
+        mergeMustSeeSeedsIntoPreferences(preferences, mustSeeSeeds);
+      }
+
+      const existingNames = new Set(selectedActivities.map((activity) => normalizePlannerText(activity.name)));
+      const injectCandidates = mustSeeSeedItems
+        .filter((seed) => !existingNames.has(normalizePlannerText(seed.name)))
+        .slice(0, 24);
+
+      const validationTasks = injectCandidates.map((seed) => ({
+        key: `sparse-seed:${normalizePlannerText(seed.name)}`,
+        provider: 'coords',
+        run: () => resolveCoordinates(
+          seed.name,
+          preferences.destination,
+          data.destCoords,
+          'attraction',
+          { allowPaidFallback: false }
+        ),
+      }));
+
+      const validationResult = await runValidationTasks(validationTasks, {
+        defaultConcurrency: 10,
+        providerConcurrency: { coords: 10 },
+        maxRetries: 2,
+        baseBackoffMs: 180,
+      });
+
+      sparseRescueValidation = {
+        validationLatencyMs: validationResult.latencyMs,
+        providerCallBreakdown: validationResult.providerCallBreakdown,
+        parallelismStats: validationResult.parallelismStats,
+      };
+
+      let injected = 0;
+      for (const seed of injectCandidates) {
+        if (injected >= 12) break;
+        const key = `sparse-seed:${normalizePlannerText(seed.name)}`;
+        const settled = validationResult.settledByKey.get(key);
+        if (!settled || settled.status !== 'fulfilled' || !settled.value) continue;
+        const resolved = settled.value;
+        selectedActivities.push({
+          id: `arch-${normalizePlannerText(seed.name).replace(/\s+/g, '-').slice(0, 48)}-${injected}`,
+          name: seed.name,
+          type: seed.kind === 'iconic' ? 'culture' : 'nature',
+          description: seed.kind === 'iconic'
+            ? "Suggestion iconique de l'architecte regional validee par geocodage"
+            : "Pepite locale proposee par l'architecte regional et validee par geocodage",
+          duration: 90,
+          estimatedCost: 0,
+          latitude: resolved.lat,
+          longitude: resolved.lng,
+          rating: seed.kind === 'iconic' ? 4.5 : 4.4,
+          reviewCount: 200,
+          mustSee: true,
+          bookingRequired: false,
+          openingHours: { open: '09:00', close: '18:00' },
+          dataReliability: 'verified',
+          geoSource: mapResolutionSourceToGeoSource(resolved.source),
+          geoConfidence: 'high',
+          source: 'mustsee',
+          score: seed.kind === 'iconic' ? 34 : 31,
+          protectedReason: 'user_forced',
+        });
+        existingNames.add(normalizePlannerText(seed.name));
+        injected++;
+      }
+
+      if (injected > 0) {
+        allActivities = [...selectedActivities];
+        console.log(`[Pipeline V3] Sparse pool rescue: +${injected} architect anchors injected (${selectedActivities.length}/${sparseThreshold})`);
+      }
+    } catch (e) {
+      console.warn('[Pipeline V3] Sparse pool rescue failed (non-blocking):', e);
+    }
+  }
+
   stageTimes['score'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 2: ${selectedActivities.length} activities selected`);
   onEvent?.({ type: 'step_done', step: 2, stepName: 'Scoring activities', durationMs: stageTimes['score'], timestamp: Date.now() });
@@ -470,6 +668,13 @@ export async function generateTripV3(
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 3, stepName: 'Clustering', timestamp: Date.now() });
   const densityProfile = computeCityDensityProfile(activitiesAfterDayTrips, preferences.durationDays);
+  if (densityProfile.densityCategory === 'spread') {
+    setRunBudgetProfile('spread');
+  } else if (densityProfile.densityCategory === 'medium') {
+    setRunBudgetProfile('medium');
+  } else {
+    setRunBudgetProfile('dense');
+  }
 
   const PACE_FACTOR: Record<string, number> = {
     relaxed: 0.65,
@@ -580,14 +785,50 @@ export async function generateTripV3(
     }
   }
 
+  const mergedProviderCallBreakdown = mergeValidationProviderBreakdowns([
+    activeBlueprint?.diagnostics?.providerCallBreakdown,
+    sparseRescueValidation.providerCallBreakdown,
+  ]);
+  const mergedParallelismStats = mergeValidationParallelismStats([
+    activeBlueprint?.diagnostics?.parallelismStats,
+    sparseRescueValidation.parallelismStats,
+  ]);
+  trip.generationDiagnostics = {
+    validationLatencyMs:
+      (activeBlueprint?.diagnostics?.validationLatencyMs || 0)
+      + sparseRescueValidation.validationLatencyMs,
+    providerCallBreakdown: mergedProviderCallBreakdown,
+    parallelismStats: mergedParallelismStats,
+  };
+
+  const scheduledItems = trip.days.flatMap((day) => day.items);
+  const validatedCount = scheduledItems.filter((item) =>
+    Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
+  ).length;
+  const replacedCount =
+    (trip.plannerDiagnostics?.lateMealReplacementCount || 0)
+    + (trip.plannerDiagnostics?.mealFallbackCount || 0)
+    + (trip.plannerDiagnostics?.routeRebuildCount || 0);
+  const rejectedCount =
+    (trip.contractViolations?.length || 0)
+    + (trip.plannerDiagnostics?.finalIntegrityFailures || 0);
+  const ratioIconicLocal = activeBlueprint?.ratioActual || { iconic: 0.6, localGem: 0.4 };
+  trip.reliabilitySummary = {
+    validatedCount,
+    replacedCount,
+    rejectedCount,
+    ratioIconicLocal,
+  };
+
   // Timing and cost logging
   const totalTime = Date.now() - startTime;
-  const { getApiCostSummary } = await import('../services/apiCostGuard');
   const costSummary = getApiCostSummary();
   console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);
   console.log(`  Quality: ${trip.qualityMetrics?.score}/100`);
   console.log(`  LLM rebalance: ${trip.plannerDiagnostics?.llmRebalanceUsed ? 'WON' : 'algo won'}`);
-  console.log(`  API cost: €${costSummary.totalEur.toFixed(2)} / €${costSummary.budget.toFixed(2)}`);
+  console.log(
+    `  API cost: €${costSummary.totalEur.toFixed(2)} (profile=${costSummary.profile}, target=€${costSummary.targetEur.toFixed(2)}, burst=€${costSummary.burstCapEur.toFixed(2)}, hard=€${costSummary.budget.toFixed(2)})`
+  );
 
   onEvent?.({ type: 'info', label: 'complete', detail: 'Trip generation complete!', timestamp: Date.now() });
 
@@ -1147,6 +1388,34 @@ export async function generateTripV3MultiCity(
     score: Math.round(segments.reduce((s, seg) => s + (seg.qualityMetrics?.score || 0), 0) / segments.length),
     invariantsPassed: segments.every(s => s.qualityMetrics?.invariantsPassed ?? true),
     violations: segments.flatMap(s => s.qualityMetrics?.violations || []),
+  };
+  mergedTrip.reliabilitySummary = {
+    validatedCount: segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.validatedCount || 0), 0),
+    replacedCount: segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.replacedCount || 0), 0),
+    rejectedCount: segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.rejectedCount || 0), 0),
+    ratioIconicLocal: {
+      iconic: Number(
+        (
+          segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.ratioIconicLocal.iconic || 0), 0)
+          / segments.length
+        ).toFixed(3)
+      ),
+      localGem: Number(
+        (
+          segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.ratioIconicLocal.localGem || 0), 0)
+          / segments.length
+        ).toFixed(3)
+      ),
+    },
+  };
+  mergedTrip.generationDiagnostics = {
+    validationLatencyMs: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.validationLatencyMs || 0), 0),
+    providerCallBreakdown: mergeValidationProviderBreakdowns(
+      segments.map((segment) => segment.generationDiagnostics?.providerCallBreakdown)
+    ),
+    parallelismStats: mergeValidationParallelismStats(
+      segments.map((segment) => segment.generationDiagnostics?.parallelismStats)
+    ),
   };
 
   return mergedTrip;

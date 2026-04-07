@@ -4,6 +4,7 @@ import { Check, Plus, Luggage } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 interface PackingItem {
   id: string;
@@ -22,30 +23,31 @@ interface Props {
   packingItems?: string[]; // from trip.travelTips.packing
 }
 
-const DEFAULT_CATEGORIES: { title: string; emoji: string; items: string[] }[] = [
-  { title: 'Essentiels', emoji: '🎒', items: ['Passeport / Carte d\'identité', 'Billets d\'avion / réservations', 'Carte bancaire', 'Téléphone + chargeur', 'Assurance voyage'] },
-  { title: 'Vêtements', emoji: '👕', items: ['T-shirts', 'Pantalons / shorts', 'Sous-vêtements', 'Chaussures confortables', 'Veste / pull'] },
-  { title: 'Toilette', emoji: '🧴', items: ['Brosse à dents', 'Shampoing', 'Crème solaire', 'Déodorant'] },
-  { title: 'Électronique', emoji: '📱', items: ['Adaptateur prise', 'Batterie externe', 'Écouteurs', 'Appareil photo'] },
-  { title: 'Santé', emoji: '💊', items: ['Médicaments personnels', 'Trousse premiers secours', 'Masques'] },
-];
-
-function buildCategories(packingItems?: string[]): PackingCategory[] {
-  if (packingItems && packingItems.length > 0) {
-    return [{
-      title: 'À emporter',
-      emoji: '🎒',
-      data: packingItems.map((item, i) => ({ id: `trip-${i}`, label: item, checked: false })),
-    }];
-  }
-  return DEFAULT_CATEGORIES.map((cat) => ({
-    title: cat.title,
-    emoji: cat.emoji,
-    data: cat.items.map((item, i) => ({ id: `${cat.title}-${i}`, label: item, checked: false })),
-  }));
-}
-
 export function PackingList({ tripId, packingItems }: Props) {
+  const { t } = useTranslation();
+
+  const DEFAULT_CATEGORIES: { title: string; emoji: string; items: string[] }[] = [
+    { title: t('packing.category.essentials'), emoji: '🎒', items: [t('packing.item.passport'), t('packing.item.tickets'), t('packing.item.card'), t('packing.item.phone'), t('packing.item.insurance')] },
+    { title: t('packing.category.clothes'), emoji: '👕', items: [t('packing.item.tshirts'), t('packing.item.pants'), t('packing.item.underwear'), t('packing.item.shoes'), t('packing.item.jacket')] },
+    { title: t('packing.category.hygiene'), emoji: '🧴', items: [t('packing.item.toothbrush'), t('packing.item.shampoo'), t('packing.item.sunscreen'), t('packing.item.deodorant')] },
+    { title: t('packing.category.electronics'), emoji: '📱', items: [t('packing.item.adapter'), t('packing.item.powerbank'), t('packing.item.headphones'), t('packing.item.camera')] },
+    { title: t('packing.category.health'), emoji: '💊', items: [t('packing.item.medications'), t('packing.item.firstaid'), t('packing.item.masks')] },
+  ];
+
+  function buildCategories(items?: string[]): PackingCategory[] {
+    if (items && items.length > 0) {
+      return [{
+        title: t('packing.category.tripItems'),
+        emoji: '🎒',
+        data: items.map((item, i) => ({ id: `trip-${i}`, label: item, checked: false })),
+      }];
+    }
+    return DEFAULT_CATEGORIES.map((cat) => ({
+      title: cat.title,
+      emoji: cat.emoji,
+      data: cat.items.map((item, i) => ({ id: `${cat.title}-${i}`, label: item, checked: false })),
+    }));
+  }
   const storageKey = `@narae/packing/${tripId}`;
   const [categories, setCategories] = useState<PackingCategory[]>(() => buildCategories(packingItems));
   const [newItem, setNewItem] = useState('');
@@ -106,7 +108,7 @@ export function PackingList({ tripId, packingItems }: Props) {
     <View style={s.container}>
       <View style={s.header}>
         <Luggage size={18} color={colors.gold} />
-        <Text style={s.title}>Packing List</Text>
+        <Text style={s.title}>{t('packing.title')}</Text>
         <Text style={s.count}>{checkedItems}/{totalItems}</Text>
       </View>
 
@@ -142,7 +144,7 @@ export function PackingList({ tripId, packingItems }: Props) {
       <View style={s.addRow}>
         <TextInput
           style={s.addInput}
-          placeholder="Ajouter un item..."
+          placeholder={t('packing.addItem')}
           placeholderTextColor={colors.textMuted}
           value={newItem}
           onChangeText={setNewItem}

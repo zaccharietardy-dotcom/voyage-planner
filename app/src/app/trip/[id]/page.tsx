@@ -2107,17 +2107,17 @@ export default function TripPage() {
                         {/* Bouton "Ajouter un jour" entre les jours (sauf après le dernier) */}
                         {canOwnerEdit && idx < (trip?.days || []).length - 1 && idx > 0 && (
                           <div className="flex items-center justify-center py-2 group">
-                            <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
+                            <div className="flex-1 h-px bg-border md:group-hover:bg-primary/30 transition-colors" />
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 text-xs text-muted-foreground hover:text-primary gap-1.5 mx-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-7 text-xs text-muted-foreground hover:text-primary gap-1.5 mx-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                               onClick={() => handleInsertDay(day.dayNumber)}
                             >
                               <CalendarPlus className="h-3.5 w-3.5" />
                               Ajouter un jour
                             </Button>
-                            <div className="flex-1 h-px bg-border group-hover:bg-primary/30 transition-colors" />
+                            <div className="flex-1 h-px bg-border md:group-hover:bg-primary/30 transition-colors" />
                           </div>
                         )}
                       </div>

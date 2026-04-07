@@ -8,6 +8,7 @@ import { shareICSFile } from '@/lib/ics';
 import { exportTripPdf } from '@/lib/exportPdf';
 import type { Trip } from '@/lib/types/trip';
 import type { LucideIcon } from 'lucide-react-native';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   isOpen: boolean;
@@ -16,16 +17,18 @@ interface Props {
 }
 
 export function CalendarExport({ isOpen, onClose, trip }: Props) {
+  const { t } = useTranslation();
+
   const handleApple = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const count = await exportTripToAppleCalendar(trip);
       onClose();
       if (count > 0) {
-        Alert.alert('Export\u00e9 !', `${count} \u00e9v\u00e9nement${count > 1 ? 's' : ''} ajout\u00e9${count > 1 ? 's' : ''} \u00e0 votre calendrier Apple.`);
+        Alert.alert(t('export.success.apple'), t('export.success.apple.msg', { count, plural: count > 1 ? 's' : '' }));
       }
     } catch {
-      Alert.alert('Erreur', 'Impossible d\'exporter vers Apple Calendar');
+      Alert.alert(t('common.error'), t('export.error.apple'));
     }
   };
 
@@ -46,7 +49,7 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
       await shareICSFile(trip);
       onClose();
     } catch {
-      Alert.alert('Erreur', 'Impossible de g\u00e9n\u00e9rer le fichier .ics');
+      Alert.alert(t('common.error'), t('export.error.ics'));
     }
   };
 
@@ -56,48 +59,48 @@ export function CalendarExport({ isOpen, onClose, trip }: Props) {
       await exportTripPdf(trip);
       onClose();
     } catch {
-      Alert.alert('Erreur', 'Impossible de g\u00e9n\u00e9rer le PDF');
+      Alert.alert(t('common.error'), t('export.error.pdf'));
     }
   };
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} height={0.48}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Text style={s.title}>Exporter</Text>
+        <Text style={s.title}>{t('export.title')}</Text>
 
         <View style={s.section}>
-          <Text style={s.sectionLabel}>CALENDRIER</Text>
+          <Text style={s.sectionLabel}>{t('export.calendar')}</Text>
           <ExportRow
             icon={Calendar}
             iconColor="#f87171"
-            label="Apple Calendar"
-            desc="Ajoute les événements à iOS"
+            label={t('export.apple.title')}
+            desc={t('export.apple.desc')}
             onPress={handleApple}
           />
           <ExportRow
             icon={Globe}
             iconColor="#60a5fa"
-            label="Google Calendar"
-            desc="Ouvre Google Calendar"
+            label={t('export.google.title')}
+            desc={t('export.google.desc')}
             onPress={handleGoogle}
           />
           <ExportRow
             icon={FileDown}
             iconColor="#4ade80"
-            label="Fichier .ics"
-            desc="Outlook, Thunderbird, etc."
+            label={t('export.ics.title')}
+            desc={t('export.ics.desc')}
             onPress={handleICS}
             isLast
           />
         </View>
 
         <View style={s.section}>
-          <Text style={s.sectionLabel}>DOCUMENT</Text>
+          <Text style={s.sectionLabel}>{t('export.document')}</Text>
           <ExportRow
             icon={FileText}
             iconColor={colors.gold}
-            label="Exporter en PDF"
-            desc="Itinéraire complet avec budget"
+            label={t('export.pdf.title')}
+            desc={t('export.pdf.desc')}
             onPress={handlePdf}
             isLast
           />

@@ -208,7 +208,7 @@ export function CalendarView({
   // Slide animation variants for day transitions
   const daySlideVariants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? '40%' : '-40%',
+      x: dir > 0 ? '10%' : '-10%',
       opacity: 0,
     }),
     center: {
@@ -216,7 +216,7 @@ export function CalendarView({
       opacity: 1,
     },
     exit: (dir: number) => ({
-      x: dir > 0 ? '-40%' : '40%',
+      x: dir > 0 ? '-10%' : '10%',
       opacity: 0,
     }),
   };

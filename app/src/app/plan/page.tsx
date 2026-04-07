@@ -5,6 +5,7 @@ import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
   StepDestination,
@@ -110,7 +111,7 @@ export default function PlanPage() {
     }
   }, []);
 
-  const stepVariants: any = {
+  const stepVariants: Variants = {
     enter: (dir: number) => ({ 
       y: dir > 0 ? 10 : -10, 
       opacity: 0,
@@ -589,8 +590,10 @@ export default function PlanPage() {
                 )} />
               </div>
               <span className={cn(
-                'text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 absolute -bottom-6 w-max text-center',
-                step.id === currentStep ? 'text-gold drop-shadow-md' : 'text-white/20 group-hover:text-white/50'
+                'text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 text-center md:absolute md:-bottom-6 md:w-max',
+                step.id === currentStep
+                  ? 'block mt-1 md:mt-0 text-gold drop-shadow-md'
+                  : 'hidden md:block text-white/20 group-hover:text-white/50'
               )}>
                 {step.label}
               </span>

@@ -6,6 +6,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { SelectionSheet, type SelectionSheetOption } from '@/components/ui/SelectionSheet';
 import { UserSearch } from '@/components/social/UserSearch';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   isOpen: boolean;
@@ -16,15 +17,16 @@ interface Props {
   onVisibilityChange?: (v: 'public' | 'friends' | 'private') => void;
 }
 
-const VISIBILITY_OPTIONS = [
-  { value: 'private' as const, label: 'Privé', desc: 'Visible uniquement par vous', icon: Lock },
-  { value: 'friends' as const, label: 'Amis', desc: 'Visible par vos abonnés', icon: Users },
-  { value: 'public' as const, label: 'Public', desc: 'Visible par tous sur Explorer', icon: Globe },
-];
-
 export function SharePanel({ isOpen, onClose, tripId, destination, visibility, onVisibilityChange }: Props) {
   const [visibilityOpen, setVisibilityOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const VISIBILITY_OPTIONS = [
+    { value: 'private' as const, label: t('share.visibility.private'), desc: t('share.visibility.private.desc'), icon: Lock },
+    { value: 'friends' as const, label: t('share.visibility.friends'), desc: t('share.visibility.friends.desc'), icon: Users },
+    { value: 'public' as const, label: t('share.visibility.public'), desc: t('share.visibility.public.desc'), icon: Globe },
+  ];
   const shareUrl = `https://naraevoyage.com/trip/${tripId}`;
   const selectedVisibility = useMemo(
     () => VISIBILITY_OPTIONS.find((option) => option.value === visibility) || VISIBILITY_OPTIONS[0],
@@ -40,14 +42,14 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
   const handleCopyLink = async () => {
     try {
       await Share.share({ message: shareUrl });
-      Alert.alert('Lien copié', shareUrl);
+      Alert.alert(t('share.copyLink.success'), shareUrl);
     } catch {}
   };
 
   const handleNativeShare = async () => {
     try {
       await Share.share({
-        message: `Découvre mon voyage à ${destination} sur Narae Voyage !\n${shareUrl}`,
+        message: `${t('share.message', { destination })}\n${shareUrl}`,
       });
     } catch {}
   };
@@ -56,10 +58,10 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
     <>
       <BottomSheet isOpen={isOpen} onClose={onClose} height={0.62}>
         <View style={styles.content}>
-          <Text style={styles.title}>Partager</Text>
+          <Text style={styles.title}>{t('share.title')}</Text>
 
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Visibilité</Text>
+            <Text style={styles.sectionLabel}>{t('share.visibility.label')}</Text>
             <Pressable onPress={() => setVisibilityOpen(true)} style={styles.visibilityCard}>
               <View style={styles.visibilityIcon}>
                 <selectedVisibility.icon size={18} color={colors.gold} />
@@ -73,18 +75,18 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Collaborateurs</Text>
+            <Text style={styles.sectionLabel}>{t('share.collaborators')}</Text>
             <Button icon={UserPlus} variant="outline" onPress={() => setInviteOpen(true)}>
-              Inviter des amis
+              {t('share.invite')}
             </Button>
           </View>
 
           <View style={styles.actions}>
             <Button icon={Link2} variant="outline" onPress={handleCopyLink}>
-              Copier le lien
+              {t('share.copyLink')}
             </Button>
             <Button icon={Share2} onPress={handleNativeShare}>
-              Partager
+              {t('share.share')}
             </Button>
           </View>
         </View>
@@ -97,8 +99,8 @@ export function SharePanel({ isOpen, onClose, tripId, destination, visibility, o
       <SelectionSheet
         isOpen={visibilityOpen}
         onClose={() => setVisibilityOpen(false)}
-        title="Visibilité du voyage"
-        subtitle="Choisissez qui peut voir ce voyage dans l’app."
+        title={t('share.visibility.title')}
+        subtitle={t('share.visibility.subtitle')}
         options={sheetOptions}
         selectedValue={visibility}
         onSelect={(value) => onVisibilityChange?.(value as 'public' | 'friends' | 'private')}

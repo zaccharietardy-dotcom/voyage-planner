@@ -2235,6 +2235,78 @@ export const DAY_TRIP_DATABASE: DayTripSuggestion[] = [
 // Main Suggestion Algorithm
 // ============================================
 
+function normalizeMatch(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenizeMatch(value: string): string[] {
+  return normalizeMatch(value)
+    .split(' ')
+    .filter((token) => token.length >= 3);
+}
+
+function tokenOverlapScore(left: string, right: string): number {
+  const leftTokens = new Set(tokenizeMatch(left));
+  const rightTokens = new Set(tokenizeMatch(right));
+  if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
+  let overlap = 0;
+  for (const token of leftTokens) {
+    if (rightTokens.has(token)) overlap++;
+  }
+  return overlap / Math.min(leftTokens.size, rightTokens.size);
+}
+
+export function matchDayTripDatabaseEntries(
+  destination: string,
+  destCoords: { lat: number; lng: number }
+): DayTripSuggestion[] {
+  const normalizedDest = normalizeMatch(destination);
+
+  const scored = DAY_TRIP_DATABASE
+    .map((trip) => {
+      const normalizedFromCity = normalizeMatch(trip.fromCity);
+      const textDirect =
+        normalizedDest.includes(normalizedFromCity) ||
+        normalizedFromCity.includes(normalizedDest);
+      const fuzzyScore = tokenOverlapScore(normalizedDest, normalizedFromCity);
+      const geoDistance = calculateDistance(destCoords.lat, destCoords.lng, trip.latitude, trip.longitude);
+
+      // A geographic fallback to support region inputs where fromCity is not an exact match.
+      const geoWindowKm = Math.min(220, Math.max(60, trip.distanceKm + 80));
+      const geoMatch = geoDistance <= geoWindowKm;
+
+      let score = 0;
+      if (textDirect) score += 100;
+      if (fuzzyScore >= 0.5) score += 70;
+      else if (fuzzyScore >= 0.3) score += 40;
+      if (geoMatch) score += 25;
+      score -= Math.min(20, Math.floor(geoDistance / 30));
+
+      return { trip, score };
+    })
+    .filter((entry) => entry.score >= 55)
+    .sort((a, b) => b.score - a.score);
+
+  if (scored.length > 0) return scored.map((entry) => entry.trip);
+
+  // Last-resort geographic fallback for regional destinations.
+  return DAY_TRIP_DATABASE
+    .map((trip) => ({
+      trip,
+      distance: calculateDistance(destCoords.lat, destCoords.lng, trip.latitude, trip.longitude),
+    }))
+    .filter((entry) => entry.distance <= 120)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, 12)
+    .map((entry) => entry.trip);
+}
+
 /**
  * Suggests day trips for a given destination based on preferences.
  *
@@ -2255,12 +2327,8 @@ export function suggestDayTrips(
     prePurchasedTickets?: Array<{ name: string; date?: string; notes?: string }>;
   }
 ): DayTripSuggestion[] {
-  const normalizedDest = destination.toLowerCase().trim();
-
-  // 1. Match by fromCity
-  const destinationMatches = DAY_TRIP_DATABASE.filter((trip) => {
-    return normalizedDest.includes(trip.fromCity) || trip.fromCity.includes(normalizedDest);
-  });
+  // 1. Match by fuzzy text + geographic filter
+  const destinationMatches = matchDayTripDatabaseEntries(destination, destCoords);
 
   // If no curated matches, return empty (caller will use AI fallback)
   if (destinationMatches.length === 0) return [];

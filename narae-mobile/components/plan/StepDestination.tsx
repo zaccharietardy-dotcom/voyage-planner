@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, FlatList, Pressable, TextInput, Keyboard, StyleSheet, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { MapPin } from 'lucide-react-native';
@@ -11,6 +11,13 @@ import type { TripPreferences } from '@/lib/types/trip';
 interface Props {
   prefs: Partial<TripPreferences>;
   onChange: (update: Partial<TripPreferences>) => void;
+}
+
+interface NominatimLocation {
+  type?: string;
+  class?: string;
+  display_name?: string;
+  name?: string;
 }
 
 const TYPE_BADGES: Record<string, { label: string; color: string }> = {
@@ -67,6 +74,7 @@ export function StepDestination({ prefs, onChange }: Props) {
   const [suggestions, setSuggestions] = useState<DestinationSuggestion[]>([]);
   const [nominatimResults, setNominatimResults] = useState<DestinationSuggestion[]>([]);
   const nominatimTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { width } = useWindowDimensions();
   const { t } = useTranslation();
 
@@ -84,10 +92,12 @@ export function StepDestination({ prefs, onChange }: Props) {
           { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
         );
         if (!resp.ok) return;
-        const data = await resp.json();
+        const rawData: unknown = await resp.json();
+        if (!Array.isArray(rawData)) return;
+        const data = rawData as NominatimLocation[];
         const results: DestinationSuggestion[] = data
-          .filter((r: any) => ['city', 'town', 'village', 'administrative', 'state', 'country'].some(t => (r.type || '').includes(t) || (r.class || '').includes(t)))
-          .map((r: any) => {
+          .filter((r) => ['city', 'town', 'village', 'administrative', 'state', 'country'].some((t) => (r.type || '').includes(t) || (r.class || '').includes(t)))
+          .map((r) => {
             const parts = (r.display_name || '').split(', ');
             const isRegion = r.type === 'administrative' || r.type === 'state';
             const isCountry = r.type === 'country';
@@ -139,6 +149,13 @@ export function StepDestination({ prefs, onChange }: Props) {
     onChange({ destination: text, durationDays: getSuggestedDuration(text, prefs.origin) });
   };
 
+  useEffect(() => {
+    return () => {
+      if (nominatimTimer.current) clearTimeout(nominatimTimer.current);
+      if (blurTimer.current) clearTimeout(blurTimer.current);
+    };
+  }, []);
+
   return (
     <View style={{ gap: 28 }}>
       {/* Title — matches web text-4xl font-serif font-bold */}
@@ -161,18 +178,26 @@ export function StepDestination({ prefs, onChange }: Props) {
             value={destQuery}
             onChangeText={handleChange}
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onBlur={() => {
+              if (blurTimer.current) clearTimeout(blurTimer.current);
+              blurTimer.current = setTimeout(() => setIsFocused(false), 120);
+            }}
             autoCorrect={false}
           />
         </View>
+      </View>
 
-        {/* Autocomplete dropdown — matches web rounded-[1.2rem] bg-[#0f1629] */}
-        {filtered.length > 0 && isFocused && (
-          <View style={s.dropdown}>
-            {filtered.map((item, idx) => {
+      {/* Autocomplete list in-flow (avoids keyboard clipping on mobile) */}
+      {filtered.length > 0 && isFocused && (
+        <View style={s.dropdownInline}>
+          <FlatList
+            data={filtered}
+            keyExtractor={(item, idx) => `${item.name}-${idx}`}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => {
               const badge = TYPE_BADGES[item.type] || TYPE_BADGES.city;
               return (
-                <Pressable key={`${item.name}-${idx}`} onPress={() => handleSelect(item.name)} style={s.suggestion}>
+                <Pressable onPress={() => handleSelect(item.name)} style={s.suggestion}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <Text style={{ fontSize: 16 }}>{item.emoji}</Text>
                     <View style={{ flex: 1 }}>
@@ -185,10 +210,10 @@ export function StepDestination({ prefs, onChange }: Props) {
                   </View>
                 </Pressable>
               );
-            })}
-          </View>
-        )}
-      </View>
+            }}
+          />
+        </View>
+      )}
 
       {/* Popular destinations — matches web grid-cols-2 rounded-[2.5rem] */}
       <View style={{ gap: 16 }}>
@@ -282,13 +307,8 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.sansMedium,
   },
-  // Dropdown — matches web rounded-[1.2rem] bg-[#0f1629] border-white/10
-  dropdown: {
-    position: 'absolute',
-    top: 62,
-    left: 0,
-    right: 0,
-    zIndex: 50,
+  // In-flow dropdown (mobile keyboard safe)
+  dropdownInline: {
     borderRadius: 19,
     borderCurve: 'continuous',
     borderWidth: 1,
@@ -299,7 +319,7 @@ const s = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 30,
     paddingVertical: 12,
-    maxHeight: 256,
+    maxHeight: 280,
   },
   suggestion: {
     paddingHorizontal: 24,

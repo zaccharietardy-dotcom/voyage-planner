@@ -5,6 +5,15 @@ interface RateLimitRpcRow {
   reset_at: string;
 }
 
+type Awaitable<T> = PromiseLike<T> | Promise<T>;
+
+export interface RateLimitSupabaseLike {
+  rpc: (
+    fn: string,
+    params: Record<string, unknown>
+  ) => Awaitable<{ data: unknown; error: { message?: string } | null }>;
+}
+
 export interface DbRateLimitResult {
   allowed: boolean;
   remaining: number;
@@ -13,12 +22,7 @@ export interface DbRateLimitResult {
 }
 
 export async function checkAndIncrementRateLimit(
-  supabase: {
-    rpc: (
-      fn: string,
-      params: Record<string, unknown>
-    ) => Promise<{ data: RateLimitRpcRow[] | null; error: { message?: string } | null }>;
-  },
+  supabase: RateLimitSupabaseLike,
   key: string,
   maxRequests: number,
   windowSeconds: number
@@ -33,7 +37,7 @@ export async function checkAndIncrementRateLimit(
     throw new Error(error.message || 'Rate limit RPC failed');
   }
 
-  const row = data?.[0];
+  const row = Array.isArray(data) ? (data[0] as RateLimitRpcRow | undefined) : undefined;
   if (!row) {
     throw new Error('Rate limit RPC returned no data');
   }

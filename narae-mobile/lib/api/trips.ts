@@ -100,7 +100,18 @@ interface SSEBufferResult {
   trip?: Trip;
 }
 
+interface GenerateSessionPayload {
+  status: 'running' | 'question' | 'done' | 'error' | 'interrupted';
+  progress?: PipelineProgressEvent | null;
+  question?: PipelineQuestion | null;
+  trip?: Trip | null;
+  error?: string | null;
+}
+
 const PIPELINE_TOTAL_STEPS = 8;
+const STREAM_READ_TIMEOUT_MS = 60_000;
+const POLL_INTERVAL_MS = 2_000;
+const POLL_MAX_DURATION_MS = 5 * 60_000;
 
 export function buildProgressFromEvent(event: PipelineProgressEvent): GenerateProgress | null {
   if (event.type === 'step_start' && event.stepName) {
@@ -183,6 +194,19 @@ export async function answerGenerateQuestion(
     const payload = await response.json().catch(() => ({}));
     throw new Error(payload.error || 'Impossible d’envoyer votre réponse');
   }
+}
+
+async function fetchGenerateSession(sessionId: string): Promise<GenerateSessionPayload> {
+  const response = await fetchWithAuth(`${SITE_URL}/api/generate/session?sessionId=${encodeURIComponent(sessionId)}`);
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `Session polling failed (${response.status})`);
+  }
+  return payload as GenerateSessionPayload;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function requestGenerate(
@@ -287,6 +311,7 @@ export async function processSSEBuffer(
   buffer: string,
   callbacks: GenerateCallbacks,
   currentSessionId: string | null,
+  answeredQuestionIds?: Set<string>,
 ): Promise<SSEBufferResult> {
   const parts = buffer.split('\n\n');
   const remaining = parts.pop() ?? '';
@@ -338,6 +363,7 @@ export async function processSSEBuffer(
           : defaultOption?.id;
 
         if (selectedOptionId) {
+          answeredQuestionIds?.add(question.questionId);
           await answerGenerateQuestion(
             sessionId ?? question.sessionId,
             question.questionId,
@@ -373,6 +399,55 @@ export async function processSSEBuffer(
   };
 }
 
+async function pollGenerationSessionUntilTerminal(
+  sessionId: string,
+  callbacks: GenerateCallbacks,
+  answeredQuestionIds: Set<string>,
+): Promise<Trip> {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt <= POLL_MAX_DURATION_MS) {
+    const session = await fetchGenerateSession(sessionId);
+
+    if (session.progress) {
+      const progress = buildProgressFromEvent(session.progress as PipelineProgressEvent);
+      if (progress) callbacks.onProgress?.(progress);
+    }
+
+    if (session.status === 'question' && session.question) {
+      const question = session.question;
+      if (!answeredQuestionIds.has(question.questionId)) {
+        const defaultOption = question.options.find((option) => option.isDefault) ?? question.options[0];
+        const selectedOptionId = callbacks.onQuestion
+          ? await callbacks.onQuestion(question)
+          : defaultOption?.id;
+        if (selectedOptionId) {
+          answeredQuestionIds.add(question.questionId);
+          await answerGenerateQuestion(sessionId, question.questionId, selectedOptionId);
+        }
+      }
+      await sleep(POLL_INTERVAL_MS);
+      continue;
+    }
+
+    if (session.status === 'done' && session.trip) {
+      return session.trip;
+    }
+
+    if (session.status === 'error') {
+      throw new Error(session.error || 'Erreur de génération');
+    }
+
+    if (session.status === 'interrupted') {
+      throw new Error(session.error || 'Génération interrompue');
+    }
+
+    await sleep(POLL_INTERVAL_MS);
+  }
+
+  throw new Error('Timeout de récupération de session');
+}
+
 async function parseSSEStream(
   res: Response,
   callbacks: GenerateCallbacks,
@@ -383,13 +458,41 @@ async function parseSSEStream(
   const decoder = new TextDecoder();
   let buffer = '';
   let sessionId: string | null = null;
+  const answeredQuestionIds = new Set<string>();
+
+  const readWithTimeout = async (): Promise<ReadableStreamReadResult<Uint8Array>> => {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    try {
+      return await Promise.race([
+        reader.read(),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error(`Stream timeout after ${STREAM_READ_TIMEOUT_MS}ms`)),
+            STREAM_READ_TIMEOUT_MS
+          );
+        }),
+      ]);
+    } finally {
+      if (timeout) clearTimeout(timeout);
+    }
+  };
 
   while (true) {
-    const { done, value } = await reader.read();
+    let readResult: ReadableStreamReadResult<Uint8Array>;
+    try {
+      readResult = await readWithTimeout();
+    } catch (err) {
+      if (sessionId) {
+        return pollGenerationSessionUntilTerminal(sessionId, callbacks, answeredQuestionIds);
+      }
+      throw err;
+    }
+
+    const { done, value } = readResult;
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const processed = await processSSEBuffer(buffer, callbacks, sessionId);
+    const processed = await processSSEBuffer(buffer, callbacks, sessionId, answeredQuestionIds);
     if (processed.trip) return processed.trip;
     if (processed.error) throw new Error(processed.error);
     buffer = processed.remaining;
@@ -397,7 +500,7 @@ async function parseSSEStream(
   }
 
   if (buffer.trim()) {
-    const processed = await processSSEBuffer(`${buffer}\n\n`, callbacks, sessionId);
+    const processed = await processSSEBuffer(`${buffer}\n\n`, callbacks, sessionId, answeredQuestionIds);
     if (processed.trip) return processed.trip;
     if (processed.error) throw new Error(processed.error);
     buffer = processed.remaining;
@@ -413,6 +516,10 @@ async function parseSSEStream(
     } catch {
       // Ignore final malformed fragment.
     }
+  }
+
+  if (sessionId) {
+    return pollGenerationSessionUntilTerminal(sessionId, callbacks, answeredQuestionIds);
   }
 
   throw new Error('Generation produced no result');

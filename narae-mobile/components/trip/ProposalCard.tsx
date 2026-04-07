@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { Avatar } from '@/components/ui/Avatar';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { Proposal, ProposalStatus } from '@/hooks/useProposals';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   proposal: Proposal;
@@ -12,13 +13,6 @@ interface Props {
   onDecide: (proposalId: string, decision: 'merge' | 'reject') => void;
 }
 
-const STATUS_LABELS: Record<ProposalStatus, string> = {
-  pending: 'En attente',
-  approved: 'Approuvé',
-  rejected: 'Rejeté',
-  merged: 'Fusionné',
-};
-
 const STATUS_COLORS: Record<ProposalStatus, string> = {
   pending: colors.gold,
   approved: '#4ade80',
@@ -26,7 +20,15 @@ const STATUS_COLORS: Record<ProposalStatus, string> = {
   merged: '#60a5fa',
 };
 
+const STATUS_KEYS: Record<ProposalStatus, string> = {
+  pending: 'proposal.pending',
+  approved: 'proposal.approved',
+  rejected: 'proposal.rejected',
+  merged: 'proposal.merged',
+};
+
 export function ProposalCard({ proposal, isOwner, onVote, onDecide }: Props) {
+  const { t } = useTranslation();
   const isPending = proposal.status === 'pending';
   const isApproved = proposal.status === 'approved';
 
@@ -39,10 +41,10 @@ export function ProposalCard({ proposal, isOwner, onVote, onDecide }: Props) {
           size="sm"
         />
         <View style={s.headerInfo}>
-          <Text style={s.author}>{proposal.author?.display_name || 'Voyageur'}</Text>
+          <Text style={s.author}>{proposal.author?.display_name || t('proposal.author.anon')}</Text>
           <View style={[s.statusBadge, { backgroundColor: `${STATUS_COLORS[proposal.status]}20` }]}>
             <Text style={[s.statusText, { color: STATUS_COLORS[proposal.status] }]}>
-              {STATUS_LABELS[proposal.status]}
+              {t(STATUS_KEYS[proposal.status] as any)}
             </Text>
           </View>
         </View>
@@ -73,14 +75,14 @@ export function ProposalCard({ proposal, isOwner, onVote, onDecide }: Props) {
             style={[s.actionBtn, s.actionBtnYes]}
           >
             <ThumbsUp size={14} color="#4ade80" />
-            <Text style={[s.actionBtnText, { color: '#4ade80' }]}>Pour</Text>
+            <Text style={[s.actionBtnText, { color: '#4ade80' }]}>{t('proposal.vote.for')}</Text>
           </Pressable>
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onVote(proposal.id, false); }}
             style={[s.actionBtn, s.actionBtnNo]}
           >
             <ThumbsDown size={14} color="#f87171" />
-            <Text style={[s.actionBtnText, { color: '#f87171' }]}>Contre</Text>
+            <Text style={[s.actionBtnText, { color: '#f87171' }]}>{t('proposal.vote.against')}</Text>
           </Pressable>
         </View>
       ) : null}
@@ -93,14 +95,14 @@ export function ProposalCard({ proposal, isOwner, onVote, onDecide }: Props) {
             style={[s.actionBtn, s.actionBtnMerge]}
           >
             <Check size={14} color={colors.bg} />
-            <Text style={[s.actionBtnText, { color: colors.bg }]}>Appliquer</Text>
+            <Text style={[s.actionBtnText, { color: colors.bg }]}>{t('proposal.merge')}</Text>
           </Pressable>
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onDecide(proposal.id, 'reject'); }}
             style={[s.actionBtn, s.actionBtnNo]}
           >
             <X size={14} color="#f87171" />
-            <Text style={[s.actionBtnText, { color: '#f87171' }]}>Rejeter</Text>
+            <Text style={[s.actionBtnText, { color: '#f87171' }]}>{t('proposal.reject')}</Text>
           </Pressable>
         </View>
       ) : null}

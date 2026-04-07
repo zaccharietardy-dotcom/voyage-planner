@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
+import { resolveRequestAuth } from '@/lib/server/requestAuth';
 
 function getAdminClient() {
   return createClient(
@@ -11,10 +11,9 @@ function getAdminClient() {
 }
 
 // GET — export all user data as JSON (GDPR data portability)
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase, user } = await resolveRequestAuth(request);
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
     const [profileRes, tripsRes, prefsRes] = await Promise.all([
@@ -48,10 +47,9 @@ export async function GET() {
 }
 
 // DELETE — delete user account and all data (GDPR right to erasure)
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
-    const supabase = await createRouteHandlerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { supabase, user } = await resolveRequestAuth(request);
     if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
     const admin = getAdminClient();

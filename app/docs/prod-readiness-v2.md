@@ -7,6 +7,8 @@ Ce document formalise les gates minimales pour déclarer la plateforme prête à
 - `npx tsc --noEmit -p app/tsconfig.json`
 - `npm --prefix app run lint -- --quiet`
 - `npm --prefix app test -- --ci --runInBand --passWithNoTests`
+- `npm run web:health`
+- `npm run backend:smoke`
 - `npm --prefix app run build`
 - `npx --prefix app playwright test e2e/smoke.spec.ts e2e/flows.spec.ts`
 
@@ -17,12 +19,14 @@ Ce document formalise les gates minimales pour déclarer la plateforme prête à
 - Les scripts tiers facultatifs sont coupés par défaut et pilotés par flag.
 - Les variables d’environnement publiques et serveur sont validées au runtime.
 - L’observabilité minimale est active: Sentry client, `global-error`, `x-request-id`, endpoints `/api/health` et `/api/health/ping`.
+- L’audit des dépendances externes est à jour via `/api/health/dependencies` et le registre machine-readable associé.
 
 ## Palier 2 — Native beta
 
 - `npm --prefix narae-mobile run lint`
 - `npm --prefix narae-mobile test`
 - `npm --prefix narae-mobile run typecheck`
+- `npm run mobile:smoke`
 - `npm --prefix narae-mobile run doctor`
 - CI `native-beta.yml` verte
 - `eas.json` configuré pour `development`, `preview`, `production`
@@ -67,3 +71,11 @@ Ce document formalise les gates minimales pour déclarer la plateforme prête à
 - `EXPO_PUBLIC_ENABLE_PREMIUM_BILLING`
 - `EXPO_PUBLIC_ENABLE_EXPERIMENTAL_SURFACES`
 - `EXPO_PUBLIC_ENABLE_EXTERNAL_PROVIDERS`
+
+## Audit intégré
+
+- Registre: `app/src/lib/integrations/registry.ts`
+- Endpoint admin: `/api/health/dependencies`
+- Smoke backend: `npm run backend:smoke`
+- Smoke billing sandbox: `npm run billing:sandbox:smoke`
+- Checklists: `app/docs/external-integrations-audit.md`

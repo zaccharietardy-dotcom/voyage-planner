@@ -18,6 +18,7 @@ import { isViatorGenericPrivateTourCandidate, scoreViatorPlusValue } from '../se
 import { isMonumentLikeActivityName, resolveOfficialTicketing } from '../services/officialTicketing';
 import { isGarbageActivity } from './utils/garbage-filter';
 import { validateCoordinate, isPlausibleCoordinate } from './utils/coordinate-validator';
+import { getDensityThresholds, type DensityCategory } from './utils/density-config';
 
 const MAX_GENERIC_PRIVATE_VIATOR = 1;
 const DISTINCTIVE_VIATOR_EXPERIENCE_KEYWORDS = [
@@ -282,16 +283,22 @@ export function scoreAndSelectActivities(
     a => a.latitude && a.longitude && a.latitude !== 0 && a.longitude !== 0
   );
 
-  // 2b. Reject GPS outliers: activities >50km from destination center.
+  // 2b. Reject GPS outliers with density-adaptive thresholds.
   // Catches cross-city contamination (e.g., "Palais de Tokyo" in Paris appearing in a Tokyo trip).
   //
   // Must-see activities use a wider threshold:
-  //   - ≤150km  → accepted (covers day-trip landmarks like Mont Fuji from Tokyo at 91km)
-  //   - >150km  → kept but tagged as a day-trip candidate with a warning log
+  //   - ≤(2 × outlier threshold)  → accepted (covers day-trip landmarks)
+  //   - beyond that               → kept but tagged as a day-trip candidate with a warning log
   //     (e.g., "Fushimi Inari-taisha" specified while planning Tokyo)
-  // Non-must-see activities keep the strict 50km cap.
-  const MAX_ACTIVITY_DIST_KM = 50;
-  const MAX_MUST_SEE_DIST_KM = 150;
+  // For sparse/regional pools, outlier distance relaxes automatically.
+  const distFromCenter = withGPS
+    .map((activity) => calculateDistance(activity.latitude, activity.longitude, data.destCoords.lat, data.destCoords.lng))
+    .sort((a, b) => a - b);
+  const p75Dist = distFromCenter[Math.floor(distFromCenter.length * 0.75)] || 0;
+  const inferredDensity: DensityCategory = p75Dist > 25 ? 'spread' : p75Dist > 10 ? 'medium' : 'dense';
+  const densityThresholds = getDensityThresholds(inferredDensity, p75Dist);
+  const MAX_ACTIVITY_DIST_KM = densityThresholds.outlierMaxDist;
+  const MAX_MUST_SEE_DIST_KM = Math.max(150, densityThresholds.outlierMaxDist * 2);
   const gpsFiltered = withGPS.filter(a => {
     const dist = calculateDistance(a.latitude, a.longitude, data.destCoords.lat, data.destCoords.lng);
     if (a.mustSee || a.source === 'mustsee') {
