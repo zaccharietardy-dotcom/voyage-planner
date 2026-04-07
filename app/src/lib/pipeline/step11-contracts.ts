@@ -93,7 +93,8 @@ export function validateContracts(
   mustSeeIds: Set<string>,
   destCoords: { lat: number; lng: number },
   mustSeeActivities?: Array<{ id: string; name: string }>,
-  timeWindows?: DayTimeWindow[]
+  timeWindows?: DayTimeWindow[],
+  densityCategory?: 'dense' | 'medium' | 'spread',
 ): ContractResult {
   const violations: string[] = [];
   const qualityWarnings: string[] = [];
@@ -227,9 +228,11 @@ export function validateContracts(
           metrics.activitiesOutsideHours++;
         }
 
-        // P0.2: Lunch/dinner only, 1.5km max (aligned with pass 3 search radius), self-meal fallback excluded.
+        // P0.2: Lunch/dinner only, distance max depends on density (urban tight, rural relaxed).
         if (!isSelfMealFallback && (isLunchMeal || isDinnerMeal) && item.latitude && item.longitude) {
-          const maxDistKm = 1.5;
+          const maxDistKm = densityCategory === 'spread' ? 5.0
+            : densityCategory === 'medium' ? 2.0
+            : 1.5;
 
           // Include hotel-related items as valid anchor points (restaurant near hotel is valid,
           // especially on arrival/departure days with few activities)

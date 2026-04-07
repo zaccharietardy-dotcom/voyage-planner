@@ -8,6 +8,7 @@
  */
 
 import type { ScoredActivity, ActivityCluster, CityDensityProfile } from './types';
+import { getDensityThresholds } from './utils/density-config';
 import { calculateDistance } from '../services/geocoding';
 import { isActivityOpenOnDay, DAY_NAMES_EN } from './utils/opening-hours';
 
@@ -49,16 +50,16 @@ export function computeCityDensityProfile(
   // (e.g. Tokyo ~60km diameter, LA ~80km, Bangkok ~30km)
   const isSpreadCity = p75 > 10;
 
-  // Adaptive hard cap: compact cities keep 5km, spread cities get up to 15km
-  // Formula for spread: p75 / numDays, capped at 15km
+  // Density-adaptive thresholds: urban stays tight, rural gets large radii
+  const rawDensity = isSpreadCity ? 'spread' : (p75 > 4 ? 'medium' : 'dense');
+  const dt = getDensityThresholds(rawDensity, p75);
+
   const hardRadiusCap = isSpreadCity
-    ? Math.max(5, Math.min(p75 / Math.max(1, numDays), 15))
+    ? dt.clusterHardCap
     : 5.0;
 
-  // Derive max cluster radius: spread divided by days, capped by travel time
   const baseRadius = p75 / Math.max(1, numDays);
-  // For spread cities, allow a larger travel-time radius (~30min transit)
-  const travelTimeRadius = isSpreadCity ? 5.0 : 2.0;
+  const travelTimeRadius = dt.clusterTravelRadius;
   const maxClusterRadius = Math.max(0.5, Math.min(baseRadius, travelTimeRadius, hardRadiusCap));
 
   const densityCategory: CityDensityProfile['densityCategory'] =

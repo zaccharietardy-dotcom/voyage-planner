@@ -301,20 +301,29 @@ interface PassConfig {
   allowReuse: boolean;
 }
 
-const PASSES: PassConfig[] = [
-  // Pass 0: ultra-close (200m), high quality — rating >= 4.0
-  { maxDist: 0.2, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
-  // Pass 1: close (500m), high quality — rating >= 4.0
-  { maxDist: 0.5, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
-  // Pass 2: standard (800m), rating >= 3.5
-  { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
-  // Pass 3: 800m, any rating
-  { maxDist: 0.8, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
-  // Pass 4: 1.2km, relaxed meal type
-  { maxDist: 1.2, checkMealType: false, checkDietary: 'relaxed', checkHours: true,  checkRating: false, allowReuse: false },
-  // Pass 5: 1.5km, any restaurant (absolute max — no more 5km fallback)
-  { maxDist: 1.5, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
-];
+// Distance multipliers by density: spread regions get wider search passes
+const DENSITY_DISTANCE_MULT: Record<string, number> = { dense: 1.0, medium: 1.5, spread: 3.5 };
+
+function getPasses(densityCategory?: string): PassConfig[] {
+  const mult = DENSITY_DISTANCE_MULT[densityCategory || 'dense'] || 1.0;
+  return [
+    // Pass 0: ultra-close, high quality — rating >= 4.0
+    { maxDist: 0.2 * mult, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+    // Pass 1: close, high quality — rating >= 4.0
+    { maxDist: 0.5 * mult, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+    // Pass 2: standard, rating >= 3.5
+    { maxDist: 0.8 * mult, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: true,  allowReuse: false },
+    // Pass 3: same distance, any rating
+    { maxDist: 0.8 * mult, checkMealType: true,  checkDietary: true,      checkHours: true,  checkRating: false, allowReuse: false },
+    // Pass 4: extended, relaxed meal type
+    { maxDist: 1.2 * mult, checkMealType: false, checkDietary: 'relaxed', checkHours: true,  checkRating: false, allowReuse: false },
+    // Pass 5: max, any restaurant
+    { maxDist: 1.5 * mult, checkMealType: false, checkDietary: false,     checkHours: false, checkRating: false, allowReuse: true  },
+  ];
+}
+
+// Default passes for backward compat (callers that don't pass density)
+const PASSES: PassConfig[] = getPasses('dense');
 
 function filterAndScoreCandidates(
   allRestaurants: Restaurant[],
@@ -632,11 +641,11 @@ export async function enrichRestaurantPool(
   const enrichedRestaurants = [...restaurants];
   if (!destination) return enrichedRestaurants;
 
-  // Density-aware search radius: spread cities need wider coverage
+  // Density-aware search radius: spread/rural destinations need much wider coverage
   const SEARCH_RADIUS =
     densityCategory === 'dense'  ? { nearbyCheck: 0.8, maxDistance: 1000 } :
-    densityCategory === 'spread' ? { nearbyCheck: 2.0, maxDistance: 2500 } :
-                                   { nearbyCheck: 1.0, maxDistance: 1500 };  // medium
+    densityCategory === 'spread' ? { nearbyCheck: 5.0, maxDistance: 5000 } :
+                                   { nearbyCheck: 1.5, maxDistance: 2000 };  // medium
 
   const enrichedIds = new Set(restaurants.map(r => r.id));
   const clusterSearches = clusters.map(async (cluster) => {

@@ -31,7 +31,8 @@ const ACTIVITY_DISPLAY: Record<string, string> = {
   wellness: 'Wellness',
 };
 
-const GENERIC_FALLBACK = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop';
+// Generic travel landscape (coastal cliffs, not desert)
+const GENERIC_FALLBACK = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=600&fit=crop';
 const CACHE_KEY_PREFIX = 'dest_img_';
 
 async function getCachedImage(destination: string): Promise<string | null> {
@@ -93,15 +94,15 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
     (async () => {
       setImageLoading(true);
 
-      // 1. Check AsyncStorage cache
+      // 1. Check AsyncStorage cache — but skip if it's the old bad fallback
       const cached = await getCachedImage(destination);
-      if (cached && !cancelled) {
+      if (cached && !cancelled && !cached.includes('photo-1469854523086') && !BAD_IMAGE_KEYWORDS.some(kw => cached.toLowerCase().includes(kw))) {
         setImageUrl(cached);
         setImageLoading(false);
         return;
       }
 
-      // 2. Fetch from Wikipedia (fr then en)
+      // 2. Fetch from Wikipedia (fr then en, with flag filtering)
       const url = await fetchDestinationImage(destination);
       if (url && !cancelled) {
         setImageUrl(url);

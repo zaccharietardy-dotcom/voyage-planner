@@ -881,7 +881,8 @@ async function runPipelineFromClusters(
     mustSeeIds,
     data.destCoords,
     mustSeeActivitiesForContracts.map(a => ({ id: a.id, name: a.name })),
-    timeWindows
+    timeWindows,
+    densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
   );
   console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
 
