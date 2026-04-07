@@ -7,20 +7,22 @@ import { useAuth } from '@/hooks/useAuth';
 import { fetchPreferences, updatePreferences } from '@/lib/api/users';
 import { Button } from '@/components/ui/Button';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation, type TranslationKey } from '@/lib/i18n';
 import {
   ACTIVITY_LABELS, DIETARY_LABELS, BUDGET_LABELS,
   type ActivityType, type DietaryType, type BudgetLevel, type PaceLevel,
 } from '@/lib/types/trip';
 
-const PACE_OPTIONS: { value: PaceLevel; label: string; desc: string }[] = [
-  { value: 'relaxed', label: 'Relaxé', desc: 'Peu d\'activités, beaucoup de temps libre' },
-  { value: 'moderate', label: 'Modéré', desc: 'Bon équilibre activités / repos' },
-  { value: 'intensive', label: 'Intensif', desc: 'Maximum d\'activités par jour' },
+const PACE_OPTION_KEYS: { value: PaceLevel; labelKey: TranslationKey; descKey: TranslationKey }[] = [
+  { value: 'relaxed', labelKey: 'preferences.pace.relaxed', descKey: 'preferences.pace.relaxed.desc' },
+  { value: 'moderate', labelKey: 'preferences.pace.moderate', descKey: 'preferences.pace.moderate.desc' },
+  { value: 'intensive', labelKey: 'preferences.pace.intensive', descKey: 'preferences.pace.intensive.desc' },
 ];
 
 export default function PreferencesScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
   const [activities, setActivities] = useState<ActivityType[]>([]);
   const [dietary, setDietary] = useState<DietaryType[]>([]);
   const [budgetLevel, setBudgetLevel] = useState<BudgetLevel | null>(null);
@@ -57,7 +59,7 @@ export default function PreferencesScreen() {
       });
       router.canGoBack() ? router.back() : router.replace("/(tabs)");
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder vos préférences');
+      Alert.alert(t('common.error'), t('preferences.error'));
     } finally {
       setSaving(false);
     }
@@ -69,11 +71,11 @@ export default function PreferencesScreen() {
         <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)")} hitSlop={12}>
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
-        <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.sansBold }}>Préférences de voyage</Text>
+        <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.sansBold }}>{t('preferences.title')}</Text>
       </View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 28 }}>
-        <Section title="Activités préférées">
+        <Section title={t('preferences.activities')}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {(Object.entries(ACTIVITY_LABELS) as [ActivityType, string][]).map(([key, label]) => (
               <Chip key={key} label={label} selected={activities.includes(key)} onPress={() => toggleActivity(key)} />
@@ -81,7 +83,7 @@ export default function PreferencesScreen() {
           </View>
         </Section>
 
-        <Section title="Restrictions alimentaires">
+        <Section title={t('preferences.dietary')}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {(Object.entries(DIETARY_LABELS) as [DietaryType, string][])
               .filter(([k]) => k !== 'none')
@@ -91,7 +93,7 @@ export default function PreferencesScreen() {
           </View>
         </Section>
 
-        <Section title="Budget par défaut">
+        <Section title={t('preferences.budget')}>
           <View style={{ gap: 8 }}>
             {(Object.entries(BUDGET_LABELS) as [BudgetLevel, { label: string; range: string }][]).map(([key, { label, range }]) => (
               <Pressable
@@ -115,9 +117,9 @@ export default function PreferencesScreen() {
           </View>
         </Section>
 
-        <Section title="Rythme de voyage">
+        <Section title={t('preferences.pace')}>
           <View style={{ gap: 8 }}>
-            {PACE_OPTIONS.map((opt) => (
+            {PACE_OPTION_KEYS.map((opt) => (
               <Pressable
                 key={opt.value}
                 onPress={() => setPace(opt.value)}
@@ -129,15 +131,15 @@ export default function PreferencesScreen() {
                 }}
               >
                 <Text style={{ color: pace === opt.value ? colors.gold : colors.text, fontSize: 15, fontFamily: fonts.sansSemiBold }}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </Text>
-                <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sans, marginTop: 2 }}>{opt.desc}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12, fontFamily: fonts.sans, marginTop: 2 }}>{t(opt.descKey)}</Text>
               </Pressable>
             ))}
           </View>
         </Section>
 
-        <Button isLoading={saving} onPress={handleSave}>Enregistrer</Button>
+        <Button isLoading={saving} onPress={handleSave}>{t('preferences.save')}</Button>
       </ScrollView>
     </SafeAreaView>
   );

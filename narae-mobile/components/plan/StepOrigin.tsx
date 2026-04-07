@@ -4,6 +4,7 @@ import { MapPin, Navigation } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { colors, fonts } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import type { TripPreferences } from '@/lib/types/trip';
 
 interface Props {
@@ -17,6 +18,7 @@ export function StepOrigin({ prefs, onChange }: Props) {
   const [query, setQuery] = useState(prefs.origin ?? '');
   const [isFocused, setIsFocused] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleSelect = (city: string) => {
     Haptics.selectionAsync();
@@ -28,8 +30,8 @@ export function StepOrigin({ prefs, onChange }: Props) {
     <View style={{ gap: 28 }}>
       {/* Title — matches web text-4xl font-serif font-bold */}
       <View style={{ alignItems: 'center' }}>
-        <Text style={s.title}>D'où partez-vous ?</Text>
-        <Text style={s.subtitle}>Pour calculer vos temps de trajet</Text>
+        <Text style={s.title}>{t('plan.origin.title')}</Text>
+        <Text style={s.subtitle}>{t('plan.origin.subtitle')}</Text>
       </View>
 
       {/* Input — matches web h-[56px] rounded-[1.2rem] with glow */}
@@ -39,7 +41,7 @@ export function StepOrigin({ prefs, onChange }: Props) {
           <MapPin size={18} color={isFocused ? colors.text : 'rgba(255,255,255,0.5)'} strokeWidth={2} />
           <TextInput
             style={s.input}
-            placeholder="Ex: Paris, Lyon, Bordeaux..."
+            placeholder={t('plan.origin.placeholder')}
             placeholderTextColor="rgba(255,255,255,0.4)"
             value={query}
             onChangeText={(t) => { setQuery(t); onChange({ origin: t }); }}
@@ -70,12 +72,12 @@ export function StepOrigin({ prefs, onChange }: Props) {
         }}
       >
         {geoLoading ? <ActivityIndicator size="small" color="rgba(255,255,255,0.9)" /> : <Navigation size={18} color="rgba(255,255,255,0.9)" />}
-        <Text style={s.geoText}>Utiliser ma position</Text>
+        <Text style={s.geoText}>{t('plan.origin.geolocation')}</Text>
       </Pressable>
 
       {/* Popular origins — matches web pill chips */}
       <View style={{ gap: 16 }}>
-        <Text style={s.sectionLabel}>VILLES POPULAIRES</Text>
+        <Text style={s.sectionLabel}>{t('plan.origin.popular')}</Text>
         <View style={s.chipGrid}>
           {POPULAR_ORIGINS.map((city) => {
             const selected = query.toLowerCase() === city.toLowerCase();

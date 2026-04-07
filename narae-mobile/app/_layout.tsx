@@ -22,6 +22,7 @@ import {
 } from '@expo-google-fonts/inter';
 
 import { AuthProvider } from '@/hooks/useAuth';
+import { I18nProvider } from '@/lib/i18n';
 import { initPurchases } from '@/lib/purchases';
 
 export { ErrorBoundary } from 'expo-router';
@@ -73,6 +74,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <I18nProvider>
       <AuthProvider>
         <ThemeProvider value={NaraeTheme}>
           <Stack screenOptions={{ headerShown: false }}>
@@ -89,6 +91,7 @@ export default function RootLayout() {
           <StatusBar style="light" />
         </ThemeProvider>
       </AuthProvider>
+      </I18nProvider>
     </SafeAreaProvider>
   );
 }

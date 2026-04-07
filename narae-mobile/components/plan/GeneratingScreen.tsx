@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { View, Text, ActivityIndicator, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, FadeInDown, withRepeat, withTiming, useAnimatedStyle, useSharedValue, Easing } from 'react-native-reanimated';
-import { Plane, Check, Compass, Info } from 'lucide-react-native';
+import { Plane, Check, Compass, Info, ArrowLeft } from 'lucide-react-native';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import type { GenerateProgress } from '@/lib/api/trips';
 import type { PipelineMapSnapshot, PipelineQuestion } from '@/lib/types/pipeline';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
@@ -19,69 +20,71 @@ interface Props {
   question?: PipelineQuestion | null;
   onAnswer?: (questionId: string, selectedOptionId: string) => void;
   onRetry: () => void;
+  onBack?: () => void;
 }
 
-const PIPELINE_LABELS = [
-  'Recherche des attractions...',
-  'Analyse des restaurants...',
-  'Sélection de l\'hébergement...',
-  'Planification du transport...',
-  'Optimisation de l\'itinéraire...',
-  'Validation qualité...',
-  'Finalisation...',
-];
+const PIPELINE_LABEL_KEYS = [
+  'generation.step1',
+  'generation.step2',
+  'generation.step3',
+  'generation.step4',
+  'generation.step5',
+  'generation.step6',
+  'generation.step7',
+] as const;
 
-type FunFact = { emoji: string; category: string; text: string };
+type FunFactDef = { emoji: string; category: string; textKey: string };
 
-const DESTINATION_FACTS: Record<string, FunFact[]> = {
+const DESTINATION_FACT_DEFS: Record<string, FunFactDef[]> = {
   paris: [
-    { emoji: '🏛️', category: 'HISTOIRE', text: 'La Tour Eiffel devait être démontée après 20 ans. Elle a été sauvée parce qu\'elle servait d\'antenne radio.' },
-    { emoji: '🍽️', category: 'GASTRONOMIE', text: 'Paris compte plus de 70 restaurants étoilés Michelin, un record mondial.' },
-    { emoji: '🎨', category: 'CULTURE', text: 'Le Louvre possède 380 000 œuvres d\'art. Il faudrait 100 jours pour tout voir.' },
-    { emoji: '🚇', category: 'TRANSPORT', text: 'Le métro parisien a 302 stations. Aucune n\'est à plus de 500m l\'une de l\'autre.' },
-    { emoji: '☕', category: 'CAFÉ', text: 'Le plus vieux café de Paris, Le Procope, existe depuis 1686.' },
-    { emoji: '🌳', category: 'NATURE', text: 'Paris possède plus de 400 parcs et jardins, soit 2 300 hectares de verdure.' },
+    { emoji: '🏛️', category: 'HISTOIRE', textKey: 'facts.paris.1' },
+    { emoji: '🍽️', category: 'GASTRONOMIE', textKey: 'facts.paris.2' },
+    { emoji: '🎨', category: 'CULTURE', textKey: 'facts.paris.3' },
+    { emoji: '🚇', category: 'TRANSPORT', textKey: 'facts.paris.4' },
+    { emoji: '☕', category: 'CAFÉ', textKey: 'facts.paris.5' },
+    { emoji: '🌳', category: 'NATURE', textKey: 'facts.paris.6' },
   ],
   tokyo: [
-    { emoji: '🗼', category: 'ARCHITECTURE', text: 'La Tokyo Skytree mesure 634m, c\'est la plus haute tour de radiodiffusion du monde.' },
-    { emoji: '🍣', category: 'GASTRONOMIE', text: 'Tokyo possède plus de restaurants étoilés Michelin que n\'importe quelle autre ville.' },
-    { emoji: '🚄', category: 'TRANSPORT', text: 'Le Shinkansen est si ponctuel que le retard moyen annuel est de 36 secondes.' },
-    { emoji: '🌸', category: 'NATURE', text: 'La saison des cerisiers en fleur dure seulement 2 semaines par an.' },
-    { emoji: '🎮', category: 'CULTURE', text: 'Akihabara compte plus de 250 magasins dédiés aux mangas et jeux vidéo.' },
-    { emoji: '⛩️', category: 'TRADITION', text: 'Il y a plus de 3 000 temples et sanctuaires dans l\'agglomération de Tokyo.' },
+    { emoji: '🗼', category: 'ARCHITECTURE', textKey: 'facts.tokyo.1' },
+    { emoji: '🍣', category: 'GASTRONOMIE', textKey: 'facts.tokyo.2' },
+    { emoji: '🚄', category: 'TRANSPORT', textKey: 'facts.tokyo.3' },
+    { emoji: '🌸', category: 'NATURE', textKey: 'facts.tokyo.4' },
+    { emoji: '🎮', category: 'CULTURE', textKey: 'facts.tokyo.5' },
+    { emoji: '⛩️', category: 'TRADITION', textKey: 'facts.tokyo.6' },
   ],
   rome: [
-    { emoji: '🏛️', category: 'HISTOIRE', text: 'Le Colisée pouvait accueillir 80 000 spectateurs, plus que la plupart des stades modernes.' },
-    { emoji: '⛲', category: 'TRADITION', text: 'On jette environ 3 000€ par jour dans la Fontaine de Trevi.' },
-    { emoji: '🍝', category: 'GASTRONOMIE', text: 'Les vrais carbonara romains n\'utilisent jamais de crème fraîche.' },
-    { emoji: '🎨', category: 'ART', text: 'Michel-Ange a mis 4 ans pour peindre le plafond de la Chapelle Sixtine.' },
-    { emoji: '😸', category: 'INSOLITE', text: 'Rome abrite une colonie de 300 chats qui vivent dans les ruines du Largo di Torre Argentina.' },
-    { emoji: '🏺', category: 'ARCHÉOLOGIE', text: 'Le Panthéon a presque 2000 ans et son dôme est toujours le plus grand dôme en béton non armé.' },
+    { emoji: '🏛️', category: 'HISTOIRE', textKey: 'facts.rome.1' },
+    { emoji: '⛲', category: 'TRADITION', textKey: 'facts.rome.2' },
+    { emoji: '🍝', category: 'GASTRONOMIE', textKey: 'facts.rome.3' },
+    { emoji: '🎨', category: 'ART', textKey: 'facts.rome.4' },
+    { emoji: '😸', category: 'INSOLITE', textKey: 'facts.rome.5' },
+    { emoji: '🏺', category: 'ARCHÉOLOGIE', textKey: 'facts.rome.6' },
   ],
 };
 
-const DEFAULT_FACTS: FunFact[] = [
-  { emoji: '🏛️', category: 'HISTOIRE', text: 'Chaque destination recèle des trésors cachés que notre algorithme sélectionne pour vous.' },
-  { emoji: '🍽️', category: 'GASTRONOMIE', text: 'Chaque restaurant est vérifié à moins de 800m de votre prochaine activité.' },
-  { emoji: '🗺️', category: 'ITINÉRAIRE', text: 'Notre algorithme compare plus de 500 activités pour trouver les meilleures.' },
-  { emoji: '⏰', category: 'HORAIRES', text: 'Votre itinéraire respecte les horaires d\'ouverture de chaque lieu.' },
-  { emoji: '🚶', category: 'TRANSPORT', text: 'Nous optimisons vos trajets pour gagner du temps entre chaque activité.' },
-  { emoji: '💡', category: 'ASTUCE', text: 'Les restaurants proposent des cuisines variées adaptées à vos préférences.' },
+const DEFAULT_FACT_DEFS: FunFactDef[] = [
+  { emoji: '🏛️', category: 'HISTOIRE', textKey: 'facts.default.1' },
+  { emoji: '🍽️', category: 'GASTRONOMIE', textKey: 'facts.default.2' },
+  { emoji: '🗺️', category: 'ITINÉRAIRE', textKey: 'facts.default.3' },
+  { emoji: '⏰', category: 'HORAIRES', textKey: 'facts.default.4' },
+  { emoji: '🚶', category: 'TRANSPORT', textKey: 'facts.default.5' },
+  { emoji: '💡', category: 'ASTUCE', textKey: 'facts.default.6' },
 ];
 
-function getFactsForDestination(destination: string): FunFact[] {
+function getFactDefsForDestination(destination: string): FunFactDef[] {
   const lower = destination.toLowerCase();
-  for (const [city, facts] of Object.entries(DESTINATION_FACTS)) {
-    if (lower.includes(city)) return facts;
+  for (const [city, defs] of Object.entries(DESTINATION_FACT_DEFS)) {
+    if (lower.includes(city)) return defs;
   }
-  return DEFAULT_FACTS;
+  return DEFAULT_FACT_DEFS;
 }
 
-export function GeneratingScreen({ origin, destination, durationDays, progress, snapshot, error, question, onAnswer, onRetry }: Props) {
-  const facts = useMemo(() => getFactsForDestination(destination), [destination]);
+export function GeneratingScreen({ origin, destination, durationDays, progress, snapshot, error, question, onAnswer, onRetry, onBack }: Props) {
+  const { t } = useTranslation();
+  const factDefs = useMemo(() => getFactDefsForDestination(destination), [destination]);
   const [factIndex, setFactIndex] = useState(0);
-  const currentStep = Math.max(0, Math.min(PIPELINE_LABELS.length - 1, (progress?.step ?? 1) - 1));
-  const progressPercent = PIPELINE_LABELS.length > 0 ? ((currentStep + 1) / PIPELINE_LABELS.length) : 0;
+  const currentStep = Math.max(0, Math.min(PIPELINE_LABEL_KEYS.length - 1, (progress?.step ?? 1) - 1));
+  const progressPercent = PIPELINE_LABEL_KEYS.length > 0 ? ((currentStep + 1) / PIPELINE_LABEL_KEYS.length) : 0;
   const anim = useSharedValue(0);
   const progressWidth = useSharedValue(0);
   const insets = useSafeAreaInsets();
@@ -99,10 +102,10 @@ export function GeneratingScreen({ origin, destination, durationDays, progress, 
       true
     );
     const interval = setInterval(() => {
-      setFactIndex((i) => (i + 1) % facts.length);
+      setFactIndex((i) => (i + 1) % factDefs.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [anim, facts.length]);
+  }, [anim, factDefs.length]);
 
   const planeStyle = useAnimatedStyle(() => ({
     transform: [
@@ -119,22 +122,38 @@ export function GeneratingScreen({ origin, destination, durationDays, progress, 
     return (
       <View style={styles.errorScreen}>
         <PremiumBackground />
+        {onBack && (
+          <Pressable onPress={onBack} style={styles.errorBackBtn}>
+            <ArrowLeft size={20} color={colors.text} />
+          </Pressable>
+        )}
         <View style={styles.errorIconWrap}>
           <Text style={{ fontSize: 40 }}>😞</Text>
         </View>
         <Text style={styles.errorTitle}>
-          Oups, un imprévu...
+          {t('generation.error.title')}
         </Text>
         <Text style={styles.errorCopy}>
           {error}
         </Text>
-        <Pressable onPress={onRetry} style={{ width: '100%' }}>
-          <View style={styles.errorCta}>
-            <Text style={{ color: colors.bg, fontSize: 16, fontFamily: fonts.sansBold }}>
-              Réessayer la génération
-            </Text>
-          </View>
-        </Pressable>
+        <View style={{ width: '100%', gap: 12 }}>
+          <Pressable onPress={onRetry}>
+            <View style={styles.errorCta}>
+              <Text style={{ color: colors.bg, fontSize: 16, fontFamily: fonts.sansBold }}>
+                {t('generation.error.retry')}
+              </Text>
+            </View>
+          </Pressable>
+          {onBack && (
+            <Pressable onPress={onBack}>
+              <View style={styles.errorBackCta}>
+                <Text style={{ color: colors.textSecondary, fontSize: 14, fontFamily: fonts.sansSemiBold }}>
+                  {t('common.back')}
+                </Text>
+              </View>
+            </Pressable>
+          )}
+        </View>
       </View>
     );
   }
@@ -152,9 +171,9 @@ export function GeneratingScreen({ origin, destination, durationDays, progress, 
               <Animated.View style={[planeStyle, styles.planeBadge]}>
                 <Plane size={28} color={colors.bg} strokeWidth={2.4} />
               </Animated.View>
-              <Text style={styles.panelTitle}>Conception Narae</Text>
+              <Text style={styles.panelTitle}>{t('generation.title')}</Text>
               <Text style={styles.kickerText}>
-                {destination.toUpperCase()} · {durationDays ?? 3} JOURS
+                {destination.toUpperCase()} · {durationDays ?? 3} {t('plan.when.duration.plural')}
               </Text>
             </View>
 
@@ -167,7 +186,7 @@ export function GeneratingScreen({ origin, destination, durationDays, progress, 
             <View style={styles.stepLabelRow}>
               <ActivityIndicator size="small" color={colors.gold} />
               <Text style={styles.stepLabelText}>
-                {progress?.label || PIPELINE_LABELS[currentStep]}
+                {progress?.label || t(PIPELINE_LABEL_KEYS[currentStep] as any)}
               </Text>
             </View>
 
@@ -180,15 +199,15 @@ export function GeneratingScreen({ origin, destination, durationDays, progress, 
                 <Animated.View key={factIndex} entering={FadeIn} style={{ gap: 12 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <View style={styles.factEmojiWrap}>
-                      <Text style={{ fontSize: 20 }}>{facts[factIndex].emoji}</Text>
+                      <Text style={{ fontSize: 20 }}>{factDefs[factIndex].emoji}</Text>
                     </View>
-                    <Text style={styles.factLabel}>{facts[factIndex].category}</Text>
+                    <Text style={styles.factLabel}>{factDefs[factIndex].category}</Text>
                   </View>
-                  <Text style={styles.factCopy}>{facts[factIndex].text}</Text>
+                  <Text style={styles.factCopy}>{t(factDefs[factIndex].textKey as any)}</Text>
                 </Animated.View>
                 {/* Dots */}
                 <View style={styles.factDots}>
-                  {facts.map((_, i) => (
+                  {factDefs.map((_, i) => (
                     <View
                       key={i}
                       style={[
@@ -216,6 +235,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     gap: 14,
+    justifyContent: 'center',
   },
   bottomPanel: {
     flex: 1,
@@ -381,5 +401,25 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     backgroundColor: colors.gold,
     alignItems: 'center',
+  },
+  errorBackCta: {
+    paddingVertical: 14,
+    borderRadius: radius.xl,
+    borderCurve: 'continuous',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+  },
+  errorBackBtn: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -17,6 +17,7 @@ import { RecommendedUsers } from '@/components/social/RecommendedUsers';
 import { UserSearch } from '@/components/social/UserSearch';
 import { colors, fonts, radius } from '@/lib/theme';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
+import { useTranslation } from '@/lib/i18n';
 
 type Tab = 'discover' | 'following';
 type Sort = 'recent' | 'trending';
@@ -24,6 +25,7 @@ type Sort = 'recent' | 'trending';
 export default function ExploreScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('discover');
   const [sort, setSort] = useState<Sort>('recent');
   const [page, setPage] = useState(1);
@@ -78,7 +80,7 @@ export default function ExploreScreen() {
           ? { ...t, user_liked: trip.user_liked, likes_count: trip.likes_count }
           : t,
       ));
-      Alert.alert('Erreur', 'Action impossible');
+      Alert.alert(t('common.error'), t('explore.error.message'));
     }
   }, [user, router]);
 
@@ -90,7 +92,7 @@ export default function ExploreScreen() {
       setCloneTarget(null);
       router.push(`/trip/${result.id}`);
     } catch {
-      Alert.alert('Erreur', 'Impossible de dupliquer ce voyage');
+      Alert.alert(t('common.error'), t('explore.clone.error'));
     } finally {
       setCloning(false);
     }
@@ -102,7 +104,7 @@ export default function ExploreScreen() {
       <View style={styles.content}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingRight: 20 }}>
           <View style={{ flex: 1 }}>
-            <ScreenHeader title="Explorer" subtitle="Découvrez les départs, les inspirations et les itinéraires de la communauté." />
+            <ScreenHeader title={t('explore.title')} subtitle={t('explore.subtitle')} />
           </View>
           <Pressable
             onPress={() => { Haptics.selectionAsync(); setShowSearch(true); }}
@@ -114,8 +116,8 @@ export default function ExploreScreen() {
 
         <View style={styles.controlsRow}>
           <View style={styles.tabsWrap}>
-            <TabButton label="Découvrir" active={tab === 'discover'} onPress={() => { Haptics.selectionAsync(); setTab('discover'); }} />
-            {user ? <TabButton label="Suivis" active={tab === 'following'} onPress={() => { Haptics.selectionAsync(); setTab('following'); }} /> : null}
+            <TabButton label={t('explore.tab.discover')} active={tab === 'discover'} onPress={() => { Haptics.selectionAsync(); setTab('discover'); }} />
+            {user ? <TabButton label={t('explore.tab.following')} active={tab === 'following'} onPress={() => { Haptics.selectionAsync(); setTab('following'); }} /> : null}
           </View>
 
           <Pressable
@@ -126,7 +128,7 @@ export default function ExploreScreen() {
             style={styles.sortPill}
           >
             <Text style={styles.sortText}>
-              {sort === 'recent' ? 'Récents' : 'Tendances'}
+              {sort === 'recent' ? t('explore.sort.recent') : t('explore.sort.trending')}
             </Text>
           </Pressable>
         </View>
@@ -141,10 +143,10 @@ export default function ExploreScreen() {
         ) : allTrips.length === 0 ? (
           <EmptyState
             icon={Compass}
-            title={tab === 'discover' ? 'Aucun voyage public' : 'Aucun voyage de vos abonnements'}
+            title={tab === 'discover' ? t('explore.empty.discover') : t('explore.empty.following')}
             description={tab === 'discover'
-              ? 'Soyez le premier à partager un voyage.'
-              : 'Suivez des voyageurs pour voir leurs trips ici.'}
+              ? t('explore.empty.discover.desc')
+              : t('explore.empty.following.desc')}
           />
         ) : (
           <FlatList
@@ -186,9 +188,9 @@ export default function ExploreScreen() {
 
         <BottomSheet isOpen={!!cloneTarget} onClose={() => setCloneTarget(null)} height={0.25}>
           <View style={styles.sheetContent}>
-            <Text style={styles.sheetTitle}>Dupliquer ce voyage ?</Text>
+            <Text style={styles.sheetTitle}>{t('explore.clone.title')}</Text>
             <Text style={styles.sheetDescription}>
-              Une copie de &quot;{cloneTarget?.title || cloneTarget?.destination}&quot; sera ajoutée à vos voyages.
+              {t('explore.clone.desc')} &quot;{cloneTarget?.title || cloneTarget?.destination}&quot; {t('explore.clone.desc_end')}
             </Text>
             <Button
               isLoading={cloning}
@@ -197,7 +199,7 @@ export default function ExploreScreen() {
                 handleClone();
               }}
             >
-              Dupliquer
+              {t('explore.clone.confirm')}
             </Button>
           </View>
         </BottomSheet>

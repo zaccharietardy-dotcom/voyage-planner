@@ -9,13 +9,13 @@
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/images/splash-icon.png",
-      "resizeMode": "cover",
+      "resizeMode": "contain",
       "backgroundColor": "#020617"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.naraevoyage.app",
-      "buildNumber": "36",
+      "buildNumber": "40",
       "usesAppleSignIn": true,
       "infoPlist": {
         "CFBundleDisplayName": "Narae Voyage",

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronUp } from 'lucide-react-native';
 import { colors, fonts } from '@/lib/theme';
 import type { TripDay, TripItem, TripItemType } from '@/lib/types/trip';
 
@@ -71,15 +71,21 @@ export function TripMap({ days, onMarkerPress, activeDay: controlledDay, onDayCh
     ? markers.map((m) => ({ latitude: m.latitude, longitude: m.longitude }))
     : [];
 
-  // Direction arrows — at 40% along each segment for proper alignment with polyline
+  // Direction arrows — placed at 40% along each segment (closer to origin, avoids overlap with destination marker)
+  // Only shown on segments > ~200m to avoid clutter on short walks
+  const MIN_ARROW_DISTANCE = 0.002; // ~200m in degrees
   const arrowMarkers = polylineCoords.length > 1
-    ? polylineCoords.slice(0, -1).map((coord, idx) => {
+    ? polylineCoords.slice(0, -1).flatMap((coord, idx) => {
           const next = polylineCoords[idx + 1];
+          const dLat = Math.abs(next.latitude - coord.latitude);
+          const dLng = Math.abs(next.longitude - coord.longitude);
+          if (dLat < MIN_ARROW_DISTANCE && dLng < MIN_ARROW_DISTANCE) return []; // skip short segments
+          // Place at 40% from origin (not 50%) to avoid overlap with destination marker
           const t = 0.4;
           const lat = coord.latitude + (next.latitude - coord.latitude) * t;
           const lng = coord.longitude + (next.longitude - coord.longitude) * t;
           const angle = bearing(coord.latitude, coord.longitude, next.latitude, next.longitude);
-          return { key: `arrow-${idx}`, latitude: lat, longitude: lng, angle };
+          return [{ key: `arrow-${idx}`, latitude: lat, longitude: lng, angle }];
         })
     : [];
 
@@ -145,15 +151,15 @@ export function TripMap({ days, onMarkerPress, activeDay: controlledDay, onDayCh
             coordinate={{ latitude: arrow.latitude, longitude: arrow.longitude }}
             anchor={{ x: 0.5, y: 0.5 }}
             flat
+            rotation={arrow.angle}
           >
             <View style={{
               width: 22, height: 22, borderRadius: 11,
               backgroundColor: 'rgba(2,6,23,0.85)',
               borderWidth: 1.5, borderColor: colors.gold,
               alignItems: 'center', justifyContent: 'center',
-              transform: [{ rotate: `${arrow.angle - 90}deg` }],
             }}>
-              <ChevronRight size={12} color={colors.gold} strokeWidth={3} />
+              <ChevronUp size={12} color={colors.gold} strokeWidth={3} />
             </View>
           </Marker>
         ))}

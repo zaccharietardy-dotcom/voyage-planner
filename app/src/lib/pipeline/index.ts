@@ -58,13 +58,14 @@ import { validateContracts } from './step11-contracts';
 import { geoReorderScheduledDay } from './utils/geo-reorder';
 import { decorateTrip } from './step12-decorate';
 import { llmReviewTrip, applyLLMCorrections } from './step13-llm-review';
-import { getDestinationIntel, type DestinationIntel } from './step0-destination-intel';
+import { getDestinationIntel, resolveDestination, type DestinationIntel } from './step0-destination-intel';
 import { applyTrustLayer } from './trust-layer';
 import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
 import { stripPlanningMetaFromDays } from './planning-meta';
 import { rebalanceClustersWithLLM, type LLMRebalanceResult } from './step3b-llm-rebalance';
-import { detectQuestions, applyQuestionAnswers } from './questionDetectors';
+import { detectQuestions, applyQuestionAnswers, detectPreFetchQuestions, applyEffects } from './questionDetectors';
+import type { DestinationAnalysis } from './step0-destination-intel';
 import { buildClusteredMapSnapshot, buildFetchedMapSnapshot } from './snapshots';
 
 // ---------------------------------------------------------------------------
@@ -229,13 +230,70 @@ export async function generateTripV2(
   onEvent?: OnPipelineEvent,
   v2Options?: GenerateTripV2Options,
 ): Promise<Trip> {
+  let regionAnalysis: DestinationAnalysis | null = null;
+
+  // Step 0a: Region resolver — classify destination, resolve regions to cities
+  if (!preferences.cityPlan && preferences.travelStyle !== 'single_base') {
+    try {
+      regionAnalysis = await resolveDestination(preferences);
+      if (regionAnalysis) {
+        if (regionAnalysis.inputType !== 'city' && regionAnalysis.resolvedCities.length > 1) {
+          preferences.cityPlan = regionAnalysis.resolvedCities.map(c => ({
+            city: c.name,
+            days: c.stayDuration,
+          }));
+          console.log(`[Pipeline] Region resolved to cityPlan: ${preferences.cityPlan.map(c => `${c.city} (${c.days}j)`).join(', ')}`);
+        } else if (regionAnalysis.resolvedCities.length === 1) {
+          preferences.destination = regionAnalysis.resolvedCities[0].name;
+          console.log(`[Pipeline] Destination resolved to: ${preferences.destination}`);
+        }
+      }
+    } catch (e) {
+      console.warn('[Pipeline] Region resolver failed, continuing with original destination:', e);
+    }
+  }
+
+  // Step 0b: Pre-fetch LLM questions — contextual questions before the main pipeline
+  let cachedIntel: DestinationIntel | null = null;
+  if (v2Options?.askUser) {
+    try {
+      cachedIntel = await getDestinationIntel(preferences.destination, preferences);
+      const preFetchQuestions = await detectPreFetchQuestions(preferences, regionAnalysis, cachedIntel);
+
+      for (const q of preFetchQuestions) {
+        emit(onEvent, { type: 'info', label: 'question', detail: q.title });
+        const selectedOptionId = await v2Options.askUser(q as any);
+        const selectedOption = q.options.find(o => o.id === selectedOptionId);
+        if (selectedOption?.effect) {
+          applyEffects(
+            [{ questionId: q.questionId, selectedOptionId, effect: selectedOption.effect }],
+            preferences,
+          );
+        }
+      }
+
+      // Si une question a changé le travelStyle, re-vérifier le routage
+      if (preferences.travelStyle === 'road_trip' && !preferences.cityPlan && regionAnalysis?.resolvedCities) {
+        preferences.cityPlan = regionAnalysis.resolvedCities.map(c => ({
+          city: c.name,
+          days: c.stayDuration,
+        }));
+      } else if (preferences.travelStyle === 'single_base' && preferences.cityPlan) {
+        preferences.destination = preferences.cityPlan[0].city;
+        preferences.cityPlan = undefined;
+      }
+    } catch (e) {
+      console.warn('[Pipeline] Pre-fetch questions failed, continuing:', e);
+    }
+  }
+
   if (preferences.cityPlan && preferences.cityPlan.length > 1) {
     return generateTripV3MultiCity(preferences, onEvent, v2Options);
   }
   return generateTripV3(
     preferences,
     onEvent,
-    { onSnapshot: v2Options?.onSnapshot },
+    { onSnapshot: v2Options?.onSnapshot, cachedIntel },
     v2Options?.askUser,
   );
 }
@@ -267,6 +325,8 @@ export interface GenerateTripV3Options {
   onFetchedData?: (data: FetchedData) => void;
   /** Lightweight cartographic snapshot for streaming clients */
   onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
+  /** Pre-fetched destination intel — avoids double LLM call when already resolved in generateTripV2 */
+  cachedIntel?: DestinationIntel | null;
 }
 
 export async function generateTripV3(
@@ -287,15 +347,19 @@ export async function generateTripV3(
     console.log('[Pipeline V3] Step 1: Using fixture data (no API calls)');
     onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data (fixture)', durationMs: 0, timestamp: Date.now() });
   } else {
-    // Step 0: Destination Intelligence — get expert knowledge to guide fetch
-    let destinationIntel: DestinationIntel | null = null;
-    try {
-      destinationIntel = await getDestinationIntel(preferences.destination, preferences);
-      if (destinationIntel) {
-        onEvent?.({ type: 'step_done', step: 0, stepName: 'Destination intelligence', durationMs: 0, timestamp: Date.now() } as any);
+    // Step 0: Destination Intelligence — use cached if available (from generateTripV2 pre-fetch)
+    let destinationIntel: DestinationIntel | null = options?.cachedIntel !== undefined ? options.cachedIntel : null;
+    if (!destinationIntel) {
+      try {
+        destinationIntel = await getDestinationIntel(preferences.destination, preferences);
+      } catch (e) {
+        console.warn('[Pipeline V3] Step 0 failed (non-blocking):', e);
       }
-    } catch (e) {
-      console.warn('[Pipeline V3] Step 0 failed (non-blocking):', e);
+    } else {
+      console.log('[Pipeline V3] Step 0: Using cached destination intel');
+    }
+    if (destinationIntel) {
+      onEvent?.({ type: 'step_done', step: 0, stepName: 'Destination intelligence', durationMs: 0, timestamp: Date.now() } as any);
     }
 
     onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
@@ -600,6 +664,23 @@ async function runPipelineFromClusters(
   }
   console.log(`[Pipeline V3] Step 7: Restaurant pool enriched (${enrichedRestaurants.length} restaurants)`);
 
+  // Budget-aware restaurant filtering: prefer restaurants within budget, fall back to all
+  const maxPriceLevel = preferences.budgetLevel === 'economic' ? 2
+    : preferences.budgetLevel === 'moderate' ? 3
+    : 4; // comfort + luxury = all price levels
+  let budgetFilteredRestaurants = enrichedRestaurants.filter(r => {
+    if (!r.priceLevel) return true; // Keep restaurants without price data
+    return r.priceLevel <= maxPriceLevel;
+  });
+  // Soft filter: if too few candidates after filtering, fall back to full pool
+  const MIN_RESTAURANTS_FOR_SCHEDULER = 10;
+  if (budgetFilteredRestaurants.length < MIN_RESTAURANTS_FOR_SCHEDULER) {
+    console.log(`[Pipeline V3] Budget filter too aggressive (${budgetFilteredRestaurants.length} < ${MIN_RESTAURANTS_FOR_SCHEDULER}), using full pool`);
+    budgetFilteredRestaurants = enrichedRestaurants;
+  } else if (budgetFilteredRestaurants.length < enrichedRestaurants.length) {
+    console.log(`[Pipeline V3] Budget filter: ${enrichedRestaurants.length} → ${budgetFilteredRestaurants.length} restaurants (max price level: ${maxPriceLevel})`);
+  }
+
   // Step 8+9+10: Unified schedule
   const repairResult = unifiedScheduleV3Days(
     clusters,
@@ -608,7 +689,7 @@ async function runPipelineFromClusters(
     hotel,
     preferences,
     data,
-    enrichedRestaurants,
+    budgetFilteredRestaurants,
     allActivities,
     data.destCoords,
     { densityCategory: densityProfile.densityCategory as 'spread' | 'medium' | 'dense' },

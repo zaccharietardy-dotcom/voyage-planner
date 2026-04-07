@@ -12,10 +12,12 @@ import { TripCard } from '@/components/trip/TripCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { Button } from '@/components/ui/Button';
+import { useTranslation } from '@/lib/i18n';
 
 export default function HomeScreen() {
   const { user, profile, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   // ─── Unauthenticated Landing ───
   if (!user && !authLoading) {
@@ -33,21 +35,21 @@ export default function HomeScreen() {
             {/* Hero text */}
             <View style={styles.heroSection}>
               <Text style={styles.heroTitle}>
-                Ton agence de voyage{'\n'}
-                <Text style={{ color: colors.gold }}>personnelle</Text>
+                {t('home.hero.title1')}{'\n'}
+                <Text style={{ color: colors.gold }}>{t('home.hero.title2')}</Text>
               </Text>
 
               <Text style={styles.heroSubtitle}>
-                Narae génère un itinéraire sur-mesure en 2 minutes.{'\n'}Activités, restos, hôtels — tout est planifié.
+                {t('home.hero.subtitle')}
               </Text>
             </View>
 
             {/* Value props */}
             <View style={styles.valuePropsContainer}>
               {[
-                { icon: Compass, label: 'Exploration\nillimitée' },
-                { icon: MapPin, label: 'Adaptation\nprécise' },
-                { icon: Users, label: 'Partage\nprivilégié' },
+                { icon: Compass, label: t('home.value.exploration') },
+                { icon: MapPin, label: t('home.value.adaptation') },
+                { icon: Users, label: t('home.value.sharing') },
               ].map((item, i) => (
                 <View key={i} style={styles.valuePropCard}>
                   <View style={styles.valuePropIconBox}>
@@ -69,7 +71,7 @@ export default function HomeScreen() {
                 icon={ArrowRight}
                 iconPosition="right"
               >
-                Commencer gratuitement
+                {t('home.cta.start')}
               </Button>
 
               <Button
@@ -78,7 +80,7 @@ export default function HomeScreen() {
                 onPress={() => router.push('/(auth)/register')}
                 style={{ marginTop: 12 }}
               >
-                Créer un compte
+                {t('home.cta.signup')}
               </Button>
             </View>
           </ScrollView>
@@ -88,7 +90,7 @@ export default function HomeScreen() {
 
   // ─── Authenticated: Home Dashboard ───
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const greeting = hour < 12 ? t('home.greeting.morning') : hour < 18 ? t('home.greeting.afternoon') : t('home.greeting.evening');
   const name = profile?.display_name?.split(' ')[0] || '';
 
   return (
@@ -102,6 +104,7 @@ export default function HomeScreen() {
 function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: {
   greeting: string; name: string; router: any; userId?: string; isAuthenticated?: boolean;
 }) {
+  const { t } = useTranslation();
   const { data: trips, isLoading } = useApi(
     () => (userId ? fetchMyTrips() : Promise.resolve([])),
     [userId ?? null],
@@ -123,7 +126,7 @@ function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: 
             {greeting}{name ? `, ${name}` : ''} !
           </Text>
           <Text style={styles.greetingSubtitle}>
-            Prêt pour votre prochaine aventure ?
+            {t('home.greeting.subtitle')}
           </Text>
         </View>
         <Pressable
@@ -140,7 +143,7 @@ function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: 
         style={styles.searchBar}
       >
         <Search size={18} color={colors.textMuted} />
-        <Text style={styles.searchPlaceholder}>Où souhaitez-vous aller ?</Text>
+        <Text style={styles.searchPlaceholder}>{t('home.search.placeholder')}</Text>
       </Pressable>
 
       {/* Plan CTA */}
@@ -156,10 +159,10 @@ function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: 
         >
           <View style={{ flex: 1 }}>
             <Text style={styles.planCtaTitle}>
-              Planifier un voyage
+              {t('home.plan.title')}
             </Text>
             <Text style={styles.planCtaSubtitle}>
-              Itinéraire sur-mesure en 2 min
+              {t('home.plan.subtitle')}
             </Text>
           </View>
           <View style={styles.planCtaIconBox}>
@@ -178,10 +181,10 @@ function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: 
         <View style={{ marginTop: 32 }}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
-              Derniers voyages
+              {t('home.recent.title')}
             </Text>
             <Pressable onPress={() => router.push('/(tabs)/trips')}>
-              <Text style={styles.sectionLink}>Tout voir</Text>
+              <Text style={styles.sectionLink}>{t('home.recent.viewAll')}</Text>
             </Pressable>
           </View>
           <FlatList
@@ -200,7 +203,7 @@ function AuthenticatedHome({ greeting, name, router, userId, isAuthenticated }: 
       {/* Popular destinations */}
       <View style={{ marginTop: 32 }}>
         <Text style={[styles.sectionTitle, { paddingHorizontal: 24, marginBottom: 16 }]}>
-          Destinations populaires
+          {t('home.destinations.title')}
         </Text>
         <FlatList
           data={DESTINATIONS.slice(0, 6)}

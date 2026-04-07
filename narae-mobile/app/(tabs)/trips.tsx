@@ -15,14 +15,15 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { colors, fonts, radius } from '@/lib/theme';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
+import { useTranslation, type TranslationKey } from '@/lib/i18n';
 
 type Filter = 'all' | 'upcoming' | 'active' | 'past';
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Tous' },
-  { key: 'upcoming', label: 'À venir' },
-  { key: 'active', label: 'En cours' },
-  { key: 'past', label: 'Passés' },
+const FILTER_KEYS: { key: Filter; i18nKey: TranslationKey }[] = [
+  { key: 'all', i18nKey: 'trips.filter.all' },
+  { key: 'upcoming', i18nKey: 'trips.filter.upcoming' },
+  { key: 'active', i18nKey: 'trips.filter.active' },
+  { key: 'past', i18nKey: 'trips.filter.past' },
 ];
 
 function getStatus(trip: TripListItem): 'upcoming' | 'active' | 'past' {
@@ -41,6 +42,8 @@ export default function TripsScreen() {
   const [selectedTrip, setSelectedTrip] = useState<TripListItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  const { t } = useTranslation();
+
   const { data: trips, isLoading, refetch } = useApi(
     () => (user ? fetchMyTrips() : Promise.resolve([])),
     [user?.id ?? null],
@@ -53,12 +56,12 @@ export default function TripsScreen() {
   const handleDelete = useCallback(async () => {
     if (!selectedTrip) return;
     Alert.alert(
-      'Supprimer ce voyage ?',
-      `"${selectedTrip.title || selectedTrip.destination}" sera supprimé définitivement.`,
+      t('trips.delete.title'),
+      `"${selectedTrip.title || selectedTrip.destination}" ${t('trips.delete.confirm')}`,
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             setDeleting(true);
@@ -67,7 +70,7 @@ export default function TripsScreen() {
               setSelectedTrip(null);
               refetch();
             } catch {
-              Alert.alert('Erreur', 'Impossible de supprimer ce voyage');
+              Alert.alert(t('common.error'), t('trips.empty.desc.filtered'));
             } finally {
               setDeleting(false);
             }
@@ -82,8 +85,8 @@ export default function TripsScreen() {
       <PremiumBackground />
       <View style={styles.content}>
         <ScreenHeader
-          title="Mes Voyages"
-          subtitle="Retrouvez vos départs, vos souvenirs et vos prochains itinéraires."
+          title={t('trips.title')}
+          subtitle={t('trips.subtitle')}
           rightAction={(
             <Pressable
               onPress={() => {
@@ -98,7 +101,7 @@ export default function TripsScreen() {
         />
 
         <View style={styles.filtersRow}>
-          {FILTERS.map((f) => {
+          {FILTER_KEYS.map((f) => {
             const active = filter === f.key;
             return (
               <Pressable
@@ -110,7 +113,7 @@ export default function TripsScreen() {
                 style={[styles.filterPill, active ? styles.filterPillActive : null]}
               >
                 <Text style={[styles.filterText, active ? styles.filterTextActive : null]}>
-                  {f.label}
+                  {t(f.i18nKey)}
                 </Text>
               </Pressable>
             );
@@ -126,13 +129,13 @@ export default function TripsScreen() {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Map}
-            title="Aucun voyage"
+            title={t('trips.empty.title')}
             description={filter === 'all'
-              ? 'Planifiez votre premier voyage en appuyant sur le bouton +'
-              : 'Aucun voyage dans cette catégorie'}
+              ? t('trips.empty.desc.all')
+              : t('trips.empty.desc.filtered')}
             action={filter === 'all'
               ? {
-                  label: 'Créer un voyage',
+                  label: t('trips.empty.cta'),
                   onPress: () => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     router.push('/plan');
@@ -173,7 +176,7 @@ export default function TripsScreen() {
                 setSelectedTrip(null);
               }}
             >
-              Voir le voyage
+              {t('trips.card.action')}
             </Button>
             <Button
               variant="danger"
@@ -184,7 +187,7 @@ export default function TripsScreen() {
                 handleDelete();
               }}
             >
-              Supprimer
+              {t('common.delete')}
             </Button>
           </View>
         </BottomSheet>

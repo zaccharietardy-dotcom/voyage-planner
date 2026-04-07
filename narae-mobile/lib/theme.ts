@@ -9,7 +9,7 @@ export const colors = {
   cardHover: '#0f1629',
   surface: '#0f172a',
   border: '#1e293b',
-  borderSubtle: 'rgba(255,255,255,0.05)',
+  borderSubtle: 'rgba(255,255,255,0.10)',
   borderWhite8: 'rgba(255,255,255,0.08)',
   borderWhite10: 'rgba(255,255,255,0.10)',
   borderWhite20: 'rgba(255,255,255,0.20)',

@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { TripItem } from '@/lib/types/trip';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   item: TripItem | null;
@@ -17,12 +18,14 @@ interface Props {
 }
 
 export function ActivityActions({ item, isOpen, onClose, onEdit, onDelete, onMove, onSwapRestaurant, availableDays }: Props) {
+  const { t } = useTranslation();
+
   if (!item) return null;
 
   const actions = [
     {
       icon: Edit3,
-      label: 'Modifier',
+      label: t('activity.actions.edit'),
       color: colors.gold,
       onPress: () => {
         onClose();
@@ -33,14 +36,14 @@ export function ActivityActions({ item, isOpen, onClose, onEdit, onDelete, onMov
     ...(item.type === 'restaurant' && item.restaurantAlternatives?.length
       ? [{
           icon: Repeat,
-          label: 'Voir les alternatives',
+          label: t('activity.actions.alternatives'),
           color: colors.restaurant,
           onPress: () => { onClose(); onSwapRestaurant?.(item); },
         }]
       : []),
     {
       icon: ArrowUpDown,
-      label: 'Déplacer à un autre jour',
+      label: t('activity.actions.move'),
       color: colors.upcoming,
       onPress: () => {
         onClose();
@@ -52,17 +55,17 @@ export function ActivityActions({ item, isOpen, onClose, onEdit, onDelete, onMov
     },
     {
       icon: Trash2,
-      label: 'Supprimer',
+      label: t('activity.actions.delete'),
       color: colors.danger,
       onPress: () => {
         onClose();
         Alert.alert(
-          'Supprimer',
-          `Retirer "${item.title}" de l'itinéraire ?`,
+          t('activity.actions.delete'),
+          t('activity.actions.deleteConfirm', { title: item.title }),
           [
-            { text: 'Annuler', style: 'cancel' },
+            { text: t('common.cancel'), style: 'cancel' },
             {
-              text: 'Supprimer',
+              text: t('common.delete'),
               style: 'destructive',
               onPress: () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -119,13 +122,15 @@ interface MoveDayProps {
 }
 
 export function MoveToDaySheet({ item, isOpen, onClose, onMoveToDay, availableDays }: MoveDayProps) {
+  const { t } = useTranslation();
+
   if (!item) return null;
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} height={0.45}>
       <View style={{ padding: 20, gap: 12 }}>
         <Text style={{ color: colors.text, fontSize: 18, fontFamily: fonts.display }}>
-          Déplacer vers...
+          {t('activity.actions.moveTitle')}
         </Text>
         <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 8 }}>
           {item.title}
@@ -157,7 +162,7 @@ export function MoveToDaySheet({ item, isOpen, onClose, onMoveToDay, availableDa
               <Calendar size={16} color={day === item.dayNumber ? colors.gold : colors.textSecondary} />
             </View>
             <Text style={{ color: day === item.dayNumber ? colors.gold : colors.text, fontSize: 14, fontFamily: fonts.sansBold }}>
-              Jour {day}{day === item.dayNumber ? ' (actuel)' : ''}
+              {t('trip.day', { n: day })}{day === item.dayNumber ? ` ${t('activity.actions.moveCurrent')}` : ''}
             </Text>
           </Pressable>
         ))}

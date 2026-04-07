@@ -34,21 +34,22 @@ import { TripCard } from '@/components/trip/TripCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 type ProfileTab = 'voyages' | 'stats' | 'club';
 
-const PROFILE_TABS = [
-  { key: 'voyages' as const, label: 'Voyages', icon: MapPin },
-  { key: 'stats' as const, label: 'Stats', icon: Trophy },
-  { key: 'club' as const, label: 'Club', icon: Crown },
-];
+const PROFILE_TAB_KEYS = [
+  { key: 'voyages' as const, i18nKey: 'profile.tabs.trips', icon: MapPin },
+  { key: 'stats' as const, i18nKey: 'profile.tabs.stats', icon: Trophy },
+  { key: 'club' as const, i18nKey: 'profile.tabs.club', icon: Crown },
+] as const;
 
-const CLUB_FEATURES = [
-  { icon: Plane, label: 'Voyages illimités' },
-  { icon: Zap, label: 'Régénération expert' },
-  { icon: FileDown, label: 'Export PDF deluxe' },
-  { icon: Award, label: 'Badge exclusif' },
-];
+const CLUB_FEATURE_KEYS = [
+  { icon: Plane, i18nKey: 'profile.club.feature1' },
+  { icon: Zap, i18nKey: 'profile.club.feature2' },
+  { icon: FileDown, i18nKey: 'profile.club.feature3' },
+  { icon: Award, i18nKey: 'profile.club.feature4' },
+] as const;
 
 export default function ProfileScreen() {
   const { user, profile, isLoading: authLoading, signOut } = useAuth();
@@ -57,6 +58,8 @@ export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState<ProfileTab>('voyages');
   const [exporting, setExporting] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const { t } = useTranslation();
 
   const { data: stats } = useApi(
     () => (user ? fetchUserStats(user.id) : Promise.resolve(null)),
@@ -82,10 +85,10 @@ export default function ProfileScreen() {
 
   const handleSignOut = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    Alert.alert('Se déconnecter', 'Êtes-vous sûr de vouloir vous déconnecter ?', [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('profile.logout.title'), t('profile.logout.confirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Se déconnecter',
+        text: t('profile.logout.title'),
         style: 'destructive',
         onPress: async () => {
           await signOut();
@@ -99,7 +102,7 @@ export default function ProfileScreen() {
     try {
       await exportAccountData();
     } catch (error) {
-      Alert.alert('Export impossible', error instanceof Error ? error.message : 'Une erreur est survenue.');
+      Alert.alert(t('profile.export.error.title'), error instanceof Error ? error.message : t('profile.export.error.message'));
     } finally {
       setExporting(false);
     }
@@ -108,12 +111,12 @@ export default function ProfileScreen() {
   const handleDeleteAccount = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     Alert.alert(
-      'Supprimer mon compte',
-      'Cette action est définitive. Toutes vos données et vos voyages seront supprimés.',
+      t('profile.delete.title'),
+      t('profile.delete.confirm'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer définitivement',
+          text: t('profile.delete.confirm_btn'),
           style: 'destructive',
           onPress: async () => {
             setDeletingAccount(true);
@@ -122,7 +125,7 @@ export default function ProfileScreen() {
               await signOut();
               router.replace('/(tabs)');
             } catch (error) {
-              Alert.alert('Suppression impossible', error instanceof Error ? error.message : 'Une erreur est survenue.');
+              Alert.alert(t('profile.delete.error.title'), error instanceof Error ? error.message : t('profile.export.error.message'));
             } finally {
               setDeletingAccount(false);
             }
@@ -142,12 +145,12 @@ export default function ProfileScreen() {
               <Plane size={32} color={colors.gold} />
             </View>
             <View style={styles.loggedOutCopy}>
-              <Text style={styles.loggedOutTitle}>Connectez-vous</Text>
+              <Text style={styles.loggedOutTitle}>{t('profile.loggedOut.title')}</Text>
               <Text style={styles.loggedOutText}>
-                Retrouvez votre profil, vos voyages et vos réglages sans scroller dans le vide.
+                {t('profile.loggedOut.desc')}
               </Text>
             </View>
-            <Button size="lg" onPress={handleLogin}>Se connecter</Button>
+            <Button size="lg" onPress={handleLogin}>{t('profile.loggedOut.cta')}</Button>
           </View>
         </View>
       </View>
@@ -203,11 +206,11 @@ export default function ProfileScreen() {
 
             {/* Stats — 3 columns */}
             <View style={styles.statsCard}>
-              <Stat value={tripCount} label="Voyages" />
+              <Stat value={tripCount} label={t('profile.tabs.trips')} />
               <View style={styles.statsDivider} />
-              <Stat value={stats?.followerCount ?? 0} label="Abonnés" />
+              <Stat value={stats?.followerCount ?? 0} label={t('profile.stats.followers')} />
               <View style={styles.statsDivider} />
-              <Stat value={stats?.followingCount ?? 0} label="Suivis" />
+              <Stat value={stats?.followingCount ?? 0} label={t('profile.stats.following')} />
             </View>
           </View>
         </View>
@@ -216,16 +219,16 @@ export default function ProfileScreen() {
         <View style={styles.actionsRow}>
           <Pressable onPress={() => { Haptics.selectionAsync(); router.push('/preferences'); }} style={styles.actionButton}>
             <Settings size={18} color={colors.gold} />
-            <Text style={styles.actionLabel}>Réglages</Text>
+            <Text style={styles.actionLabel}>{t('profile.actions.settings')}</Text>
           </Pressable>
           <Pressable onPress={handleSignOut} style={styles.actionButton}>
             <LogOut size={18} color="rgba(255,255,255,0.5)" />
-            <Text style={styles.actionLabel}>Déconnexion</Text>
+            <Text style={styles.actionLabel}>{t('profile.actions.logout')}</Text>
           </Pressable>
         </View>
 
         <View style={styles.tabsRow}>
-          {PROFILE_TABS.map((tab) => {
+          {PROFILE_TAB_KEYS.map((tab) => {
             const active = activeTab === tab.key;
 
             return (
@@ -239,7 +242,7 @@ export default function ProfileScreen() {
               >
                 <tab.icon size={16} color={active ? colors.gold : colors.textMuted} />
                 <Text style={[styles.tabLabel, active ? styles.tabLabelActive : null]}>
-                  {tab.label}
+                  {t(tab.i18nKey)}
                 </Text>
               </Pressable>
             );
@@ -256,9 +259,9 @@ export default function ProfileScreen() {
             ) : tripCount === 0 ? (
               <Card variant="elevated" style={styles.emptyTripsCard}>
                 <MapPin size={36} color={colors.textMuted} />
-                <Text style={styles.emptyTripsTitle}>Aucun voyage pour le moment</Text>
+                <Text style={styles.emptyTripsTitle}>{t('profile.trips.empty.title')}</Text>
                 <Text style={styles.emptyTripsText}>
-                  Lancez votre premier itinéraire depuis le bouton central.
+                  {t('profile.trips.empty.desc')}
                 </Text>
               </Card>
             ) : (
@@ -279,9 +282,9 @@ export default function ProfileScreen() {
         {activeTab === 'stats' ? (
           <View style={styles.tabContent}>
             <Card variant="premium" style={styles.statsOverview}>
-              <Stat value={tripCount} label="Créés" />
-              <Stat value={(trips ?? []).filter((trip) => new Date(trip.end_date) < new Date()).length} label="Terminés" />
-              <Stat value={(trips ?? []).filter((trip) => new Date(trip.start_date) > new Date()).length} label="À venir" />
+              <Stat value={tripCount} label={t('profile.stats.created')} />
+              <Stat value={(trips ?? []).filter((trip) => new Date(trip.end_date) < new Date()).length} label={t('profile.stats.completed')} />
+              <Stat value={(trips ?? []).filter((trip) => new Date(trip.start_date) > new Date()).length} label={t('profile.stats.upcoming')} />
             </Card>
 
             {stats ? (
@@ -300,21 +303,21 @@ export default function ProfileScreen() {
               <View style={[styles.clubIconWrap, isPro ? styles.clubIconWrapActive : null]}>
                 {isPro ? <Crown size={30} color={colors.gold} /> : <CreditCard size={30} color={colors.textMuted} />}
               </View>
-              <Text style={styles.clubTitle}>{isPro ? 'Membre Privilège' : 'Accès Standard'}</Text>
+              <Text style={styles.clubTitle}>{isPro ? t('profile.club.title.pro') : t('profile.club.title.free')}</Text>
               <Text style={styles.clubText}>
                 {isPro
-                  ? 'Voyages illimités et fonctionnalités exclusives.'
-                  : 'Passez à Pro pour débloquer toutes les fonctionnalités.'}
+                  ? t('profile.club.text.pro')
+                  : t('profile.club.text.free')}
               </Text>
             </Card>
 
             {!isPro ? (
               <>
                 <View style={styles.featureGrid}>
-                  {CLUB_FEATURES.map((feature) => (
-                    <View key={feature.label} style={styles.featureCard}>
+                  {CLUB_FEATURE_KEYS.map((feature) => (
+                    <View key={feature.i18nKey} style={styles.featureCard}>
                       <feature.icon size={24} color={colors.gold} />
-                      <Text style={styles.featureLabel}>{feature.label}</Text>
+                      <Text style={styles.featureLabel}>{t(feature.i18nKey)}</Text>
                     </View>
                   ))}
                 </View>
@@ -325,7 +328,7 @@ export default function ProfileScreen() {
                     router.push('/pricing');
                   }}
                 >
-                  Devenir Pro
+                  {t('profile.club.cta.free')}
                 </Button>
               </>
             ) : (
@@ -336,7 +339,7 @@ export default function ProfileScreen() {
                 }}
                 variant="outline"
               >
-                Gérer mon abonnement
+                {t('profile.club.cta.pro')}
               </Button>
             )}
           </View>

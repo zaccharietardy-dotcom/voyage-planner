@@ -46,11 +46,23 @@ export function resolveBudget(preferences: TripPreferences): ResolvedBudget {
   const perPersonBudget = totalBudget / groupSize;
   const perPersonPerDay = perPersonBudget / durationDays;
 
+  // Budget breakdown par catégorie (% du budget/personne/jour)
+  // Ratios typiques : hébergement 35%, repas 30%, activités 20%, transport 15%
+  const ratios = budgetLevel === 'economic'
+    ? { accommodation: 0.30, food: 0.30, activities: 0.15, transport: 0.25 }
+    : budgetLevel === 'luxury'
+    ? { accommodation: 0.40, food: 0.25, activities: 0.25, transport: 0.10 }
+    : { accommodation: 0.35, food: 0.30, activities: 0.20, transport: 0.15 };
+
   return {
     totalBudget,
     perPersonBudget,
     perPersonPerDay,
     budgetLevel,
+    dailyAccommodation: Math.round(perPersonPerDay * ratios.accommodation),
+    dailyFood: Math.round(perPersonPerDay * ratios.food),
+    dailyActivities: Math.round(perPersonPerDay * ratios.activities),
+    dailyTransport: Math.round(perPersonPerDay * ratios.transport),
   };
 }
 

@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius, goldGradient } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
 
 export default function ForgotPasswordScreen() {
@@ -13,6 +14,7 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const { t } = useTranslation();
 
   const handleReset = async () => {
     if (!email) return;
@@ -36,10 +38,10 @@ export default function ForgotPasswordScreen() {
               <Text style={{ fontSize: 40 }}>✉️</Text>
             </View>
             <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, fontWeight: 'bold', textAlign: 'center', marginBottom: 12 }}>
-              Email envoyé
+              {t('auth.forgot.success.title')}
             </Text>
             <Text style={{ color: '#94a3b8', fontSize: 16, fontFamily: fonts.sans, textAlign: 'center', lineHeight: 24 }}>
-              Vérifiez votre boîte mail pour{'\n'}réinitialiser votre mot de passe.
+              {t('auth.forgot.success.subtitle')}
             </Text>
             <Pressable
               onPress={() => { Haptics.selectionAsync(); router.replace('/(auth)/login'); }}
@@ -54,7 +56,7 @@ export default function ForgotPasswordScreen() {
                   boxShadow: '0 6px 12px rgba(197,160,89,0.35)',
                 }}
               >
-                <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold, fontWeight: '800' }}>Retour à la connexion</Text>
+                <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold, fontWeight: '800' }}>{t('auth.forgot.success.backLink')}</Text>
               </LinearGradient>
             </Pressable>
         </ScrollView>
@@ -71,17 +73,17 @@ export default function ForgotPasswordScreen() {
           </Pressable>
 
           <Text style={{ color: colors.text, fontSize: 36, fontFamily: fonts.display, fontWeight: 'bold', marginBottom: 8 }}>
-            Mot de passe oublié
+            {t('auth.forgot.title')}
           </Text>
           <Text style={{ color: '#94a3b8', fontSize: 16, fontFamily: fonts.sans, marginBottom: 32 }}>
-            Entrez votre email, on vous envoie un lien de réinitialisation.
+            {t('auth.forgot.subtitle')}
           </Text>
 
-          <Text style={{ color: '#94a3b8', fontSize: 11, fontFamily: fonts.sansSemiBold, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8, marginLeft: 4 }}>Email</Text>
+          <Text style={{ color: '#94a3b8', fontSize: 11, fontFamily: fonts.sansSemiBold, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8, marginLeft: 4 }}>{t('auth.forgot.email.label')}</Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
-            placeholder="votre@email.com"
+            placeholder={t('auth.forgot.email.placeholder')}
             placeholderTextColor="#475569"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -105,7 +107,7 @@ export default function ForgotPasswordScreen() {
                 boxShadow: '0 6px 12px rgba(197,160,89,0.35)',
               }}
             >
-              {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold, fontWeight: '800' }}>Envoyer le lien</Text>}
+              {isLoading ? <ActivityIndicator color={colors.bg} /> : <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold, fontWeight: '800' }}>{t('auth.forgot.submit')}</Text>}
             </LinearGradient>
           </Pressable>
       </ScrollView>

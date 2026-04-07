@@ -17,6 +17,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, ArrowRight, Lock, Sparkles } from 'lucide-react-native';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/lib/i18n';
 import { api } from '@/lib/api/client';
 import {
   checkGenerateAccess,
@@ -38,14 +39,14 @@ import { StepBudget } from '@/components/plan/StepBudget';
 import { StepSummary } from '@/components/plan/StepSummary';
 import { GeneratingScreen } from '@/components/plan/GeneratingScreen';
 
-const STEP_TITLES = [
-  'Destination',
-  'Ville de départ',
-  'Quand ?',
-  'Voyageurs',
-  'Centres d’intérêt',
-  'Budget',
-  'Résumé',
+const STEP_TITLE_KEYS = [
+  'plan.steps.destination',
+  'plan.steps.origin',
+  'plan.steps.when',
+  'plan.steps.group',
+  'plan.steps.preferences',
+  'plan.steps.budget',
+  'plan.steps.summary',
 ] as const;
 
 const DEFAULT_PREFS: Partial<TripPreferences> = {
@@ -73,6 +74,7 @@ export function PlanWizardScreen() {
   const questionResolverRef = useRef<((selectedOptionId: string) => void) | null>(null);
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const { t } = useTranslation();
 
   const compact = height < 760;
   const navHeight = compact ? 74 : 82;
@@ -125,16 +127,16 @@ export function PlanWizardScreen() {
   const validate = useCallback(() => {
     switch (step) {
       case 0:
-        if (!prefs.destination?.trim()) return 'Veuillez choisir une destination.';
+        if (!prefs.destination?.trim()) return t('plan.error.destination');
         return null;
       case 1:
-        if (!prefs.origin?.trim()) return 'Indiquez votre ville de départ.';
+        if (!prefs.origin?.trim()) return t('plan.error.origin');
         return null;
       case 2:
-        if (!prefs.startDate) return 'Veuillez choisir une date de départ.';
+        if (!prefs.startDate) return t('plan.error.date');
         return null;
       case 4:
-        if (!prefs.activities?.length) return 'Sélectionnez au moins une activité.';
+        if (!prefs.activities?.length) return t('plan.error.activities');
         return null;
       default:
         return null;
@@ -162,7 +164,7 @@ export function PlanWizardScreen() {
     }
     setFormError(null);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (step < STEP_TITLES.length - 1) {
+    if (step < STEP_TITLE_KEYS.length - 1) {
       goTo(step + 1);
     }
   };
@@ -237,7 +239,7 @@ export function PlanWizardScreen() {
 
       router.replace(`/trip/${savedTrip.id}`);
     } catch (error) {
-      setGenError(error instanceof Error ? error.message : 'Erreur inconnue');
+      setGenError(error instanceof Error ? error.message : t('common.error'));
     } finally {
       setIsGenerating(false);
     }
@@ -327,15 +329,15 @@ export function PlanWizardScreen() {
 
             <View style={{ gap: 8 }}>
               <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display }}>
-                {gate.action === 'upgrade' ? 'Débloquez la génération' : 'Connectez-vous'}
+                {gate.action === 'upgrade' ? t('plan.gate.upgrade') : t('plan.gate.login')}
               </Text>
               <Text style={{ color: colors.textSecondary, fontSize: 15, fontFamily: fonts.sans, lineHeight: 24 }}>
-                {gate.reason || 'Connectez-vous pour générer votre voyage.'}
+                {gate.reason || t('plan.gate.reason')}
               </Text>
             </View>
 
             <Button size="lg" onPress={handleGateAction}>
-              {gate.action === 'upgrade' ? 'Voir les offres' : 'Se connecter'}
+              {gate.action === 'upgrade' ? t('plan.gate.upgrade_btn') : t('plan.gate.login_btn')}
             </Button>
 
             <Button
@@ -344,7 +346,7 @@ export function PlanWizardScreen() {
               onPress={() => router.replace('/(tabs)')}
               style={{ marginTop: -4 }}
             >
-              Revenir à l’accueil
+              {t('plan.gate.home')}
             </Button>
           </View>
         </View>
@@ -356,7 +358,7 @@ export function PlanWizardScreen() {
     return (
       <GeneratingScreen
         origin={prefs.origin ?? ''}
-        destination={prefs.destination ?? 'votre destination'}
+        destination={prefs.destination ?? ''}
         durationDays={prefs.durationDays ?? 3}
         progress={progress}
         snapshot={mapSnapshot}
@@ -364,6 +366,7 @@ export function PlanWizardScreen() {
         question={pipelineQuestion}
         onAnswer={handleQuestionAnswer}
         onRetry={handleGenerate}
+        onBack={() => { setIsGenerating(false); setGenError(null); }}
       />
     );
   }
@@ -388,16 +391,16 @@ export function PlanWizardScreen() {
               <ArrowLeft size={20} color={colors.text} />
             </Pressable>
             <Text style={[styles.stepLabel, { marginTop: 0 }]}>
-              Étape {step + 1} / {STEP_TITLES.length}
+              {t('plan.step.counter', { current: step + 1, total: STEP_TITLE_KEYS.length })}
             </Text>
           </View>
 
           <Text style={[styles.title, compact ? styles.titleCompact : null]}>
-            {STEP_TITLES[step]}
+            {t(STEP_TITLE_KEYS[step] as any)}
           </Text>
 
           <View style={styles.dotsRow}>
-            {STEP_TITLES.map((label, index) => {
+            {STEP_TITLE_KEYS.map((label, index) => {
               const isActive = index === step;
               const isDone = index < step;
 
@@ -430,7 +433,7 @@ export function PlanWizardScreen() {
             styles.contentArea,
             {
               marginHorizontal: compact ? 12 : 16,
-              marginBottom: step < STEP_TITLES.length - 1 ? navHeight + insets.bottom + 26 : insets.bottom + 16,
+              marginBottom: step < STEP_TITLE_KEYS.length - 1 ? navHeight + insets.bottom + 26 : insets.bottom + 16,
             },
           ]}
         >
@@ -453,7 +456,7 @@ export function PlanWizardScreen() {
           </ScrollView>
         </View>
 
-        {step < STEP_TITLES.length - 1 ? (
+        {step < STEP_TITLE_KEYS.length - 1 ? (
           <View style={[styles.navWrap, { paddingBottom: insets.bottom + 12, paddingHorizontal: compact ? 12 : 16 }]}>
             {formError ? (
               <View style={styles.errorBadge}>
@@ -468,7 +471,7 @@ export function PlanWizardScreen() {
                 style={styles.navButton}
                 icon={ArrowLeft}
               >
-                {step === 0 ? 'Quitter' : 'Retour'}
+                {step === 0 ? t('plan.nav.quit') : t('plan.nav.back')}
               </Button>
               <Button
                 size="lg"
@@ -477,7 +480,7 @@ export function PlanWizardScreen() {
                 icon={ArrowRight}
                 iconPosition="right"
               >
-                {step === STEP_TITLES.length - 2 ? 'Récapitulatif' : 'Suivant'}
+                {step === STEP_TITLE_KEYS.length - 2 ? t('plan.nav.summary') : t('plan.nav.next')}
               </Button>
             </View>
           </View>

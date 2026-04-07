@@ -9,6 +9,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { SITE_URL } from '@/lib/constants';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
@@ -48,13 +49,14 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const { t } = useTranslation();
   const redirectPath = getSafeRedirectPath(params.redirect, '/(tabs)');
 
   const passwordCriteria = [
-    { label: '8 caractères minimum', met: password.length >= 8 },
-    { label: 'Une majuscule', met: /[A-Z]/.test(password) },
-    { label: 'Un chiffre', met: /[0-9]/.test(password) },
-    { label: 'Un caractère spécial', met: /[^A-Za-z0-9]/.test(password) },
+    { label: t('auth.register.criteria.length'), met: password.length >= 8 },
+    { label: t('auth.register.criteria.uppercase'), met: /[A-Z]/.test(password) },
+    { label: t('auth.register.criteria.digit'), met: /[0-9]/.test(password) },
+    { label: t('auth.register.criteria.special'), met: /[^A-Za-z0-9]/.test(password) },
   ];
 
   const handleAppleLogin = async () => {
@@ -72,7 +74,7 @@ export default function RegisterScreen() {
       }
     } catch (e: any) {
       if (e.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Erreur Apple Sign-In', e?.message || 'Connexion Apple impossible');
+      Alert.alert(t('auth.login.error.apple'), e?.message || t('auth.login.error.appleUnavailable'));
     }
   };
 
@@ -83,7 +85,7 @@ export default function RegisterScreen() {
         provider: 'google',
         options: { redirectTo: redirectUrl, skipBrowserRedirect: true },
       });
-      if (error || !data.url) { Alert.alert('Erreur', 'Connexion Google impossible'); return; }
+      if (error || !data.url) { Alert.alert(t('common.error'), t('auth.login.error.google')); return; }
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
       if (result.type === 'success' && result.url) {
@@ -96,17 +98,17 @@ export default function RegisterScreen() {
         }
       }
     } catch {
-      Alert.alert('Erreur', 'Connexion Google impossible');
+      Alert.alert(t('common.error'), t('auth.login.error.google'));
     }
   };
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !email || !password) {
-      setError('Veuillez remplir tous les champs');
+      setError(t('auth.register.error.empty'));
       return;
     }
     if (password.length < 8) {
-      setError('Le mot de passe doit faire au moins 8 caractères');
+      setError(t('auth.register.error.passwordLength'));
       return;
     }
 
@@ -122,7 +124,7 @@ export default function RegisterScreen() {
 
       if (signUpError) {
         if (signUpError.message.includes('already registered')) {
-          setError('Un compte existe déjà avec cet email');
+          setError(t('auth.register.error.exists'));
         } else {
           setError(signUpError.message);
         }
@@ -139,7 +141,7 @@ export default function RegisterScreen() {
       setSuccess(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
-      setError('Une erreur est survenue');
+      setError(t('auth.register.error.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -154,15 +156,15 @@ export default function RegisterScreen() {
             <Text style={{ fontSize: 40 }}>✉️</Text>
           </View>
           <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, textAlign: 'center', marginBottom: 12 }}>
-            Vérifiez votre email
+            {t('auth.register.success.title')}
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: 16, fontFamily: fonts.sans, textAlign: 'center', lineHeight: 24 }}>
-            Un lien de confirmation a été envoyé à{'\n'}
+            {t('auth.register.success.subtitle')}{'\n'}
             <Text style={{ color: colors.gold, fontFamily: fonts.sansBold }}>{email}</Text>
           </Text>
           <Pressable onPress={() => router.replace({ pathname: '/(auth)/login', params: { redirect: redirectPath } })} style={{ marginTop: 40, width: '100%' }}>
             <LinearGradient colors={goldGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: radius.button, borderCurve: 'continuous', paddingVertical: 20, alignItems: 'center' }}>
-              <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold }}>Retour à la connexion</Text>
+              <Text style={{ color: colors.bg, fontSize: 17, fontFamily: fonts.sansSemiBold }}>{t('auth.register.success.backLink')}</Text>
             </LinearGradient>
           </Pressable>
         </ScrollView>
@@ -186,47 +188,47 @@ export default function RegisterScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.header}>
-              <Text style={styles.title}>Créer un compte</Text>
-              <Text style={styles.subtitle}>Rejoignez Narae et commencez à planifier vos aventures</Text>
+              <Text style={styles.title}>{t('auth.register.title')}</Text>
+              <Text style={styles.subtitle}>{t('auth.register.subtitle')}</Text>
             </View>
 
             <View style={styles.socialContainer}>
               <Pressable style={styles.appleButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleAppleLogin(); }}>
                 <AppleLogo />
-                <Text style={styles.appleButtonText}>S'inscrire avec Apple</Text>
+                <Text style={styles.appleButtonText}>{t('auth.register.apple')}</Text>
               </Pressable>
               <Pressable style={styles.googleButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleGoogleLogin(); }}>
                 <GoogleLogo />
-                <Text style={styles.googleButtonText}>S'inscrire avec Google</Text>
+                <Text style={styles.googleButtonText}>{t('auth.register.google')}</Text>
               </Pressable>
             </View>
 
             <View style={styles.dividerContainer}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OU S'INSCRIRE AVEC EMAIL</Text>
+              <Text style={styles.dividerText}>{t('auth.register.divider')}</Text>
               <View style={styles.dividerLine} />
             </View>
 
             <View style={styles.form}>
               <View style={styles.row}>
                 <View style={[styles.inputGroup, { flex: 1 }]}>
-                  <Text style={styles.label}>PRÉNOM</Text>
-                  <Input value={firstName} onChangeText={setFirstName} placeholder="Jean" />
+                  <Text style={styles.label}>{t('auth.register.firstName.label')}</Text>
+                  <Input value={firstName} onChangeText={setFirstName} placeholder={t('auth.register.firstName.placeholder')} />
                 </View>
                 <View style={[styles.inputGroup, { flex: 1 }]}>
-                  <Text style={styles.label}>NOM</Text>
-                  <Input value={lastName} onChangeText={setLastName} placeholder="Dupont" />
+                  <Text style={styles.label}>{t('auth.register.lastName.label')}</Text>
+                  <Input value={lastName} onChangeText={setLastName} placeholder={t('auth.register.lastName.placeholder')} />
                 </View>
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>ADRESSE EMAIL</Text>
-                <Input value={email} onChangeText={(t) => { setEmail(t); setError(null); }} placeholder="votre@email.com" autoCapitalize="none" keyboardType="email-address" />
+                <Text style={styles.label}>{t('auth.register.email.label')}</Text>
+                <Input value={email} onChangeText={(v) => { setEmail(v); setError(null); }} placeholder={t('auth.login.email.placeholder')} autoCapitalize="none" keyboardType="email-address" />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>MOT DE PASSE</Text>
-                <Input value={password} onChangeText={(t) => { setPassword(t); setError(null); }} placeholder="••••••••" secureTextEntry />
+                <Text style={styles.label}>{t('auth.register.password.label')}</Text>
+                <Input value={password} onChangeText={(v) => { setPassword(v); setError(null); }} placeholder={t('auth.login.password.placeholder')} secureTextEntry />
                 <View style={styles.criteriaContainer}>
                   {passwordCriteria.map((c, i) => (
                     <View key={i} style={styles.criteriaItem}>
@@ -244,14 +246,14 @@ export default function RegisterScreen() {
               )}
 
               <Button variant="primary" size="lg" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleRegister(); }} isLoading={isLoading} style={{ marginTop: 12 }}>
-                Créer mon compte
+                {t('auth.register.submit')}
               </Button>
             </View>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Déjà un compte ? </Text>
+              <Text style={styles.footerText}>{t('auth.register.loginPrompt')}</Text>
               <Pressable onPress={() => router.push({ pathname: '/(auth)/login', params: { redirect: redirectPath } })}>
-                <Text style={styles.footerLink}>Se connecter</Text>
+                <Text style={styles.footerLink}>{t('auth.register.loginLink')}</Text>
               </Pressable>
             </View>
           </ScrollView>

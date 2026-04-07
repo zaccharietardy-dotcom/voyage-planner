@@ -77,6 +77,11 @@ export interface ResolvedBudget {
   perPersonBudget: number;
   perPersonPerDay: number;
   budgetLevel: BudgetLevel;
+  // Daily breakdown per category (per person)
+  dailyAccommodation?: number;
+  dailyActivities?: number;
+  dailyFood?: number;
+  dailyTransport?: number;
 }
 
 export interface TripPreferences {
@@ -119,6 +124,7 @@ export interface TripPreferences {
 
   // Multi-villes / Road trip
   tripMode?: 'precise' | 'inspired';
+  travelStyle?: 'single_base' | 'road_trip' | 'auto';
   cityPlan?: CityStage[];
 
   // Étape 6 (optionnel) - Détails logistiques

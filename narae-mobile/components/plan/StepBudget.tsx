@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, useWindowDimensions } fro
 import { Coins, Wallet, CreditCard, Gem } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import {
   BUDGET_LABELS, TRANSPORT_LABELS,
   type BudgetLevel, type TransportType, type TripPreferences,
@@ -13,25 +14,26 @@ interface Props {
   onChange: (update: Partial<TripPreferences>) => void;
 }
 
-const BUDGET_OPTIONS: { key: BudgetLevel; label: string; range: string; Icon: typeof Coins }[] = [
-  { key: 'economic', label: 'Éco', range: '< 50€/j', Icon: Coins },
-  { key: 'moderate', label: 'Modéré', range: '50-120€/j', Icon: Wallet },
-  { key: 'comfort', label: 'Confort', range: '120-250€', Icon: CreditCard },
-  { key: 'luxury', label: 'Luxe', range: '250€+/j', Icon: Gem },
+const BUDGET_OPTIONS: { key: BudgetLevel; labelKey: 'plan.budget.economic' | 'plan.budget.moderate' | 'plan.budget.comfort' | 'plan.budget.luxury'; rangeKey: 'plan.budget.economic.range' | 'plan.budget.moderate.range' | 'plan.budget.comfort.range' | 'plan.budget.luxury.range'; Icon: typeof Coins }[] = [
+  { key: 'economic', labelKey: 'plan.budget.economic', rangeKey: 'plan.budget.economic.range', Icon: Coins },
+  { key: 'moderate', labelKey: 'plan.budget.moderate', rangeKey: 'plan.budget.moderate.range', Icon: Wallet },
+  { key: 'comfort', labelKey: 'plan.budget.comfort', rangeKey: 'plan.budget.comfort.range', Icon: CreditCard },
+  { key: 'luxury', labelKey: 'plan.budget.luxury', rangeKey: 'plan.budget.luxury.range', Icon: Gem },
 ];
 
-const TRANSPORT_OPTIONS: { value: TransportType; label: string; emoji: string }[] = [
-  { value: 'optimal', label: 'Optimal', emoji: '🎯' },
-  { value: 'plane', label: 'Avion', emoji: '✈️' },
-  { value: 'train', label: 'Train', emoji: '🚄' },
-  { value: 'car', label: 'Voiture', emoji: '🚗' },
-  { value: 'bus', label: 'Bus', emoji: '🚌' },
+const TRANSPORT_OPTIONS: { value: TransportType; labelKey: 'plan.budget.transport.optimal' | 'plan.budget.transport.plane' | 'plan.budget.transport.train' | 'plan.budget.transport.car' | 'plan.budget.transport.bus'; emoji: string }[] = [
+  { value: 'optimal', labelKey: 'plan.budget.transport.optimal', emoji: '🎯' },
+  { value: 'plane', labelKey: 'plan.budget.transport.plane', emoji: '✈️' },
+  { value: 'train', labelKey: 'plan.budget.transport.train', emoji: '🚄' },
+  { value: 'car', labelKey: 'plan.budget.transport.car', emoji: '🚗' },
+  { value: 'bus', labelKey: 'plan.budget.transport.bus', emoji: '🚌' },
 ];
 
 export function StepBudget({ prefs, onChange }: Props) {
   const budget = prefs.budgetLevel ?? 'moderate';
   const transport = prefs.transport ?? 'optimal';
   const { width } = useWindowDimensions();
+  const { t } = useTranslation();
   // Card width: container width minus padding (24*2) minus shell padding (20*2) minus gap (12)
   const cardW = (width - 48 - 40 - 12) / 2;
 
@@ -39,13 +41,13 @@ export function StepBudget({ prefs, onChange }: Props) {
     <View style={{ gap: 28 }}>
       {/* Title */}
       <View style={{ alignItems: 'center' }}>
-        <Text style={s.title}>Quel budget ?</Text>
-        <Text style={s.subtitle}>Pour adapter le confort</Text>
+        <Text style={s.title}>{t('plan.budget.title')}</Text>
+        <Text style={s.subtitle}>{t('plan.budget.subtitle')}</Text>
       </View>
 
       {/* Budget 2x2 grid — fixed width cards */}
       <View style={s.budgetGrid}>
-        {BUDGET_OPTIONS.map(({ key, label, range, Icon }) => {
+        {BUDGET_OPTIONS.map(({ key, labelKey, rangeKey, Icon }) => {
           const selected = budget === key;
           return (
             <Pressable
@@ -56,8 +58,8 @@ export function StepBudget({ prefs, onChange }: Props) {
               <View style={[s.iconCircle, selected && s.iconCircleSelected]}>
                 <Icon size={20} color={selected ? '#000' : 'rgba(255,255,255,0.4)'} />
               </View>
-              <Text style={[s.budgetLabel, selected && { color: colors.text }]}>{label}</Text>
-              <Text style={s.budgetRange}>{range}</Text>
+              <Text style={[s.budgetLabel, selected && { color: colors.text }]}>{t(labelKey)}</Text>
+              <Text style={s.budgetRange}>{t(rangeKey)}</Text>
             </Pressable>
           );
         })}
@@ -65,7 +67,7 @@ export function StepBudget({ prefs, onChange }: Props) {
 
       {/* Transport — horizontal scroll row */}
       <View style={{ gap: 12 }}>
-        <Text style={s.sectionLabel}>TRANSPORT</Text>
+        <Text style={s.sectionLabel}>{t('plan.budget.transport')}</Text>
         <View style={s.transportRow}>
           {TRANSPORT_OPTIONS.map((opt) => {
             const selected = transport === opt.value;
@@ -76,7 +78,7 @@ export function StepBudget({ prefs, onChange }: Props) {
                 style={[s.transportChip, selected && s.transportChipSelected]}
               >
                 <Text style={{ fontSize: 16 }}>{opt.emoji}</Text>
-                <Text style={[s.transportLabel, selected && { color: colors.gold }]}>{opt.label}</Text>
+                <Text style={[s.transportLabel, selected && { color: colors.gold }]}>{t(opt.labelKey)}</Text>
               </Pressable>
             );
           })}

@@ -6,6 +6,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts, goldGradient } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import type { LucideIcon } from 'lucide-react-native';
 
 function TabIcon({ icon: Icon, label, focused, isCentral }: {
@@ -55,6 +56,7 @@ function TabIcon({ icon: Icon, label, focused, isCentral }: {
 
 export default function TabLayout() {
   const { bottom } = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <Tabs
@@ -90,8 +92,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Accueil',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Home} label="Accueil" focused={focused} />,
+          title: t('tabs.home'),
+          tabBarIcon: ({ focused }) => <TabIcon icon={Home} label={t('tabs.home')} focused={focused} />,
         }}
         listeners={{
           tabPress: () => Haptics.selectionAsync(),
@@ -100,8 +102,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explorer',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Compass} label="Explorer" focused={focused} />,
+          title: t('tabs.explore'),
+          tabBarIcon: ({ focused }) => <TabIcon icon={Compass} label={t('tabs.explore')} focused={focused} />,
         }}
         listeners={{
           tabPress: () => Haptics.selectionAsync(),
@@ -110,8 +112,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="plan"
         options={{
-          title: 'Creer',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Plus} label="Creer" focused={focused} isCentral />,
+          title: t('tabs.create'),
+          tabBarIcon: ({ focused }) => <TabIcon icon={Plus} label={t('tabs.create')} focused={focused} isCentral />,
           tabBarStyle: { display: 'none' },
         }}
         listeners={{
@@ -121,8 +123,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="globe"
         options={{
-          title: 'Globe',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Globe} label="Globe" focused={focused} />,
+          title: t('tabs.globe'),
+          tabBarIcon: ({ focused }) => <TabIcon icon={Globe} label={t('tabs.globe')} focused={focused} />,
         }}
         listeners={{
           tabPress: () => Haptics.selectionAsync(),
@@ -131,8 +133,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
-          tabBarIcon: ({ focused }) => <TabIcon icon={User} label="Profil" focused={focused} />,
+          title: t('tabs.profile'),
+          tabBarIcon: ({ focused }) => <TabIcon icon={User} label={t('tabs.profile')} focused={focused} />,
         }}
         listeners={{
           tabPress: () => Haptics.selectionAsync(),

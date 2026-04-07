@@ -7,36 +7,38 @@ import { colors, fonts, radius } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { getPackages, purchasePackage, restorePurchases, checkProStatus } from '@/lib/purchases';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation, type TranslationKey } from '@/lib/i18n';
 import type { PurchasesPackage } from 'react-native-purchases';
 
-const FEATURES = [
-  { icon: Plane, label: 'Voyages illimités', desc: 'Créez autant de voyages que vous voulez' },
-  { icon: Zap, label: 'Régénération expert', desc: 'Régénérez et optimisez à volonté' },
-  { icon: Users, label: 'Collaboration groupe', desc: 'Planifiez et partagez les dépenses entre amis' },
-  { icon: FileDown, label: 'Export PDF premium', desc: 'Carnet de voyage complet à imprimer' },
-  { icon: Star, label: 'Support prioritaire', desc: 'Réponse sous 24h garantie' },
-];
+const FEATURE_KEYS = [
+  { icon: Plane, labelKey: 'pricing.features.unlimited', descKey: 'pricing.features.unlimited.desc' },
+  { icon: Zap, labelKey: 'pricing.features.regen', descKey: 'pricing.features.regen.desc' },
+  { icon: Users, labelKey: 'pricing.features.collab', descKey: 'pricing.features.collab.desc' },
+  { icon: FileDown, labelKey: 'pricing.features.export', descKey: 'pricing.features.export.desc' },
+  { icon: Star, labelKey: 'pricing.features.support', descKey: 'pricing.features.support.desc' },
+] as const;
 
 type PlanType = 'annual' | 'monthly' | 'single';
 
 interface PlanOption {
   type: PlanType;
-  label: string;
+  labelKey: TranslationKey;
   priceFallback: string;
-  periodFallback: string;
-  badge?: string;
-  desc?: string;
+  periodKey?: TranslationKey;
+  badgeKey?: TranslationKey;
+  descKey?: TranslationKey;
 }
 
-const PLANS: PlanOption[] = [
-  { type: 'annual', label: 'Annuel', priceFallback: '29.99€', periodFallback: '/an', badge: '-58%', desc: 'soit 2.49€/mois' },
-  { type: 'monthly', label: 'Mensuel', priceFallback: '4.99€', periodFallback: '/mois' },
-  { type: 'single', label: 'Voyage unique', priceFallback: '1.99€', periodFallback: '', desc: '1 voyage généré par IA' },
+const PLAN_KEYS: PlanOption[] = [
+  { type: 'annual', labelKey: 'pricing.plan.annual', priceFallback: '29.99€', periodKey: 'pricing.plan.annual.period', badgeKey: 'pricing.plan.annual.badge', descKey: 'pricing.plan.annual.desc' },
+  { type: 'monthly', labelKey: 'pricing.plan.monthly', priceFallback: '4.99€', periodKey: 'pricing.plan.monthly.period' },
+  { type: 'single', labelKey: 'pricing.plan.single', priceFallback: '1.99€', descKey: 'pricing.plan.single.desc' },
 ];
 
 export default function PricingScreen() {
   const router = useRouter();
   const { profile } = useAuth();
+  const { t } = useTranslation();
   const [packages, setPackages] = useState<PurchasesPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -65,7 +67,7 @@ export default function PricingScreen() {
   const handlePurchase = async () => {
     const pkg = findPkg(selectedPlan);
     if (!pkg) {
-      Alert.alert('Erreur', 'Offre non disponible. Réessayez plus tard.');
+      Alert.alert(t('common.error'), t('pricing.error.unavailable'));
       return;
     }
     setPurchasing(true);
@@ -73,14 +75,14 @@ export default function PricingScreen() {
       const info = await purchasePackage(pkg);
       if (info) {
         const msg = selectedPlan === 'single'
-          ? 'Votre voyage est prêt à être généré !'
-          : 'Bienvenue dans Narae Pro !';
-        Alert.alert('Merci !', msg, [
-          { text: 'OK', onPress: () => router.back() },
+          ? t('pricing.success.single')
+          : t('pricing.success.subscription');
+        Alert.alert(t('pricing.success.title'), msg, [
+          { text: t('common.ok'), onPress: () => router.back() },
         ]);
       }
     } catch {
-      Alert.alert('Erreur', 'L\'achat a échoué. Veuillez réessayer.');
+      Alert.alert(t('common.error'), t('pricing.error.purchase'));
     } finally {
       setPurchasing(false);
     }
@@ -92,14 +94,14 @@ export default function PricingScreen() {
       const info = await restorePurchases();
       const hasPro = info?.entitlements.active['pro'] !== undefined;
       if (hasPro) {
-        Alert.alert('Restauré !', 'Votre abonnement Pro est actif.', [
-          { text: 'OK', onPress: () => router.back() },
+        Alert.alert(t('pricing.success.title'), t('pricing.success.restore'), [
+          { text: t('common.ok'), onPress: () => router.back() },
         ]);
       } else {
-        Alert.alert('Aucun abonnement', 'Aucun achat précédent trouvé.');
+        Alert.alert(t('pricing.error.noSubscription'), t('pricing.error.noRestores'));
       }
     } catch {
-      Alert.alert('Erreur', 'La restauration a échoué.');
+      Alert.alert(t('common.error'), t('pricing.error.restore'));
     } finally {
       setRestoring(false);
     }
@@ -117,7 +119,7 @@ export default function PricingScreen() {
           <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} hitSlop={12}>
             <ArrowLeft size={24} color={colors.text} />
           </Pressable>
-          <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>Abonnement</Text>
+          <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>{t('pricing.title')}</Text>
         </View>
 
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, gap: 24 }}>
@@ -128,18 +130,19 @@ export default function PricingScreen() {
             <Crown size={40} color={colors.gold} />
           </View>
           <Text style={{ color: colors.text, fontSize: 28, fontFamily: fonts.display, textAlign: 'center' }}>
-            Vous êtes <Text style={{ color: colors.gold }}>Pro</Text>
+            {t('pricing.pro.title').replace('{highlight}', '')}
+            <Text style={{ color: colors.gold }}>{t('pricing.pro.highlight')}</Text>
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: 15, textAlign: 'center', lineHeight: 22 }}>
-            Profitez de vos voyages illimités, de la collaboration groupe et de toutes les fonctionnalités premium.
+            {t('pricing.pro.desc')}
           </Text>
 
           <View style={{ width: '100%', gap: 12, marginTop: 16 }}>
             <Button icon={Settings} onPress={handleManageSubscription}>
-              Gérer mon abonnement
+              {t('pricing.pro.manage')}
             </Button>
             <Text style={{ color: colors.textDim, fontSize: 12, textAlign: 'center' }}>
-              Modifiez, changez de formule ou annulez depuis les réglages Apple.
+              {t('pricing.pro.subtitle')}
             </Text>
           </View>
         </View>
@@ -148,11 +151,12 @@ export default function PricingScreen() {
   }
 
   // ── Purchase flow ──
+  const selectedPlanObj = PLAN_KEYS.find(p => p.type === selectedPlan)!;
   const buttonLabel = purchasing
-    ? 'Traitement...'
+    ? t('pricing.button.processing')
     : selectedPlan === 'single'
-      ? `Acheter — ${getPrice(PLANS[2])}`
-      : `S'abonner — ${getPrice(PLANS.find(p => p.type === selectedPlan)!)}${PLANS.find(p => p.type === selectedPlan)!.periodFallback}`;
+      ? t('pricing.button.buy').replace('{price}', getPrice(PLAN_KEYS[2]))
+      : t('pricing.button.subscribe').replace('{price}', getPrice(selectedPlanObj)).replace('{period}', selectedPlanObj.periodKey ? t(selectedPlanObj.periodKey) : '');
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -160,7 +164,7 @@ export default function PricingScreen() {
         <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} hitSlop={12}>
           <ArrowLeft size={24} color={colors.text} />
         </Pressable>
-        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>Abonnement</Text>
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>{t('pricing.title')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60, gap: 20 }}>
@@ -174,16 +178,16 @@ export default function PricingScreen() {
             <Crown size={32} color={colors.gold} />
           </View>
           <Text style={{ color: colors.text, fontSize: 26, fontFamily: fonts.display, textAlign: 'center' }}>
-            Narae <Text style={{ color: colors.gold }}>Pro</Text>
+            {t('pricing.hero.title').replace('{highlight}', '')}<Text style={{ color: colors.gold }}>{t('pricing.pro.highlight')}</Text>
           </Text>
           <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: 'center', marginTop: 6 }}>
-            Débloquez tout le potentiel de votre voyage
+            {t('pricing.hero.subtitle')}
           </Text>
         </View>
 
         {/* Plan selector */}
         <View style={{ gap: 10 }}>
-          {PLANS.map((plan) => {
+          {PLAN_KEYS.map((plan) => {
             const isSelected = selectedPlan === plan.type;
             return (
               <Pressable
@@ -210,20 +214,20 @@ export default function PricingScreen() {
 
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700' }}>{plan.label}</Text>
-                    {plan.badge ? (
+                    <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700' }}>{t(plan.labelKey)}</Text>
+                    {plan.badgeKey ? (
                       <View style={{ backgroundColor: colors.goldBg, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>
-                        <Text style={{ color: colors.gold, fontSize: 11, fontWeight: '800' }}>{plan.badge}</Text>
+                        <Text style={{ color: colors.gold, fontSize: 11, fontWeight: '800' }}>{t(plan.badgeKey)}</Text>
                       </View>
                     ) : null}
                   </View>
-                  {plan.desc ? (
-                    <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{plan.desc}</Text>
+                  {plan.descKey ? (
+                    <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{t(plan.descKey)}</Text>
                   ) : null}
                 </View>
 
                 <Text style={{ color: isSelected ? colors.gold : colors.textSecondary, fontSize: 17, fontWeight: '800' }}>
-                  {getPrice(plan)}<Text style={{ fontSize: 12, fontWeight: '500' }}>{plan.periodFallback}</Text>
+                  {getPrice(plan)}<Text style={{ fontSize: 12, fontWeight: '500' }}>{plan.periodKey ? t(plan.periodKey) : ''}</Text>
                 </Text>
               </Pressable>
             );
@@ -232,8 +236,8 @@ export default function PricingScreen() {
 
         {/* Features */}
         <View style={{ gap: 10 }}>
-          {FEATURES.map((f) => (
-            <View key={f.label} style={{
+          {FEATURE_KEYS.map((f) => (
+            <View key={f.labelKey} style={{
               flexDirection: 'row', alignItems: 'center', gap: 12,
               paddingVertical: 10, paddingHorizontal: 4,
             }}>
@@ -244,8 +248,8 @@ export default function PricingScreen() {
                 <f.icon size={18} color={colors.gold} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600' }}>{f.label}</Text>
-                <Text style={{ color: colors.textMuted, fontSize: 12 }}>{f.desc}</Text>
+                <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600' }}>{t(f.labelKey)}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>{t(f.descKey)}</Text>
               </View>
               <Check size={16} color={colors.gold} />
             </View>
@@ -266,13 +270,13 @@ export default function PricingScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <RotateCcw size={13} color={colors.textMuted} />
             <Text style={{ color: colors.textMuted, fontSize: 13 }}>
-              {restoring ? 'Restauration...' : 'Restaurer un achat'}
+              {restoring ? t('pricing.restore.loading') : t('pricing.restore')}
             </Text>
           </View>
         </Pressable>
 
         <Text style={{ color: colors.textDim, fontSize: 11, textAlign: 'center', lineHeight: 16 }}>
-          Paiement via votre compte Apple. Abonnement renouvelé automatiquement sauf annulation au moins 24h avant la fin de la période. Gérez dans Réglages {'>'} Apple ID {'>'} Abonnements.
+          {t('pricing.disclaimer')}
         </Text>
       </ScrollView>
     </SafeAreaView>

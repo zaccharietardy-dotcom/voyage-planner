@@ -5,6 +5,7 @@ import {
 } from '@/lib/types/trip';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   prefs: Partial<TripPreferences>;
@@ -12,24 +13,25 @@ interface Props {
 }
 
 // Web-exact activity pills: emoji + short uppercase label
-const ACTIVITY_OPTIONS: { key: ActivityType; emoji: string; label: string }[] = [
-  { key: 'culture', emoji: '🏛️', label: 'CULTURE' },
-  { key: 'nature', emoji: '🌳', label: 'NATURE' },
-  { key: 'gastronomy', emoji: '🍽️', label: 'FOODIE' },
-  { key: 'adventure', emoji: '⛰️', label: 'AVENTURE' },
-  { key: 'beach', emoji: '🏖️', label: 'PLAGE' },
-  { key: 'shopping', emoji: '🛍️', label: 'SHOPPING' },
-  { key: 'nightlife', emoji: '🍹', label: 'NIGHTLIFE' },
-  { key: 'wellness', emoji: '🧘', label: 'WELLNESS' },
+const ACTIVITY_OPTIONS: { key: ActivityType; emoji: string; labelKey: string }[] = [
+  { key: 'culture', emoji: '🏛️', labelKey: 'plan.pref.culture' },
+  { key: 'nature', emoji: '🌳', labelKey: 'plan.pref.nature' },
+  { key: 'gastronomy', emoji: '🍽️', labelKey: 'plan.pref.gastronomy' },
+  { key: 'adventure', emoji: '⛰️', labelKey: 'plan.pref.adventure' },
+  { key: 'beach', emoji: '🏖️', labelKey: 'plan.pref.beach' },
+  { key: 'shopping', emoji: '🛍️', labelKey: 'plan.pref.shopping' },
+  { key: 'nightlife', emoji: '🍹', labelKey: 'plan.pref.nightlife' },
+  { key: 'wellness', emoji: '🧘', labelKey: 'plan.pref.wellness' },
 ];
 
-const PACE_OPTIONS: { value: PaceLevel; label: string; emoji: string; desc: string }[] = [
-  { value: 'relaxed', label: 'CHILL', emoji: '🐢', desc: 'Tranquille' },
-  { value: 'moderate', label: 'ÉQUI.', emoji: '⚖️', desc: 'Équilibré' },
-  { value: 'intensive', label: 'RUSH', emoji: '🚀', desc: 'Intensif' },
+const PACE_OPTIONS: { value: PaceLevel; labelKey: string; emoji: string; descKey: string }[] = [
+  { value: 'relaxed', labelKey: 'plan.pref.pace.relaxed', emoji: '🐢', descKey: 'plan.pref.pace.relaxed_desc' },
+  { value: 'moderate', labelKey: 'plan.pref.pace.moderate', emoji: '⚖️', descKey: 'plan.pref.pace.moderate_desc' },
+  { value: 'intensive', labelKey: 'plan.pref.pace.intensive', emoji: '🚀', descKey: 'plan.pref.pace.intensive_desc' },
 ];
 
 export function StepPreferences({ prefs, onChange }: Props) {
+  const { t } = useTranslation();
   const activities = prefs.activities ?? [];
   const dietary = prefs.dietary ?? [];
   const pace = prefs.pace ?? 'moderate';
@@ -59,15 +61,15 @@ export function StepPreferences({ prefs, onChange }: Props) {
     <View style={{ gap: 32 }}>
       {/* Title */}
       <View style={{ alignItems: 'center' }}>
-        <Text style={s.title}>Qu'aimez-vous ?</Text>
-        <Text style={s.subtitle}>Pour un itinéraire qui vous ressemble</Text>
+        <Text style={s.title}>{t('plan.pref.title')}</Text>
+        <Text style={s.subtitle}>{t('plan.pref.subtitle')}</Text>
       </View>
 
       {/* Activities */}
       <View style={{ gap: 16 }}>
-        <Text style={s.sectionLabel}>ACTIVITÉS PRÉFÉRÉES</Text>
+        <Text style={s.sectionLabel}>{t('plan.pref.activities')}</Text>
         <View style={s.pillGrid}>
-          {ACTIVITY_OPTIONS.map(({ key, emoji, label }) => {
+          {ACTIVITY_OPTIONS.map(({ key, emoji, labelKey }) => {
             const selected = activities.includes(key);
             return (
               <Pressable
@@ -76,14 +78,14 @@ export function StepPreferences({ prefs, onChange }: Props) {
                 style={[s.pill, selected && s.pillSelected]}
               >
                 <Text style={[s.pillEmoji, selected && s.pillEmojiSelected]}>{emoji}</Text>
-                <Text style={[s.pillLabel, selected && s.pillLabelSelected]}>{label}</Text>
+                <Text style={[s.pillLabel, selected && s.pillLabelSelected]}>{t(labelKey as any)}</Text>
               </Pressable>
             );
           })}
         </View>
 
         <Pressable onPress={handleSkip} style={{ alignSelf: 'center', paddingVertical: 8 }}>
-          <Text style={s.skipText}>PASSER, SURPRENEZ-MOI !</Text>
+          <Text style={s.skipText}>{t('plan.pref.skip')}</Text>
         </Pressable>
       </View>
 
@@ -92,7 +94,7 @@ export function StepPreferences({ prefs, onChange }: Props) {
 
       {/* Pace / Rythme */}
       <View style={{ gap: 16 }}>
-        <Text style={s.sectionLabel}>RYTHME DU VOYAGE</Text>
+        <Text style={s.sectionLabel}>{t('plan.pref.pace')}</Text>
         <View style={{ flexDirection: 'row', gap: 12 }}>
           {PACE_OPTIONS.map((opt) => {
             const selected = pace === opt.value;
@@ -105,8 +107,8 @@ export function StepPreferences({ prefs, onChange }: Props) {
                 <Text style={[s.paceEmoji, selected && { transform: [{ scale: 1.1 }] }]}>
                   {opt.emoji}
                 </Text>
-                <Text style={[s.paceLabel, selected && s.paceLabelSelected]}>{opt.label}</Text>
-                <Text style={s.paceDesc}>{opt.desc}</Text>
+                <Text style={[s.paceLabel, selected && s.paceLabelSelected]}>{t(opt.labelKey as any)}</Text>
+                <Text style={s.paceDesc}>{t(opt.descKey as any)}</Text>
               </Pressable>
             );
           })}
@@ -118,7 +120,7 @@ export function StepPreferences({ prefs, onChange }: Props) {
 
       {/* Dietary */}
       <View style={{ gap: 16 }}>
-        <Text style={s.sectionLabel}>RESTRICTIONS ALIMENTAIRES</Text>
+        <Text style={s.sectionLabel}>{t('plan.pref.dietary')}</Text>
         <View style={s.pillGrid}>
           {(Object.entries(DIETARY_LABELS) as [DietaryType, string][])
             .filter(([k]) => k !== 'none')
@@ -139,10 +141,10 @@ export function StepPreferences({ prefs, onChange }: Props) {
 
       {/* Must-see */}
       <View style={{ gap: 12 }}>
-        <Text style={s.sectionLabel}>INCONTOURNABLES (OPTIONNEL)</Text>
+        <Text style={s.sectionLabel}>{t('plan.pref.mustsee')}</Text>
         <TextInput
           style={s.textArea}
-          placeholder="Ex: Sagrada Familia, Parc Güell..."
+          placeholder={t('plan.pref.mustsee.placeholder')}
           placeholderTextColor="rgba(255,255,255,0.3)"
           multiline
           value={mustSee}

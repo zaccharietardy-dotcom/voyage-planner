@@ -28,6 +28,7 @@ export const generateTripSchema = z.object({
   mealPreference: z.enum(['auto', 'mostly_cooking', 'mostly_restaurants', 'balanced']).optional(),
   pace: z.enum(['relaxed', 'moderate', 'intensive']).optional(),
   tripMode: z.enum(['precise', 'inspired']).optional(),
+  travelStyle: z.enum(['single_base', 'road_trip', 'auto']).optional(),
   prePurchasedTickets: z.array(z.object({
     name: z.string().min(1).max(200),
     date: z.string().optional(),

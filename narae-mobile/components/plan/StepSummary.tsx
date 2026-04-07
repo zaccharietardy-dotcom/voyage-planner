@@ -4,7 +4,9 @@ import { Image } from 'expo-image';
 import { Pencil, Users, Wallet, Compass } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, fonts, goldGradient } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import {
   BUDGET_LABELS, GROUP_TYPE_LABELS,
   type TripPreferences, type ActivityType,
@@ -29,54 +31,86 @@ const ACTIVITY_DISPLAY: Record<string, string> = {
   wellness: 'Wellness',
 };
 
-const PRESET_IMAGES: Record<string, string> = {
-  'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=600&fit=crop',
-  'New York': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1200&h=600&fit=crop',
-  'Barcelona': 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1200&h=600&fit=crop',
-  'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=600&fit=crop',
-  'Rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&h=600&fit=crop',
-  'Amsterdam': 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=1200&h=600&fit=crop',
-  'Lisbonne': 'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=1200&h=600&fit=crop',
-  'Marrakech': 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&h=600&fit=crop',
-  'London': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1200&h=600&fit=crop',
-  'Nice': 'https://images.unsplash.com/photo-1491166617655-0723a0999cfc?w=1200&h=600&fit=crop',
-};
+const GENERIC_FALLBACK = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop';
+const CACHE_KEY_PREFIX = 'dest_img_';
 
-function getFallbackImage(destination?: string): string {
-  if (!destination) return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop';
-  for (const [city, url] of Object.entries(PRESET_IMAGES)) {
-    if (destination.toLowerCase().includes(city.toLowerCase())) return url;
+async function getCachedImage(destination: string): Promise<string | null> {
+  try {
+    const cached = await AsyncStorage.getItem(CACHE_KEY_PREFIX + destination.toLowerCase());
+    return cached;
+  } catch { return null; }
+}
+
+async function setCachedImage(destination: string, url: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(CACHE_KEY_PREFIX + destination.toLowerCase(), url);
+  } catch { /* ignore */ }
+}
+
+const BAD_IMAGE_KEYWORDS = ['flag', 'drapeau', 'blason', 'coat_of_arms', 'armoiries', 'logo', 'emblem', 'banner', 'gwenn', 'seal_of', 'escudo', 'wappen', 'bandiera'];
+
+async function fetchDestinationImage(destination: string): Promise<string | null> {
+  // Try French Wikipedia first, then English
+  for (const lang of ['fr', 'en']) {
+    try {
+      const title = encodeURIComponent(destination.replace(/ /g, '_'));
+      const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${title}`);
+      if (!res.ok) continue;
+      const json = await res.json();
+      const imgUrl = json.originalimage?.source || json.thumbnail?.source;
+      if (!imgUrl) continue;
+      // Skip flags, coat of arms, logos, emblems
+      const imgLower = imgUrl.toLowerCase();
+      if (BAD_IMAGE_KEYWORDS.some(kw => imgLower.includes(kw))) continue;
+      return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
+    } catch { continue; }
   }
-  return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&h=600&fit=crop';
+  // Fallback: try with " tourisme" suffix for regions
+  try {
+    const title = encodeURIComponent(destination.replace(/ /g, '_'));
+    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/Tourisme_en_${title}`);
+    if (res.ok) {
+      const json = await res.json();
+      const imgUrl = json.originalimage?.source || json.thumbnail?.source;
+      if (imgUrl && !BAD_IMAGE_KEYWORDS.some(kw => imgUrl.toLowerCase().includes(kw))) {
+        return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
+      }
+    }
+  } catch { /* ignore */ }
+  return null;
 }
 
 export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) {
+  const { t } = useTranslation();
   const destination = prefs.destination || '';
-  const [imageUrl, setImageUrl] = useState<string>(getFallbackImage(destination));
+  const [imageUrl, setImageUrl] = useState<string>(GENERIC_FALLBACK);
   const [imageLoading, setImageLoading] = useState(true);
 
   useEffect(() => {
     if (!destination) { setImageLoading(false); return; }
+    let cancelled = false;
 
-    const fetchImage = async () => {
+    (async () => {
       setImageLoading(true);
-      try {
-        const lang = /paris|lyon|marseille|bordeaux|nice|strasbourg|lille|toulouse|nantes|montpellier|annecy|marrakech|tunis|bruxelles|genève|québec|montréal/i.test(destination) ? 'fr' : 'en';
-        const title = encodeURIComponent(destination.replace(/ /g, '_'));
-        const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${title}`);
-        if (!res.ok) { setImageLoading(false); return; }
-        const json = await res.json();
-        if (json.thumbnail?.source) {
-          setImageUrl(json.thumbnail.source.replace(/\/\d+px-/, '/1000px-'));
-        }
-      } catch { /* fallback */ } finally { setImageLoading(false); }
-    };
 
-    let hasPreset = false;
-    for (const city of Object.keys(PRESET_IMAGES)) {
-      if (destination.toLowerCase().includes(city.toLowerCase())) hasPreset = true;
-    }
-    if (!hasPreset) { fetchImage(); } else { setImageUrl(getFallbackImage(destination)); setImageLoading(false); }
+      // 1. Check AsyncStorage cache
+      const cached = await getCachedImage(destination);
+      if (cached && !cancelled) {
+        setImageUrl(cached);
+        setImageLoading(false);
+        return;
+      }
+
+      // 2. Fetch from Wikipedia (fr then en)
+      const url = await fetchDestinationImage(destination);
+      if (url && !cancelled) {
+        setImageUrl(url);
+        await setCachedImage(destination, url);
+      }
+      if (!cancelled) setImageLoading(false);
+    })();
+
+    return () => { cancelled = true; };
   }, [destination]);
 
   const handleEdit = (step: number) => { Haptics.selectionAsync(); onEdit(step); };
@@ -109,7 +143,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
           <Text style={s.heroTitle}>{destination || 'Destination'}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
             <View style={s.durationBadge}>
-              <Text style={s.durationBadgeText}>{prefs.durationDays || 3} jours</Text>
+              <Text style={s.durationBadgeText}>{prefs.durationDays || 3} {t('plan.summary.days')}</Text>
             </View>
             {!!dateStr && (
               <Text style={s.heroDate}>· {dateStr}</Text>
@@ -127,7 +161,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
           <View style={[s.summaryIcon, { backgroundColor: 'rgba(59,130,246,0.1)' }]}>
             <Users size={18} color="#60A5FA" />
           </View>
-          <Text style={s.summaryLabel}>GROUPE</Text>
+          <Text style={s.summaryLabel}>{t('plan.summary.group')}</Text>
           <Text style={s.summaryValue}>
             {GROUP_TYPE_LABELS[prefs.groupType ?? 'couple'].replace(/\s*[\p{Emoji_Presentation}\p{Extended_Pictographic}]+$/u, '')} ({prefs.groupSize})
           </Text>
@@ -137,7 +171,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
           <View style={[s.summaryIcon, { backgroundColor: 'rgba(34,197,94,0.1)' }]}>
             <Wallet size={18} color="#4ADE80" />
           </View>
-          <Text style={s.summaryLabel}>CONFORT</Text>
+          <Text style={s.summaryLabel}>{t('plan.summary.budget')}</Text>
           <Text style={s.summaryValue}>
             {BUDGET_LABELS[prefs.budgetLevel ?? 'moderate']?.label}
           </Text>
@@ -168,7 +202,7 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
             <Compass size={22} color="#000" />
           )}
           <Text style={s.generateText}>
-            {isGenerating ? 'Création de l\'itinéraire...' : 'Générer mon voyage'}
+            {isGenerating ? t('plan.summary.generating') : t('plan.summary.generate')}
           </Text>
         </LinearGradient>
       </Pressable>

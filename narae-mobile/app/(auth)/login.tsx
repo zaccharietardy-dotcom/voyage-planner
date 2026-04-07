@@ -8,6 +8,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { SITE_URL } from '@/lib/constants';
 import { colors, fonts, radius } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
@@ -42,11 +43,12 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
   const redirectPath = getSafeRedirectPath(params.redirect, '/(tabs)');
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
-      setError('Veuillez remplir tous les champs');
+      setError(t('auth.login.error.empty'));
       return;
     }
     setIsLoading(true);
@@ -55,16 +57,16 @@ export default function LoginScreen() {
     try {
       const rl = await fetch(`${SITE_URL}/api/auth/login`, { method: 'POST' });
       if (rl.status === 429) {
-        setError('Trop de tentatives. Réessayez dans quelques minutes.');
+        setError(t('auth.login.error.rateLimit'));
         return;
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
         if (signInError.message.includes('Invalid login credentials')) {
-          setError('Email ou mot de passe incorrect');
+          setError(t('auth.login.error.invalid'));
         } else if (signInError.message.includes('Email not confirmed')) {
-          setError('Veuillez confirmer votre email');
+          setError(t('auth.login.error.emailNotConfirmed'));
         } else {
           setError(signInError.message);
         }
@@ -72,7 +74,7 @@ export default function LoginScreen() {
       }
       router.replace(redirectPath as Href);
     } catch {
-      setError('Une erreur est survenue');
+      setError(t('auth.login.error.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +95,7 @@ export default function LoginScreen() {
       }
     } catch (e: any) {
       if (e.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Erreur Apple Sign-In', e?.message || 'Connexion Apple impossible');
+      Alert.alert(t('auth.login.error.apple'), e?.message || t('auth.login.error.appleUnavailable'));
     }
   };
 
@@ -104,7 +106,7 @@ export default function LoginScreen() {
         provider: 'google',
         options: { redirectTo: redirectUrl, skipBrowserRedirect: true },
       });
-      if (error || !data.url) { Alert.alert('Erreur', 'Connexion Google impossible'); return; }
+      if (error || !data.url) { Alert.alert(t('common.error'), t('auth.login.error.google')); return; }
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
       if (result.type === 'success' && result.url) {
@@ -112,14 +114,14 @@ export default function LoginScreen() {
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
         if (!accessToken || !refreshToken) {
-          Alert.alert('Erreur', 'La connexion Google n\'a pas retourné de session valide.');
+          Alert.alert(t('common.error'), t('auth.login.error.googleSession'));
           return;
         }
         await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
         router.replace(redirectPath as Href);
       }
     } catch {
-      Alert.alert('Erreur', 'Connexion Google impossible');
+      Alert.alert(t('common.error'), t('auth.login.error.google'));
     }
   };
 
@@ -139,38 +141,38 @@ export default function LoginScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.header}>
-              <Text style={styles.title}>Bon retour parmi nous</Text>
-              <Text style={styles.subtitle}>Accédez à vos carnets de route et itinéraires sur-mesure</Text>
+              <Text style={styles.title}>{t('auth.login.title')}</Text>
+              <Text style={styles.subtitle}>{t('auth.login.subtitle')}</Text>
             </View>
 
             <View style={styles.socialContainer}>
               <Pressable style={styles.appleButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleAppleLogin(); }}>
                 <AppleLogo />
-                <Text style={styles.appleButtonText}>Continuer avec Apple</Text>
+                <Text style={styles.appleButtonText}>{t('auth.login.apple')}</Text>
               </Pressable>
               <Pressable style={styles.googleButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleGoogleLogin(); }}>
                 <GoogleLogo />
-                <Text style={styles.googleButtonText}>Continuer avec Google</Text>
+                <Text style={styles.googleButtonText}>{t('auth.login.google')}</Text>
               </Pressable>
             </View>
 
             <View style={styles.dividerContainer}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OU CONTINUER AVEC EMAIL</Text>
+              <Text style={styles.dividerText}>{t('auth.login.divider')}</Text>
               <View style={styles.dividerLine} />
             </View>
 
             <View style={styles.form}>
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>ADRESSE EMAIL</Text>
-                <Input value={email} onChangeText={(t) => { setEmail(t); setError(null); }} placeholder="votre@email.com" autoCapitalize="none" keyboardType="email-address" />
+                <Text style={styles.label}>{t('auth.login.email.label')}</Text>
+                <Input value={email} onChangeText={(v) => { setEmail(v); setError(null); }} placeholder={t('auth.login.email.placeholder')} autoCapitalize="none" keyboardType="email-address" />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>MOT DE PASSE</Text>
-                <Input value={password} onChangeText={(t) => { setPassword(t); setError(null); }} placeholder="••••••••" secureTextEntry />
+                <Text style={styles.label}>{t('auth.login.password.label')}</Text>
+                <Input value={password} onChangeText={(v) => { setPassword(v); setError(null); }} placeholder={t('auth.login.password.placeholder')} secureTextEntry />
                   <Pressable onPress={() => router.push('/(auth)/forgot-password')} style={styles.forgotPassword}>
-                    <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
+                    <Text style={styles.forgotPasswordText}>{t('auth.login.forgot')}</Text>
                   </Pressable>
               </View>
 
@@ -181,14 +183,14 @@ export default function LoginScreen() {
               )}
 
               <Button variant="primary" size="lg" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleEmailLogin(); }} isLoading={isLoading} style={{ marginTop: 12 }}>
-                Se connecter
+                {t('auth.login.submit')}
               </Button>
             </View>
 
             <View style={styles.footer}>
-              <Text style={styles.footerText}>Pas de compte ? </Text>
+              <Text style={styles.footerText}>{t('auth.login.signupPrompt')}</Text>
               <Pressable onPress={() => router.push({ pathname: '/(auth)/register', params: { redirect: redirectPath } })}>
-                <Text style={styles.footerLink}>Créer un compte</Text>
+                <Text style={styles.footerLink}>{t('auth.login.signupLink')}</Text>
               </Pressable>
             </View>
           </ScrollView>

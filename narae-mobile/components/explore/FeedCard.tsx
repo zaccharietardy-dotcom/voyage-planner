@@ -7,6 +7,7 @@ import { BlurView } from 'expo-blur';
 import { Avatar } from '@/components/ui/Avatar';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { FeedTrip } from '@/lib/api/feed';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   trip: FeedTrip;
@@ -38,6 +39,7 @@ function getImage(dest: string, coverUrl: string | null): string {
 }
 
 export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
+  const { t } = useTranslation();
   const likeScale = useSharedValue(1);
 
   const likeAnimStyle = useAnimatedStyle(() => ({
@@ -75,7 +77,7 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
         )}
 
         <View style={styles.destinationWrap}>
-          <Text style={styles.kicker}>Découverte de la communauté</Text>
+          <Text style={styles.kicker}>{t('feed.kicker')}</Text>
           <Text style={styles.title}>{trip.title || trip.destination}</Text>
           <Text style={styles.destinationText}>{trip.destination}</Text>
         </View>
@@ -89,7 +91,7 @@ export function FeedCard({ trip, onPress, onLike, onClone }: Props) {
               {trip.owner.display_name}
             </Text>
             <Text style={styles.ownerMeta}>
-              {trip.likes_count > 0 ? `${trip.likes_count} j'aime` : 'Itinéraire publié'}
+              {trip.likes_count > 0 ? t('feed.likes', { count: trip.likes_count }) : t('feed.published')}
             </Text>
           </View>
         </View>

@@ -3,6 +3,7 @@ import { User, Heart, Users, Baby, UserCheck, Minus, Plus } from 'lucide-react-n
 import * as Haptics from 'expo-haptics';
 import { GROUP_TYPE_LABELS, type GroupType, type TripPreferences } from '@/lib/types/trip';
 import { colors, fonts } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import type { LucideIcon } from 'lucide-react-native';
 
 interface Props {
@@ -19,6 +20,7 @@ const GROUP_OPTIONS: { value: GroupType; Icon: LucideIcon; emoji: string }[] = [
 ];
 
 export function StepGroup({ prefs, onChange }: Props) {
+  const { t } = useTranslation();
   const size = prefs.groupSize ?? 2;
   const type = prefs.groupType ?? 'couple';
 
@@ -44,8 +46,8 @@ export function StepGroup({ prefs, onChange }: Props) {
     <View style={{ gap: 32 }}>
       {/* Title — matches web text-4xl font-serif font-bold */}
       <View style={{ alignItems: 'center' }}>
-        <Text style={s.title}>Avec qui partez-vous ?</Text>
-        <Text style={s.subtitle}>Pour adapter les activités et le rythme</Text>
+        <Text style={s.title}>{t('plan.group.title')}</Text>
+        <Text style={s.subtitle}>{t('plan.group.subtitle')}</Text>
       </View>
 
       {/* Counter — matches web rounded-[2.5rem] border-white/[0.08] bg-[#0e1220]/50 p-10 */}
@@ -77,13 +79,13 @@ export function StepGroup({ prefs, onChange }: Props) {
         </View>
 
         <Text style={s.counterLabel}>
-          {size === 1 ? 'VOYAGEUR' : 'VOYAGEURS'}
+          {size === 1 ? t('plan.group.singular') : t('plan.group.plural')}
         </Text>
       </View>
 
       {/* Group type — matches web grid-cols-2 gap-4 */}
       <View style={{ gap: 16 }}>
-        <Text style={s.sectionLabel}>TYPE DE VOYAGE</Text>
+        <Text style={s.sectionLabel}>{t('plan.group.type')}</Text>
         <View style={s.typeGrid}>
           {GROUP_OPTIONS.map((opt) => {
             const selected = type === opt.value;

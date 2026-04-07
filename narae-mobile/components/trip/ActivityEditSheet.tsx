@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { TripItem, TripItemType } from '@/lib/types/trip';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   item: TripItem | null;
@@ -14,16 +15,17 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-const TYPES: { key: TripItemType; label: string }[] = [
-  { key: 'activity', label: 'Activité' },
-  { key: 'restaurant', label: 'Restaurant' },
-  { key: 'hotel', label: 'Hébergement' },
-  { key: 'transport', label: 'Transport' },
-  { key: 'flight', label: 'Vol' },
-  { key: 'free_time', label: 'Temps libre' },
-];
-
 export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: Props) {
+  const { t } = useTranslation();
+
+  const TYPES: { key: TripItemType; label: string }[] = [
+    { key: 'activity', label: t('activity.type.activity') },
+    { key: 'restaurant', label: t('activity.type.restaurant') },
+    { key: 'hotel', label: t('activity.type.hotel') },
+    { key: 'transport', label: t('activity.type.transport') },
+    { key: 'flight', label: t('activity.type.flight') },
+    { key: 'free_time', label: t('activity.type.free_time') },
+  ];
   const [title, setTitle] = useState('');
   const [type, setType] = useState<TripItemType>('activity');
   const [description, setDescription] = useState('');
@@ -76,12 +78,12 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
   const handleDelete = () => {
     if (!item) return;
     Alert.alert(
-      'Supprimer',
-      `Retirer "${item.title}" de l'itinéraire ?`,
+      t('activity.edit.delete'),
+      t('activity.edit.deleteConfirm', { title: item.title }),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -110,22 +112,22 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
     <BottomSheet isOpen={isOpen} onClose={handleClose} height={0.85}>
       <ScrollView contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
         <Text style={{ color: colors.text, fontSize: 20, fontFamily: fonts.display }}>
-          Modifier l'activité
+          {t('activity.edit.title')}
         </Text>
 
         {/* Title */}
-        <Field label="Titre" icon={FileText}>
+        <Field label={t('activity.edit.field.title')} icon={FileText}>
           <TextInput
             value={title}
             onChangeText={setTitle}
             style={inputStyle}
             placeholderTextColor={colors.textMuted}
-            placeholder="Nom de l'activité"
+            placeholder={t('activity.edit.field.title.placeholder')}
           />
         </Field>
 
         {/* Type pills */}
-        <Field label="Type" icon={Tag}>
+        <Field label={t('activity.edit.field.type')} icon={Tag}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
             {TYPES.map((t) => (
               <Pressable
@@ -146,20 +148,20 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
         </Field>
 
         {/* Location */}
-        <Field label="Lieu" icon={MapPin}>
+        <Field label={t('activity.edit.field.location')} icon={MapPin}>
           <TextInput
             value={locationName}
             onChangeText={setLocationName}
             style={inputStyle}
             placeholderTextColor={colors.textMuted}
-            placeholder="Adresse ou nom du lieu"
+            placeholder={t('activity.edit.field.location.placeholder')}
           />
         </Field>
 
         {/* Time + Duration row */}
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <View style={{ flex: 1 }}>
-            <Field label="Heure" icon={Clock}>
+            <Field label={t('activity.edit.field.time')} icon={Clock}>
               <TextInput
                 value={startTime}
                 onChangeText={setStartTime}
@@ -171,7 +173,7 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
             </Field>
           </View>
           <View style={{ flex: 1 }}>
-            <Field label="Durée (min)" icon={Clock}>
+            <Field label={t('activity.edit.field.duration')} icon={Clock}>
               <TextInput
                 value={duration}
                 onChangeText={setDuration}
@@ -185,7 +187,7 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
         </View>
 
         {/* Cost */}
-        <Field label="Coût estimé" icon={DollarSign}>
+        <Field label={t('activity.edit.field.cost')} icon={DollarSign}>
           <TextInput
             value={cost}
             onChangeText={setCost}
@@ -197,13 +199,13 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
         </Field>
 
         {/* Description */}
-        <Field label="Description" icon={FileText}>
+        <Field label={t('activity.edit.field.description')} icon={FileText}>
           <TextInput
             value={description}
             onChangeText={setDescription}
             style={[inputStyle, { minHeight: 80, textAlignVertical: 'top' }]}
             placeholderTextColor={colors.textMuted}
-            placeholder="Notes, détails..."
+            placeholder={t('activity.edit.field.description.placeholder')}
             multiline
           />
         </Field>
@@ -212,11 +214,11 @@ export function ActivityEditSheet({ item, isOpen, onClose, onSave, onDelete }: P
         <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
           <Pressable onPress={handleDelete} style={deleteButtonStyle}>
             <Trash2 size={18} color={colors.danger} />
-            <Text style={{ color: colors.danger, fontSize: 14, fontFamily: fonts.sansBold }}>Supprimer</Text>
+            <Text style={{ color: colors.danger, fontSize: 14, fontFamily: fonts.sansBold }}>{t('activity.edit.delete')}</Text>
           </Pressable>
           <Pressable onPress={handleSave} style={saveButtonStyle}>
             <Save size={18} color="#000" />
-            <Text style={{ color: '#000', fontSize: 14, fontFamily: fonts.sansBold }}>Sauvegarder</Text>
+            <Text style={{ color: '#000', fontSize: 14, fontFamily: fonts.sansBold }}>{t('activity.edit.save')}</Text>
           </Pressable>
         </View>
       </ScrollView>

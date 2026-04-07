@@ -126,3 +126,82 @@ export const DESTINATIONS: Destination[] = [
 export function getDestination(slug: string): Destination | undefined {
   return DESTINATIONS.find(d => d.slug === slug);
 }
+
+// Regions, countries, and additional cities for autocomplete
+export type DestinationType = 'city' | 'region' | 'country';
+
+export interface DestinationSuggestion {
+  name: string;
+  country?: string;
+  type: DestinationType;
+  emoji: string;
+}
+
+export const AUTOCOMPLETE_ENTRIES: DestinationSuggestion[] = [
+  // Villes populaires (from DESTINATIONS + extras)
+  ...DESTINATIONS.map(d => ({ name: d.name, country: d.country, type: 'city' as const, emoji: d.emoji })),
+  { name: 'Berlin', country: 'Allemagne', type: 'city', emoji: '🇩🇪' },
+  { name: 'Prague', country: 'Tchéquie', type: 'city', emoji: '🏰' },
+  { name: 'Vienne', country: 'Autriche', type: 'city', emoji: '🎶' },
+  { name: 'Madrid', country: 'Espagne', type: 'city', emoji: '☀️' },
+  { name: 'Séville', country: 'Espagne', type: 'city', emoji: '💃' },
+  { name: 'Nice', country: 'France', type: 'city', emoji: '🌴' },
+  { name: 'Lyon', country: 'France', type: 'city', emoji: '🍽️' },
+  { name: 'Bordeaux', country: 'France', type: 'city', emoji: '🍷' },
+  { name: 'Marseille', country: 'France', type: 'city', emoji: '⛵' },
+  { name: 'Strasbourg', country: 'France', type: 'city', emoji: '🏠' },
+  { name: 'Athènes', country: 'Grèce', type: 'city', emoji: '🏛️' },
+  { name: 'Dubrovnik', country: 'Croatie', type: 'city', emoji: '🏖️' },
+  { name: 'Budapest', country: 'Hongrie', type: 'city', emoji: '♨️' },
+  { name: 'Copenhague', country: 'Danemark', type: 'city', emoji: '🧜‍♀️' },
+  { name: 'Stockholm', country: 'Suède', type: 'city', emoji: '🏔️' },
+  { name: 'Édimbourg', country: 'Écosse', type: 'city', emoji: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+  { name: 'Florence', country: 'Italie', type: 'city', emoji: '🎨' },
+  { name: 'Venise', country: 'Italie', type: 'city', emoji: '🛶' },
+  { name: 'Naples', country: 'Italie', type: 'city', emoji: '🍕' },
+  { name: 'Kyoto', country: 'Japon', type: 'city', emoji: '⛩️' },
+  { name: 'Osaka', country: 'Japon', type: 'city', emoji: '🍜' },
+  { name: 'Bangkok', country: 'Thaïlande', type: 'city', emoji: '🛕' },
+  { name: 'Bali', country: 'Indonésie', type: 'city', emoji: '🌺' },
+  { name: 'Séoul', country: 'Corée du Sud', type: 'city', emoji: '🇰🇷' },
+  { name: 'Dubai', country: 'Émirats arabes unis', type: 'city', emoji: '🏙️' },
+  { name: 'Le Caire', country: 'Égypte', type: 'city', emoji: '🔺' },
+  { name: 'Hanoï', country: 'Vietnam', type: 'city', emoji: '🍜' },
+  { name: 'Mexico', country: 'Mexique', type: 'city', emoji: '🌮' },
+  { name: 'Buenos Aires', country: 'Argentine', type: 'city', emoji: '💃' },
+  // Régions françaises
+  { name: 'Bretagne', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Normandie', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Provence', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Côte d\'Azur', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Alsace', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Pays Basque', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Corse', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Dordogne', country: 'France', type: 'region', emoji: '🗺️' },
+  { name: 'Camargue', country: 'France', type: 'region', emoji: '🗺️' },
+  // Régions européennes
+  { name: 'Toscane', country: 'Italie', type: 'region', emoji: '🗺️' },
+  { name: 'Amalfi', country: 'Italie', type: 'region', emoji: '🗺️' },
+  { name: 'Algarve', country: 'Portugal', type: 'region', emoji: '🗺️' },
+  { name: 'Andalousie', country: 'Espagne', type: 'region', emoji: '🗺️' },
+  { name: 'Catalogne', country: 'Espagne', type: 'region', emoji: '🗺️' },
+  { name: 'Îles Baléares', country: 'Espagne', type: 'region', emoji: '🗺️' },
+  { name: 'Crète', country: 'Grèce', type: 'region', emoji: '🗺️' },
+  { name: 'Cyclades', country: 'Grèce', type: 'region', emoji: '🗺️' },
+  { name: 'Highlands', country: 'Écosse', type: 'region', emoji: '🗺️' },
+  { name: 'Bavière', country: 'Allemagne', type: 'region', emoji: '🗺️' },
+  { name: 'Fjords', country: 'Norvège', type: 'region', emoji: '🗺️' },
+  // Pays
+  { name: 'Japon', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Islande', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Portugal', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Grèce', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Croatie', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Thaïlande', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Vietnam', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Mexique', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Maroc', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Norvège', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Écosse', country: '', type: 'country', emoji: '🌍' },
+  { name: 'Irlande', country: '', type: 'country', emoji: '🌍' },
+];

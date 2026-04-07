@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ChevronLeft, ChevronRight, Minus, Plus, Calendar } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts } from '@/lib/theme';
+import { useTranslation } from '@/lib/i18n';
 import type { TripPreferences } from '@/lib/types/trip';
 
 interface Props {
@@ -11,35 +12,17 @@ interface Props {
 }
 
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const MONTH_NAMES = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-
-// Quick date options
-function getQuickDates(): { label: string; date: Date; sub: string }[] {
-  const now = new Date();
-  const nextWeekend = new Date(now);
-  nextWeekend.setDate(now.getDate() + ((6 - now.getDay() + 7) % 7 || 7));
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const inTwoWeeks = new Date(now);
-  inTwoWeeks.setDate(now.getDate() + 14);
-
-  return [
-    { label: 'Ce week-end', date: nextWeekend, sub: formatShort(nextWeekend) },
-    { label: 'Dans 2 semaines', date: inTwoWeeks, sub: formatShort(inTwoWeeks) },
-    { label: 'Mois prochain', date: nextMonth, sub: MONTH_NAMES[nextMonth.getMonth()] },
-    { label: 'Flexible', date: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30), sub: 'Date flexible' },
-  ];
-}
-
-function formatShort(d: Date): string {
-  return `${d.getDate()} ${MONTH_NAMES[d.getMonth()].slice(0, 3)}`;
-}
 
 export function StepWhen({ prefs, onChange }: Props) {
+  const { t } = useTranslation();
   const today = new Date();
   const [viewMonth, setViewMonth] = useState(prefs.startDate ? new Date(prefs.startDate).getMonth() : today.getMonth());
   const [viewYear, setViewYear] = useState(prefs.startDate ? new Date(prefs.startDate).getFullYear() : today.getFullYear());
   const selectedDate = prefs.startDate ? new Date(prefs.startDate) : null;
   const duration = prefs.durationDays ?? 3;
+
+  const monthName = (idx: number) => t(`plan.when.month.${idx}` as any);
+  const formatShort = (d: Date) => `${d.getDate()} ${monthName(d.getMonth()).slice(0, 3)}`;
 
   const calendarDays = useMemo(() => {
     const firstDay = new Date(viewYear, viewMonth, 1);
@@ -52,7 +35,21 @@ export function StepWhen({ prefs, onChange }: Props) {
     return cells;
   }, [viewMonth, viewYear]);
 
-  const quickDates = useMemo(getQuickDates, []);
+  const quickDates = useMemo(() => {
+    const now = new Date();
+    const nextWeekend = new Date(now);
+    nextWeekend.setDate(now.getDate() + ((6 - now.getDay() + 7) % 7 || 7));
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const inTwoWeeks = new Date(now);
+    inTwoWeeks.setDate(now.getDate() + 14);
+
+    return [
+      { label: t('plan.when.quick.weekend'), date: nextWeekend, sub: formatShort(nextWeekend) },
+      { label: t('plan.when.quick.twoweeks'), date: inTwoWeeks, sub: formatShort(inTwoWeeks) },
+      { label: t('plan.when.quick.nextmonth'), date: nextMonth, sub: monthName(nextMonth.getMonth()) },
+      { label: t('plan.when.quick.flexible'), date: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30), sub: t('plan.when.quick.flexible_sub') },
+    ];
+  }, [t]);
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
@@ -92,8 +89,8 @@ export function StepWhen({ prefs, onChange }: Props) {
     <View style={{ gap: 32 }}>
       {/* Title */}
       <View style={{ alignItems: 'center' }}>
-        <Text style={s.title}>Quand partez-vous ?</Text>
-        <Text style={s.subtitle}>Définissez vos dates et la durée</Text>
+        <Text style={s.title}>{t('plan.when.title')}</Text>
+        <Text style={s.subtitle}>{t('plan.when.subtitle')}</Text>
       </View>
 
       {/* Quick dates — matches web grid-cols-2 */}
@@ -106,11 +103,36 @@ export function StepWhen({ prefs, onChange }: Props) {
         ))}
       </View>
 
+      {/* Duration spinner — moved above calendar per user feedback */}
+      <View style={s.durationBox}>
+        <Text style={s.calendarSectionLabel}>{t('plan.when.duration')}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 32, marginTop: 16 }}>
+          <Pressable
+            onPress={() => { if (duration > 1) { Haptics.selectionAsync(); onChange({ durationDays: duration - 1 }); } }}
+            style={[s.spinnerButton, duration <= 1 && { opacity: 0.3 }]}
+          >
+            <Minus size={22} color={colors.text} />
+          </Pressable>
+
+          <View style={{ alignItems: 'center', minWidth: 80 }}>
+            <Text style={s.durationNumber}>{duration}</Text>
+            <Text style={s.durationLabel}>{duration === 1 ? t('plan.when.duration.singular') : t('plan.when.duration.plural')}</Text>
+          </View>
+
+          <Pressable
+            onPress={() => { if (duration < 21) { Haptics.selectionAsync(); onChange({ durationDays: duration + 1 }); } }}
+            style={[s.spinnerButton, duration >= 21 && { opacity: 0.3 }]}
+          >
+            <Plus size={22} color={colors.text} />
+          </Pressable>
+        </View>
+      </View>
+
       {/* Calendar — matches web rounded-xl border bg-card p-3 */}
       <View style={s.calendarBox}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <Calendar size={14} color={colors.gold} />
-          <Text style={s.calendarSectionLabel}>DATE DE DÉPART</Text>
+          <Text style={s.calendarSectionLabel}>{t('plan.when.calendar')}</Text>
         </View>
 
         {/* Month navigation */}
@@ -118,7 +140,7 @@ export function StepWhen({ prefs, onChange }: Props) {
           <Pressable onPress={prevMonth} hitSlop={12} style={s.monthButton}>
             <ChevronLeft size={20} color={colors.textSecondary} />
           </Pressable>
-          <Text style={s.monthTitle}>{MONTH_NAMES[viewMonth]} {viewYear}</Text>
+          <Text style={s.monthTitle}>{monthName(viewMonth)} {viewYear}</Text>
           <Pressable onPress={nextMonth} hitSlop={12} style={s.monthButton}>
             <ChevronRight size={20} color={colors.textSecondary} />
           </Pressable>
@@ -153,30 +175,6 @@ export function StepWhen({ prefs, onChange }: Props) {
         </View>
       </View>
 
-      {/* Duration spinner — matches web counter style */}
-      <View style={s.durationBox}>
-        <Text style={s.calendarSectionLabel}>DURÉE DU VOYAGE</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 32, marginTop: 16 }}>
-          <Pressable
-            onPress={() => { if (duration > 1) { Haptics.selectionAsync(); onChange({ durationDays: duration - 1 }); } }}
-            style={[s.spinnerButton, duration <= 1 && { opacity: 0.3 }]}
-          >
-            <Minus size={22} color={colors.text} />
-          </Pressable>
-
-          <View style={{ alignItems: 'center', minWidth: 80 }}>
-            <Text style={s.durationNumber}>{duration}</Text>
-            <Text style={s.durationLabel}>{duration === 1 ? 'JOUR' : 'JOURS'}</Text>
-          </View>
-
-          <Pressable
-            onPress={() => { if (duration < 21) { Haptics.selectionAsync(); onChange({ durationDays: duration + 1 }); } }}
-            style={[s.spinnerButton, duration >= 21 && { opacity: 0.3 }]}
-          >
-            <Plus size={22} color={colors.text} />
-          </Pressable>
-        </View>
-      </View>
     </View>
   );
 }

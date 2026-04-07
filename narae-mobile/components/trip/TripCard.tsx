@@ -5,6 +5,7 @@ import { Calendar, Users, MapPin } from 'lucide-react-native';
 import { Badge } from '@/components/ui/Badge';
 import { colors, fonts, radius } from '@/lib/theme';
 import type { TripListItem } from '@/lib/api/trips';
+import { useTranslation } from '@/lib/i18n';
 
 interface Props {
   trip: TripListItem;
@@ -34,13 +35,13 @@ function getImageForDestination(destination: string): string {
   return DEFAULT_IMAGE;
 }
 
-function getTripStatus(trip: TripListItem): { variant: 'upcoming' | 'active' | 'past'; label: string } {
+function getTripStatusVariant(trip: TripListItem): 'upcoming' | 'active' | 'past' {
   const now = new Date();
   const start = new Date(trip.start_date);
   const end = new Date(trip.end_date);
-  if (now < start) return { variant: 'upcoming', label: 'À venir' };
-  if (now >= start && now <= end) return { variant: 'active', label: 'En cours' };
-  return { variant: 'past', label: 'Passé' };
+  if (now < start) return 'upcoming';
+  if (now >= start && now <= end) return 'active';
+  return 'past';
 }
 
 function formatDate(dateStr: string): string {
@@ -48,8 +49,16 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
+const STATUS_KEYS: Record<string, string> = {
+  upcoming: 'trip.card.upcoming',
+  active: 'trip.card.active',
+  past: 'trip.card.past',
+};
+
 export function TripCard({ trip, onPress, compact }: Props) {
-  const status = getTripStatus(trip);
+  const { t } = useTranslation();
+  const variant = getTripStatusVariant(trip);
+  const status = { variant, label: t(STATUS_KEYS[variant] as any) };
   const imageUrl = getImageForDestination(trip.destination);
   const imageHeight = compact ? 130 : 220;
 
@@ -72,7 +81,7 @@ export function TripCard({ trip, onPress, compact }: Props) {
           <Badge variant={status.variant} label={status.label} />
         </View>
         <View style={styles.destinationWrap}>
-          <Text style={styles.kicker}>Voyage sur mesure</Text>
+          <Text style={styles.kicker}>{t('trip.card.kicker')}</Text>
           <Text style={[styles.title, compact ? styles.titleCompact : null]}>
             {trip.title || trip.destination}
           </Text>

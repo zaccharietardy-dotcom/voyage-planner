@@ -120,7 +120,10 @@ export function ActivityItem({ item, isFirst, isLast, onPress, onLongPress, onSw
       <Pressable
         onPress={onPress}
         onLongPress={onLongPress}
-        style={({ pressed }) => pressed && onPress ? { opacity: 0.95, transform: [{ scale: 0.97 }] } : null}
+        style={({ pressed }) => [
+          { flex: 1 },
+          pressed && onPress ? { opacity: 0.95, transform: [{ scale: 0.97 }] } : null,
+        ]}
       >
         <View style={s.card}>
           {/* Left: Image — rounded */}
@@ -334,7 +337,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 8,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
   },
-  altName: { color: colors.text, fontSize: 12, fontFamily: fonts.sansBold, maxWidth: 120 },
+  altName: { color: colors.text, fontSize: 12, fontFamily: fonts.sansBold, flex: 1 },
   altMeta: { color: colors.textMuted, fontSize: 10, fontFamily: fonts.sans },
   altSwap: { color: colors.gold, fontSize: 10, fontFamily: fonts.sansBold },
 });

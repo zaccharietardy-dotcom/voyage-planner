@@ -43,6 +43,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { TripSheet } from '@/components/trip/TripSheet';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { PremiumBackground } from '@/components/ui/PremiumBackground';
+import { useTranslation } from '@/lib/i18n';
 
 const FALLBACK_IMAGES: Record<string, string> = {
   paris: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
@@ -67,12 +68,12 @@ function getImage(dest: string): string {
 
 type Tab = 'itinerary' | 'booking' | 'budget' | 'expenses' | 'info';
 
-const TABS: { key: Tab; label: string; icon: typeof MapPin }[] = [
-  { key: 'itinerary', label: 'ITINÉRAIRE', icon: MapPin },
-  { key: 'expenses', label: 'DÉPENSES', icon: CreditCard },
-  { key: 'booking', label: 'RÉSERVER', icon: Ticket },
-  { key: 'budget', label: 'BUDGET', icon: PieChart },
-  { key: 'info', label: 'INFOS', icon: Info },
+const TAB_KEYS: { key: Tab; labelKey: string; icon: typeof MapPin }[] = [
+  { key: 'itinerary', labelKey: 'trip.tabs.itinerary', icon: MapPin },
+  { key: 'expenses', labelKey: 'trip.tabs.expenses', icon: CreditCard },
+  { key: 'booking', labelKey: 'trip.tabs.booking', icon: Ticket },
+  { key: 'budget', labelKey: 'trip.tabs.budget', icon: PieChart },
+  { key: 'info', labelKey: 'trip.tabs.info', icon: Info },
 ];
 
 export default function TripDetailScreen() {
@@ -89,6 +90,7 @@ export default function TripDetailScreen() {
   const [addTargetDay, setAddTargetDay] = useState(1);
   const [visibility, setVisibility] = useState<'public' | 'friends' | 'private'>('private');
 
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { data: row, isLoading, error } = useApi(() => fetchTrip(id!), [id]);
 
@@ -354,18 +356,18 @@ export default function TripDetailScreen() {
       <TripSheet>
         {/* Tabs inside sheet */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContent}>
-          {TABS.map((t) => (
+          {TAB_KEYS.map((tab) => (
             <Pressable
-              key={t.key}
+              key={tab.key}
               onPress={() => {
                 Haptics.selectionAsync();
-                setActiveTab(t.key);
+                setActiveTab(tab.key);
               }}
-              style={[styles.tabButton, activeTab === t.key ? styles.tabButtonActive : null]}
+              style={[styles.tabButton, activeTab === tab.key ? styles.tabButtonActive : null]}
             >
-              <t.icon size={15} color={activeTab === t.key ? '#000' : colors.textMuted} />
-              <Text style={[styles.tabButtonLabel, activeTab === t.key ? styles.tabButtonLabelActive : null]}>
-                {t.label}
+              <tab.icon size={15} color={activeTab === tab.key ? '#000' : colors.textMuted} />
+              <Text style={[styles.tabButtonLabel, activeTab === tab.key ? styles.tabButtonLabelActive : null]}>
+                {t(tab.labelKey as any)}
               </Text>
             </Pressable>
           ))}
@@ -542,6 +544,7 @@ export default function TripDetailScreen() {
 }
 
 function BudgetTab({ trip }: { trip: Trip }) {
+  const { t } = useTranslation();
   const breakdown = trip.costBreakdown;
   if (!breakdown) {
     return (
@@ -607,7 +610,7 @@ function BudgetTab({ trip }: { trip: Trip }) {
           <Text style={styles.sectionTitle}>Par jour</Text>
           {trip.days.map((day) => day.dailyBudget ? (
             <View key={day.dayNumber} style={styles.dailyBudgetRow}>
-              <Text style={styles.dailyBudgetLabel}>Jour {day.dayNumber}</Text>
+              <Text style={styles.dailyBudgetLabel}>{t('trip.day', { n: day.dayNumber })}</Text>
               <Text style={styles.dailyBudgetValue}>{Math.round(day.dailyBudget.total)}€</Text>
             </View>
           ) : null)}
