@@ -31,13 +31,18 @@ const ACTIVITY_DISPLAY: Record<string, string> = {
   wellness: 'Wellness',
 };
 
-// Generic travel landscape (coastal cliffs, not desert)
-const GENERIC_FALLBACK = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=600&fit=crop';
 const CACHE_KEY_PREFIX = 'dest_img_';
+const BAD_IMAGE_KEYWORDS = ['flag', 'drapeau', 'blason', 'coat_of_arms', 'armoiries', 'logo', 'emblem', 'banner', 'gwenn', 'seal_of', 'escudo', 'wappen', 'bandiera', 'carte_', 'map_of', 'location_'];
 
 async function getCachedImage(destination: string): Promise<string | null> {
   try {
-    const cached = await AsyncStorage.getItem(CACHE_KEY_PREFIX + destination.toLowerCase());
+    const key = CACHE_KEY_PREFIX + destination.toLowerCase();
+    const cached = await AsyncStorage.getItem(key);
+    // Invalidate old bad caches (desert photo, flags, etc.)
+    if (cached && (cached.includes('unsplash.com') || BAD_IMAGE_KEYWORDS.some(kw => cached.toLowerCase().includes(kw)))) {
+      await AsyncStorage.removeItem(key);
+      return null;
+    }
     return cached;
   } catch { return null; }
 }
@@ -48,43 +53,86 @@ async function setCachedImage(destination: string, url: string): Promise<void> {
   } catch { /* ignore */ }
 }
 
-const BAD_IMAGE_KEYWORDS = ['flag', 'drapeau', 'blason', 'coat_of_arms', 'armoiries', 'logo', 'emblem', 'banner', 'gwenn', 'seal_of', 'escudo', 'wappen', 'bandiera'];
+function isGoodImage(url: string): boolean {
+  const lower = url.toLowerCase();
+  return !BAD_IMAGE_KEYWORDS.some(kw => lower.includes(kw));
+}
 
+function extractWikiImage(json: any): string | null {
+  const imgUrl = json?.originalimage?.source || json?.thumbnail?.source;
+  if (!imgUrl || !isGoodImage(imgUrl)) return null;
+  return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
+}
+
+/**
+ * Multi-strategy image fetch. Tries in order:
+ * 1. Wikipedia fr/en for exact destination name
+ * 2. Wikipedia "Tourisme_en_{destination}"
+ * 3. Nominatim → find the biggest city in the region → Wikipedia for that city
+ * 4. null (caller shows gradient placeholder, NOT a random photo)
+ */
 async function fetchDestinationImage(destination: string): Promise<string | null> {
-  // Try French Wikipedia first, then English
+  const encodedTitle = encodeURIComponent(destination.replace(/ /g, '_'));
+
+  // Strategy 1: Direct Wikipedia fr + en
   for (const lang of ['fr', 'en']) {
     try {
-      const title = encodeURIComponent(destination.replace(/ /g, '_'));
-      const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${title}`);
+      const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodedTitle}`);
       if (!res.ok) continue;
-      const json = await res.json();
-      const imgUrl = json.originalimage?.source || json.thumbnail?.source;
-      if (!imgUrl) continue;
-      // Skip flags, coat of arms, logos, emblems
-      const imgLower = imgUrl.toLowerCase();
-      if (BAD_IMAGE_KEYWORDS.some(kw => imgLower.includes(kw))) continue;
-      return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
+      const img = extractWikiImage(await res.json());
+      if (img) return img;
     } catch { continue; }
   }
-  // Fallback: try with " tourisme" suffix for regions
+
+  // Strategy 2: "Tourisme en {destination}" (fr Wikipedia)
   try {
-    const title = encodeURIComponent(destination.replace(/ /g, '_'));
-    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/Tourisme_en_${title}`);
+    const res = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/Tourisme_en_${encodedTitle}`);
     if (res.ok) {
-      const json = await res.json();
-      const imgUrl = json.originalimage?.source || json.thumbnail?.source;
-      if (imgUrl && !BAD_IMAGE_KEYWORDS.some(kw => imgUrl.toLowerCase().includes(kw))) {
-        return imgUrl.includes('/thumb/') ? imgUrl.replace(/\/\d+px-/, '/1200px-') : imgUrl;
+      const img = extractWikiImage(await res.json());
+      if (img) return img;
+    }
+  } catch { /* ignore */ }
+
+  // Strategy 3: Find the main city in the region via Nominatim, then get its Wikipedia image
+  try {
+    const nRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
+    );
+    if (nRes.ok) {
+      const results = await nRes.json();
+      if (results.length > 0 && results[0].boundingbox) {
+        const [south, north, west, east] = results[0].boundingbox;
+        // Search for cities in the bounding box
+        const cityRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=city&format=json&limit=3&bounded=1&viewbox=${west},${north},${east},${south}&featuretype=city`,
+          { headers: { 'User-Agent': 'NaraeVoyage/1.0' } },
+        );
+        if (cityRes.ok) {
+          const cities = await cityRes.json();
+          // Try Wikipedia for each city until we get a good image
+          for (const city of cities) {
+            const cityName = city.name || city.display_name?.split(',')[0];
+            if (!cityName) continue;
+            try {
+              const wRes = await fetch(`https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cityName)}`);
+              if (!wRes.ok) continue;
+              const img = extractWikiImage(await wRes.json());
+              if (img) return img;
+            } catch { continue; }
+          }
+        }
       }
     }
   } catch { /* ignore */ }
-  return null;
+
+  return null; // No fallback photo — caller shows gradient
 }
 
 export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) {
   const { t } = useTranslation();
   const destination = prefs.destination || '';
-  const [imageUrl, setImageUrl] = useState<string>(GENERIC_FALLBACK);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
 
   useEffect(() => {
@@ -94,21 +142,21 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
     (async () => {
       setImageLoading(true);
 
-      // 1. Check AsyncStorage cache — but skip if it's the old bad fallback
+      // 1. Check AsyncStorage cache
       const cached = await getCachedImage(destination);
-      if (cached && !cancelled && !cached.includes('photo-1469854523086') && !BAD_IMAGE_KEYWORDS.some(kw => cached.toLowerCase().includes(kw))) {
+      if (cached && !cancelled) {
         setImageUrl(cached);
         setImageLoading(false);
         return;
       }
 
-      // 2. Fetch from Wikipedia (fr then en, with flag filtering)
+      // 2. Multi-strategy fetch (Wikipedia → Nominatim city → null)
       const url = await fetchDestinationImage(destination);
-      if (url && !cancelled) {
-        setImageUrl(url);
-        await setCachedImage(destination, url);
+      if (!cancelled) {
+        setImageUrl(url); // null = gradient placeholder
+        if (url) await setCachedImage(destination, url);
+        setImageLoading(false);
       }
-      if (!cancelled) setImageLoading(false);
     })();
 
     return () => { cancelled = true; };
@@ -124,14 +172,23 @@ export function StepSummary({ prefs, onEdit, onGenerate, isGenerating }: Props) 
     <View style={{ gap: 20 }}>
       {/* Hero Card — matches web rounded-[2rem] aspect-[2/1] */}
       <Pressable onPress={() => handleEdit(0)} style={s.heroCard}>
-        <Image
-          source={{ uri: imageUrl }}
-          style={[StyleSheet.absoluteFillObject, { opacity: imageLoading ? 0 : 1 }]}
-          contentFit="cover"
-          transition={300}
-          onLoadEnd={() => setImageLoading(false)}
-        />
-        {imageLoading && (
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={[StyleSheet.absoluteFillObject, { opacity: imageLoading ? 0 : 1 }]}
+            contentFit="cover"
+            transition={300}
+            onLoadEnd={() => setImageLoading(false)}
+          />
+        ) : (
+          <LinearGradient
+            colors={['#1a2744', '#0d1b2a', '#020617']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+        )}
+        {imageLoading && imageUrl && (
           <View style={{ ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator color={colors.gold} />
           </View>
