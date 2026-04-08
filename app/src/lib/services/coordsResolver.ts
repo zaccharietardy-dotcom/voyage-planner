@@ -18,8 +18,75 @@ import { geocodeAddress, calculateDistance } from './geocoding';
 import { geocodeWithGemini } from './geminiSearch';
 import { geocodeWithFallback } from './serpApiPlaces';
 
-// Distance maximale acceptée entre le résultat API et le centre de destination
-const MAX_RESOLUTION_DISTANCE_KM = 30;
+// Distance maximale acceptée entre le résultat API et le centre de destination.
+// NOTE:
+// - Attractions in regional / road-trip contexts legitimately span wider areas.
+// - Restaurants/hotels remain stricter to avoid cross-city pollution.
+const DEFAULT_ATTRACTION_MAX_DISTANCE_KM = 60;
+const DEFAULT_LOCAL_MAX_DISTANCE_KM = 25;
+const BROAD_DESTINATION_MAX_DISTANCE_KM = 220;
+const BROAD_DESTINATION_HINTS = [
+  'bretagne',
+  'normandie',
+  'provence',
+  'loire',
+  'alsace',
+  'occitanie',
+  'corse',
+  'toscane',
+  'sicile',
+  'andalousie',
+  'region',
+  'région',
+  'province',
+  'country',
+  'france',
+  'italie',
+  'espagne',
+];
+
+function normalizeHint(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function isLikelyBroadDestination(city: string): boolean {
+  const normalized = normalizeHint(city);
+  if (!normalized) return false;
+
+  if (BROAD_DESTINATION_HINTS.some((hint) => normalized.includes(hint))) {
+    return true;
+  }
+
+  // Heuristic: multi-token area names often indicate a region-level query
+  // ("cote de granit rose", "south of france", etc.).
+  const tokens = normalized.split(/[\s,-]+/).filter(Boolean);
+  return tokens.length >= 4;
+}
+
+function inferResolutionMaxDistanceKm(
+  city: string,
+  itemType: string,
+  explicitMaxDistanceKm?: number
+): number {
+  if (Number.isFinite(explicitMaxDistanceKm)) {
+    return Math.max(5, Math.min(300, explicitMaxDistanceKm as number));
+  }
+
+  if (isLikelyBroadDestination(city)) {
+    return BROAD_DESTINATION_MAX_DISTANCE_KM;
+  }
+
+  const normalizedType = (itemType || '').toLowerCase();
+  if (normalizedType === 'restaurant' || normalizedType === 'hotel') {
+    return DEFAULT_LOCAL_MAX_DISTANCE_KM;
+  }
+
+  return DEFAULT_ATTRACTION_MAX_DISTANCE_KM;
+}
 
 /**
  * Vérifie que les coordonnées résolues sont bien proches de la destination
@@ -29,11 +96,12 @@ function isResultNearDestination(
   result: { lat: number; lng: number },
   nearbyCoords: { lat: number; lng: number },
   name: string,
-  source: string
+  source: string,
+  maxDistanceKm: number
 ): boolean {
   const distance = calculateDistance(result.lat, result.lng, nearbyCoords.lat, nearbyCoords.lng);
-  if (distance > MAX_RESOLUTION_DISTANCE_KM) {
-    console.warn(`[CoordsResolver] ❌ ${source} rejeté pour "${name}": ${distance.toFixed(1)}km de la destination (max ${MAX_RESOLUTION_DISTANCE_KM}km)`);
+  if (distance > maxDistanceKm) {
+    console.warn(`[CoordsResolver] ❌ ${source} rejeté pour "${name}": ${distance.toFixed(1)}km de la destination (max ${maxDistanceKm}km)`);
     return false;
   }
   return true;
@@ -49,6 +117,7 @@ export interface ResolutionResult {
 
 interface ResolveCoordinatesOptions {
   allowPaidFallback?: boolean;
+  maxDistanceKm?: number;
 }
 
 // In-memory resolution cache (avoids re-resolving the same item in a single generation)
@@ -99,6 +168,7 @@ export async function resolveCoordinates(
   if (!name || !city) return null;
 
   const allowPaidFallback = options?.allowPaidFallback !== false;
+  const maxDistanceKm = inferResolutionMaxDistanceKm(city, itemType, options?.maxDistanceKm);
   totalResolutionAttempts++;
   const cacheKey = `${name.toLowerCase().trim()}|${city.toLowerCase().trim()}|paid:${allowPaidFallback ? '1' : '0'}`;
 
@@ -116,7 +186,7 @@ export async function resolveCoordinates(
   try {
     const travelResult = await resolveAttractionByName(name, nearbyCoords);
     if (travelResult && travelResult.lat && travelResult.lng) {
-      if (isResultNearDestination(travelResult, nearbyCoords, name, 'Travel Places')) {
+      if (isResultNearDestination(travelResult, nearbyCoords, name, 'Travel Places', maxDistanceKm)) {
         const result: ResolutionResult = {
           lat: travelResult.lat,
           lng: travelResult.lng,
@@ -138,7 +208,7 @@ export async function resolveCoordinates(
     const geoQuery = `${name}, ${city}`;
     const geo = await geocodeAddress(geoQuery);
     if (geo && geo.lat && geo.lng) {
-      if (isResultNearDestination(geo, nearbyCoords, name, 'Nominatim')) {
+      if (isResultNearDestination(geo, nearbyCoords, name, 'Nominatim', maxDistanceKm)) {
         const result: ResolutionResult = {
           lat: geo.lat,
           lng: geo.lng,
@@ -160,7 +230,7 @@ export async function resolveCoordinates(
   try {
     const geminiResult = await geocodeWithGemini(name, city);
     if (geminiResult && geminiResult.lat && geminiResult.lng) {
-      if (isResultNearDestination(geminiResult, nearbyCoords, name, 'Gemini')) {
+      if (isResultNearDestination(geminiResult, nearbyCoords, name, 'Gemini', maxDistanceKm)) {
         const result: ResolutionResult = {
           lat: geminiResult.lat,
           lng: geminiResult.lng,
@@ -183,7 +253,7 @@ export async function resolveCoordinates(
     try {
       const placesResult = await geocodeWithFallback(name, city, nearbyCoords);
       if (placesResult && placesResult.lat && placesResult.lng) {
-        if (isResultNearDestination(placesResult, nearbyCoords, name, 'Google Places/SerpAPI')) {
+        if (isResultNearDestination(placesResult, nearbyCoords, name, 'Google Places/SerpAPI', maxDistanceKm)) {
           const result: ResolutionResult = {
             lat: placesResult.lat,
             lng: placesResult.lng,

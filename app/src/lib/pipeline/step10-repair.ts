@@ -38,6 +38,7 @@ export interface RepairResult {
   rescueDiagnostics?: {
     protectedBreakCount: number;
     lateMealReplacementCount: number;
+    mealSemanticReplacementCount?: number;
     dayTripEvictionCount: number;
     finalIntegrityFailures: number;
     orphanTransportCount?: number;
@@ -470,10 +471,19 @@ export function ensureMustSees(
         // Use must-see's own opening hours for start time, or early morning default
         const preferredStart = mustSee.openingHours?.open || '09:00';
         const mustSeeDuration = mustSee.duration || 60;
+        const preferredEnd = addMinutes(preferredStart, mustSeeDuration);
+        const mockMustSeePreferred = {
+          ...mustSee,
+          openingHours: mustSee.openingHours,
+          openingHoursByDay: mustSee.openingHoursByDay,
+        } as ScoredActivity;
+        if ((mustSee.openingHours || mustSee.openingHoursByDay)
+          && !isOpenAtTime(mockMustSeePreferred, dayDate, preferredStart, preferredEnd)) {
+          continue;
+        }
 
         // Check keyword-based closing time (gardens/parks without explicit hours)
         const closeTime = getActivityCloseTime(mustSee as ScoredActivity, dayDate);
-        const preferredEnd = addMinutes(preferredStart, mustSeeDuration);
         if (closeTime && timeToMin(preferredEnd) > timeToMin(closeTime)) {
           // Would end after closing — try to fit before close instead
           const fitStart = addMinutes(closeTime, -mustSeeDuration);
@@ -563,7 +573,7 @@ export function ensureMustSees(
           type: 'replacement',
           dayNumber: day.dayNumber,
           itemTitle: mustSee.name,
-          description: `Injected must-see "${mustSee.name}" at ${preferredStart}, evicted "${evicted.title}" (time-unconstrained fallback)`,
+          description: `Injected must-see "${mustSee.name}" at ${preferredStart}, evicted "${evicted.title}" (hours-safe fallback)`,
         });
         plannedActivityNamesNorm.add(normalizeForMatching(mustSee.name));
         globalPlacedIds?.add(mustSee.id || mustSee.name);
@@ -724,6 +734,15 @@ export function fillLargeGapsWithFreeTime(
   repairs?: RepairAction[],
   densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): void {
+  const isUsefulTimelineItem = (item: TripItem): boolean => {
+    if (item.type === 'activity' || item.type === 'checkin' || item.type === 'checkout') return true;
+    if (item.type === 'flight' || item.type === 'transport') return true;
+    if (item.type === 'restaurant') {
+      return !item.qualityFlags?.includes('self_meal_fallback');
+    }
+    return false;
+  };
+
   // Build set of already-placed activity IDs to find unassigned pool activities
   const placedIds = new Set<string>();
   const placedNamesNorm = new Set<string>();
@@ -862,10 +881,22 @@ export function fillLargeGapsWithFreeTime(
         } // end distance tier loop
       }
 
-      // Fallback: insert free_time if no suitable activity found
+      // Fallback: insert bounded free_time if no suitable activity found.
+      // Avoid giant "empty blocks" that make plans look broken.
       if (!filled) {
+        const plannedItemsForDay = [...day.items, ...insertions.map((entry) => entry.item)];
+        const usefulItemsCount = plannedItemsForDay.filter(isUsefulTimelineItem).length;
+        if (usefulItemsCount < 3) {
+          // Guardrail: avoid filling "mostly empty" days with synthetic free_time.
+          continue;
+        }
+        const existingFreeBlocks = day.items.filter((item) => item.type === 'free_time').length
+          + insertions.filter((insertion) => insertion.item.type === 'free_time').length;
+        if (existingFreeBlocks >= 1) {
+          continue;
+        }
         const freeStart = addMinutes(current.endTime, 10);
-        const freeDuration = availableMinutes;
+        const freeDuration = Math.max(45, Math.min(120, availableMinutes));
         const freeEnd = addMinutes(freeStart, freeDuration);
 
         insertions.push({

@@ -19,6 +19,7 @@ import type { TripDay, TripItem } from '../types/trip';
 import type { ActivityCluster, ScoredActivity, FetchedData } from './types';
 import type { DayMealPlan, MealPlacement } from './step8-place-restaurants';
 import { findBestRestaurant } from './step8-place-restaurants';
+import { isAppropriateForMeal } from './step4-restaurants';
 import type { DayTravelTimes, TravelLeg } from './step7b-travel-times';
 import type { DayTimeWindow } from './step4-anchor-transport';
 import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter } from './utils/time';
@@ -648,6 +649,10 @@ export function enforceRestaurantSafetyForDay(
     dayRestaurants?: Restaurant[];
     dietary?: string[];
     usedRestaurantIds?: Set<string>;
+    stats?: {
+      mealSemanticReplacementCount?: number;
+      mealFallbackCount?: number;
+    };
   } = {}
 ): number {
   const activityPoints = day.items
@@ -665,6 +670,12 @@ export function enforceRestaurantSafetyForDay(
 
     const isLunchOrDinner = mealType === 'lunch' || mealType === 'dinner';
     const currentRestaurant = item.restaurant;
+    const semanticCandidate = currentRestaurant || ({
+      name: `${item.title || ''} ${item.locationName || ''}`.trim(),
+      latitude: item.latitude,
+      longitude: item.longitude,
+    } as Restaurant);
+    const currentSemanticOk = isAppropriateForMeal(semanticCandidate, mealType);
     const currentOpen = currentRestaurant
       ? isRestaurantOpenForSlot(currentRestaurant, day.date, item.startTime, item.endTime)
       : true;
@@ -673,7 +684,7 @@ export function enforceRestaurantSafetyForDay(
       : 0;
     const currentDistanceOk = !isLunchOrDinner || currentDist <= 0.8;
 
-    if (currentOpen && currentDistanceOk) continue;
+    if (currentOpen && currentDistanceOk && currentSemanticOk) continue;
 
     const replacement = findRestaurantReplacementForSlot(
       mealType,
@@ -685,6 +696,10 @@ export function enforceRestaurantSafetyForDay(
     );
 
     if (replacement) {
+      if (!currentSemanticOk) {
+        options.stats = options.stats || {};
+        options.stats.mealSemanticReplacementCount = (options.stats.mealSemanticReplacementCount || 0) + 1;
+      }
       const mealLabel = getMealLabel(mealType);
       day.items[i] = {
         ...item,
@@ -726,8 +741,13 @@ export function enforceRestaurantSafetyForDay(
       if (
         replacementFromDayPool
         && replacementFromDayPool.distanceFromAnchor <= 0.8
+        && isAppropriateForMeal(replacementFromDayPool.primary, mealType)
         && isRestaurantOpenForSlot(replacementFromDayPool.primary, day.date, item.startTime, item.endTime)
       ) {
+        if (!currentSemanticOk) {
+          options.stats = options.stats || {};
+          options.stats.mealSemanticReplacementCount = (options.stats.mealSemanticReplacementCount || 0) + 1;
+        }
         const mealLabel = getMealLabel(mealType);
         day.items[i] = {
           ...item,
@@ -747,6 +767,11 @@ export function enforceRestaurantSafetyForDay(
       }
 
       replacementsToFallback++;
+      options.stats = options.stats || {};
+      options.stats.mealFallbackCount = (options.stats.mealFallbackCount || 0) + 1;
+      if (!currentSemanticOk) {
+        options.stats.mealSemanticReplacementCount = (options.stats.mealSemanticReplacementCount || 0) + 1;
+      }
       day.items[i] = createSelfMealFallbackItem(
         mealType,
         item.startTime,
@@ -783,6 +808,7 @@ function findRestaurantReplacementForSlot(
   const uniqueCandidates = [...uniqueById.values()];
 
   const valid = uniqueCandidates.filter((candidate) => {
+    if (!isAppropriateForMeal(candidate, mealType)) return false;
     if (!isRestaurantOpenForSlot(candidate, dayDate, startTime, endTime)) return false;
     if (!isLunchOrDinner) return true;
     return nearestActivityDistanceKm(candidate.latitude, candidate.longitude, activityPoints) <= 0.8;

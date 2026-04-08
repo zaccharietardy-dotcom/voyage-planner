@@ -148,8 +148,15 @@ export function clusterActivities(
     }
   }
 
-  // Limit day trips based on trip length
-  const maxDayTrips = numDays <= 5 ? 1 : Math.floor((numDays - 1) / 3);
+  // Limit day trips based on trip length and density.
+  // Spread/regional trips need more day-trip slots to avoid impossible mega-clusters.
+  const farMustSeeCount = dayTripMustSees.filter((a) =>
+    calculateDistance(a.latitude, a.longitude, cityCenter.lat, cityCenter.lng) >= 45
+  ).length;
+  const hasRegionalSpreadSignal = densityProfile?.densityCategory === 'spread' || farMustSeeCount >= 2;
+  const maxDayTrips = hasRegionalSpreadSignal
+    ? (numDays <= 5 ? 2 : Math.max(2, Math.floor((numDays - 1) / 2)))
+    : (numDays <= 5 ? 1 : Math.floor((numDays - 1) / 3));
 
   // If more must-see day trips than allowed, keep the FARTHEST ones (they need a dedicated day
   // the most — closer must-sees can survive in city clusters). Demote the rest.

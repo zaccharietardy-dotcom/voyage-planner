@@ -299,9 +299,12 @@ export function scoreAndSelectActivities(
   const densityThresholds = getDensityThresholds(inferredDensity, p75Dist);
   const MAX_ACTIVITY_DIST_KM = densityThresholds.outlierMaxDist;
   const MAX_MUST_SEE_DIST_KM = Math.max(150, densityThresholds.outlierMaxDist * 2);
+  const isStrictMustSee = (activity: ScoredActivity): boolean =>
+    activity.mustSee === true
+    || (activity.source === 'mustsee' && !(activity.id || '').startsWith('intel-'));
   const gpsFiltered = withGPS.filter(a => {
     const dist = calculateDistance(a.latitude, a.longitude, data.destCoords.lat, data.destCoords.lng);
-    if (a.mustSee || a.source === 'mustsee') {
+    if (isStrictMustSee(a)) {
       if (dist > MAX_MUST_SEE_DIST_KM) {
         console.warn(`[Pipeline V2] ⚠️ Must-see far from destination: "${a.name}" (${dist.toFixed(0)}km > ${MAX_MUST_SEE_DIST_KM}km) — keeping as day-trip candidate`);
         (a as any).dayTripCandidate = true;
@@ -551,7 +554,7 @@ export function scoreAndSelectActivities(
       console.log(`[Score] Dropping "${act.name}" — invalid coordinates (${act.latitude}, ${act.longitude})`);
       return false;
     }
-    const maxDistKm = (act.mustSee || act.source === 'mustsee') ? 500 : 100;
+    const maxDistKm = isStrictMustSee(act) ? 500 : 100;
     const validation = validateCoordinate(act.latitude, act.longitude, destCoords, maxDistKm);
     if (!validation.valid) {
       console.log(`[Score] Dropping "${act.name}" — ${validation.reason}`);

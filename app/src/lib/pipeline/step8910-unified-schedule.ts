@@ -54,6 +54,7 @@ import { timeToMin, minToTime, addMinutes, isPastEnd, ensureAfter, sortAndReinde
 import { getClusterCentroid } from './utils/geo';
 import { isDuplicateActivityCandidate } from './utils/activityDedup';
 import { isOpenAtTime } from './utils/opening-hours';
+import { computeMealEligibility } from './utils/meal-eligibility';
 import { enrichWithTicketingLinks } from '../services/officialTicketing';
 import { isNightlifeActivity } from './step2-score';
 import { getDensityThresholds } from './utils/density-config';
@@ -209,6 +210,8 @@ export function unifiedScheduleV3Days(
   const rescueDiagnostics = {
     protectedBreakCount: 0,
     lateMealReplacementCount: 0,
+    mealSemanticReplacementCount: 0,
+    mealFallbackCount: 0,
     dayTripEvictionCount: 0,
     finalIntegrityFailures: 0,
   };
@@ -297,14 +300,15 @@ export function unifiedScheduleV3Days(
     const dayStartMin = timeToMin(dayStartTime);
     const dayEndMin = timeToMin(dayEndTime);
     const hasArrivalFlight = timeWindow?.hasArrivalTransport ?? false;
-    let canHaveBreakfast = dayStartMin < 10 * 60 && dayStartMin < dayEndMin && !hasArrivalFlight;   // no breakfast on arrival day
-    const canHaveLunch = dayStartMin < 13 * 60 && dayEndMin > 12 * 60; // window spans lunch hours
-    const hasDepartureForMeals = timeWindow?.hasDepartureTransport ?? false;
-    // Departure days: allow an early dinner if activity window ends late enough
-    // (dayEndMin already includes departure buffer, so a dinner fits if ≥90min remain after 17:30)
-    const canHaveDinner = hasDepartureForMeals
-      ? dayEndMin >= 18 * 60 + 30  // 18:30 = enough for a quick 60min dinner before cutoff
-      : dayEndMin >= 18 * 60;
+    const mealEligibility = computeMealEligibility({
+      dayStartTime,
+      dayEndTime,
+      hasArrivalTransport: hasArrivalFlight,
+      hasDepartureTransport: timeWindow?.hasDepartureTransport ?? false,
+    });
+    let canHaveBreakfast = mealEligibility.expectBreakfast;
+    const canHaveLunch = mealEligibility.expectLunch;
+    const canHaveDinner = mealEligibility.expectDinner;
 
     if (rescueStageAtLeast(rescueStage, 3) && canHaveBreakfast) {
       const breakfastConsumesUntil = dayStartMin + 60;
@@ -589,12 +593,6 @@ export function unifiedScheduleV3Days(
                 break;
               }
             }
-            // Strict hours check failed — use candidate anyway at best slot
-            // A real restaurant with slightly wrong hours beats "Repas libre"
-            if (!lunchPlacement) {
-              lunchPlacement = candidatePlacement;
-              finalLunchTime = lunchSlots[0];
-            }
           }
           // Skip hotel-fallback: on day trips, prefer "Repas libre" over a restaurant 16km away
           if (lunchPlacement) {
@@ -711,11 +709,6 @@ export function unifiedScheduleV3Days(
                 break;
               }
             }
-            // Strict hours check failed — use candidate anyway at best slot
-            if (!lunchPlacement) {
-              lunchPlacement = candidatePlacement;
-              finalLunchTime = lunchSlots[0];
-            }
           }
           if (lunchPlacement) {
             items.push(createRestaurantItem(
@@ -751,11 +744,6 @@ export function unifiedScheduleV3Days(
                 break;
               }
             }
-            // Strict hours check failed — use candidate anyway at best slot
-            if (!dinnerPlacement) {
-              dinnerPlacement = candidateDinner;
-              finalDinnerTime = dinnerSlots[0];
-            }
           }
           if (dinnerPlacement) {
             items.push(createRestaurantItem(
@@ -784,12 +772,15 @@ export function unifiedScheduleV3Days(
             dietary, usedRestaurantIds, dayDateForRestaurant, density
           );
           if (lunchPlacement) {
-            // Use candidate even if strict hours check fails — real restaurant beats "Repas libre"
-            items.push(createRestaurantItem(
-              { ...lunchPlacement, anchorName: 'Position actuelle' },
-              'lunch', lunchTime, 75, cluster.dayNumber, orderIndex++
-            ));
-            usedRestaurantIds.add(lunchPlacement.primary.id);
+            if (strictMealPlacement(lunchPlacement, dayDate, lunchTime, 75, 0.8)) {
+              items.push(createRestaurantItem(
+                { ...lunchPlacement, anchorName: 'Position actuelle' },
+                'lunch', lunchTime, 75, cluster.dayNumber, orderIndex++
+              ));
+              usedRestaurantIds.add(lunchPlacement.primary.id);
+            } else {
+              items.push(createSelfMealFallbackItem('lunch', lunchTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
+            }
           } else {
             items.push(createSelfMealFallbackItem('lunch', lunchTime, 75, cluster.dayNumber, orderIndex++, lunchAnchor));
           }
@@ -826,11 +817,6 @@ export function unifiedScheduleV3Days(
               finalDinnerTime = slot;
               break;
             }
-          }
-          // Strict hours check failed — use candidate anyway at best slot
-          if (!dinnerPlacement) {
-            dinnerPlacement = candidateDinner;
-            finalDinnerTime = dinnerSlots[0];
           }
         }
         if (dinnerPlacement) {
@@ -908,13 +894,35 @@ export function unifiedScheduleV3Days(
       for (const missing of missingMustSees) {
         if (nonMustSeeIndices.length === 0) break;
         nonMustSeeIndices.sort((a, b) => (a.item.rating ?? 0) - (b.item.rating ?? 0));
-        const victim = nonMustSeeIndices.shift()!;
-
         const replaceDuration = missing.duration || 60;
-        const replaceItem = createActivityItem(missing, victim.item.startTime, replaceDuration, cluster.dayNumber, victim.item.orderIndex, destination);
-        console.warn(`[Unified] Day ${cluster.dayNumber}: must-see "${missing.name}" forced — evicting "${victim.item.title}"`);
-        items[victim.idx] = replaceItem;
-        globalPlacedIds.add(missing.id || missing.name);
+        let replaced = false;
+
+        while (nonMustSeeIndices.length > 0 && !replaced) {
+          const victim = nonMustSeeIndices.shift()!;
+          const slotStart = victim.item.startTime;
+          const slotEnd = addMinutes(slotStart, replaceDuration);
+          const closesAt = getActivityCloseTime(missing, dayDate);
+          const mockMissing = {
+            name: missing.name,
+            openingHours: missing.openingHours,
+            openingHoursByDay: missing.openingHoursByDay,
+          } as ScoredActivity;
+          const fitsOpening =
+            (!missing.openingHours && !missing.openingHoursByDay)
+            || (
+              isOpenAtTime(mockMissing, dayDate, slotStart, slotEnd)
+              && (!closesAt || timeToMin(slotEnd) <= timeToMin(closesAt))
+            );
+          if (!fitsOpening) {
+            continue;
+          }
+
+          const replaceItem = createActivityItem(missing, slotStart, replaceDuration, cluster.dayNumber, victim.item.orderIndex, destination);
+          console.warn(`[Unified] Day ${cluster.dayNumber}: must-see "${missing.name}" injected at valid slot — evicting "${victim.item.title}"`);
+          items[victim.idx] = replaceItem;
+          globalPlacedIds.add(missing.id || missing.name);
+          replaced = true;
+        }
       }
 
       sortAndReindexItems(items);
@@ -1034,11 +1042,11 @@ export function unifiedScheduleV3Days(
       const nextStartMin = timeToMin(next.startTime || '00:00');
 
       if (currEndMin > nextStartMin) {
-        const shiftedStart = currEndMin + 5;
+        let shiftedStart = currEndMin + 5;
         const itemDuration = next.duration
           ? next.duration
           : Math.max(0, timeToMin(next.endTime || '00:00') - nextStartMin);
-        const shiftedEnd = shiftedStart + Math.max(itemDuration, 0);
+        let shiftedEnd = shiftedStart + Math.max(itemDuration, 0);
 
         if (shiftedStart >= hardEndMin) {
           console.log(`[Unified] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (past hard end)`);
@@ -1097,8 +1105,26 @@ export function unifiedScheduleV3Days(
             openingHoursByDay: next.openingHoursByDay as Record<string, { open: string; close: string } | null> | undefined,
           } as ScoredActivity;
           if (!isOpenAtTime(mockAct, day.date, minToTime(shiftedStart), minToTime(shiftedEnd))) {
-            if (next.mustSee) {
-              console.warn(`[Unified] Overlap fix: keeping must-see "${next.title}" on Day ${day.dayNumber} despite hours shift`);
+            const durationMin = Math.max(30, (next.duration || 0) > 0 ? next.duration! : shiftedEnd - shiftedStart);
+            const openAt = getActivityOpenTime(mockAct, day.date);
+            const closeAt = getActivityCloseTime(mockAct, day.date);
+            let adjustedStart = shiftedStart;
+
+            if (openAt) {
+              adjustedStart = Math.max(adjustedStart, timeToMin(openAt));
+            }
+            if (closeAt && adjustedStart + durationMin > timeToMin(closeAt)) {
+              adjustedStart = timeToMin(closeAt) - durationMin;
+            }
+
+            const stillInvalid =
+              (openAt && adjustedStart < timeToMin(openAt))
+              || (closeAt && adjustedStart + durationMin > timeToMin(closeAt));
+
+            if (!stillInvalid) {
+              shiftedStart = adjustedStart;
+              shiftedEnd = adjustedStart + durationMin;
+              console.log(`[Unified] Overlap fix: rescheduled "${next.title}" on Day ${day.dayNumber} to ${minToTime(shiftedStart)} (hours-safe)`);
             } else {
               console.log(`[Unified] Overlap fix: dropping "${next.title}" on Day ${day.dayNumber} (outside opening hours after shift)`);
               day.items.splice(i + 1, 1);
@@ -1127,9 +1153,22 @@ export function unifiedScheduleV3Days(
 
       const actualMealType =
         startMin < 11 * 60 ? 'breakfast' :
-        startMin < 15 * 60 ? 'lunch' : 'dinner';
+        // Allow late lunch windows after dense day shifts; avoids turning a 16:30-ish
+        // lunch into dinner and then tripping P0.3 (no lunch).
+        startMin < 17 * 60 + 30 ? 'lunch' : 'dinner';
 
       if (actualMealType !== item.mealType && item.mealType !== 'breakfast') {
+        const hasOtherLunch = day.items.some(
+          (other) => other !== item && other.type === 'restaurant' && other.mealType === 'lunch'
+        );
+        const hasOtherDinner = day.items.some(
+          (other) => other !== item && other.type === 'restaurant' && other.mealType === 'dinner'
+        );
+
+        // Never relabel away the only lunch/dinner slot of the day.
+        if (item.mealType === 'lunch' && actualMealType === 'dinner' && !hasOtherLunch) continue;
+        if (item.mealType === 'dinner' && actualMealType === 'lunch' && !hasOtherDinner) continue;
+
         const oldLabel = item.mealType === 'lunch' ? 'Déjeuner' : 'Dîner';
         const newLabel = actualMealType === 'lunch' ? 'Déjeuner' : 'Dîner';
         if (item.title) {
@@ -1159,11 +1198,6 @@ export function unifiedScheduleV3Days(
             && item.type === 'activity' && isNightlifeActivity({ name: item.title })) {
           return true;
         }
-        // Exempt must-see activities — dropping them causes P0.8 violations
-        if (item.mustSee) {
-          console.warn(`[Unified] Hard stop: keeping must-see "${item.title}" on Day ${day.dayNumber} despite cutoff at ${minToTime(dayEndForHardStop)}`);
-          return true;
-        }
         console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (past ${minToTime(dayEndForHardStop)})`);
         return false;
       }
@@ -1171,11 +1205,6 @@ export function unifiedScheduleV3Days(
       if (hasDeparture && item.endTime) {
         const endMin = timeToMin(item.endTime);
         if (endMin > dayEndForHardStop) {
-          // Exempt must-see activities
-          if (item.mustSee) {
-            console.warn(`[Unified] Hard stop: keeping must-see "${item.title}" on Day ${day.dayNumber} despite end past departure window`);
-            return true;
-          }
           console.log(`[Unified] Hard stop: dropping "${item.title}" on Day ${day.dayNumber} (ends past departure window)`);
           return false;
         }
@@ -1194,6 +1223,7 @@ export function unifiedScheduleV3Days(
       dayRestaurants: dayRestaurantPools.get(day.dayNumber),
       dietary,
       usedRestaurantIds,
+      stats: rescueDiagnostics,
     });
     day.items.forEach((item, idx) => { item.orderIndex = idx; });
   }
@@ -1340,14 +1370,102 @@ export function unifiedScheduleV3Days(
       const currEndMin = timeToMin(curr.endTime || '00:00');
       const nextStartMin = timeToMin(next.startTime || '00:00');
       if (currEndMin > nextStartMin) {
-        const shiftedStart = currEndMin + 5;
+        let shiftedStart = currEndMin + 5;
         const itemDuration = next.duration
           ? next.duration
           : Math.max(0, timeToMin(next.endTime || '00:00') - nextStartMin);
+        let shiftedEnd = shiftedStart + Math.max(itemDuration, 0);
+
+        // Keep activity shifts opening-hours safe; otherwise drop the optional item.
+        if (next.type === 'activity') {
+          const mockAct = {
+            name: next.title || '',
+            openingHours: next.openingHours as { open: string; close: string } | undefined,
+            openingHoursByDay: next.openingHoursByDay as Record<string, { open: string; close: string } | null> | undefined,
+          } as ScoredActivity;
+
+          if (!isOpenAtTime(mockAct, day.date, minToTime(shiftedStart), minToTime(shiftedEnd))) {
+            const durationMin = Math.max(30, (next.duration || 0) > 0 ? next.duration! : shiftedEnd - shiftedStart);
+            const openAt = getActivityOpenTime(mockAct, day.date);
+            const closeAt = getActivityCloseTime(mockAct, day.date);
+            let adjustedStart = shiftedStart;
+
+            if (openAt) {
+              adjustedStart = Math.max(adjustedStart, timeToMin(openAt));
+            }
+            if (closeAt && adjustedStart + durationMin > timeToMin(closeAt)) {
+              adjustedStart = timeToMin(closeAt) - durationMin;
+            }
+
+            const stillInvalid =
+              (openAt && adjustedStart < timeToMin(openAt))
+              || (closeAt && adjustedStart + durationMin > timeToMin(closeAt));
+
+            if (!stillInvalid) {
+              shiftedStart = adjustedStart;
+              shiftedEnd = adjustedStart + durationMin;
+            } else {
+              console.log(`[Unified] Repair recascade: dropping "${next.title}" on Day ${day.dayNumber} (outside opening hours after shift)`);
+              day.items.splice(i + 1, 1);
+              i--;
+              continue;
+            }
+          }
+        }
+
+        // Keep restaurant shifts opening-hours safe.
+        if (next.type === 'restaurant' && next.restaurant && !next.qualityFlags?.includes('self_meal_fallback')) {
+          const newStart = minToTime(shiftedStart);
+          const newEnd = minToTime(shiftedEnd);
+          if (!isRestaurantOpenForSlot(next.restaurant, day.date, newStart, newEnd)) {
+            const mealType = next.mealType as 'breakfast' | 'lunch' | 'dinner' | undefined;
+            const mealLabel = mealType === 'breakfast' ? 'Petit-déjeuner' : mealType === 'lunch' ? 'Déjeuner' : 'Dîner';
+            const anchor = next.latitude && next.longitude
+              ? { lat: next.latitude, lng: next.longitude }
+              : null;
+            let replaced = false;
+
+            if (anchor && mealType) {
+              const replacement = findBestRestaurant(
+                dayRestaurantPools.get(day.dayNumber) || restaurants,
+                anchor,
+                mealType,
+                0.8,
+                3.5,
+                2,
+                dietary,
+                usedRestaurantIds,
+                day.date
+              );
+              if (replacement && strictMealPlacement(replacement, day.date, newStart, itemDuration || 75, 0.8)) {
+                next.title = `${mealLabel} — ${replacement.primary.name}`;
+                next.restaurant = replacement.primary;
+                next.restaurantAlternatives = replacement.alternatives;
+                next.latitude = replacement.primary.latitude;
+                next.longitude = replacement.primary.longitude;
+                next.locationName = replacement.primary.name;
+                usedRestaurantIds.add(replacement.primary.id);
+                replaced = true;
+              }
+            }
+
+            if (!replaced) {
+              next.title = `${mealLabel} — Repas libre`;
+              next.description = 'Pique-nique / courses / repas maison';
+              next.locationName = 'Repas libre';
+              next.restaurant = undefined;
+              next.restaurantAlternatives = undefined;
+              next.qualityFlags = ['self_meal_fallback'];
+              rescueDiagnostics.mealFallbackCount++;
+            }
+          }
+        }
+
         next.startTime = minToTime(shiftedStart);
-        next.endTime = minToTime(shiftedStart + Math.max(itemDuration, 0));
         if (next.type === 'activity' && next.duration) {
           next.endTime = minToTime(shiftedStart + next.duration);
+        } else {
+          next.endTime = minToTime(shiftedEnd);
         }
       }
     }
@@ -1360,6 +1478,7 @@ export function unifiedScheduleV3Days(
         dayRestaurants: dayRestaurantPools.get(day.dayNumber),
         dietary,
         usedRestaurantIds,
+        stats: rescueDiagnostics,
       });
       stampDayPlanningMeta(day, findDayRole(day));
       sortAndReindexItems(day.items);
@@ -1418,19 +1537,24 @@ export function unifiedScheduleV3Days(
             mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex
           );
           usedRestaurantIds.add(replacement.primary.id);
-        } else if (item.restaurant) {
-          // Un vrai restaurant distant > "Repas libre" — garder mais flagger
+        } else {
+          // P0-first policy: no far lunch/dinner should survive the final pass.
+          // If no compliant replacement exists, switch to self-meal fallback instead of
+          // keeping a distant restaurant that would fail contracts.
           const reason = replacement
             ? `closest restaurant "${replacement.primary.name}" still ${(replacementDist * 1000).toFixed(0)}m away`
             : 'no restaurant found nearby';
-          console.log(`[Unified P0.2] Day ${day.dayNumber}: ${reason} — keeping "${item.restaurant.name}" with distant flag`);
-          item.qualityFlags = [...(item.qualityFlags || []), 'restaurant_distant'];
-        } else {
-          // Aucun restaurant placé → vrai fallback
-          const reason = 'no restaurant available';
           console.log(`[Unified P0.2] Day ${day.dayNumber}: ${reason} — using Repas libre`);
           rescueDiagnostics.lateMealReplacementCount++;
-          day.items[i] = createSelfMealFallbackItem(mealType as 'lunch' | 'dinner', item.startTime, item.duration || 75, day.dayNumber, item.orderIndex, reAnchor);
+          rescueDiagnostics.mealFallbackCount++;
+          day.items[i] = createSelfMealFallbackItem(
+            mealType as 'lunch' | 'dinner',
+            item.startTime,
+            item.duration || 75,
+            day.dayNumber,
+            item.orderIndex,
+            reAnchor
+          );
         }
       }
     }
@@ -1526,6 +1650,7 @@ export function unifiedScheduleV3Days(
         dayRestaurants: dayRestaurantPools.get(day.dayNumber),
         dietary,
         usedRestaurantIds,
+        stats: rescueDiagnostics,
       });
 
       const filteredItems: TripItem[] = [];
@@ -1590,25 +1715,28 @@ export function unifiedScheduleV3Days(
   // Catches cases where the initial scheduler couldn't place meals (e.g., arrival days
   // where activities were injected by repair before the official activity window)
   for (const day of days) {
-    const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
-    const hasLunch = day.items.some(i => i.type === 'restaurant' && i.startTime >= '11:00' && i.startTime < '15:00');
-    const hasDinner = day.items.some(i => i.type === 'restaurant' && i.startTime >= '17:30');
+      const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
+      const hasLunch = day.items.some(i => i.type === 'restaurant' && i.startTime >= '11:00' && i.startTime < '15:00');
+      const hasDinner = day.items.some(i => i.type === 'restaurant' && i.startTime >= '17:30');
 
     // Compute the actual occupied time range from ALL items (not just activities)
     const scheduledItems = day.items.filter(i => i.startTime && i.endTime);
     if (scheduledItems.length === 0) continue;
 
-    // Effective start: for arrival days, the traveler is available well before dayStartTime
-    // (transport items haven't been injected yet at this stage, so use timeWindow)
-    const hasArrival = tw?.hasArrivalTransport ?? false;
-    const firstItemMin = timeToMin(scheduledItems[0].startTime);
-    // On arrival days, assume traveler is available by ~11:00 at latest (even long-haul)
-    // This enables lunch rescue on days where the scheduler used a conservative late start
-    const effectiveStartMin = hasArrival ? Math.min(firstItemMin, 11 * 60) : firstItemMin;
-    const lastItemEnd = scheduledItems.reduce((max, a) => Math.max(max, timeToMin(a.endTime || a.startTime)), 0);
+      const firstItemMin = timeToMin(scheduledItems[0].startTime);
+      const lastItemEnd = scheduledItems.reduce((max, a) => Math.max(max, timeToMin(a.endTime || a.startTime)), 0);
+      const mealEligibilityForRescue = computeMealEligibility({
+        dayStartTime: tw?.activityStartTime || scheduledItems[0].startTime,
+        dayEndTime: tw?.activityEndTime
+          || scheduledItems[scheduledItems.length - 1].endTime
+          || scheduledItems[scheduledItems.length - 1].startTime,
+        hasArrivalTransport: tw?.hasArrivalTransport ?? false,
+        hasDepartureTransport: tw?.hasDepartureTransport ?? false,
+      });
+      const effectiveStartMin = Math.min(firstItemMin, mealEligibilityForRescue.effectiveStartMin);
 
     // Lunch rescue: if effective day start is before 13:00 and items span past noon
-    if (!hasLunch && effectiveStartMin < 13 * 60 && lastItemEnd > 12 * 60) {
+      if (!hasLunch && mealEligibilityForRescue.expectLunch && effectiveStartMin < 13 * 60 && lastItemEnd > 12 * 60) {
       // Find a gap around 12:00-14:30 that's >= 60min
       const lunchSlot = findGapForMeal(day.items, 12 * 60, 14 * 60 + 30, 60);
       if (lunchSlot) {
@@ -1639,11 +1767,11 @@ export function unifiedScheduleV3Days(
     // Dinner rescue: if there are activities past 17:00 but no dinner
     // For departure days, use a generous cutoff: departure buffer already accounts
     // for travel to airport. A quick 60min dinner fits before the buffer.
-    const hasDeparture = tw?.hasDepartureTransport ?? false;
-    const strictDayEnd = hasDeparture ? timeToMin(tw?.activityEndTime || '22:00') : 22 * 60;
-    // Allow dinner up to 60min past the strict end — the 150min flight buffer has room
-    const dinnerDeadline = hasDeparture ? strictDayEnd + 60 : Math.min(strictDayEnd, 21 * 60 + 30);
-    if (!hasDinner && lastItemEnd >= 17 * 60 && dinnerDeadline >= 18 * 60 + 30) {
+      const hasDeparture = tw?.hasDepartureTransport ?? false;
+      const strictDayEnd = hasDeparture ? timeToMin(tw?.activityEndTime || '22:00') : 22 * 60;
+      // Allow dinner up to 60min past the strict end — the 150min flight buffer has room
+      const dinnerDeadline = hasDeparture ? strictDayEnd + 60 : Math.min(strictDayEnd, 21 * 60 + 30);
+      if (!hasDinner && mealEligibilityForRescue.expectDinner && lastItemEnd >= 17 * 60 && dinnerDeadline >= 18 * 60 + 30) {
       const dinnerSlot = findGapForMeal(day.items, 17 * 60 + 30, dinnerDeadline, 60);
       if (dinnerSlot) {
         const dinnerAnchor = findNearestActivityCoords(day.items, dinnerSlot.start);

@@ -286,8 +286,16 @@ export function buildDayTripPacks(
     return { packs: [], cityActivities: activities, destinationMismatchCount: 0 };
   }
 
-  // Cap day trips
-  const maxDayTrips = numDays <= 5 ? 1 : Math.floor((numDays - 1) / 3);
+  // Cap day trips adaptively.
+  // Regional/sparse itineraries need more than one day-trip slot on 4-5 day trips.
+  const farCandidateCount = dayTripCandidates.filter((candidate) => {
+    const dist = calculateDistance(candidate.latitude, candidate.longitude, cityCenter.lat, cityCenter.lng);
+    return dist >= 45;
+  }).length;
+  const hasRegionalSpreadSignal = farCandidateCount >= 2;
+  const maxDayTrips = hasRegionalSpreadSignal
+    ? (numDays <= 5 ? 2 : Math.max(2, Math.floor((numDays - 1) / 2)))
+    : (numDays <= 5 ? 1 : Math.floor((numDays - 1) / 3));
 
   // Group candidates by destination to avoid creating duplicate packs
   // (e.g. 5 activities near Kamakura → 1 Kamakura pack, not 5)

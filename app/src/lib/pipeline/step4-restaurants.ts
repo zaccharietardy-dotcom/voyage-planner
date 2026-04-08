@@ -391,6 +391,11 @@ const HARD_EXCLUDED_FOR_MEALS = [
   'supermarket', 'supermarché', 'supermercado', 'grocery', 'épicerie',
   'convenience store', 'minimarket', 'mini market', 'supérette',
   'hypermarket', 'hypermarché',
+  // Non-meal venues frequently misclassified by APIs
+  'cinema', 'cinéma', 'movie theater', 'movie_theater', 'imax', 'pathé', 'pathe', 'gaumont', 'ugc',
+  'theater', 'theatre', 'théâtre',
+  'museum', 'musée', 'memorial', 'mémorial',
+  'stadium', 'arena', 'aquarium', 'zoo',
 ];
 
 export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType): boolean {
@@ -446,9 +451,12 @@ export function isAppropriateForMeal(restaurant: Restaurant, mealType: MealType)
   }
 
   if (mealType === 'lunch') {
+    // Lunch must look like an actual meal venue.
+    const hasPositiveSignal = LUNCH_POSITIVE_SIGNALS.some(s => allText.includes(s));
+    if (!hasPositiveSignal) return false;
+
     for (const excluded of LUNCH_EXCLUDED_KEYWORDS) {
       if (allText.includes(excluded)) {
-        const hasPositiveSignal = LUNCH_POSITIVE_SIGNALS.some(s => allText.includes(s));
         const hasStrongProfile =
           (restaurant.priceLevel || 0) >= 2 ||
           ((restaurant.rating || 0) >= 4.3 && (restaurant.reviewCount || 0) >= 80);

@@ -165,4 +165,58 @@ describe('step11-contracts restaurant invariants', () => {
     expect(result.violations.some(v => v.includes('P0.2: Day 2'))).toBe(false);
     expect(result.violations.some(v => v.includes('outside opening hours') && v.includes('Day 2'))).toBe(false);
   });
+
+  it('does not flag P0.6 for day-trip context in spread destinations', () => {
+    const dayTripDay: TripDay = {
+      dayNumber: 2,
+      date: new Date('2026-03-17T00:00:00.000Z'),
+      isDayTrip: true,
+      dayTripDestination: 'Mont Saint-Michel',
+      items: [
+        {
+          id: 'daytrip-bus',
+          dayNumber: 2,
+          startTime: '09:00',
+          endTime: '10:10',
+          type: 'transport',
+          title: 'Bus → Mont Saint-Michel',
+          description: 'Day trip outbound',
+          locationName: 'Bretagne',
+          latitude: 48.5294,
+          longitude: -1.7804,
+          orderIndex: 0,
+          transportDirection: 'daytrip_outbound',
+          transportRole: 'daytrip_outbound',
+        },
+        {
+          id: 'daytrip-act',
+          dayNumber: 2,
+          startTime: '10:30',
+          endTime: '12:00',
+          type: 'activity',
+          title: 'Mont Saint-Michel',
+          description: 'Must-see',
+          locationName: 'Mont Saint-Michel',
+          latitude: 48.6360,
+          longitude: -1.5115,
+          orderIndex: 1,
+          duration: 90,
+          planningMeta: { protectedReason: 'day_trip_anchor' },
+        },
+      ],
+    };
+
+    const result = validateContracts(
+      [dayTripDay],
+      '2026-03-16',
+      new Set<string>(),
+      // Rennes-ish center; day-trip item can be >100km and should be accepted for spread/day-trip
+      { lat: 48.1173, lng: -1.6778 },
+      undefined,
+      undefined,
+      'spread'
+    );
+
+    expect(result.violations.some(v => v.includes('P0.6'))).toBe(false);
+  });
 });

@@ -15,6 +15,10 @@ import { generateFlightLink } from './linkGenerator';
 function getGeminiApiKey() { return process.env.GOOGLE_AI_API_KEY; }
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
+function buildGeminiUrl(): string {
+  return `${GEMINI_API_URL}?key=${getGeminiApiKey()}`;
+}
+
 /**
  * Fetch Gemini with automatic retry on 429 (quota exceeded).
  * Retries up to 3 times with exponential backoff (2s, 4s, 8s).
@@ -32,7 +36,7 @@ export async function fetchGeminiWithRetry(
     return new Response(JSON.stringify({ error: { message: 'Gemini quota circuit breaker', status: 'RESOURCE_EXHAUSTED' } }), { status: 429 });
   }
 
-  const url = `${GEMINI_API_URL}?key=${getGeminiApiKey()}`;
+  const url = buildGeminiUrl();
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const response = await fetch(url, {
       method: 'POST',
@@ -69,6 +73,86 @@ export async function fetchGeminiWithRetry(
     return response;
   }
   return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+}
+
+/**
+ * Fast planner call path for closed-world scheduling.
+ * - Strict per-attempt timeout (AbortController)
+ * - Short retry window (default: 1 retry, ~450ms backoff)
+ * - Keeps the global quota circuit-breaker behavior
+ */
+export async function fetchGeminiPlannerFast(
+  body: Record<string, unknown>,
+  options: {
+    timeoutMs?: number;
+    maxRetries?: number;
+    retryDelayMs?: number;
+  } = {}
+): Promise<Response> {
+  if (Date.now() < quotaExhaustedUntil) {
+    return new Response(JSON.stringify({ error: { message: 'Gemini quota circuit breaker', status: 'RESOURCE_EXHAUSTED' } }), { status: 429 });
+  }
+
+  const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
+  const maxRetries = Math.max(0, options.maxRetries ?? 1);
+  const retryDelayMs = Math.max(200, options.retryDelayMs ?? 450);
+  const url = buildGeminiUrl();
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      // Retry only for short-lived pressure errors in fast planner mode.
+      if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        continue;
+      }
+
+      if (response.status === 429) {
+        quotaExhaustedUntil = Date.now() + 60_000;
+      }
+
+      if (response.status === 200) {
+        const cloned = response.clone();
+        try {
+          const json = await cloned.json();
+          if (json.error?.status === 'RESOURCE_EXHAUSTED') {
+            quotaExhaustedUntil = Date.now() + 60_000;
+          }
+        } catch {
+          // ignore parse errors and return the response as-is
+        }
+      }
+
+      return response;
+    } catch (error) {
+      const isAbort = error instanceof Error && error.name === 'AbortError';
+      if (isAbort) {
+        if (attempt < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+          continue;
+        }
+        return new Response(JSON.stringify({ error: { message: 'planner timeout', status: 'DEADLINE_EXCEEDED' } }), { status: 408 });
+      }
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        continue;
+      }
+      return new Response(JSON.stringify({ error: { message: 'planner call failed', status: 'UNAVAILABLE' } }), { status: 503 });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  return new Response(JSON.stringify({ error: { message: 'planner timeout', status: 'DEADLINE_EXCEEDED' } }), { status: 408 });
 }
 
 /**

@@ -431,9 +431,11 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
     }
   }
 
-  // ── Step 0 Intelligence: inject LLM-curated must-sees ──────────────────
-  // When destination intel is available (cache or LLM), merge its must-see attractions
-  // into the pool. These are expert-curated and should always be present.
+  // ── Step 0 Intelligence: inject LLM-curated regional seeds ──────────────
+  // When destination intel is available (cache or LLM), merge its attractions
+  // into the pool as high-quality seeds.
+  // IMPORTANT: these are NOT strict user must-sees, otherwise regional trips
+  // over-constrain scheduling and create impossible late-night forced inserts.
   if (destinationIntel?.mustSeeAttractions?.length) {
     const normalizeFuzzy = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
     // Extract words from original name (before full normalization) — handles reordered names
@@ -467,7 +469,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
           name: intel.name,
           type: intel.type as any,
           description: intel.whyImportant,
-          mustSee: true,
+          mustSee: false,
           latitude: 0,
           longitude: 0,
           duration: intel.estimatedDuration,
@@ -482,7 +484,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
       }
     }
     if (intelInjected > 0) {
-      console.log(`[Pipeline V2] Step 0 Intel: injected ${intelInjected} must-sees for "${destination}"`);
+      console.log(`[Pipeline V2] Step 0 Intel: injected ${intelInjected} regional seeds for "${destination}"`);
     }
   }
 

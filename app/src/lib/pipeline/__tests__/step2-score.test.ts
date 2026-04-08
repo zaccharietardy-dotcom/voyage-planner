@@ -206,4 +206,31 @@ describe('step2-score interest curation', () => {
     expect(selectedInLausanne.some((activity) => activity.id === 'agency-1')).toBe(false);
     expect(selectedInLausanne.some((activity) => activity.id === 'valid-1')).toBe(true);
   });
+
+  it('treats intel-* mustsee source as non-strict seeds for distance filtering', () => {
+    const activities: Attraction[] = [
+      attraction({ id: 'near-1', name: 'Louvre', rating: 4.8, reviewCount: 120000, latitude: 48.8606, longitude: 2.3376 }),
+      attraction({ id: 'near-2', name: 'Musée d\'Orsay', rating: 4.7, reviewCount: 89000, latitude: 48.8600, longitude: 2.3266 }),
+    ];
+
+    const data = createFetchedData(activities);
+    data.mustSeeAttractions = [
+      attraction({
+        id: 'intel-far-seed',
+        name: 'Very Far Seed',
+        mustSee: false,
+        latitude: 45.7640, // ~390km from Paris
+        longitude: 4.8357,
+        rating: 4.4,
+        reviewCount: 2000,
+      }),
+    ];
+
+    const selected = scoreAndSelectActivities(data, {
+      ...createPreferences(),
+      mustSee: '',
+    });
+
+    expect(selected.some((activity) => activity.id === 'intel-far-seed')).toBe(false);
+  });
 });

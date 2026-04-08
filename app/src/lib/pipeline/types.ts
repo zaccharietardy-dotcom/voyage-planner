@@ -410,6 +410,8 @@ export interface PlannerDiagnostics {
   protectedBreakCount?: number;
   /** Meals replaced only at final integrity / late safety */
   lateMealReplacementCount?: number;
+  /** Meals replaced due to semantic mismatch (non-food venue, supermarket, etc.) */
+  mealSemanticReplacementCount?: number;
   /** Cluster day numbers without matching time windows */
   dayNumberMismatchCount?: number;
   /** Day trip items evicted or moved out of their original day */
@@ -432,6 +434,8 @@ export interface PlannerDiagnostics {
   missingProtectedMustSeeCount?: number;
   /** Day-trip items that leaked out of a day-trip day, or city items that leaked in */
   dayTripAtomicityBreakCount?: number;
+  /** Number of activity swaps performed by final 60/40 ratio enforcer */
+  ratioMixSwapCount?: number;
 }
 
 // ============================================

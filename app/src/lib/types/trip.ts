@@ -627,6 +627,7 @@ export interface Trip {
     rescueStage?: number;
     protectedBreakCount?: number;
     lateMealReplacementCount?: number;
+    mealSemanticReplacementCount?: number;
     dayNumberMismatchCount?: number;
     dayTripEvictionCount?: number;
     finalIntegrityFailures?: number;
@@ -638,6 +639,7 @@ export interface Trip {
     routeRebuildCount?: number;
     missingProtectedMustSeeCount?: number;
     dayTripAtomicityBreakCount?: number;
+    ratioMixSwapCount?: number;
     arrivalFatigueViolationCount?: number;
     temporalImpossibleItemCount?: number;
     sparseFullCityDayCount?: number;
@@ -655,6 +657,7 @@ export interface Trip {
     validatedCount: number;
     replacedCount: number;
     rejectedCount: number;
+    groundingRate?: number;
     ratioIconicLocal: {
       iconic: number;
       localGem: number;
@@ -662,6 +665,22 @@ export interface Trip {
   };
   generationDiagnostics?: {
     validationLatencyMs: number;
+    plannerMode?: 'deterministic' | 'llm_closed_world';
+    llmSchedulerUsed?: boolean;
+    fallbackReason?: string;
+    groundingRate?: number;
+    unknownIdRate?: number;
+    parseAttempts?: number;
+    plannerBudgetMs?: number;
+    plannerTimeoutRate?: number;
+    closedWorldActivationRate?: number;
+    mealSemanticReplacements?: number;
+    freeTimeMinutesByDay?: Record<string, number>;
+    replacementCounts?: {
+      lateMealReplacementCount: number;
+      mealFallbackCount: number;
+      routeRebuildCount: number;
+    };
     providerCallBreakdown: Record<string, {
       scheduled: number;
       executed: number;

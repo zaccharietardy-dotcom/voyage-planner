@@ -81,6 +81,28 @@ const CUISINE_DIETARY_AFFINITY: Record<string, string[]> = {
   afghan: ['halal'],
 };
 
+const NON_MEAL_VENUE_KEYWORDS = [
+  'cinema', 'movie', 'imax', 'pathe', 'pathé', 'gaumont', 'ugc',
+  'theatre', 'theater',
+  'museum', 'musee', 'musée', 'memorial', 'mémorial', 'monument',
+  'stadium', 'arena', 'aquarium', 'zoo',
+];
+
+function isLikelyMealRestaurant(restaurant: Restaurant): boolean {
+  const type = String((restaurant as any).type || '').toLowerCase();
+  const cuisine = Array.isArray(restaurant.cuisineTypes)
+    ? restaurant.cuisineTypes.join(' ').toLowerCase()
+    : '';
+  const text = `${restaurant.name || ''} ${type} ${cuisine}`.toLowerCase();
+  if (/(tourist_attraction|movie_theater|museum|art_gallery|stadium|event_venue|monument)/.test(type)) {
+    return false;
+  }
+  for (const keyword of NON_MEAL_VENUE_KEYWORDS) {
+    if (text.includes(keyword)) return false;
+  }
+  return true;
+}
+
 // ============================================
 // Main Function
 // ============================================
@@ -339,6 +361,7 @@ function filterAndScoreCandidates(
     .filter(r => {
       if (!pass.allowReuse && usedIds.has(r.id)) return false;
       if (!r.latitude || !r.longitude) return false;
+      if (!isLikelyMealRestaurant(r)) return false;
       const dist = calculateDistance(anchor.lat, anchor.lng, r.latitude, r.longitude);
       if (dist > pass.maxDist) return false;
       if (pass.checkMealType && !isAppropriateForMeal(r, mealType)) return false;

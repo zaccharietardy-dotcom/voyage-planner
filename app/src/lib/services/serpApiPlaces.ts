@@ -177,6 +177,49 @@ function buildRestaurantsSearchCacheKey(
   ].join('|');
 }
 
+const NON_MEAL_PLACE_TYPES = new Set([
+  'movie_theater', 'cinema', 'theater', 'theatre', 'performing_arts_theater',
+  'museum', 'art_gallery', 'memorial', 'monument',
+  'stadium', 'arena', 'sports_complex',
+  'gym', 'fitness_center',
+  'aquarium', 'zoo', 'amusement_park',
+  'shopping_mall',
+]);
+
+const NON_MEAL_PLACE_NAME_KEYWORDS = [
+  'cinema', 'movie', 'imax', 'pathe', 'pathé',
+  'gaumont', 'ugc',
+  'theatre', 'theater', 'théâtre', 'spectacle',
+  'museum', 'musee', 'memorial',
+  'stadium', 'arena', 'aquarium', 'zoo',
+];
+
+const MEAL_PLACE_TYPE_SIGNALS = [
+  'restaurant', 'food', 'meal', 'cafe', 'coffee', 'bakery',
+  'bistro', 'brasserie', 'trattoria', 'osteria', 'pizzeria', 'grill',
+  'bar', 'pub', 'taverna',
+];
+
+function isLikelyMealVenue(place: SerpApiLocalResult): boolean {
+  const title = (place.title || '').toLowerCase();
+  const allTypes = [place.type, ...(place.types || []), ...(place.type_ids || [])]
+    .filter(Boolean)
+    .map((type) => String(type).toLowerCase());
+
+  for (const type of allTypes) {
+    if (NON_MEAL_PLACE_TYPES.has(type)) return false;
+  }
+  for (const keyword of NON_MEAL_PLACE_NAME_KEYWORDS) {
+    if (title.includes(keyword)) return false;
+  }
+
+  const hasMealTypeSignal = allTypes.some((type) =>
+    MEAL_PLACE_TYPE_SIGNALS.some((signal) => type.includes(signal))
+  );
+  const hasMealNameSignal = MEAL_PLACE_TYPE_SIGNALS.some((signal) => title.includes(signal));
+  return hasMealTypeSignal || hasMealNameSignal;
+}
+
 /**
  * Recherche des restaurants via SerpAPI Google Local
  */
@@ -302,7 +345,9 @@ export async function searchRestaurantsWithSerpApi(
       });
 
       // Convertir en format Restaurant
-      const restaurants: Restaurant[] = openResults.map((r, index) => {
+      const restaurants: Restaurant[] = openResults
+        .filter((place) => isLikelyMealVenue(place))
+        .map((r, index) => {
         // Générer une URL Google Maps fiable en utilisant le NOM + ADRESSE COMPLÈTE
         // Cela permet à Google Maps de trouver le lieu exact
         const searchQuery = r.address
@@ -1139,6 +1184,7 @@ export async function searchRestaurantsNearby(
         if (!place.gps_coordinates?.latitude || !place.gps_coordinates?.longitude) {
           continue;
         }
+        if (!isLikelyMealVenue(place)) continue;
 
         // Calculer la distance en mètres
         const distanceKm = calculateDistance(

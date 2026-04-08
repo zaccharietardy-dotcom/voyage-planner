@@ -26,6 +26,7 @@ import { isPlausibleCoordinate } from './utils/coordinate-validator';
 import { calculateDistance } from '../services/geocoding';
 import { getMinDuration, getMaxDuration } from './utils/constants';
 import { normalizeForMatching } from './utils/dedup';
+import { computeMealEligibility } from './utils/meal-eligibility';
 
 // ============================================
 // Types
@@ -124,6 +125,11 @@ export function validateContracts(
   const plannedActivityNamesNorm: string[] = [];
   let totalRestaurantDist = 0;
   let restaurantDistCount = 0;
+  const crossCountryMaxKm = densityCategory === 'spread'
+    ? 220
+    : densityCategory === 'medium'
+      ? 140
+      : 100;
 
   for (const day of days) {
     // Skip transit-only days entirely — no meals expected
@@ -141,15 +147,24 @@ export function validateContracts(
           metrics.invalidCoordinates++;
         }
 
-        // P0.6: Cross-country check (>100km from destination)
+        // P0.6: Cross-country check.
+        // Day-trip contexts are allowed to leave the destination envelope.
+        const isDayTripContext = day.isDayTrip
+          || item.transportDirection === 'daytrip_outbound'
+          || item.transportDirection === 'daytrip_return'
+          || item.transportRole === 'daytrip_outbound'
+          || item.transportRole === 'daytrip_return'
+          || item.planningMeta?.protectedReason === 'day_trip'
+          || item.planningMeta?.protectedReason === 'day_trip_anchor';
         if (
           item.latitude !== 0
           && item.longitude !== 0
           && item.type !== 'flight'
           && !(item.type === 'transport' && item.transportRole === 'longhaul')
+          && !isDayTripContext
         ) {
           const dist = calculateDistance(item.latitude, item.longitude, destCoords.lat, destCoords.lng);
-          if (dist > 100) {
+          if (dist > crossCountryMaxKm) {
             violations.push(`P0.6: "${item.title}" is ${dist.toFixed(0)}km from destination (cross-country?)`);
             metrics.invalidCoordinates++;
           }
@@ -256,34 +271,26 @@ export function validateContracts(
       }
     }
 
-    // P0.3: Missing meals — use time-window-derived eligibility (not blanket day exemptions)
+    // P0.3: Missing meals — shared eligibility logic with scheduler
     const tw = timeWindows?.find(w => w.dayNumber === day.dayNumber);
-    const twStartMin = tw ? toMinutes(tw.activityStartTime) : 0;
-    const twEndMin = tw ? toMinutes(tw.activityEndTime) : 22 * 60;
-    const hasUsableWindow = twEndMin > twStartMin;
-    // Check actual arrival/departure transport (more reliable than time window flags,
-    // which are set before transport injection in step 11b)
     const isFirstDay = day.dayNumber === days[0]?.dayNumber;
     const isLastDay = day.dayNumber === days[days.length - 1]?.dayNumber;
     const arrivalItem = day.items.find(i =>
-      (isFirstDay && i.type === 'flight') || (i.type === 'transport' && (i as any).transportDirection === 'outbound')
+      (isFirstDay && i.type === 'flight') || (i.type === 'transport' && i.transportDirection === 'outbound')
     );
     const departureItem = day.items.find(i =>
-      (isLastDay && i.type === 'flight') || (i.type === 'transport' && (i as any).transportDirection === 'return')
+      (isLastDay && i.type === 'flight') || (i.type === 'transport' && i.transportDirection === 'return')
     );
-    // For arrival days, effective start = arrival end time + buffer (customs/transport)
-    const effectiveStartMin = arrivalItem?.endTime
-      ? toMinutes(arrivalItem.endTime) + 60  // 1h buffer after arrival
-      : twStartMin;
-    const expectLunch = hasUsableWindow && effectiveStartMin < 13 * 60 && twEndMin > 12 * 60;
-    const hasDeparture = !!(tw?.hasDepartureTransport || departureItem);
-    const effectiveEndMin = departureItem
-      ? toMinutes(departureItem.startTime || '23:59')
-      : twEndMin;
-    // Departure days: a quick dinner is feasible if departure is >= 18:30
-    // (the departure buffer already accounts for airport travel)
-    const dinnerThreshold = hasDeparture ? 18 * 60 + 30 : 18 * 60;
-    const expectDinner = hasUsableWindow && effectiveEndMin >= dinnerThreshold;
+    const eligibility = computeMealEligibility({
+      dayStartTime: tw?.activityStartTime || '00:00',
+      dayEndTime: tw?.activityEndTime || '22:00',
+      hasArrivalTransport: Boolean(tw?.hasArrivalTransport || arrivalItem),
+      hasDepartureTransport: Boolean(tw?.hasDepartureTransport || departureItem),
+      arrivalEndTime: arrivalItem?.endTime,
+      departureStartTime: departureItem?.startTime,
+    });
+    const expectLunch = eligibility.expectLunch;
+    const expectDinner = eligibility.expectDinner;
 
     if (!hasLunch && expectLunch) {
       violations.push(`P0.3: Day ${day.dayNumber} has no lunch`);

@@ -18,6 +18,7 @@
  */
 
 import type { Trip, TripPreferences, TransportOptionSummary, Restaurant, Accommodation } from '../types';
+import type { TripDay, TripItem } from '../types/trip';
 import type { PipelineQuestion } from '../types/pipelineQuestions';
 import type {
   ActivityCluster,
@@ -52,9 +53,12 @@ import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from '
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 import { anchorTransport } from './step4-anchor-transport';
 import { timeToMin, minToTime } from './utils/time';
+import { getDensityThresholds } from './utils/density-config';
 import { computeTravelTimes } from './step7b-travel-times';
 import { enrichRestaurantPool } from './step8-place-restaurants';
 import { unifiedScheduleV3Days } from './step8910-unified-schedule';
+import { createSelfMealFallbackItem } from './step9-schedule';
+import { ensureMustSees, type RepairAction } from './step10-repair';
 import { validateContracts } from './step11-contracts';
 import { geoReorderScheduledDay } from './utils/geo-reorder';
 import { decorateTrip } from './step12-decorate';
@@ -71,10 +75,12 @@ import { buildDayTripPacks } from './day-trip-pack';
 import { optimizeClusterRouting } from './intra-day-router';
 import { stripPlanningMetaFromDays } from './planning-meta';
 import { rebalanceClustersWithLLM, type LLMRebalanceResult } from './step3b-llm-rebalance';
+import { attemptClosedWorldDayPlanning } from './step-llm-day-planner';
 import { detectQuestions, applyQuestionAnswers, detectPreFetchQuestions, applyEffects } from './questionDetectors';
 import type { DestinationAnalysis } from './step0-destination-intel';
 import { buildClusteredMapSnapshot, buildFetchedMapSnapshot } from './snapshots';
 import { getApiCostSummary, resetApiCostTracker, setRunBudgetProfile } from '../services/apiCostGuard';
+import { isOpenAtTime } from './utils/opening-hours';
 import {
   mergeValidationParallelismStats,
   mergeValidationProviderBreakdowns,
@@ -123,6 +129,303 @@ function normalizePlannerText(value?: string): string {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
+}
+
+type ActivityMixKind = 'iconic' | 'local_gem';
+
+function classifyActivityMixKind(activity: Pick<ScoredActivity, 'mustSee' | 'source' | 'protectedReason' | 'reviewCount' | 'rating'>): ActivityMixKind {
+  if (
+    activity.mustSee
+    || activity.source === 'mustsee'
+    || activity.protectedReason === 'must_see'
+    || activity.protectedReason === 'user_forced'
+  ) {
+    return 'iconic';
+  }
+  const reviewCount = activity.reviewCount || 0;
+  const rating = activity.rating || 0;
+  if (reviewCount >= 600 && rating >= 4.4) return 'iconic';
+  return 'local_gem';
+}
+
+function computeFinalActivityRatio(
+  days: TripDay[],
+  allActivities: ScoredActivity[],
+): { iconic: number; localGem: number; total: number } {
+  const byId = new Map(allActivities.map((activity) => [activity.id, activity]));
+  const byName = new Map(allActivities.map((activity) => [normalizePlannerText(activity.name), activity]));
+  let iconic = 0;
+  let localGem = 0;
+
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type !== 'activity') continue;
+      const match = byId.get(item.id) || byName.get(normalizePlannerText(item.title || item.locationName || ''));
+      const kind = match
+        ? classifyActivityMixKind(match)
+        : (item.mustSee ? 'iconic' : 'local_gem');
+      if (kind === 'iconic') iconic++;
+      else localGem++;
+    }
+  }
+
+  const total = iconic + localGem;
+  if (total === 0) {
+    return { iconic: 0.6, localGem: 0.4, total: 0 };
+  }
+  return {
+    iconic: Number((iconic / total).toFixed(3)),
+    localGem: Number((localGem / total).toFixed(3)),
+    total,
+  };
+}
+
+function enforceFinalActivityRatio(
+  days: TripDay[],
+  allActivities: ScoredActivity[],
+  densityCategory: 'dense' | 'medium' | 'spread',
+): { swaps: number; ratio: { iconic: number; localGem: number } } {
+  const minIconic = 0.55;
+  const maxIconic = 0.65;
+  const maxSwapDistanceKm = densityCategory === 'spread' ? 25 : densityCategory === 'medium' ? 14 : 8;
+
+  const byId = new Map(allActivities.map((activity) => [activity.id, activity]));
+  const byName = new Map(allActivities.map((activity) => [normalizePlannerText(activity.name), activity]));
+
+  const plannedIds = new Set<string>();
+  const plannedNames = new Set<string>();
+  const slots: Array<{
+    day: TripDay;
+    item: TripItem;
+    kind: ActivityMixKind;
+    source: ScoredActivity | null;
+    replaceable: boolean;
+  }> = [];
+
+  for (const day of days) {
+    for (const item of day.items) {
+      if (item.type !== 'activity') continue;
+      const source = byId.get(item.id) || byName.get(normalizePlannerText(item.title || item.locationName || '')) || null;
+      const kind = source
+        ? classifyActivityMixKind(source)
+        : (item.mustSee ? 'iconic' : 'local_gem');
+      if (item.id) plannedIds.add(item.id);
+      plannedNames.add(normalizePlannerText(item.title || item.locationName || ''));
+      slots.push({
+        day,
+        item,
+        kind,
+        source,
+        replaceable: !item.mustSee,
+      });
+    }
+  }
+
+  const current = computeFinalActivityRatio(days, allActivities);
+  if (current.total < 4 || (current.iconic >= minIconic && current.iconic <= maxIconic)) {
+    return { swaps: 0, ratio: { iconic: current.iconic, localGem: current.localGem } };
+  }
+
+  const neededKind: ActivityMixKind = current.iconic < minIconic ? 'iconic' : 'local_gem';
+  const replaceKind: ActivityMixKind = neededKind === 'iconic' ? 'local_gem' : 'iconic';
+  const maxSwaps = Math.max(1, Math.ceil(Math.abs(current.iconic - 0.6) * current.total));
+
+  const pool = allActivities
+    .filter((activity) => !plannedIds.has(activity.id) && !plannedNames.has(normalizePlannerText(activity.name)))
+    .filter((activity) => classifyActivityMixKind(activity) === neededKind);
+
+  const replaceSlots = slots.filter((slot) => slot.replaceable && slot.kind === replaceKind);
+  let swaps = 0;
+
+  for (const slot of replaceSlots) {
+    if (swaps >= maxSwaps) break;
+    const anchorLat = slot.item.latitude;
+    const anchorLng = slot.item.longitude;
+    const dayDate = slot.day.date;
+
+    const candidateIndex = pool.findIndex((candidate) => {
+      const distanceOk = Number.isFinite(anchorLat) && Number.isFinite(anchorLng)
+        ? calculateDistance(anchorLat, anchorLng, candidate.latitude, candidate.longitude) <= maxSwapDistanceKm
+        : true;
+      if (!distanceOk) return false;
+      if (!candidate.openingHours && !candidate.openingHoursByDay) return true;
+      return isOpenAtTime(candidate, dayDate, slot.item.startTime, slot.item.endTime);
+    });
+
+    if (candidateIndex < 0) continue;
+    const candidate = pool.splice(candidateIndex, 1)[0];
+
+    slot.item.id = candidate.id || slot.item.id;
+    slot.item.title = candidate.name;
+    slot.item.locationName = candidate.name;
+    slot.item.description = candidate.description || slot.item.description;
+    slot.item.latitude = candidate.latitude;
+    slot.item.longitude = candidate.longitude;
+    slot.item.rating = candidate.rating;
+    slot.item.reviewCount = candidate.reviewCount;
+    slot.item.mustSee = candidate.mustSee;
+    slot.item.openingHours = candidate.openingHours;
+    slot.item.openingHoursByDay = candidate.openingHoursByDay;
+    slot.item.geoSource = candidate.geoSource;
+    slot.item.geoConfidence = candidate.geoConfidence;
+    slot.item.qualityFlags = [...new Set([...(slot.item.qualityFlags || []), 'ratio_mix_swap'])];
+    swaps++;
+  }
+
+  const ratio = computeFinalActivityRatio(days, allActivities);
+  return {
+    swaps,
+    ratio: {
+      iconic: ratio.iconic,
+      localGem: ratio.localGem,
+    },
+  };
+}
+
+function injectFirstLastMileTransfers(day1: TripDay, lastDay: TripDay): void {
+  const outboundLonghaulIndex = day1.items.findIndex((item) =>
+    item.type === 'flight'
+    || (item.type === 'transport' && item.transportRole === 'longhaul' && item.transportDirection === 'outbound')
+  );
+  if (outboundLonghaulIndex >= 0) {
+    const longhaul = day1.items[outboundLonghaulIndex];
+    const afterLonghaul = day1.items.slice(outboundLonghaulIndex + 1).find((item) =>
+      item.type !== 'transport' && item.type !== 'flight'
+    );
+    if (longhaul.endTime && afterLonghaul?.startTime) {
+      const startMin = timeToMin(longhaul.endTime);
+      const endMin = timeToMin(afterLonghaul.startTime);
+      const hasArrivalTransfer = day1.items.some((item) => item.type === 'transport' && item.transportRole === 'hotel_return');
+      if (!hasArrivalTransfer && endMin - startMin >= 35) {
+        const transferStart = minToTime(startMin + 10);
+        const transferDuration = Math.max(20, Math.min(45, endMin - startMin - 15));
+        const transferEnd = minToTime(timeToMin(transferStart) + transferDuration);
+        const transferItem: TripItem = {
+          id: `arrival-transfer-${day1.dayNumber}`,
+          dayNumber: day1.dayNumber,
+          startTime: transferStart,
+          endTime: transferEnd,
+          type: 'transport',
+          title: 'Transfert arrivée',
+          description: `Aéroport/Gare → ${afterLonghaul.locationName || 'hébergement'}`,
+          locationName: afterLonghaul.locationName || 'Transfert local',
+          latitude: afterLonghaul.latitude || longhaul.latitude || 0,
+          longitude: afterLonghaul.longitude || longhaul.longitude || 0,
+          orderIndex: outboundLonghaulIndex + 1,
+          duration: transferDuration,
+          transportMode: 'car',
+          transportRole: 'hotel_return',
+          transportDirection: 'outbound',
+          transportTimeSource: 'estimated',
+          estimatedCost: 0,
+          qualityFlags: ['first_last_mile_visible'],
+        };
+        day1.items.splice(outboundLonghaulIndex + 1, 0, transferItem);
+      }
+    }
+  }
+
+  const returnLonghaulIndex = lastDay.items.findIndex((item) =>
+    item.type === 'flight'
+    || (item.type === 'transport' && item.transportRole === 'longhaul' && item.transportDirection === 'return')
+  );
+  if (returnLonghaulIndex >= 0) {
+    const longhaul = lastDay.items[returnLonghaulIndex];
+    const beforeLonghaul = [...lastDay.items.slice(0, returnLonghaulIndex)].reverse().find((item) =>
+      item.type !== 'transport' && item.type !== 'flight'
+    );
+    if (longhaul.startTime && beforeLonghaul?.endTime) {
+      const startMin = timeToMin(beforeLonghaul.endTime);
+      const endMin = timeToMin(longhaul.startTime);
+      const hasDepartureTransfer = lastDay.items.some((item) => item.type === 'transport' && item.transportRole === 'hotel_depart');
+      if (!hasDepartureTransfer && endMin - startMin >= 35) {
+        const transferDuration = Math.max(20, Math.min(45, endMin - startMin - 15));
+        const transferEnd = minToTime(endMin - 10);
+        const transferStart = minToTime(Math.max(startMin + 5, timeToMin(transferEnd) - transferDuration));
+        const transferItem: TripItem = {
+          id: `departure-transfer-${lastDay.dayNumber}`,
+          dayNumber: lastDay.dayNumber,
+          startTime: transferStart,
+          endTime: transferEnd,
+          type: 'transport',
+          title: 'Transfert départ',
+          description: `${beforeLonghaul.locationName || 'hébergement'} → Aéroport/Gare`,
+          locationName: beforeLonghaul.locationName || 'Transfert local',
+          latitude: beforeLonghaul.latitude || longhaul.latitude || 0,
+          longitude: beforeLonghaul.longitude || longhaul.longitude || 0,
+          orderIndex: returnLonghaulIndex,
+          duration: Math.max(20, timeToMin(transferEnd) - timeToMin(transferStart)),
+          transportMode: 'car',
+          transportRole: 'hotel_depart',
+          transportDirection: 'return',
+          transportTimeSource: 'estimated',
+          estimatedCost: 0,
+          qualityFlags: ['first_last_mile_visible'],
+        };
+        lastDay.items.splice(returnLonghaulIndex, 0, transferItem);
+      }
+    }
+  }
+
+  day1.items.forEach((item, index) => { item.orderIndex = index; });
+  lastDay.items.forEach((item, index) => { item.orderIndex = index; });
+}
+
+function enforceFinalRestaurantProximity(
+  days: TripDay[],
+  densityCategory: 'dense' | 'medium' | 'spread'
+): number {
+  const maxDistKm = getDensityThresholds(densityCategory).p02ContractDist;
+  const anchorTypes = new Set(['activity', 'checkin', 'checkout', 'hotel']);
+  let convertedToFallback = 0;
+
+  for (const day of days) {
+    for (let i = 0; i < day.items.length; i++) {
+      const item = day.items[i];
+      if (item.type !== 'restaurant') continue;
+      if (item.qualityFlags?.includes('self_meal_fallback')) continue;
+      if (item.mealType !== 'lunch' && item.mealType !== 'dinner') continue;
+      if (!item.latitude || !item.longitude) continue;
+
+      const anchors = day.items.filter(
+        (candidate) => anchorTypes.has(candidate.type) && candidate.latitude && candidate.longitude
+      );
+      if (anchors.length === 0) continue;
+
+      let nearestDist = Infinity;
+      let nearestAnchor: TripItem | null = null;
+      for (const anchor of anchors) {
+        const dist = calculateDistance(
+          item.latitude,
+          item.longitude,
+          anchor.latitude!,
+          anchor.longitude!
+        );
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestAnchor = anchor;
+        }
+      }
+
+      if (nearestDist <= maxDistKm) continue;
+
+      const anchorCoords = nearestAnchor
+        ? { lat: nearestAnchor.latitude!, lng: nearestAnchor.longitude! }
+        : null;
+      day.items[i] = createSelfMealFallbackItem(
+        item.mealType,
+        item.startTime || '12:30',
+        item.duration || 75,
+        day.dayNumber,
+        item.orderIndex,
+        anchorCoords
+      );
+      convertedToFallback++;
+    }
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  return convertedToFallback;
 }
 
 function mergeMustSeeSeedsIntoPreferences(
@@ -327,8 +630,16 @@ export async function generateTripV2(
   let regionAnalysis: DestinationAnalysis | null = null;
   let regionalBlueprint: RegionalBlueprint | null = null;
 
-  // Step 0a: Region resolver — classify destination, resolve regions to cities
-  if (!preferences.cityPlan && preferences.travelStyle !== 'single_base') {
+  // Step 0a: Region resolver — classify destination, resolve regions to cities.
+  // Also run when cityPlan is a trivial mirror of destination (e.g. [{ city: "Bretagne", days: 5 }]).
+  const hasSingleCityPlan = Array.isArray(preferences.cityPlan) && preferences.cityPlan.length === 1;
+  const cityPlanMatchesDestination = hasSingleCityPlan
+    && normalizePlannerText(preferences.cityPlan?.[0]?.city) === normalizePlannerText(preferences.destination);
+  const shouldRunRegionResolver =
+    (!preferences.cityPlan || cityPlanMatchesDestination)
+    && preferences.travelStyle !== 'single_base';
+
+  if (shouldRunRegionResolver) {
     try {
       regionAnalysis = await resolveDestination(preferences);
       if (regionAnalysis?.inputType && regionAnalysis.inputType !== 'city') {
@@ -497,7 +808,16 @@ export async function generateTripV3(
 
   // Sparse pool activation: use regional architect as a blueprint seeding layer.
   const sparseThreshold = Math.max(12, preferences.durationDays * 3);
-  if (selectedActivities.length < sparseThreshold) {
+  const scheduleReadyCount = selectedActivities.filter((activity) =>
+    (activity.duration || 0) >= 60
+    && (activity.rating || 0) >= 3.8
+    && (activity.score || 0) >= 12
+  ).length;
+  const qualitySparseThreshold = Math.max(8, preferences.durationDays * 2);
+  const shouldTriggerSparseRescue =
+    selectedActivities.length < sparseThreshold
+    || scheduleReadyCount < qualitySparseThreshold;
+  if (shouldTriggerSparseRescue) {
     try {
       const sparseBlueprint = options?.regionalBlueprint || await planRegionalBlueprint(preferences, { forceForSparse: true });
       activeBlueprint = sparseBlueprint;
@@ -573,7 +893,7 @@ export async function generateTripV3(
 
       if (injected > 0) {
         allActivities = [...selectedActivities];
-        console.log(`[Pipeline V3] Sparse pool rescue: +${injected} architect anchors injected (${selectedActivities.length}/${sparseThreshold})`);
+        console.log(`[Pipeline V3] Sparse pool rescue: +${injected} architect anchors injected (${selectedActivities.length}/${sparseThreshold}, quality=${scheduleReadyCount}/${qualitySparseThreshold})`);
       }
     } catch (e) {
       console.warn('[Pipeline V3] Sparse pool rescue failed (non-blocking):', e);
@@ -731,11 +1051,6 @@ export async function generateTripV3(
   );
   options?.onSnapshot?.(buildClusteredMapSnapshot(clusters, previewHotels[0] || null, data));
 
-  // Step 3b: LLM rebalance attempt
-  const llmResult = await rebalanceClustersWithLLM(
-    clusters, timeWindows, preferences, densityProfile
-  );
-
   const pipelineCtx = {
     data, preferences, timeWindows, bestTransport, syntheticReturnTransport,
     allActivities, selectedActivities,
@@ -743,45 +1058,145 @@ export async function generateTripV3(
     dayTripPacks, arrivalFatigueRole, destinationMismatchCount,
   };
 
-  let trip: Trip;
+  const closedWorldGateEnabled =
+    densityProfile.densityCategory === 'spread' || shouldTriggerSparseRescue;
+  const closedWorldMeta: {
+    enabled: boolean;
+    used: boolean;
+    fallbackReason?: string;
+    groundingRate: number;
+    unknownIdRate: number;
+    parseAttempts: number;
+    latencyMs: number;
+    plannerBudgetMs: number;
+    ratioIconicLocal?: { iconic: number; localGem: number };
+  } = {
+    enabled: closedWorldGateEnabled,
+    used: false,
+    groundingRate: 0,
+    unknownIdRate: 0,
+    parseAttempts: 0,
+    latencyMs: 0,
+    plannerBudgetMs: 0,
+  };
 
-  if (llmResult) {
-    // Run both paths in parallel (no onEvent in helpers to avoid double-emitting)
-    const [tripAlgo, tripLLM] = await Promise.all([
-      runPipelineFromClusters(structuredClone(clusters), pipelineCtx),
-      runPipelineFromClusters(llmResult.clusters, pipelineCtx),
-    ]);
+  let trip: Trip | null = null;
 
-    const scoreAlgo = tripAlgo.qualityMetrics?.score ?? 0;
-    const scoreLLM = tripLLM.qualityMetrics?.score ?? 0;
-    console.log(`[Pipeline V3] A/B fork: algo=${scoreAlgo}/100 vs llm=${scoreLLM}/100`);
+  if (closedWorldGateEnabled) {
+    const elapsedMs = Date.now() - startTime;
+    const plannerProfileBudgetMs =
+      densityProfile.densityCategory === 'spread'
+        ? 45_000
+        : shouldTriggerSparseRescue
+          ? 32_000
+          : 20_000;
+    const plannerReserveMs = 35_000;
+    const plannerBudgetMs = Math.max(0, Math.min(plannerProfileBudgetMs, 180_000 - elapsedMs - plannerReserveMs));
+    closedWorldMeta.plannerBudgetMs = plannerBudgetMs;
 
-    if (scoreLLM > scoreAlgo) {
-      trip = tripLLM;
-      if (trip.plannerDiagnostics) {
-        trip.plannerDiagnostics.llmRebalanceUsed = true;
-        trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
-        trip.plannerDiagnostics.algoScore = scoreAlgo;
-        trip.plannerDiagnostics.llmRebalanceThemes = llmResult.themes;
-        trip.plannerDiagnostics.llmRebalanceLatencyMs = llmResult.latencyMs;
-      }
+    if (elapsedMs >= 180_000 || plannerBudgetMs < 4_000) {
+      closedWorldMeta.fallbackReason = 'hard_cap_reached';
     } else {
-      trip = tripAlgo;
-      if (trip.plannerDiagnostics) {
-        trip.plannerDiagnostics.llmRebalanceUsed = false;
-        trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
-        trip.plannerDiagnostics.algoScore = scoreAlgo;
-        trip.plannerDiagnostics.llmRebalanceLatencyMs = llmResult.latencyMs;
+      const catalogRestaurants = [
+        ...(data.tripAdvisorRestaurants || []),
+        ...(data.serpApiRestaurants || []),
+      ];
+      const plannerAttempt = await attemptClosedWorldDayPlanning({
+        clusters,
+        restaurants: catalogRestaurants,
+        dayTripPacks,
+        preferences,
+        timeWindows,
+        densityCategory: densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
+        maxPlannerLatencyMs: plannerBudgetMs,
+      });
+
+      closedWorldMeta.groundingRate = plannerAttempt.groundingRate;
+      closedWorldMeta.unknownIdRate = plannerAttempt.unknownIdRate;
+      closedWorldMeta.parseAttempts = plannerAttempt.parseAttempts;
+      closedWorldMeta.latencyMs = plannerAttempt.latencyMs;
+
+      if (plannerAttempt.result) {
+        closedWorldMeta.ratioIconicLocal = plannerAttempt.result.hints.ratioIconicLocal;
+        try {
+          const llmScheduledTrip = await runPipelineFromClusters(plannerAttempt.result.clusters, pipelineCtx);
+          if (llmScheduledTrip.qualityMetrics?.invariantsPassed) {
+            trip = llmScheduledTrip;
+            closedWorldMeta.used = true;
+            if (trip.plannerDiagnostics) {
+              trip.plannerDiagnostics.llmRebalanceUsed = false;
+              trip.plannerDiagnostics.llmRebalanceScore = null;
+              trip.plannerDiagnostics.algoScore = trip.qualityMetrics?.score ?? 0;
+              trip.plannerDiagnostics.llmRebalanceLatencyMs = plannerAttempt.latencyMs;
+            }
+          } else {
+            closedWorldMeta.fallbackReason = 'p0_blocking_after_llm_scheduler';
+          }
+        } catch (err) {
+          console.warn('[Pipeline V3] Closed-world scheduler failed, falling back:', err);
+          closedWorldMeta.fallbackReason = 'llm_scheduler_runtime_error';
+        }
+      } else {
+        closedWorldMeta.fallbackReason = plannerAttempt.failureReason || 'llm_scheduler_failed';
       }
     }
-  } else {
-    // LLM failed, algo only
-    trip = await runPipelineFromClusters(clusters, pipelineCtx);
-    if (trip.plannerDiagnostics) {
-      trip.plannerDiagnostics.llmRebalanceUsed = false;
-      trip.plannerDiagnostics.llmRebalanceScore = null;
-      trip.plannerDiagnostics.algoScore = trip.qualityMetrics?.score ?? 0;
-      trip.plannerDiagnostics.llmRebalanceLatencyMs = 0;
+  }
+
+  if (!trip) {
+    // Closed-world gate path: fallback must stay deterministic (no second LLM loop).
+    if (closedWorldGateEnabled) {
+      trip = await runPipelineFromClusters(clusters, pipelineCtx);
+      if (trip.plannerDiagnostics) {
+        trip.plannerDiagnostics.llmRebalanceUsed = false;
+        trip.plannerDiagnostics.llmRebalanceScore = null;
+        trip.plannerDiagnostics.algoScore = trip.qualityMetrics?.score ?? 0;
+        trip.plannerDiagnostics.llmRebalanceLatencyMs = 0;
+      }
+    } else {
+      // Legacy dense path: keep A/B LLM rebalance experiment.
+      const llmResult = await rebalanceClustersWithLLM(
+        clusters, timeWindows, preferences, densityProfile
+      );
+
+      if (llmResult) {
+        // Run both paths in parallel (no onEvent in helpers to avoid double-emitting)
+        const [tripAlgo, tripLLM] = await Promise.all([
+          runPipelineFromClusters(structuredClone(clusters), pipelineCtx),
+          runPipelineFromClusters(llmResult.clusters, pipelineCtx),
+        ]);
+
+        const scoreAlgo = tripAlgo.qualityMetrics?.score ?? 0;
+        const scoreLLM = tripLLM.qualityMetrics?.score ?? 0;
+        console.log(`[Pipeline V3] A/B fork: algo=${scoreAlgo}/100 vs llm=${scoreLLM}/100`);
+
+        if (scoreLLM > scoreAlgo) {
+          trip = tripLLM;
+          if (trip.plannerDiagnostics) {
+            trip.plannerDiagnostics.llmRebalanceUsed = true;
+            trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
+            trip.plannerDiagnostics.algoScore = scoreAlgo;
+            trip.plannerDiagnostics.llmRebalanceThemes = llmResult.themes;
+            trip.plannerDiagnostics.llmRebalanceLatencyMs = llmResult.latencyMs;
+          }
+        } else {
+          trip = tripAlgo;
+          if (trip.plannerDiagnostics) {
+            trip.plannerDiagnostics.llmRebalanceUsed = false;
+            trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
+            trip.plannerDiagnostics.algoScore = scoreAlgo;
+            trip.plannerDiagnostics.llmRebalanceLatencyMs = llmResult.latencyMs;
+          }
+        }
+      } else {
+        // LLM failed, algo only
+        trip = await runPipelineFromClusters(clusters, pipelineCtx);
+        if (trip.plannerDiagnostics) {
+          trip.plannerDiagnostics.llmRebalanceUsed = false;
+          trip.plannerDiagnostics.llmRebalanceScore = null;
+          trip.plannerDiagnostics.algoScore = trip.qualityMetrics?.score ?? 0;
+          trip.plannerDiagnostics.llmRebalanceLatencyMs = 0;
+        }
+      }
     }
   }
 
@@ -793,12 +1208,36 @@ export async function generateTripV3(
     activeBlueprint?.diagnostics?.parallelismStats,
     sparseRescueValidation.parallelismStats,
   ]);
+  const freeTimeMinutesByDay = Object.fromEntries(
+    trip.days.map((day) => {
+      const minutes = day.items
+        .filter((item) => item.type === 'free_time')
+        .reduce((sum, item) => sum + (item.duration || Math.max(0, timeToMin(item.endTime) - timeToMin(item.startTime))), 0);
+      return [String(day.dayNumber), minutes];
+    })
+  );
   trip.generationDiagnostics = {
     validationLatencyMs:
       (activeBlueprint?.diagnostics?.validationLatencyMs || 0)
       + sparseRescueValidation.validationLatencyMs,
     providerCallBreakdown: mergedProviderCallBreakdown,
     parallelismStats: mergedParallelismStats,
+    plannerMode: closedWorldMeta.used ? 'llm_closed_world' : 'deterministic',
+    llmSchedulerUsed: closedWorldMeta.used,
+    fallbackReason: !closedWorldMeta.used ? closedWorldMeta.fallbackReason : undefined,
+    groundingRate: closedWorldMeta.enabled ? closedWorldMeta.groundingRate : undefined,
+    unknownIdRate: closedWorldMeta.enabled ? closedWorldMeta.unknownIdRate : undefined,
+    parseAttempts: closedWorldMeta.enabled ? closedWorldMeta.parseAttempts : undefined,
+    plannerBudgetMs: closedWorldMeta.enabled ? closedWorldMeta.plannerBudgetMs : undefined,
+    plannerTimeoutRate: closedWorldMeta.enabled ? (closedWorldMeta.fallbackReason === 'planner_timeout' ? 1 : 0) : undefined,
+    closedWorldActivationRate: closedWorldMeta.enabled ? (closedWorldMeta.used ? 1 : 0) : undefined,
+    mealSemanticReplacements: trip.plannerDiagnostics?.mealSemanticReplacementCount || 0,
+    freeTimeMinutesByDay,
+    replacementCounts: {
+      lateMealReplacementCount: trip.plannerDiagnostics?.lateMealReplacementCount || 0,
+      mealFallbackCount: trip.plannerDiagnostics?.mealFallbackCount || 0,
+      routeRebuildCount: trip.plannerDiagnostics?.routeRebuildCount || 0,
+    },
   };
 
   const scheduledItems = trip.days.flatMap((day) => day.items);
@@ -812,11 +1251,16 @@ export async function generateTripV3(
   const rejectedCount =
     (trip.contractViolations?.length || 0)
     + (trip.plannerDiagnostics?.finalIntegrityFailures || 0);
-  const ratioIconicLocal = activeBlueprint?.ratioActual || { iconic: 0.6, localGem: 0.4 };
+  const ratioComputed = computeFinalActivityRatio(trip.days, allActivities);
+  const ratioIconicLocal = {
+    iconic: ratioComputed.iconic,
+    localGem: ratioComputed.localGem,
+  };
   trip.reliabilitySummary = {
     validatedCount,
     replacedCount,
     rejectedCount,
+    groundingRate: closedWorldMeta.enabled ? closedWorldMeta.groundingRate : undefined,
     ratioIconicLocal,
   };
 
@@ -938,6 +1382,17 @@ async function runPipelineFromClusters(
   console.log(`[Pipeline V3] Step 8: Unified schedule built with ${repairResult.days.length} days, ${repairResult.repairs.length} repairs`);
 
   const scheduledDays = repairResult.days;
+  const startDateStr = preferences.startDate.toISOString().split('T')[0];
+  const ratioEnforcement = enforceFinalActivityRatio(
+    scheduledDays,
+    allActivities,
+    densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
+  );
+  if (ratioEnforcement.swaps > 0) {
+    console.log(
+      `[Pipeline V3] Ratio enforcer: ${ratioEnforcement.swaps} swap(s), iconic=${ratioEnforcement.ratio.iconic.toFixed(3)}`
+    );
+  }
 
   // Step 11b: Inject transport items (outbound + return) into day schedule
   if (scheduledDays.length > 0) {
@@ -949,6 +1404,7 @@ async function runPipelineFromClusters(
 
     addOutboundTransportItem(day1, data.outboundFlight || null, bestTransport, preferences, transportFallbackCoords);
     addReturnTransportItem(lastDay, data.returnFlight || null, bestTransport, preferences, transportFallbackCoords);
+    injectFirstLastMileTransfers(day1, lastDay);
     console.log(`[Pipeline V3] Step 11b: Transport items injected (mode: ${bestTransport?.mode || 'none'})`);
 
     // Post-injection safety: remove items past return transport on last day
@@ -1014,6 +1470,24 @@ async function runPipelineFromClusters(
     }
   }
 
+  const postInjectionMustSeeRepairs: RepairAction[] = [];
+  const postInjectionMustSeeUnresolved: string[] = [];
+  ensureMustSees(
+    scheduledDays,
+    allActivities,
+    startDateStr,
+    postInjectionMustSeeRepairs,
+    postInjectionMustSeeUnresolved
+  );
+  if (postInjectionMustSeeRepairs.length > 0) {
+    console.log(`[Pipeline V3] Post-injection must-see recovery: ${postInjectionMustSeeRepairs.length} injection(s)`);
+  }
+  if (postInjectionMustSeeUnresolved.length > 0) {
+    for (const msg of postInjectionMustSeeUnresolved) {
+      console.warn(`[Pipeline V3] Post-injection must-see unresolved: ${msg}`);
+    }
+  }
+
   // Step 13: LLM Review (safety net) — Gemini 3 Flash reviews for logical errors
   if (process.env.PIPELINE_LLM_REVIEW === 'on') {
     try {
@@ -1049,6 +1523,14 @@ async function runPipelineFromClusters(
         day.items.forEach((item, idx) => { item.orderIndex = idx; });
       }
     }
+  }
+
+  const finalP02Fallbacks = enforceFinalRestaurantProximity(
+    scheduledDays,
+    densityProfile.densityCategory as 'dense' | 'medium' | 'spread'
+  );
+  if (finalP02Fallbacks > 0) {
+    console.log(`[Pipeline V3] Final P0.2 guard: converted ${finalP02Fallbacks} distant meal(s) to Repas libre`);
   }
 
   // Diagnostics computation
@@ -1113,7 +1595,6 @@ async function runPipelineFromClusters(
   const temporalImpossibleItemCount = repairResult.rescueDiagnostics?.temporalImpossibleItemCount ?? 0;
 
   // Step 10: Validate contracts
-  const startDateStr = preferences.startDate.toISOString().split('T')[0];
   const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
   const mustSeeIds = new Set(mustSeeActivitiesForContracts.map(a => a.id));
   const contractResult = validateContracts(
@@ -1129,7 +1610,10 @@ async function runPipelineFromClusters(
 
   const contractsModeRaw = (process.env.PIPELINE_CONTRACTS_MODE || 'warn').toLowerCase();
   const contractsMode: 'strict' | 'warn' = contractsModeRaw === 'warn' ? 'warn' : 'strict';
-  const unresolvedRepairViolations = repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`);
+  const unresolvedRepairViolations = [
+    ...repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`),
+    ...postInjectionMustSeeUnresolved.map(v => `POST_INJECTION_REPAIR: ${v}`),
+  ];
   const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations];
   if (contractsMode === 'strict' && combinedContractViolations.length > 0) {
     const violationPreview = combinedContractViolations.slice(0, 5).join(' | ');
@@ -1240,6 +1724,7 @@ async function runPipelineFromClusters(
     rescueStage: 0,
     protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
     lateMealReplacementCount: repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0,
+    mealSemanticReplacementCount: repairResult.rescueDiagnostics?.mealSemanticReplacementCount ?? 0,
     dayNumberMismatchCount: 0,
     dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
     finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
@@ -1257,6 +1742,7 @@ async function runPipelineFromClusters(
     sparseFullCityDayCount,
     dayTripDestinationMismatchCount,
     sameFamilyOverloadCount,
+    ratioMixSwapCount: ratioEnforcement.swaps,
   };
 
   // Calculate cost breakdown from actual scheduled items
@@ -1371,6 +1857,15 @@ export async function generateTripV3MultiCity(
     dayOffset += segment.days.length;
   }
 
+  const mergedFreeTimeMinutesByDay = Object.fromEntries(
+    mergedDays.map((day) => {
+      const minutes = day.items
+        .filter((item) => item.type === 'free_time')
+        .reduce((sum, item) => sum + (item.duration || Math.max(0, timeToMin(item.endTime) - timeToMin(item.startTime))), 0);
+      return [String(day.dayNumber), minutes];
+    })
+  );
+
   // Build merged Trip
   const mergedTrip: Trip = {
     ...segments[0], // Base from first segment
@@ -1393,6 +1888,12 @@ export async function generateTripV3MultiCity(
     validatedCount: segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.validatedCount || 0), 0),
     replacedCount: segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.replacedCount || 0), 0),
     rejectedCount: segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.rejectedCount || 0), 0),
+    groundingRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.groundingRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
     ratioIconicLocal: {
       iconic: Number(
         (
@@ -1410,6 +1911,49 @@ export async function generateTripV3MultiCity(
   };
   mergedTrip.generationDiagnostics = {
     validationLatencyMs: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.validationLatencyMs || 0), 0),
+    plannerMode: segments.some((segment) => segment.generationDiagnostics?.plannerMode === 'llm_closed_world')
+      ? 'llm_closed_world'
+      : 'deterministic',
+    llmSchedulerUsed: segments.some((segment) => Boolean(segment.generationDiagnostics?.llmSchedulerUsed)),
+    fallbackReason: segments.find((segment) => segment.generationDiagnostics?.fallbackReason)?.generationDiagnostics?.fallbackReason,
+    groundingRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.groundingRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    unknownIdRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.unknownIdRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    parseAttempts: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.parseAttempts || 0), 0),
+    plannerBudgetMs: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.plannerBudgetMs || 0), 0)
+        / segments.length
+      ).toFixed(0)
+    ),
+    plannerTimeoutRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.plannerTimeoutRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    closedWorldActivationRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.closedWorldActivationRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    mealSemanticReplacements: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.mealSemanticReplacements || 0), 0),
+    freeTimeMinutesByDay: mergedFreeTimeMinutesByDay,
+    replacementCounts: {
+      lateMealReplacementCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.replacementCounts?.lateMealReplacementCount || 0), 0),
+      mealFallbackCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.replacementCounts?.mealFallbackCount || 0), 0),
+      routeRebuildCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.replacementCounts?.routeRebuildCount || 0), 0),
+    },
     providerCallBreakdown: mergeValidationProviderBreakdowns(
       segments.map((segment) => segment.generationDiagnostics?.providerCallBreakdown)
     ),

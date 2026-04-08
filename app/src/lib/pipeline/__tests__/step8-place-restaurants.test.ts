@@ -112,4 +112,35 @@ describe('step8-place-restaurants strict placement', () => {
     expect(plans[0].meals.length).toBe(3);
     expect(plans[0].meals[0].mealType).toBe('breakfast');
   });
+
+  it('rejects non-meal venues (cinema/theater) even if they are nearby', async () => {
+    const cinema = makeRestaurant({
+      id: 'cinema-1',
+      name: 'Pathé Rennes',
+      cuisineTypes: ['movie_theater'],
+      type: 'movie_theater' as any,
+    });
+    const bistro = makeRestaurant({
+      id: 'bistro-1',
+      name: 'Le Vrai Bistrot',
+      cuisineTypes: ['french restaurant', 'bistro'],
+      type: 'restaurant' as any,
+    });
+
+    const plans = await placeRestaurants(
+      [cluster],
+      [cinema, bistro],
+      { lat: 41.3851, lng: 2.1734 },
+      {
+        maxDistanceKm: 0.8,
+        minRating: 3.5,
+        alternativeCount: 2,
+        startDate: new Date('2026-03-16T00:00:00.000Z'),
+      }
+    );
+
+    const mealNames = plans[0].meals.map((meal) => meal.primary.name.toLowerCase());
+    expect(mealNames.some((name) => name.includes('path'))).toBe(false);
+    expect(mealNames.some((name) => name.includes('bistrot'))).toBe(true);
+  });
 });

@@ -681,6 +681,45 @@ function estimateAttractionCost(priceLevel?: string, destination?: string, name?
   }
 }
 
+const NON_MEAL_GOOGLE_TYPES = new Set([
+  'movie_theater', 'cinema', 'theater', 'theatre', 'performing_arts_theater',
+  'museum', 'art_gallery', 'memorial', 'monument',
+  'stadium', 'arena', 'sports_complex',
+  'gym', 'fitness_center',
+  'aquarium', 'zoo', 'amusement_park',
+  'shopping_mall',
+]);
+
+const NON_MEAL_GOOGLE_NAME_KEYWORDS = [
+  'cinema', 'movie', 'imax', 'pathe', 'gaumont', 'ugc',
+  'theatre', 'theater', 'spectacle',
+  'museum', 'musee', 'memorial',
+  'stadium', 'arena', 'aquarium', 'zoo',
+];
+
+const MEAL_GOOGLE_TYPE_SIGNALS = [
+  'restaurant', 'food', 'meal', 'cafe', 'coffee', 'bakery',
+  'bistro', 'brasserie', 'bar', 'pub', 'grill',
+];
+
+function isLikelyGoogleMealVenue(place: GooglePlaceNewResult): boolean {
+  const title = (place.displayName?.text || '').toLowerCase();
+  const allTypes = [place.primaryType, ...(place.types || [])]
+    .filter(Boolean)
+    .map((type) => String(type).toLowerCase());
+  for (const type of allTypes) {
+    if (NON_MEAL_GOOGLE_TYPES.has(type)) return false;
+  }
+  for (const keyword of NON_MEAL_GOOGLE_NAME_KEYWORDS) {
+    if (title.includes(keyword)) return false;
+  }
+  const hasMealTypeSignal = allTypes.some((type) =>
+    MEAL_GOOGLE_TYPE_SIGNALS.some((signal) => type.includes(signal))
+  );
+  const hasMealNameSignal = MEAL_GOOGLE_TYPE_SIGNALS.some((signal) => title.includes(signal));
+  return hasMealTypeSignal || hasMealNameSignal;
+}
+
 // ============================================
 // High-level API: Search Restaurants
 // ============================================
@@ -731,6 +770,7 @@ export async function searchRestaurantsGooglePlaces(
   );
 
   const restaurants = openPlaces
+    .filter((place) => isLikelyGoogleMealVenue(place))
     .map(p => googlePlaceNewToRestaurant(p, destination))
     .slice(0, limit);
 
@@ -786,6 +826,7 @@ export async function searchRestaurantsNearbyGooglePlaces(
   for (const place of places) {
     if (!place.location?.latitude || !place.location?.longitude) continue;
     if (place.businessStatus === 'CLOSED_PERMANENTLY') continue;
+    if (!isLikelyGoogleMealVenue(place)) continue;
 
     const distanceKm = calculateDistance(
       activityCoords.lat, activityCoords.lng,
