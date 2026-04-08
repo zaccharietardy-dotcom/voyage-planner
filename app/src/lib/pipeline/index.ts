@@ -80,6 +80,7 @@ import { detectQuestions, applyQuestionAnswers, detectPreFetchQuestions, applyEf
 import type { DestinationAnalysis } from './step0-destination-intel';
 import { buildClusteredMapSnapshot, buildFetchedMapSnapshot } from './snapshots';
 import { getApiCostSummary, resetApiCostTracker, setRunBudgetProfile } from '../services/apiCostGuard';
+import { isProviderQuotaLikeError } from '../utils/quotaErrors';
 import { isOpenAtTime } from './utils/opening-hours';
 import {
   mergeValidationParallelismStats,
@@ -94,6 +95,12 @@ import {
 // ---------------------------------------------------------------------------
 function emit(onEvent: OnPipelineEvent | undefined, partial: Omit<import('./types').PipelineEvent, 'timestamp'>) {
   onEvent?.({ ...partial, timestamp: Date.now() });
+}
+
+function isTruthyEnvFlag(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
 }
 
 /** Resolve best transport option based on user preference + available options */
@@ -132,6 +139,7 @@ function normalizePlannerText(value?: string): string {
 }
 
 type ActivityMixKind = 'iconic' | 'local_gem';
+type RatioFeasibleBand = { lower: number; upper: number; catalogIconicRatio: number };
 
 function classifyActivityMixKind(activity: Pick<ScoredActivity, 'mustSee' | 'source' | 'protectedReason' | 'reviewCount' | 'rating'>): ActivityMixKind {
   if (
@@ -184,9 +192,11 @@ function enforceFinalActivityRatio(
   days: TripDay[],
   allActivities: ScoredActivity[],
   densityCategory: 'dense' | 'medium' | 'spread',
-): { swaps: number; ratio: { iconic: number; localGem: number } } {
-  const minIconic = 0.55;
-  const maxIconic = 0.65;
+  ratioBand?: RatioFeasibleBand,
+): { swaps: number; ratio: { iconic: number; localGem: number }; ratioFeasibleBand: RatioFeasibleBand } {
+  const effectiveBand: RatioFeasibleBand = ratioBand || { lower: 0.55, upper: 0.65, catalogIconicRatio: 0.6 };
+  const minIconic = effectiveBand.lower;
+  const maxIconic = effectiveBand.upper;
   const maxSwapDistanceKm = densityCategory === 'spread' ? 25 : densityCategory === 'medium' ? 14 : 8;
 
   const byId = new Map(allActivities.map((activity) => [activity.id, activity]));
@@ -223,12 +233,13 @@ function enforceFinalActivityRatio(
 
   const current = computeFinalActivityRatio(days, allActivities);
   if (current.total < 4 || (current.iconic >= minIconic && current.iconic <= maxIconic)) {
-    return { swaps: 0, ratio: { iconic: current.iconic, localGem: current.localGem } };
+    return { swaps: 0, ratio: { iconic: current.iconic, localGem: current.localGem }, ratioFeasibleBand: effectiveBand };
   }
 
   const neededKind: ActivityMixKind = current.iconic < minIconic ? 'iconic' : 'local_gem';
   const replaceKind: ActivityMixKind = neededKind === 'iconic' ? 'local_gem' : 'iconic';
-  const maxSwaps = Math.max(1, Math.ceil(Math.abs(current.iconic - 0.6) * current.total));
+  const targetRatio = effectiveBand.catalogIconicRatio || 0.6;
+  const maxSwaps = Math.max(1, Math.ceil(Math.abs(current.iconic - targetRatio) * current.total));
 
   const pool = allActivities
     .filter((activity) => !plannedIds.has(activity.id) && !plannedNames.has(normalizePlannerText(activity.name)))
@@ -279,6 +290,7 @@ function enforceFinalActivityRatio(
       iconic: ratio.iconic,
       localGem: ratio.localGem,
     },
+    ratioFeasibleBand: effectiveBand,
   };
 }
 
@@ -614,6 +626,58 @@ function countArrivalFatigueViolations(
     }
   }
   return violations;
+}
+
+function plannerActivityKey(activity: ScoredActivity): string {
+  return activity.planningToken
+    || activity.id
+    || normalizePlannerText(activity.name);
+}
+
+function plannedItemKey(item: TripItem): string {
+  return item.planningMeta?.planningToken
+    || item.id
+    || normalizePlannerText(item.title || item.locationName || '');
+}
+
+function computeLlmOrderPreservedRate(
+  clusters: ActivityCluster[],
+  days: TripDay[],
+): number | undefined {
+  const lockedClusters = clusters.filter((cluster) => cluster.routingPolicy === 'llm_locked');
+  if (lockedClusters.length === 0) return undefined;
+
+  const dayByNumber = new Map(days.map((day) => [day.dayNumber, day]));
+  let totalPairs = 0;
+  let preservedPairs = 0;
+
+  for (const cluster of lockedClusters) {
+    const day = dayByNumber.get(cluster.dayNumber);
+    if (!day) continue;
+
+    const planned = cluster.activities.map((activity) => plannerActivityKey(activity)).filter((key) => key.length > 0);
+    const final = day.items
+      .filter((item) => item.type === 'activity')
+      .map((item) => plannedItemKey(item))
+      .filter((key) => key.length > 0);
+
+    const plannedIndex = new Map<string, number>();
+    for (let i = 0; i < planned.length; i++) plannedIndex.set(planned[i], i);
+    const projected = final.filter((key) => plannedIndex.has(key));
+    if (projected.length <= 1) continue;
+
+    for (let i = 0; i < projected.length - 1; i++) {
+      for (let j = i + 1; j < projected.length; j++) {
+        totalPairs++;
+        const left = plannedIndex.get(projected[i]) ?? 0;
+        const right = plannedIndex.get(projected[j]) ?? 0;
+        if (left <= right) preservedPairs++;
+      }
+    }
+  }
+
+  if (totalPairs === 0) return 1;
+  return Number((preservedPairs / totalPairs).toFixed(3));
 }
 
 /**
@@ -1051,15 +1115,24 @@ export async function generateTripV3(
   );
   options?.onSnapshot?.(buildClusteredMapSnapshot(clusters, previewHotels[0] || null, data));
 
-  const pipelineCtx = {
+  const pipelineCtx: Parameters<typeof runPipelineFromClusters>[1] = {
     data, preferences, timeWindows, bestTransport, syntheticReturnTransport,
     allActivities, selectedActivities,
     densityProfile: { densityCategory: densityProfile.densityCategory },
     dayTripPacks, arrivalFatigueRole, destinationMismatchCount,
+    ratioFeasibleBand: undefined,
   };
 
+  const forceClosedWorldPlanner =
+    isTruthyEnvFlag(process.env.PIPELINE_FORCE_CLOSED_WORLD)
+    || isTruthyEnvFlag(process.env.FORCE_CLOSED_WORLD_PLANNER);
   const closedWorldGateEnabled =
-    densityProfile.densityCategory === 'spread' || shouldTriggerSparseRescue;
+    forceClosedWorldPlanner
+    || densityProfile.densityCategory === 'spread'
+    || shouldTriggerSparseRescue;
+  if (forceClosedWorldPlanner) {
+    console.log('[Pipeline V3] Closed-world planner force-enabled via env flag');
+  }
   const closedWorldMeta: {
     enabled: boolean;
     used: boolean;
@@ -1070,6 +1143,10 @@ export async function generateTripV3(
     latencyMs: number;
     plannerBudgetMs: number;
     ratioIconicLocal?: { iconic: number; localGem: number };
+    ratioFeasibleBand?: RatioFeasibleBand;
+    requestedDropCount: number;
+    acceptedDropCount: number;
+    dropRecoveryCount: number;
   } = {
     enabled: closedWorldGateEnabled,
     used: false,
@@ -1078,6 +1155,9 @@ export async function generateTripV3(
     parseAttempts: 0,
     latencyMs: 0,
     plannerBudgetMs: 0,
+    requestedDropCount: 0,
+    acceptedDropCount: 0,
+    dropRecoveryCount: 0,
   };
 
   let trip: Trip | null = null;
@@ -1085,7 +1165,9 @@ export async function generateTripV3(
   if (closedWorldGateEnabled) {
     const elapsedMs = Date.now() - startTime;
     const plannerProfileBudgetMs =
-      densityProfile.densityCategory === 'spread'
+      forceClosedWorldPlanner
+        ? 40_000
+        : densityProfile.densityCategory === 'spread'
         ? 45_000
         : shouldTriggerSparseRescue
           ? 32_000
@@ -1118,6 +1200,11 @@ export async function generateTripV3(
 
       if (plannerAttempt.result) {
         closedWorldMeta.ratioIconicLocal = plannerAttempt.result.hints.ratioIconicLocal;
+        closedWorldMeta.ratioFeasibleBand = plannerAttempt.result.hints.ratioFeasibleBand;
+        closedWorldMeta.requestedDropCount = plannerAttempt.result.hints.requestedDropCount;
+        closedWorldMeta.acceptedDropCount = plannerAttempt.result.hints.acceptedDropCount;
+        closedWorldMeta.dropRecoveryCount = plannerAttempt.result.hints.dropRecoveryCount;
+        pipelineCtx.ratioFeasibleBand = plannerAttempt.result.hints.ratioFeasibleBand;
         try {
           const llmScheduledTrip = await runPipelineFromClusters(plannerAttempt.result.clusters, pipelineCtx);
           if (llmScheduledTrip.qualityMetrics?.invariantsPassed) {
@@ -1232,6 +1319,11 @@ export async function generateTripV3(
     plannerTimeoutRate: closedWorldMeta.enabled ? (closedWorldMeta.fallbackReason === 'planner_timeout' ? 1 : 0) : undefined,
     closedWorldActivationRate: closedWorldMeta.enabled ? (closedWorldMeta.used ? 1 : 0) : undefined,
     mealSemanticReplacements: trip.plannerDiagnostics?.mealSemanticReplacementCount || 0,
+    llmOrderPreservedRate: trip.plannerDiagnostics?.llmOrderPreservedRate,
+    requestedDropCount: closedWorldMeta.enabled ? closedWorldMeta.requestedDropCount : undefined,
+    acceptedDropCount: closedWorldMeta.enabled ? closedWorldMeta.acceptedDropCount : undefined,
+    dropRecoveryCount: closedWorldMeta.enabled ? closedWorldMeta.dropRecoveryCount : undefined,
+    ratioFeasibleBand: closedWorldMeta.enabled ? closedWorldMeta.ratioFeasibleBand : undefined,
     freeTimeMinutesByDay,
     replacementCounts: {
       lateMealReplacementCount: trip.plannerDiagnostics?.lateMealReplacementCount || 0,
@@ -1262,6 +1354,7 @@ export async function generateTripV3(
     rejectedCount,
     groundingRate: closedWorldMeta.enabled ? closedWorldMeta.groundingRate : undefined,
     ratioIconicLocal,
+    ratioFeasibleBand: closedWorldMeta.enabled ? closedWorldMeta.ratioFeasibleBand : undefined,
   };
 
   // Timing and cost logging
@@ -1298,13 +1391,14 @@ async function runPipelineFromClusters(
     dayTripPacks: DayTripPack[];
     arrivalFatigueRole: ArrivalFatigueRole;
     destinationMismatchCount: number;
+    ratioFeasibleBand?: RatioFeasibleBand;
     onEvent?: OnPipelineEvent;
   }
 ): Promise<Trip> {
   const {
     data, preferences, timeWindows, bestTransport, syntheticReturnTransport,
     allActivities, selectedActivities, densityProfile, dayTripPacks,
-    arrivalFatigueRole, destinationMismatchCount, onEvent,
+    arrivalFatigueRole, destinationMismatchCount, ratioFeasibleBand, onEvent,
   } = ctx;
 
   // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
@@ -1330,8 +1424,13 @@ async function runPipelineFromClusters(
   try {
     travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode, preferences.startDate);
   } catch (err) {
-    console.error('[Pipeline V3] Step 6 failed:', err);
-    throw new Error(`[Pipeline V3] Travel times computation failed: ${(err as Error).message}`);
+    if (isProviderQuotaLikeError(err)) {
+      console.warn('[Pipeline V3] Step 6 quota/rate-limited, falling back to estimated travel times');
+      travelTimes = await computeTravelTimes(clusters, hotelCoords, 'off', preferences.startDate);
+    } else {
+      console.error('[Pipeline V3] Step 6 failed:', err);
+      throw new Error(`[Pipeline V3] Travel times computation failed: ${(err as Error).message}`);
+    }
   }
   console.log(`[Pipeline V3] Step 6: Travel times computed (${directionsMode} mode)`);
 
@@ -1344,8 +1443,13 @@ async function runPipelineFromClusters(
   try {
     enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination, densityProfile.densityCategory as 'spread' | 'medium' | 'dense');
   } catch (err) {
-    console.error('[Pipeline V3] Step 7 failed:', err);
-    throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);
+    if (isProviderQuotaLikeError(err)) {
+      console.warn('[Pipeline V3] Step 7 quota/rate-limited, using existing restaurant pool');
+      enrichedRestaurants = [...allRestaurants];
+    } else {
+      console.error('[Pipeline V3] Step 7 failed:', err);
+      throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);
+    }
   }
   console.log(`[Pipeline V3] Step 7: Restaurant pool enriched (${enrichedRestaurants.length} restaurants)`);
 
@@ -1387,6 +1491,7 @@ async function runPipelineFromClusters(
     scheduledDays,
     allActivities,
     densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
+    ratioFeasibleBand,
   );
   if (ratioEnforcement.swaps > 0) {
     console.log(
@@ -1504,12 +1609,16 @@ async function runPipelineFromClusters(
     }
   }
 
+  const routingPolicyByDay = new Map(
+    clusters.map((cluster) => [cluster.dayNumber, cluster.routingPolicy || 'geo_optimized'])
+  );
+
   // Step 10b: Post-scheduler geographic reorder (reduce zigzag)
   // Swap activity time slots to minimize total travel distance per day
   {
     for (const day of scheduledDays) {
       const actCount = day.items.filter((i) => i.type === 'activity').length;
-      if (actCount > 2) {
+      if (actCount > 2 && routingPolicyByDay.get(day.dayNumber) !== 'llm_locked') {
         // Pass departure end time so geo-reorder won't push activities past flight
         const tw = timeWindows.find(w => w.dayNumber === day.dayNumber);
         const depEnd = tw?.hasDepartureTransport ? tw.activityEndTime : undefined;
@@ -1593,6 +1702,7 @@ async function runPipelineFromClusters(
   const sameFamilyOverloadCount = countSameFamilyOverload(scheduledDays);
   const arrivalFatigueViolationCount = countArrivalFatigueViolations(scheduledDays, hotel, arrivalFatigueRole);
   const temporalImpossibleItemCount = repairResult.rescueDiagnostics?.temporalImpossibleItemCount ?? 0;
+  const llmOrderPreservedRate = computeLlmOrderPreservedRate(clusters, scheduledDays);
 
   // Step 10: Validate contracts
   const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
@@ -1743,6 +1853,7 @@ async function runPipelineFromClusters(
     dayTripDestinationMismatchCount,
     sameFamilyOverloadCount,
     ratioMixSwapCount: ratioEnforcement.swaps,
+    llmOrderPreservedRate,
   };
 
   // Calculate cost breakdown from actual scheduled items
@@ -1908,6 +2019,20 @@ export async function generateTripV3MultiCity(
         ).toFixed(3)
       ),
     },
+    ratioFeasibleBand: (() => {
+      const bands = segments
+        .map((segment) => segment.reliabilitySummary?.ratioFeasibleBand)
+        .filter((band): band is RatioFeasibleBand => Boolean(band));
+      if (bands.length === 0) return undefined;
+      const avgLower = bands.reduce((sum, band) => sum + band.lower, 0) / bands.length;
+      const avgUpper = bands.reduce((sum, band) => sum + band.upper, 0) / bands.length;
+      const avgCatalog = bands.reduce((sum, band) => sum + band.catalogIconicRatio, 0) / bands.length;
+      return {
+        lower: Number(avgLower.toFixed(3)),
+        upper: Number(avgUpper.toFixed(3)),
+        catalogIconicRatio: Number(avgCatalog.toFixed(3)),
+      };
+    })(),
   };
   mergedTrip.generationDiagnostics = {
     validationLatencyMs: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.validationLatencyMs || 0), 0),
@@ -1948,6 +2073,29 @@ export async function generateTripV3MultiCity(
       ).toFixed(3)
     ),
     mealSemanticReplacements: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.mealSemanticReplacements || 0), 0),
+    llmOrderPreservedRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.llmOrderPreservedRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    requestedDropCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.requestedDropCount || 0), 0),
+    acceptedDropCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.acceptedDropCount || 0), 0),
+    dropRecoveryCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.dropRecoveryCount || 0), 0),
+    ratioFeasibleBand: (() => {
+      const bands = segments
+        .map((segment) => segment.generationDiagnostics?.ratioFeasibleBand)
+        .filter((band): band is RatioFeasibleBand => Boolean(band));
+      if (bands.length === 0) return undefined;
+      const avgLower = bands.reduce((sum, band) => sum + band.lower, 0) / bands.length;
+      const avgUpper = bands.reduce((sum, band) => sum + band.upper, 0) / bands.length;
+      const avgCatalog = bands.reduce((sum, band) => sum + band.catalogIconicRatio, 0) / bands.length;
+      return {
+        lower: Number(avgLower.toFixed(3)),
+        upper: Number(avgUpper.toFixed(3)),
+        catalogIconicRatio: Number(avgCatalog.toFixed(3)),
+      };
+    })(),
     freeTimeMinutesByDay: mergedFreeTimeMinutesByDay,
     replacementCounts: {
       lateMealReplacementCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.replacementCounts?.lateMealReplacementCount || 0), 0),

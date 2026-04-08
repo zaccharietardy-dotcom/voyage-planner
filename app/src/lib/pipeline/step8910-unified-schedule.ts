@@ -82,6 +82,19 @@ function strictMealPlacement(
   );
 }
 
+function clampItemStartToDayWindow(
+  preferredStart: string,
+  dayStartTime: string,
+  dayEndTime: string,
+  minDuration: number
+): string {
+  const dayStart = timeToMin(dayStartTime);
+  const dayEnd = timeToMin(dayEndTime);
+  const latestStart = Math.max(dayStart, dayEnd - minDuration);
+  const preferred = timeToMin(preferredStart);
+  return minToTime(Math.min(Math.max(preferred, dayStart), latestStart));
+}
+
 /** Search restaurant with progressive radius: tight (400m) → standard (800m) → extended for non-dense cities */
 function findBestRestaurantTight(
   restaurants: Parameters<typeof findBestRestaurant>[0],
@@ -371,7 +384,12 @@ export function unifiedScheduleV3Days(
 
     // 2b. CHECKIN (Day 1, after breakfast — before activities)
     if (cluster.dayNumber === 1 && hotel) {
-      const checkinTime = hotel.checkInTime || '15:00';
+      const checkinTime = clampItemStartToDayWindow(
+        hotel.checkInTime || '15:00',
+        dayStartTime,
+        dayEndTime,
+        15
+      );
       items.push(createCheckinItem(hotel, checkinTime, cluster.dayNumber, orderIndex++));
     }
 
@@ -413,7 +431,7 @@ export function unifiedScheduleV3Days(
     dayRestaurantPools.set(cluster.dayNumber, dayRestaurants);
 
     // 4. SORT activities: NN seed → 2-opt with opening-hours constraints
-    {
+    if (cluster.routingPolicy !== 'llm_locked') {
       const startLat = hotel?.latitude ?? cluster.activities[0]?.latitude ?? 0;
       const startLng = hotel?.longitude ?? cluster.activities[0]?.longitude ?? 0;
 
@@ -1190,7 +1208,7 @@ export function unifiedScheduleV3Days(
       : 22 * 60;
     const beforeCount = day.items.length;
     day.items = day.items.filter(item => {
-      if (item.type === 'flight' || item.type === 'checkout') return true;
+      if (item.type === 'flight' || item.type === 'checkout' || item.type === 'checkin') return true;
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= dayEndForHardStop) {
         // Exempt nightlife items on non-departure days
@@ -1572,8 +1590,8 @@ export function unifiedScheduleV3Days(
     day.items = day.items.filter(item => {
       // Keep flights (departure flight is past cutoff by definition)
       if (item.type === 'flight') return true;
-      // Keep checkout (already capped by pass 3)
-      if (item.type === 'checkout') return true;
+      // Keep hotel logistics markers (already capped by pass 3)
+      if (item.type === 'checkout' || item.type === 'checkin') return true;
 
       const startMin = timeToMin(item.startTime || '00:00');
       if (startMin >= cutoffMin) {
@@ -1796,6 +1814,49 @@ export function unifiedScheduleV3Days(
           }
         }
       }
+    }
+  }
+
+  // 26. Ensure lodging markers remain visible when accommodation exists.
+  if (hotel && days.length > 0) {
+    const day1 = days[0];
+    const day1Window = timeWindows.find((w) => w.dayNumber === day1.dayNumber);
+    const hasCheckin = day1.items.some((item) => item.type === 'checkin');
+    if (!hasCheckin) {
+      const checkinTime = clampItemStartToDayWindow(
+        hotel.checkInTime || '15:00',
+        day1Window?.activityStartTime || '08:30',
+        day1Window?.activityEndTime || '22:00',
+        15
+      );
+      day1.items.push(createCheckinItem(hotel, checkinTime, day1.dayNumber, day1.items.length));
+      sortAndReindexItems(day1.items);
+      repairs.push({
+        type: 'replacement',
+        dayNumber: day1.dayNumber,
+        itemTitle: `Check-in — ${hotel.name}`,
+        description: 'Hotel visibility guard: reinserted missing check-in',
+      });
+    }
+
+    const lastDay = days[days.length - 1];
+    const lastWindow = timeWindows.find((w) => w.dayNumber === lastDay.dayNumber);
+    const hasCheckout = lastDay.items.some((item) => item.type === 'checkout');
+    if (!hasCheckout) {
+      const checkoutTime = clampItemStartToDayWindow(
+        addMinutes(hotel.checkOutTime || '11:00', -30),
+        lastWindow?.activityStartTime || '08:30',
+        lastWindow?.activityEndTime || '22:00',
+        30
+      );
+      lastDay.items.push(createCheckoutItem(hotel, addMinutes(checkoutTime, 30), lastDay.dayNumber, lastDay.items.length));
+      sortAndReindexItems(lastDay.items);
+      repairs.push({
+        type: 'replacement',
+        dayNumber: lastDay.dayNumber,
+        itemTitle: `Check-out — ${hotel.name}`,
+        description: 'Hotel visibility guard: reinserted missing check-out',
+      });
     }
   }
 

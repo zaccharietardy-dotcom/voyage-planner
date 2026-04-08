@@ -20,6 +20,7 @@ import { TripPreferences } from '@/lib/types';
 import { ArrowLeft, ArrowRight, UserCog, Check, AlertCircle, X } from 'lucide-react';
 import { generateTripStream, PipelineProgressEvent } from '@/lib/generateTrip';
 import { cn } from '@/lib/utils';
+import { isProviderQuotaLikeMessage, isUserQuotaLikeMessage } from '@/lib/utils/quotaErrors';
 import { safeSetItem } from '@/lib/storage';
 import { useAuth } from '@/components/auth';
 import { useUserPreferences, preferenceOptions } from '@/hooks/useUserPreferences';
@@ -402,12 +403,21 @@ export default function PlanPage() {
     } catch (error) {
       console.error('Erreur génération:', error);
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
+      const normalized = message.toLowerCase();
+      const userQuotaExceeded =
+        isUserQuotaLikeMessage(message)
+        || message.includes('QUOTA_EXCEEDED')
+        || normalized.includes('rate_limit')
+        || normalized.includes('trop de generation');
+      const providerQuotaExceeded = !userQuotaExceeded && isProviderQuotaLikeMessage(message);
 
       if (message.includes('authentifié') || message.includes('Non authentifié')) {
         toast.error(t('plan.error.loginToGenerate'));
         router.push('/login?redirect=/plan');
-      } else if (message.includes('QUOTA_EXCEEDED') || message.includes('Limite') || message.includes('RATE_LIMIT') || message.includes('Trop de génération')) {
+      } else if (userQuotaExceeded) {
         router.push('/pricing?reason=' + encodeURIComponent(t('plan.error.upgradePro')));
+      } else if (providerQuotaExceeded) {
+        setGenerationError('Nos APIs partenaires sont temporairement en limite de quota. Reessaie dans 1 a 2 minutes.');
       } else {
         setGenerationError(message);
       }

@@ -113,6 +113,33 @@ const STREAM_READ_TIMEOUT_MS = 60_000;
 const POLL_INTERVAL_MS = 2_000;
 const POLL_MAX_DURATION_MS = 5 * 60_000;
 
+function normalizeErrorText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isProviderQuotaLikeMessage(message: string): boolean {
+  const text = normalizeErrorText(message || '');
+  if (!text) return false;
+  return (
+    text.includes('quota')
+    || text.includes('resource_exhausted')
+    || text.includes('rate limit')
+    || text.includes('too many requests')
+    || text.includes('insufficient_quota')
+    || /\b429\b/.test(text)
+  );
+}
+
+function mapGenerationErrorMessage(message: string): string {
+  if (isProviderQuotaLikeMessage(message)) {
+    return 'Nos APIs partenaires sont temporairement en limite de quota. Reessaie dans 1 a 2 minutes.';
+  }
+  return message;
+}
+
 export function buildProgressFromEvent(event: PipelineProgressEvent): GenerateProgress | null {
   if (event.type === 'step_start' && event.stepName) {
     return {
@@ -256,7 +283,7 @@ async function parseSSETextFallback(
   }
 
   if (processed.error) {
-    throw new Error(processed.error);
+    throw new Error(mapGenerationErrorMessage(processed.error));
   }
 
   const extractedTrip = extractTripFromRawSSE(raw);
@@ -288,7 +315,7 @@ export async function generateTrip(
     if (status === 401) {
       throw new Error('Le serveur a rejeté votre session. Déconnectez-vous de l\'app puis reconnectez-vous.');
     }
-    throw new Error(err.error || `Erreur génération (${status})`);
+    throw new Error(mapGenerationErrorMessage(err.error || `Erreur génération (${status})`));
   }
 
   // The generate endpoint may stream SSE or return JSON directly.
@@ -435,11 +462,11 @@ async function pollGenerationSessionUntilTerminal(
     }
 
     if (session.status === 'error') {
-      throw new Error(session.error || 'Erreur de génération');
+      throw new Error(mapGenerationErrorMessage(session.error || 'Erreur de génération'));
     }
 
     if (session.status === 'interrupted') {
-      throw new Error(session.error || 'Génération interrompue');
+      throw new Error(mapGenerationErrorMessage(session.error || 'Génération interrompue'));
     }
 
     await sleep(POLL_INTERVAL_MS);
@@ -494,7 +521,7 @@ async function parseSSEStream(
     buffer += decoder.decode(value, { stream: true });
     const processed = await processSSEBuffer(buffer, callbacks, sessionId, answeredQuestionIds);
     if (processed.trip) return processed.trip;
-    if (processed.error) throw new Error(processed.error);
+    if (processed.error) throw new Error(mapGenerationErrorMessage(processed.error));
     buffer = processed.remaining;
     sessionId = processed.sessionId;
   }
@@ -502,7 +529,7 @@ async function parseSSEStream(
   if (buffer.trim()) {
     const processed = await processSSEBuffer(`${buffer}\n\n`, callbacks, sessionId, answeredQuestionIds);
     if (processed.trip) return processed.trip;
-    if (processed.error) throw new Error(processed.error);
+    if (processed.error) throw new Error(mapGenerationErrorMessage(processed.error));
     buffer = processed.remaining;
     sessionId = processed.sessionId;
   }

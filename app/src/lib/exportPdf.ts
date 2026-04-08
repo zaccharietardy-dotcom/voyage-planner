@@ -48,6 +48,17 @@ function formatCost(cost?: number): string {
   return `${cost.toFixed(0)}€`;
 }
 
+function sanitizePdfText(value: string): string {
+  return (value || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/[→←↔⟶⟵]/g, '->')
+    .replace(/[’‘]/g, '\'')
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /**
  * Ajoute un header Narae Voyage avec titre et infos du voyage
  */
@@ -63,7 +74,7 @@ function addHeader(doc: jsPDF, trip: Trip, pageNumber: number = 1) {
   // Destination
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
-  doc.text(trip.preferences.destination, pageWidth / 2, 30, { align: 'center' });
+  doc.text(sanitizePdfText(trip.preferences.destination), pageWidth / 2, 30, { align: 'center' });
 
   // Dates
   doc.setFontSize(10);
@@ -115,7 +126,7 @@ function addDaySection(doc: jsPDF, day: TripDay, trip: Trip, startY: number): nu
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
-  const dayTitle = `Jour ${day.dayNumber} - ${format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}`;
+  const dayTitle = sanitizePdfText(`Jour ${day.dayNumber} - ${format(new Date(day.date), 'EEEE d MMMM', { locale: fr })}`);
   doc.text(dayTitle, 20, currentY);
   currentY += 7;
 
@@ -134,7 +145,7 @@ function addDaySection(doc: jsPDF, day: TripDay, trip: Trip, startY: number): nu
     .filter(item => item.type !== 'transport') // Exclure les transports de la liste
     .map(item => {
       const time = item.startTime || '—';
-      const title = item.title || 'Sans titre';
+      const title = sanitizePdfText(item.title || 'Sans titre');
       const duration = formatDuration(item.duration);
       const cost = formatCost(item.estimatedCost);
 
@@ -176,6 +187,51 @@ function addDaySection(doc: jsPDF, day: TripDay, trip: Trip, startY: number): nu
   currentY = (doc as any).lastAutoTable.finalY + 10;
 
   return currentY;
+}
+
+/**
+ * Ajoute un résumé d'hébergement lisible en début de document.
+ */
+function addAccommodationSummary(doc: jsPDF, trip: Trip, startY: number): number {
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let currentY = startY;
+  const hotel = trip.accommodation;
+  if (!hotel) return currentY;
+
+  if (currentY > pageHeight - 55) {
+    doc.addPage();
+    currentY = addHeader(doc, trip, doc.getCurrentPageInfo().pageNumber);
+    addFooter(doc, doc.getCurrentPageInfo().pageNumber);
+  }
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 0, 0);
+  doc.text('Hébergement', 20, currentY);
+  currentY += 6;
+
+  const hotelName = sanitizePdfText(hotel.name || 'Hotel');
+  const hotelAddress = sanitizePdfText(hotel.address || hotelName);
+  const checkIn = sanitizePdfText(hotel.checkInTime || '15:00');
+  const checkOut = sanitizePdfText(hotel.checkOutTime || '11:00');
+  const pricePerNight = hotel.pricePerNight ? `${hotel.pricePerNight.toFixed(0)}€ / nuit` : 'Prix non communiqué';
+  const lodgingLines = [
+    hotelName,
+    hotelAddress,
+    `Check-in: ${checkIn} · Check-out: ${checkOut}`,
+    pricePerNight,
+  ];
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(50, 50, 50);
+  for (const line of lodgingLines) {
+    if (!line) continue;
+    doc.text(line, 20, currentY);
+    currentY += 5;
+  }
+
+  return currentY + 4;
 }
 
 /**
@@ -270,6 +326,7 @@ export function exportTripPdf(trip: Trip): void {
   addFooter(doc, 1);
 
   currentY += 5; // Espacement après le header
+  currentY = addAccommodationSummary(doc, trip, currentY);
 
   // Ajouter chaque jour
   trip.days.forEach((day, index) => {

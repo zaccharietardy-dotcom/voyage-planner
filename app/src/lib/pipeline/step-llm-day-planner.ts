@@ -16,6 +16,12 @@ import { trackEstimatedCost } from '../services/apiCostGuard';
 type PlannerCandidateType = 'activity' | 'restaurant' | 'transport';
 type PlannerKind = 'iconic' | 'local_gem';
 
+export interface PlannerRatioFeasibleBand {
+  lower: number;
+  upper: number;
+  catalogIconicRatio: number;
+}
+
 export interface PlannerCatalogCandidate {
   candidateId: string;
   type: PlannerCandidateType;
@@ -30,6 +36,7 @@ export interface PlannerCatalogCandidate {
   sourceId: string;
   originalDayNumber?: number;
   fixedDayNumber?: number;
+  protectedReason?: ScoredActivity['protectedReason'];
 }
 
 export interface PlannerCatalog {
@@ -42,6 +49,7 @@ export interface PlannerCatalog {
 export interface DayPlanHint {
   dayNumber: number;
   candidateIds: string[];
+  dropCandidateIds?: string[];
   theme?: string;
 }
 
@@ -53,6 +61,10 @@ export interface DayPlanHints {
   invalidCandidateRefs: string[];
   parseAttempts: number;
   latencyMs: number;
+  requestedDropCount: number;
+  acceptedDropCount: number;
+  dropRecoveryCount: number;
+  ratioFeasibleBand: PlannerRatioFeasibleBand;
 }
 
 export interface ClosedWorldPlannerResult {
@@ -71,7 +83,7 @@ export interface ClosedWorldPlannerAttempt {
 }
 
 interface ParsedDayPlanPayload {
-  days: Array<{ dayNumber?: number; candidateIds?: unknown; theme?: unknown }>;
+  days: Array<{ dayNumber?: number; candidateIds?: unknown; dropCandidateIds?: unknown; theme?: unknown }>;
 }
 
 function normalizeText(value: string): string {
@@ -90,8 +102,6 @@ function timeToMinSimple(hhmm: string): number {
 
 const UNKNOWN_ID_RATE_MAX = 0.2;
 const MIN_GROUNDING_RATE = 0.6;
-const ICONIC_RATIO_MIN = 0.55;
-const ICONIC_RATIO_MAX = 0.65;
 const MIN_PLANNER_ATTEMPT_TIMEOUT_MS = 3000;
 const MAX_PLANNER_ATTEMPT_TIMEOUT_MS = 14000;
 const PLANNER_ATTEMPT_GUARD_MS = 800;
@@ -125,6 +135,33 @@ function computeRatio(candidates: PlannerCatalogCandidate[]): { iconic: number; 
     iconic: Number(iconicRatio.toFixed(3)),
     localGem: Number((1 - iconicRatio).toFixed(3)),
   };
+}
+
+export function computeFeasibleRatioBand(candidates: PlannerCatalogCandidate[]): PlannerRatioFeasibleBand {
+  const relevant = candidates.filter((candidate) => candidate.type === 'activity');
+  if (relevant.length === 0) {
+    return { lower: 0.5, upper: 0.7, catalogIconicRatio: 0.6 };
+  }
+  const iconicCount = relevant.filter((candidate) => candidate.kind === 'iconic').length;
+  const catalogIconicRatio = iconicCount / relevant.length;
+  const lower = Math.max(0.35, catalogIconicRatio - 0.10);
+  const upper = Math.min(0.80, catalogIconicRatio + 0.10);
+  return {
+    lower: Number(lower.toFixed(3)),
+    upper: Number(upper.toFixed(3)),
+    catalogIconicRatio: Number(catalogIconicRatio.toFixed(3)),
+  };
+}
+
+function isProtectedDropCandidate(candidate: PlannerCatalogCandidate): boolean {
+  return Boolean(
+    candidate.mustSee
+    || candidate.fixedDayNumber
+    || candidate.protectedReason === 'must_see'
+    || candidate.protectedReason === 'day_trip'
+    || candidate.protectedReason === 'day_trip_anchor'
+    || candidate.protectedReason === 'user_forced'
+  );
 }
 
 function shouldLockActivity(activity: ScoredActivity, cluster: ActivityCluster): boolean {
@@ -181,6 +218,7 @@ export function buildPlannerCatalog(
         sourceId,
         originalDayNumber: cluster.dayNumber,
         fixedDayNumber: locked ? cluster.dayNumber : undefined,
+        protectedReason: activity.protectedReason,
       });
     }
   }
@@ -246,6 +284,9 @@ function buildPrompt(
   timeWindows: DayTimeWindow[],
 ): string {
   const activityCandidates = catalog.candidates.filter((candidate) => candidate.type === 'activity');
+  const ratioBand = computeFeasibleRatioBand(activityCandidates);
+  const movableCount = activityCandidates.filter((candidate) => !isProtectedDropCandidate(candidate)).length;
+  const dropCap = Math.min(3, Math.floor(movableCount * 0.15));
   const lines = activityCandidates.map((candidate) => {
     const fixed = candidate.fixedDayNumber ? `FIXED_DAY=${candidate.fixedDayNumber}` : 'MOVABLE';
     const dur = candidate.durationBounds ? `${candidate.durationBounds.min}-${candidate.durationBounds.max}min` : '60-120min';
@@ -275,15 +316,15 @@ function buildPrompt(
     'RÈGLES STRICTES:',
     '1) Utilise uniquement les candidateIds fournis (aucun nom libre).',
     '2) Les IDs FIXED_DAY doivent rester sur ce jour.',
-    '3) Aucun doublon, aucune suppression: toutes les activités doivent être assignées.',
-    '4) Vise un ratio 60/40 iconique/pépites (bande 55-65% iconique).',
+    `3) Tu peux supprimer des candidats movables, mais reste sous ${dropCap} drops globaux (must-see/fixed interdits).`,
+    `4) Vise un ratio iconique réaliste dans la bande ${Math.round(ratioBand.lower * 100)}-${Math.round(ratioBand.upper * 100)}% (catalog=${Math.round(ratioBand.catalogIconicRatio * 100)}%).`,
     '5) Évite le zigzag: privilégie les activités de même zone le même jour.',
     '6) Respecte la capacité de chaque jour (somme durées dans la fenêtre).',
     '',
     'FORMAT JSON OBLIGATOIRE:',
     '{',
     '  "days": [',
-    '    { "dayNumber": 1, "candidateIds": ["act:..."], "theme": "..." }',
+    '    { "dayNumber": 1, "candidateIds": ["act:..."], "dropCandidateIds": ["act:..."], "theme": "..." }',
     '  ]',
     '}',
   ].join('\n');
@@ -313,11 +354,12 @@ function buildRepairPrompt(
     windows.join('\n'),
     '',
     'Format OBLIGATOIRE:',
-    '{"days":[{"dayNumber":1,"candidateIds":["act:..."],"theme":"..."}]}',
+    '{"days":[{"dayNumber":1,"candidateIds":["act:..."],"dropCandidateIds":["act:..."],"theme":"..."}]}',
     '',
     'Règles:',
     '- dayNumber entier',
     '- candidateIds tableau de strings uniquement',
+    '- dropCandidateIds tableau de strings uniquement (optionnel)',
     '- aucun texte hors JSON',
     '',
     'JSON à réparer:',
@@ -326,7 +368,7 @@ function buildRepairPrompt(
 }
 
 function normalizeParsedPayload(
-  parsed: ParsedDayPlanPayload | Array<{ dayNumber?: number; candidateIds?: unknown; theme?: unknown }>
+  parsed: ParsedDayPlanPayload | Array<{ dayNumber?: number; candidateIds?: unknown; dropCandidateIds?: unknown; theme?: unknown }>
 ): ParsedDayPlanPayload | null {
   const rows = Array.isArray(parsed) ? parsed : parsed.days;
   if (!Array.isArray(rows)) return null;
@@ -337,10 +379,14 @@ function normalizeParsedPayload(
     if (!Number.isInteger(row.dayNumber)) return null;
     if (!Array.isArray(row.candidateIds)) return null;
     if (row.candidateIds.some((id) => typeof id !== 'string')) return null;
+    if (row.dropCandidateIds !== undefined && (!Array.isArray(row.dropCandidateIds) || row.dropCandidateIds.some((id) => typeof id !== 'string'))) {
+      return null;
+    }
     if (row.theme !== undefined && typeof row.theme !== 'string') return null;
     normalized.push({
       dayNumber: row.dayNumber,
       candidateIds: row.candidateIds,
+      dropCandidateIds: row.dropCandidateIds,
       theme: row.theme,
     });
   }
@@ -350,7 +396,7 @@ function normalizeParsedPayload(
 }
 
 function parseDayHints(rawText: string): ParsedDayPlanPayload | null {
-  const parsed = extractStrictJson<ParsedDayPlanPayload | Array<{ dayNumber?: number; candidateIds?: unknown; theme?: unknown }>>(rawText);
+  const parsed = extractStrictJson<ParsedDayPlanPayload | Array<{ dayNumber?: number; candidateIds?: unknown; dropCandidateIds?: unknown; theme?: unknown }>>(rawText);
   if (!parsed) return null;
   return normalizeParsedPayload(parsed);
 }
@@ -399,15 +445,22 @@ function rebuildClustersFromHints(
   hints: ParsedDayPlanPayload,
   catalog: PlannerCatalog,
   originalClusters: ActivityCluster[],
+  timeWindows: DayTimeWindow[] = [],
 ): {
   clusters: ActivityCluster[];
   groundingRate: number;
   unknownIdRate: number;
   invalidCandidateRefs: string[];
   ratioIconicLocal: { iconic: number; localGem: number };
+  requestedDropCount: number;
+  acceptedDropCount: number;
+  dropRecoveryCount: number;
+  ratioFeasibleBand: PlannerRatioFeasibleBand;
 } {
   const activityCandidates = catalog.candidates.filter((candidate) => candidate.type === 'activity');
+  const ratioFeasibleBand = computeFeasibleRatioBand(activityCandidates);
   const candidateById = new Map(activityCandidates.map((candidate) => [candidate.candidateId, candidate]));
+  const candidateBySourceId = new Map(activityCandidates.map((candidate) => [candidate.sourceId, candidate]));
   const activityBySourceId = new Map<string, ScoredActivity>();
 
   for (const cluster of originalClusters) {
@@ -422,7 +475,14 @@ function rebuildClustersFromHints(
   const invalidCandidateRefs: string[] = [];
   let totalRequestedRefs = 0;
   let totalValidRefs = 0;
-  const requestedCandidates: PlannerCatalogCandidate[] = [];
+  const requestedDropIds = new Set<string>();
+
+  const isTransitDay = (dayNumber: number): boolean => {
+    const timeWindow = timeWindows.find((window) => window.dayNumber === dayNumber);
+    if (timeWindow?.hasArrivalTransport || timeWindow?.hasDepartureTransport) return true;
+    const cluster = originalClusters[dayNumber - 1];
+    return cluster?.plannerRole === 'arrival' || cluster?.plannerRole === 'departure';
+  };
 
   for (const day of hints.days) {
     const dayNumber = Number(day.dayNumber);
@@ -439,10 +499,21 @@ function rebuildClustersFromHints(
         continue;
       }
       totalValidRefs++;
-      requestedCandidates.push(candidate);
       if (globallyAssigned.has(rawId)) continue;
       globallyAssigned.add(rawId);
       accepted.push(rawId);
+    }
+    const dropIds = Array.isArray(day.dropCandidateIds) ? day.dropCandidateIds : [];
+    for (const rawDropId of dropIds) {
+      if (typeof rawDropId !== 'string') continue;
+      totalRequestedRefs++;
+      const candidate = candidateById.get(rawDropId);
+      if (!candidate) {
+        invalidCandidateRefs.push(rawDropId);
+        continue;
+      }
+      totalValidRefs++;
+      requestedDropIds.add(rawDropId);
     }
     normalizedByDay.set(dayNumber, accepted);
   }
@@ -465,31 +536,159 @@ function rebuildClustersFromHints(
     }
   }
 
-  // Put unassigned activities back to their original day.
+  // Explicit LLM drops: remove from assigned days before constraint checks.
+  for (const droppedCandidateId of requestedDropIds) {
+    const candidate = candidateById.get(droppedCandidateId);
+    if (!candidate || isProtectedDropCandidate(candidate)) continue;
+    for (const [dayNumber, ids] of normalizedByDay.entries()) {
+      const idx = ids.indexOf(droppedCandidateId);
+      if (idx < 0) continue;
+      ids.splice(idx, 1);
+      normalizedByDay.set(dayNumber, ids);
+      globallyAssigned.delete(droppedCandidateId);
+    }
+  }
+
+  const requestedDropCandidates = new Map<string, PlannerCatalogCandidate>();
+
+  // Implicit drops for movable unassigned candidates.
   for (const candidate of activityCandidates) {
     if (globallyAssigned.has(candidate.candidateId)) continue;
-    const fallbackDay = candidate.originalDayNumber || 1;
+    if (isProtectedDropCandidate(candidate)) {
+      const fallbackDay = candidate.fixedDayNumber || candidate.originalDayNumber || 1;
+      const ids = normalizedByDay.get(fallbackDay) || [];
+      if (!ids.includes(candidate.candidateId)) ids.unshift(candidate.candidateId);
+      normalizedByDay.set(fallbackDay, ids);
+      globallyAssigned.add(candidate.candidateId);
+    } else {
+      requestedDropCandidates.set(candidate.candidateId, candidate);
+    }
+  }
+  for (const droppedCandidateId of requestedDropIds) {
+    const candidate = candidateById.get(droppedCandidateId);
+    if (!candidate || isProtectedDropCandidate(candidate)) continue;
+    requestedDropCandidates.set(candidate.candidateId, candidate);
+  }
+
+  const movableCandidates = activityCandidates.filter((candidate) => !isProtectedDropCandidate(candidate));
+  const globalDropCap = Math.min(3, Math.floor(movableCandidates.length * 0.15));
+  const acceptedDropIds = new Set<string>();
+  const acceptedDropsByDay = new Map<number, number>();
+
+  const requestedDropList = [...requestedDropCandidates.values()].sort((left, right) => {
+    const leftDay = left.originalDayNumber || left.fixedDayNumber || 1;
+    const rightDay = right.originalDayNumber || right.fixedDayNumber || 1;
+    if (leftDay !== rightDay) return leftDay - rightDay;
+    return left.candidateId.localeCompare(right.candidateId);
+  });
+
+  for (const candidate of requestedDropList) {
+    const fallbackDay = candidate.originalDayNumber || candidate.fixedDayNumber || 1;
+    if (acceptedDropIds.size >= globalDropCap) continue;
+    if (!isTransitDay(fallbackDay) && (acceptedDropsByDay.get(fallbackDay) || 0) >= 1) continue;
+    acceptedDropIds.add(candidate.candidateId);
+    acceptedDropsByDay.set(fallbackDay, (acceptedDropsByDay.get(fallbackDay) || 0) + 1);
+  }
+
+  // Reinsert non-accepted drops on their original/fixed day.
+  for (const candidate of requestedDropList) {
+    if (acceptedDropIds.has(candidate.candidateId)) continue;
+    const fallbackDay = candidate.fixedDayNumber || candidate.originalDayNumber || 1;
     const ids = normalizedByDay.get(fallbackDay) || [];
-    ids.push(candidate.candidateId);
+    if (!ids.includes(candidate.candidateId)) ids.push(candidate.candidateId);
     normalizedByDay.set(fallbackDay, ids);
     globallyAssigned.add(candidate.candidateId);
   }
 
+  let dropRecoveryCount = 0;
+
+  // Guarantee minimum useful activities/day.
+  for (let dayNumber = 1; dayNumber <= originalClusters.length; dayNumber++) {
+    const dayIds = normalizedByDay.get(dayNumber) || [];
+    const minActivities = isTransitDay(dayNumber) ? 1 : 2;
+    if (dayIds.length >= minActivities) {
+      normalizedByDay.set(dayNumber, dayIds);
+      continue;
+    }
+
+    let missing = minActivities - dayIds.length;
+    const original = originalClusters[dayNumber - 1];
+    const dayZone = original?.dayTripDestination || `day-${dayNumber}`;
+    const dayCentroid = original?.centroid;
+
+    const refillPool = [...acceptedDropIds]
+      .map((candidateId) => candidateById.get(candidateId))
+      .filter((candidate): candidate is PlannerCatalogCandidate => Boolean(candidate))
+      .sort((left, right) => {
+        const leftSameDay = (left.originalDayNumber || 0) === dayNumber ? 0 : 1;
+        const rightSameDay = (right.originalDayNumber || 0) === dayNumber ? 0 : 1;
+        if (leftSameDay !== rightSameDay) return leftSameDay - rightSameDay;
+        const leftSameZone = left.zone === dayZone ? 0 : 1;
+        const rightSameZone = right.zone === dayZone ? 0 : 1;
+        if (leftSameZone !== rightSameZone) return leftSameZone - rightSameZone;
+        const leftShort = (left.durationBounds?.max || 120) <= 120 ? 0 : 1;
+        const rightShort = (right.durationBounds?.max || 120) <= 120 ? 0 : 1;
+        if (leftShort !== rightShort) return leftShort - rightShort;
+        if (!dayCentroid || !left.coords || !right.coords) return left.candidateId.localeCompare(right.candidateId);
+        const leftDist = calculateDistance(dayCentroid.lat, dayCentroid.lng, left.coords.lat, left.coords.lng);
+        const rightDist = calculateDistance(dayCentroid.lat, dayCentroid.lng, right.coords.lat, right.coords.lng);
+        return leftDist - rightDist;
+      });
+
+    for (const candidate of refillPool) {
+      if (missing <= 0) break;
+      if (!acceptedDropIds.has(candidate.candidateId)) continue;
+      if (dayIds.includes(candidate.candidateId)) continue;
+      dayIds.push(candidate.candidateId);
+      acceptedDropIds.delete(candidate.candidateId);
+      globallyAssigned.add(candidate.candidateId);
+      missing--;
+      dropRecoveryCount++;
+    }
+
+    if (missing > 0) {
+      for (const activity of original?.activities || []) {
+        if (missing <= 0) break;
+        const sourceId = activity.id || `${activity.name}:${original.dayNumber}`;
+        const candidate = candidateBySourceId.get(sourceId);
+        if (!candidate) continue;
+        if (dayIds.includes(candidate.candidateId)) continue;
+        if (globallyAssigned.has(candidate.candidateId)) continue;
+        dayIds.push(candidate.candidateId);
+        globallyAssigned.add(candidate.candidateId);
+        missing--;
+      }
+    }
+
+    normalizedByDay.set(dayNumber, dayIds);
+  }
+
   const rebuilt: ActivityCluster[] = [];
+  const usedCandidateIds = new Set<string>();
   for (let dayNumber = 1; dayNumber <= originalClusters.length; dayNumber++) {
     const original = originalClusters[dayNumber - 1];
     const dayIds = normalizedByDay.get(dayNumber) || [];
     const dayActivities: ScoredActivity[] = [];
-    for (const candidateId of dayIds) {
+    for (let orderIndex = 0; orderIndex < dayIds.length; orderIndex++) {
+      const candidateId = dayIds[orderIndex];
       const candidate = candidateById.get(candidateId);
       if (!candidate) continue;
       const activity = activityBySourceId.get(candidate.sourceId);
       if (!activity) continue;
-      dayActivities.push(activity);
+      dayActivities.push({
+        ...activity,
+        llmOrderIndex: orderIndex,
+      });
+      usedCandidateIds.add(candidateId);
     }
 
-    // Hard fallback: never produce an empty day from planner hints.
-    const finalActivities = dayActivities.length > 0 ? dayActivities : original.activities;
+    // Hard fallback safety: never produce an empty day from planner hints.
+    const finalActivities = dayActivities.length > 0
+      ? dayActivities
+      : original.activities.slice(0, Math.max(1, isTransitDay(dayNumber) ? 1 : Math.min(2, original.activities.length))).map((activity, index) => ({
+          ...activity,
+          llmOrderIndex: index,
+        }));
     const centroid = finalActivities.length > 0
       ? {
           lat: finalActivities.reduce((sum, activity) => sum + activity.latitude, 0) / finalActivities.length,
@@ -517,16 +716,15 @@ function rebuildClustersFromHints(
       isDayTrip: original.isDayTrip,
       dayTripDestination: original.dayTripDestination,
       plannerRole: original.plannerRole,
+      routingPolicy: 'llm_locked',
     });
   }
 
-  const usedCandidates = rebuilt.flatMap((cluster) => cluster.activities.map((activity) => {
-    const sourceId = activity.id || `${activity.name}:${cluster.dayNumber}`;
-    const match = activityCandidates.find((candidate) => candidate.sourceId === sourceId);
-    return match;
-  })).filter(Boolean) as PlannerCatalogCandidate[];
+  const usedCandidates = [...usedCandidateIds]
+    .map((candidateId) => candidateById.get(candidateId))
+    .filter((candidate): candidate is PlannerCatalogCandidate => Boolean(candidate));
 
-  const ratioIconicLocal = computeRatio(requestedCandidates.length > 0 ? requestedCandidates : usedCandidates);
+  const ratioIconicLocal = computeRatio(usedCandidates.length > 0 ? usedCandidates : activityCandidates);
   const groundingRate = totalRequestedRefs > 0 ? totalValidRefs / totalRequestedRefs : 0;
   const unknownIdRate = totalRequestedRefs > 0 ? invalidCandidateRefs.length / totalRequestedRefs : 0;
 
@@ -536,6 +734,10 @@ function rebuildClustersFromHints(
     unknownIdRate,
     invalidCandidateRefs,
     ratioIconicLocal,
+    requestedDropCount: requestedDropList.length,
+    acceptedDropCount: acceptedDropIds.size,
+    dropRecoveryCount,
+    ratioFeasibleBand,
   };
 }
 
@@ -630,7 +832,7 @@ export async function attemptClosedWorldDayPlanning(
     }
   }
 
-  const rebuilt = rebuildClustersFromHints(parsed, catalog, params.clusters);
+  const rebuilt = rebuildClustersFromHints(parsed, catalog, params.clusters, params.timeWindows);
   if (rebuilt.unknownIdRate > UNKNOWN_ID_RATE_MAX) {
     return {
       result: null,
@@ -652,7 +854,10 @@ export async function attemptClosedWorldDayPlanning(
     };
   }
 
-  if (rebuilt.ratioIconicLocal.iconic < ICONIC_RATIO_MIN || rebuilt.ratioIconicLocal.iconic > ICONIC_RATIO_MAX) {
+  if (
+    rebuilt.ratioIconicLocal.iconic < rebuilt.ratioFeasibleBand.lower
+    || rebuilt.ratioIconicLocal.iconic > rebuilt.ratioFeasibleBand.upper
+  ) {
     return {
       result: null,
       failureReason: 'ratio_out_of_band',
@@ -669,9 +874,13 @@ export async function attemptClosedWorldDayPlanning(
     const parsedIds = Array.isArray(parsedDay?.candidateIds)
       ? parsedDay!.candidateIds.filter((value): value is string => typeof value === 'string')
       : [];
+    const parsedDropIds = Array.isArray(parsedDay?.dropCandidateIds)
+      ? parsedDay!.dropCandidateIds.filter((value): value is string => typeof value === 'string')
+      : [];
     normalizedDays.push({
       dayNumber,
       candidateIds: parsedIds,
+      dropCandidateIds: parsedDropIds,
       theme: typeof parsedDay?.theme === 'string' ? parsedDay.theme : '',
     });
   }
@@ -688,6 +897,10 @@ export async function attemptClosedWorldDayPlanning(
         invalidCandidateRefs: rebuilt.invalidCandidateRefs,
         parseAttempts,
         latencyMs: Date.now() - t0,
+        requestedDropCount: rebuilt.requestedDropCount,
+        acceptedDropCount: rebuilt.acceptedDropCount,
+        dropRecoveryCount: rebuilt.dropRecoveryCount,
+        ratioFeasibleBand: rebuilt.ratioFeasibleBand,
       },
     },
     groundingRate: rebuilt.groundingRate,
@@ -700,4 +913,5 @@ export async function attemptClosedWorldDayPlanning(
 export const __test__ = {
   parseDayHints,
   rebuildClustersFromHints,
+  computeFeasibleRatioBand,
 };

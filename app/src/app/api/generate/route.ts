@@ -7,6 +7,7 @@ import { normalizeCity } from '@/lib/services/cityNormalization';
 import { deriveBillingState, fetchEntitlementsForUser } from '@/lib/server/billingEntitlements';
 import { checkAndIncrementRateLimit, type RateLimitSupabaseLike } from '@/lib/server/dbRateLimit';
 import { resolveRequestAuth } from '@/lib/server/requestAuth';
+import { classifyGenerationError } from '@/lib/utils/quotaErrors';
 import { registerQuestion, cleanupSession } from './sessionStore';
 import { upsertGenerationSession } from './sessionDb';
 import { generateTripSchema } from '@/lib/validations/generate';
@@ -310,6 +311,7 @@ export async function POST(request: NextRequest) {
           cleanupSession(sessionId);
           const message = error instanceof Error ? error.message : String(error);
           const stack = error instanceof Error ? error.stack : '';
+          const classified = classifyGenerationError(message);
           console.error('[Generate] ❌ Erreur de génération:', message);
           console.error('[Generate] Stack trace:', stack);
           Sentry.captureException(error, {
@@ -318,12 +320,17 @@ export async function POST(request: NextRequest) {
 
           // S'assurer que le message d'erreur est bien envoyé
           try {
-            // Nettoyer le message pour le JSON — tronquer si trop long
-            const safeMessage = message
-              .replace(/"/g, '\\"')
+            // Keep user-facing messages stable and safe for SSE.
+            const safeMessage = classified.message
               .replace(/\n/g, ' ')
+              .trim()
               .substring(0, 500);
-            controller.enqueue(encoder.encode(`data: {"status":"error","error":"${safeMessage}"}\n\n`));
+            const errorPayload = {
+              status: 'error',
+              error: safeMessage,
+              code: classified.code,
+            };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorPayload)}\n\n`));
             await persistSession({
               status: 'error',
               progress: { label: 'failed' },
@@ -349,11 +356,15 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (activeUserId) activeGenerations.delete(activeUserId);
     const message = error instanceof Error ? error.message : String(error);
+    const classified = classifyGenerationError(message);
     console.error('Erreur de génération:', message);
     Sentry.captureException(error);
     return NextResponse.json(
-      { error: `Erreur lors de la génération du voyage: ${message}` },
-      { status: 500 }
+      {
+        error: `Erreur lors de la generation du voyage: ${classified.message}`,
+        code: classified.code,
+      },
+      { status: classified.httpStatus }
     );
   }
 }

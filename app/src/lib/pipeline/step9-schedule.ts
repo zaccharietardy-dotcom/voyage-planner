@@ -849,9 +849,9 @@ export function createCheckoutItem(
     startTime: addMinutes(checkoutTime, -30),
     endTime: checkoutTime,
     type: 'checkout',
-    title: `Check-out — ${hotel.name}`,
+    title: sanitizeDisplayText(`Check-out — ${hotel.name}`),
     description: `Libérer la chambre avant ${checkoutTime}`,
-    locationName: hotel.name || '',
+    locationName: sanitizeDisplayText(hotel.name || ''),
     latitude: hotel.latitude || 0,
     longitude: hotel.longitude || 0,
     orderIndex,
@@ -876,9 +876,9 @@ export function createCheckinItem(
     startTime: checkinTime,
     endTime: addMinutes(checkinTime, 15),
     type: 'checkin',
-    title: `Check-in — ${hotel.name}`,
+    title: sanitizeDisplayText(`Check-in — ${hotel.name}`),
     description: `Arrivée et installation à l'hôtel`,
-    locationName: hotel.name || '',
+    locationName: sanitizeDisplayText(hotel.name || ''),
     latitude: hotel.latitude || 0,
     longitude: hotel.longitude || 0,
     orderIndex,
@@ -896,9 +896,20 @@ export function createCheckinItem(
  * Normalize activity titles: convert all-caps or all-lowercase to Title Case.
  * Preserves mixed-case titles that are already correct.
  */
+function sanitizeDisplayText(value: string): string {
+  return (value || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/[→←↔⟶⟵]/g, '->')
+    .replace(/[’‘]/g, '\'')
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function normalizeActivityTitle(title: string, destination?: string): string {
   if (!title) return 'Activity';
-  let cleaned = title.trim();
+  let cleaned = sanitizeDisplayText(title);
   if (!cleaned) return 'Activity';
 
   // Strip pipe/em-dash SEO suffixes: "Jardin Majorelle | Musée Berbère" → "Jardin Majorelle"
@@ -972,8 +983,8 @@ export function createTravelItem(
     startTime,
     endTime: addMinutes(startTime, durationMinutes),
     type: 'transport',
-    title: `${modeLabel} — ${distLabel}`,
-    description: `${leg.fromName} → ${leg.toName}`,
+    title: sanitizeDisplayText(`${modeLabel} — ${distLabel}`),
+    description: sanitizeDisplayText(`${leg.fromName} -> ${leg.toName}`),
     locationName: '',
     latitude: toActivity.latitude,
     longitude: toActivity.longitude,
@@ -1030,7 +1041,7 @@ export function createActivityItem(
     type: 'activity',
     title,
     description,
-    locationName: activity.name || '',
+    locationName: sanitizeDisplayText(activity.name || ''),
     latitude: activity.latitude,
     longitude: activity.longitude,
     orderIndex,
@@ -1048,6 +1059,7 @@ export function createActivityItem(
       sourcePackId: activity.sourcePackId,
       plannerRole: activity.plannerRole,
       originalDayNumber: activity.originalDayNumber ?? dayNumber,
+      llmOrderIndex: activity.llmOrderIndex,
     },
     openingHours: activity.openingHours,
     openingHoursByDay: activity.openingHoursByDay,
@@ -1068,15 +1080,16 @@ export function createRestaurantItem(
 ): TripItem {
   const restaurant = meal.primary;
   const mealLabel = getMealLabel(mealType);
+  const restaurantName = sanitizeDisplayText(restaurant.name || 'Restaurant');
   return {
     id: `meal-${dayNumber}-${mealType}`,
     dayNumber,
     startTime,
     endTime: addMinutes(startTime, duration),
     type: 'restaurant',
-    title: `${mealLabel} — ${restaurant.name || 'Restaurant'}`,
-    description: `${mealLabel} à ${restaurant.name}`,
-    locationName: restaurant.name || '',
+    title: sanitizeDisplayText(`${mealLabel} — ${restaurantName}`),
+    description: sanitizeDisplayText(`${mealLabel} à ${restaurantName}`),
+    locationName: restaurantName,
     latitude: restaurant.latitude || 0,
     longitude: restaurant.longitude || 0,
     orderIndex,
@@ -1090,7 +1103,7 @@ export function createRestaurantItem(
     bookingUrl: restaurant.reservationUrl || restaurant.googleMapsUrl,
     googleMapsPlaceUrl: restaurant.googlePlaceId
       ? `https://www.google.com/maps/place/?q=place_id:${restaurant.googlePlaceId}`
-      : restaurant.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.name || '')}`,
+      : restaurant.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantName)}`,
     openingHoursByDay: restaurant.openingHours,
   };
 }

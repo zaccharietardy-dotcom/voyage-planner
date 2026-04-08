@@ -14,6 +14,7 @@ export interface PlanningMeta {
   sourcePackId?: string;
   plannerRole?: PlannerRole;
   originalDayNumber?: number;
+  llmOrderIndex?: number;
 }
 
 const ROLE_COMPAT: Record<PlannerRole, PlannerRole[]> = {

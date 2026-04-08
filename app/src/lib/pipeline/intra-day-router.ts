@@ -216,6 +216,7 @@ export function optimizeClusterRouting(
   const dayEndMin = timeToMin(dayEndTime);
 
   for (const cluster of clusters) {
+    if (cluster.routingPolicy === 'llm_locked') continue;
     if (cluster.isDayTrip) continue; // day trips have their own routing
     if (cluster.activities.length <= 2) continue;
 

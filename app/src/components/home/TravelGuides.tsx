@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { generateTripStream } from '@/lib/generateTrip';
 import { GeneratingScreen } from '@/components/trip/GeneratingScreen';
 import { TripPreferences } from '@/lib/types';
+import { isProviderQuotaLikeMessage, isUserQuotaLikeMessage } from '@/lib/utils/quotaErrors';
 
 const GROUP_TYPE_LABELS_SHORT: Record<string, string> = {
   solo: 'Solo',
@@ -97,10 +98,19 @@ export function TravelGuides() {
       router.push(`/trip/${trip.id}`);
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Erreur inconnue';
+      const normalized = msg.toLowerCase();
+      const userQuotaExceeded =
+        isUserQuotaLikeMessage(msg)
+        || normalized.includes('quota_exceeded')
+        || normalized.includes('rate_limit')
+        || normalized.includes('trop de generation');
+      const providerQuotaExceeded = !userQuotaExceeded && isProviderQuotaLikeMessage(msg);
       if (msg.includes('authentifié') || msg.includes('Non authentifié')) {
         router.push('/login?redirect=/');
-      } else if (msg.includes('QUOTA') || msg.includes('Limite') || msg.includes('RATE_LIMIT') || msg.includes('Trop de génération')) {
+      } else if (userQuotaExceeded) {
         router.push('/pricing?reason=' + encodeURIComponent('Passez à Pro pour des voyages illimités'));
+      } else if (providerQuotaExceeded) {
+        toast.error('Nos APIs partenaires sont temporairement en limite de quota. Reessaie dans 1 a 2 minutes.');
       } else {
         toast.error(msg);
       }

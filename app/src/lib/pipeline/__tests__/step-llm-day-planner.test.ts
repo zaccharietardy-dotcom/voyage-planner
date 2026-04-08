@@ -124,4 +124,76 @@ describe('step-llm-day-planner', () => {
     expect(parsed).not.toBeNull();
     expect(parsed?.days[0].dayNumber).toBe(1);
   });
+
+  it('computes an adaptive feasible ratio band for skewed catalogs', () => {
+    const iconic = Array.from({ length: 5 }, (_, idx) => makeActivity({
+      id: `iconic-${idx + 1}`,
+      name: `Iconic ${idx + 1}`,
+      mustSee: true,
+      source: 'mustsee',
+      latitude: 48.85 + idx * 0.001,
+      longitude: 2.35 + idx * 0.001,
+    }));
+    const local = makeActivity({
+      id: 'local-1',
+      name: 'Pepite locale',
+      mustSee: false,
+      source: 'google_places',
+      latitude: 48.861,
+      longitude: 2.349,
+    });
+    const catalog = buildPlannerCatalog([makeCluster(1, [...iconic, local])], [], [] as DayTripPack[], 'Bretagne', 'spread');
+    const activityCandidates = catalog.candidates.filter((candidate) => candidate.type === 'activity');
+    const band = __test__.computeFeasibleRatioBand(activityCandidates);
+    expect(band.catalogIconicRatio).toBeCloseTo(0.833, 2);
+    expect(band.lower).toBeCloseTo(0.733, 2);
+    expect(band.upper).toBe(0.8);
+  });
+
+  it('applies constrained drops and keeps llm_locked routing', () => {
+    const fixed = makeActivity({ id: 'fix-1', name: 'Anchor fixe', mustSee: true, source: 'mustsee', latitude: 48.8, longitude: -2.0 });
+    const movablesDay1 = Array.from({ length: 4 }, (_, idx) => makeActivity({
+      id: `d1-m-${idx + 1}`,
+      name: `Movable D1 ${idx + 1}`,
+      latitude: 48.81 + idx * 0.002,
+      longitude: -2.01 + idx * 0.002,
+    }));
+    const movablesDay2 = Array.from({ length: 4 }, (_, idx) => makeActivity({
+      id: `d2-m-${idx + 1}`,
+      name: `Movable D2 ${idx + 1}`,
+      latitude: 48.90 + idx * 0.002,
+      longitude: -2.11 + idx * 0.002,
+    }));
+
+    const clusters: ActivityCluster[] = [
+      makeCluster(1, [fixed, ...movablesDay1]),
+      makeCluster(2, [...movablesDay2]),
+    ];
+    const catalog = buildPlannerCatalog(clusters, [], [] as DayTripPack[], 'Bretagne', 'spread');
+    const fixedCandidateId = catalog.candidates.find((candidate) => candidate.sourceId === 'fix-1')?.candidateId;
+    expect(fixedCandidateId).toBeDefined();
+
+    const parsed = __test__.parseDayHints(JSON.stringify({
+      days: [
+        {
+          dayNumber: 1,
+          candidateIds: [fixedCandidateId].filter((value): value is string => Boolean(value)),
+          dropCandidateIds: movablesDay1
+            .map((a) => catalog.candidates.find((c) => c.sourceId === a.id)?.candidateId)
+            .filter((value): value is string => Boolean(value)),
+        },
+        { dayNumber: 2, candidateIds: [] },
+      ],
+    }));
+    expect(parsed).not.toBeNull();
+
+    const rebuilt = __test__.rebuildClustersFromHints(parsed!, catalog, clusters);
+    expect(rebuilt.requestedDropCount).toBeGreaterThan(0);
+    expect(rebuilt.acceptedDropCount).toBeLessThanOrEqual(1); // floor(15% of 8 movables) => 1
+    expect(rebuilt.clusters.every((cluster) => cluster.activities.length >= 2)).toBe(true);
+    expect(rebuilt.clusters.every((cluster) => cluster.routingPolicy === 'llm_locked')).toBe(true);
+
+    const day1Ids = new Set(rebuilt.clusters[0].activities.map((activity) => activity.id));
+    expect(day1Ids.has('fix-1')).toBe(true);
+  });
 });

@@ -426,6 +426,7 @@ export interface TripItem {
     sourcePackId?: string;
     plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
     originalDayNumber?: number;
+    llmOrderIndex?: number;
   };
   // Opening hours data for scheduling validation
   openingHours?: { open: string; close: string };
@@ -646,6 +647,7 @@ export interface Trip {
     restaurantRefetchMissCount?: number;
     dayTripDestinationMismatchCount?: number;
     sameFamilyOverloadCount?: number;
+    llmOrderPreservedRate?: number;
     // LLM rebalance A/B fork diagnostics
     llmRebalanceUsed?: boolean;
     llmRebalanceScore?: number | null;
@@ -662,6 +664,11 @@ export interface Trip {
       iconic: number;
       localGem: number;
     };
+    ratioFeasibleBand?: {
+      lower: number;
+      upper: number;
+      catalogIconicRatio: number;
+    };
   };
   generationDiagnostics?: {
     validationLatencyMs: number;
@@ -675,6 +682,15 @@ export interface Trip {
     plannerTimeoutRate?: number;
     closedWorldActivationRate?: number;
     mealSemanticReplacements?: number;
+    llmOrderPreservedRate?: number;
+    requestedDropCount?: number;
+    acceptedDropCount?: number;
+    dropRecoveryCount?: number;
+    ratioFeasibleBand?: {
+      lower: number;
+      upper: number;
+      catalogIconicRatio: number;
+    };
     freeTimeMinutesByDay?: Record<string, number>;
     replacementCounts?: {
       lateMealReplacementCount: number;

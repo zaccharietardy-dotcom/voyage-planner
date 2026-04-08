@@ -150,6 +150,8 @@ export interface ScoredActivity extends Attraction {
   plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
   /** Original day number from the planner before any repair pass */
   originalDayNumber?: number;
+  /** Closed-world planner order index for llm_locked days */
+  llmOrderIndex?: number;
 }
 
 // ============================================
@@ -166,6 +168,7 @@ export interface ActivityCluster {
   isDayTrip?: boolean; // true if cluster is a day trip to a distant destination
   dayTripDestination?: string; // e.g. "Pompei"
   plannerRole?: 'arrival' | 'full_city' | 'day_trip' | 'recovery' | 'departure' | 'short_full_day';
+  routingPolicy?: 'llm_locked' | 'geo_optimized';
 }
 
 // ============================================
