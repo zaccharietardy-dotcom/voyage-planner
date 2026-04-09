@@ -54,6 +54,18 @@ export interface DayPlanHint {
   candidateIds: string[];
   dropCandidateIds?: string[];
   theme?: string;
+  narrative?: string;
+  activityTips?: Record<string, string>;
+  mealContext?: Record<string, string>;
+  routeNotes?: Record<string, string>;
+}
+
+export interface LLMEnrichments {
+  dayThemes: Record<number, string>;
+  dayNarratives: Record<number, string>;
+  activityTips: Record<string, string>;
+  mealContext: { [dayNumber: number]: Record<string, string> };
+  routeNotes: Record<string, string>;
 }
 
 export interface DayPlanHints {
@@ -75,6 +87,7 @@ export interface ClosedWorldPlannerResult {
   clusters: ActivityCluster[];
   hints: DayPlanHints;
   catalog: PlannerCatalog;
+  enrichments: LLMEnrichments;
 }
 
 export interface ClosedWorldPlannerAttempt {
@@ -118,7 +131,16 @@ export interface CandidateDecisionEvent {
 }
 
 interface ParsedDayPlanPayload {
-  days: Array<{ dayNumber?: number; candidateIds?: unknown; dropCandidateIds?: unknown; theme?: unknown }>;
+  days: Array<{
+    dayNumber?: number;
+    candidateIds?: unknown;
+    dropCandidateIds?: unknown;
+    theme?: unknown;
+    narrative?: unknown;
+    activityTips?: unknown;
+    mealContext?: unknown;
+    routeNotes?: unknown;
+  }>;
 }
 
 function normalizeText(value: string): string {
@@ -490,10 +512,26 @@ function buildPrompt(
     '5) Évite le zigzag: privilégie les activités de même zone le même jour.',
     '6) Respecte la capacité de chaque jour (somme durées dans la fenêtre).',
     '',
+    'ENRICHISSEMENT NARRATIF:',
+    '7) Pour chaque jour, écris "theme" (titre évocateur 8-12 mots) et "narrative" (2 phrases immersives décrivant l\'arc de la journée).',
+    '8) Pour chaque activité, écris un "activityTips" (1-2 phrases conseil PRUDENT: meilleur moment, astuce locale, détail surprenant). PAS de faits durs non vérifiables (pas "ouvert depuis 1973", pas "marée basse à 9h47"). Préfère "vérifiez les horaires de marée".',
+    '9) Pour chaque repas (lunch/dinner), écris un "mealContext": 1 phrase décrivant la cuisine locale de la zone (pas un restaurant spécifique).',
+    '10) Pour chaque trajet entre deux activités consécutives, écris un "routeNotes" (clé "idFrom->idTo"): 1 phrase sur ce qu\'on voit en chemin.',
+    '11) CONSCIENCE TEMPORELLE: viewpoints en fin d\'après-midi, marchés le matin, musées tôt ou tard (moins de monde), plages en milieu de journée.',
+    '',
     'FORMAT JSON OBLIGATOIRE:',
     '{',
     '  "days": [',
-    '    { "dayNumber": 1, "candidateIds": ["act:..."], "dropCandidateIds": ["act:..."], "theme": "..." }',
+    '    {',
+    '      "dayNumber": 1,',
+    '      "candidateIds": ["act:..."],',
+    '      "dropCandidateIds": ["act:..."],',
+    '      "theme": "Titre évocateur du jour",',
+    '      "narrative": "2 phrases immersives.",',
+    '      "activityTips": { "act:xxx": "Conseil prudent 1-2 phrases" },',
+    '      "mealContext": { "lunch": "Cuisine locale de la zone", "dinner": "..." },',
+    '      "routeNotes": { "act:a->act:b": "Ce qu\'on voit en chemin" }',
+    '    }',
     '  ]',
     '}',
   ].join('\n');
@@ -568,8 +606,21 @@ function isTruncationFinishReason(finishReason?: string): boolean {
     || normalized.includes('token_limit');
 }
 
+function safeStringRecord(value: unknown): Record<string, string> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const result: Record<string, string> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof k === 'string' && typeof v === 'string' && v.trim()) {
+      result[k] = v.trim();
+      count++;
+    }
+  }
+  return count > 0 ? result : undefined;
+}
+
 function normalizeParsedPayload(
-  parsed: ParsedDayPlanPayload | Array<{ dayNumber?: number; candidateIds?: unknown; dropCandidateIds?: unknown; theme?: unknown }>
+  parsed: ParsedDayPlanPayload | Array<ParsedDayPlanPayload['days'][number]>
 ): ParsedDayPlanPayload | null {
   const rows = Array.isArray(parsed) ? parsed : parsed.days;
   if (!Array.isArray(rows)) return null;
@@ -589,6 +640,10 @@ function normalizeParsedPayload(
       candidateIds: row.candidateIds,
       dropCandidateIds: row.dropCandidateIds,
       theme: row.theme,
+      narrative: typeof row.narrative === 'string' ? row.narrative.trim() : undefined,
+      activityTips: safeStringRecord(row.activityTips),
+      mealContext: safeStringRecord(row.mealContext),
+      routeNotes: safeStringRecord(row.routeNotes),
     });
   }
 
@@ -596,8 +651,41 @@ function normalizeParsedPayload(
   return { days: normalized };
 }
 
+function extractEnrichments(parsed: ParsedDayPlanPayload): LLMEnrichments {
+  const enrichments: LLMEnrichments = {
+    dayThemes: {},
+    dayNarratives: {},
+    activityTips: {},
+    mealContext: {} as { [dayNumber: number]: Record<string, string> },
+    routeNotes: {},
+  };
+  for (const day of parsed.days) {
+    const dn = day.dayNumber ?? 0;
+    if (typeof day.theme === 'string' && day.theme.trim()) {
+      enrichments.dayThemes[dn] = day.theme.trim();
+    }
+    if (typeof day.narrative === 'string' && day.narrative.trim()) {
+      enrichments.dayNarratives[dn] = day.narrative.trim();
+    }
+    if (day.activityTips) {
+      for (const [k, v] of Object.entries(day.activityTips)) {
+        enrichments.activityTips[k] = v;
+      }
+    }
+    if (day.mealContext && Object.keys(day.mealContext).length > 0) {
+      enrichments.mealContext[dn] = day.mealContext as Record<string, string>;
+    }
+    if (day.routeNotes) {
+      for (const [k, v] of Object.entries(day.routeNotes)) {
+        enrichments.routeNotes[k] = v;
+      }
+    }
+  }
+  return enrichments;
+}
+
 function parseDayHints(rawText: string): ParsedDayPlanPayload | null {
-  const parsed = extractStrictJson<ParsedDayPlanPayload | Array<{ dayNumber?: number; candidateIds?: unknown; dropCandidateIds?: unknown; theme?: unknown }>>(rawText);
+  const parsed = extractStrictJson<ParsedDayPlanPayload | Array<ParsedDayPlanPayload['days'][number]>>(rawText);
   if (!parsed) return null;
   return normalizeParsedPayload(parsed);
 }
@@ -667,7 +755,7 @@ async function fetchOpenAiPlannerFast(
   const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
   const maxRetries = Math.max(0, options.maxRetries ?? 0);
   const retryDelayMs = Math.max(200, options.retryDelayMs ?? 450);
-  const maxOutputTokens = Math.max(500, Math.min(3000, options.maxOutputTokens ?? 1400));
+  const maxOutputTokens = Math.max(500, Math.min(4500, options.maxOutputTokens ?? 2400));
   const model = process.env.OPENAI_PLANNER_MODEL || 'gpt-5-mini';
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -733,7 +821,7 @@ async function fetchAnthropicPlannerFast(
   const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
   const maxRetries = Math.max(0, options.maxRetries ?? 0);
   const retryDelayMs = Math.max(200, options.retryDelayMs ?? 450);
-  const maxOutputTokens = Math.max(500, Math.min(3000, options.maxOutputTokens ?? 1200));
+  const maxOutputTokens = Math.max(500, Math.min(4500, options.maxOutputTokens ?? 2000));
   const model = process.env.ANTHROPIC_PLANNER_MODEL || 'claude-haiku-4-5';
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -1610,10 +1698,13 @@ export async function attemptClosedWorldDayPlanning(
       });
     }
 
+    const enrichments = extractEnrichments(parsed);
+
     return {
       result: {
         clusters: rebuilt.clusters,
         catalog,
+        enrichments,
         hints: {
           days: normalizedDays,
           ratioIconicLocal: rebuilt.ratioIconicLocal,

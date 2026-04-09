@@ -405,6 +405,7 @@ export interface TripItem {
   geoSource?: 'place' | 'known_product' | 'geocode' | 'city_fallback'; // Origine de la coordonnée
   geoConfidence?: 'high' | 'medium' | 'low'; // Confiance de géolocalisation
   qualityFlags?: string[]; // Flags qualité (fallback transport, coords faibles, etc.)
+  llmContextTip?: string; // Conseil contextuel LLM — soft prudent, 1-2 phrases (meilleur moment, astuce locale, détail surprenant)
   // Titre de l'activité Viator (si différent du titre de l'activité)
   // Ex: "Piazza Navona" → "Rome Walking Tour: Pantheon, Piazza Navona and Trevi Fountain"
   viatorTitle?: string;

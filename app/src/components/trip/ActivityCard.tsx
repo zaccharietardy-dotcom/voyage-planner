@@ -485,8 +485,13 @@ export const ActivityCard = memo(function ActivityCard({
                 {userDescription}
               </p>
             )}
+            {item.llmContextTip && (
+              <p className="text-xs text-[#c5a059]/70 line-clamp-1 mt-0.5">
+                💡 {item.llmContextTip}
+              </p>
+            )}
           </div>
-          
+
           <ChevronRight className="h-4 w-4 text-white/10 group-hover:text-gold/40 transition-colors shrink-0" />
         </div>
       )}
@@ -554,6 +559,11 @@ export const ActivityCard = memo(function ActivityCard({
               {userDescription && (
                 <p className="text-xs text-white/50 line-clamp-2 leading-snug mt-1 italic font-serif">
                   {userDescription}
+                </p>
+              )}
+              {item.llmContextTip && (
+                <p className="text-xs text-[#c5a059]/70 line-clamp-2 leading-snug mt-1">
+                  💡 {item.llmContextTip}
                 </p>
               )}
             </div>

@@ -319,7 +319,10 @@ export const CalendarDayColumn = memo(function CalendarDayColumn({
             </div>
           )}
           {day.theme && (
-            <div className="text-[10px] text-muted-foreground truncate">{day.theme}</div>
+            <div className="text-[10px] text-[#c5a059]/80 font-medium truncate">{day.theme}</div>
+          )}
+          {day.dayNarrative && (
+            <div className="text-[10px] text-muted-foreground italic line-clamp-2 leading-tight mt-0.5">{day.dayNarrative}</div>
           )}
         </div>
       )}

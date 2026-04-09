@@ -1689,6 +1689,44 @@ export async function generateTripV3(
             trip = llmScheduledTrip;
             closedWorldMeta.used = true;
             recordRunStep('deterministic_composer', 'Deterministic composer', 'done', scheduleStartedAt);
+
+            // Inject LLM enrichments (themes, narratives, tips, route notes)
+            const enrichments = plannerAttempt.result!.enrichments;
+            if (enrichments && trip.days) {
+              for (const day of trip.days) {
+                if (enrichments.dayThemes[day.dayNumber]) {
+                  day.theme = enrichments.dayThemes[day.dayNumber];
+                }
+                if (enrichments.dayNarratives[day.dayNumber]) {
+                  day.dayNarrative = enrichments.dayNarratives[day.dayNumber];
+                }
+                const dayMealCtx = enrichments.mealContext[day.dayNumber];
+                for (let i = 0; i < day.items.length; i++) {
+                  const item = day.items[i];
+                  // Activity tips by candidateId
+                  if (item.type === 'activity' && item.id) {
+                    const tip = enrichments.activityTips[item.id]
+                      || enrichments.activityTips[`act:${normalizePlannerText(item.id).replace(/\s+/g, '-').slice(0, 64)}`];
+                    if (tip) item.llmContextTip = tip;
+                  }
+                  // Meal context by mealType (not by restaurant ID — resto can be swapped)
+                  if (item.type === 'restaurant' && item.mealType && dayMealCtx?.[item.mealType]) {
+                    item.llmContextTip = dayMealCtx[item.mealType];
+                  }
+                  // Route notes between consecutive activities only
+                  if (item.type === 'transport' && i > 0 && i < day.items.length - 1) {
+                    const prev = day.items[i - 1];
+                    const next = day.items[i + 1];
+                    if (prev?.type === 'activity' && next?.type === 'activity' && prev.id && next.id) {
+                      const routeKey = `${prev.id}->${next.id}`;
+                      const note = enrichments.routeNotes[routeKey];
+                      if (note) item.description = note;
+                    }
+                  }
+                }
+              }
+            }
+
             if (trip.plannerDiagnostics) {
               trip.plannerDiagnostics.llmRebalanceUsed = false;
               trip.plannerDiagnostics.llmRebalanceScore = null;
