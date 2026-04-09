@@ -734,6 +734,17 @@ export function fillLargeGapsWithFreeTime(
   repairs?: RepairAction[],
   densityCategory: 'dense' | 'medium' | 'spread' = 'medium'
 ): void {
+  const MICRO_DISCOVERY_PATTERNS = /(parc|park|garden|jardin|market|marche|promenade|viewpoint|belvedere|plage|beach|port|vieux|old\s+town|museum|musee|temple|church|cathedral|basilica|street|quartier|district|food|cafe|coffee)/i;
+  const isMicroDiscoveryCandidate = (candidate: ScoredActivity): boolean => {
+    if (!candidate) return false;
+    if (!Number.isFinite(candidate.latitude) || !Number.isFinite(candidate.longitude)) return false;
+    if ((candidate.duration || 0) > 120) return false;
+    if (candidate.mustSee) return false;
+    if (candidate.geoConfidence === 'low') return false;
+    const text = `${candidate.name || ''} ${candidate.description || ''}`.toLowerCase();
+    return MICRO_DISCOVERY_PATTERNS.test(text);
+  };
+
   const isUsefulTimelineItem = (item: TripItem): boolean => {
     if (item.type === 'activity' || item.type === 'checkin' || item.type === 'checkout') return true;
     if (item.type === 'flight' || item.type === 'transport') return true;
@@ -881,7 +892,84 @@ export function fillLargeGapsWithFreeTime(
         } // end distance tier loop
       }
 
-      // Fallback: insert bounded free_time if no suitable activity found.
+      // Secondary fallback: micro-discovery from verified nearby POIs.
+      // We prefer this over generic free_time to keep days concrete.
+      if (!filled && startDate) {
+        const dayDate = getDayDate(startDate, day.dayNumber);
+        const candidateStart = addMinutes(current.endTime, 10);
+        const MICRO_DISTANCE_TIERS_KM =
+          densityCategory === 'dense' ? [0.9, 1.8, 3.2] :
+          densityCategory === 'spread' ? [3.0, 6.0, 12.0] :
+          [1.4, 2.8, 5.5];
+
+        for (const maxDistKm of MICRO_DISTANCE_TIERS_KM) {
+          if (filled) break;
+          for (let j = 0; j < unassigned.length; j++) {
+            const candidate = unassigned[j];
+            if (!isMicroDiscoveryCandidate(candidate)) continue;
+
+            const dist = calculateDistance(lat, lng, candidate.latitude, candidate.longitude);
+            if (dist > maxDistKm) continue;
+
+            const actDuration = Math.max(35, Math.min(95, candidate.duration || 60));
+            const transportIn = estimateTravelBuffer(dist);
+            if (actDuration + transportIn > availableMinutes) continue;
+
+            const actStart = addMinutes(candidateStart, transportIn);
+            const actEnd = addMinutes(actStart, actDuration);
+            if (candidate.openingHours || candidate.openingHoursByDay) {
+              if (!isOpenAtTime(candidate, dayDate, actStart, actEnd)) continue;
+            }
+            const closeTime = getActivityCloseTime(candidate, dayDate);
+            if (closeTime && timeToMin(actEnd) > timeToMin(closeTime)) continue;
+
+            insertions.push({
+              index: i + 1,
+              item: {
+                id: candidate.id || `micro-discovery-${day.dayNumber}-${i}`,
+                dayNumber: day.dayNumber,
+                type: 'activity',
+                title: normalizeActivityTitle(candidate.name),
+                description: candidate.description || 'Micro-découverte locale vérifiée à proximité.',
+                locationName: candidate.name,
+                startTime: actStart,
+                endTime: actEnd,
+                duration: actDuration,
+                latitude: candidate.latitude,
+                longitude: candidate.longitude,
+                rating: candidate.rating,
+                mustSee: false,
+                orderIndex: 0,
+                openingHours: candidate.openingHours,
+                openingHoursByDay: candidate.openingHoursByDay,
+                bookingUrl: candidate.bookingUrl,
+                imageUrl: candidate.imageUrl,
+                photoGallery: candidate.photoGallery,
+                qualityFlags: Array.from(new Set([...(candidate.qualityFlags || []), 'micro_discovery'])),
+                googleMapsPlaceUrl: candidate.latitude && candidate.longitude
+                  ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(candidate.name)}&query=${candidate.latitude},${candidate.longitude}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(candidate.name)}`,
+              } as TripItem,
+            });
+
+            unassigned.splice(j, 1);
+            placedIds.add(candidate.id || '');
+            placedNamesNorm.add(normalizeForMatching(candidate.name));
+
+            repairs?.push({
+              type: 'replacement',
+              dayNumber: day.dayNumber,
+              itemTitle: candidate.name,
+              description: `Micro-discovery: inserted "${candidate.name}" (${actDuration}min, ${(dist * 1000).toFixed(0)}m away)`,
+            });
+
+            filled = true;
+            break;
+          }
+        }
+      }
+
+      // Last fallback: bounded free_time if no suitable activity found.
       // Avoid giant "empty blocks" that make plans look broken.
       if (!filled) {
         const plannedItemsForDay = [...day.items, ...insertions.map((entry) => entry.item)];
@@ -907,8 +995,8 @@ export function fillLargeGapsWithFreeTime(
             startTime: freeStart,
             endTime: freeEnd,
             type: 'free_time',
-            title: 'Temps libre — Exploration du quartier',
-            description: 'Profitez de ce temps libre pour flâner dans le quartier, faire du shopping ou prendre un café',
+            title: 'Pause libre — Découverte locale',
+            description: 'Pause flexible: balade, café ou arrêt spontané à proximité.',
             locationName: '',
             latitude: lat,
             longitude: lng,

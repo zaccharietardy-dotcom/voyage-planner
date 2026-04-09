@@ -86,6 +86,7 @@ import { getApiCostSummary, resetApiCostTracker, setRunBudgetProfile } from '../
 import {
   configureProviderQuotaGuard,
   isProviderQuotaStopError,
+  reportProviderQuotaExceeded,
   resetProviderQuotaGuard,
 } from '../services/providerQuotaGuard';
 import { isProviderQuotaLikeError } from '../utils/quotaErrors';
@@ -1091,7 +1092,7 @@ export async function generateTripV2(
   resetProviderQuotaGuard();
   configureProviderQuotaGuard({
     stopImmediate: true,
-    requiredProviders: ['gemini', 'serpapi', 'google_places'],
+    requiredProviders: ['gemini', 'serpapi', 'google_places', 'google_maps'],
   });
   setRunBudgetProfile('dense');
 
@@ -1561,7 +1562,7 @@ export async function generateTripV3(
     preferences.budgetLevel || 'medium',
     undefined,
     preferences.durationDays,
-    { destination: preferences.destination },
+    { destination: preferences.destination, destCoords: data.destCoords },
     3,
   );
   options?.onSnapshot?.(buildClusteredMapSnapshot(clusters, previewHotels[0] || null, data));
@@ -1577,12 +1578,13 @@ export async function generateTripV3(
   const forceClosedWorldPlanner =
     isTruthyEnvFlag(process.env.PIPELINE_FORCE_CLOSED_WORLD)
     || isTruthyEnvFlag(process.env.FORCE_CLOSED_WORLD_PLANNER);
-  const closedWorldGateEnabled =
-    forceClosedWorldPlanner
-    || densityProfile.densityCategory === 'spread'
-    || shouldTriggerSparseRescue;
+  const closedWorldDisabled = isTruthyEnvFlag(process.env.PIPELINE_DISABLE_CLOSED_WORLD);
+  const closedWorldGateEnabled = !closedWorldDisabled;
   if (forceClosedWorldPlanner) {
     console.log('[Pipeline V3] Closed-world planner force-enabled via env flag');
+  }
+  if (closedWorldDisabled) {
+    console.log('[Pipeline V3] Closed-world planner disabled via env flag');
   }
   const closedWorldMeta: {
     enabled: boolean;
@@ -1621,18 +1623,9 @@ export async function generateTripV3(
   let trip: Trip | null = null;
 
   if (closedWorldGateEnabled) {
-    const qualityFirstMode = isTruthyEnvFlag(process.env.PIPELINE_QUALITY_FIRST);
-    const defaultClosedWorldHardCapMs =
-      forceClosedWorldPlanner
-        ? 300_000
-        : qualityFirstMode
-          ? 240_000
-          : 180_000;
+    const defaultClosedWorldHardCapMs = Number.POSITIVE_INFINITY;
     const overrideHardCapMs = parsePositiveIntEnv(process.env.PIPELINE_HARD_CAP_MS);
-    const disableHardCap = isTruthyEnvFlag(process.env.PIPELINE_DISABLE_HARD_CAP);
-    const closedWorldHardCapMs = disableHardCap
-      ? Number.POSITIVE_INFINITY
-      : (overrideHardCapMs || defaultClosedWorldHardCapMs);
+    const closedWorldHardCapMs = overrideHardCapMs || defaultClosedWorldHardCapMs;
     const elapsedMs = Date.now() - startTime;
     const plannerProfileBudgetMs =
       forceClosedWorldPlanner
@@ -1640,8 +1633,8 @@ export async function generateTripV3(
         : densityProfile.densityCategory === 'spread'
         ? 45_000
         : shouldTriggerSparseRescue
-          ? 32_000
-          : 20_000;
+          ? 36_000
+          : 28_000;
     const plannerReserveMs =
       forceClosedWorldPlanner
         ? 10_000
@@ -1669,7 +1662,7 @@ export async function generateTripV3(
         timeWindows,
         densityCategory: densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
         maxPlannerLatencyMs: plannerBudgetMs,
-        enableGptFallback: forceClosedWorldPlanner || densityProfile.densityCategory === 'spread' || shouldTriggerSparseRescue,
+        enableGptFallback: Boolean(process.env.OPENAI_API_KEY) && !isTruthyEnvFlag(process.env.PIPELINE_DISABLE_GPT_FALLBACK),
       });
 
       closedWorldMeta.groundingRate = plannerAttempt.groundingRate;
@@ -1957,7 +1950,7 @@ async function runPipelineFromClusters(
     preferences.budgetLevel || 'medium',
     undefined,
     preferences.durationDays,
-    { destination: preferences.destination },
+    { destination: preferences.destination, destCoords: data.destCoords },
     3
   );
   const hotels = rankedHotels.length > 0
@@ -1983,8 +1976,8 @@ async function runPipelineFromClusters(
   } catch (err) {
     if (isProviderQuotaStopError(err)) throw err;
     if (isProviderQuotaLikeError(err)) {
-      console.warn('[Pipeline V3] Step 6 quota/rate-limited, falling back to estimated travel times');
-      travelTimes = await computeTravelTimes(clusters, hotelCoords, 'off', preferences.startDate);
+      reportProviderQuotaExceeded('google_maps', 'step6_travel_times_quota_like');
+      throw err;
     } else {
       console.error('[Pipeline V3] Step 6 failed:', err);
       throw new Error(`[Pipeline V3] Travel times computation failed: ${(err as Error).message}`);
@@ -2003,8 +1996,8 @@ async function runPipelineFromClusters(
   } catch (err) {
     if (isProviderQuotaStopError(err)) throw err;
     if (isProviderQuotaLikeError(err)) {
-      console.warn('[Pipeline V3] Step 7 quota/rate-limited, using existing restaurant pool');
-      enrichedRestaurants = [...allRestaurants];
+      reportProviderQuotaExceeded('serpapi', 'step7_restaurant_enrichment_quota_like');
+      throw err;
     } else {
       console.error('[Pipeline V3] Step 7 failed:', err);
       throw new Error(`[Pipeline V3] Restaurant pool enrichment failed: ${(err as Error).message}`);

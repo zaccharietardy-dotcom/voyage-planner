@@ -303,8 +303,21 @@ function getPopupContent(item: TripItem, index: number): string {
     ? (item.description || item.title || transportModeFallback)
     : (item.title || '');
 
+  const popupImageCandidate = (() => {
+    if (item.imageUrl?.trim()) return item.imageUrl;
+    if (Array.isArray(item.photoGallery)) {
+      const firstGallery = item.photoGallery.find((photo) => typeof photo === 'string' && photo.trim().length > 0);
+      if (firstGallery) return firstGallery;
+    }
+    if (item.type === 'restaurant' && Array.isArray(item.restaurant?.photos)) {
+      const firstRestaurantPhoto = item.restaurant.photos.find((photo) => typeof photo === 'string' && photo.trim().length > 0);
+      if (firstRestaurantPhoto) return firstRestaurantPhoto;
+    }
+    return '';
+  })();
+
   // Photo — onerror hides only the img, not the container
-  const sanitizedImageUrl = safeImageUrl(item.imageUrl || '');
+  const sanitizedImageUrl = safeImageUrl(popupImageCandidate || '');
   const hasImage = !!sanitizedImageUrl;
   const imageHtml = hasImage
     ? `<div style="position:relative;width:100%;height:160px;overflow:hidden;border-radius:15px 15px 0 0;background:#0f172a;">
@@ -660,7 +673,45 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     const bounds = L.latLngBounds([]);
     const isAllDaysView = filterDay === null;
     const mapVisibleItems = isAllDaysView
-      ? displayItems.filter((item) => item.type === 'activity' || item.type === 'checkin' || item.type === 'checkout' || item.type === 'flight')
+      ? (() => {
+          const hubs: TripItem[] = [];
+          const byDay = new Map<number, TripItem[]>();
+          for (const item of displayItems) {
+            const day = item.dayNumber || 0;
+            const bucket = byDay.get(day);
+            if (bucket) bucket.push(item);
+            else byDay.set(day, [item]);
+          }
+
+          for (const [dayNumber, dayItems] of Array.from(byDay.entries()).sort((a, b) => a[0] - b[0])) {
+            const activities = dayItems.filter((item) => item.type === 'activity' && item.latitude && item.longitude);
+            if (activities.length > 0) {
+              const avgLat = activities.reduce((sum, item) => sum + item.latitude, 0) / activities.length;
+              const avgLng = activities.reduce((sum, item) => sum + item.longitude, 0) / activities.length;
+              const seed = activities[0];
+              hubs.push({
+                ...seed,
+                id: `macro-hub-${dayNumber}`,
+                title: `Jour ${dayNumber}`,
+                locationName: seed.locationName || seed.title,
+                latitude: avgLat,
+                longitude: avgLng,
+              });
+              continue;
+            }
+
+            const fallback = dayItems.find((item) => item.latitude && item.longitude);
+            if (fallback) {
+              hubs.push({
+                ...fallback,
+                id: `macro-hub-${dayNumber}`,
+                title: `Jour ${dayNumber}`,
+                locationName: fallback.locationName || fallback.title,
+              });
+            }
+          }
+          return hubs;
+        })()
       : displayItems;
 
     // Add markers — only activities get sequential numbers
@@ -702,30 +753,32 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       bounds.extend([item.latitude, item.longitude]);
     });
 
-    // Add hotel marker from checkin/checkout accommodation data
-    const hotelAdded = new Set<string>();
-    items.forEach((item) => {
-      if (item.type !== 'checkin' && item.type !== 'checkout') return;
-      const acc = item.accommodation;
-      if (!acc?.latitude || !acc?.longitude) return;
-      const key = `${acc.latitude.toFixed(4)},${acc.longitude.toFixed(4)}`;
-      if (hotelAdded.has(key)) return;
-      hotelAdded.add(key);
-      const icon = createTypeIcon(L, 'hotel', item.dayNumber, false);
-      const name = acc.name || item.title || 'Hôtel';
-      const marker = L.marker([acc.latitude, acc.longitude], { icon, interactive: true })
-        .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">Hotel · ${name}</div>`, {
-          maxWidth: 220,
-          className: 'clean-popup',
-        });
-      markerLayer.addLayer(marker);
-      bounds.extend([acc.latitude, acc.longitude]);
-    });
+    if (!isAllDaysView) {
+      // Add hotel marker from checkin/checkout accommodation data
+      const hotelAdded = new Set<string>();
+      items.forEach((item) => {
+        if (item.type !== 'checkin' && item.type !== 'checkout') return;
+        const acc = item.accommodation;
+        if (!acc?.latitude || !acc?.longitude) return;
+        const key = `${acc.latitude.toFixed(4)},${acc.longitude.toFixed(4)}`;
+        if (hotelAdded.has(key)) return;
+        hotelAdded.add(key);
+        const icon = createTypeIcon(L, 'hotel', item.dayNumber, false);
+        const name = acc.name || item.title || 'Hôtel';
+        const marker = L.marker([acc.latitude, acc.longitude], { icon, interactive: true })
+          .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">Hotel · ${name}</div>`, {
+            maxWidth: 220,
+            className: 'clean-popup',
+          });
+        markerLayer.addLayer(marker);
+        bounds.extend([acc.latitude, acc.longitude]);
+      });
+    }
 
     // NOTE: Departure (origin) coords intentionally NOT added to bounds.
     // But ARRIVAL airport at destination IS added — the user wants to see the route
     // from the airport to the first activity.
-    const flightItems = displayItems.filter(i => i.type === 'flight');
+    const flightItems = isAllDaysView ? [] : displayItems.filter(i => i.type === 'flight');
     const arrivalAirportCoords = new Map<number, [number, number]>(); // dayNumber → coords
     const departureAirportCoords = new Map<number, [number, number]>();
     for (const fi of flightItems) {
@@ -1119,7 +1172,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     // Day summary pills are rendered as a React legend overlay (see JSX below)
 
     // Flight arc
-    if (flightInfo?.departureCoords) {
+    if (!isAllDaysView && flightInfo?.departureCoords) {
       const originIcon = L.divIcon({
         className: 'origin-marker',
         html: `<div style="

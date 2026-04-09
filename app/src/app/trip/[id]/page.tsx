@@ -122,6 +122,18 @@ const SHOW_GENERATION_DEBUG = process.env.NEXT_PUBLIC_SHOW_GENERATION_DEBUG === 
 const SHOW_TRIP_QUALITY_SUMMARY =
   SHOW_GENERATION_DEBUG && process.env.NEXT_PUBLIC_SHOW_TRIP_QUALITY_SUMMARY === 'true';
 
+function mapContractViolationToUserMessage(violation: string): string {
+  const text = String(violation || '');
+  if (/P0\.6/i.test(text)) return 'Certaines étapes étaient trop éloignées de la zone du voyage.';
+  if (/P0\.5/i.test(text)) return 'Quelques trajets étaient trop longs pour une journée cohérente.';
+  if (/P0\.3/i.test(text)) return 'La couverture repas de certaines journées est incomplète.';
+  if (/P0\.2/i.test(text)) return 'Le placement de certains repas n’était pas assez proche des activités.';
+  if (/P0\.1/i.test(text)) return 'Certaines activités n’étaient pas compatibles avec les horaires d’ouverture.';
+  if (/P0/i.test(text)) return 'Une contrainte de fiabilité critique n’a pas été respectée.';
+  if (/repair/i.test(text)) return 'Une étape n’a pas pu être réparée automatiquement.';
+  return 'Un ajustement qualité est encore nécessaire sur cet itinéraire.';
+}
+
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
   const newHotelName = newHotel.name;
@@ -1610,13 +1622,13 @@ export default function TripPage() {
           <div className="relative flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/40 dark:bg-red-900/20">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
             <div className="flex-1 space-y-0.5">
-              <p className="text-sm font-medium text-red-800 dark:text-red-300">Itinéraire dégradé</p>
-              {trip.contractViolations.slice(0, 5).map((v, i) => (
-                <p key={i} className="text-xs text-red-700 dark:text-red-400">{v}</p>
+              <p className="text-sm font-medium text-red-800 dark:text-red-300">Itinéraire à revoir</p>
+              {Array.from(new Set(trip.contractViolations.map(mapContractViolationToUserMessage))).slice(0, 4).map((message, i) => (
+                <p key={i} className="text-xs text-red-700 dark:text-red-400">{message}</p>
               ))}
-              {trip.contractViolations.length > 5 && (
+              {trip.contractViolations.length > 4 && (
                 <p className="text-xs text-red-500 dark:text-red-500">
-                  +{trip.contractViolations.length - 5} autre{trip.contractViolations.length - 5 > 1 ? 's' : ''} violation{trip.contractViolations.length - 5 > 1 ? 's' : ''}
+                  +{trip.contractViolations.length - 4} autre{trip.contractViolations.length - 4 > 1 ? 's' : ''} point{trip.contractViolations.length - 4 > 1 ? 's' : ''} à corriger
                 </p>
               )}
             </div>

@@ -1,98 +1,137 @@
-import { selectHotelByBarycenter } from '../step5-hotel';
+import { selectTopHotelsByBarycenter } from '../step5-hotel';
 import type { Accommodation } from '../../types';
-import type { ActivityCluster } from '../types';
+import type { ActivityCluster, ScoredActivity } from '../types';
 
-function makeHotel(
-  id: string,
-  name: string,
-  latitude: number,
-  longitude: number,
-  rating: number,
-  pricePerNight: number
-): Accommodation {
+function makeActivity(overrides: Partial<ScoredActivity>): ScoredActivity {
   return {
-    id,
-    name,
-    type: 'hotel',
-    address: 'Address',
-    latitude,
-    longitude,
-    rating,
-    reviewCount: 100,
-    stars: 3,
-    pricePerNight,
-    currency: 'EUR',
-    amenities: [],
-    checkInTime: '15:00',
-    checkOutTime: '11:00',
-    bookingUrl: `https://www.booking.com/hotel/xx/${id}.html`,
+    id: 'act-1',
+    name: 'Sample Activity',
+    type: 'culture',
+    description: '',
+    duration: 90,
+    estimatedCost: 0,
+    latitude: 48.39,
+    longitude: -2.49,
+    rating: 4.5,
+    mustSee: true,
+    bookingRequired: false,
+    openingHours: { open: '09:00', close: '18:00' },
+    score: 80,
+    source: 'mustsee',
+    reviewCount: 1000,
+    ...overrides,
   };
 }
 
-function makeCluster(points: Array<{ lat: number; lng: number }>): ActivityCluster {
+function makeCluster(activities: ScoredActivity[]): ActivityCluster {
   return {
     dayNumber: 1,
-    centroid: {
-      lat: points.reduce((sum, point) => sum + point.lat, 0) / points.length,
-      lng: points.reduce((sum, point) => sum + point.lng, 0) / points.length,
-    },
-    totalIntraDistance: 0,
-    activities: points.map((point, index) => ({
-      id: `a-${index}`,
-      name: `Activity ${index}`,
-      latitude: point.lat,
-      longitude: point.lng,
-    } as any)),
+    activities,
+    centroid: { lat: 48.39, lng: -2.49 },
+    totalIntraDistance: 4,
   };
 }
 
-describe('step5-hotel selection', () => {
-  const clusters: ActivityCluster[] = [
-    makeCluster([
-      { lat: 41.9010, lng: 12.4920 },
-      { lat: 41.9040, lng: 12.4980 },
-      { lat: 41.8990, lng: 12.4860 },
-    ]),
-  ];
+function makeHotel(overrides: Partial<Accommodation>): Accommodation {
+  return {
+    id: 'hotel-1',
+    name: 'Hotel test',
+    type: 'hotel',
+    address: 'Adresse',
+    latitude: 48.40,
+    longitude: -2.50,
+    rating: 8.4,
+    reviewCount: 240,
+    pricePerNight: 120,
+    currency: 'EUR',
+    amenities: ['WiFi'],
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
+    bookingUrl: 'https://www.booking.com/hotel/test',
+    ...overrides,
+  };
+}
 
-  it('prefers central hotels over high-rated excentré ones', () => {
-    const hotels: Accommodation[] = [
-      makeHotel('far', "Annie's Home", 42.0117, 12.3707, 9.2, 55), // ~15km away
-      makeHotel('center-a', 'Roma Centro A', 41.9025, 12.4930, 8.3, 110), // ~0.1km
-      makeHotel('center-b', 'Roma Centro B', 41.9090, 12.5000, 8.8, 120), // ~1km
-    ];
+describe('step5-hotel distance safety', () => {
+  it('filters cross-country hotel candidates when near options exist', () => {
+    const clusters = [makeCluster([makeActivity({})])];
+    const nearHotel = makeHotel({ id: 'near-1', latitude: 48.41, longitude: -2.48, bookingUrl: 'https://www.booking.com/hotel/near' });
+    const farHotel = makeHotel({
+      id: 'far-nyc',
+      name: 'Cozy Beach Rental 1B/1B',
+      latitude: 40.7128,
+      longitude: -74.006,
+      bookingUrl: 'https://www.airbnb.com/rooms/12345',
+    });
 
-    const selected = selectHotelByBarycenter(clusters, hotels, 'moderate');
-    expect(selected?.id).toBe('center-a');
+    const result = selectTopHotelsByBarycenter(
+      clusters,
+      [farHotel, nearHotel],
+      'moderate',
+      undefined,
+      4,
+      { destination: 'Bretagne' },
+      3,
+    );
+
+    expect(result.length).toBeGreaterThan(0);
+    expect(result[0].id).toBe('near-1');
+    expect(result.every((hotel) => hotel.id !== 'far-nyc')).toBe(true);
   });
 
-  it('keeps only nearest slice when all options are far', () => {
-    const hotels: Accommodation[] = [
-      makeHotel('d9', 'Rome East', 41.9700, 12.5600, 8.5, 90),   // ~9km
-      makeHotel('d10', 'Rome North', 41.9850, 12.5000, 9.1, 95), // ~10km
-      makeHotel('d19', 'Rome Outside', 42.0500, 12.6500, 9.6, 80), // ~19km
-      makeHotel('d22', 'Rome Very Far', 42.1000, 12.7000, 9.8, 75), // ~22km
-    ];
+  it('returns centered synthetic fallback when all hotel candidates are far away', () => {
+    const clusters = [makeCluster([makeActivity({})])];
+    const farHotel = makeHotel({
+      id: 'far-only',
+      name: 'Remote Listing',
+      latitude: 40.7128,
+      longitude: -74.006,
+      bookingUrl: 'https://www.airbnb.com/rooms/67890',
+    });
 
-    const selected = selectHotelByBarycenter(clusters, hotels, 'moderate');
-    expect(['d9', 'd10']).toContain(selected?.id);
+    const result = selectTopHotelsByBarycenter(
+      clusters,
+      [farHotel],
+      'moderate',
+      undefined,
+      4,
+      { destination: 'Bretagne' },
+      3,
+    );
+
+    expect(result.length).toBe(1);
+    expect(result[0].qualityFlags).toContain('hotel_price_estimated');
+    expect(Math.abs((result[0].latitude || 0) - 48.39)).toBeLessThan(0.2);
+    expect(Math.abs((result[0].longitude || 0) - (-2.49))).toBeLessThan(0.2);
   });
 
-  it('applies dense-urban cap for Paris profile', () => {
-    const parisCluster: ActivityCluster[] = [
-      makeCluster([
-        { lat: 48.8606, lng: 2.3376 },
-        { lat: 48.8584, lng: 2.2945 },
-        { lat: 48.8738, lng: 2.2950 },
-      ]),
-    ];
+  it('uses destination coords as center when activity barycenter is unavailable', () => {
+    const farHotel = makeHotel({
+      id: 'far-nyc',
+      name: 'Far Away Listing',
+      latitude: 40.7128,
+      longitude: -74.006,
+      bookingUrl: 'https://www.airbnb.com/rooms/9090',
+    });
+    const nearDestHotel = makeHotel({
+      id: 'near-dest',
+      latitude: 48.21,
+      longitude: -2.95,
+      bookingUrl: 'https://www.booking.com/hotel/near-dest',
+    });
 
-    const hotels: Accommodation[] = [
-      makeHotel('near', 'Paris Centre', 48.8612, 2.3334, 8.1, 140),
-      makeHotel('far', 'Paris Excentré', 48.8879, 2.3912, 9.2, 120), // >4km from center
-    ];
+    const result = selectTopHotelsByBarycenter(
+      [],
+      [farHotel, nearDestHotel],
+      'moderate',
+      undefined,
+      4,
+      { destination: 'Bretagne', destCoords: { lat: 48.202, lng: -2.932 } },
+      3,
+    );
 
-    const selected = selectHotelByBarycenter(parisCluster, hotels, 'moderate', undefined, 3, { destination: 'Paris' });
-    expect(selected?.id).toBe('near');
+    expect(result.length).toBeGreaterThan(0);
+    expect(result[0].id).toBe('near-dest');
+    expect(result.every((hotel) => hotel.id !== 'far-nyc')).toBe(true);
   });
 });

@@ -728,6 +728,8 @@ export interface Trip {
     quotaStopProvider?: string;
     budgetStopReason?: string;
     publishGateResult?: 'publishable' | 'draft';
+    qualityGateResult?: 'passed' | 'failed';
+    qualityGateFailures?: string[];
     plannerMode?: 'deterministic' | 'llm_closed_world';
     llmSchedulerUsed?: boolean;
     fallbackReason?: string;

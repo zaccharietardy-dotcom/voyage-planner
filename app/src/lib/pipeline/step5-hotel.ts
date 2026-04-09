@@ -12,6 +12,7 @@ import { getHotelHardCapKmForProfile, resolveQualityCityProfile } from './qualit
 
 type SelectHotelOptions = {
   destination?: string;
+  destCoords?: { lat: number; lng: number };
 };
 
 /**
@@ -78,7 +79,8 @@ export function selectHotelByBarycenter(
 
   // 1. Compute weighted center from activities (duration + must-see priority + score signal).
   const weightedCenter = computeWeightedActivityCenter(clusters);
-  if (!weightedCenter) {
+  const selectionCenter = weightedCenter || options?.destCoords;
+  if (!selectionCenter) {
     return [...hotels]
       .filter((hotel) => Number.isFinite(hotel.latitude) && Number.isFinite(hotel.longitude))
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))[0] || null;
@@ -108,7 +110,7 @@ export function selectHotelByBarycenter(
     // Use weightedCenter coords so route calculations stay near activities.
     const fallback = hotels.find(h => h.latitude && h.longitude) || hotels[0] || null;
     if (fallback) {
-      return buildLastResortHotel(fallback, budgetLevel, options?.destination, weightedCenter || undefined);
+      return buildLastResortHotel(fallback, budgetLevel, options?.destination, selectionCenter || undefined);
     }
     return null;
   }
@@ -119,7 +121,7 @@ export function selectHotelByBarycenter(
   const candidatesByDistance = candidates
     .map((hotel) => ({
       hotel,
-      distanceToCenterKm: calculateDistance(weightedCenter.lat, weightedCenter.lng, hotel.latitude, hotel.longitude),
+      distanceToCenterKm: calculateDistance(selectionCenter.lat, selectionCenter.lng, hotel.latitude, hotel.longitude),
       boundaryDistanceKm: averageBoundaryDistance(hotel, activityAnchors),
     }))
     .sort((a, b) => a.distanceToCenterKm - b.distanceToCenterKm);
@@ -150,7 +152,7 @@ export function selectHotelByBarycenter(
       // No hotel within 5km — use last resort with center coordinates
       const fallback = candidatesByDistance[0]?.hotel;
       if (fallback) {
-        return buildLastResortHotel(fallback, budgetLevel, options?.destination, weightedCenter);
+        return buildLastResortHotel(fallback, budgetLevel, options?.destination, selectionCenter);
       }
       return null;
     }
@@ -159,7 +161,7 @@ export function selectHotelByBarycenter(
 
   // 3. Score: center distance dominates; boundary distance + rating refine.
   const scored = candidates.map(h => {
-    const dist = calculateDistance(weightedCenter.lat, weightedCenter.lng, h.latitude, h.longitude);
+    const dist = calculateDistance(selectionCenter.lat, selectionCenter.lng, h.latitude, h.longitude);
     const boundaryDist = averageBoundaryDistance(h, activityAnchors);
     const ratingNorm = Math.max(0, Math.min(1, normalizeHotelRating(h) / 10)); // 0-1 scale
     const ratingBoost = 0.75 + ratingNorm * 0.25;
@@ -217,7 +219,8 @@ export function selectTopHotelsByBarycenter(
   });
 
   const weightedCenter = computeWeightedActivityCenter(clusters);
-  if (!weightedCenter) {
+  const selectionCenter = weightedCenter || options?.destCoords;
+  if (!selectionCenter) {
     return hotels
       .filter(h => Number.isFinite(h.latitude) && Number.isFinite(h.longitude) && hasValidPriceAndBookingUrl(h))
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))
@@ -241,13 +244,51 @@ export function selectTopHotelsByBarycenter(
   }
 
   if (candidates.length === 0) {
-    // Last resort: return hotels that at least have a price (URL may be missing)
-    return hotels.filter(h => h.pricePerNight > 0).slice(0, count);
+    // Last resort: synthesize a centered fallback to avoid cross-country hotel picks.
+    const fallback = hotels.find((hotel) => Number.isFinite(hotel.latitude) && Number.isFinite(hotel.longitude)) || hotels[0];
+    return fallback
+      ? [buildLastResortHotel(fallback, budgetLevel, options?.destination, selectionCenter || undefined)]
+      : [];
   }
+
+  // Distance safety net for alternatives too (prevents far-away hotels from polluting the timeline).
+  const hardCapKm = getHotelHardCapKmForProfile(profile, durationDays);
+  const candidatesByDistance = candidates
+    .map((hotel) => ({
+      hotel,
+      distanceToCenterKm: calculateDistance(selectionCenter.lat, selectionCenter.lng, hotel.latitude, hotel.longitude),
+    }))
+    .sort((a, b) => a.distanceToCenterKm - b.distanceToCenterKm);
+
+  let filteredByRadius: typeof candidatesByDistance = [];
+  for (let pass = 0; pass <= 2; pass++) {
+    const radius = hardCapKm + pass * 0.4;
+    const local = candidatesByDistance.filter((entry) => entry.distanceToCenterKm <= radius);
+    if (local.length > 0) {
+      filteredByRadius = local;
+      break;
+    }
+  }
+
+  if (filteredByRadius.length === 0) {
+    const cappedByAbsolute = candidatesByDistance.filter(
+      (entry) => entry.distanceToCenterKm <= ABSOLUTE_MAX_HOTEL_DISTANCE_KM
+    );
+    if (cappedByAbsolute.length > 0) {
+      filteredByRadius = cappedByAbsolute;
+    } else {
+      const fallback = candidatesByDistance[0]?.hotel || candidates[0];
+      return fallback
+        ? [buildLastResortHotel(fallback, budgetLevel, options?.destination, selectionCenter)]
+        : [];
+    }
+  }
+
+  candidates = filteredByRadius.map((entry) => entry.hotel);
 
   const activityAnchors = collectDailyBoundaryAnchors(clusters);
   const scored = candidates.map(h => {
-    const dist = calculateDistance(weightedCenter.lat, weightedCenter.lng, h.latitude, h.longitude);
+    const dist = calculateDistance(selectionCenter.lat, selectionCenter.lng, h.latitude, h.longitude);
     const boundaryDist = averageBoundaryDistance(h, activityAnchors);
     const ratingNorm = Math.max(0, Math.min(1, normalizeHotelRating(h) / 10));
     const ratingBoost = 0.75 + ratingNorm * 0.25;

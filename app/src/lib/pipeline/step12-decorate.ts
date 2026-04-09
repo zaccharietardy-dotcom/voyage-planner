@@ -67,7 +67,7 @@ function generateTemplateTheme(items: TripItem[], dayNumber: number, totalDays: 
   // Generic themes by day position
   if (dayNumber === 1) return 'Première découverte';
   if (dayNumber === totalDays) return 'Dernière journée';
-  return 'Exploration du quartier';
+  return 'Découverte locale';
 }
 
 /** Generate a narrative blurb from the activity list */

@@ -198,6 +198,30 @@ function getRestaurantGooglePhoto(restaurant?: Partial<Restaurant>): string | un
   return undefined;
 }
 
+function pickBestItemImage(item: TripItem): string | undefined {
+  const candidates: string[] = [];
+
+  if (item.type === 'restaurant') {
+    const restaurantPhotos = Array.isArray(item.restaurant?.photos) ? item.restaurant?.photos : [];
+    candidates.push(...restaurantPhotos.filter((photo): photo is string => typeof photo === 'string'));
+  }
+
+  if (Array.isArray(item.photoGallery)) {
+    candidates.push(...item.photoGallery.filter((photo): photo is string => typeof photo === 'string'));
+  }
+
+  if (typeof item.imageUrl === 'string') candidates.push(item.imageUrl);
+
+  for (const raw of candidates) {
+    const directGooglePhoto = toGooglePlacePhotoUrl(raw);
+    if (directGooglePhoto) return directGooglePhoto;
+    const normalized = normalizeImageUrl(raw);
+    if (normalized) return normalized;
+  }
+
+  return undefined;
+}
+
 function normalizeTransportModeForUi(mode?: string): TripItem['transportMode'] | undefined {
   if (!mode) return undefined;
   const normalized = mode.toLowerCase();
@@ -390,11 +414,7 @@ export const ActivityCard = memo(function ActivityCard({
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
   const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
   const color = TRIP_ITEM_COLORS[item.type];
-  const imageUrl = normalizeImageUrl(item.type === 'restaurant'
-    ? (getRestaurantGooglePhoto(item.restaurant) || item.imageUrl)
-    : item.type === 'flight'
-    ? undefined
-    : item.imageUrl);
+  const imageUrl = item.type === 'flight' ? undefined : pickBestItemImage(item);
   const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -516,12 +536,12 @@ export const ActivityCard = memo(function ActivityCard({
             hasActions && 'pr-11'
           )}>
             <div className="min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-0.5 flex-wrap">
-                <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink-0 max-w-[70%] truncate">
+              <div className="flex items-start justify-between gap-1 mb-0.5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink min-w-0 max-w-[58%] truncate">
                   {t(`tripItem.type.${item.type}` as any)}
                 </span>
                 {estimatedCostLabel && (
-                  <span className="inline-flex shrink-0 min-w-[54px] justify-center items-center rounded-full border border-gold/40 bg-gold/15 px-2 py-0.5 text-[11px] font-black text-gold shadow-sm shadow-black/20">
+                  <span className="inline-flex shrink-0 min-w-[62px] justify-center items-center rounded-full border border-gold/45 bg-gold/20 px-2 py-0.5 text-[11px] font-black text-gold shadow-sm shadow-black/20">
                     {estimatedCostLabel}
                   </span>
                 )}

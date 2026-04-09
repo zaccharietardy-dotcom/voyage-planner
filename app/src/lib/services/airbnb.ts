@@ -9,6 +9,7 @@
  */
 
 import { Accommodation } from '../types';
+import { calculateDistance } from './geocoding';
 
 function getRapidApiKey() { return process.env.RAPIDAPI_KEY || ''; }
 const AIRBNB_HOST = 'airbnb13.p.rapidapi.com';
@@ -24,6 +25,39 @@ interface AirbnbSearchOptions {
   requireKitchen?: boolean;
   limit?: number;
   cityCenter?: { lat: number; lng: number };
+}
+
+const BROAD_DESTINATION_HINTS = [
+  'bretagne',
+  'brittany',
+  'normandie',
+  'normandy',
+  'region',
+  'région',
+  'country',
+  'france',
+  'italie',
+  'espagne',
+  'andalousie',
+  'andalusia',
+  'toscane',
+  'tuscany',
+];
+
+function normalizeDestinationLabel(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function isLikelyBroadDestination(destination: string): boolean {
+  const normalized = normalizeDestinationLabel(destination);
+  if (!normalized) return false;
+  if (BROAD_DESTINATION_HINTS.some((hint) => normalized.includes(hint))) return true;
+  const tokens = normalized.split(/[\s,-]+/).filter(Boolean);
+  return tokens.length >= 4;
 }
 
 export function isValidAirbnbRoomUrl(url?: string | null, listingId?: string): boolean {
@@ -112,10 +146,26 @@ export async function searchAirbnbListings(
     ));
 
     const accommodations: Accommodation[] = [];
+    const maxDistanceToCenterKm = options.cityCenter
+      ? (isLikelyBroadDestination(destination) ? 220 : 45)
+      : null;
 
     for (const item of listings.slice(0, options.limit || 15)) {
       const listingId = String(item.id || '').trim();
       if (!listingId || !item.lat || !item.lng) continue;
+
+      let distanceToCenter: number | undefined;
+      if (options.cityCenter) {
+        distanceToCenter = calculateDistance(
+          item.lat,
+          item.lng,
+          options.cityCenter.lat,
+          options.cityCenter.lng,
+        );
+        if (maxDistanceToCenterKm != null && distanceToCenter > maxDistanceToCenterKm) {
+          continue;
+        }
+      }
 
       // Extraire le prix par nuit
       let pricePerNight = 0;
@@ -161,7 +211,7 @@ export async function searchAirbnbListings(
         checkInTime: '15:00',
         checkOutTime: '11:00',
         bookingUrl,
-        distanceToCenter: undefined,
+        distanceToCenter,
         breakfastIncluded: false,
         description: item.type || undefined,
       });

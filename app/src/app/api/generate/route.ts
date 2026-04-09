@@ -451,6 +451,8 @@ export async function POST(request: NextRequest) {
             admissionDecision: 'admission_allowed',
             requestFingerprint,
             publishGateResult: publishGate.result,
+            qualityGateResult: publishGate.publishable ? 'passed' : 'failed',
+            qualityGateFailures: publishGate.gateFailures,
             quotaStopProvider: undefined,
             budgetStopReason: undefined,
           };
@@ -464,6 +466,15 @@ export async function POST(request: NextRequest) {
           clearInterval(keepAlive);
           clearTimeout(warningTimeout);
           activeGenerations.delete(user.id);
+
+          // Quality gate: log but always deliver the trip to the user.
+          // Blocking on score < 85 frustrates users (especially for regional trips
+          // where scoring is calibrated for dense cities).
+          if (!publishGate.publishable) {
+            console.warn(
+              `[Generate] Quality gate soft-fail: ${publishGate.gateFailures?.join(', ')}. Trip delivered anyway.`
+            );
+          }
 
           // Sérialiser le trip — peut être gros (100KB+), log la taille
           let tripJson: string;

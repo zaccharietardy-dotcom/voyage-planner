@@ -145,7 +145,15 @@ function addDaySection(doc: jsPDF, day: TripDay, trip: Trip, startY: number): nu
 
   // Préparer les données pour le tableau
   const tableData = day.items
-    .filter(item => item.type !== 'transport') // Exclure les transports de la liste
+    // Keep major transport legs visible for itinerary coherence.
+    .filter((item) => {
+      if (item.type !== 'transport') return true;
+      return item.transportRole === 'longhaul'
+        || item.transportDirection === 'outbound'
+        || item.transportDirection === 'return'
+        || item.transportRole === 'hotel_return'
+        || item.transportRole === 'hotel_depart';
+    })
     .map(item => {
       const time = sanitizePdfText(item.startTime || '—');
       const title = sanitizePdfText(item.title || 'Sans titre');
