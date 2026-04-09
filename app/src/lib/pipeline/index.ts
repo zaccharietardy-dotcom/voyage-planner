@@ -1623,7 +1623,7 @@ export async function generateTripV3(
   let trip: Trip | null = null;
 
   if (closedWorldGateEnabled) {
-    const defaultClosedWorldHardCapMs = 240_000; // 4min — leaves margin before Vercel 5min limit
+    const defaultClosedWorldHardCapMs = 120_000; // 2min — planner must finish fast, leaves 2.5min for scheduling + contracts
     const overrideHardCapMs = parsePositiveIntEnv(process.env.PIPELINE_HARD_CAP_MS);
     const closedWorldHardCapMs = overrideHardCapMs || defaultClosedWorldHardCapMs;
     const elapsedMs = Date.now() - startTime;
