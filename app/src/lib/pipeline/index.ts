@@ -2488,39 +2488,57 @@ export async function generateTripV3MultiCity(
 
   console.log(`[Pipeline V3] Multi-city trip: ${cityPlan.map(c => `${c.city} (${c.days}d)`).join(' → ')}`);
 
-  const segments: Trip[] = [];
-  const currentDate = new Date(preferences.startDate || new Date());
-
+  // Build per-city preferences with correct start dates
+  const cityPrefsArray: Array<{ prefs: TripPreferences; index: number }> = [];
+  const baseDate = new Date(preferences.startDate || new Date());
+  let dateOffset = 0;
   for (let i = 0; i < cityPlan.length; i++) {
     const city = cityPlan[i];
-
-    const cityPrefs: TripPreferences = {
-      ...preferences,
-      destination: city.city,
-      durationDays: city.days,
-      startDate: new Date(currentDate),
-    };
-
-    onEvent?.({
-      type: 'info',
-      label: 'multi-city',
-      detail: `Planning ${city.city} (${city.days} days)...`,
-      timestamp: Date.now(),
-    });
-
-    const segment = await generateTripV3(
-      cityPrefs,
-      onEvent,
-      {
-        onSnapshot: options?.onSnapshot,
-        runId: options?.runId ? `${options.runId}:seg${i + 1}` : undefined,
-        enableRunTrace: options?.enableRunTrace,
+    const cityDate = new Date(baseDate);
+    cityDate.setDate(cityDate.getDate() + dateOffset);
+    cityPrefsArray.push({
+      prefs: {
+        ...preferences,
+        destination: city.city,
+        durationDays: city.days,
+        startDate: cityDate,
       },
-    );
-    segments.push(segment);
+      index: i,
+    });
+    dateOffset += city.days;
+  }
 
-    // Advance date
-    currentDate.setDate(currentDate.getDate() + city.days);
+  // Run all cities in parallel for speed (each city is independent)
+  onEvent?.({
+    type: 'info',
+    label: 'multi-city',
+    detail: `Planning ${cityPlan.length} cities in parallel...`,
+    timestamp: Date.now(),
+  });
+
+  const segmentResults = await Promise.allSettled(
+    cityPrefsArray.map(({ prefs, index }) =>
+      generateTripV3(
+        prefs,
+        onEvent,
+        {
+          onSnapshot: options?.onSnapshot,
+          runId: options?.runId ? `${options.runId}:seg${index + 1}` : undefined,
+          enableRunTrace: options?.enableRunTrace,
+        },
+      )
+    )
+  );
+
+  const segments: Trip[] = [];
+  for (let i = 0; i < segmentResults.length; i++) {
+    const result = segmentResults[i];
+    if (result.status === 'fulfilled') {
+      segments.push(result.value);
+    } else {
+      console.error(`[Pipeline V3] Multi-city segment ${i + 1} (${cityPlan[i].city}) failed:`, result.reason);
+      throw new Error(`Multi-city segment failed for ${cityPlan[i].city}: ${(result.reason as Error)?.message || String(result.reason)}`);
+    }
   }
 
   // Merge segments into one trip
