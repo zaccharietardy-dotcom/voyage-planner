@@ -156,6 +156,39 @@ function toGooglePlacePhotoUrl(url?: string): string | undefined {
   return GOOGLE_PLACE_PHOTO_PATTERN.test(normalized) ? normalized : undefined;
 }
 
+function normalizeImageUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  const normalized = url.trim();
+  if (!normalized) return undefined;
+  if (normalized.startsWith('//')) return `https:${normalized}`;
+  if (/^http:\/\//i.test(normalized)) return normalized.replace(/^http:\/\//i, 'https://');
+  return normalized;
+}
+
+function sanitizeUserFacingDescription(description?: string): string | undefined {
+  if (!description) return undefined;
+  const cleaned = description
+    .replace(/valid[ée]e?\s+par\s+geocodage/gi, '')
+    .replace(/validee?\s+par\s+geocodage/gi, '')
+    .replace(/valid(?:ated|e)?\s+by\s+geocod(?:ing|age)/gi, '')
+    .replace(/sugg?estion\s+(?:iconique|locale)[^,.]*[,.]?/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  return cleaned || undefined;
+}
+
+function formatEstimatedCostLabel(cost: TripItem['estimatedCost']): string | null {
+  if (cost === undefined || cost === null) return null;
+  const numeric = Number(cost);
+  if (Number.isFinite(numeric)) {
+    if (numeric <= 0) return 'Gratuit';
+    return `${Math.round(numeric)}€`;
+  }
+  const raw = String(cost).trim();
+  if (!raw) return null;
+  return raw;
+}
+
 function getRestaurantGooglePhoto(restaurant?: Partial<Restaurant>): string | undefined {
   const photos = Array.isArray(restaurant?.photos) ? restaurant.photos : [];
   for (const photo of photos) {
@@ -357,11 +390,11 @@ export const ActivityCard = memo(function ActivityCard({
   const transportMode = item.type === 'transport' ? getTransportModeForItem(item) : undefined;
   const transportIconTestId = transportMode ? `transport-icon-${transportMode}` : undefined;
   const color = TRIP_ITEM_COLORS[item.type];
-  const imageUrl = item.type === 'restaurant'
-    ? (getRestaurantGooglePhoto(item.restaurant) || toGooglePlacePhotoUrl(item.imageUrl))
+  const imageUrl = normalizeImageUrl(item.type === 'restaurant'
+    ? (getRestaurantGooglePhoto(item.restaurant) || item.imageUrl)
     : item.type === 'flight'
     ? undefined
-    : item.imageUrl;
+    : item.imageUrl);
   const hasImage = imageUrl && IMAGE_TYPES.includes(item.type);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -382,6 +415,8 @@ export const ActivityCard = memo(function ActivityCard({
 
   const isLocked = item.type === 'flight' || item.type === 'checkin' || item.type === 'checkout';
   const hasActions = !isLocked && (onSwapClick || onEdit || onDelete || onEditTime);
+  const estimatedCostLabel = formatEstimatedCostLabel(item.estimatedCost);
+  const userDescription = sanitizeUserFacingDescription(item.description);
 
   const showImage = hasImage && !imgError;
   // Restaurant with alternatives: render as flat card with 3 equal suggestion cards
@@ -425,9 +460,9 @@ export const ActivityCard = memo(function ActivityCard({
                 {item.startTime}
               </div>
             </div>
-            {item.description && (
+            {userDescription && (
               <p className="text-xs text-white/40 line-clamp-1 italic mt-0.5 font-serif">
-                {item.description}
+                {userDescription}
               </p>
             )}
           </div>
@@ -476,14 +511,19 @@ export const ActivityCard = memo(function ActivityCard({
           </div>
 
           {/* Right Side: Content */}
-          <div className="flex-1 min-w-0 px-2.5 py-1.5 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]">
+          <div className={cn(
+            'flex-1 min-w-0 px-2.5 py-1.5 flex flex-col justify-between bg-gradient-to-r from-[#0A1628] to-[#0D1F35]',
+            hasActions && 'pr-11'
+          )}>
             <div className="min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-0.5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink-0">
+              <div className="flex items-start justify-between gap-2 mb-0.5 flex-wrap">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gold-gradient shrink-0 max-w-[70%] truncate">
                   {t(`tripItem.type.${item.type}` as any)}
                 </span>
-                {item.estimatedCost && (
-                  <span className="text-xs font-bold text-white/60">{item.estimatedCost}€</span>
+                {estimatedCostLabel && (
+                  <span className="inline-flex shrink-0 min-w-[54px] justify-center items-center rounded-full border border-gold/40 bg-gold/15 px-2 py-0.5 text-[11px] font-black text-gold shadow-sm shadow-black/20">
+                    {estimatedCostLabel}
+                  </span>
                 )}
               </div>
               
@@ -491,9 +531,9 @@ export const ActivityCard = memo(function ActivityCard({
                 {item.title}
               </h4>
               
-              {item.description && (
+              {userDescription && (
                 <p className="text-xs text-white/50 line-clamp-2 leading-snug mt-1 italic font-serif">
-                  {item.description}
+                  {userDescription}
                 </p>
               )}
             </div>
@@ -525,7 +565,8 @@ export const ActivityCard = memo(function ActivityCard({
                   className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl border border-gold/30 bg-gold/5 text-gold text-[11px] font-bold tracking-wide hover:bg-gold/10 active:scale-[0.97] transition-all"
                   onClick={(e) => { e.stopPropagation(); setShowAlternative(true); hapticImpactLight(); }}
                 >
-                  🔄 Alternative disponible
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                  Alternative disponible
                 </motion.button>
               )}
               {alternative && showAlternative && (

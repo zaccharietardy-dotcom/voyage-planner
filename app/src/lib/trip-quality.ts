@@ -92,13 +92,13 @@ export function getTripQualitySummary(trip: Trip): TripQualitySummary {
     reviewPoints.push(`${itemsMissingBookingInfo} étape${itemsMissingBookingInfo > 1 ? 's' : ''} sans lien exploitable de réservation ou de navigation.`);
   }
   if (fallbackCount > 0) {
-    reviewPoints.push(`${fallbackCount} élément${fallbackCount > 1 ? 's' : ''} proviennent d'un fallback ou d'une estimation.`);
+    reviewPoints.push(`${fallbackCount} étape${fallbackCount > 1 ? 's' : ''} utilisent une option de secours.`);
   }
   if (lowConfidenceCount > 0) {
-    reviewPoints.push(`${lowConfidenceCount} point${lowConfidenceCount > 1 ? 's' : ''} ont une géolocalisation faible.`);
+    reviewPoints.push(`${lowConfidenceCount} localisation${lowConfidenceCount > 1 ? 's' : ''} restent approximatives.`);
   }
   if (qualityWarningCount > 0) {
-    reviewPoints.push(`${qualityWarningCount} avertissement${qualityWarningCount > 1 ? 's' : ''} qualité remonté${qualityWarningCount > 1 ? 's' : ''} par le pipeline.`);
+    reviewPoints.push(`${qualityWarningCount} point${qualityWarningCount > 1 ? 's' : ''} de cohérence supplémentaire${qualityWarningCount > 1 ? 's' : ''} à vérifier.`);
   }
   if (reviewPoints.length === 0) {
     reviewPoints.push('L’itinéraire ne présente aucun signal bloquant connu sur la génération actuelle.');

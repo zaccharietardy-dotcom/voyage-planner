@@ -40,6 +40,8 @@ export type AskUserFn = (question: Omit<PipelineQuestion, 'sessionId'>) => Promi
 export interface GenerateTripV2Options {
   askUser?: AskUserFn;
   onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
+  runId?: string;
+  enableRunTrace?: boolean;
 }
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -53,6 +55,7 @@ import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from '
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 import { anchorTransport } from './step4-anchor-transport';
 import { timeToMin, minToTime } from './utils/time';
+import { computeMealEligibility } from './utils/meal-eligibility';
 import { getDensityThresholds } from './utils/density-config';
 import { computeTravelTimes } from './step7b-travel-times';
 import { enrichRestaurantPool } from './step8-place-restaurants';
@@ -80,6 +83,11 @@ import { detectQuestions, applyQuestionAnswers, detectPreFetchQuestions, applyEf
 import type { DestinationAnalysis } from './step0-destination-intel';
 import { buildClusteredMapSnapshot, buildFetchedMapSnapshot } from './snapshots';
 import { getApiCostSummary, resetApiCostTracker, setRunBudgetProfile } from '../services/apiCostGuard';
+import {
+  configureProviderQuotaGuard,
+  isProviderQuotaStopError,
+  resetProviderQuotaGuard,
+} from '../services/providerQuotaGuard';
 import { isProviderQuotaLikeError } from '../utils/quotaErrors';
 import { isOpenAtTime } from './utils/opening-hours';
 import {
@@ -101,6 +109,22 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
   if (!value) return false;
   const normalized = value.trim().toLowerCase();
   return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
+}
+
+function parsePositiveIntEnv(value: string | undefined): number | null {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return parsed;
+}
+
+function buildRunId(seed?: string): string {
+  if (seed && seed.trim()) return seed.trim();
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `run-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
 }
 
 /** Resolve best transport option based on user preference + available options */
@@ -185,6 +209,98 @@ function computeFinalActivityRatio(
     iconic: Number((iconic / total).toFixed(3)),
     localGem: Number((localGem / total).toFixed(3)),
     total,
+  };
+}
+
+function computeRealMealCoverage(days: TripDay[]): number {
+  const mealItems = days.flatMap((day) =>
+    day.items.filter((item) =>
+      item.type === 'restaurant' && (item.mealType === 'lunch' || item.mealType === 'dinner')
+    )
+  );
+  if (mealItems.length === 0) return 0;
+  const realMeals = mealItems.filter((item) =>
+    !item.qualityFlags?.includes('self_meal_fallback') && Boolean(item.restaurant)
+  );
+  return Number((realMeals.length / mealItems.length).toFixed(3));
+}
+
+function computeHubCoherenceScore(days: TripDay[]): number {
+  const centroids: Array<{ lat: number; lng: number }> = [];
+  for (const day of days) {
+    const activities = day.items.filter((item) =>
+      item.type === 'activity' && Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
+    );
+    if (activities.length === 0) continue;
+    centroids.push({
+      lat: activities.reduce((sum, item) => sum + item.latitude, 0) / activities.length,
+      lng: activities.reduce((sum, item) => sum + item.longitude, 0) / activities.length,
+    });
+  }
+  if (centroids.length <= 1) return 1;
+  let totalKm = 0;
+  for (let i = 1; i < centroids.length; i++) {
+    totalKm += calculateDistance(
+      centroids[i - 1].lat,
+      centroids[i - 1].lng,
+      centroids[i].lat,
+      centroids[i].lng,
+    );
+  }
+  const avgKm = totalKm / (centroids.length - 1);
+  const score = 1 - Math.max(0, avgKm - 40) / 220;
+  return Number(Math.max(0, Math.min(1, score)).toFixed(3));
+}
+
+function mergeReasonCodeCounts(
+  maps: Array<Record<string, number> | undefined>
+): Record<string, number> | undefined {
+  const merged: Record<string, number> = {};
+  for (const map of maps) {
+    if (!map) continue;
+    for (const [reasonCode, count] of Object.entries(map)) {
+      merged[reasonCode] = (merged[reasonCode] || 0) + count;
+    }
+  }
+  return Object.keys(merged).length > 0 ? merged : undefined;
+}
+
+function summarizePlannerAudit(
+  plannerAudit: NonNullable<Trip['runTrace']>['llmAudit'] | undefined
+): {
+  plannerTimeoutCount: number;
+  plannerTruncationCount: number;
+  plannerFinishReasonCounts?: Record<string, number>;
+} {
+  let plannerTimeoutCount = 0;
+  let plannerTruncationCount = 0;
+  const plannerFinishReasonCounts: Record<string, number> = {};
+
+  for (const entry of plannerAudit || []) {
+    const finishReason = (entry.finishReason || '').trim();
+    const finishKey = finishReason ? finishReason.toLowerCase() : '';
+    if (finishKey) {
+      plannerFinishReasonCounts[finishKey] = (plannerFinishReasonCounts[finishKey] || 0) + 1;
+    }
+
+    const failureReason = (entry.failureReason || '').toLowerCase();
+    const timeoutLike = failureReason.includes('timeout') || entry.responseStatus === 408;
+    if (timeoutLike) plannerTimeoutCount++;
+
+    const truncationLike = finishKey.includes('max_tokens')
+      || finishKey.includes('max_output_tokens')
+      || finishKey.includes('length')
+      || finishKey.includes('token_limit')
+      || failureReason.includes('parse_truncated');
+    if (truncationLike) plannerTruncationCount++;
+  }
+
+  return {
+    plannerTimeoutCount,
+    plannerTruncationCount,
+    plannerFinishReasonCounts: Object.keys(plannerFinishReasonCounts).length
+      ? plannerFinishReasonCounts
+      : undefined,
   };
 }
 
@@ -440,6 +556,261 @@ function enforceFinalRestaurantProximity(
   return convertedToFallback;
 }
 
+function enforceFinalMealSemantics(days: TripDay[]): number {
+  const anchorTypes = new Set(['activity', 'checkin', 'checkout', 'hotel']);
+  let convertedToFallback = 0;
+
+  for (const day of days) {
+    for (let i = 0; i < day.items.length; i++) {
+      const item = day.items[i];
+      if (item.type !== 'restaurant') continue;
+      if (item.qualityFlags?.includes('self_meal_fallback')) continue;
+      if (item.mealType !== 'lunch' && item.mealType !== 'dinner') continue;
+
+      const semanticCandidate = item.restaurant || ({
+        id: item.id || `synthetic-meal-${day.dayNumber}-${i}`,
+        name: `${item.title || ''} ${item.locationName || ''}`.trim() || 'Repas',
+        address: item.locationName || item.title || 'Adresse inconnue',
+        latitude: item.latitude || 0,
+        longitude: item.longitude || 0,
+        rating: item.rating || 0,
+        reviewCount: item.reviewCount || 0,
+        priceLevel: 2 as const,
+        cuisineTypes: [],
+        dietaryOptions: [],
+        openingHours: {},
+      });
+
+      if (isAppropriateForMeal(semanticCandidate, item.mealType)) continue;
+
+      const nearestAnchor = day.items
+        .filter((candidate) =>
+          anchorTypes.has(candidate.type)
+          && Number.isFinite(candidate.latitude)
+          && Number.isFinite(candidate.longitude)
+        )
+        .sort((left, right) => {
+          const leftDist = calculateDistance(
+            item.latitude || 0,
+            item.longitude || 0,
+            left.latitude || 0,
+            left.longitude || 0,
+          );
+          const rightDist = calculateDistance(
+            item.latitude || 0,
+            item.longitude || 0,
+            right.latitude || 0,
+            right.longitude || 0,
+          );
+          return leftDist - rightDist;
+        })[0];
+
+      day.items[i] = createSelfMealFallbackItem(
+        item.mealType,
+        item.startTime || (item.mealType === 'lunch' ? '12:30' : '19:00'),
+        item.duration || (item.mealType === 'lunch' ? 75 : 90),
+        day.dayNumber,
+        item.orderIndex,
+        nearestAnchor
+          ? { lat: nearestAnchor.latitude || 0, lng: nearestAnchor.longitude || 0 }
+          : null,
+      );
+      convertedToFallback++;
+    }
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  return convertedToFallback;
+}
+
+function findMealFallbackAnchor(day: TripDay, targetMin: number): { lat: number; lng: number } | null {
+  const anchors = day.items
+    .filter((item) =>
+      Number.isFinite(item.latitude)
+      && Number.isFinite(item.longitude)
+      && (item.type === 'activity' || item.type === 'checkin' || item.type === 'checkout')
+    )
+    .map((item) => {
+      const start = timeToMin(item.startTime || '00:00');
+      const end = timeToMin(item.endTime || item.startTime || '00:00');
+      const mid = (start + end) / 2;
+      return {
+        lat: item.latitude || 0,
+        lng: item.longitude || 0,
+        distance: Math.abs(mid - targetMin),
+      };
+    })
+    .sort((left, right) => left.distance - right.distance);
+  if (anchors.length === 0) return null;
+  return { lat: anchors[0].lat, lng: anchors[0].lng };
+}
+
+function findMealSlotStart(
+  day: TripDay,
+  preferredMin: number,
+  durationMin: number,
+  windowStartMin: number,
+  windowEndMin: number,
+): number | null {
+  const latestStart = windowEndMin - durationMin;
+  if (latestStart < windowStartMin) return null;
+
+  const clampedPreferred = Math.min(latestStart, Math.max(windowStartMin, preferredMin));
+  const intervals = day.items
+    .map((item) => ({
+      start: timeToMin(item.startTime || '00:00'),
+      end: timeToMin(item.endTime || item.startTime || '00:00'),
+    }))
+    .filter((slot) => slot.end > windowStartMin && slot.start < windowEndMin)
+    .sort((left, right) => left.start - right.start);
+
+  // Try preferred slot first.
+  let overlaps = false;
+  for (const slot of intervals) {
+    if (clampedPreferred < slot.end && (clampedPreferred + durationMin) > slot.start) {
+      overlaps = true;
+      break;
+    }
+  }
+  if (!overlaps) return clampedPreferred;
+
+  // Find earliest available gap in window.
+  let cursor = windowStartMin;
+  for (const slot of intervals) {
+    if (slot.start - cursor >= durationMin) {
+      return cursor;
+    }
+    cursor = Math.max(cursor, slot.end);
+  }
+  if (windowEndMin - cursor >= durationMin) return cursor;
+
+  return latestStart;
+}
+
+function enforceFinalMealCoverage(
+  days: TripDay[],
+  timeWindows: DayTimeWindow[],
+): number {
+  let insertedFallbackMeals = 0;
+  const firstDayNumber = days[0]?.dayNumber;
+  const lastDayNumber = days[days.length - 1]?.dayNumber;
+
+  for (const day of days) {
+    let hasLunch = false;
+    let hasDinner = false;
+
+    for (const item of day.items) {
+      if (item.type !== 'restaurant') continue;
+      const title = (item.title || '').toLowerCase();
+      if (item.mealType === 'lunch' || (title.includes('déjeuner') && !title.includes('petit-déjeuner')) || title.includes('lunch')) {
+        hasLunch = true;
+      }
+      if (item.mealType === 'dinner' || title.includes('dîner') || title.includes('diner') || title.includes('dinner')) {
+        hasDinner = true;
+      }
+    }
+
+    const tw = timeWindows.find((window) => window.dayNumber === day.dayNumber);
+    const arrivalItem = day.items.find((item) =>
+      ((day.dayNumber === firstDayNumber) && item.type === 'flight')
+      || (item.type === 'transport' && item.transportDirection === 'outbound')
+    );
+    const departureItem = day.items.find((item) =>
+      ((day.dayNumber === lastDayNumber) && item.type === 'flight')
+      || (item.type === 'transport' && item.transportDirection === 'return')
+    );
+    const eligibility = computeMealEligibility({
+      dayStartTime: tw?.activityStartTime || '00:00',
+      dayEndTime: tw?.activityEndTime || '22:00',
+      hasArrivalTransport: Boolean(tw?.hasArrivalTransport || arrivalItem),
+      hasDepartureTransport: Boolean(tw?.hasDepartureTransport || departureItem),
+      arrivalEndTime: arrivalItem?.endTime,
+      departureStartTime: departureItem?.startTime,
+    });
+    if (!eligibility.hasUsableWindow) continue;
+
+    const requiredMeals: Array<{ mealType: 'lunch' | 'dinner'; duration: number; preferred: number }> = [];
+    if (eligibility.expectLunch && !hasLunch) {
+      requiredMeals.push({ mealType: 'lunch', duration: 75, preferred: 12 * 60 + 45 });
+    }
+    if (eligibility.expectDinner && !hasDinner) {
+      requiredMeals.push({ mealType: 'dinner', duration: 90, preferred: 19 * 60 });
+    }
+
+    for (const meal of requiredMeals) {
+      const slotStart = findMealSlotStart(
+        day,
+        meal.preferred,
+        meal.duration,
+        eligibility.effectiveStartMin,
+        eligibility.effectiveEndMin,
+      );
+      if (slotStart === null) continue;
+      const anchor = findMealFallbackAnchor(day, slotStart);
+      day.items.push(createSelfMealFallbackItem(
+        meal.mealType,
+        minToTime(slotStart),
+        meal.duration,
+        day.dayNumber,
+        day.items.length,
+        anchor,
+      ));
+      insertedFallbackMeals++;
+    }
+
+    day.items.sort((left, right) => timeToMin(left.startTime || '00:00') - timeToMin(right.startTime || '00:00'));
+    day.items.forEach((item, idx) => { item.orderIndex = idx; });
+  }
+
+  return insertedFallbackMeals;
+}
+
+function buildFallbackAccommodation(
+  clusters: ActivityCluster[],
+  destinationCoords: { lat: number; lng: number },
+  destination: string,
+  budgetLevel: TripPreferences['budgetLevel'],
+): Accommodation {
+  const points = clusters
+    .flatMap((cluster) => cluster.activities)
+    .filter((activity) => Number.isFinite(activity.latitude) && Number.isFinite(activity.longitude));
+
+  const center = points.length > 0
+    ? {
+      lat: points.reduce((sum, activity) => sum + activity.latitude, 0) / points.length,
+      lng: points.reduce((sum, activity) => sum + activity.longitude, 0) / points.length,
+    }
+    : destinationCoords;
+
+  const estimatedNightlyRate = budgetLevel === 'economic'
+    ? 65
+    : budgetLevel === 'moderate'
+      ? 120
+      : budgetLevel === 'comfort'
+        ? 185
+        : 280;
+
+  const destinationLabel = (destination || 'destination').trim() || 'destination';
+  return {
+    id: `fallback-hotel-${normalizePlannerText(destinationLabel).replace(/\s+/g, '-') || 'default'}`,
+    name: `Hébergement central — ${destinationLabel}`,
+    type: 'hotel',
+    address: destinationLabel,
+    latitude: center.lat,
+    longitude: center.lng,
+    rating: 4.2,
+    reviewCount: 0,
+    pricePerNight: estimatedNightlyRate,
+    currency: 'EUR',
+    amenities: [],
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
+    bookingUrl: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destinationLabel)}&group_adults=2&no_rooms=1`,
+    dataReliability: 'estimated',
+    qualityFlags: ['hotel_synthetic_fallback'],
+  };
+}
+
 function mergeMustSeeSeedsIntoPreferences(
   preferences: TripPreferences,
   seeds: string[],
@@ -629,14 +1000,14 @@ function countArrivalFatigueViolations(
 }
 
 function plannerActivityKey(activity: ScoredActivity): string {
-  return activity.planningToken
-    || activity.id
+  return activity.id
+    || activity.planningToken
     || normalizePlannerText(activity.name);
 }
 
 function plannedItemKey(item: TripItem): string {
-  return item.planningMeta?.planningToken
-    || item.id
+  return item.id
+    || item.planningMeta?.planningToken
     || normalizePlannerText(item.title || item.locationName || '');
 }
 
@@ -648,6 +1019,34 @@ function computeLlmOrderPreservedRate(
   if (lockedClusters.length === 0) return undefined;
 
   const dayByNumber = new Map(days.map((day) => [day.dayNumber, day]));
+  let indexedPairs = 0;
+  let indexedPreservedPairs = 0;
+
+  for (const cluster of lockedClusters) {
+    const day = dayByNumber.get(cluster.dayNumber);
+    if (!day) continue;
+
+    const llmOrderSequence = day.items
+      .filter((item) => item.type === 'activity')
+      .map((item) => item.planningMeta?.llmOrderIndex)
+      .filter((value): value is number => Number.isFinite(value));
+
+    if (llmOrderSequence.length <= 1) continue;
+
+    for (let i = 0; i < llmOrderSequence.length - 1; i++) {
+      for (let j = i + 1; j < llmOrderSequence.length; j++) {
+        indexedPairs++;
+        if (llmOrderSequence[i] <= llmOrderSequence[j]) {
+          indexedPreservedPairs++;
+        }
+      }
+    }
+  }
+
+  if (indexedPairs > 0) {
+    return Number((indexedPreservedPairs / indexedPairs).toFixed(3));
+  }
+
   let totalPairs = 0;
   let preservedPairs = 0;
 
@@ -689,6 +1088,11 @@ export async function generateTripV2(
   v2Options?: GenerateTripV2Options,
 ): Promise<Trip> {
   resetApiCostTracker();
+  resetProviderQuotaGuard();
+  configureProviderQuotaGuard({
+    stopImmediate: true,
+    requiredProviders: ['gemini', 'serpapi', 'google_places'],
+  });
   setRunBudgetProfile('dense');
 
   let regionAnalysis: DestinationAnalysis | null = null;
@@ -726,6 +1130,7 @@ export async function generateTripV2(
         }
       }
     } catch (e) {
+      if (isProviderQuotaStopError(e)) throw e;
       console.warn('[Pipeline] Region resolver failed, continuing with original destination:', e);
     }
   }
@@ -766,6 +1171,7 @@ export async function generateTripV2(
         preferences.cityPlan = undefined;
       }
     } catch (e) {
+      if (isProviderQuotaStopError(e)) throw e;
       console.warn('[Pipeline] Pre-fetch questions failed, continuing:', e);
     }
   }
@@ -776,7 +1182,13 @@ export async function generateTripV2(
   return generateTripV3(
     preferences,
     onEvent,
-    { onSnapshot: v2Options?.onSnapshot, cachedIntel, regionalBlueprint },
+    {
+      onSnapshot: v2Options?.onSnapshot,
+      cachedIntel,
+      regionalBlueprint,
+      runId: v2Options?.runId,
+      enableRunTrace: v2Options?.enableRunTrace,
+    },
     v2Options?.askUser,
   );
 }
@@ -812,6 +1224,10 @@ export interface GenerateTripV3Options {
   cachedIntel?: DestinationIntel | null;
   /** Optional regional blueprint (LLM architect) to seed must-sees and diagnostics */
   regionalBlueprint?: RegionalBlueprint | null;
+  /** Stable trace id for one generation run */
+  runId?: string;
+  /** Force forensic trace payload in diagnostics */
+  enableRunTrace?: boolean;
 }
 
 export async function generateTripV3(
@@ -821,6 +1237,33 @@ export async function generateTripV3(
   askUser?: AskUserFn,
 ): Promise<Trip> {
   const startTime = Date.now();
+  const runId = buildRunId(options?.runId);
+  const traceEnabled = options?.enableRunTrace !== false;
+  const runTraceSteps: NonNullable<Trip['runTrace']>['steps'] = [];
+  const runTraceFallbackReasons: string[] = [];
+  const recordRunStep = (
+    stepId: string,
+    stepName: string,
+    status: 'done' | 'fallback' | 'error',
+    startedAt: number,
+    reasonCode?: string,
+    detail?: string,
+  ) => {
+    if (!traceEnabled) return;
+    runTraceSteps.push({
+      stepId,
+      stepName,
+      status,
+      latencyMs: Math.max(0, Date.now() - startedAt),
+      reasonCode,
+      startedAt: new Date(startedAt).toISOString(),
+      endedAt: new Date().toISOString(),
+      detail,
+    });
+    if (reasonCode && status !== 'done') {
+      runTraceFallbackReasons.push(reasonCode);
+    }
+  };
   const stageTimes: Record<string, number> = {};
 
   // Step 1: Fetch all data (or use fixture)
@@ -831,6 +1274,7 @@ export async function generateTripV3(
     stageTimes['fetch'] = 0;
     console.log('[Pipeline V3] Step 1: Using fixture data (no API calls)');
     onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data (fixture)', durationMs: 0, timestamp: Date.now() });
+    recordRunStep('step1_fetch', 'Fetching data', 'done', t, undefined, 'fixture_data');
   } else {
     // Step 0: Destination Intelligence — use cached if available (from generateTripV2 pre-fetch)
     let destinationIntel: DestinationIntel | null = options?.cachedIntel !== undefined ? options.cachedIntel : null;
@@ -838,6 +1282,7 @@ export async function generateTripV3(
       try {
         destinationIntel = await getDestinationIntel(preferences.destination, preferences);
       } catch (e) {
+        if (isProviderQuotaStopError(e)) throw e;
         console.warn('[Pipeline V3] Step 0 failed (non-blocking):', e);
       }
     } else {
@@ -851,11 +1296,14 @@ export async function generateTripV3(
     try {
       data = await fetchAllData(preferences, onEvent, destinationIntel);
     } catch (err) {
+      if (isProviderQuotaStopError(err)) throw err;
       console.error('[Pipeline V3] Step 1 failed:', err);
+      recordRunStep('step1_fetch', 'Fetching data', 'error', t, 'fetch_failed', (err as Error)?.message || String(err));
       throw new Error(`[Pipeline V3] Data fetch failed: ${(err as Error).message}`);
     }
     stageTimes['fetch'] = Date.now() - t;
     onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data', durationMs: stageTimes['fetch'], timestamp: Date.now() });
+    recordRunStep('step1_fetch', 'Fetching data', 'done', t);
   }
 
   // Notify caller with FetchedData (for fixture capture)
@@ -933,8 +1381,8 @@ export async function generateTripV3(
           name: seed.name,
           type: seed.kind === 'iconic' ? 'culture' : 'nature',
           description: seed.kind === 'iconic'
-            ? "Suggestion iconique de l'architecte regional validee par geocodage"
-            : "Pepite locale proposee par l'architecte regional et validee par geocodage",
+            ? "Incontournable recommande pour cette destination"
+            : "Pepite locale recommandee pour une experience plus authentique",
           duration: 90,
           estimatedCost: 0,
           latitude: resolved.lat,
@@ -960,6 +1408,7 @@ export async function generateTripV3(
         console.log(`[Pipeline V3] Sparse pool rescue: +${injected} architect anchors injected (${selectedActivities.length}/${sparseThreshold}, quality=${scheduleReadyCount}/${qualitySparseThreshold})`);
       }
     } catch (e) {
+      if (isProviderQuotaStopError(e)) throw e;
       console.warn('[Pipeline V3] Sparse pool rescue failed (non-blocking):', e);
     }
   }
@@ -967,6 +1416,7 @@ export async function generateTripV3(
   stageTimes['score'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 2: ${selectedActivities.length} activities selected`);
   onEvent?.({ type: 'step_done', step: 2, stepName: 'Scoring activities', durationMs: stageTimes['score'], timestamp: Date.now() });
+  recordRunStep('step2_score', 'Scoring activities', 'done', t);
 
   // Step 2a: Trust layer — enrich activities with confidence metadata (internal, no prod impact)
   applyTrustLayer(selectedActivities, data, data.destCoords);
@@ -1103,6 +1553,7 @@ export async function generateTripV3(
   stageTimes['cluster'] = Date.now() - t;
   console.log(`[Pipeline V3] Step 3: ${clusters.length} clusters created (${dayTripPacks.length} day trip packs)`);
   onEvent?.({ type: 'step_done', step: 3, stepName: 'Clustering', durationMs: stageTimes['cluster'], timestamp: Date.now() });
+  recordRunStep('step3_cluster', 'Clustering', 'done', t);
 
   const previewHotels = selectTopHotelsByBarycenter(
     clusters,
@@ -1137,6 +1588,8 @@ export async function generateTripV3(
     enabled: boolean;
     used: boolean;
     fallbackReason?: string;
+    providerUsed?: 'gemini' | 'anthropic' | 'gpt' | 'deterministic';
+    providerFallback: boolean;
     groundingRate: number;
     unknownIdRate: number;
     parseAttempts: number;
@@ -1147,9 +1600,13 @@ export async function generateTripV3(
     requestedDropCount: number;
     acceptedDropCount: number;
     dropRecoveryCount: number;
+    reasonCodeCounts?: Record<string, number>;
+    plannerAudit: NonNullable<Trip['runTrace']>['llmAudit'];
+    candidateDecisionEvents?: NonNullable<Trip['runTrace']>['candidateDecisions'];
   } = {
     enabled: closedWorldGateEnabled,
     used: false,
+    providerFallback: false,
     groundingRate: 0,
     unknownIdRate: 0,
     parseAttempts: 0,
@@ -1158,11 +1615,24 @@ export async function generateTripV3(
     requestedDropCount: 0,
     acceptedDropCount: 0,
     dropRecoveryCount: 0,
+    plannerAudit: [],
   };
 
   let trip: Trip | null = null;
 
   if (closedWorldGateEnabled) {
+    const qualityFirstMode = isTruthyEnvFlag(process.env.PIPELINE_QUALITY_FIRST);
+    const defaultClosedWorldHardCapMs =
+      forceClosedWorldPlanner
+        ? 300_000
+        : qualityFirstMode
+          ? 240_000
+          : 180_000;
+    const overrideHardCapMs = parsePositiveIntEnv(process.env.PIPELINE_HARD_CAP_MS);
+    const disableHardCap = isTruthyEnvFlag(process.env.PIPELINE_DISABLE_HARD_CAP);
+    const closedWorldHardCapMs = disableHardCap
+      ? Number.POSITIVE_INFINITY
+      : (overrideHardCapMs || defaultClosedWorldHardCapMs);
     const elapsedMs = Date.now() - startTime;
     const plannerProfileBudgetMs =
       forceClosedWorldPlanner
@@ -1172,11 +1642,19 @@ export async function generateTripV3(
         : shouldTriggerSparseRescue
           ? 32_000
           : 20_000;
-    const plannerReserveMs = 35_000;
-    const plannerBudgetMs = Math.max(0, Math.min(plannerProfileBudgetMs, 180_000 - elapsedMs - plannerReserveMs));
+    const plannerReserveMs =
+      forceClosedWorldPlanner
+        ? 10_000
+        : densityProfile.densityCategory === 'spread' || shouldTriggerSparseRescue
+          ? 12_000
+          : 26_000;
+    const plannerBudgetMs = Math.max(0, Math.min(plannerProfileBudgetMs, closedWorldHardCapMs - elapsedMs - plannerReserveMs));
     closedWorldMeta.plannerBudgetMs = plannerBudgetMs;
-
-    if (elapsedMs >= 180_000 || plannerBudgetMs < 4_000) {
+    const minPlannerBudgetMs =
+      forceClosedWorldPlanner || densityProfile.densityCategory === 'spread' || shouldTriggerSparseRescue
+        ? 3_500
+        : 4_000;
+    if (elapsedMs >= closedWorldHardCapMs || plannerBudgetMs < minPlannerBudgetMs) {
       closedWorldMeta.fallbackReason = 'hard_cap_reached';
     } else {
       const catalogRestaurants = [
@@ -1191,12 +1669,18 @@ export async function generateTripV3(
         timeWindows,
         densityCategory: densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
         maxPlannerLatencyMs: plannerBudgetMs,
+        enableGptFallback: forceClosedWorldPlanner || densityProfile.densityCategory === 'spread' || shouldTriggerSparseRescue,
       });
 
       closedWorldMeta.groundingRate = plannerAttempt.groundingRate;
       closedWorldMeta.unknownIdRate = plannerAttempt.unknownIdRate;
       closedWorldMeta.parseAttempts = plannerAttempt.parseAttempts;
       closedWorldMeta.latencyMs = plannerAttempt.latencyMs;
+      closedWorldMeta.providerUsed = plannerAttempt.providerUsed;
+      closedWorldMeta.providerFallback = plannerAttempt.providerFallback;
+      closedWorldMeta.reasonCodeCounts = plannerAttempt.reasonCodeCounts;
+      closedWorldMeta.plannerAudit = plannerAttempt.plannerAudit;
+      closedWorldMeta.candidateDecisionEvents = plannerAttempt.candidateDecisionEvents;
 
       if (plannerAttempt.result) {
         closedWorldMeta.ratioIconicLocal = plannerAttempt.result.hints.ratioIconicLocal;
@@ -1206,10 +1690,12 @@ export async function generateTripV3(
         closedWorldMeta.dropRecoveryCount = plannerAttempt.result.hints.dropRecoveryCount;
         pipelineCtx.ratioFeasibleBand = plannerAttempt.result.hints.ratioFeasibleBand;
         try {
+          const scheduleStartedAt = Date.now();
           const llmScheduledTrip = await runPipelineFromClusters(plannerAttempt.result.clusters, pipelineCtx);
           if (llmScheduledTrip.qualityMetrics?.invariantsPassed) {
             trip = llmScheduledTrip;
             closedWorldMeta.used = true;
+            recordRunStep('deterministic_composer', 'Deterministic composer', 'done', scheduleStartedAt);
             if (trip.plannerDiagnostics) {
               trip.plannerDiagnostics.llmRebalanceUsed = false;
               trip.plannerDiagnostics.llmRebalanceScore = null;
@@ -1218,10 +1704,13 @@ export async function generateTripV3(
             }
           } else {
             closedWorldMeta.fallbackReason = 'p0_blocking_after_llm_scheduler';
+            recordRunStep('deterministic_composer', 'Deterministic composer', 'fallback', scheduleStartedAt, 'p0_blocking_after_llm_scheduler');
           }
         } catch (err) {
+          if (isProviderQuotaStopError(err)) throw err;
           console.warn('[Pipeline V3] Closed-world scheduler failed, falling back:', err);
           closedWorldMeta.fallbackReason = 'llm_scheduler_runtime_error';
+          recordRunStep('deterministic_composer', 'Deterministic composer', 'error', Date.now(), 'llm_scheduler_runtime_error', (err as Error)?.message || String(err));
         }
       } else {
         closedWorldMeta.fallbackReason = plannerAttempt.failureReason || 'llm_scheduler_failed';
@@ -1229,10 +1718,24 @@ export async function generateTripV3(
     }
   }
 
+  if (closedWorldGateEnabled) {
+    const plannerStartedAt = Date.now() - Math.max(0, closedWorldMeta.latencyMs);
+    recordRunStep(
+      'closed_world_planner',
+      'Closed-world planner',
+      closedWorldMeta.used ? 'done' : (closedWorldMeta.fallbackReason ? 'fallback' : 'done'),
+      plannerStartedAt,
+      closedWorldMeta.used ? undefined : closedWorldMeta.fallbackReason,
+      closedWorldMeta.providerUsed ? `provider=${closedWorldMeta.providerUsed}` : undefined,
+    );
+  }
+
   if (!trip) {
     // Closed-world gate path: fallback must stay deterministic (no second LLM loop).
     if (closedWorldGateEnabled) {
+      const scheduleStartedAt = Date.now();
       trip = await runPipelineFromClusters(clusters, pipelineCtx);
+      recordRunStep('deterministic_composer', 'Deterministic composer', 'fallback', scheduleStartedAt, closedWorldMeta.fallbackReason || 'closed_world_fallback');
       if (trip.plannerDiagnostics) {
         trip.plannerDiagnostics.llmRebalanceUsed = false;
         trip.plannerDiagnostics.llmRebalanceScore = null;
@@ -1241,6 +1744,7 @@ export async function generateTripV3(
       }
     } else {
       // Legacy dense path: keep A/B LLM rebalance experiment.
+      const scheduleStartedAt = Date.now();
       const llmResult = await rebalanceClustersWithLLM(
         clusters, timeWindows, preferences, densityProfile
       );
@@ -1258,6 +1762,7 @@ export async function generateTripV3(
 
         if (scoreLLM > scoreAlgo) {
           trip = tripLLM;
+          recordRunStep('deterministic_composer', 'Deterministic composer', 'done', scheduleStartedAt);
           if (trip.plannerDiagnostics) {
             trip.plannerDiagnostics.llmRebalanceUsed = true;
             trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
@@ -1267,6 +1772,7 @@ export async function generateTripV3(
           }
         } else {
           trip = tripAlgo;
+          recordRunStep('deterministic_composer', 'Deterministic composer', 'done', scheduleStartedAt);
           if (trip.plannerDiagnostics) {
             trip.plannerDiagnostics.llmRebalanceUsed = false;
             trip.plannerDiagnostics.llmRebalanceScore = scoreLLM;
@@ -1277,6 +1783,7 @@ export async function generateTripV3(
       } else {
         // LLM failed, algo only
         trip = await runPipelineFromClusters(clusters, pipelineCtx);
+        recordRunStep('deterministic_composer', 'Deterministic composer', 'fallback', scheduleStartedAt, 'llm_rebalance_unavailable');
         if (trip.plannerDiagnostics) {
           trip.plannerDiagnostics.llmRebalanceUsed = false;
           trip.plannerDiagnostics.llmRebalanceScore = null;
@@ -1303,10 +1810,14 @@ export async function generateTripV3(
       return [String(day.dayNumber), minutes];
     })
   );
+  const realMealCoverage = computeRealMealCoverage(trip.days);
+  const hubCoherenceScore = computeHubCoherenceScore(trip.days);
+  const plannerAuditStats = summarizePlannerAudit(closedWorldMeta.plannerAudit);
   trip.generationDiagnostics = {
     validationLatencyMs:
       (activeBlueprint?.diagnostics?.validationLatencyMs || 0)
       + sparseRescueValidation.validationLatencyMs,
+    runId,
     providerCallBreakdown: mergedProviderCallBreakdown,
     parallelismStats: mergedParallelismStats,
     plannerMode: closedWorldMeta.used ? 'llm_closed_world' : 'deterministic',
@@ -1317,12 +1828,22 @@ export async function generateTripV3(
     parseAttempts: closedWorldMeta.enabled ? closedWorldMeta.parseAttempts : undefined,
     plannerBudgetMs: closedWorldMeta.enabled ? closedWorldMeta.plannerBudgetMs : undefined,
     plannerTimeoutRate: closedWorldMeta.enabled ? (closedWorldMeta.fallbackReason === 'planner_timeout' ? 1 : 0) : undefined,
+    plannerTimeoutCount: closedWorldMeta.enabled ? plannerAuditStats.plannerTimeoutCount : undefined,
+    plannerTruncationCount: closedWorldMeta.enabled ? plannerAuditStats.plannerTruncationCount : undefined,
+    plannerFinishReasonCounts: closedWorldMeta.enabled ? plannerAuditStats.plannerFinishReasonCounts : undefined,
     closedWorldActivationRate: closedWorldMeta.enabled ? (closedWorldMeta.used ? 1 : 0) : undefined,
+    geoFallbackUsed: data.geoFallbackUsed,
     mealSemanticReplacements: trip.plannerDiagnostics?.mealSemanticReplacementCount || 0,
     llmOrderPreservedRate: trip.plannerDiagnostics?.llmOrderPreservedRate,
     requestedDropCount: closedWorldMeta.enabled ? closedWorldMeta.requestedDropCount : undefined,
     acceptedDropCount: closedWorldMeta.enabled ? closedWorldMeta.acceptedDropCount : undefined,
     dropRecoveryCount: closedWorldMeta.enabled ? closedWorldMeta.dropRecoveryCount : undefined,
+    plannerProviderUsed: closedWorldMeta.used
+      ? (closedWorldMeta.providerUsed || 'gemini')
+      : (closedWorldMeta.enabled ? (closedWorldMeta.providerUsed || 'deterministic') : 'deterministic'),
+    providerFallback: closedWorldMeta.enabled ? closedWorldMeta.providerFallback : undefined,
+    hubCoherenceScore,
+    reasonCodeCounts: closedWorldMeta.reasonCodeCounts,
     ratioFeasibleBand: closedWorldMeta.enabled ? closedWorldMeta.ratioFeasibleBand : undefined,
     freeTimeMinutesByDay,
     replacementCounts: {
@@ -1355,11 +1876,36 @@ export async function generateTripV3(
     groundingRate: closedWorldMeta.enabled ? closedWorldMeta.groundingRate : undefined,
     ratioIconicLocal,
     ratioFeasibleBand: closedWorldMeta.enabled ? closedWorldMeta.ratioFeasibleBand : undefined,
+    realMealCoverage,
+    freeTimeMinutesByDay,
+    hubConsistencyRate: hubCoherenceScore,
   };
 
   // Timing and cost logging
   const totalTime = Date.now() - startTime;
   const costSummary = getApiCostSummary();
+  const runTrace: NonNullable<Trip['runTrace']> = {
+    runId,
+    startedAt: new Date(startTime).toISOString(),
+    endedAt: new Date().toISOString(),
+    status: trip.qualityMetrics?.invariantsPassed
+      ? (closedWorldMeta.used ? 'done' : (closedWorldMeta.enabled ? 'fallback' : 'done'))
+      : 'error',
+    totalLatencyMs: totalTime,
+    estimatedCostEur: costSummary.totalEur,
+    fallbackReasons: Array.from(new Set(runTraceFallbackReasons)),
+    steps: runTraceSteps,
+    llmAudit: closedWorldMeta.plannerAudit,
+    candidateDecisions: closedWorldMeta.candidateDecisionEvents?.slice(0, 600),
+    reasonCodeCounts: closedWorldMeta.reasonCodeCounts,
+  };
+  if (traceEnabled) {
+    trip.runTrace = runTrace;
+    if (trip.generationDiagnostics) {
+      trip.generationDiagnostics.runTrace = runTrace;
+    }
+  }
+
   console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);
   console.log(`  Quality: ${trip.qualityMetrics?.score}/100`);
   console.log(`  LLM rebalance: ${trip.plannerDiagnostics?.llmRebalanceUsed ? 'WON' : 'algo won'}`);
@@ -1405,7 +1951,7 @@ async function runPipelineFromClusters(
   optimizeClusterRouting(clusters);
 
   // Step 4: Select hotel (3 tiers) — per-path since clusters differ
-  const hotels = selectTopHotelsByBarycenter(
+  const rankedHotels = selectTopHotelsByBarycenter(
     clusters,
     data.bookingHotels || [],
     preferences.budgetLevel || 'medium',
@@ -1414,7 +1960,18 @@ async function runPipelineFromClusters(
     { destination: preferences.destination },
     3
   );
+  const hotels = rankedHotels.length > 0
+    ? rankedHotels
+    : [buildFallbackAccommodation(
+      clusters,
+      data.destCoords,
+      preferences.destination || '',
+      preferences.budgetLevel || 'moderate',
+    )];
   const hotel = hotels[0] || null;
+  if (rankedHotels.length === 0 && hotel) {
+    console.warn('[Pipeline V3] Step 4: Hotel pool empty/invalid, using synthetic fallback accommodation');
+  }
   const hotelCoords = hotel ? { lat: hotel.latitude, lng: hotel.longitude } : data.destCoords;
   console.log(`[Pipeline V3] Step 4: Hotel selected: ${hotel?.name || 'none'}`);
 
@@ -1424,6 +1981,7 @@ async function runPipelineFromClusters(
   try {
     travelTimes = await computeTravelTimes(clusters, hotelCoords, directionsMode, preferences.startDate);
   } catch (err) {
+    if (isProviderQuotaStopError(err)) throw err;
     if (isProviderQuotaLikeError(err)) {
       console.warn('[Pipeline V3] Step 6 quota/rate-limited, falling back to estimated travel times');
       travelTimes = await computeTravelTimes(clusters, hotelCoords, 'off', preferences.startDate);
@@ -1443,6 +2001,7 @@ async function runPipelineFromClusters(
   try {
     enrichedRestaurants = await enrichRestaurantPool(clusters, allRestaurants, preferences.destination, densityProfile.densityCategory as 'spread' | 'medium' | 'dense');
   } catch (err) {
+    if (isProviderQuotaStopError(err)) throw err;
     if (isProviderQuotaLikeError(err)) {
       console.warn('[Pipeline V3] Step 7 quota/rate-limited, using existing restaurant pool');
       enrichedRestaurants = [...allRestaurants];
@@ -1605,6 +2164,7 @@ async function runPipelineFromClusters(
         console.log(`[Pipeline V3] Step 13: LLM review passed — no issues (confidence: ${review.confidence})`);
       }
     } catch (e) {
+      if (isProviderQuotaStopError(e)) throw e;
       console.warn('[Pipeline V3] Step 13: LLM review failed (non-blocking):', e);
     }
   }
@@ -1640,6 +2200,16 @@ async function runPipelineFromClusters(
   );
   if (finalP02Fallbacks > 0) {
     console.log(`[Pipeline V3] Final P0.2 guard: converted ${finalP02Fallbacks} distant meal(s) to Repas libre`);
+  }
+
+  const finalSemanticFallbacks = enforceFinalMealSemantics(scheduledDays);
+  if (finalSemanticFallbacks > 0) {
+    console.log(`[Pipeline V3] Final meal semantic guard: converted ${finalSemanticFallbacks} non-food meal(s) to Repas libre`);
+  }
+
+  const finalCoverageFallbacks = enforceFinalMealCoverage(scheduledDays, timeWindows);
+  if (finalCoverageFallbacks > 0) {
+    console.log(`[Pipeline V3] Final meal coverage guard: inserted ${finalCoverageFallbacks} fallback meal(s) for missing lunch/dinner`);
   }
 
   // Diagnostics computation
@@ -1820,6 +2390,12 @@ async function runPipelineFromClusters(
   const criticalGeoCount = combinedContractViolations.filter(
     v => v.includes('P0.5') || v.includes('P0.6')
   ).length;
+  const totalLateMealReplacements =
+    (repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0) + finalSemanticFallbacks + finalCoverageFallbacks;
+  const totalMealSemanticReplacements =
+    (repairResult.rescueDiagnostics?.mealSemanticReplacementCount ?? 0) + finalSemanticFallbacks;
+  const totalMealFallbackCount =
+    (repairResult.rescueDiagnostics?.mealFallbackCount ?? 0) + finalSemanticFallbacks + finalCoverageFallbacks;
 
   trip.plannerDiagnostics = {
     plannerVersion: 'v3.0',
@@ -1833,8 +2409,8 @@ async function runPipelineFromClusters(
     contractsPassed: contractResult.invariantsPassed,
     rescueStage: 0,
     protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
-    lateMealReplacementCount: repairResult.rescueDiagnostics?.lateMealReplacementCount ?? 0,
-    mealSemanticReplacementCount: repairResult.rescueDiagnostics?.mealSemanticReplacementCount ?? 0,
+    lateMealReplacementCount: totalLateMealReplacements,
+    mealSemanticReplacementCount: totalMealSemanticReplacements,
     dayNumberMismatchCount: 0,
     dayTripEvictionCount: repairResult.rescueDiagnostics?.dayTripEvictionCount ?? 0,
     finalIntegrityFailures: repairResult.rescueDiagnostics?.finalIntegrityFailures ?? 0,
@@ -1842,7 +2418,7 @@ async function runPipelineFromClusters(
     teleportLegCount: repairResult.rescueDiagnostics?.teleportLegCount ?? 0,
     staleNarrativeCount: repairResult.rescueDiagnostics?.staleNarrativeCount ?? 0,
     freeTimeOverBudgetCount: repairResult.rescueDiagnostics?.freeTimeOverBudgetCount ?? 0,
-    mealFallbackCount: repairResult.rescueDiagnostics?.mealFallbackCount ?? 0,
+    mealFallbackCount: totalMealFallbackCount,
     routeRebuildCount: repairResult.rescueDiagnostics?.routeRebuildCount ?? 0,
     restaurantRefetchMissCount: repairResult.rescueDiagnostics?.restaurantRefetchMissCount ?? 0,
     missingProtectedMustSeeCount,
@@ -1913,7 +2489,7 @@ export async function generateTripV3MultiCity(
     return generateTripV3(
       preferences,
       onEvent,
-      { onSnapshot: options?.onSnapshot },
+      { onSnapshot: options?.onSnapshot, runId: options?.runId, enableRunTrace: options?.enableRunTrace },
     );
   }
 
@@ -1942,7 +2518,11 @@ export async function generateTripV3MultiCity(
     const segment = await generateTripV3(
       cityPrefs,
       onEvent,
-      { onSnapshot: options?.onSnapshot },
+      {
+        onSnapshot: options?.onSnapshot,
+        runId: options?.runId ? `${options.runId}:seg${i + 1}` : undefined,
+        enableRunTrace: options?.enableRunTrace,
+      },
     );
     segments.push(segment);
 
@@ -2033,9 +2613,23 @@ export async function generateTripV3MultiCity(
         catalogIconicRatio: Number(avgCatalog.toFixed(3)),
       };
     })(),
+    realMealCoverage: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.realMealCoverage || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    freeTimeMinutesByDay: mergedFreeTimeMinutesByDay,
+    hubConsistencyRate: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.reliabilitySummary?.hubConsistencyRate || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
   };
   mergedTrip.generationDiagnostics = {
     validationLatencyMs: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.validationLatencyMs || 0), 0),
+    runId: options?.runId || undefined,
     plannerMode: segments.some((segment) => segment.generationDiagnostics?.plannerMode === 'llm_closed_world')
       ? 'llm_closed_world'
       : 'deterministic',
@@ -2066,12 +2660,18 @@ export async function generateTripV3MultiCity(
         / segments.length
       ).toFixed(3)
     ),
+    plannerTimeoutCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.plannerTimeoutCount || 0), 0),
+    plannerTruncationCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.plannerTruncationCount || 0), 0),
+    plannerFinishReasonCounts: mergeReasonCodeCounts(
+      segments.map((segment) => segment.generationDiagnostics?.plannerFinishReasonCounts)
+    ),
     closedWorldActivationRate: Number(
       (
         segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.closedWorldActivationRate || 0), 0)
         / segments.length
       ).toFixed(3)
     ),
+    geoFallbackUsed: segments.some((segment) => Boolean(segment.generationDiagnostics?.geoFallbackUsed)),
     mealSemanticReplacements: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.mealSemanticReplacements || 0), 0),
     llmOrderPreservedRate: Number(
       (
@@ -2082,6 +2682,18 @@ export async function generateTripV3MultiCity(
     requestedDropCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.requestedDropCount || 0), 0),
     acceptedDropCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.acceptedDropCount || 0), 0),
     dropRecoveryCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.dropRecoveryCount || 0), 0),
+    plannerProviderUsed: segments.find((segment) => segment.generationDiagnostics?.plannerProviderUsed && segment.generationDiagnostics.plannerProviderUsed !== 'deterministic')
+      ?.generationDiagnostics?.plannerProviderUsed || 'deterministic',
+    providerFallback: segments.some((segment) => Boolean(segment.generationDiagnostics?.providerFallback)),
+    hubCoherenceScore: Number(
+      (
+        segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.hubCoherenceScore || 0), 0)
+        / segments.length
+      ).toFixed(3)
+    ),
+    reasonCodeCounts: mergeReasonCodeCounts(
+      segments.map((segment) => segment.generationDiagnostics?.reasonCodeCounts)
+    ),
     ratioFeasibleBand: (() => {
       const bands = segments
         .map((segment) => segment.generationDiagnostics?.ratioFeasibleBand)
@@ -2109,6 +2721,27 @@ export async function generateTripV3MultiCity(
       segments.map((segment) => segment.generationDiagnostics?.parallelismStats)
     ),
   };
+
+  if (options?.enableRunTrace !== false) {
+    mergedTrip.runTrace = {
+      runId: options?.runId || buildRunId(),
+      startedAt: segments[0]?.runTrace?.startedAt || new Date().toISOString(),
+      endedAt: segments[segments.length - 1]?.runTrace?.endedAt || new Date().toISOString(),
+      status: mergedTrip.qualityMetrics?.invariantsPassed ? 'done' : 'error',
+      totalLatencyMs: segments.reduce((sum, segment) => sum + (segment.runTrace?.totalLatencyMs || 0), 0),
+      estimatedCostEur: Number(
+        segments.reduce((sum, segment) => sum + (segment.runTrace?.estimatedCostEur || 0), 0).toFixed(3)
+      ),
+      fallbackReasons: Array.from(new Set(
+        segments.flatMap((segment) => segment.runTrace?.fallbackReasons || [])
+      )),
+      steps: segments.flatMap((segment) => segment.runTrace?.steps || []),
+      llmAudit: segments.flatMap((segment) => segment.runTrace?.llmAudit || []),
+      candidateDecisions: segments.flatMap((segment) => segment.runTrace?.candidateDecisions || []).slice(0, 1200),
+      reasonCodeCounts: mergeReasonCodeCounts(segments.map((segment) => segment.runTrace?.reasonCodeCounts)),
+    };
+    mergedTrip.generationDiagnostics.runTrace = mergedTrip.runTrace;
+  }
 
   return mergedTrip;
 }

@@ -30,6 +30,24 @@ interface TravelTipsResult {
   };
 }
 
+function cleanJsonPayload(raw: string): string {
+  return raw
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/,\s*([}\]])/g, '$1')
+    .trim();
+}
+
+function extractJsonCandidate(text: string): string | null {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced?.[1]) return fenced[1].trim();
+  const object = text.match(/\{[\s\S]*\}/);
+  if (object?.[0]) return object[0].trim();
+  return null;
+}
+
 export async function generateTravelTips(
   origin: string,
   destination: string,
@@ -94,17 +112,30 @@ Si la destination est dans un pays francophone ÉTRANGER (ex: France→Belgique,
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const text = response.content
+      .map((block) => (block.type === 'text' ? block.text : ''))
+      .filter((value) => value.length > 0)
+      .join('\n')
+      .trim();
+    const jsonCandidate = extractJsonCandidate(text);
+    if (!jsonCandidate) {
       console.warn('[TravelTips] No JSON found in response');
       return null;
     }
 
-    const result = JSON.parse(jsonMatch[0]) as TravelTipsResult;
-    return result;
+    const candidates = [jsonCandidate, cleanJsonPayload(jsonCandidate)];
+    for (const candidate of candidates) {
+      try {
+        return JSON.parse(candidate) as TravelTipsResult;
+      } catch {
+        // try next candidate
+      }
+    }
+
+    console.warn('[TravelTips] Invalid JSON response, skipping tips');
+    return null;
   } catch (error) {
-    console.error('[TravelTips] Error:', error);
+    console.error('[TravelTips] Error:', error instanceof Error ? error.message : String(error));
     return null;
   }
 }

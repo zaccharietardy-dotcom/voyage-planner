@@ -73,6 +73,8 @@ export interface FetchedData {
   // Coordinates
   destCoords: { lat: number; lng: number };
   originCoords: { lat: number; lng: number };
+  geoFallbackUsed?: boolean;
+  geoFallbackReason?: string;
   originAirports: AirportInfo[];
   destAirports: AirportInfo[];
 

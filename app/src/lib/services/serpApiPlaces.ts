@@ -17,6 +17,8 @@ import { Attraction } from './attractions';
 import { calculateDistance } from './geocoding';
 import { getDestinationSize, getCostMultiplier, getDestinationArchetypes } from './destinationData';
 import { trackSerpApiRequest } from './apiUsageTracker';
+import { isProviderQuotaStopError, reportProviderQuotaExceeded } from './providerQuotaGuard';
+import { isProviderQuotaLikeMessage } from '../utils/quotaErrors';
 
 function getSerpApiKey() { return process.env.SERPAPI_KEY?.trim(); }
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
@@ -35,6 +37,29 @@ async function trackedSerpApiFetch(input: string, init?: RequestInit): Promise<R
   const timeoutId = setTimeout(() => controller.abort(), 12000);
   try {
     const response = await fetch(input, { ...init, signal: controller.signal });
+    if (response.status === 429) {
+      reportProviderQuotaExceeded('serpapi', 'http_429');
+    }
+    if (response.status === 403) {
+      const text = await response.clone().text().catch(() => '');
+      if (isProviderQuotaLikeMessage(text)) {
+        reportProviderQuotaExceeded('serpapi', 'http_403_quota');
+      }
+    }
+    if (response.ok) {
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const payload = await response.clone().json().catch(() => null);
+        const errorText = typeof payload?.error === 'string'
+          ? payload.error
+          : typeof payload?.error?.message === 'string'
+            ? payload.error.message
+            : '';
+        if (isProviderQuotaLikeMessage(errorText)) {
+          reportProviderQuotaExceeded('serpapi', 'body_quota_error');
+        }
+      }
+    }
     return response;
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
@@ -1830,6 +1855,7 @@ export async function searchRestaurantsWithFallback(
         return results;
       }
     } catch (error) {
+      if (isProviderQuotaStopError(error)) throw error;
       console.warn(`[Places Wrapper] Google Places restaurants failed, falling back to SerpAPI:`, error);
     }
   }
@@ -1862,6 +1888,7 @@ export async function searchRestaurantsNearbyWithFallback(
         return results;
       }
     } catch (error) {
+      if (isProviderQuotaStopError(error)) throw error;
       console.warn(`[Places Wrapper] Google Places nearby restaurants failed, falling back to SerpAPI:`, error);
     }
   }
@@ -1894,6 +1921,7 @@ export async function searchAttractionsMultiQueryWithFallback(
         return results;
       }
     } catch (error) {
+      if (isProviderQuotaStopError(error)) throw error;
       console.warn(`[Places Wrapper] Google Places attractions failed, falling back to SerpAPI:`, error);
     }
   }
@@ -1919,6 +1947,7 @@ export async function searchMustSeeWithFallback(
         return results;
       }
     } catch (error) {
+      if (isProviderQuotaStopError(error)) throw error;
       console.warn(`[Places Wrapper] Google Places must-see failed, falling back to SerpAPI:`, error);
     }
   }
@@ -1943,6 +1972,7 @@ export async function geocodeWithFallback(
         return result;
       }
     } catch (error) {
+      if (isProviderQuotaStopError(error)) throw error;
       console.warn(`[Places Wrapper] Google Places geocode failed, falling back to SerpAPI:`, error);
     }
   }

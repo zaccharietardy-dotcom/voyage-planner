@@ -11,12 +11,46 @@
 
 import { Flight } from '../types';
 import { generateFlightLink } from './linkGenerator';
+import { reportProviderQuotaExceeded } from './providerQuotaGuard';
+import { isProviderQuotaLikeMessage } from '../utils/quotaErrors';
 
 function getGeminiApiKey() { return process.env.GOOGLE_AI_API_KEY; }
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
 function buildGeminiUrl(): string {
   return `${GEMINI_API_URL}?key=${getGeminiApiKey()}`;
+}
+
+async function detectGeminiQuotaAndThrow(response: Response): Promise<void> {
+  if (response.status === 429) {
+    quotaExhaustedUntil = Date.now() + 60_000;
+    reportProviderQuotaExceeded('gemini', 'http_429');
+    return;
+  }
+
+  if (response.status === 403) {
+    const body = await response.clone().text().catch(() => '');
+    if (isProviderQuotaLikeMessage(body)) {
+      quotaExhaustedUntil = Date.now() + 60_000;
+      reportProviderQuotaExceeded('gemini', 'http_403_quota');
+      return;
+    }
+  }
+
+  if (response.status === 200) {
+    const cloned = response.clone();
+    try {
+      const json = await cloned.json();
+      const status = String(json?.error?.status || '').toUpperCase();
+      const message = String(json?.error?.message || '');
+      if (status === 'RESOURCE_EXHAUSTED' || isProviderQuotaLikeMessage(message)) {
+        quotaExhaustedUntil = Date.now() + 60_000;
+        reportProviderQuotaExceeded('gemini', status || 'resource_exhausted');
+      }
+    } catch {
+      // Not JSON or parse error: ignore.
+    }
+  }
 }
 
 /**
@@ -32,8 +66,7 @@ export async function fetchGeminiWithRetry(
 ): Promise<Response> {
   // Circuit breaker: if we recently hit quota, return a fake 429 immediately
   if (Date.now() < quotaExhaustedUntil) {
-    console.warn(`[Gemini] Circuit breaker active — skipping call (resets in ${Math.ceil((quotaExhaustedUntil - Date.now()) / 1000)}s)`);
-    return new Response(JSON.stringify({ error: { message: 'Gemini quota circuit breaker', status: 'RESOURCE_EXHAUSTED' } }), { status: 429 });
+    reportProviderQuotaExceeded('gemini', 'circuit_breaker_active');
   }
 
   const url = buildGeminiUrl();
@@ -43,32 +76,14 @@ export async function fetchGeminiWithRetry(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
+    await detectGeminiQuotaAndThrow(response);
+
     // Retry on 429 (rate limit) or 503 (overloaded)
-    if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
+    if (response.status === 503 && attempt < maxRetries) {
       const delay = Math.pow(2, attempt + 1) * 2000; // 4s, 8s, 16s
       console.warn(`[Gemini] Rate limited (${response.status}), retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
       await new Promise(r => setTimeout(r, delay));
       continue;
-    }
-    // Activate circuit breaker on final 429
-    if (response.status === 429) {
-      quotaExhaustedUntil = Date.now() + 60_000; // skip all calls for 60s
-      console.warn('[Gemini] Circuit breaker activated for 60s');
-    }
-    // Also check for quota errors in 200 responses
-    if (response.status === 200) {
-      const cloned = response.clone();
-      try {
-        const json = await cloned.json();
-        if (json.error?.status === 'RESOURCE_EXHAUSTED') {
-          quotaExhaustedUntil = Date.now() + 60_000;
-          console.warn('[Gemini] RESOURCE_EXHAUSTED in body — circuit breaker activated for 60s');
-          if (attempt < maxRetries) {
-            await new Promise(r => setTimeout(r, 8000));
-            continue;
-          }
-        }
-      } catch { /* not JSON or parse error — return as-is */ }
     }
     return response;
   }
@@ -90,7 +105,7 @@ export async function fetchGeminiPlannerFast(
   } = {}
 ): Promise<Response> {
   if (Date.now() < quotaExhaustedUntil) {
-    return new Response(JSON.stringify({ error: { message: 'Gemini quota circuit breaker', status: 'RESOURCE_EXHAUSTED' } }), { status: 429 });
+    reportProviderQuotaExceeded('gemini', 'circuit_breaker_active');
   }
 
   const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
@@ -109,27 +124,12 @@ export async function fetchGeminiPlannerFast(
         body: JSON.stringify(body),
         signal: controller.signal,
       });
+      await detectGeminiQuotaAndThrow(response);
 
       // Retry only for short-lived pressure errors in fast planner mode.
-      if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
+      if (response.status === 503 && attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
         continue;
-      }
-
-      if (response.status === 429) {
-        quotaExhaustedUntil = Date.now() + 60_000;
-      }
-
-      if (response.status === 200) {
-        const cloned = response.clone();
-        try {
-          const json = await cloned.json();
-          if (json.error?.status === 'RESOURCE_EXHAUSTED') {
-            quotaExhaustedUntil = Date.now() + 60_000;
-          }
-        } catch {
-          // ignore parse errors and return the response as-is
-        }
       }
 
       return response;

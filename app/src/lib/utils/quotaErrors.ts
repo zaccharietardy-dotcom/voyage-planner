@@ -7,6 +7,21 @@ const PROVIDER_QUOTA_PATTERNS: RegExp[] = [
   /\b429\b/,
   /\bcredit(?:s)?\b.*\b(exhausted|depleted|insufficient)\b/i,
   /\bbilling\b.*\blimit\b/i,
+  /\bprovider_quota_exceeded\b/i,
+];
+
+const BUDGET_STOP_PATTERNS: RegExp[] = [
+  /\bbudget_over_burst_cap\b/i,
+  /\bbudget[_\s-]?burst\b/i,
+  /\bapi cost guard\b/i,
+  /\bhard[_\s-]?cap\b/i,
+];
+
+const ADMISSION_BLOCK_PATTERNS: RegExp[] = [
+  /\badmission[_\s-]?(cooldown|blocked|provider_not_ready|quality_live_daily_cap|dedupe_hit)\b/i,
+  /\bcooldown_active\b/i,
+  /\bquality_live_daily_cap\b/i,
+  /\bprovider_not_ready\b/i,
 ];
 
 const USER_SUBSCRIPTION_PATTERNS: RegExp[] = [
@@ -31,6 +46,18 @@ export function isProviderQuotaLikeMessage(message: string): boolean {
   return PROVIDER_QUOTA_PATTERNS.some((pattern) => pattern.test(text));
 }
 
+export function isBudgetStopLikeMessage(message: string): boolean {
+  if (!message) return false;
+  const text = normalizeText(message);
+  return BUDGET_STOP_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+export function isAdmissionBlockLikeMessage(message: string): boolean {
+  if (!message) return false;
+  const text = normalizeText(message);
+  return ADMISSION_BLOCK_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 export function isUserQuotaLikeMessage(message: string): boolean {
   if (!message) return false;
   const text = normalizeText(message);
@@ -41,7 +68,10 @@ export function isProviderQuotaLikeError(error: unknown): boolean {
   if (!error) return false;
   if (typeof error === 'string') return isProviderQuotaLikeMessage(error);
   if (error instanceof Error) {
+    if (error.name === 'ProviderQuotaStopError') return true;
     if (isProviderQuotaLikeMessage(error.message)) return true;
+    const reasonCode = (error as { reasonCode?: unknown }).reasonCode;
+    if (typeof reasonCode === 'string' && reasonCode === 'provider_quota_exceeded') return true;
     const maybeStatus = (error as { status?: unknown }).status;
     if (typeof maybeStatus === 'number' && maybeStatus === 429) return true;
     return false;
@@ -56,7 +86,7 @@ export function isProviderQuotaLikeError(error: unknown): boolean {
 }
 
 export interface GenerationErrorClassification {
-  code: 'USER_QUOTA_EXCEEDED' | 'PROVIDER_QUOTA_EXCEEDED' | 'UNKNOWN_ERROR';
+  code: 'USER_QUOTA_EXCEEDED' | 'PROVIDER_QUOTA_EXCEEDED' | 'BUDGET_OVER_BURST_CAP' | 'ADMISSION_BLOCKED' | 'UNKNOWN_ERROR';
   message: string;
   httpStatus: number;
 }
@@ -74,6 +104,20 @@ export function classifyGenerationError(message: string): GenerationErrorClassif
       code: 'PROVIDER_QUOTA_EXCEEDED',
       message: 'Nos APIs partenaires sont temporairement en limite de quota. Reessaie dans 1 a 2 minutes.',
       httpStatus: 503,
+    };
+  }
+  if (isBudgetStopLikeMessage(message)) {
+    return {
+      code: 'BUDGET_OVER_BURST_CAP',
+      message: 'Generation arretee: budget API maximum atteint pour ce run. Reessaie plus tard.',
+      httpStatus: 429,
+    };
+  }
+  if (isAdmissionBlockLikeMessage(message)) {
+    return {
+      code: 'ADMISSION_BLOCKED',
+      message: 'Generation temporairement bloquee (cooldown, dedupe, ou provider indisponible).',
+      httpStatus: 429,
     };
   }
   return {

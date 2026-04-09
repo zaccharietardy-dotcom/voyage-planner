@@ -45,6 +45,11 @@ export async function GET(request: NextRequest) {
       trip: session.trip || null,
       error: error || null,
       sessionId: session.session_id,
+      runId:
+        (session.progress as any)?.runId
+        || (session.trip as any)?.generationDiagnostics?.runId
+        || (session.trip as any)?.runTrace?.runId
+        || session.session_id,
       heartbeatAt: session.heartbeat_at || null,
       updatedAt: session.updated_at || null,
     });
@@ -53,4 +58,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

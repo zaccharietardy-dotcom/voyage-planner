@@ -35,7 +35,7 @@ function formatDuration(minutes?: number): string {
   if (!minutes) return '—';
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  if (hours > 0 && mins > 0) return `${hours}h${mins}`;
+  if (hours > 0 && mins > 0) return `${hours}h${String(mins).padStart(2, '0')}`;
   if (hours > 0) return `${hours}h`;
   return `${mins}min`;
 }
@@ -55,6 +55,9 @@ function sanitizePdfText(value: string): string {
     .replace(/[→←↔⟶⟵]/g, '->')
     .replace(/[’‘]/g, '\'')
     .replace(/[“”]/g, '"')
+    // Helvetica core font in jsPDF has limited glyph coverage.
+    // Strip unsupported unicode to avoid corrupted rendering/extraction artifacts.
+    .replace(/[^\x20-\x7E\u00A0-\u00FF]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -144,10 +147,10 @@ function addDaySection(doc: jsPDF, day: TripDay, trip: Trip, startY: number): nu
   const tableData = day.items
     .filter(item => item.type !== 'transport') // Exclure les transports de la liste
     .map(item => {
-      const time = item.startTime || '—';
+      const time = sanitizePdfText(item.startTime || '—');
       const title = sanitizePdfText(item.title || 'Sans titre');
-      const duration = formatDuration(item.duration);
-      const cost = formatCost(item.estimatedCost);
+      const duration = sanitizePdfText(formatDuration(item.duration));
+      const cost = sanitizePdfText(formatCost(item.estimatedCost));
 
       return [time, title, duration, cost];
     });
@@ -167,6 +170,7 @@ function addDaySection(doc: jsPDF, day: TripDay, trip: Trip, startY: number): nu
     bodyStyles: {
       fontSize: 9,
       textColor: [0, 0, 0],
+      overflow: 'linebreak',
     },
     alternateRowStyles: {
       fillColor: [248, 248, 248],

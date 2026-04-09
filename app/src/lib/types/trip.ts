@@ -655,10 +655,57 @@ export interface Trip {
     llmRebalanceThemes?: string[];
     llmRebalanceLatencyMs?: number;
   };
+  runTrace?: {
+    runId: string;
+    startedAt: string;
+    endedAt?: string;
+    status: 'running' | 'done' | 'fallback' | 'error';
+    totalLatencyMs?: number;
+    estimatedCostEur?: number;
+    fallbackReasons?: string[];
+    steps: Array<{
+      stepId: string;
+      stepName: string;
+      status: 'done' | 'fallback' | 'error';
+      latencyMs: number;
+      reasonCode?: string;
+      startedAt?: string;
+      endedAt?: string;
+      costEur?: number;
+      detail?: string;
+    }>;
+    llmAudit?: Array<{
+      provider: 'gemini' | 'anthropic' | 'gpt';
+      attempt: number;
+      promptType: 'primary' | 'repair_json';
+      parseStatus: 'ok' | 'invalid_json' | 'call_failed';
+      latencyMs: number;
+      attemptTimeoutMs?: number;
+      requestedOutputTokens?: number;
+      responseStatus?: number;
+      failureReason?: string;
+      promptRedacted: string;
+      rawResponsePreview?: string;
+      rawResponseTail?: string;
+      rawResponseLength?: number;
+      finishReason?: string;
+      outputTokens?: number;
+    }>;
+    candidateDecisions?: Array<{
+      candidateId: string;
+      dayNumber?: number;
+      stage: 'proposed' | 'grounding' | 'assignment' | 'drop' | 'recovery';
+      decision: 'keep' | 'reject' | 'drop' | 'reinsert' | 'recover';
+      reasonCode: string;
+    }>;
+    reasonCodeCounts?: Record<string, number>;
+  };
   reliabilitySummary?: {
     validatedCount: number;
     replacedCount: number;
     rejectedCount: number;
+    publishable?: boolean;
+    gateFailures?: string[];
     groundingRate?: number;
     ratioIconicLocal: {
       iconic: number;
@@ -669,9 +716,18 @@ export interface Trip {
       upper: number;
       catalogIconicRatio: number;
     };
+    realMealCoverage?: number;
+    freeTimeMinutesByDay?: Record<string, number>;
+    hubConsistencyRate?: number;
   };
   generationDiagnostics?: {
     validationLatencyMs: number;
+    runId?: string;
+    admissionDecision?: string | { allowed?: boolean; reasonCode?: string };
+    requestFingerprint?: string;
+    quotaStopProvider?: string;
+    budgetStopReason?: string;
+    publishGateResult?: 'publishable' | 'draft';
     plannerMode?: 'deterministic' | 'llm_closed_world';
     llmSchedulerUsed?: boolean;
     fallbackReason?: string;
@@ -680,12 +736,20 @@ export interface Trip {
     parseAttempts?: number;
     plannerBudgetMs?: number;
     plannerTimeoutRate?: number;
+    plannerTimeoutCount?: number;
+    plannerTruncationCount?: number;
+    plannerFinishReasonCounts?: Record<string, number>;
     closedWorldActivationRate?: number;
+    geoFallbackUsed?: boolean;
     mealSemanticReplacements?: number;
     llmOrderPreservedRate?: number;
     requestedDropCount?: number;
     acceptedDropCount?: number;
     dropRecoveryCount?: number;
+    plannerProviderUsed?: 'gemini' | 'anthropic' | 'gpt' | 'deterministic';
+    providerFallback?: boolean;
+    hubCoherenceScore?: number;
+    reasonCodeCounts?: Record<string, number>;
     ratioFeasibleBand?: {
       lower: number;
       upper: number;
@@ -715,6 +779,7 @@ export interface Trip {
       maxInFlight: number;
       maxInFlightByProvider: Record<string, number>;
     };
+    runTrace?: Trip['runTrace'];
   };
 
   // État des réservations

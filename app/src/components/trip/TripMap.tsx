@@ -69,17 +69,17 @@ const TYPE_SHAPES: Record<string, { containerCss: string; innerCss: string }> = 
 };
 
 
-const TYPE_EMOJIS: Record<string, string> = {
-  activity:   '🏛️',
-  restaurant: '🍴',
-  hotel:      '🛏️',
-  checkin:    '🔑',
-  checkout:   '🧳',
-  transport:  '🚇',
-  flight:     '✈️',
-  parking:    '🅿️',
-  luggage:    '🧳',
-  free_time:  '☕',
+const TYPE_MARKERS: Record<string, string> = {
+  activity:   '',
+  restaurant: 'R',
+  hotel:      'H',
+  checkin:    'H',
+  checkout:   'H',
+  transport:  '↔',
+  flight:     '✈',
+  parking:    'P',
+  luggage:    'B',
+  free_time:  '•',
 };
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -158,10 +158,9 @@ function compareItemsForRoute(a: TripItem, b: TripItem): number {
 }
 
 function createNumberedIcon(L: any, num: number, type: string, dayNumber: number, isHighlighted: boolean) {
-  const colors = getDayColor(dayNumber);
   const shape = TYPE_SHAPES[type] || TYPE_SHAPES.activity;
   const size = isHighlighted ? 44 : 38;
-  const emoji = TYPE_EMOJIS[type] || '📍';
+  const markerBadge = TYPE_MARKERS[type];
   const shadow = isHighlighted
     ? `box-shadow: 0 0 25px rgba(197, 160, 89, 0.6), 0 8px 20px rgba(0,0,0,0.4);`
     : 'box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
@@ -195,7 +194,7 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
       ${containerTransform}
     ">
       <span style="font-family:'Playfair Display', serif; font-size:${size * 0.45}px; font-weight:800; ${shape.innerCss}">${num}</span>
-      <div style="
+      ${markerBadge ? `<div style="
         position:absolute;
         top:-8px;
         right:-8px;
@@ -203,11 +202,13 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
         width:20px;height:20px;
         border-radius:50%;
         display:flex;align-items:center;justify-content:center;
-        font-size:11px;
+        font-size:10px;
+        font-weight:800;
+        color:#c5a059;
         border:1.5px solid #c5a059;
         box-shadow:0 2px 4px rgba(0,0,0,0.3);
         ${shape.innerCss}
-      ">${emoji}</div>
+      ">${markerBadge}</div>` : ''}
     </div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -215,26 +216,28 @@ function createNumberedIcon(L: any, num: number, type: string, dayNumber: number
   });
 }
 
-function createEmojiIcon(L: any, type: string, dayNumber: number) {
-  const emoji = TYPE_EMOJIS[type] || '📍';
-  const bgColors: Record<string, string> = {
-    restaurant: '#F97316',
-    hotel: '#8B5CF6',
-  };
-  const bg = bgColors[type] || '#64748b';
-  const size = 36;
-
+function createTypeIcon(L: any, type: string, dayNumber: number, isHighlighted: boolean) {
+  const colors = getDayColor(dayNumber);
+  const marker = TYPE_MARKERS[type] || '•';
+  const size = isHighlighted ? 40 : 34;
+  const shadow = isHighlighted
+    ? 'box-shadow: 0 0 18px rgba(197, 160, 89, 0.45), 0 8px 20px rgba(0,0,0,0.35);'
+    : 'box-shadow: 0 4px 12px rgba(0,0,0,0.25);';
   return L.divIcon({
-    className: 'emoji-marker',
+    className: 'type-marker',
     html: `<div style="
       width:${size}px;height:${size}px;
-      border-radius:50%;
-      background:${bg};
-      border:2px solid white;
+      border-radius:10px;
+      background:${colors.bg};
+      border:2px solid ${colors.border};
       display:flex;align-items:center;justify-content:center;
-      box-shadow:0 2px 8px rgba(0,0,0,0.25);
-      font-size:18px;
-    ">${emoji}</div>`,
+      color:${colors.border};
+      font-size:${type === 'flight' ? '16px' : '12px'};
+      font-weight:800;
+      letter-spacing:0.02em;
+      ${shadow}
+      transition:all 0.2s ease;
+    ">${marker}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
@@ -243,9 +246,30 @@ function createEmojiIcon(L: any, type: string, dayNumber: number) {
 
 function safeImageUrl(url: string): string {
   if (!url) return '';
-  if (url.startsWith('/')) return url;
-  try { const u = new URL(url); return u.protocol === 'https:' ? url : ''; }
+  const normalized = url.trim();
+  if (!normalized) return '';
+  if (normalized.startsWith('//')) return `https:${normalized}`;
+  if (normalized.startsWith('/')) return normalized;
+  try {
+    const u = new URL(normalized);
+    if (u.protocol === 'https:') return u.toString();
+    if (u.protocol === 'http:') {
+      u.protocol = 'https:';
+      return u.toString();
+    }
+    return '';
+  }
   catch { return ''; }
+}
+
+function createMarkerIcon(
+  L: any,
+  entry: { num: number; type: string; dayNumber: number },
+  isHighlighted: boolean,
+) {
+  return entry.type === 'activity'
+    ? createNumberedIcon(L, entry.num, entry.type, entry.dayNumber, isHighlighted)
+    : createTypeIcon(L, entry.type, entry.dayNumber, isHighlighted);
 }
 
 function getPopupContent(item: TripItem, index: number): string {
@@ -327,7 +351,10 @@ function getPopupContent(item: TripItem, index: number): string {
   // Rating + cost
   const metaParts: string[] = [];
   if (item.rating) metaParts.push(`<span style="color:${goldColor};font-weight:700;">${item.rating.toFixed(1)}★</span>`);
-  if (item.estimatedCost) metaParts.push(`<span style="font-weight:600;">~${item.estimatedCost}€</span>`);
+  if (item.estimatedCost != null) {
+    const numericCost = Number(item.estimatedCost);
+    metaParts.push(`<span style="font-weight:600;">${Number.isFinite(numericCost) && numericCost <= 0 ? 'Gratuit' : `~${item.estimatedCost}€`}</span>`);
+  }
   if (item.locationName) metaParts.push(escapeHtml(item.locationName));
   const metaHtml = metaParts.length > 0
     ? `<div style="font-size:11px;color:${mutedColor};margin-top:4px;display:flex;align-items:center;gap:8px;">${metaParts.join('<span style="opacity:0.3;">·</span>')}</div>`
@@ -451,6 +478,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
   const [showLegend, setShowLegend] = useState(false);
   const [filterDay, setFilterDay] = useState<number | null>(null);
   const [showNeighbourhoods, setShowNeighbourhoods] = useState(false);
+  const hasInitializedDayFilterRef = useRef(false);
 
   // Auto-switch day filter when a NEW item is selected from a different day
   const prevSelectedRef = useRef(selectedItemId);
@@ -477,6 +505,14 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     items.forEach(i => { if (i.dayNumber) days.add(i.dayNumber); });
     return Array.from(days).sort((a, b) => a - b);
   }, [items]);
+
+  // Default view = active day (not "Tout") to keep the map readable.
+  useEffect(() => {
+    if (hasInitializedDayFilterRef.current) return;
+    if (dayNumbers.length === 0) return;
+    setFilterDay(dayNumbers[0]);
+    hasInitializedDayFilterRef.current = true;
+  }, [dayNumbers]);
 
   // Filtered items based on day filter
   const displayItems = useMemo(() => {
@@ -622,6 +658,10 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     }
 
     const bounds = L.latLngBounds([]);
+    const isAllDaysView = filterDay === null;
+    const mapVisibleItems = isAllDaysView
+      ? displayItems.filter((item) => item.type === 'activity' || item.type === 'checkin' || item.type === 'checkout' || item.type === 'flight')
+      : displayItems;
 
     // Add markers — only activities get sequential numbers
     // Transport, checkin, checkout, luggage, free_time, parking are hidden from map to reduce clutter
@@ -631,7 +671,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     // so markers show 1, 2, 3 per day instead of global indices across the trip
     const activityNumberMap = new Map<string, number>();
     const perDayCounter = new Map<number, number>();
-    displayItems.forEach((item) => {
+    mapVisibleItems.forEach((item) => {
       if (!item.latitude || !item.longitude) return;
       if (item.type !== 'activity') return;
       const day = item.dayNumber || 0;
@@ -640,15 +680,13 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       activityNumberMap.set(item.id, count);
     });
 
-    displayItems.forEach((item) => {
+    mapVisibleItems.forEach((item) => {
       if (!item.latitude || !item.longitude) return;
       if (HIDDEN_TYPES.has(item.type)) return;
-      // Activities get sequential per-day numbers, restaurants/hotels get emoji-only (num=0)
+      // Activities get sequential per-day numbers, restaurants/hotels use typed markers
       const isNumbered = item.type === 'activity';
       const num = isNumbered ? (activityNumberMap.get(item.id) ?? 0) : 0;
-      const icon = isNumbered
-        ? createNumberedIcon(L, num, item.type, item.dayNumber, false)
-        : createEmojiIcon(L, item.type, item.dayNumber);
+      const icon = createMarkerIcon(L, { num, type: item.type, dayNumber: item.dayNumber }, false);
 
       const marker = L.marker([item.latitude, item.longitude], { icon, interactive: true })
         .bindPopup(getPopupContent(item, num), {
@@ -673,10 +711,10 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       const key = `${acc.latitude.toFixed(4)},${acc.longitude.toFixed(4)}`;
       if (hotelAdded.has(key)) return;
       hotelAdded.add(key);
-      const icon = createEmojiIcon(L, 'hotel', item.dayNumber);
+      const icon = createTypeIcon(L, 'hotel', item.dayNumber, false);
       const name = acc.name || item.title || 'Hôtel';
       const marker = L.marker([acc.latitude, acc.longitude], { icon, interactive: true })
-        .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">🛏️ ${name}</div>`, {
+        .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">Hotel · ${name}</div>`, {
           maxWidth: 220,
           className: 'clean-popup',
         });
@@ -702,7 +740,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           // Add airport marker
           const airportIcon = L.divIcon({
             className: 'plane-marker',
-            html: `<div style="background:${getDayColor(fi.dayNumber).bg};width:26px;height:26px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-size:13px;">✈️</div>`,
+            html: `<div style="background:${getDayColor(fi.dayNumber).bg};width:26px;height:26px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f8fafc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 14.2 22 12l-4.2-2.2L12 2l-1.2 4.7L6 9 2 8l2 4-2 4 4-1 4.8 2.3L12 22z"/></svg></div>`,
             iconSize: [26, 26],
             iconAnchor: [13, 13],
           });
@@ -716,7 +754,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         bounds.extend(coords);
         const airportIcon = L.divIcon({
           className: 'plane-marker',
-          html: `<div style="background:${getDayColor(fi.dayNumber).bg};width:26px;height:26px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-size:13px;">✈️</div>`,
+          html: `<div style="background:${getDayColor(fi.dayNumber).bg};width:26px;height:26px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f8fafc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 14.2 22 12l-4.2-2.2L12 2l-1.2 4.7L6 9 2 8l2 4-2 4 4-1 4.8 2.3L12 22z"/></svg></div>`,
           iconSize: [26, 26],
           iconAnchor: [13, 13],
         });
@@ -743,7 +781,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     }
 
     // Draw route polylines PER DAY with real routes when available
-    const routeCandidates = displayItems
+    const routeCandidates = mapVisibleItems
       .filter((item) => item.latitude && item.longitude && item.type !== 'flight')
       .sort(compareItemsForRoute);
 
@@ -764,6 +802,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     });
 
     dayEntries.forEach(([dayNum, dayItems]) => {
+      if (isAllDaysView) return;
       // Extract hotel coordinates from checkin/checkout items
       const hotelItem = items.find(
         (item) =>
@@ -837,13 +876,16 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       }
 
       if (nodes.length < 2) return;
+      if (isAllDaysView) return;
+
+      const segmentNodes = nodes;
 
       const color = filterDay === null ? getDayColor(dayNum).bg : getDayColor(filterDay).bg;
 
       // Draw per-segment: real polyline or straight line fallback
-      for (let i = 0; i < nodes.length - 1; i++) {
-        const fromNode = nodes[i];
-        const toNode = nodes[i + 1];
+      for (let i = 0; i < segmentNodes.length - 1; i++) {
+        const fromNode = segmentNodes[i];
+        const toNode = segmentNodes[i + 1];
         let nextItem = toNode.item;
 
         // Determine segment coords: decoded polyline or straight line
@@ -868,16 +910,15 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           segmentCoords = [fromNode.coords, toNode.coords];
         }
 
-        // When showing all days, reduce visual noise
-        const isAllDays = filterDay === null;
-        const haloOpacity = isAllDays ? 0.05 : 0.15;
-        const lineOpacity = isAllDays ? 0.3 : 0.7;
-        const lineWeight = isAllDays ? 2 : 3;
+        // When showing all days, reduce visual noise (macro mode).
+        const haloOpacity = isAllDaysView ? 0.03 : 0.15;
+        const lineOpacity = isAllDaysView ? 0.22 : 0.7;
+        const lineWeight = isAllDaysView ? 2 : 3;
 
         // Halo
         const halo = L.polyline(segmentCoords, {
-          color: isAllDays ? getDayColor(dayNum).bg : '#c5a059',
-          weight: isAllDays ? 6 : 10,
+          color: isAllDaysView ? getDayColor(dayNum).bg : '#c5a059',
+          weight: isAllDaysView ? 4 : 10,
           opacity: haloOpacity,
           smoothFactor: 2,
           lineJoin: 'round',
@@ -887,7 +928,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
         // Main line
         const polyline = L.polyline(segmentCoords, {
-          color: isAllDays ? getDayColor(dayNum).bg : '#c5a059',
+          color: isAllDaysView ? getDayColor(dayNum).bg : '#c5a059',
           weight: lineWeight,
           opacity: lineOpacity,
           smoothFactor: 2,
@@ -897,7 +938,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         routeLayer.addLayer(polyline);
 
         // Arrow decorators
-        if (polylineDecoratorRef.current) {
+        if (polylineDecoratorRef.current && !isAllDaysView) {
           const decorator = L.polylineDecorator(polyline, {
             patterns: [{
               offset: '25%',
@@ -938,7 +979,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         }
 
         // Travel time label at segment midpoint
-        if (nextItem?.timeFromPrevious && nextItem.timeFromPrevious >= 2) {
+        if (!isAllDaysView && nextItem?.timeFromPrevious && nextItem.timeFromPrevious >= 2) {
           const midIdx = Math.floor(segmentCoords.length / 2);
           const midPoint = segmentCoords[midIdx];
 
@@ -1016,6 +1057,65 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       }
     });
 
+    if (isAllDaysView) {
+      const macroPoints: Array<{ dayNum: number; coords: [number, number] }> = [];
+      for (const [dayNum, dayItems] of dayEntries) {
+        const dayActivities = dayItems.filter((item) => item.type === 'activity');
+        if (dayActivities.length > 0) {
+          const avgLat = dayActivities.reduce((sum, item) => sum + item.latitude, 0) / dayActivities.length;
+          const avgLng = dayActivities.reduce((sum, item) => sum + item.longitude, 0) / dayActivities.length;
+          macroPoints.push({ dayNum, coords: [avgLat, avgLng] });
+          continue;
+        }
+
+        const fallback = dayItems.find((item) => item.latitude && item.longitude);
+        if (fallback) {
+          macroPoints.push({ dayNum, coords: [fallback.latitude, fallback.longitude] });
+        }
+      }
+
+      const compactMacroPoints: Array<{ dayNum: number; coords: [number, number] }> = [];
+      for (const point of macroPoints) {
+        const previous = compactMacroPoints[compactMacroPoints.length - 1];
+        if (!previous) {
+          compactMacroPoints.push(point);
+          continue;
+        }
+        const sameHubDistance = Math.abs(point.coords[0] - previous.coords[0]) + Math.abs(point.coords[1] - previous.coords[1]);
+        if (sameHubDistance < 0.02) {
+          continue;
+        }
+        compactMacroPoints.push(point);
+      }
+
+      for (let i = 0; i < compactMacroPoints.length - 1; i++) {
+        const from = compactMacroPoints[i];
+        const to = compactMacroPoints[i + 1];
+        const segmentColor = getDayColor(to.dayNum).bg;
+
+        const macroHalo = L.polyline([from.coords, to.coords], {
+          color: segmentColor,
+          weight: 8,
+          opacity: 0.06,
+          smoothFactor: 2,
+          lineJoin: 'round',
+          lineCap: 'round',
+        });
+        routeLayer.addLayer(macroHalo);
+
+        const macroLine = L.polyline([from.coords, to.coords], {
+          color: segmentColor,
+          weight: 3,
+          opacity: 0.4,
+          smoothFactor: 2,
+          lineJoin: 'round',
+          lineCap: 'round',
+          dashArray: '6 8',
+        });
+        routeLayer.addLayer(macroLine);
+      }
+    }
+
     // Day summary pills are rendered as a React legend overlay (see JSX below)
 
     // Flight arc
@@ -1027,8 +1127,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
           width:30px;height:30px;border-radius:50%;border:2px solid white;
           box-shadow:0 1px 4px rgba(0,0,0,0.25);
           display:flex;align-items:center;justify-content:center;
-          font-size:14px;
-        ">🏠</div>`,
+        "><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f8fafc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M10 20v-5h4v5"/></svg></div>`,
         iconSize: [30, 30],
         iconAnchor: [15, 15],
         popupAnchor: [0, -15],
@@ -1079,7 +1178,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
         const planeIcon = L.divIcon({
           className: 'plane-marker',
-          html: `<div style="font-size:16px;transform:rotate(${planeAngle + 90}deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));">✈️</div>`,
+          html: `<div style="transform:rotate(${planeAngle + 90}deg);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 14.2 22 12l-4.2-2.2L12 2l-1.2 4.7L6 9 2 8l2 4-2 4 4-1 4.8 2.3L12 22z"/></svg></div>`,
           iconSize: [20, 20],
           iconAnchor: [10, 10],
         });
@@ -1103,7 +1202,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
             display:flex;align-items:center;justify-content:center;
             box-shadow:0 1px 4px rgba(0,0,0,0.25);
             transition:transform 0.15s ease;
-          ">⭐</div>`,
+          "><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 9.5 8.5 4 9.3l4 3.9-.9 5.5 4.9-2.6 4.9 2.6-.9-5.5 4-3.9-5.5-.8z"/></svg></div>`,
           iconSize: [28, 28],
           iconAnchor: [14, 14],
           popupAnchor: [0, -14],
@@ -1155,7 +1254,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     if (prevId && prevId !== hoveredItemId) {
       const prevEntry = markerMapRef.current.get(prevId);
       if (prevEntry) {
-        prevEntry.marker.setIcon(createNumberedIcon(L, prevEntry.num, prevEntry.type, prevEntry.dayNumber, false));
+        prevEntry.marker.setIcon(createMarkerIcon(L, prevEntry, false));
       }
     }
 
@@ -1163,7 +1262,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
     if (hoveredItemId) {
       const entry = markerMapRef.current.get(hoveredItemId);
       if (entry) {
-        entry.marker.setIcon(createNumberedIcon(L, entry.num, entry.type, entry.dayNumber, true));
+        entry.marker.setIcon(createMarkerIcon(L, entry, true));
       }
     }
 

@@ -88,6 +88,36 @@ function inferResolutionMaxDistanceKm(
   return DEFAULT_ATTRACTION_MAX_DISTANCE_KM;
 }
 
+function simplifySearchName(name: string): string {
+  return name
+    .replace(/["'`]/g, '')
+    .replace(/\b(le|la|les|de|du|des|d')\b/gi, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function buildGeocodeQueries(name: string, city: string): string[] {
+  const simplified = simplifySearchName(name);
+  const candidates = [
+    `${name}, ${city}`,
+    `${simplified}, ${city}`,
+    `${name} ${city}`,
+    `${simplified} ${city}`,
+  ]
+    .map((query) => query.replace(/\s{2,}/g, ' ').trim())
+    .filter(Boolean);
+
+  const deduped: string[] = [];
+  const seen = new Set<string>();
+  for (const query of candidates) {
+    const key = query.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(query);
+  }
+  return deduped;
+}
+
 /**
  * Vérifie que les coordonnées résolues sont bien proches de la destination
  * Rejette les résultats d'une autre ville (ex: Lisbonne pour un trip Barcelone)
@@ -203,11 +233,16 @@ export async function resolveCoordinates(
     console.warn(`[CoordsResolver] Travel Places échoué pour "${name}":`, e);
   }
 
-  // Step 2: Nominatim/OSM (gratuit, 500ms throttle)
+  // Step 2: Nominatim/OSM (gratuit, 500ms throttle) with query variants
   try {
-    const geoQuery = `${name}, ${city}`;
-    const geo = await geocodeAddress(geoQuery);
-    if (geo && geo.lat && geo.lng) {
+    const boundedKm = Math.max(30, Math.min(260, maxDistanceKm + 20));
+    for (const geoQuery of buildGeocodeQueries(name, city)) {
+      const geo = await geocodeAddress(geoQuery, {
+        nearbyCoords,
+        limit: 6,
+        boundedKm,
+      });
+      if (!geo || !geo.lat || !geo.lng) continue;
       if (isResultNearDestination(geo, nearbyCoords, name, 'Nominatim', maxDistanceKm)) {
         const result: ResolutionResult = {
           lat: geo.lat,
@@ -220,7 +255,6 @@ export async function resolveCoordinates(
         totalResolved++;
         return result;
       }
-      // Result too far from destination, try next API
     }
   } catch (e) {
     console.warn(`[CoordsResolver] Nominatim échoué pour "${name}":`, e);

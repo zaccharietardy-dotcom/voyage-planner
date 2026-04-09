@@ -22,6 +22,8 @@ import { calculateDistance } from './geocoding';
 import { getDestinationSize, getCostMultiplier, getDestinationArchetypes } from './destinationData';
 import { buildPlacePhotoProxyUrl } from './googlePlacePhoto';
 import { getCachedResponse, setCachedResponse } from './supabaseCache';
+import { reportProviderQuotaExceeded } from './providerQuotaGuard';
+import { isProviderQuotaLikeMessage } from '../utils/quotaErrors';
 
 // ============================================
 // Configuration
@@ -113,9 +115,17 @@ async function googlePlacesFetch<T>(
   googlePlacesRequestCount++;
 
   // Cost guard — determine call type from endpoint
-  const { trackApiCost } = await import('./apiCostGuard');
+  const { trackApiCost, isApiBudgetSoftLimitError } = await import('./apiCostGuard');
   const costType = endpoint.includes('searchNearby') ? 'places-nearby-search' : 'places-text-search';
-  trackApiCost(costType);
+  try {
+    trackApiCost(costType);
+  } catch (error) {
+    if (isApiBudgetSoftLimitError(error)) {
+      console.warn(`[Google Places New] Soft budget block for ${costType}, skipping non-critical call`);
+      return null;
+    }
+    throw error;
+  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
@@ -135,6 +145,9 @@ async function googlePlacesFetch<T>(
     if (!response.ok) {
       const errorBody = await response.text().catch(() => '');
       console.error(`[Google Places New] HTTP ${response.status}: ${errorBody.substring(0, 300)}`);
+      if (response.status === 429 || isProviderQuotaLikeMessage(errorBody)) {
+        reportProviderQuotaExceeded('google_places', `http_${response.status}`);
+      }
       return null;
     }
 

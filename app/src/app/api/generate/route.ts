@@ -11,6 +11,17 @@ import { classifyGenerationError } from '@/lib/utils/quotaErrors';
 import { registerQuestion, cleanupSession } from './sessionStore';
 import { upsertGenerationSession } from './sessionDb';
 import { generateTripSchema } from '@/lib/validations/generate';
+import {
+  buildRequestFingerprint,
+  evaluateAdmissionWithProviderReadiness,
+  evaluateGenerationAdmission,
+  getProviderReadinessSnapshot,
+  registerGenerationRunCompleted,
+  registerGenerationRunFailed,
+  registerGenerationRunStarted,
+} from './admission';
+import { isProviderQuotaStopError } from '@/lib/services/providerQuotaGuard';
+import { isApiBudgetExceededError } from '@/lib/services/apiCostGuard';
 
 export const maxDuration = 300; // 5 minutes max
 
@@ -28,8 +39,9 @@ interface SessionPersistPayload {
   heartbeat?: boolean;
 }
 
-function buildProgressPayloadFromEvent(event: PipelineEvent, now: number): Record<string, unknown> {
+function buildProgressPayloadFromEvent(event: PipelineEvent, now: number, runId?: string): Record<string, unknown> {
   return {
+    runId: runId || null,
     step: event.step ?? null,
     type: event.type ?? null,
     label: event.stepName || event.label || null,
@@ -38,8 +50,83 @@ function buildProgressPayloadFromEvent(event: PipelineEvent, now: number): Recor
   };
 }
 
+function evaluatePublishGate(trip: unknown): {
+  publishable: boolean;
+  gateFailures: string[];
+  result: 'publishable' | 'draft';
+} {
+  const typedTrip = (trip || {}) as {
+    qualityMetrics?: { score?: number; invariantsPassed?: boolean; violations?: string[] };
+    contractViolations?: string[];
+  };
+  const score = Number(typedTrip.qualityMetrics?.score || 0);
+  const qualityViolations = Array.isArray(typedTrip.qualityMetrics?.violations)
+    ? typedTrip.qualityMetrics?.violations || []
+    : [];
+  const contractViolations = Array.isArray(typedTrip.contractViolations)
+    ? typedTrip.contractViolations
+    : [];
+  const p0ByViolation = [...qualityViolations, ...contractViolations].some((violation) => /(^|\b)P0(\.|:)/i.test(String(violation)));
+  const p0Blocking = typedTrip.qualityMetrics?.invariantsPassed === false || p0ByViolation;
+
+  const gateFailures: string[] = [];
+  if (score < 85) gateFailures.push('score_below_85');
+  if (p0Blocking) gateFailures.push('p0_blocking');
+
+  const publishable = gateFailures.length === 0;
+  return {
+    publishable,
+    gateFailures,
+    result: publishable ? 'publishable' : 'draft',
+  };
+}
+
+function mapAdmissionReason(reasonCode: string): {
+  message: string;
+  httpStatus: number;
+  action: string;
+} {
+  switch (reasonCode) {
+    case 'cooldown_active':
+      return {
+        message: 'Une génération identique est déjà en cours ou vient d’être faite. Réessaie dans quelques instants.',
+        httpStatus: 429,
+        action: 'wait',
+      };
+    case 'quality_live_daily_cap':
+      return {
+        message: 'Cadence live atteinte pour aujourd’hui. Réessaie plus tard.',
+        httpStatus: 429,
+        action: 'retry_later',
+      };
+    case 'provider_not_ready':
+      return {
+        message: 'Provider indisponible ou en quota. Réessaie plus tard.',
+        httpStatus: 503,
+        action: 'retry_later',
+      };
+    case 'dedupe_hit':
+      return {
+        message: 'Un résultat récent existe déjà pour cette demande.',
+        httpStatus: 200,
+        action: 'replay',
+      };
+    default:
+      return {
+        message: 'Admission bloquée temporairement.',
+        httpStatus: 429,
+        action: 'wait',
+      };
+  }
+}
+
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
 export async function POST(request: NextRequest) {
   let activeUserId: string | null = null;
+  let requestFingerprintForError: string | null = null;
   try {
     const body = await request.json();
 
@@ -118,6 +205,77 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const requestFingerprint = buildRequestFingerprint(validatedBody);
+    requestFingerprintForError = requestFingerprint;
+    const providerReadiness = await getProviderReadinessSnapshot({
+      probe: true,
+    });
+    const admissionCheck = evaluateAdmissionWithProviderReadiness({
+      admission: evaluateGenerationAdmission({ userId: user.id, requestFingerprint }),
+      providerReadiness,
+    });
+
+    if (!admissionCheck.allowed) {
+      const mapped = mapAdmissionReason(admissionCheck.reasonCode);
+      if (admissionCheck.reasonCode === 'dedupe_hit' && admissionCheck.replayTrip) {
+        const replayTrip = cloneJson(admissionCheck.replayTrip as Record<string, unknown>);
+        const replayTripAny = replayTrip as any;
+        const diagnostics = (replayTrip.generationDiagnostics || {}) as Record<string, unknown>;
+        replayTrip.generationDiagnostics = {
+          ...diagnostics,
+          admissionDecision: admissionCheck.reasonCode,
+          requestFingerprint,
+          fallbackReason: diagnostics.fallbackReason || 'dedupe_replay',
+        };
+
+        const encoder = new TextEncoder();
+        const sessionId = admissionCheck.replaySessionId || crypto.randomUUID();
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ status: 'session', sessionId })}\n\n`)
+            );
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({
+                status: 'done',
+                trip: replayTrip,
+                replay: true,
+                draft: replayTripAny?.reliabilitySummary?.publishable === false,
+                publishGateResult: replayTripAny?.generationDiagnostics?.publishGateResult || 'unknown',
+              })}\n\n`)
+            );
+            controller.close();
+          },
+        });
+        return new Response(stream, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        });
+      }
+
+      return NextResponse.json(
+        {
+          error: mapped.message,
+          code: 'ADMISSION_BLOCKED',
+          reasonCode: admissionCheck.reasonCode,
+          action: mapped.action,
+          requestFingerprint,
+          admission: {
+            allowed: false,
+            reasonCode: admissionCheck.reasonCode,
+            cooldownSeconds: admissionCheck.cooldownRemainingMs
+              ? Math.ceil(admissionCheck.cooldownRemainingMs / 1000)
+              : 0,
+          },
+          providerReadiness,
+        },
+        { status: mapped.httpStatus }
+      );
+    }
+
     // Concurrency guard: one generation at a time per user
     if (activeGenerations.has(user.id)) {
       return NextResponse.json(
@@ -152,6 +310,7 @@ export async function POST(request: NextRequest) {
             console.warn('[Generate] Failed to persist generation session:', err);
           }
         };
+        const runId = sessionId;
 
         // Emit sessionId as the very first event
         try {
@@ -159,9 +318,20 @@ export async function POST(request: NextRequest) {
             encoder.encode(`data: ${JSON.stringify({ status: 'session', sessionId })}\n\n`)
           );
         } catch { /* stream closed */ }
+        registerGenerationRunStarted({
+          userId: user.id,
+          requestFingerprint,
+          sessionId,
+        });
         await persistSession({
           status: 'running',
-          progress: { step: 0, label: 'initializing' },
+          progress: {
+            step: 0,
+            label: 'initializing',
+            runId,
+            requestFingerprint,
+            admissionDecision: 'admission_allowed',
+          },
         });
 
         // Envoyer un ping toutes les 10s pour garder la connexion vivante
@@ -170,7 +340,7 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(`data: {"status":"generating"}\n\n`));
             void persistSession({
               status: 'running',
-              progress: { label: 'stream-alive' },
+              progress: { label: 'stream-alive', runId },
               heartbeat: true,
             });
           } catch {
@@ -187,7 +357,7 @@ export async function POST(request: NextRequest) {
             );
             void persistSession({
               status: 'running',
-              progress: { step: 99, label: 'long-running' },
+              progress: { step: 99, label: 'long-running', runId },
               heartbeat: true,
             });
           } catch { /* stream may be closed */ }
@@ -216,7 +386,7 @@ export async function POST(request: NextRequest) {
               lastProgressPersistAt = now;
               void persistSession({
                 status: 'running',
-                progress: buildProgressPayloadFromEvent(event, now),
+                progress: buildProgressPayloadFromEvent(event, now, runId),
                 heartbeat: true,
               });
             }
@@ -238,7 +408,7 @@ export async function POST(request: NextRequest) {
             return new Promise<string>((resolve) => {
               void persistSession({
                 status: 'question',
-                progress: { label: 'awaiting-answer', questionId: question.questionId },
+                progress: { label: 'awaiting-answer', questionId: question.questionId, runId },
                 question: fullQuestion,
                 heartbeat: true,
               });
@@ -248,7 +418,7 @@ export async function POST(request: NextRequest) {
                 (selectedOptionId) => {
                   void persistSession({
                     status: 'running',
-                    progress: { label: 'question-answered', questionId: question.questionId },
+                    progress: { label: 'question-answered', questionId: question.questionId, runId },
                     question: null,
                     heartbeat: true,
                   });
@@ -270,9 +440,26 @@ export async function POST(request: NextRequest) {
           };
 
           const trip = await Promise.race([
-            generateTripV2(preferences, onEvent, { askUser, onSnapshot }),
+            generateTripV2(preferences, onEvent, { askUser, onSnapshot, runId, enableRunTrace: true }),
             timeoutPromise
-          ]);
+          ]) as unknown as Record<string, unknown>;
+
+          const publishGate = evaluatePublishGate(trip);
+          const diagnostics = ((trip.generationDiagnostics as Record<string, unknown> | undefined) || {});
+          trip.generationDiagnostics = {
+            ...diagnostics,
+            admissionDecision: 'admission_allowed',
+            requestFingerprint,
+            publishGateResult: publishGate.result,
+            quotaStopProvider: undefined,
+            budgetStopReason: undefined,
+          };
+          const reliability = ((trip.reliabilitySummary as Record<string, unknown> | undefined) || {});
+          trip.reliabilitySummary = {
+            ...reliability,
+            publishable: publishGate.publishable,
+            gateFailures: publishGate.gateFailures,
+          };
 
           clearInterval(keepAlive);
           clearTimeout(warningTimeout);
@@ -291,14 +478,30 @@ export async function POST(request: NextRequest) {
           }
 
           // Envoyer le résultat final
-          const finalMessage = `data: {"status":"done","trip":${tripJson}}\n\n`;
+          const finalMessage = `data: ${JSON.stringify({
+            status: 'done',
+            trip,
+            draft: !publishGate.publishable,
+            publishGateResult: publishGate.result,
+          })}\n\n`;
           controller.enqueue(encoder.encode(finalMessage));
           await persistSession({
             status: 'done',
-            progress: { label: 'completed' },
+            progress: {
+              label: 'completed',
+              runId,
+              requestFingerprint,
+              publishGateResult: publishGate.result,
+            },
             question: null,
             trip,
             heartbeat: true,
+          });
+          registerGenerationRunCompleted({
+            userId: user.id,
+            requestFingerprint,
+            sessionId,
+            trip,
           });
           // Petit délai pour s'assurer que le message est bien flush avant de fermer
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -308,10 +511,17 @@ export async function POST(request: NextRequest) {
           clearInterval(keepAlive);
           clearTimeout(warningTimeout);
           activeGenerations.delete(user.id);
+          registerGenerationRunFailed({
+            userId: user.id,
+            requestFingerprint,
+            sessionId,
+          });
           cleanupSession(sessionId);
           const message = error instanceof Error ? error.message : String(error);
           const stack = error instanceof Error ? error.stack : '';
           const classified = classifyGenerationError(message);
+          const quotaStopProvider = isProviderQuotaStopError(error) ? error.provider : undefined;
+          const budgetStopReason = isApiBudgetExceededError(error) ? error.reasonCode : undefined;
           console.error('[Generate] ❌ Erreur de génération:', message);
           console.error('[Generate] Stack trace:', stack);
           Sentry.captureException(error, {
@@ -329,11 +539,20 @@ export async function POST(request: NextRequest) {
               status: 'error',
               error: safeMessage,
               code: classified.code,
+              quotaStopProvider,
+              budgetStopReason,
+              requestFingerprint,
             };
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorPayload)}\n\n`));
             await persistSession({
               status: 'error',
-              progress: { label: 'failed' },
+              progress: {
+                label: 'failed',
+                runId,
+                requestFingerprint,
+                quotaStopProvider,
+                budgetStopReason,
+              },
               error: safeMessage,
               question: null,
               heartbeat: true,
@@ -357,12 +576,17 @@ export async function POST(request: NextRequest) {
     if (activeUserId) activeGenerations.delete(activeUserId);
     const message = error instanceof Error ? error.message : String(error);
     const classified = classifyGenerationError(message);
+    const quotaStopProvider = isProviderQuotaStopError(error) ? error.provider : undefined;
+    const budgetStopReason = isApiBudgetExceededError(error) ? error.reasonCode : undefined;
     console.error('Erreur de génération:', message);
     Sentry.captureException(error);
     return NextResponse.json(
       {
         error: `Erreur lors de la generation du voyage: ${classified.message}`,
         code: classified.code,
+        requestFingerprint: requestFingerprintForError,
+        quotaStopProvider,
+        budgetStopReason,
       },
       { status: classified.httpStatus }
     );

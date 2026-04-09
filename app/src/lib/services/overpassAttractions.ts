@@ -551,6 +551,23 @@ export function isOverpassConfigured(): boolean {
   return true;
 }
 
+function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+      * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return 6371 * c;
+}
+
 /**
  * Résout un nom d'attraction en coordonnées via Travel Places API (RapidAPI)
  */
@@ -563,7 +580,7 @@ export async function resolveAttractionByName(
 
   try {
     const query = JSON.stringify({
-      query: `{ getPlaces(name: "${name.replace(/"/g, '\\"')}", lat: ${cityCenter.lat}, lng: ${cityCenter.lng}, maxDistMeters: 20000, limit: 1) { name lat lng } }`,
+      query: `{ getPlaces(name: "${name.replace(/"/g, '\\"')}", lat: ${cityCenter.lat}, lng: ${cityCenter.lng}, maxDistMeters: 20000, limit: 6) { name lat lng } }`,
     });
 
     const response = await fetch('https://travel-places.p.rapidapi.com/', {
@@ -582,7 +599,26 @@ export async function resolveAttractionByName(
     const data = await response.json();
     const places = data?.data?.getPlaces;
     if (places && places.length > 0) {
-      return { lat: places[0].lat, lng: places[0].lng, name: places[0].name };
+      const validPlaces: Array<{ lat: number; lng: number; name: string }> = places
+        .map((place: any) => {
+          const lat = Number(place?.lat);
+          const lng = Number(place?.lng);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+          return {
+            lat,
+            lng,
+            name: String(place?.name || name).trim() || name,
+          };
+        })
+        .filter((place: { lat: number; lng: number; name: string } | null): place is { lat: number; lng: number; name: string } => Boolean(place))
+        .sort((left: { lat: number; lng: number }, right: { lat: number; lng: number }) =>
+          haversineKm(cityCenter.lat, cityCenter.lng, left.lat, left.lng)
+          - haversineKm(cityCenter.lat, cityCenter.lng, right.lat, right.lng)
+        );
+
+      if (validPlaces.length > 0) {
+        return validPlaces[0];
+      }
     }
   } catch (e) {
     console.warn(`[TravelPlaces] Error resolving "${name}":`, e);

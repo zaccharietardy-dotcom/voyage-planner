@@ -14,6 +14,8 @@ import type { Attraction } from '../../services/attractions';
 import type { ActivityType } from '../../types';
 import { buildPlacePhotoProxyUrl } from '../../services/googlePlacePhoto';
 import { getCachedResponse, setCachedResponse } from '../../services/supabaseCache';
+import { reportProviderQuotaExceeded } from '../../services/providerQuotaGuard';
+import { isProviderQuotaLikeMessage } from '../../utils/quotaErrors';
 
 const GOOGLE_PLACES_TEXT_SEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
 
@@ -84,8 +86,16 @@ export async function searchGooglePlacesAttractions(
         continue;
       }
 
-      const { trackApiCost } = await import('../../services/apiCostGuard');
-      trackApiCost('places-text-search-legacy');
+      const { trackApiCost, isApiBudgetSoftLimitError } = await import('../../services/apiCostGuard');
+      try {
+        trackApiCost('places-text-search-legacy');
+      } catch (error) {
+        if (isApiBudgetSoftLimitError(error)) {
+          console.warn('[Google Places] Soft budget block on text search, skipping query');
+          continue;
+        }
+        throw error;
+      }
 
       const url = new URL(GOOGLE_PLACES_TEXT_SEARCH_URL);
       url.searchParams.set('query', query);
@@ -97,6 +107,9 @@ export async function searchGooglePlacesAttractions(
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          reportProviderQuotaExceeded('google_places', 'legacy_http_429');
+        }
         console.warn(`[Google Places] HTTP ${response.status} for query "${query}"`);
         continue;
       }
@@ -104,6 +117,9 @@ export async function searchGooglePlacesAttractions(
       const data = await response.json();
 
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+        if (data.status === 'OVER_QUERY_LIMIT' || isProviderQuotaLikeMessage(String(data.error_message || ''))) {
+          reportProviderQuotaExceeded('google_places', `legacy_status_${String(data.status || 'unknown')}`);
+        }
         console.warn(`[Google Places] Status: ${data.status} - ${data.error_message || ''}`);
         continue;
       }
@@ -283,8 +299,15 @@ async function fetchPlaceDetails(
   if (cachedDetails) return cachedDetails;
 
   try {
-    const { trackApiCost } = await import('../../services/apiCostGuard');
-    trackApiCost('places-details-legacy');
+    const { trackApiCost, isApiBudgetSoftLimitError } = await import('../../services/apiCostGuard');
+    try {
+      trackApiCost('places-details-legacy');
+    } catch (error) {
+      if (isApiBudgetSoftLimitError(error)) {
+        return null;
+      }
+      throw error;
+    }
 
     const url = new URL(GOOGLE_PLACES_DETAILS_URL);
     url.searchParams.set('place_id', placeId);
@@ -296,10 +319,20 @@ async function fetchPlaceDetails(
       signal: AbortSignal.timeout(5000),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      if (response.status === 429) {
+        reportProviderQuotaExceeded('google_places', 'legacy_details_http_429');
+      }
+      return null;
+    }
 
     const data = await response.json();
-    if (data.status !== 'OK') return null;
+    if (data.status !== 'OK') {
+      if (data.status === 'OVER_QUERY_LIMIT' || isProviderQuotaLikeMessage(String(data.error_message || ''))) {
+        reportProviderQuotaExceeded('google_places', `legacy_details_${String(data.status || 'unknown')}`);
+      }
+      return null;
+    }
 
     const result = data.result;
     if (!result) return null;

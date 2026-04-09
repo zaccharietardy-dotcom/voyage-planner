@@ -380,11 +380,46 @@ export function clearGeocodeCache() {
   geocodeCache.clear();
 }
 
+export interface GeocodeAddressOptions {
+  nearbyCoords?: { lat: number; lng: number };
+  limit?: number;
+  countryCodes?: string[];
+  boundedKm?: number;
+}
+
+function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+    * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return 6371 * c;
+}
+
 /**
  * Géocode une adresse en coordonnées (with in-memory cache + Nominatim throttle)
  */
-export async function geocodeAddress(address: string): Promise<GeocodingResult | null> {
-  const cacheKey = address.toLowerCase().trim();
+export async function geocodeAddress(
+  address: string,
+  options?: GeocodeAddressOptions
+): Promise<GeocodingResult | null> {
+  const trimmedAddress = address.toLowerCase().trim();
+  const nearbyKey = options?.nearbyCoords
+    ? `${options.nearbyCoords.lat.toFixed(3)},${options.nearbyCoords.lng.toFixed(3)}`
+    : 'none';
+  const limit = Math.max(1, Math.min(8, options?.limit ?? (options?.nearbyCoords ? 6 : 1)));
+  const normalizedCountryCodes = Array.isArray(options?.countryCodes)
+    ? options!.countryCodes
+      .map((code) => String(code || '').trim().toLowerCase())
+      .filter((code) => /^[a-z]{2}$/.test(code))
+      .sort()
+      .join(',')
+    : '';
+  const boundedKm = Math.max(10, Math.min(500, options?.boundedKm ?? 90));
+  const cacheKey = `${trimmedAddress}|near:${nearbyKey}|limit:${limit}|cc:${normalizedCountryCodes}|bounded:${boundedKm}`;
 
   // Return cached promise if available (deduplicates concurrent calls for same address)
   const cached = geocodeCache.get(cacheKey);
@@ -392,9 +427,31 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
 
   const promise = withNominatimThrottle(async () => {
     try {
-      const encoded = encodeURIComponent(address);
+      const params = new URLSearchParams({
+        format: 'json',
+        q: address,
+        limit: String(limit),
+        addressdetails: '1',
+      });
+
+      if (normalizedCountryCodes) {
+        params.set('countrycodes', normalizedCountryCodes);
+      }
+
+      if (options?.nearbyCoords) {
+        const latDelta = boundedKm / 111;
+        const cosLat = Math.max(0.25, Math.abs(Math.cos((options.nearbyCoords.lat * Math.PI) / 180)));
+        const lngDelta = boundedKm / (111 * cosLat);
+        const left = options.nearbyCoords.lng - lngDelta;
+        const right = options.nearbyCoords.lng + lngDelta;
+        const top = options.nearbyCoords.lat + latDelta;
+        const bottom = options.nearbyCoords.lat - latDelta;
+        params.set('viewbox', `${left},${top},${right},${bottom}`);
+        params.set('bounded', '1');
+      }
+
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&limit=1`,
+        `https://nominatim.openstreetmap.org/search?${params.toString()}`,
         {
           headers: {
             'User-Agent': 'VoyageApp/1.0',
@@ -403,16 +460,35 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
       );
 
       if (!response.ok) {
-        throw new Error('Geocoding request failed');
+        throw new Error(`Geocoding request failed (${response.status})`);
       }
 
       const data = await response.json();
 
-      if (data.length === 0) {
+      if (!Array.isArray(data) || data.length === 0) {
         return null;
       }
 
-      const result = data[0];
+      const result = options?.nearbyCoords
+        ? [...data]
+          .map((candidate) => ({
+            candidate,
+            distanceKm: haversineDistanceKm(
+              options.nearbyCoords!.lat,
+              options.nearbyCoords!.lng,
+              Number(candidate.lat),
+              Number(candidate.lon),
+            ),
+          }))
+          .filter(({ candidate, distanceKm }) =>
+            Number.isFinite(Number(candidate?.lat))
+            && Number.isFinite(Number(candidate?.lon))
+            && Number.isFinite(distanceKm)
+          )
+          .sort((left, right) => left.distanceKm - right.distanceKm)[0]?.candidate
+        : data[0];
+      if (!result) return null;
+
       return {
         lat: parseFloat(result.lat),
         lng: parseFloat(result.lon),
@@ -420,7 +496,8 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult |
         type: result.type,
       };
     } catch (error) {
-      console.error('Geocoding error:', error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`[Geocoding] Nominatim request failed (${message})`);
       return null;
     }
   });

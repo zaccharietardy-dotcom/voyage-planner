@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useGoBack } from '@/hooks/useGoBack';
 import dynamic from 'next/dynamic';
 import { Trip, TripItem, TripDay, Accommodation, GROUP_TYPE_LABELS, ACTIVITY_LABELS } from '@/lib/types';
@@ -117,6 +117,10 @@ import { TripFeedbackCards } from '@/components/trip/TripFeedbackCards';
 import { TripQualitySummary } from '@/components/trip/TripQualitySummary';
 import { generateTripStream } from '@/lib/generateTrip';
 import { safeGetItem, safeSetItem } from '@/lib/storage';
+
+const SHOW_GENERATION_DEBUG = process.env.NEXT_PUBLIC_SHOW_GENERATION_DEBUG === 'true';
+const SHOW_TRIP_QUALITY_SUMMARY =
+  SHOW_GENERATION_DEBUG && process.env.NEXT_PUBLIC_SHOW_TRIP_QUALITY_SUMMARY === 'true';
 
 function updateTripWithNewHotel(trip: Trip, newHotel: Accommodation): Trip {
   const oldHotelName = trip.accommodation?.name || '';
@@ -272,6 +276,7 @@ function resolveSelectedTransportFromGeneratedTrip(
 export default function TripPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const goBack = useGoBack('/');
   const tripId = params.id as string;
   const { user } = useAuth();
@@ -419,6 +424,8 @@ export default function TripPage() {
   const canPropose = useCollaborativeMode ? (userRole === 'owner' || userRole === 'editor') : localIsOwner;
   const canVoteOnProposals = useCollaborativeMode ? userRole === 'editor' : false;
   const canOwnerDecide = useCollaborativeMode ? userRole === 'owner' : false;
+  const debugQueryEnabled = searchParams.get('debug') === '1';
+  const canViewGenerationDebug = (SHOW_GENERATION_DEBUG || debugQueryEnabled) && (isOwner || localIsOwner);
 
   useEffect(() => {
     const hydrateTrip = (rawTrip: Trip): Trip => {
@@ -1245,7 +1252,19 @@ export default function TripPage() {
   // Keep backward-compat function signatures for non-map callers
   const getAllItems = (): TripItem[] => allItems;
 
-  const handleExportDebug = (compact: boolean = true) => {
+  const downloadJsonFile = useCallback((payload: unknown, filename: string) => {
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleExportDebug = useCallback((compact: boolean = true) => {
     if (!trip) return;
     const debugExport = {
       _meta: {
@@ -1264,16 +1283,47 @@ export default function TripPage() {
       days: trip.days,
       ...(compact ? {} : { _rawTrip: trip }),
     };
-    const blob = new Blob([JSON.stringify(debugExport, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `voyage-debug-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+    downloadJsonFile(
+      debugExport,
+      `voyage-debug-${new Date().toISOString().split('T')[0]}.json`
+    );
+  }, [downloadJsonFile, trip]);
+
+  const handleExportGenerationRunTrace = useCallback(async () => {
+    if (!trip) return;
+
+    const runId = trip.generationDiagnostics?.runId || trip.runTrace?.runId;
+    const sessionId = runId?.split(':')[0];
+    if (!runId && !sessionId) {
+      toast.error('Aucun runId trouvé pour ce voyage');
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams();
+      if (runId) params.set('runId', runId);
+      if (sessionId) params.set('sessionId', sessionId);
+
+      const response = await fetch(`/api/generate/debug?${params.toString()}`);
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        const message = typeof payload?.error === 'string' ? payload.error : `Erreur ${response.status}`;
+        throw new Error(message);
+      }
+
+      const payload = await response.json();
+      const exportRunId = payload?.runId || runId || sessionId;
+      downloadJsonFile(
+        payload,
+        `voyage-run-trace-${String(exportRunId).replace(/[^a-zA-Z0-9-_]/g, '_')}.json`
+      );
+      toast.success('Trace de génération exportée');
+    } catch (error) {
+      console.error('Erreur export trace génération:', error);
+      toast.error('Impossible de récupérer la trace serveur, export local généré');
+      handleExportDebug(false);
+    }
+  }, [downloadJsonFile, handleExportDebug, trip]);
 
   const handleExportPdf = async () => {
     if (!trip) return;
@@ -1548,7 +1598,7 @@ export default function TripPage() {
         </div>
       )}
 
-      {trip && (
+      {SHOW_TRIP_QUALITY_SUMMARY && trip && (
         <div className="container mx-auto px-4 pt-3">
           <TripQualitySummary trip={trip} />
         </div>
@@ -1699,6 +1749,17 @@ export default function TripPage() {
                     >
                       <Download className="h-4 w-4" />
                     </Button>
+                    {canViewGenerationDebug && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 rounded-xl text-muted-foreground hover:text-gold hover:bg-gold/10"
+                        onClick={handleExportGenerationRunTrace}
+                        title="Exporter la trace de génération"
+                      >
+                        <Bug className="h-4 w-4" />
+                      </Button>
+                    )}
                     {isOwner && (
                       <Button 
                         variant="ghost" 
@@ -2308,6 +2369,18 @@ export default function TripPage() {
               <Download className="h-5 w-5 text-muted-foreground" />
               Exporter en PDF
             </button>
+            {canViewGenerationDebug && (
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-muted transition-colors"
+                onClick={() => {
+                  handleExportGenerationRunTrace();
+                  setShowMobileActions(false);
+                }}
+              >
+                <Bug className="h-5 w-5 text-muted-foreground" />
+                Exporter la trace debug
+              </button>
+            )}
             <button
               className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-left text-sm font-medium hover:bg-muted transition-colors"
               onClick={() => { setShowFlythrough(true); setShowMobileActions(false); }}

@@ -156,6 +156,28 @@ export async function POST(request: Request) {
     const forwarded = request.headers.get('x-forwarded-for');
     const generatorIp = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || null;
 
+    const publishable = tripData?.reliabilitySummary?.publishable !== false
+      && tripData?.generationDiagnostics?.publishGateResult !== 'draft';
+    const requestedVisibility: 'public' | 'private' | 'friends' =
+      tripData?.visibility === 'public'
+        ? 'public'
+        : tripData?.visibility === 'friends'
+          ? 'friends'
+          : 'private';
+    const finalVisibility: 'public' | 'private' | 'friends' = publishable ? requestedVisibility : 'private';
+    const normalizedTripData = {
+      ...tripData,
+      publicationStatus: publishable ? 'publishable' : 'draft',
+      reliabilitySummary: {
+        ...(tripData?.reliabilitySummary || {}),
+        publishable,
+      },
+      generationDiagnostics: {
+        ...(tripData?.generationDiagnostics || {}),
+        publishGateResult: publishable ? 'publishable' : 'draft',
+      },
+    };
+
     const insertData = {
       owner_id: user.id,
       name: tripName,
@@ -165,8 +187,9 @@ export async function POST(request: Request) {
       end_date: endDateStr,
       duration_days: durationDays || 7,
       preferences: tripData.preferences || {},
-      data: tripData || {},
+      data: normalizedTripData,
       share_code: shareCode,
+      visibility: finalVisibility,
       ...(generatorIp && { generator_ip: generatorIp }),
     };
 

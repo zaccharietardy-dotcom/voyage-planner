@@ -330,9 +330,9 @@ describe('unifiedScheduleV3Days', () => {
     });
 
     it('keeps LLM order when cluster routing policy is llm_locked', () => {
-      const act1 = makeActivity({ id: 'a1', name: 'Castle North', duration: 45, latitude: 41.5000, longitude: 2.2500 });
-      const act2 = makeActivity({ id: 'a2', name: 'Beach East', duration: 45, latitude: 41.3905, longitude: 2.1705 });
-      const act3 = makeActivity({ id: 'a3', name: 'Market South', duration: 45, latitude: 41.3300, longitude: 2.1200 });
+      const act1 = makeActivity({ id: 'a1', name: 'Castle North', duration: 45, latitude: 41.5000, longitude: 2.2500, llmOrderIndex: 0 });
+      const act2 = makeActivity({ id: 'a2', name: 'Beach East', duration: 45, latitude: 41.3905, longitude: 2.1705, llmOrderIndex: 1 });
+      const act3 = makeActivity({ id: 'a3', name: 'Market South', duration: 45, latitude: 41.3300, longitude: 2.1200, llmOrderIndex: 2 });
 
       const result = unifiedScheduleV3Days(
         [{
@@ -351,6 +351,7 @@ describe('unifiedScheduleV3Days', () => {
 
       const activities = result.days[0].items.filter((item) => item.type === 'activity');
       expect(activities.map((item) => item.locationName)).toEqual(['Castle North', 'Beach East', 'Market South']);
+      expect(activities.map((item) => item.planningMeta?.llmOrderIndex)).toEqual([0, 1, 2]);
     });
 
     it('stops placing activities past dayEndTime', () => {

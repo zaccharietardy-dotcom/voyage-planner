@@ -11,8 +11,10 @@ import type { TripPreferences, Restaurant } from '../types';
 import type { CityDensityProfile } from './types';
 import { calculateDistance } from '../services/geocoding';
 import { fetchGeminiPlannerFast } from '../services/geminiSearch';
-import { trackEstimatedCost } from '../services/apiCostGuard';
+import { isApiBudgetExceededError, trackEstimatedCost } from '../services/apiCostGuard';
+import { isProviderQuotaStopError } from '../services/providerQuotaGuard';
 
+type PlannerProvider = 'gemini' | 'anthropic' | 'gpt';
 type PlannerCandidateType = 'activity' | 'restaurant' | 'transport';
 type PlannerKind = 'iconic' | 'local_gem';
 
@@ -26,6 +28,7 @@ export interface PlannerCatalogCandidate {
   candidateId: string;
   type: PlannerCandidateType;
   name: string;
+  qualityScore?: number;
   coords?: { lat: number; lng: number };
   durationBounds?: { min: number; max: number };
   openingWindows?: Record<string, { open: string; close: string } | null>;
@@ -65,6 +68,7 @@ export interface DayPlanHints {
   acceptedDropCount: number;
   dropRecoveryCount: number;
   ratioFeasibleBand: PlannerRatioFeasibleBand;
+  reasonCodeCounts: Record<string, number>;
 }
 
 export interface ClosedWorldPlannerResult {
@@ -80,6 +84,37 @@ export interface ClosedWorldPlannerAttempt {
   unknownIdRate: number;
   parseAttempts: number;
   latencyMs: number;
+  providerUsed?: PlannerProvider;
+  providerFallback: boolean;
+  plannerAudit: PlannerAuditEntry[];
+  candidateDecisionEvents?: CandidateDecisionEvent[];
+  reasonCodeCounts?: Record<string, number>;
+}
+
+export interface PlannerAuditEntry {
+  provider: PlannerProvider;
+  attempt: number;
+  promptType: 'primary' | 'repair_json';
+  parseStatus: 'ok' | 'invalid_json' | 'call_failed';
+  latencyMs: number;
+  attemptTimeoutMs?: number;
+  requestedOutputTokens?: number;
+  responseStatus?: number;
+  failureReason?: string;
+  promptRedacted: string;
+  rawResponsePreview?: string;
+  rawResponseTail?: string;
+  rawResponseLength?: number;
+  finishReason?: string;
+  outputTokens?: number;
+}
+
+export interface CandidateDecisionEvent {
+  candidateId: string;
+  dayNumber?: number;
+  stage: 'proposed' | 'grounding' | 'assignment' | 'drop' | 'recovery';
+  decision: 'keep' | 'reject' | 'drop' | 'reinsert' | 'recover';
+  reasonCode: string;
 }
 
 interface ParsedDayPlanPayload {
@@ -95,6 +130,12 @@ function normalizeText(value: string): string {
     .trim();
 }
 
+function isTruthyEnvFlag(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'yes' || normalized === 'on';
+}
+
 function timeToMinSimple(hhmm: string): number {
   const [h, m] = hhmm.split(':').map(Number);
   return (h || 0) * 60 + (m || 0);
@@ -102,22 +143,38 @@ function timeToMinSimple(hhmm: string): number {
 
 const UNKNOWN_ID_RATE_MAX = 0.2;
 const MIN_GROUNDING_RATE = 0.6;
-const MIN_PLANNER_ATTEMPT_TIMEOUT_MS = 3000;
-const MAX_PLANNER_ATTEMPT_TIMEOUT_MS = 14000;
+const MIN_PLANNER_ATTEMPT_TIMEOUT_MS = 4000;
+const MAX_PLANNER_ATTEMPT_TIMEOUT_MS = 40000;
 const PLANNER_ATTEMPT_GUARD_MS = 800;
+const PRIMARY_ATTEMPT_SOFT_CAP_MS = 12000;
+const MIN_ACTIVITY_CATALOG_SIZE = 12;
+const MAX_ACTIVITY_CATALOG_SIZE = 72;
+const MAX_DECISION_EVENTS = 1200;
+const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
+const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
+function cleanPotentialJson(raw: string): string {
+  return raw
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/,\s*([}\]])/g, '$1')
+    .trim();
+}
 
 function extractStrictJson<T>(raw: string): T | null {
+  const candidates: string[] = [];
   const trimmed = raw.trim();
-  try {
-    return JSON.parse(trimmed) as T;
-  } catch {
-    // continue
-  }
+  if (trimmed) candidates.push(trimmed);
 
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  if (fenced) {
+  if (fenced?.[1]) candidates.push(fenced[1].trim());
+
+  for (const candidateRaw of candidates) {
+    const candidate = cleanPotentialJson(candidateRaw);
+    if (!candidate) continue;
     try {
-      return JSON.parse(fenced[1].trim()) as T;
+      return JSON.parse(candidate) as T;
     } catch {
       // continue
     }
@@ -208,6 +265,7 @@ export function buildPlannerCatalog(
         candidateId,
         type: 'activity',
         name: activity.name,
+        qualityScore: Number.isFinite(activity.score) ? activity.score : undefined,
         coords: { lat: activity.latitude, lng: activity.longitude },
         durationBounds: { min: Math.max(30, duration - 30), max: Math.min(360, duration + 60) },
         openingWindows: activity.openingHoursByDay as Record<string, { open: string; close: string } | null> | undefined,
@@ -278,6 +336,116 @@ export function buildPlannerCatalog(
   };
 }
 
+function computePlannerActivityCap(
+  totalDays: number,
+  densityCategory: CityDensityProfile['densityCategory'],
+  maxPlannerLatencyMs: number,
+): number {
+  const safeDays = Math.max(1, totalDays || 1);
+  const densityBase = densityCategory === 'spread'
+    ? safeDays * 7 + 8
+    : densityCategory === 'medium'
+      ? safeDays * 6 + 8
+      : safeDays * 5 + 6;
+  const latencyPenalty = maxPlannerLatencyMs < 12_000
+    ? 16
+    : maxPlannerLatencyMs < 20_000
+      ? 8
+      : 0;
+  const capped = densityBase - latencyPenalty;
+  return Math.max(MIN_ACTIVITY_CATALOG_SIZE, Math.min(MAX_ACTIVITY_CATALOG_SIZE, capped));
+}
+
+function candidatePriority(candidate: PlannerCatalogCandidate): number {
+  const baseScore = Number.isFinite(candidate.qualityScore) ? Number(candidate.qualityScore) : 0;
+  const protectedBonus = isProtectedDropCandidate(candidate) ? 120 : 0;
+  const fixedBonus = candidate.fixedDayNumber ? 60 : 0;
+  const mustSeeBonus = candidate.mustSee ? 40 : 0;
+  const localGemBonus = candidate.kind === 'local_gem' ? 4 : 0;
+  return baseScore + protectedBonus + fixedBonus + mustSeeBonus + localGemBonus;
+}
+
+function compactPlannerCatalog(
+  catalog: PlannerCatalog,
+  options: { maxActivityCandidates: number }
+): PlannerCatalog {
+  const maxActivityCandidates = Math.max(MIN_ACTIVITY_CATALOG_SIZE, options.maxActivityCandidates);
+  const activityCandidates = catalog.candidates.filter((candidate) => candidate.type === 'activity');
+  if (activityCandidates.length <= maxActivityCandidates) return catalog;
+
+  const protectedActivities = activityCandidates.filter((candidate) => isProtectedDropCandidate(candidate));
+  const movableActivities = activityCandidates.filter((candidate) => !isProtectedDropCandidate(candidate));
+
+  const selected = new Map<string, PlannerCatalogCandidate>();
+  for (const candidate of protectedActivities) {
+    selected.set(candidate.candidateId, candidate);
+  }
+
+  if (selected.size > maxActivityCandidates) {
+    const keepIds = new Set(
+      [...selected.values()]
+        .sort((left, right) => candidatePriority(right) - candidatePriority(left))
+        .slice(0, maxActivityCandidates)
+        .map((candidate) => candidate.candidateId)
+    );
+    return {
+      ...catalog,
+      candidates: catalog.candidates.filter((candidate) => candidate.type !== 'activity' || keepIds.has(candidate.candidateId)),
+    };
+  }
+
+  const remainingSlots = maxActivityCandidates - selected.size;
+  if (remainingSlots <= 0) {
+    const keepIds = new Set(selected.keys());
+    return {
+      ...catalog,
+      candidates: catalog.candidates.filter((candidate) => candidate.type !== 'activity' || keepIds.has(candidate.candidateId)),
+    };
+  }
+
+  const dayBuckets = new Map<number, PlannerCatalogCandidate[]>();
+  for (const candidate of movableActivities) {
+    const dayNumber = candidate.originalDayNumber || candidate.fixedDayNumber || 1;
+    if (!dayBuckets.has(dayNumber)) dayBuckets.set(dayNumber, []);
+    dayBuckets.get(dayNumber)!.push(candidate);
+  }
+  for (const bucket of dayBuckets.values()) {
+    bucket.sort((left, right) => candidatePriority(right) - candidatePriority(left));
+  }
+
+  const dayNumbers = [...dayBuckets.keys()].sort((left, right) => left - right);
+  const targetFloorPerDay = dayNumbers.length > 0
+    ? Math.max(1, Math.floor(Math.min(remainingSlots, dayNumbers.length * 2) / dayNumbers.length))
+    : 0;
+
+  for (const dayNumber of dayNumbers) {
+    const bucket = dayBuckets.get(dayNumber) || [];
+    let taken = 0;
+    while (bucket.length > 0 && taken < targetFloorPerDay && selected.size < maxActivityCandidates) {
+      const candidate = bucket.shift();
+      if (!candidate || selected.has(candidate.candidateId)) continue;
+      selected.set(candidate.candidateId, candidate);
+      taken++;
+    }
+  }
+
+  if (selected.size < maxActivityCandidates) {
+    const leftovers = movableActivities
+      .filter((candidate) => !selected.has(candidate.candidateId))
+      .sort((left, right) => candidatePriority(right) - candidatePriority(left));
+    for (const candidate of leftovers) {
+      if (selected.size >= maxActivityCandidates) break;
+      selected.set(candidate.candidateId, candidate);
+    }
+  }
+
+  const keepIds = new Set(selected.keys());
+  return {
+    ...catalog,
+    candidates: catalog.candidates.filter((candidate) => candidate.type !== 'activity' || keepIds.has(candidate.candidateId)),
+  };
+}
+
 function buildPrompt(
   catalog: PlannerCatalog,
   preferences: TripPreferences,
@@ -293,7 +461,8 @@ function buildPrompt(
     const scoreHint = candidate.kind === 'iconic' ? 'iconic' : 'local_gem';
     const mustSee = candidate.mustSee ? 'must_see' : 'optional';
     const zone = candidate.zone || 'destination';
-    return `- id=${candidate.candidateId} | name=${candidate.name} | ${scoreHint} | ${mustSee} | zone=${zone} | duration=${dur} | ${fixed}`;
+    const compactName = (candidate.name || '').slice(0, 34);
+    return `- id=${candidate.candidateId} | n=${compactName} | ${scoreHint} | ${mustSee} | z=${zone} | dur=${dur} | ${fixed}`;
   });
 
   const windows = timeWindows.map((window) => {
@@ -363,8 +532,40 @@ function buildRepairPrompt(
     '- aucun texte hors JSON',
     '',
     'JSON à réparer:',
-    invalidRaw,
+    invalidRaw.slice(0, 2200),
   ].join('\n');
+}
+
+function buildCompactRepairPrompt(
+  catalog: PlannerCatalog,
+  timeWindows: DayTimeWindow[],
+): string {
+  const ids = catalog.candidates
+    .filter((candidate) => candidate.type === 'activity')
+    .map((candidate) => candidate.candidateId)
+    .join(', ');
+  const windows = timeWindows
+    .map((window) => `J${window.dayNumber}:${window.activityStartTime}-${window.activityEndTime}`)
+    .join(' | ');
+
+  return [
+    'Réponds UNIQUEMENT en JSON compact valide.',
+    'Objectif: planifier par candidateIds, sans texte libre.',
+    `Jours: ${windows}`,
+    `IDs autorisés: ${ids}`,
+    'Format strict:',
+    '{"days":[{"dayNumber":1,"candidateIds":["act:..."],"dropCandidateIds":["act:..."]}]}',
+    'Contraintes: dayNumber entier, candidateIds/dropCandidateIds tableaux de strings.',
+  ].join('\n');
+}
+
+function isTruncationFinishReason(finishReason?: string): boolean {
+  if (!finishReason) return false;
+  const normalized = finishReason.toLowerCase();
+  return normalized.includes('max_tokens')
+    || normalized.includes('length')
+    || normalized.includes('max_output_tokens')
+    || normalized.includes('token_limit');
 }
 
 function normalizeParsedPayload(
@@ -401,42 +602,258 @@ function parseDayHints(rawText: string): ParsedDayPlanPayload | null {
   return normalizeParsedPayload(parsed);
 }
 
+function redactPrompt(prompt: string): string {
+  return prompt
+    .replace(/act:[a-z0-9-]+/gi, 'act:<id>')
+    .replace(/\b\d{2}:\d{2}\b/g, '<time>')
+    .slice(0, 1800);
+}
+
+function extractOpenAIText(payload: any): string {
+  if (typeof payload?.output_text === 'string' && payload.output_text.trim()) {
+    return payload.output_text.trim();
+  }
+  const output = Array.isArray(payload?.output) ? payload.output : [];
+  const chunks: string[] = [];
+  for (const item of output) {
+    const content = Array.isArray(item?.content) ? item.content : [];
+    for (const part of content) {
+      if (typeof part?.text === 'string' && part.text.trim()) {
+        chunks.push(part.text.trim());
+      }
+    }
+  }
+  return chunks.join('\n').trim();
+}
+
+function extractGeminiText(payload: any): string {
+  const candidates = Array.isArray(payload?.candidates) ? payload.candidates : [];
+  if (candidates.length === 0) return '';
+  const parts = Array.isArray(candidates[0]?.content?.parts) ? candidates[0].content.parts : [];
+  const chunks: string[] = [];
+  for (const part of parts) {
+    if (typeof part?.text === 'string' && part.text.trim()) {
+      chunks.push(part.text.trim());
+    }
+  }
+  return chunks.join('\n').trim();
+}
+
+function extractAnthropicText(payload: any): string {
+  const content = Array.isArray(payload?.content) ? payload.content : [];
+  const chunks: string[] = [];
+  for (const part of content) {
+    if (part?.type === 'text' && typeof part?.text === 'string' && part.text.trim()) {
+      chunks.push(part.text.trim());
+    }
+  }
+  return chunks.join('\n').trim();
+}
+
+async function fetchOpenAiPlannerFast(
+  prompt: string,
+  options: {
+    timeoutMs?: number;
+    maxRetries?: number;
+    retryDelayMs?: number;
+    maxOutputTokens?: number;
+  } = {}
+): Promise<Response> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: { message: 'openai_api_key_missing', status: 'UNAVAILABLE' } }), { status: 503 });
+  }
+
+  const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
+  const maxRetries = Math.max(0, options.maxRetries ?? 0);
+  const retryDelayMs = Math.max(200, options.retryDelayMs ?? 450);
+  const maxOutputTokens = Math.max(500, Math.min(3000, options.maxOutputTokens ?? 1400));
+  const model = process.env.OPENAI_PLANNER_MODEL || 'gpt-5-mini';
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(OPENAI_RESPONSES_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          input: prompt,
+          text: { format: { type: 'json_object' } },
+          reasoning: { effort: 'low' },
+          max_output_tokens: maxOutputTokens,
+        }),
+        signal: controller.signal,
+      });
+      if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      const isAbort = error instanceof Error && error.name === 'AbortError';
+      if (isAbort) {
+        if (attempt < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+          continue;
+        }
+        return new Response(JSON.stringify({ error: { message: 'planner timeout', status: 'DEADLINE_EXCEEDED' } }), { status: 408 });
+      }
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        continue;
+      }
+      return new Response(JSON.stringify({ error: { message: 'planner call failed', status: 'UNAVAILABLE' } }), { status: 503 });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  return new Response(JSON.stringify({ error: { message: 'planner timeout', status: 'DEADLINE_EXCEEDED' } }), { status: 408 });
+}
+
+async function fetchAnthropicPlannerFast(
+  prompt: string,
+  options: {
+    timeoutMs?: number;
+    maxRetries?: number;
+    retryDelayMs?: number;
+    maxOutputTokens?: number;
+  } = {}
+): Promise<Response> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: { message: 'anthropic_api_key_missing', status: 'UNAVAILABLE' } }), { status: 503 });
+  }
+
+  const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
+  const maxRetries = Math.max(0, options.maxRetries ?? 0);
+  const retryDelayMs = Math.max(200, options.retryDelayMs ?? 450);
+  const maxOutputTokens = Math.max(500, Math.min(3000, options.maxOutputTokens ?? 1200));
+  const model = process.env.ANTHROPIC_PLANNER_MODEL || 'claude-haiku-4-5';
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(ANTHROPIC_MESSAGES_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: maxOutputTokens,
+          temperature: 0,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+        signal: controller.signal,
+      });
+      if ((response.status === 429 || response.status === 503) && attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      const isAbort = error instanceof Error && error.name === 'AbortError';
+      if (isAbort) {
+        if (attempt < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+          continue;
+        }
+        return new Response(JSON.stringify({ error: { message: 'planner timeout', status: 'DEADLINE_EXCEEDED' } }), { status: 408 });
+      }
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        continue;
+      }
+      return new Response(JSON.stringify({ error: { message: 'planner call failed', status: 'UNAVAILABLE' } }), { status: 503 });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  return new Response(JSON.stringify({ error: { message: 'planner timeout', status: 'DEADLINE_EXCEEDED' } }), { status: 408 });
+}
+
 async function callPlannerRawText(
   prompt: string,
   attemptTimeoutMs: number,
   maxRetries: number,
-): Promise<{ rawText: string } | { failureReason: string }> {
+  provider: PlannerProvider,
+  maxOutputTokens: number,
+): Promise<{
+  rawText: string;
+  responseStatus: number;
+  finishReason?: string;
+  outputTokens?: number;
+} | { failureReason: string; responseStatus?: number }> {
   try {
-    const response = await fetchGeminiPlannerFast({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 3000,
-          responseMimeType: 'application/json',
-        },
-      }, {
-        timeoutMs: attemptTimeoutMs,
-        maxRetries,
-        retryDelayMs: 450,
-      });
+    const response = provider === 'gpt'
+      ? await fetchOpenAiPlannerFast(prompt, {
+          timeoutMs: attemptTimeoutMs,
+          maxRetries,
+          retryDelayMs: 450,
+          maxOutputTokens,
+        })
+      : provider === 'anthropic'
+        ? await fetchAnthropicPlannerFast(prompt, {
+            timeoutMs: attemptTimeoutMs,
+            maxRetries,
+            retryDelayMs: 450,
+            maxOutputTokens,
+          })
+        : await fetchGeminiPlannerFast({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0,
+              maxOutputTokens,
+              responseMimeType: 'application/json',
+            },
+          }, {
+            timeoutMs: attemptTimeoutMs,
+            maxRetries,
+            retryDelayMs: 450,
+          });
 
     if (!(response instanceof Response)) {
       return { failureReason: 'planner_timeout' };
     }
     if (response.status === 408) {
-      return { failureReason: 'planner_timeout' };
+      return { failureReason: 'planner_timeout', responseStatus: response.status };
     }
     if (!response.ok) {
-      return { failureReason: `planner_http_${response.status}` };
+      return { failureReason: `planner_http_${response.status}`, responseStatus: response.status };
     }
 
     const payload = await response.json();
-    const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const rawText = provider === 'gpt'
+      ? extractOpenAIText(payload)
+      : provider === 'anthropic'
+        ? extractAnthropicText(payload)
+        : extractGeminiText(payload);
     if (!rawText) {
-      return { failureReason: 'planner_empty_response' };
+      return { failureReason: 'planner_empty_response', responseStatus: response.status };
     }
-    return { rawText };
-  } catch {
+    const finishReason = provider === 'gpt'
+      ? undefined
+      : provider === 'anthropic'
+        ? payload?.stop_reason
+        : payload?.candidates?.[0]?.finishReason;
+    const outputTokens = provider === 'anthropic'
+      ? Number(payload?.usage?.output_tokens || 0) || undefined
+      : Number(payload?.usageMetadata?.candidatesTokenCount || 0) || undefined;
+    return { rawText, responseStatus: response.status, finishReason, outputTokens };
+  } catch (error) {
+    if (isProviderQuotaStopError(error) || isApiBudgetExceededError(error)) {
+      throw error;
+    }
     return { failureReason: 'planner_call_error' };
   }
 }
@@ -456,12 +873,22 @@ function rebuildClustersFromHints(
   acceptedDropCount: number;
   dropRecoveryCount: number;
   ratioFeasibleBand: PlannerRatioFeasibleBand;
+  reasonCodeCounts: Record<string, number>;
+  candidateDecisionEvents: CandidateDecisionEvent[];
 } {
   const activityCandidates = catalog.candidates.filter((candidate) => candidate.type === 'activity');
   const ratioFeasibleBand = computeFeasibleRatioBand(activityCandidates);
   const candidateById = new Map(activityCandidates.map((candidate) => [candidate.candidateId, candidate]));
   const candidateBySourceId = new Map(activityCandidates.map((candidate) => [candidate.sourceId, candidate]));
   const activityBySourceId = new Map<string, ScoredActivity>();
+  const reasonCodeCounts: Record<string, number> = {};
+  const candidateDecisionEvents: CandidateDecisionEvent[] = [];
+  const pushDecision = (event: CandidateDecisionEvent) => {
+    reasonCodeCounts[event.reasonCode] = (reasonCodeCounts[event.reasonCode] || 0) + 1;
+    if (candidateDecisionEvents.length < MAX_DECISION_EVENTS) {
+      candidateDecisionEvents.push(event);
+    }
+  };
 
   for (const cluster of originalClusters) {
     for (const activity of cluster.activities) {
@@ -493,12 +920,33 @@ function rebuildClustersFromHints(
     for (const rawId of ids) {
       if (typeof rawId !== 'string') continue;
       totalRequestedRefs++;
+      pushDecision({
+        candidateId: rawId,
+        dayNumber,
+        stage: 'proposed',
+        decision: 'keep',
+        reasonCode: 'llm_proposed',
+      });
       const candidate = candidateById.get(rawId);
       if (!candidate) {
         invalidCandidateRefs.push(rawId);
+        pushDecision({
+          candidateId: rawId,
+          dayNumber,
+          stage: 'grounding',
+          decision: 'reject',
+          reasonCode: 'unknown_candidate_id',
+        });
         continue;
       }
       totalValidRefs++;
+      pushDecision({
+        candidateId: rawId,
+        dayNumber,
+        stage: 'grounding',
+        decision: 'keep',
+        reasonCode: 'candidate_id_valid',
+      });
       if (globallyAssigned.has(rawId)) continue;
       globallyAssigned.add(rawId);
       accepted.push(rawId);
@@ -507,9 +955,23 @@ function rebuildClustersFromHints(
     for (const rawDropId of dropIds) {
       if (typeof rawDropId !== 'string') continue;
       totalRequestedRefs++;
+      pushDecision({
+        candidateId: rawDropId,
+        dayNumber,
+        stage: 'drop',
+        decision: 'drop',
+        reasonCode: 'llm_requested_drop',
+      });
       const candidate = candidateById.get(rawDropId);
       if (!candidate) {
         invalidCandidateRefs.push(rawDropId);
+        pushDecision({
+          candidateId: rawDropId,
+          dayNumber,
+          stage: 'grounding',
+          decision: 'reject',
+          reasonCode: 'unknown_candidate_id',
+        });
         continue;
       }
       totalValidRefs++;
@@ -533,19 +995,43 @@ function rebuildClustersFromHints(
       sourceDayIds.unshift(candidate.candidateId);
       normalizedByDay.set(fixedDay, sourceDayIds);
       globallyAssigned.add(candidate.candidateId);
+      pushDecision({
+        candidateId: candidate.candidateId,
+        dayNumber: fixedDay,
+        stage: 'assignment',
+        decision: 'reinsert',
+        reasonCode: 'fixed_day_enforced',
+      });
     }
   }
 
   // Explicit LLM drops: remove from assigned days before constraint checks.
   for (const droppedCandidateId of requestedDropIds) {
     const candidate = candidateById.get(droppedCandidateId);
-    if (!candidate || isProtectedDropCandidate(candidate)) continue;
+    if (!candidate) continue;
+    if (isProtectedDropCandidate(candidate)) {
+      pushDecision({
+        candidateId: droppedCandidateId,
+        dayNumber: candidate.fixedDayNumber || candidate.originalDayNumber,
+        stage: 'drop',
+        decision: 'reject',
+        reasonCode: 'protected_drop_rejected',
+      });
+      continue;
+    }
     for (const [dayNumber, ids] of normalizedByDay.entries()) {
       const idx = ids.indexOf(droppedCandidateId);
       if (idx < 0) continue;
       ids.splice(idx, 1);
       normalizedByDay.set(dayNumber, ids);
       globallyAssigned.delete(droppedCandidateId);
+      pushDecision({
+        candidateId: droppedCandidateId,
+        dayNumber,
+        stage: 'drop',
+        decision: 'drop',
+        reasonCode: 'drop_applied',
+      });
     }
   }
 
@@ -560,8 +1046,22 @@ function rebuildClustersFromHints(
       if (!ids.includes(candidate.candidateId)) ids.unshift(candidate.candidateId);
       normalizedByDay.set(fallbackDay, ids);
       globallyAssigned.add(candidate.candidateId);
+      pushDecision({
+        candidateId: candidate.candidateId,
+        dayNumber: fallbackDay,
+        stage: 'assignment',
+        decision: 'reinsert',
+        reasonCode: 'protected_unassigned_reinserted',
+      });
     } else {
       requestedDropCandidates.set(candidate.candidateId, candidate);
+      pushDecision({
+        candidateId: candidate.candidateId,
+        dayNumber: candidate.originalDayNumber,
+        stage: 'drop',
+        decision: 'drop',
+        reasonCode: 'implicit_movable_drop_request',
+      });
     }
   }
   for (const droppedCandidateId of requestedDropIds) {
@@ -584,10 +1084,35 @@ function rebuildClustersFromHints(
 
   for (const candidate of requestedDropList) {
     const fallbackDay = candidate.originalDayNumber || candidate.fixedDayNumber || 1;
-    if (acceptedDropIds.size >= globalDropCap) continue;
-    if (!isTransitDay(fallbackDay) && (acceptedDropsByDay.get(fallbackDay) || 0) >= 1) continue;
+    if (acceptedDropIds.size >= globalDropCap) {
+      pushDecision({
+        candidateId: candidate.candidateId,
+        dayNumber: fallbackDay,
+        stage: 'drop',
+        decision: 'reject',
+        reasonCode: 'drop_cap_global_reached',
+      });
+      continue;
+    }
+    if (!isTransitDay(fallbackDay) && (acceptedDropsByDay.get(fallbackDay) || 0) >= 1) {
+      pushDecision({
+        candidateId: candidate.candidateId,
+        dayNumber: fallbackDay,
+        stage: 'drop',
+        decision: 'reject',
+        reasonCode: 'drop_cap_day_reached',
+      });
+      continue;
+    }
     acceptedDropIds.add(candidate.candidateId);
     acceptedDropsByDay.set(fallbackDay, (acceptedDropsByDay.get(fallbackDay) || 0) + 1);
+    pushDecision({
+      candidateId: candidate.candidateId,
+      dayNumber: fallbackDay,
+      stage: 'drop',
+      decision: 'drop',
+      reasonCode: 'drop_accepted',
+    });
   }
 
   // Reinsert non-accepted drops on their original/fixed day.
@@ -598,6 +1123,13 @@ function rebuildClustersFromHints(
     if (!ids.includes(candidate.candidateId)) ids.push(candidate.candidateId);
     normalizedByDay.set(fallbackDay, ids);
     globallyAssigned.add(candidate.candidateId);
+    pushDecision({
+      candidateId: candidate.candidateId,
+      dayNumber: fallbackDay,
+      stage: 'assignment',
+      decision: 'reinsert',
+      reasonCode: 'drop_rejected_reinsert',
+    });
   }
 
   let dropRecoveryCount = 0;
@@ -644,6 +1176,13 @@ function rebuildClustersFromHints(
       globallyAssigned.add(candidate.candidateId);
       missing--;
       dropRecoveryCount++;
+      pushDecision({
+        candidateId: candidate.candidateId,
+        dayNumber,
+        stage: 'recovery',
+        decision: 'recover',
+        reasonCode: 'day_minimum_recovery_from_drop',
+      });
     }
 
     if (missing > 0) {
@@ -657,6 +1196,13 @@ function rebuildClustersFromHints(
         dayIds.push(candidate.candidateId);
         globallyAssigned.add(candidate.candidateId);
         missing--;
+        pushDecision({
+          candidateId: candidate.candidateId,
+          dayNumber,
+          stage: 'recovery',
+          decision: 'recover',
+          reasonCode: 'day_minimum_recovery_from_original',
+        });
       }
     }
 
@@ -680,6 +1226,13 @@ function rebuildClustersFromHints(
         llmOrderIndex: orderIndex,
       });
       usedCandidateIds.add(candidateId);
+      pushDecision({
+        candidateId,
+        dayNumber,
+        stage: 'assignment',
+        decision: 'keep',
+        reasonCode: 'assigned_to_day',
+      });
     }
 
     // Hard fallback safety: never produce an empty day from planner hints.
@@ -689,6 +1242,9 @@ function rebuildClustersFromHints(
           ...activity,
           llmOrderIndex: index,
         }));
+    if (dayActivities.length === 0) {
+      reasonCodeCounts['empty_day_hard_fallback'] = (reasonCodeCounts['empty_day_hard_fallback'] || 0) + 1;
+    }
     const centroid = finalActivities.length > 0
       ? {
           lat: finalActivities.reduce((sum, activity) => sum + activity.latitude, 0) / finalActivities.length,
@@ -738,6 +1294,8 @@ function rebuildClustersFromHints(
     acceptedDropCount: acceptedDropIds.size,
     dropRecoveryCount,
     ratioFeasibleBand,
+    reasonCodeCounts,
+    candidateDecisionEvents,
   };
 }
 
@@ -750,20 +1308,32 @@ export async function attemptClosedWorldDayPlanning(
     timeWindows: DayTimeWindow[];
     densityCategory: CityDensityProfile['densityCategory'];
     maxPlannerLatencyMs?: number;
+    enableGptFallback?: boolean;
   }
 ): Promise<ClosedWorldPlannerAttempt> {
   const t0 = Date.now();
+  const enforceRatioBand =
+    !isTruthyEnvFlag(process.env.PIPELINE_LLM_RATIO_GATE_DISABLE)
+    && !isTruthyEnvFlag(process.env.PIPELINE_LLM_BENCH_MODE);
   const maxPlannerLatencyMs = Math.max(4000, params.maxPlannerLatencyMs ?? 12000);
   const plannerDeadlineMs = t0 + maxPlannerLatencyMs;
   let parseAttempts = 0;
+  const plannerAudit: PlannerAuditEntry[] = [];
 
-  const catalog = buildPlannerCatalog(
+  const fullCatalog = buildPlannerCatalog(
     params.clusters,
     params.restaurants,
     params.dayTripPacks,
     params.preferences.destination || '',
     params.densityCategory,
   );
+
+  const maxActivityCandidates = computePlannerActivityCap(
+    fullCatalog.totalDays,
+    params.densityCategory,
+    maxPlannerLatencyMs,
+  );
+  const catalog = compactPlannerCatalog(fullCatalog, { maxActivityCandidates });
 
   const activityCount = catalog.candidates.filter((candidate) => candidate.type === 'activity').length;
   if (activityCount < 4) {
@@ -774,139 +1344,314 @@ export async function attemptClosedWorldDayPlanning(
       unknownIdRate: 0,
       parseAttempts,
       latencyMs: Date.now() - t0,
+      providerFallback: false,
+      plannerAudit,
     };
   }
 
   const primaryPrompt = buildPrompt(catalog, params.preferences, params.timeWindows);
-  trackEstimatedCost('llm_closed_world_planner', 0.008);
+  const plannerOutputTokens = Math.min(
+    2600,
+    Math.max(1000, params.clusters.length * 220 + activityCount * 24)
+  );
 
-  const callWithRemainingBudget = async (prompt: string): Promise<{ rawText: string } | { failureReason: string }> => {
+  const providerOrder: PlannerProvider[] = ['gemini'];
+  if (params.enableGptFallback && process.env.OPENAI_API_KEY) {
+    providerOrder.push('gpt');
+  }
+  if (process.env.ANTHROPIC_API_KEY) {
+    providerOrder.push('anthropic');
+  }
+
+  const callWithRemainingBudget = async (
+    provider: PlannerProvider,
+    promptType: 'primary' | 'repair_json',
+    prompt: string,
+    providersRemaining: number,
+    options?: { maxOutputTokens?: number },
+  ): Promise<{
+    rawText: string;
+    responseStatus: number;
+    finishReason?: string;
+    outputTokens?: number;
+  } | { failureReason: string; responseStatus?: number }> => {
     parseAttempts++;
+    const outputTokenBudget = Math.max(
+      700,
+      Math.min(3000, options?.maxOutputTokens || plannerOutputTokens),
+    );
     const remainingMs = plannerDeadlineMs - Date.now();
-    if (remainingMs <= MIN_PLANNER_ATTEMPT_TIMEOUT_MS + PLANNER_ATTEMPT_GUARD_MS) {
+    const reserveForOtherProviders = Math.max(0, providersRemaining - 1) * (MIN_PLANNER_ATTEMPT_TIMEOUT_MS + PLANNER_ATTEMPT_GUARD_MS);
+    const reserveForRepair = promptType === 'primary'
+      ? (MIN_PLANNER_ATTEMPT_TIMEOUT_MS + PLANNER_ATTEMPT_GUARD_MS)
+      : 0;
+    const availableMs = remainingMs - reserveForOtherProviders - reserveForRepair;
+    if (availableMs <= MIN_PLANNER_ATTEMPT_TIMEOUT_MS + PLANNER_ATTEMPT_GUARD_MS) {
+      plannerAudit.push({
+        provider,
+        attempt: parseAttempts,
+        promptType,
+        parseStatus: 'call_failed',
+        latencyMs: 0,
+        attemptTimeoutMs: 0,
+        requestedOutputTokens: outputTokenBudget,
+        failureReason: 'planner_timeout',
+        promptRedacted: redactPrompt(prompt),
+      });
       return { failureReason: 'planner_timeout' };
     }
     const attemptTimeoutMs = Math.max(
       MIN_PLANNER_ATTEMPT_TIMEOUT_MS,
-      Math.min(MAX_PLANNER_ATTEMPT_TIMEOUT_MS, remainingMs - PLANNER_ATTEMPT_GUARD_MS)
+      Math.min(
+        MAX_PLANNER_ATTEMPT_TIMEOUT_MS,
+        providersRemaining > 1 ? PRIMARY_ATTEMPT_SOFT_CAP_MS : MAX_PLANNER_ATTEMPT_TIMEOUT_MS,
+        availableMs - PLANNER_ATTEMPT_GUARD_MS,
+      )
     );
-    return callPlannerRawText(prompt, attemptTimeoutMs, 0);
+    trackEstimatedCost(
+      provider === 'gpt'
+        ? 'llm_closed_world_planner_gpt'
+        : provider === 'anthropic'
+          ? 'llm_closed_world_planner_anthropic'
+          : 'llm_closed_world_planner',
+      provider === 'gpt' ? 0.015 : provider === 'anthropic' ? 0.012 : 0.008
+    );
+    const attemptStartedAt = Date.now();
+    const attemptResult = await callPlannerRawText(prompt, attemptTimeoutMs, 0, provider, outputTokenBudget);
+    const latencyMs = Date.now() - attemptStartedAt;
+    if ('failureReason' in attemptResult) {
+      plannerAudit.push({
+        provider,
+        attempt: parseAttempts,
+        promptType,
+        parseStatus: 'call_failed',
+        latencyMs,
+        attemptTimeoutMs,
+        requestedOutputTokens: outputTokenBudget,
+        responseStatus: attemptResult.responseStatus,
+        failureReason: attemptResult.failureReason,
+        promptRedacted: redactPrompt(prompt),
+      });
+      return attemptResult;
+    }
+    plannerAudit.push({
+      provider,
+      attempt: parseAttempts,
+      promptType,
+      parseStatus: parseDayHints(attemptResult.rawText) ? 'ok' : 'invalid_json',
+      latencyMs,
+      attemptTimeoutMs,
+      requestedOutputTokens: outputTokenBudget,
+      responseStatus: attemptResult.responseStatus,
+      finishReason: attemptResult.finishReason,
+      outputTokens: attemptResult.outputTokens,
+      promptRedacted: redactPrompt(prompt),
+      rawResponsePreview: attemptResult.rawText.slice(0, 600),
+      rawResponseTail: attemptResult.rawText.slice(-240),
+      rawResponseLength: attemptResult.rawText.length,
+    });
+    return attemptResult;
   };
 
-  const firstAttempt = await callWithRemainingBudget(primaryPrompt);
-  if ('failureReason' in firstAttempt) {
-    return {
-      result: null,
-      failureReason: firstAttempt.failureReason,
-      groundingRate: 0,
-      unknownIdRate: 0,
-      parseAttempts,
-      latencyMs: Date.now() - t0,
-    };
-  }
+  let lastFailureReason = 'llm_scheduler_failed';
+  let lastGroundingRate = 0;
+  let lastUnknownIdRate = 0;
+  let lastReasonCodeCounts: Record<string, number> | undefined;
+  let lastCandidateDecisionEvents: CandidateDecisionEvent[] | undefined;
 
-  let parsed = parseDayHints(firstAttempt.rawText);
-  if (!parsed) {
-    const repairPrompt = buildRepairPrompt(catalog, params.timeWindows, firstAttempt.rawText);
-    const retryAttempt = await callWithRemainingBudget(repairPrompt);
-    if ('failureReason' in retryAttempt) {
+  for (let providerIndex = 0; providerIndex < providerOrder.length; providerIndex++) {
+    const provider = providerOrder[providerIndex];
+    const providersRemaining = providerOrder.length - providerIndex;
+    const firstAttempt = await callWithRemainingBudget(provider, 'primary', primaryPrompt, providersRemaining);
+    if ('failureReason' in firstAttempt) {
+      lastFailureReason = firstAttempt.failureReason;
+      if (providerIndex < providerOrder.length - 1) continue;
       return {
         result: null,
-        failureReason: retryAttempt.failureReason,
+        failureReason: lastFailureReason,
         groundingRate: 0,
         unknownIdRate: 0,
         parseAttempts,
         latencyMs: Date.now() - t0,
+        providerFallback: providerIndex > 0,
+        providerUsed: provider,
+        plannerAudit,
       };
     }
-    parsed = parseDayHints(retryAttempt.rawText);
+
+    let parsed = parseDayHints(firstAttempt.rawText);
     if (!parsed) {
+      const firstAttemptTruncated = isTruncationFinishReason(firstAttempt.finishReason);
+      const repairPrompt = firstAttemptTruncated
+        ? buildCompactRepairPrompt(catalog, params.timeWindows)
+        : buildRepairPrompt(catalog, params.timeWindows, firstAttempt.rawText);
+      const retryAttempt = await callWithRemainingBudget(
+        provider,
+        'repair_json',
+        repairPrompt,
+        providersRemaining,
+        { maxOutputTokens: firstAttemptTruncated ? Math.min(3000, plannerOutputTokens + 500) : plannerOutputTokens },
+      );
+      if ('failureReason' in retryAttempt) {
+        lastFailureReason = retryAttempt.failureReason;
+        if (providerIndex < providerOrder.length - 1) continue;
+        return {
+          result: null,
+          failureReason: lastFailureReason,
+          groundingRate: 0,
+          unknownIdRate: 0,
+          parseAttempts,
+          latencyMs: Date.now() - t0,
+          providerFallback: providerIndex > 0,
+          providerUsed: provider,
+          plannerAudit,
+        };
+      }
+      parsed = parseDayHints(retryAttempt.rawText);
+      if (!parsed) {
+        lastFailureReason = firstAttemptTruncated || isTruncationFinishReason(retryAttempt.finishReason)
+          ? 'planner_parse_truncated'
+          : 'planner_parse_invalid';
+        if (providerIndex < providerOrder.length - 1) continue;
+        return {
+          result: null,
+          failureReason: lastFailureReason,
+          groundingRate: 0,
+          unknownIdRate: 0,
+          parseAttempts,
+          latencyMs: Date.now() - t0,
+          providerFallback: providerIndex > 0,
+          providerUsed: provider,
+          plannerAudit,
+        };
+      }
+    }
+
+    const rebuilt = rebuildClustersFromHints(parsed, catalog, params.clusters, params.timeWindows);
+    lastGroundingRate = rebuilt.groundingRate;
+    lastUnknownIdRate = rebuilt.unknownIdRate;
+    lastReasonCodeCounts = rebuilt.reasonCodeCounts;
+    lastCandidateDecisionEvents = rebuilt.candidateDecisionEvents;
+
+    if (rebuilt.unknownIdRate > UNKNOWN_ID_RATE_MAX) {
+      lastFailureReason = 'unknown_id_rate_high';
+      if (providerIndex < providerOrder.length - 1) continue;
       return {
         result: null,
-        failureReason: 'planner_parse_invalid',
-        groundingRate: 0,
-        unknownIdRate: 0,
+        failureReason: lastFailureReason,
+        groundingRate: rebuilt.groundingRate,
+        unknownIdRate: rebuilt.unknownIdRate,
         parseAttempts,
         latencyMs: Date.now() - t0,
+        providerFallback: providerIndex > 0,
+        providerUsed: provider,
+        plannerAudit,
+        reasonCodeCounts: rebuilt.reasonCodeCounts,
+        candidateDecisionEvents: rebuilt.candidateDecisionEvents,
       };
     }
-  }
+    if (rebuilt.groundingRate < MIN_GROUNDING_RATE) {
+      lastFailureReason = 'grounding_below_threshold';
+      if (providerIndex < providerOrder.length - 1) continue;
+      return {
+        result: null,
+        failureReason: lastFailureReason,
+        groundingRate: rebuilt.groundingRate,
+        unknownIdRate: rebuilt.unknownIdRate,
+        parseAttempts,
+        latencyMs: Date.now() - t0,
+        providerFallback: providerIndex > 0,
+        providerUsed: provider,
+        plannerAudit,
+        reasonCodeCounts: rebuilt.reasonCodeCounts,
+        candidateDecisionEvents: rebuilt.candidateDecisionEvents,
+      };
+    }
 
-  const rebuilt = rebuildClustersFromHints(parsed, catalog, params.clusters, params.timeWindows);
-  if (rebuilt.unknownIdRate > UNKNOWN_ID_RATE_MAX) {
+    const ratioOutOfBand =
+      rebuilt.ratioIconicLocal.iconic < rebuilt.ratioFeasibleBand.lower
+      || rebuilt.ratioIconicLocal.iconic > rebuilt.ratioFeasibleBand.upper;
+    if (ratioOutOfBand && enforceRatioBand) {
+      lastFailureReason = 'ratio_out_of_band';
+      if (providerIndex < providerOrder.length - 1) continue;
+      return {
+        result: null,
+        failureReason: lastFailureReason,
+        groundingRate: rebuilt.groundingRate,
+        unknownIdRate: rebuilt.unknownIdRate,
+        parseAttempts,
+        latencyMs: Date.now() - t0,
+        providerFallback: providerIndex > 0,
+        providerUsed: provider,
+        plannerAudit,
+        reasonCodeCounts: rebuilt.reasonCodeCounts,
+        candidateDecisionEvents: rebuilt.candidateDecisionEvents,
+      };
+    }
+    if (ratioOutOfBand && !enforceRatioBand) {
+      rebuilt.reasonCodeCounts['ratio_out_of_band_accepted'] =
+        (rebuilt.reasonCodeCounts['ratio_out_of_band_accepted'] || 0) + 1;
+    }
+
+    const normalizedDays: DayPlanHint[] = [];
+    for (let dayNumber = 1; dayNumber <= params.clusters.length; dayNumber++) {
+      const parsedDay = parsed.days.find((day) => Number(day.dayNumber) === dayNumber);
+      const parsedIds = Array.isArray(parsedDay?.candidateIds)
+        ? parsedDay!.candidateIds.filter((value): value is string => typeof value === 'string')
+        : [];
+      const parsedDropIds = Array.isArray(parsedDay?.dropCandidateIds)
+        ? parsedDay!.dropCandidateIds.filter((value): value is string => typeof value === 'string')
+        : [];
+      normalizedDays.push({
+        dayNumber,
+        candidateIds: parsedIds,
+        dropCandidateIds: parsedDropIds,
+        theme: typeof parsedDay?.theme === 'string' ? parsedDay.theme : '',
+      });
+    }
+
     return {
-      result: null,
-      failureReason: 'unknown_id_rate_high',
+      result: {
+        clusters: rebuilt.clusters,
+        catalog,
+        hints: {
+          days: normalizedDays,
+          ratioIconicLocal: rebuilt.ratioIconicLocal,
+          groundingRate: rebuilt.groundingRate,
+          unknownIdRate: rebuilt.unknownIdRate,
+          invalidCandidateRefs: rebuilt.invalidCandidateRefs,
+          parseAttempts,
+          latencyMs: Date.now() - t0,
+          requestedDropCount: rebuilt.requestedDropCount,
+          acceptedDropCount: rebuilt.acceptedDropCount,
+          dropRecoveryCount: rebuilt.dropRecoveryCount,
+          ratioFeasibleBand: rebuilt.ratioFeasibleBand,
+          reasonCodeCounts: rebuilt.reasonCodeCounts,
+        },
+      },
       groundingRate: rebuilt.groundingRate,
       unknownIdRate: rebuilt.unknownIdRate,
       parseAttempts,
       latencyMs: Date.now() - t0,
+      providerUsed: provider,
+      providerFallback: providerIndex > 0,
+      plannerAudit,
+      reasonCodeCounts: rebuilt.reasonCodeCounts,
+      candidateDecisionEvents: rebuilt.candidateDecisionEvents,
     };
-  }
-  if (rebuilt.groundingRate < MIN_GROUNDING_RATE) {
-    return {
-      result: null,
-      failureReason: 'grounding_below_threshold',
-      groundingRate: rebuilt.groundingRate,
-      unknownIdRate: rebuilt.unknownIdRate,
-      parseAttempts,
-      latencyMs: Date.now() - t0,
-    };
-  }
-
-  if (
-    rebuilt.ratioIconicLocal.iconic < rebuilt.ratioFeasibleBand.lower
-    || rebuilt.ratioIconicLocal.iconic > rebuilt.ratioFeasibleBand.upper
-  ) {
-    return {
-      result: null,
-      failureReason: 'ratio_out_of_band',
-      groundingRate: rebuilt.groundingRate,
-      unknownIdRate: rebuilt.unknownIdRate,
-      parseAttempts,
-      latencyMs: Date.now() - t0,
-    };
-  }
-
-  const normalizedDays: DayPlanHint[] = [];
-  for (let dayNumber = 1; dayNumber <= params.clusters.length; dayNumber++) {
-    const parsedDay = parsed.days.find((day) => Number(day.dayNumber) === dayNumber);
-    const parsedIds = Array.isArray(parsedDay?.candidateIds)
-      ? parsedDay!.candidateIds.filter((value): value is string => typeof value === 'string')
-      : [];
-    const parsedDropIds = Array.isArray(parsedDay?.dropCandidateIds)
-      ? parsedDay!.dropCandidateIds.filter((value): value is string => typeof value === 'string')
-      : [];
-    normalizedDays.push({
-      dayNumber,
-      candidateIds: parsedIds,
-      dropCandidateIds: parsedDropIds,
-      theme: typeof parsedDay?.theme === 'string' ? parsedDay.theme : '',
-    });
   }
 
   return {
-    result: {
-      clusters: rebuilt.clusters,
-      catalog,
-      hints: {
-        days: normalizedDays,
-        ratioIconicLocal: rebuilt.ratioIconicLocal,
-        groundingRate: rebuilt.groundingRate,
-        unknownIdRate: rebuilt.unknownIdRate,
-        invalidCandidateRefs: rebuilt.invalidCandidateRefs,
-        parseAttempts,
-        latencyMs: Date.now() - t0,
-        requestedDropCount: rebuilt.requestedDropCount,
-        acceptedDropCount: rebuilt.acceptedDropCount,
-        dropRecoveryCount: rebuilt.dropRecoveryCount,
-        ratioFeasibleBand: rebuilt.ratioFeasibleBand,
-      },
-    },
-    groundingRate: rebuilt.groundingRate,
-    unknownIdRate: rebuilt.unknownIdRate,
+    result: null,
+    failureReason: lastFailureReason,
+    groundingRate: lastGroundingRate,
+    unknownIdRate: lastUnknownIdRate,
     parseAttempts,
     latencyMs: Date.now() - t0,
+    providerFallback: providerOrder.length > 1,
+    plannerAudit,
+    reasonCodeCounts: lastReasonCodeCounts,
+    candidateDecisionEvents: lastCandidateDecisionEvents,
   };
 }
 
@@ -914,4 +1659,6 @@ export const __test__ = {
   parseDayHints,
   rebuildClustersFromHints,
   computeFeasibleRatioBand,
+  compactPlannerCatalog,
+  computePlannerActivityCap,
 };

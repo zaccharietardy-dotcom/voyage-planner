@@ -34,28 +34,28 @@ export function TripQualitySummary({ trip }: TripQualitySummaryProps) {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Metric
             icon={Sparkles}
-            label="Score pipeline"
+            label="Qualité globale"
             value={summary.score !== null ? `${summary.score}/100` : 'n/a'}
           />
           <Metric
             icon={Link2}
-            label="Couverture booking"
+            label="Étapes réservables"
             value={`${summary.bookingCoveragePercent}%`}
           />
           <Metric
             icon={AlertTriangle}
-            label="Violations contrat"
+            label="Points bloquants"
             value={String(summary.contractViolationCount)}
           />
           <Metric
             icon={MapPinOff}
-            label="Fallbacks / géo faible"
+            label="Ajustements automatiques"
             value={String(summary.fallbackCount + summary.lowConfidenceCount)}
           />
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">Points à vérifier</p>
+          <p className="text-sm font-medium text-foreground">À améliorer</p>
           {summary.reviewPoints.slice(0, 4).map((point) => (
             <p key={point} className="text-sm text-muted-foreground">
               {point}

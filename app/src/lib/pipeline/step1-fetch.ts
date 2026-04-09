@@ -28,6 +28,7 @@ import { getMustSeeAttractions, type Attraction } from '../services/attractions'
 import { resolveCoordinates } from '../services/coordsResolver';
 import { fetchWeatherForecast } from '../services/weather';
 import Anthropic from '@anthropic-ai/sdk';
+import type { DestinationIntel } from './step0-destination-intel';
 
 /**
  * Retry wrapper: retries a promise factory once with a delay on rejection.
@@ -46,6 +47,86 @@ async function withRetry<T>(
     await new Promise(resolve => setTimeout(resolve, delayMs));
     return withRetry(promiseFactory, retries - 1, delayMs);
   }
+}
+
+type CoordinateResolution = {
+  coords: { lat: number; lng: number };
+  usedFallback: boolean;
+  fallbackReason?: string;
+};
+
+const REGIONAL_DESTINATION_CENTROIDS: Record<string, { lat: number; lng: number }> = {
+  bretagne: { lat: 48.202, lng: -2.932 },
+  brittany: { lat: 48.202, lng: -2.932 },
+  normandie: { lat: 49.182, lng: -0.37 },
+  normandy: { lat: 49.182, lng: -0.37 },
+  toscane: { lat: 43.771, lng: 11.255 },
+  tuscany: { lat: 43.771, lng: 11.255 },
+  andalousie: { lat: 37.389, lng: -5.984 },
+  andalusia: { lat: 37.389, lng: -5.984 },
+  cote_d_azur: { lat: 43.703, lng: 7.266 },
+  cote_dazur: { lat: 43.703, lng: 7.266 },
+  provence: { lat: 43.949, lng: 4.806 },
+};
+
+function normalizeRegionKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function findRegionalCentroidFallback(rawDestination: string): { lat: number; lng: number } | null {
+  const normalized = normalizeRegionKey(rawDestination || '');
+  if (!normalized) return null;
+  if (REGIONAL_DESTINATION_CENTROIDS[normalized]) return REGIONAL_DESTINATION_CENTROIDS[normalized];
+
+  for (const [key, coords] of Object.entries(REGIONAL_DESTINATION_CENTROIDS)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
+      return coords;
+    }
+  }
+  return null;
+}
+
+async function resolveCityCoordsWithFallback(
+  city: string,
+  role: 'origin' | 'destination',
+): Promise<CoordinateResolution> {
+  const direct = await getCityCenterCoordsAsync(city);
+  if (direct) {
+    return { coords: direct, usedFallback: false };
+  }
+
+  const variants = role === 'destination'
+    ? [`${city} city`, `${city} city center`, `${city} region`]
+    : [`${city} city`, `${city} city center`];
+  for (const variant of variants) {
+    if (!variant || variant.toLowerCase() === city.toLowerCase()) continue;
+    const coords = await getCityCenterCoordsAsync(variant);
+    if (coords) {
+      return {
+        coords,
+        usedFallback: true,
+        fallbackReason: `${role}_variant_query`,
+      };
+    }
+  }
+
+  if (role === 'destination') {
+    const centroid = findRegionalCentroidFallback(city);
+    if (centroid) {
+      return {
+        coords: centroid,
+        usedFallback: true,
+        fallbackReason: 'destination_regional_centroid',
+      };
+    }
+  }
+
+  throw new Error(`[Pipeline] Geocoding failed for ${role}: ${city}. Cannot proceed without valid coordinates.`);
 }
 
 function extractViatorProductCode(activity: Attraction): string | null {
@@ -80,7 +161,7 @@ function buildViatorLocationCandidates(activityName: string, destination: string
  */
 import type { OnPipelineEvent } from './types';
 
-export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent, destinationIntel?: import('./step0-destination-intel').DestinationIntel | null): Promise<FetchedData> {
+export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent, destinationIntel?: DestinationIntel | null): Promise<FetchedData> {
   const T0 = Date.now();
   const { origin, destination } = preferences;
 
@@ -102,18 +183,22 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
 
   // Phase 0: Geocoding (needed by subsequent calls)
   onEvent?.({ type: 'api_call', step: 1, label: 'Geocoding', timestamp: Date.now() });
-  const [originCoords, destCoords, originAirports, destAirports] = await Promise.all([
-    getCityCenterCoordsAsync(origin).then(c => {
-      if (!c) throw new Error(`[Pipeline] Geocoding failed for origin: ${origin}. Cannot proceed without valid coordinates.`);
-      return c;
-    }),
-    getCityCenterCoordsAsync(destination).then(c => {
-      if (!c) throw new Error(`[Pipeline] Geocoding failed for destination: ${destination}. Cannot proceed without valid coordinates.`);
-      return c;
-    }),
+  const [originCoordResolution, destCoordResolution, originAirports, destAirports] = await Promise.all([
+    resolveCityCoordsWithFallback(origin, 'origin'),
+    resolveCityCoordsWithFallback(destination, 'destination'),
     findNearbyAirportsAsync(origin),
     findNearbyAirportsAsync(destination),
   ]);
+  const originCoords = originCoordResolution.coords;
+  const destCoords = destCoordResolution.coords;
+  const geoFallbackUsed = originCoordResolution.usedFallback || destCoordResolution.usedFallback;
+  const geoFallbackReason = [originCoordResolution.fallbackReason, destCoordResolution.fallbackReason]
+    .filter((reason): reason is string => Boolean(reason))
+    .join('|') || undefined;
+
+  if (geoFallbackUsed) {
+    console.warn(`[Pipeline V2] Geocoding fallback used: ${geoFallbackReason || 'unspecified'}`);
+  }
 
   console.log(`[Pipeline V2] Phase 0: Coords resolved in ${Date.now() - T0}ms`);
   onEvent?.({ type: 'api_done', step: 1, label: 'Geocoding', durationMs: Date.now() - T0, timestamp: Date.now() });
@@ -594,6 +679,8 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   return {
     destCoords,
     originCoords,
+    geoFallbackUsed,
+    geoFallbackReason,
     originAirports,
     destAirports,
     googlePlacesAttractions,

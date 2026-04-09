@@ -8,6 +8,8 @@
  */
 
 import { getCachedResponse, setCachedResponse } from './supabaseCache';
+import { isApiBudgetExceededError, isApiBudgetSoftLimitError, trackApiCost } from './apiCostGuard';
+import { reportProviderQuotaExceeded } from './providerQuotaGuard';
 
 // Configuration des API
 function getGoogleMapsKey() { return process.env.GOOGLE_MAPS_API_KEY; }
@@ -114,6 +116,9 @@ export async function getDirections(request: DirectionsRequest): Promise<Directi
       const result = await searchWithGoogle(from, to, mode, departureTime);
       return { ...result, googleMapsUrl };
     } catch (error) {
+      if (isApiBudgetExceededError(error)) {
+        throw error;
+      }
       // Transit may fail (ZERO_RESULTS) in some regions — try driving via OSRM
       try {
         const drivingResult = await searchWithOSRM(from, to, 'driving');
@@ -154,8 +159,14 @@ async function searchWithGoogle(
   const cached = await getCachedResponse<Omit<DirectionsResult, 'googleMapsUrl'>>('directions', cacheKey);
   if (cached) return cached;
 
-  const { trackApiCost } = await import('./apiCostGuard');
-  trackApiCost('directions');
+  try {
+    trackApiCost('directions');
+  } catch (error) {
+    if (isApiBudgetSoftLimitError(error)) {
+      throw new Error('budget_over_target_soft_block:directions');
+    }
+    throw error;
+  }
 
   const params = new URLSearchParams({
     origin: `${from.lat},${from.lng}`,
@@ -175,12 +186,18 @@ async function searchWithGoogle(
   );
 
   if (!response.ok) {
+    if (response.status === 429) {
+      reportProviderQuotaExceeded('google_maps', 'directions_http_429');
+    }
     throw new Error(`Google API error: ${response.status}`);
   }
 
   const data = await response.json();
 
   if (data.status !== 'OK' || !data.routes?.length) {
+    if (data.status === 'OVER_QUERY_LIMIT') {
+      reportProviderQuotaExceeded('google_maps', 'directions_over_query_limit');
+    }
     throw new Error(`Google API: ${data.status}`);
   }
 

@@ -196,4 +196,41 @@ describe('step-llm-day-planner', () => {
     const day1Ids = new Set(rebuilt.clusters[0].activities.map((activity) => activity.id));
     expect(day1Ids.has('fix-1')).toBe(true);
   });
+
+  it('compacts large catalogs while preserving protected activities', () => {
+    const protectedActivity = makeActivity({
+      id: 'must-1',
+      name: 'Must See Anchor',
+      mustSee: true,
+      source: 'mustsee',
+      score: 90,
+    });
+    const day1Movables = Array.from({ length: 8 }, (_, idx) => makeActivity({
+      id: `d1-${idx + 1}`,
+      name: `D1 ${idx + 1}`,
+      score: 40 - idx,
+      latitude: 48.80 + idx * 0.002,
+      longitude: -2.0 + idx * 0.002,
+    }));
+    const day2Movables = Array.from({ length: 8 }, (_, idx) => makeActivity({
+      id: `d2-${idx + 1}`,
+      name: `D2 ${idx + 1}`,
+      score: 38 - idx,
+      latitude: 48.90 + idx * 0.002,
+      longitude: -2.1 + idx * 0.002,
+    }));
+    const clusters: ActivityCluster[] = [
+      makeCluster(1, [protectedActivity, ...day1Movables]),
+      makeCluster(2, [...day2Movables]),
+    ];
+    const catalog = buildPlannerCatalog(clusters, [], [] as DayTripPack[], 'Bretagne', 'spread');
+    const compacted = __test__.compactPlannerCatalog(catalog, { maxActivityCandidates: 10 });
+    const compactActivities = compacted.candidates.filter((candidate) => candidate.type === 'activity');
+    expect(compactActivities.length).toBeLessThanOrEqual(12);
+    expect(compactActivities.some((candidate) => candidate.sourceId === 'must-1')).toBe(true);
+    // Keep some coverage across days (not all from one day).
+    const retainedDays = new Set(compactActivities.map((candidate) => candidate.originalDayNumber));
+    expect(retainedDays.has(1)).toBe(true);
+    expect(retainedDays.has(2)).toBe(true);
+  });
 });
