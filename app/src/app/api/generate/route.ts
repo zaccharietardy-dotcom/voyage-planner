@@ -23,7 +23,7 @@ import {
 import { isProviderQuotaStopError } from '@/lib/services/providerQuotaGuard';
 import { isApiBudgetExceededError } from '@/lib/services/apiCostGuard';
 
-export const maxDuration = 300; // 5 minutes max
+export const maxDuration = 600; // 10 minutes — multi-city LLM needs room
 
 const FREE_LIFETIME_LIMIT = 1;
 
@@ -367,7 +367,7 @@ export async function POST(request: NextRequest) {
           // Timeout explicite de 4min45 (avant le timeout Vercel de 5 min)
           // pour avoir le temps de renvoyer une erreur propre
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min45)')), 285_000);
+            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 9min)')), 540_000);
           });
 
           const configuredPipeline = process.env.PIPELINE_VERSION || 'v3';
