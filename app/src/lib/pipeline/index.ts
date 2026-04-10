@@ -1266,6 +1266,19 @@ export async function generateTripV3(
     }
   };
   const stageTimes: Record<string, number> = {};
+  const apiCallTimings: Array<{ label: string; durationMs: number; status: 'ok' | 'error' }> = [];
+  const wrappedOnEvent: OnPipelineEvent | undefined = onEvent
+    ? (event) => {
+        onEvent(event);
+        if (event.type === 'api_done' && event.label) {
+          apiCallTimings.push({
+            label: event.label,
+            durationMs: event.durationMs ?? 0,
+            status: event.detail?.startsWith('ERROR') ? 'error' : 'ok',
+          });
+        }
+      }
+    : undefined;
 
   // Step 1: Fetch all data (or use fixture)
   let t = Date.now();
@@ -1295,7 +1308,7 @@ export async function generateTripV3(
 
     onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
     try {
-      data = await fetchAllData(preferences, onEvent, destinationIntel);
+      data = await fetchAllData(preferences, wrappedOnEvent, destinationIntel);
     } catch (err) {
       if (isProviderQuotaStopError(err)) throw err;
       console.error('[Pipeline V3] Step 1 failed:', err);
@@ -1331,6 +1344,7 @@ export async function generateTripV3(
     selectedActivities.length < sparseThreshold
     || scheduleReadyCount < qualitySparseThreshold;
   if (shouldTriggerSparseRescue) {
+    const sparseRescueStart = Date.now();
     try {
       const sparseBlueprint = options?.regionalBlueprint || await planRegionalBlueprint(preferences, { forceForSparse: true });
       activeBlueprint = sparseBlueprint;
@@ -1406,7 +1420,8 @@ export async function generateTripV3(
 
       if (injected > 0) {
         allActivities = [...selectedActivities];
-        console.log(`[Pipeline V3] Sparse pool rescue: +${injected} architect anchors injected (${selectedActivities.length}/${sparseThreshold}, quality=${scheduleReadyCount}/${qualitySparseThreshold})`);
+        stageTimes['sparse-rescue'] = Date.now() - sparseRescueStart;
+        console.log(`[Pipeline V3] Sparse pool rescue: +${injected} architect anchors injected (${selectedActivities.length}/${sparseThreshold}, quality=${scheduleReadyCount}/${qualitySparseThreshold}) in ${stageTimes['sparse-rescue']}ms`);
       }
     } catch (e) {
       if (isProviderQuotaStopError(e)) throw e;
@@ -1669,6 +1684,7 @@ export async function generateTripV3(
       closedWorldMeta.unknownIdRate = plannerAttempt.unknownIdRate;
       closedWorldMeta.parseAttempts = plannerAttempt.parseAttempts;
       closedWorldMeta.latencyMs = plannerAttempt.latencyMs;
+      stageTimes['llm-planner'] = plannerAttempt.latencyMs;
       closedWorldMeta.providerUsed = plannerAttempt.providerUsed;
       closedWorldMeta.providerFallback = plannerAttempt.providerFallback;
       closedWorldMeta.reasonCodeCounts = plannerAttempt.reasonCodeCounts;
@@ -1939,10 +1955,31 @@ export async function generateTripV3(
 
   console.log(`[Pipeline V3] Trip generated in ${totalTime}ms`);
   console.log(`  Quality: ${trip.qualityMetrics?.score}/100`);
-  console.log(`  LLM rebalance: ${trip.plannerDiagnostics?.llmRebalanceUsed ? 'WON' : 'algo won'}`);
+  console.log(`  LLM planner: ${closedWorldMeta.used ? `used (${closedWorldMeta.providerUsed}, ${closedWorldMeta.latencyMs}ms)` : `fallback (${closedWorldMeta.fallbackReason})`}`);
   console.log(
     `  API cost: €${costSummary.totalEur.toFixed(2)} (profile=${costSummary.profile}, target=€${costSummary.targetEur.toFixed(2)}, burst=€${costSummary.burstCapEur.toFixed(2)}, hard=€${costSummary.budget.toFixed(2)})`
   );
+
+  // Profiling: detailed API call timings sorted by duration
+  if (apiCallTimings.length > 0) {
+    const sorted = [...apiCallTimings].sort((a, b) => b.durationMs - a.durationMs);
+    console.log(`  ── API call profiling (${sorted.length} calls) ──`);
+    for (const call of sorted) {
+      const statusIcon = call.status === 'ok' ? '✓' : '✗';
+      console.log(`    ${statusIcon} ${call.label}: ${(call.durationMs / 1000).toFixed(1)}s`);
+    }
+    const totalApiMs = sorted.reduce((s, c) => s + c.durationMs, 0);
+    console.log(`  ── Total API time (sequential): ${(totalApiMs / 1000).toFixed(1)}s, wall clock: ${(totalTime / 1000).toFixed(1)}s ──`);
+  }
+
+  // Stage timings summary
+  const stageEntries = Object.entries(stageTimes).sort(([, a], [, b]) => b - a);
+  if (stageEntries.length > 0) {
+    console.log(`  ── Stage profiling ──`);
+    for (const [stage, ms] of stageEntries) {
+      console.log(`    ${stage}: ${(ms / 1000).toFixed(1)}s`);
+    }
+  }
 
   onEvent?.({ type: 'info', label: 'complete', detail: 'Trip generation complete!', timestamp: Date.now() });
 
