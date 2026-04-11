@@ -348,6 +348,8 @@ export async function fetchAllData(
       !(a.qualityFlags || []).includes('viator_low_plus_value')
   );
   if (viatorEstimated.length > 0) {
+    const viatorGeoStart = Date.now();
+    onEvent?.({ type: 'api_call', step: 1, label: 'Viator GPS resolution', timestamp: viatorGeoStart });
     console.log(`[Pipeline V2] Resolving GPS for ${viatorEstimated.length} Viator activities...`);
     const productCoordsCache = new Map<string, { lat: number; lng: number } | null>();
 
@@ -425,6 +427,7 @@ export async function fetchAllData(
     );
     const verified = viatorEstimated.filter((a: Attraction) => a.dataReliability === 'verified').length;
     console.log(`[Pipeline V2] Resolved precise Viator GPS for ${verified}/${viatorEstimated.length} activities`);
+    onEvent?.({ type: 'api_done', step: 1, label: 'Viator GPS resolution', durationMs: Date.now() - viatorGeoStart, timestamp: Date.now() });
   }
 
   // ── Fetch activities and restaurants for each day trip ──────────────────────
@@ -432,6 +435,8 @@ export async function fetchAllData(
   const dayTripRestaurants: Record<string, import('../types').Restaurant[]> = {};
 
   if (dayTripSuggestions.length > 0) {
+    const dayTripStart = Date.now();
+    onEvent?.({ type: 'api_call', step: 1, label: 'Day trip fetches', timestamp: dayTripStart });
     console.log(`[Pipeline V2] Fetching data for ${dayTripSuggestions.length} day trip destination(s)...`);
     const dayTripFetches = dayTripSuggestions.map(async (dt) => {
       const dtCoords = { lat: dt.latitude, lng: dt.longitude };
@@ -465,6 +470,7 @@ export async function fetchAllData(
       }
     });
     await Promise.allSettled(dayTripFetches);
+    onEvent?.({ type: 'api_done', step: 1, label: 'Day trip fetches', durationMs: Date.now() - dayTripStart, timestamp: Date.now() });
   }
 
   // ── Inject curated must-sees from hardcoded database ──────────────────────
@@ -558,6 +564,8 @@ export async function fetchAllData(
     (a: Attraction) => a.id?.startsWith('intel-') && a.latitude === 0 && a.longitude === 0
   );
   if (unresolvedIntel.length > 0) {
+    const intelGeoStart = Date.now();
+    onEvent?.({ type: 'api_call', step: 1, label: 'Intel GPS resolution', timestamp: intelGeoStart });
     console.log(`[Pipeline V2] Resolving GPS for ${unresolvedIntel.length} Step 0 intel must-sees...`);
     const resolveResults = await Promise.allSettled(
       unresolvedIntel.map(async (activity: Attraction) => {
@@ -599,6 +607,7 @@ export async function fetchAllData(
       }
       console.log(`[Pipeline V2] Dropped ${stillUnresolved.length} unresolvable Step 0 items: ${stillUnresolved.map(a => a.name).join(', ')}`);
     }
+    onEvent?.({ type: 'api_done', step: 1, label: 'Intel GPS resolution', durationMs: Date.now() - intelGeoStart, timestamp: Date.now() });
   }
 
   // ── AI fallback: generate must-sees for uncovered destinations ──────────
@@ -631,6 +640,7 @@ export async function fetchAllData(
   if (shouldSearchFlights) {
     const FLIGHT_TIMEOUT = 20_000; // 20s max for flight search
     const T_FLIGHTS = Date.now();
+    onEvent?.({ type: 'api_call', step: 1, label: 'Flight search', timestamp: T_FLIGHTS });
     try {
       const flightResult = await Promise.race([
         findBestFlights(
@@ -648,8 +658,10 @@ export async function fetchAllData(
         return: flightResult.returnFlightAlternatives || [],
       };
       console.log(`[Pipeline V2] Flights found in ${Date.now() - T_FLIGHTS}ms`);
+      onEvent?.({ type: 'api_done', step: 1, label: 'Flight search', durationMs: Date.now() - T_FLIGHTS, timestamp: Date.now() });
     } catch (e) {
       console.warn(`[Pipeline V2] Flight search failed (${Date.now() - T_FLIGHTS}ms):`, e instanceof Error ? e.message : e);
+      onEvent?.({ type: 'api_done', step: 1, label: 'Flight search', durationMs: Date.now() - T_FLIGHTS, detail: `ERROR: ${(e as Error)?.message || e}`, timestamp: Date.now() });
     }
   }
 
