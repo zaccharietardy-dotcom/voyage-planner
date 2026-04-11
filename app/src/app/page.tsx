@@ -240,7 +240,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container-wide py-6 space-y-8">
+      <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
         <div>
           <h1 className="text-2xl font-serif font-bold">
             {greeting}{displayName ? `, ${displayName.split(' ')[0]}` : ''} !

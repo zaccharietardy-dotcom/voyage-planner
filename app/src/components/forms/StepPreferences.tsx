@@ -12,9 +12,9 @@ interface StepPreferencesProps {
 type ActivityType = 'beach' | 'nature' | 'culture' | 'gastronomy' | 'nightlife' | 'shopping' | 'adventure' | 'wellness';
 
 const PACE_IDS: { id: PaceLevel; emoji: string; labelKey: TranslationKey; descKey: TranslationKey }[] = [
-  { id: 'relaxed', emoji: '\u{1F422}', labelKey: 'plan.pref.paceRelaxed', descKey: 'plan.pref.paceRelaxedDesc' },
+  { id: 'relaxed', emoji: '\u{1F331}', labelKey: 'plan.pref.paceRelaxed', descKey: 'plan.pref.paceRelaxedDesc' },
   { id: 'moderate', emoji: '\u2696\uFE0F', labelKey: 'plan.pref.paceModerate', descKey: 'plan.pref.paceModerateDesc' },
-  { id: 'intensive', emoji: '\u{1F680}', labelKey: 'plan.pref.paceIntensive', descKey: 'plan.pref.paceIntensiveDesc' },
+  { id: 'intensive', emoji: '\u{1F3C3}', labelKey: 'plan.pref.paceIntensive', descKey: 'plan.pref.paceIntensiveDesc' },
 ];
 
 const ACTIVITY_IDS: { id: ActivityType; emoji: string; labelKey: TranslationKey }[] = [
