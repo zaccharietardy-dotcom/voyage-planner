@@ -349,7 +349,7 @@ export async function POST(request: NextRequest) {
           }
         }, 10_000);
 
-        // Warning SSE at 3 minutes (before the hard 4m45 timeout)
+        // Warning SSE before hard timeout (keep user informed on long runs)
         const warningTimeout = setTimeout(() => {
           try {
             controller.enqueue(
@@ -361,13 +361,17 @@ export async function POST(request: NextRequest) {
               heartbeat: true,
             });
           } catch { /* stream may be closed */ }
-        }, 180_000);
+        }, 210_000);
+
+        // Collect API call timings for profiling (logged on timeout or completion)
+        const apiTimings: Array<{ label: string; durationMs: number; status: 'ok' | 'error' }> = [];
+        const stepTimings: Array<{ step: number; name: string; durationMs: number }> = [];
 
         try {
-          // Timeout explicite de 4min45 (avant le timeout Vercel de 5 min)
-          // pour avoir le temps de renvoyer une erreur propre
+          // Timeout explicite très proche de la limite Vercel (5 min),
+          // pour maximiser les chances de terminer sans être kill brutalement.
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min45)')), 285_000);
+            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min57)')), 297_000);
           });
 
           const configuredPipeline = process.env.PIPELINE_VERSION || 'v3';
@@ -381,6 +385,23 @@ export async function POST(request: NextRequest) {
                 encoder.encode(`data: ${JSON.stringify({ status: 'progress', event })}\n\n`)
               );
             } catch { /* stream closed */ }
+
+            // Collect profiling data from events
+            if (event.type === 'api_done' && event.label) {
+              apiTimings.push({
+                label: event.label,
+                durationMs: event.durationMs ?? 0,
+                status: event.detail?.startsWith('ERROR') ? 'error' : 'ok',
+              });
+            }
+            if (event.type === 'step_done' && event.stepName) {
+              stepTimings.push({
+                step: event.step ?? 0,
+                name: event.stepName,
+                durationMs: event.durationMs ?? 0,
+              });
+            }
+
             const now = Date.now();
             if (now - lastProgressPersistAt >= 1500) {
               lastProgressPersistAt = now;
@@ -532,6 +553,21 @@ export async function POST(request: NextRequest) {
           const budgetStopReason = isApiBudgetExceededError(error) ? error.reasonCode : undefined;
           console.error('[Generate] ❌ Erreur de génération:', message);
           console.error('[Generate] Stack trace:', stack);
+
+          // Always dump profiling on error (especially timeout) so we can diagnose
+          if (apiTimings.length > 0) {
+            const sorted = [...apiTimings].sort((a, b) => b.durationMs - a.durationMs);
+            console.log(`[Generate] ── PROFILING DUMP (${sorted.length} API calls before failure) ──`);
+            for (const call of sorted) {
+              console.log(`  ${call.status === 'ok' ? '✓' : '✗'} ${call.label}: ${(call.durationMs / 1000).toFixed(1)}s`);
+            }
+          }
+          if (stepTimings.length > 0) {
+            console.log(`[Generate] ── STEP TIMINGS ──`);
+            for (const s of stepTimings) {
+              console.log(`  Step ${s.step} (${s.name}): ${(s.durationMs / 1000).toFixed(1)}s`);
+            }
+          }
           Sentry.captureException(error, {
             extra: { destination: preferences.destination, origin: preferences.origin, userId: user.id },
           });
