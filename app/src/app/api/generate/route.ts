@@ -22,6 +22,7 @@ import {
 } from './admission';
 import { isProviderQuotaStopError } from '@/lib/services/providerQuotaGuard';
 import { isApiBudgetExceededError } from '@/lib/services/apiCostGuard';
+import { storeProfilingData } from '@/lib/services/profilingStore';
 
 export const maxDuration = 300; // 5 minutes — Vercel Hobby plan limit
 
@@ -364,6 +365,7 @@ export async function POST(request: NextRequest) {
         }, 210_000);
 
         // Collect API call timings for profiling (logged on timeout or completion)
+        const generationStartMs = Date.now();
         const apiTimings: Array<{ label: string; durationMs: number; status: 'ok' | 'error' }> = [];
         const stepTimings: Array<{ step: number; name: string; durationMs: number }> = [];
 
@@ -499,6 +501,15 @@ export async function POST(request: NextRequest) {
           try {
             tripJson = JSON.stringify(trip);
             console.debug(`[Generate] Trip generated, JSON size: ${(tripJson.length / 1024).toFixed(1)}KB`);
+            storeProfilingData({
+              timestamp: new Date().toISOString(),
+              destination: preferences.destination || 'unknown',
+              durationDays: preferences.durationDays || 0,
+              status: 'done',
+              totalElapsedMs: Date.now() - generationStartMs,
+              apiTimings: [...apiTimings].sort((a, b) => b.durationMs - a.durationMs),
+              stepTimings: [...stepTimings],
+            });
           } catch (serializeErr) {
             console.error('[Generate] ❌ JSON.stringify(trip) failed:', serializeErr);
             controller.enqueue(encoder.encode(`data: {"status":"error","error":"Erreur de sérialisation du voyage"}\n\n`));
@@ -553,6 +564,18 @@ export async function POST(request: NextRequest) {
           const budgetStopReason = isApiBudgetExceededError(error) ? error.reasonCode : undefined;
           console.error('[Generate] ❌ Erreur de génération:', message);
           console.error('[Generate] Stack trace:', stack);
+
+          // Persist profiling for GET /api/generate/profiling
+          storeProfilingData({
+            timestamp: new Date().toISOString(),
+            destination: preferences.destination || 'unknown',
+            durationDays: preferences.durationDays || 0,
+            status: message.includes('Timeout') ? 'timeout' : 'error',
+            totalElapsedMs: Date.now() - generationStartMs,
+            apiTimings: [...apiTimings].sort((a, b) => b.durationMs - a.durationMs),
+            stepTimings: [...stepTimings],
+            error: message,
+          });
 
           // Always dump profiling on error (especially timeout) so we can diagnose
           if (apiTimings.length > 0) {
