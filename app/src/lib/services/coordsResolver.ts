@@ -26,23 +26,24 @@ const DEFAULT_ATTRACTION_MAX_DISTANCE_KM = 60;
 const DEFAULT_LOCAL_MAX_DISTANCE_KM = 25;
 const BROAD_DESTINATION_MAX_DISTANCE_KM = 220;
 const BROAD_DESTINATION_HINTS = [
-  'bretagne',
-  'normandie',
+  'bretagne', 'brittany',
+  'normandie', 'normandy',
   'provence',
   'loire',
   'alsace',
   'occitanie',
-  'corse',
-  'toscane',
-  'sicile',
-  'andalousie',
-  'region',
-  'région',
-  'province',
+  'corse', 'corsica',
+  'toscane', 'tuscany', 'toscana',
+  'sicile', 'sicily', 'sicilia',
+  'andalousie', 'andalusia', 'andalucia',
+  'algarve',
+  'catalogne', 'catalonia', 'catalunya',
+  'baviere', 'bavaria', 'bayern',
+  'region', 'région', 'province', 'county',
   'country',
-  'france',
-  'italie',
-  'espagne',
+  'france', 'italie', 'italy', 'espagne', 'spain',
+  'portugal', 'grece', 'greece', 'croatie', 'croatia',
+  'deutschland', 'germany', 'allemagne',
 ];
 
 function normalizeHint(value: string): string {
