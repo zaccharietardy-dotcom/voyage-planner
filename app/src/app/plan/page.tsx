@@ -365,6 +365,14 @@ export default function PlanPage() {
         total_activities: generatedTrip.days?.reduce((sum, day) => sum + day.items.length, 0) || 0,
       });
 
+      if (generatedTrip?.reliabilitySummary?.publishable === false) {
+        const failures = Array.isArray(generatedTrip?.reliabilitySummary?.gateFailures)
+          ? generatedTrip.reliabilitySummary.gateFailures.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0)
+          : [];
+        const shortFailures = failures.length > 0 ? ` (${failures.slice(0, 2).join(' · ')})` : '';
+        toast.warning(`Itinéraire généré en brouillon privé${shortFailures}`);
+      }
+
       if (user) {
         try {
           const saveResponse = await fetch('/api/trips', {
@@ -402,6 +410,7 @@ export default function PlanPage() {
       router.push(`/trip/${generatedTrip.id}`);
     } catch (error) {
       console.error('Erreur génération:', error);
+      const streamError = error as Error & { code?: string; gateFailures?: string[] };
       const message = error instanceof Error ? error.message : 'Erreur inconnue';
       const normalized = message.toLowerCase();
       const userQuotaExceeded =
@@ -410,6 +419,10 @@ export default function PlanPage() {
         || normalized.includes('rate_limit')
         || normalized.includes('trop de generation');
       const providerQuotaExceeded = !userQuotaExceeded && isProviderQuotaLikeMessage(message);
+      const qualityGateFailed =
+        streamError?.code === 'QUALITY_GATE_FAILED'
+        || normalized.includes('quality_gate_failed')
+        || normalized.includes('qualité insuffisante');
 
       if (message.includes('authentifié') || message.includes('Non authentifié')) {
         toast.error(t('plan.error.loginToGenerate'));
@@ -418,6 +431,14 @@ export default function PlanPage() {
         router.push('/pricing?reason=' + encodeURIComponent(t('plan.error.upgradePro')));
       } else if (providerQuotaExceeded) {
         setGenerationError('Nos APIs partenaires sont temporairement en limite de quota. Reessaie dans 1 a 2 minutes.');
+      } else if (qualityGateFailed) {
+        const failures = Array.isArray(streamError?.gateFailures)
+          ? streamError.gateFailures.filter((entry) => typeof entry === 'string' && entry.trim().length > 0)
+          : [];
+        const shortFailures = failures.length > 0 ? ` Détails: ${failures.slice(0, 3).join(' · ')}` : '';
+        setGenerationError(
+          `On a stoppé la publication pour éviter un itinéraire incohérent. Ajuste légèrement la destination, la durée ou le budget puis relance.${shortFailures}`
+        );
       } else {
         setGenerationError(message);
       }

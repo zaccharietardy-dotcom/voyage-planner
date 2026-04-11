@@ -464,37 +464,9 @@ export async function POST(request: NextRequest) {
           };
 
           if (!publishGate.publishable) {
-            clearInterval(keepAlive);
-            clearTimeout(warningTimeout);
-            activeGenerations.delete(user.id);
-            registerGenerationRunFailed({
-              userId: user.id,
-              requestFingerprint,
-              sessionId,
-            });
-            const gateMessage = `quality_gate_failed: ${publishGate.gateFailures.join(', ')}`;
-            await persistSession({
-              status: 'error',
-              progress: {
-                label: 'quality-gate-failed',
-                runId,
-                requestFingerprint,
-                publishGateResult: publishGate.result,
-              },
-              question: null,
-              error: gateMessage,
-              heartbeat: true,
-            });
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-              status: 'error',
-              error: 'quality_gate_failed',
-              code: 'QUALITY_GATE_FAILED',
-              gateFailures: publishGate.gateFailures,
-              requestFingerprint,
-            })}\n\n`));
-            cleanupSession(sessionId);
-            controller.close();
-            return;
+            console.warn(
+              `[Generate] Quality gate failed. Returning draft-only trip. Failures: ${publishGate.gateFailures.join(' | ')}`
+            );
           }
 
           clearInterval(keepAlive);

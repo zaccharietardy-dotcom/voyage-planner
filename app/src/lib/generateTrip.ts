@@ -20,6 +20,12 @@ export interface PipelineProgressEvent {
   detail?: string;
 }
 
+type StreamErrorPayload = {
+  message: string;
+  code?: string;
+  gateFailures?: string[];
+};
+
 async function postQuestionAnswer(
   sessionId: string,
   questionId: string,
@@ -45,6 +51,13 @@ async function postQuestionAnswer(
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
   }
+}
+
+function throwStreamError(payload: StreamErrorPayload): never {
+  const error = new Error(payload.message) as Error & { code?: string; gateFailures?: string[] };
+  if (payload.code) error.code = payload.code;
+  if (payload.gateFailures?.length) error.gateFailures = payload.gateFailures;
+  throw error;
 }
 
 export async function generateTripStream(
@@ -99,7 +112,13 @@ export async function generateTripStream(
       }
     });
     if (result.trip) return result.trip;
-    if (result.error) throw new Error(result.error);
+    if (result.error) {
+      throwStreamError({
+        message: result.error,
+        code: result.errorCode,
+        gateFailures: result.gateFailures,
+      });
+    }
     buffer = result.remaining;
   }
 
@@ -108,7 +127,13 @@ export async function generateTripStream(
   if (buffer.trim()) {
     const result = processSSEBuffer(buffer + '\n\n', onProgress);
     if (result.trip) return result.trip;
-    if (result.error) throw new Error(result.error);
+    if (result.error) {
+      throwStreamError({
+        message: result.error,
+        code: result.errorCode,
+        gateFailures: result.gateFailures,
+      });
+    }
 
     // Dernière tentative : chercher le JSON brut du trip dans le buffer
     const tripJson = extractTripJson(buffer);
@@ -129,7 +154,7 @@ function processSSEBuffer(
   onProgress?: (status: string, event?: PipelineProgressEvent) => void,
   onSession?: (sessionId: string) => void,
   onQuestionEvent?: (question: PipelineQuestion) => void,
-): { trip?: Trip; error?: string; remaining: string } {
+): { trip?: Trip; error?: string; errorCode?: string; gateFailures?: string[]; remaining: string } {
   // Séparer les événements SSE par \n\n (double newline = fin d'événement)
   const parts = buffer.split('\n\n');
   const remaining = parts.pop() || ''; // dernier élément = fragment non terminé
@@ -176,7 +201,14 @@ function processSSEBuffer(
       }
 
       if (msg.status === 'error') {
-        return { error: msg.error || 'Erreur de génération', remaining: '' };
+        return {
+          error: msg.error || 'Erreur de génération',
+          errorCode: typeof msg.code === 'string' ? msg.code : undefined,
+          gateFailures: Array.isArray(msg.gateFailures)
+            ? msg.gateFailures.filter((entry: unknown): entry is string => typeof entry === 'string')
+            : undefined,
+          remaining: '',
+        };
       }
     } catch (e) {
       if (e instanceof SyntaxError) {

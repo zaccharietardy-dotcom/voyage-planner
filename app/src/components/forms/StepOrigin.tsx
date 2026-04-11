@@ -57,6 +57,20 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
       return;
     }
 
+    // Safari can persist a denied state and skip the popup entirely.
+    // We surface a clear message before attempting getCurrentPosition.
+    try {
+      if (typeof navigator.permissions?.query === 'function') {
+        const permission = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (permission.state === 'denied') {
+          setGeoError('Safari bloque déjà la localisation pour ce site. Ouvre aA > Réglages du site web > Localisation > Demander/Autoriser, puis recharge.');
+          return;
+        }
+      }
+    } catch {
+      // Ignore unsupported Permissions API and continue with direct geolocation request.
+    }
+
     setIsLocating(true);
 
     const getCurrentPosition = (options: PositionOptions): Promise<GeolocationPosition> =>
