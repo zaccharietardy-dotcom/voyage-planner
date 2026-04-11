@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
-import { generateTripV2, type PipelineEvent, type PipelineMapSnapshot } from '@/lib/pipeline';
+import { generateTripV2, type PipelineEvent } from '@/lib/pipeline-v4';
+import type { PipelineMapSnapshot } from '@/lib/pipeline/types';
 import { TripPreferences } from '@/lib/types';
 import type { PipelineQuestion } from '@/lib/types/pipelineQuestions';
 import { normalizeCity } from '@/lib/services/cityNormalization';
