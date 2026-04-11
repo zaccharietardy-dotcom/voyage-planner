@@ -42,6 +42,8 @@ export interface GenerateTripV2Options {
   onSnapshot?: (snapshot: PipelineMapSnapshot) => void;
   runId?: string;
   enableRunTrace?: boolean;
+  destinationRadiusKm?: number;
+  destinationEnvelope?: DestinationEnvelope | null;
 }
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -50,6 +52,12 @@ import { clusterActivities, computeCityDensityProfile } from './step3-cluster';
 import { selectTieredHotels, selectTopHotelsByBarycenter } from './step5-hotel';
 import { calculateDistance } from '../services/geocoding';
 import { resolveCoordinates } from '../services/coordsResolver';
+import {
+  buildDestinationEnvelope,
+  getEnvelopeAdaptiveRadiusKm,
+  isPointWithinDestinationEnvelope,
+  type DestinationEnvelope,
+} from '../services/destinationEnvelope';
 import { addOutboundTransportItem, addReturnTransportItem } from './utils/transport-items';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
@@ -1080,6 +1088,127 @@ function computeLlmOrderPreservedRate(
   return Number((preservedPairs / totalPairs).toFixed(3));
 }
 
+interface DestinationScopeEnforcementStats {
+  outsideEnvelopeRejectCount: number;
+  removedCount: number;
+  recenteredCount: number;
+  mealFallbackCount: number;
+}
+
+function inferMealTypeFromItem(item: TripItem): 'breakfast' | 'lunch' | 'dinner' {
+  if (item.mealType === 'breakfast' || item.mealType === 'lunch' || item.mealType === 'dinner') {
+    return item.mealType;
+  }
+  const text = `${item.title || ''} ${item.description || ''}`.toLowerCase();
+  if (text.includes('petit-dejeuner') || text.includes('petit-déjeuner') || text.includes('breakfast')) return 'breakfast';
+  if (text.includes('diner') || text.includes('dîner') || text.includes('dinner')) return 'dinner';
+  return 'lunch';
+}
+
+function enforceDestinationEnvelopeOnTimeline(
+  days: TripDay[],
+  envelope: DestinationEnvelope | null,
+): DestinationScopeEnforcementStats {
+  const stats: DestinationScopeEnforcementStats = {
+    outsideEnvelopeRejectCount: 0,
+    removedCount: 0,
+    recenteredCount: 0,
+    mealFallbackCount: 0,
+  };
+  if (!envelope) return stats;
+
+  for (const day of days) {
+    const normalizedItems: TripItem[] = [];
+    for (const item of day.items) {
+      if (!Number.isFinite(item.latitude) || !Number.isFinite(item.longitude)) {
+        normalizedItems.push(item);
+        continue;
+      }
+      if (item.type === 'flight' || item.type === 'transport') {
+        normalizedItems.push(item);
+        continue;
+      }
+
+      const inside = isPointWithinDestinationEnvelope(
+        { lat: item.latitude, lng: item.longitude },
+        envelope,
+        { extraBufferKm: 6 },
+      );
+      if (inside) {
+        normalizedItems.push(item);
+        continue;
+      }
+
+      stats.outsideEnvelopeRejectCount += 1;
+
+      if (item.type === 'restaurant') {
+        const fallback = createSelfMealFallbackItem(
+          inferMealTypeFromItem(item),
+          item.startTime,
+          item.duration || Math.max(30, timeToMin(item.endTime) - timeToMin(item.startTime)),
+          item.dayNumber,
+          item.orderIndex,
+          envelope.center,
+        );
+        fallback.id = `${item.id}-scope-fallback`;
+        fallback.qualityFlags = Array.from(new Set([...(fallback.qualityFlags || []), 'geo_scope_filtered']));
+        normalizedItems.push(fallback);
+        stats.mealFallbackCount += 1;
+        continue;
+      }
+
+      if (item.type === 'free_time' || item.type === 'checkin' || item.type === 'checkout' || item.type === 'hotel') {
+        normalizedItems.push({
+          ...item,
+          latitude: envelope.center.lat,
+          longitude: envelope.center.lng,
+          title: item.type === 'free_time' ? 'Pause libre — Découverte locale' : item.title,
+          description: item.type === 'free_time'
+            ? 'Pause flexible: balade, café ou arrêt spontané à proximité.'
+            : item.description,
+          qualityFlags: Array.from(new Set([...(item.qualityFlags || []), 'geo_scope_recentered'])),
+        });
+        stats.recenteredCount += 1;
+        continue;
+      }
+
+      stats.removedCount += 1;
+    }
+
+    day.items = normalizedItems.map((item, index) => ({
+      ...item,
+      orderIndex: index,
+    }));
+  }
+
+  return stats;
+}
+
+function sanitizeGenericTimelineLabels(days: TripDay[]): number {
+  let patched = 0;
+  const genericPattern = /(exploration du quartier|explore the neighborhood|temps libre|free time)/i;
+  for (const day of days) {
+    day.items = day.items.map((item) => {
+      if (!genericPattern.test(item.title || '')) return item;
+      patched += 1;
+      if (item.type === 'free_time') {
+        return {
+          ...item,
+          title: 'Pause libre — Découverte locale',
+          description: 'Pause flexible: balade, café ou arrêt spontané à proximité.',
+        };
+      }
+      return {
+        ...item,
+        type: 'free_time',
+        title: 'Pause libre — Découverte locale',
+        description: 'Pause flexible: balade, café ou arrêt spontané à proximité.',
+      };
+    });
+  }
+  return patched;
+}
+
 /**
  * Generate a trip — routes to V3 single-city or multi-city.
  */
@@ -1096,6 +1225,7 @@ export async function generateTripV2(
   });
   setRunBudgetProfile('dense');
 
+  const requestedDestinationInput = preferences.destination;
   let regionAnalysis: DestinationAnalysis | null = null;
   let regionalBlueprint: RegionalBlueprint | null = null;
 
@@ -1134,6 +1264,45 @@ export async function generateTripV2(
       if (isProviderQuotaStopError(e)) throw e;
       console.warn('[Pipeline] Region resolver failed, continuing with original destination:', e);
     }
+  }
+
+  // Build a dynamic destination envelope (bbox + center) to keep items in-scope.
+  const resolvedCityCoords = (regionAnalysis?.resolvedCities || [])
+    .map((city) => city.coords)
+    .filter((coords): coords is { lat: number; lng: number } => Boolean(coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)));
+  const envelopeQuery =
+    regionAnalysis?.inputType && regionAnalysis.inputType !== 'city'
+      ? requestedDestinationInput
+      : preferences.destination;
+  let destinationEnvelope: DestinationEnvelope | null = v2Options?.destinationEnvelope || null;
+  if (!destinationEnvelope) {
+    destinationEnvelope = await buildDestinationEnvelope(envelopeQuery, {
+      resolvedCityCoords,
+      fallbackCenter: preferences.destinationCoords,
+    });
+  }
+
+  // Compute destination radius from envelope first, then from resolved-city spread.
+  let destinationRadiusKm: number | undefined = v2Options?.destinationRadiusKm;
+  if (!destinationRadiusKm && destinationEnvelope) {
+    destinationRadiusKm = getEnvelopeAdaptiveRadiusKm(destinationEnvelope);
+  }
+  if (regionAnalysis?.resolvedCities && regionAnalysis.resolvedCities.length >= 2) {
+    const coords = regionAnalysis.resolvedCities
+      .map(c => c.coords)
+      .filter((c): c is { lat: number; lng: number } => !!c && Number.isFinite(c.lat) && Number.isFinite(c.lng));
+    if (!destinationRadiusKm && coords.length >= 2) {
+      const centerLat = coords.reduce((s, c) => s + c.lat, 0) / coords.length;
+      const centerLng = coords.reduce((s, c) => s + c.lng, 0) / coords.length;
+      const maxDist = Math.max(...coords.map(c => calculateDistance(centerLat, centerLng, c.lat, c.lng)));
+      destinationRadiusKm = Math.max(30, maxDist * 1.5); // 1.5x margin for activities around outer cities
+      console.log(`[Pipeline] Destination radius: ${destinationRadiusKm.toFixed(0)}km (from ${coords.length} resolved cities)`);
+    }
+  }
+  if (destinationEnvelope) {
+    console.log(
+      `[Pipeline] Destination envelope: source=${destinationEnvelope.source}, confidence=${destinationEnvelope.confidence}, radius=${destinationEnvelope.radiusKm.toFixed(0)}km`
+    );
   }
 
   if (preferences.travelStyle === 'road_trip' || (preferences.cityPlan?.length || 0) > 1) {
@@ -1178,7 +1347,11 @@ export async function generateTripV2(
   }
 
   if (preferences.cityPlan && preferences.cityPlan.length > 1) {
-    return generateTripV3MultiCity(preferences, onEvent, v2Options);
+    return generateTripV3MultiCity(preferences, onEvent, {
+      ...v2Options,
+      destinationRadiusKm,
+      destinationEnvelope,
+    });
   }
   return generateTripV3(
     preferences,
@@ -1189,6 +1362,8 @@ export async function generateTripV2(
       regionalBlueprint,
       runId: v2Options?.runId,
       enableRunTrace: v2Options?.enableRunTrace,
+      destinationRadiusKm,
+      destinationEnvelope,
     },
     v2Options?.askUser,
   );
@@ -1229,6 +1404,10 @@ export interface GenerateTripV3Options {
   runId?: string;
   /** Force forensic trace payload in diagnostics */
   enableRunTrace?: boolean;
+  /** Destination area radius in km (from bounding box). Used to adapt coord resolution max distance. */
+  destinationRadiusKm?: number;
+  /** Destination geographic envelope for strict in-destination filtering. */
+  destinationEnvelope?: DestinationEnvelope | null;
 }
 
 export async function generateTripV3(
@@ -1279,12 +1458,24 @@ export async function generateTripV3(
         }
       }
     : undefined;
+  let destinationEnvelope: DestinationEnvelope | null = options?.destinationEnvelope || null;
+  if (!destinationEnvelope) {
+    destinationEnvelope = await buildDestinationEnvelope(preferences.destination, {
+      fallbackCenter: preferences.destinationCoords,
+    });
+  }
+  const effectiveDestinationRadiusKm =
+    options?.destinationRadiusKm
+    || (destinationEnvelope ? getEnvelopeAdaptiveRadiusKm(destinationEnvelope) : undefined);
 
   // Step 1: Fetch all data (or use fixture)
   let t = Date.now();
   let data: FetchedData;
   if (options?.fixtureData) {
     data = options.fixtureData;
+    if (!destinationEnvelope && data.destinationEnvelope) {
+      destinationEnvelope = data.destinationEnvelope;
+    }
     stageTimes['fetch'] = 0;
     console.log('[Pipeline V3] Step 1: Using fixture data (no API calls)');
     onEvent?.({ type: 'step_done', step: 1, stepName: 'Fetching data (fixture)', durationMs: 0, timestamp: Date.now() });
@@ -1308,7 +1499,13 @@ export async function generateTripV3(
 
     onEvent?.({ type: 'step_start', step: 1, stepName: 'Fetching data', timestamp: Date.now() });
     try {
-      data = await fetchAllData(preferences, wrappedOnEvent, destinationIntel);
+      data = await fetchAllData(preferences, wrappedOnEvent, destinationIntel, {
+        destinationEnvelope,
+        destinationRadiusKm: effectiveDestinationRadiusKm,
+      });
+      if (!destinationEnvelope && data.destinationEnvelope) {
+        destinationEnvelope = data.destinationEnvelope;
+      }
     } catch (err) {
       if (isProviderQuotaStopError(err)) throw err;
       console.error('[Pipeline V3] Step 1 failed:', err);
@@ -1327,7 +1524,7 @@ export async function generateTripV3(
   // Step 2: Score and rank activities
   t = Date.now();
   onEvent?.({ type: 'step_start', step: 2, stepName: 'Scoring activities', timestamp: Date.now() });
-  let selectedActivities = scoreAndSelectActivities(data, preferences);
+  const selectedActivities = scoreAndSelectActivities(data, preferences);
   let allActivities = [...selectedActivities]; // For repair pass
   let activeBlueprint: RegionalBlueprint | null = options?.regionalBlueprint || null;
   let sparseRescueValidation = emptyValidationDiagnosticsSnapshot();
@@ -1367,7 +1564,11 @@ export async function generateTripV3(
           preferences.destination,
           data.destCoords,
           'attraction',
-          { allowPaidFallback: false }
+          {
+            allowPaidFallback: false,
+            destinationEnvelope: destinationEnvelope || undefined,
+            destinationRadiusKm: effectiveDestinationRadiusKm,
+          }
         ),
       }));
 
@@ -1587,6 +1788,7 @@ export async function generateTripV3(
     allActivities, selectedActivities,
     densityProfile: { densityCategory: densityProfile.densityCategory },
     dayTripPacks, arrivalFatigueRole, destinationMismatchCount,
+    destinationEnvelope,
     ratioFeasibleBand: undefined,
   };
 
@@ -1880,6 +2082,9 @@ export async function generateTripV3(
     plannerFinishReasonCounts: closedWorldMeta.enabled ? plannerAuditStats.plannerFinishReasonCounts : undefined,
     closedWorldActivationRate: closedWorldMeta.enabled ? (closedWorldMeta.used ? 1 : 0) : undefined,
     geoFallbackUsed: data.geoFallbackUsed,
+    geoScopeSource: destinationEnvelope?.source,
+    outsideEnvelopeRejectCount: trip.plannerDiagnostics?.outsideEnvelopeRejectCount || 0,
+    inspiredModeUsed: preferences.tripMode === 'inspired',
     mealSemanticReplacements: trip.plannerDiagnostics?.mealSemanticReplacementCount || 0,
     llmOrderPreservedRate: trip.plannerDiagnostics?.llmOrderPreservedRate,
     requestedDropCount: closedWorldMeta.enabled ? closedWorldMeta.requestedDropCount : undefined,
@@ -2005,6 +2210,7 @@ async function runPipelineFromClusters(
     dayTripPacks: DayTripPack[];
     arrivalFatigueRole: ArrivalFatigueRole;
     destinationMismatchCount: number;
+    destinationEnvelope?: DestinationEnvelope | null;
     ratioFeasibleBand?: RatioFeasibleBand;
     onEvent?: OnPipelineEvent;
   }
@@ -2012,8 +2218,9 @@ async function runPipelineFromClusters(
   const {
     data, preferences, timeWindows, bestTransport, syntheticReturnTransport,
     allActivities, selectedActivities, densityProfile, dayTripPacks,
-    arrivalFatigueRole, destinationMismatchCount, ratioFeasibleBand, onEvent,
+    arrivalFatigueRole, destinationMismatchCount, destinationEnvelope, ratioFeasibleBand, onEvent,
   } = ctx;
+  const effectiveDestinationEnvelope = destinationEnvelope || data.destinationEnvelope || null;
 
   // Step 3b: Optimize intra-day routing (weighted NN + 2-opt)
   optimizeClusterRouting(clusters);
@@ -2341,6 +2548,11 @@ async function runPipelineFromClusters(
   const arrivalFatigueViolationCount = countArrivalFatigueViolations(scheduledDays, hotel, arrivalFatigueRole);
   const temporalImpossibleItemCount = repairResult.rescueDiagnostics?.temporalImpossibleItemCount ?? 0;
   const llmOrderPreservedRate = computeLlmOrderPreservedRate(clusters, scheduledDays);
+  const destinationScopeStats = enforceDestinationEnvelopeOnTimeline(scheduledDays, effectiveDestinationEnvelope);
+  const genericLabelPatchCount = sanitizeGenericTimelineLabels(scheduledDays);
+  if (genericLabelPatchCount > 0) {
+    console.log(`[Pipeline V3] Generic timeline labels sanitized: ${genericLabelPatchCount}`);
+  }
 
   // Step 10: Validate contracts
   const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
@@ -2353,6 +2565,7 @@ async function runPipelineFromClusters(
     mustSeeActivitiesForContracts.map(a => ({ id: a.id, name: a.name })),
     timeWindows,
     densityProfile.densityCategory as 'dense' | 'medium' | 'spread',
+    effectiveDestinationEnvelope,
   );
   console.log(`[Pipeline V3] Step 10: Quality score ${contractResult.score}/100, Invariants: ${contractResult.invariantsPassed ? 'PASSED' : 'FAILED'}`);
 
@@ -2498,6 +2711,7 @@ async function runPipelineFromClusters(
     sameFamilyOverloadCount,
     ratioMixSwapCount: ratioEnforcement.swaps,
     llmOrderPreservedRate,
+    outsideEnvelopeRejectCount: destinationScopeStats.outsideEnvelopeRejectCount,
   };
 
   // Calculate cost breakdown from actual scheduled items
@@ -2758,6 +2972,13 @@ export async function generateTripV3MultiCity(
       ).toFixed(3)
     ),
     geoFallbackUsed: segments.some((segment) => Boolean(segment.generationDiagnostics?.geoFallbackUsed)),
+    geoScopeSource: segments.find((segment) => segment.generationDiagnostics?.geoScopeSource)
+      ?.generationDiagnostics?.geoScopeSource,
+    outsideEnvelopeRejectCount: segments.reduce(
+      (sum, segment) => sum + (segment.generationDiagnostics?.outsideEnvelopeRejectCount || 0),
+      0
+    ),
+    inspiredModeUsed: segments.some((segment) => Boolean(segment.generationDiagnostics?.inspiredModeUsed)),
     mealSemanticReplacements: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.mealSemanticReplacements || 0), 0),
     llmOrderPreservedRate: Number(
       (

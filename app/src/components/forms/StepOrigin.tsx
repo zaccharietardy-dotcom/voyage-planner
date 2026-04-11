@@ -48,7 +48,7 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     setGeoError(null);
 
     if (typeof window !== 'undefined' && !window.isSecureContext) {
-      setGeoError('La géolocalisation nécessite une connexion HTTPS sécurisée.');
+      setGeoError('La géolocalisation Safari nécessite HTTPS (ou localhost). Ouvrez le site en https puis réessayez.');
       return;
     }
 
@@ -58,40 +58,58 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     }
 
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const res = await fetch(`/api/geocode/reverse?lat=${latitude}&lng=${longitude}`);
-          if (res.ok) {
-            const data = await res.json();
-            const city = data.city || data.address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-            setQuery(city);
-            onChange({
-              origin: city,
-              homeCoords: { lat: latitude, lng: longitude },
-              homeAddress: data.address,
-            });
-          } else {
-            setGeoError('Impossible de déterminer votre ville.');
-          }
-        } catch {
-          setGeoError('Erreur lors de la récupération de votre position.');
+
+    const getCurrentPosition = (options: PositionOptions): Promise<GeolocationPosition> =>
+      new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, options));
+
+    try {
+      let position: GeolocationPosition;
+      try {
+        // First try: fast + cached location (works better on iOS/Safari in many cases).
+        position = await getCurrentPosition({
+          enableHighAccuracy: false,
+          timeout: 12000,
+          maximumAge: 300000,
+        });
+      } catch (firstError) {
+        const first = firstError as GeolocationPositionError;
+        if (first.code !== first.TIMEOUT && first.code !== first.POSITION_UNAVAILABLE) {
+          throw firstError;
         }
-        setIsLocating(false);
-      },
-      (error) => {
-        setIsLocating(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          setGeoError('Autorisez la géolocalisation dans les réglages de votre navigateur (Safari : Réglages du site > Localisation), puis réessayez.');
-        } else if (error.code === error.TIMEOUT) {
-          setGeoError('La localisation a pris trop de temps. Réessayez.');
-        } else {
-          setGeoError('Impossible de récupérer votre position.');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    );
+        // Second try: high accuracy if the fast pass timed out.
+        position = await getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0,
+        });
+      }
+
+      const { latitude, longitude } = position.coords;
+      const res = await fetch(`/api/geocode/reverse?lat=${latitude}&lng=${longitude}`);
+      if (res.ok) {
+        const data = await res.json();
+        const city = data.city || data.address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        setQuery(city);
+        onChange({
+          origin: city,
+          homeCoords: { lat: latitude, lng: longitude },
+          homeAddress: data.address,
+        });
+      } else {
+        setGeoError('Position trouvée, mais impossible de déterminer la ville.');
+      }
+    } catch (error) {
+      const geoError = error as GeolocationPositionError;
+      if (geoError?.code === geoError.PERMISSION_DENIED) {
+        setGeoError('Accès refusé. Safari > aA > Réglages du site web > Localisation > Autoriser, puis réessayez.');
+      } else if (geoError?.code === geoError.TIMEOUT) {
+        setGeoError('La localisation a expiré. Vérifiez le GPS/réseau et réessayez.');
+      } else {
+        setGeoError('Impossible de récupérer votre position actuelle.');
+      }
+    } finally {
+      setIsLocating(false);
+    }
   }, [onChange]);
 
   return (

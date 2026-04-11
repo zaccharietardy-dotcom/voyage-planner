@@ -9,6 +9,7 @@ import type { TripPreferences } from '../types';
 import type { FetchedData } from './types';
 
 import { getCityCenterCoordsAsync, findNearbyAirportsAsync } from '../services/geocoding';
+import { buildDestinationEnvelope, type DestinationEnvelope } from '../services/destinationEnvelope';
 import { compareTransportOptions } from '../services/transport';
 import { searchAttractionsMultiQueryWithFallback, searchMustSeeWithFallback, searchRestaurantsWithFallback } from '../services/serpApiPlaces';
 // canUseSerpApi no longer needed — Google Places (New) handles quota automatically
@@ -55,45 +56,15 @@ type CoordinateResolution = {
   fallbackReason?: string;
 };
 
-const REGIONAL_DESTINATION_CENTROIDS: Record<string, { lat: number; lng: number }> = {
-  bretagne: { lat: 48.202, lng: -2.932 },
-  brittany: { lat: 48.202, lng: -2.932 },
-  normandie: { lat: 49.182, lng: -0.37 },
-  normandy: { lat: 49.182, lng: -0.37 },
-  toscane: { lat: 43.771, lng: 11.255 },
-  tuscany: { lat: 43.771, lng: 11.255 },
-  andalousie: { lat: 37.389, lng: -5.984 },
-  andalusia: { lat: 37.389, lng: -5.984 },
-  cote_d_azur: { lat: 43.703, lng: 7.266 },
-  cote_dazur: { lat: 43.703, lng: 7.266 },
-  provence: { lat: 43.949, lng: 4.806 },
-};
-
-function normalizeRegionKey(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-}
-
-function findRegionalCentroidFallback(rawDestination: string): { lat: number; lng: number } | null {
-  const normalized = normalizeRegionKey(rawDestination || '');
-  if (!normalized) return null;
-  if (REGIONAL_DESTINATION_CENTROIDS[normalized]) return REGIONAL_DESTINATION_CENTROIDS[normalized];
-
-  for (const [key, coords] of Object.entries(REGIONAL_DESTINATION_CENTROIDS)) {
-    if (normalized.includes(key) || key.includes(normalized)) {
-      return coords;
-    }
-  }
-  return null;
+interface FetchGeoScopeOptions {
+  destinationEnvelope?: DestinationEnvelope | null;
+  destinationRadiusKm?: number;
 }
 
 async function resolveCityCoordsWithFallback(
   city: string,
   role: 'origin' | 'destination',
+  options?: FetchGeoScopeOptions,
 ): Promise<CoordinateResolution> {
   const direct = await getCityCenterCoordsAsync(city);
   if (direct) {
@@ -116,12 +87,12 @@ async function resolveCityCoordsWithFallback(
   }
 
   if (role === 'destination') {
-    const centroid = findRegionalCentroidFallback(city);
-    if (centroid) {
+    const envelope = options?.destinationEnvelope || await buildDestinationEnvelope(city);
+    if (envelope?.center) {
       return {
-        coords: centroid,
+        coords: envelope.center,
         usedFallback: true,
-        fallbackReason: 'destination_regional_centroid',
+        fallbackReason: options?.destinationEnvelope ? 'destination_envelope_center' : 'destination_envelope_lookup',
       };
     }
   }
@@ -161,7 +132,12 @@ function buildViatorLocationCandidates(activityName: string, destination: string
  */
 import type { OnPipelineEvent } from './types';
 
-export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPipelineEvent, destinationIntel?: DestinationIntel | null): Promise<FetchedData> {
+export async function fetchAllData(
+  preferences: TripPreferences,
+  onEvent?: OnPipelineEvent,
+  destinationIntel?: DestinationIntel | null,
+  geoScope?: FetchGeoScopeOptions,
+): Promise<FetchedData> {
   const T0 = Date.now();
   const { origin, destination } = preferences;
 
@@ -184,8 +160,8 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   // Phase 0: Geocoding (needed by subsequent calls)
   onEvent?.({ type: 'api_call', step: 1, label: 'Geocoding', timestamp: Date.now() });
   const [originCoordResolution, destCoordResolution, originAirports, destAirports] = await Promise.all([
-    resolveCityCoordsWithFallback(origin, 'origin'),
-    resolveCityCoordsWithFallback(destination, 'destination'),
+    resolveCityCoordsWithFallback(origin, 'origin', geoScope),
+    resolveCityCoordsWithFallback(destination, 'destination', geoScope),
     findNearbyAirportsAsync(origin),
     findNearbyAirportsAsync(destination),
   ]);
@@ -419,7 +395,11 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
               fallbackCandidate,
               destination,
               destCoords,
-              'attraction'
+              'attraction',
+              {
+                destinationEnvelope: geoScope?.destinationEnvelope || undefined,
+                destinationRadiusKm: geoScope?.destinationRadiusKm,
+              }
             );
             if (coords) {
               activity.latitude = coords.lat;
@@ -585,7 +565,11 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
           activity.name,
           destination,
           destCoords,
-          'attraction'
+          'attraction',
+          {
+            destinationEnvelope: geoScope?.destinationEnvelope || undefined,
+            destinationRadiusKm: geoScope?.destinationRadiusKm,
+          }
         );
         if (coords) {
           activity.latitude = coords.lat;
@@ -623,7 +607,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   if (curatedMustSees.length === 0 && mustSeeAttractions.length === 0) {
     console.log(`[Pipeline V2] No curated must-sees for "${destination}" — generating via AI...`);
     try {
-      const aiMustSees = await generateMustSeesWithAI(destination, destCoords);
+      const aiMustSees = await generateMustSeesWithAI(destination, destCoords, geoScope);
       if (aiMustSees.length > 0) {
         mustSeeAttractions.push(...aiMustSees);
         console.log(`[Pipeline V2] AI generated ${aiMustSees.length} must-sees: ${aiMustSees.map(a => a.name).join(', ')}`);
@@ -679,6 +663,7 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
   return {
     destCoords,
     originCoords,
+    destinationEnvelope: geoScope?.destinationEnvelope || null,
     geoFallbackUsed,
     geoFallbackReason,
     originAirports,
@@ -715,7 +700,8 @@ export async function fetchAllData(preferences: TripPreferences, onEvent?: OnPip
  */
 async function generateMustSeesWithAI(
   destination: string,
-  destCoords: { lat: number; lng: number }
+  destCoords: { lat: number; lng: number },
+  geoScope?: FetchGeoScopeOptions,
 ): Promise<Attraction[]> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return [];
@@ -771,7 +757,16 @@ Règles : UNIQUEMENT des lieux réels, célèbres et vérifiables. Inclure les l
     const name = a.name?.trim();
     if (!name) return null;
 
-    const coords = await resolveCoordinates(name, destination, destCoords, 'attraction');
+    const coords = await resolveCoordinates(
+      name,
+      destination,
+      destCoords,
+      'attraction',
+      {
+        destinationEnvelope: geoScope?.destinationEnvelope || undefined,
+        destinationRadiusKm: geoScope?.destinationRadiusKm,
+      }
+    );
     if (!coords) {
       console.warn(`[Pipeline V2] AI must-see: GPS resolution failed for "${name}", skipping`);
       return null;

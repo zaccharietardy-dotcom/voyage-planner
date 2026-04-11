@@ -159,7 +159,7 @@ Contraintes strictes:
 - N'inclus jamais d'agence de voyage, office du tourisme, ni point d'information comme "activité".
 - Donne uniquement des étapes plausibles et cohérentes géographiquement.
 
-Propose 3-4 itinéraires concrets et variés. Pour chaque suggestion:
+Propose exactement 4 itinéraires concrets et variés. Pour chaque suggestion:
 - Donne un titre accrocheur
 - Indique si c'est une ville unique, un multi-villes, ou un road trip
 - Détaille les étapes (ville + nombre de jours recommandé)
@@ -203,7 +203,7 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks):
       description: s.description as string,
       estimatedBudget: s.estimatedBudget as string,
       bestSeason: s.bestSeason as string | undefined,
-    }));
+    })).slice(0, 4);
   } catch {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -219,7 +219,7 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks):
         description: s.description as string,
         estimatedBudget: s.estimatedBudget as string,
         bestSeason: s.bestSeason as string | undefined,
-      }));
+      })).slice(0, 4);
     }
     throw new Error('Failed to parse destination suggestions response');
   }

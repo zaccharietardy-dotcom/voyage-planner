@@ -5,6 +5,7 @@
 import type { Attraction } from '../services/attractions';
 import type { DayTripSuggestion } from '../services/dayTripSuggestions';
 import type { AirportInfo } from '../services/geocoding';
+import type { DestinationEnvelope } from '../services/destinationEnvelope';
 import type {
   Restaurant,
   Accommodation,
@@ -73,6 +74,7 @@ export interface FetchedData {
   // Coordinates
   destCoords: { lat: number; lng: number };
   originCoords: { lat: number; lng: number };
+  destinationEnvelope?: DestinationEnvelope | null;
   geoFallbackUsed?: boolean;
   geoFallbackReason?: string;
   originAirports: AirportInfo[];

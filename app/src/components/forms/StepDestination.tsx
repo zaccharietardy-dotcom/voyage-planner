@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { TripPreferences, CityStage, DurationSuggestion, DestinationSuggestion } from '@/lib/types';
+import { TripPreferences, CityStage, DurationSuggestion, DestinationSuggestion, ActivityType } from '@/lib/types';
 import { useSuggestions } from '@/hooks/useSuggestions';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { StyleMatchBadge } from '@/components/trip/StyleMatchBadge';
@@ -83,11 +83,25 @@ const TYPE_LABELS: Record<DestinationSuggestion['type'], { label: string; icon: 
   road_trip: { label: 'Road trip', icon: Route },
 };
 
+const VIBE_OPTIONS: Array<{ id: ActivityType; label: string }> = [
+  { id: 'nature', label: 'Nature' },
+  { id: 'beach', label: 'Plage' },
+  { id: 'culture', label: 'Musées & culture' },
+  { id: 'gastronomy', label: 'Gastronomie' },
+  { id: 'wellness', label: 'Détente' },
+  { id: 'adventure', label: 'Aventure' },
+  { id: 'nightlife', label: 'Vie nocturne' },
+  { id: 'shopping', label: 'Shopping' },
+];
+
 export function StepDestination({ data, onChange }: StepDestinationProps) {
   const { t } = useTranslation();
   const mode = data.tripMode || 'precise';
   const stages = data.cityPlan || [{ city: '', days: 7 }];
   const [inspireQuery, setInspireQuery] = useState('');
+  const [inspiredVibes, setInspiredVibes] = useState<ActivityType[]>(
+    Array.isArray(data.activities) ? data.activities : []
+  );
   const [durationSuggestionForStage, setDurationSuggestionForStage] = useState<number | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -110,6 +124,12 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     clearDuration,
     clearDestination,
   } = useSuggestions();
+
+  useEffect(() => {
+    if (Array.isArray(data.activities)) {
+      setInspiredVibes(data.activities);
+    }
+  }, [data.activities]);
 
   // --- Helpers ---
 
@@ -154,6 +174,28 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
       durationDays: totalDays,
     });
     clearDestination();
+  };
+
+  const toggleInspiredVibe = (vibe: ActivityType) => {
+    const hasVibe = inspiredVibes.includes(vibe);
+    const next = hasVibe
+      ? inspiredVibes.filter((entry) => entry !== vibe)
+      : [...inspiredVibes, vibe];
+    setInspiredVibes(next);
+    onChange({ activities: next });
+  };
+
+  const requestInspiredSuggestions = async () => {
+    const query = inspireQuery.trim();
+    if (!query) return;
+    const days = data.durationDays || totalDays || 5;
+    await fetchDestinationSuggestions(query, {
+      origin: data.origin,
+      activities: inspiredVibes.length > 0 ? inspiredVibes : data.activities,
+      budgetLevel: data.budgetLevel,
+      groupType: data.groupType,
+      durationDays: days,
+    });
   };
 
   const handleDurationSuggestion = async (stageIndex: number) => {
@@ -360,6 +402,181 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     handleUseCurrentLocation({ forceOriginUpdate: true, silentErrors: true });
   };
 
+  if (mode === 'inspired') {
+    return (
+      <div className="space-y-10 max-w-[640px] mx-auto w-full">
+        <div className="text-center space-y-4">
+          <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+            {t('plan.dest.title')}
+          </h2>
+          <p className="text-[17px] text-[#94a3b8] font-light">
+            Je ne sais pas encore où aller, aide-moi à trouver.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#0e1220]/50 p-1">
+          <button
+            type="button"
+            onClick={() => setMode('precise')}
+            className="h-11 rounded-xl text-sm font-semibold text-white/70 hover:text-white transition-colors"
+          >
+            Destination précise
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('inspired')}
+            className="h-11 rounded-xl bg-gold text-black text-sm font-bold shadow-[0_10px_24px_rgba(197,160,89,0.35)]"
+          >
+            Je ne sais pas où aller
+          </button>
+        </div>
+
+        <Card className="border-white/10 bg-[#0f1629]/70 backdrop-blur-xl">
+          <CardContent className="p-6 space-y-6">
+            <div className="space-y-2">
+              <Label className="text-white">Décris ton envie</Label>
+              <Textarea
+                value={inspireQuery}
+                onChange={(event) => setInspireQuery(event.target.value)}
+                placeholder="Ex: 5 jours, nature + plage, petit budget, au départ de Paris"
+                className="min-h-[92px] rounded-xl bg-[#0b1020] border-white/10 text-white placeholder:text-white/40"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-white">Ambiance recherchée</Label>
+              <div className="flex flex-wrap gap-2">
+                {VIBE_OPTIONS.map((vibe) => {
+                  const active = inspiredVibes.includes(vibe.id);
+                  return (
+                    <button
+                      key={vibe.id}
+                      type="button"
+                      onClick={() => toggleInspiredVibe(vibe.id)}
+                      className={cn(
+                        'px-3 py-2 rounded-full text-xs font-semibold border transition-colors',
+                        active
+                          ? 'bg-gold text-black border-gold'
+                          : 'bg-[#0b1020] text-white/80 border-white/15 hover:border-white/35'
+                      )}
+                    >
+                      {vibe.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Durée souhaitée</Label>
+                <Input
+                  type="number"
+                  min={2}
+                  max={30}
+                  value={data.durationDays || totalDays || 5}
+                  onChange={(event) => {
+                    const next = Number.parseInt(event.target.value, 10);
+                    if (!Number.isFinite(next)) return;
+                    onChange({ durationDays: Math.max(1, Math.min(30, next)) });
+                  }}
+                  className="bg-[#0b1020] border-white/10 text-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white">Budget</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['economic', 'moderate', 'comfort', 'luxury'] as const).map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => onChange({ budgetLevel: level })}
+                      className={cn(
+                        'h-10 rounded-xl border text-xs font-semibold capitalize transition-colors',
+                        data.budgetLevel === level
+                          ? 'bg-gold text-black border-gold'
+                          : 'bg-[#0b1020] text-white/80 border-white/15 hover:border-white/35'
+                      )}
+                    >
+                      {level === 'economic' ? 'Petit budget' :
+                        level === 'moderate' ? 'Modéré' :
+                          level === 'comfort' ? 'Confort' : 'Premium'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={requestInspiredSuggestions}
+              disabled={loadingDestination || inspireQuery.trim().length < 5}
+              className="w-full h-12 rounded-xl bg-gold hover:bg-gold/90 text-black font-bold"
+            >
+              {loadingDestination ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Recherche en cours...
+                </span>
+              ) : 'Me proposer 4 idées de voyage'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {destinationSuggestions && destinationSuggestions.length > 0 && (
+          <div className="space-y-4">
+            {destinationSuggestions.slice(0, 4).map((suggestion, index) => {
+              const typeMeta = TYPE_LABELS[suggestion.type];
+              const TypeIcon = typeMeta.icon;
+              return (
+                <Card key={`${suggestion.title}-${index}`} className="border-white/10 bg-[#0f1629]/70 backdrop-blur-xl">
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-lg font-bold text-white">{suggestion.title}</p>
+                        <p className="text-sm text-white/70 mt-1">{suggestion.description}</p>
+                      </div>
+                      <Badge className="bg-white/10 text-white border-white/15 gap-1">
+                        <TypeIcon className="h-3.5 w-3.5" />
+                        {typeMeta.label}
+                      </Badge>
+                    </div>
+
+                    <div className="text-sm text-white/80">
+                      {suggestion.stages.map((stage) => `${stage.city} (${stage.days}j)`).join(' → ')}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {suggestion.highlights.slice(0, 3).map((highlight, idx) => (
+                        <Badge key={idx} variant="secondary" className="bg-white/10 text-white/85 border-white/10">
+                          {highlight}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm text-white/70">
+                      <span>Budget: {suggestion.estimatedBudget}</span>
+                      <span>Saison: {suggestion.bestSeason || 'Toute l’année'}</span>
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={() => applyDestinationSuggestion(suggestion)}
+                      className="w-full h-11 rounded-xl bg-gold hover:bg-gold/90 text-black font-semibold"
+                    >
+                      Choisir cette proposition
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-12 max-w-[600px] mx-auto w-full">
       <div className="text-center space-y-4">
@@ -369,6 +586,23 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
         <p className="text-[17px] text-[#94a3b8] font-light">
           {t('plan.dest.subtitle')}
         </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#0e1220]/50 p-1">
+        <button
+          type="button"
+          onClick={() => setMode('precise')}
+          className="h-11 rounded-xl bg-gold text-black text-sm font-bold shadow-[0_10px_24px_rgba(197,160,89,0.35)]"
+        >
+          Destination précise
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('inspired')}
+          className="h-11 rounded-xl text-sm font-semibold text-white/70 hover:text-white transition-colors"
+        >
+          Je ne sais pas où aller
+        </button>
       </div>
 
       <div className="space-y-8">

@@ -15,6 +15,7 @@
 import type { TripPreferences, CityStage } from '../types';
 import { fetchGeminiWithRetry } from '../services/geminiSearch';
 import { CITY_CENTERS } from '../services/geocoding';
+import type { DestinationEnvelope } from '../services/destinationEnvelope';
 
 // ============================================
 // Types
@@ -193,7 +194,9 @@ export interface DestinationAnalysis {
     name: string;
     stayDuration: number; // jours recommandés
     highlights: string[];
+    coords?: { lat: number; lng: number };
   }>;
+  destinationEnvelope?: DestinationEnvelope;
 }
 
 // Nominatim types that indicate a region (not a city)
@@ -318,7 +321,14 @@ async function resolveViaNominatimBbox(
         ? Math.max(1, remaining)
         : Math.max(1, Math.round(remaining / (topCities.length - i)));
       remaining -= days;
-      return { name, stayDuration: days, highlights: [] };
+      const lat = Number.parseFloat(c.lat || '');
+      const lng = Number.parseFloat(c.lon || '');
+      return {
+        name,
+        stayDuration: days,
+        highlights: [],
+        coords: Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : undefined,
+      };
     });
 
     console.log(`[Step 0] Nominatim bbox: found ${resolvedCities.length} cities: ${resolvedCities.map(c => `${c.name} (${c.stayDuration}j)`).join(', ')}`);

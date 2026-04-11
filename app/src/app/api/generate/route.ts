@@ -463,18 +463,43 @@ export async function POST(request: NextRequest) {
             gateFailures: publishGate.gateFailures,
           };
 
+          if (!publishGate.publishable) {
+            clearInterval(keepAlive);
+            clearTimeout(warningTimeout);
+            activeGenerations.delete(user.id);
+            registerGenerationRunFailed({
+              userId: user.id,
+              requestFingerprint,
+              sessionId,
+            });
+            const gateMessage = `quality_gate_failed: ${publishGate.gateFailures.join(', ')}`;
+            await persistSession({
+              status: 'error',
+              progress: {
+                label: 'quality-gate-failed',
+                runId,
+                requestFingerprint,
+                publishGateResult: publishGate.result,
+              },
+              question: null,
+              error: gateMessage,
+              heartbeat: true,
+            });
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              status: 'error',
+              error: 'quality_gate_failed',
+              code: 'QUALITY_GATE_FAILED',
+              gateFailures: publishGate.gateFailures,
+              requestFingerprint,
+            })}\n\n`));
+            cleanupSession(sessionId);
+            controller.close();
+            return;
+          }
+
           clearInterval(keepAlive);
           clearTimeout(warningTimeout);
           activeGenerations.delete(user.id);
-
-          // Quality gate: log but always deliver the trip to the user.
-          // Blocking on score < 85 frustrates users (especially for regional trips
-          // where scoring is calibrated for dense cities).
-          if (!publishGate.publishable) {
-            console.warn(
-              `[Generate] Quality gate soft-fail: ${publishGate.gateFailures?.join(', ')}. Trip delivered anyway.`
-            );
-          }
 
           // Sérialiser le trip — peut être gros (100KB+), log la taille
           let tripJson: string;

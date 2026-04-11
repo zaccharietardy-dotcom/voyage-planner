@@ -36,6 +36,7 @@ interface DestinationSuggestBody {
   query: string;
   origin?: string;
   activities?: ActivityType[];
+  vibes?: ActivityType[];
   budgetLevel?: BudgetLevel;
   groupType?: GroupType;
   durationDays?: number;
@@ -147,6 +148,7 @@ function parseSuggestBody(payload: unknown): SuggestBody {
     query: query || '',
     origin: asTrimmedString(body.origin, 'origin', false),
     activities: asActivityTypes(body.activities),
+    vibes: asActivityTypes(body.vibes),
     budgetLevel: asBudgetLevel(body.budgetLevel),
     groupType: asGroupType(body.groupType),
     durationDays: asDurationDays(body.durationDays),
@@ -201,9 +203,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ type: 'duration', duration: suggestion });
     }
 
+    const mergedActivities = Array.from(new Set([
+      ...(body.activities || []),
+      ...(body.vibes || []),
+    ]));
     const suggestions = await generateDestinationSuggestions(body.query, {
       origin: body.origin,
-      activities: body.activities,
+      activities: mergedActivities.length > 0 ? mergedActivities : undefined,
       budgetLevel: body.budgetLevel,
       groupType: body.groupType,
       durationDays: body.durationDays,

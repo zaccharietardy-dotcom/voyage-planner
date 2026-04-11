@@ -20,6 +20,33 @@ export interface PipelineProgressEvent {
   detail?: string;
 }
 
+async function postQuestionAnswer(
+  sessionId: string,
+  questionId: string,
+  selectedOptionId: string
+): Promise<void> {
+  const payload = { sessionId, questionId, selectedOptionId };
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await fetch('/api/generate/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) return;
+
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body?.error || `HTTP ${response.status}`);
+    } catch (error) {
+      if (attempt >= 2) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+}
+
 export async function generateTripStream(
   preferences: Partial<TripPreferences> & Record<string, unknown>,
   onProgress?: (status: string, event?: PipelineProgressEvent) => void,
@@ -66,15 +93,7 @@ export async function generateTripStream(
       const selectedOptionId = await onQuestion(question);
       // POST the answer to the server
       try {
-        await fetch('/api/generate/answer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            questionId: question.questionId,
-            selectedOptionId,
-          }),
-        });
+        await postQuestionAnswer(sessionId, question.questionId, selectedOptionId);
       } catch (e) {
         console.warn('[SSE] Failed to POST answer:', e);
       }

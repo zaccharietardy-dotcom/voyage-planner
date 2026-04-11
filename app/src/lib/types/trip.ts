@@ -649,6 +649,7 @@ export interface Trip {
     dayTripDestinationMismatchCount?: number;
     sameFamilyOverloadCount?: number;
     llmOrderPreservedRate?: number;
+    outsideEnvelopeRejectCount?: number;
     // LLM rebalance A/B fork diagnostics
     llmRebalanceUsed?: boolean;
     llmRebalanceScore?: number | null;
@@ -744,6 +745,9 @@ export interface Trip {
     plannerFinishReasonCounts?: Record<string, number>;
     closedWorldActivationRate?: number;
     geoFallbackUsed?: boolean;
+    geoScopeSource?: 'nominatim' | 'resolved_cities' | 'fallback_center';
+    outsideEnvelopeRejectCount?: number;
+    inspiredModeUsed?: boolean;
     mealSemanticReplacements?: number;
     llmOrderPreservedRate?: number;
     requestedDropCount?: number;

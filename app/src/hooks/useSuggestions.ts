@@ -5,6 +5,7 @@ import type { DurationSuggestion, DestinationSuggestion, ActivityType, BudgetLev
 
 interface SuggestionContext {
   activities?: ActivityType[];
+  vibes?: ActivityType[];
   budgetLevel?: BudgetLevel;
   groupType?: GroupType;
   origin?: string;

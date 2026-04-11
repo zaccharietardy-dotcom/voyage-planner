@@ -584,6 +584,14 @@ export function GeneratingScreen({ destination, durationDays, pipelineStep, ques
           <span className="tabular-nums bg-white/5 px-2 py-1 rounded-md border border-white/5">{elapsed}s</span>
         </div>
 
+        <div className="mb-8 rounded-2xl border border-gold/20 bg-gold/5 px-4 py-3">
+          <p className="text-xs md:text-sm text-gold/90 leading-relaxed">
+            {question
+              ? 'Question en cours. Votre réponse nous aide à améliorer le voyage en direct.'
+              : 'Restez sur la page, on peut vous poser une ou deux questions pour affiner le voyage.'}
+          </p>
+        </div>
+
         {/* Question or Fun fact card */}
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl p-8 shadow-2xl">
           <AnimatePresence mode="wait">

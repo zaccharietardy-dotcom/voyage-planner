@@ -24,6 +24,10 @@ import type { DayTimeWindow } from './step4-anchor-transport';
 import { isOpenAtTime, isActivityOpenOnDay } from './utils/opening-hours';
 import { isPlausibleCoordinate } from './utils/coordinate-validator';
 import { calculateDistance } from '../services/geocoding';
+import {
+  isPointWithinDestinationEnvelope,
+  type DestinationEnvelope,
+} from '../services/destinationEnvelope';
 import { getMinDuration, getMaxDuration } from './utils/constants';
 import { normalizeForMatching } from './utils/dedup';
 import { computeMealEligibility } from './utils/meal-eligibility';
@@ -96,6 +100,7 @@ export function validateContracts(
   mustSeeActivities?: Array<{ id: string; name: string }>,
   timeWindows?: DayTimeWindow[],
   densityCategory?: 'dense' | 'medium' | 'spread',
+  destinationEnvelope?: DestinationEnvelope | null,
 ): ContractResult {
   const violations: string[] = [];
   const qualityWarnings: string[] = [];
@@ -163,10 +168,22 @@ export function validateContracts(
           && !(item.type === 'transport' && item.transportRole === 'longhaul')
           && !isDayTripContext
         ) {
-          const dist = calculateDistance(item.latitude, item.longitude, destCoords.lat, destCoords.lng);
-          if (dist > crossCountryMaxKm) {
-            violations.push(`P0.6: "${item.title}" is ${dist.toFixed(0)}km from destination (cross-country?)`);
-            metrics.invalidCoordinates++;
+          if (destinationEnvelope) {
+            const inEnvelope = isPointWithinDestinationEnvelope(
+              { lat: item.latitude, lng: item.longitude },
+              destinationEnvelope,
+              { extraBufferKm: 6 },
+            );
+            if (!inEnvelope) {
+              violations.push(`P0.6[outside_destination_envelope]: "${item.title}" is outside destination envelope`);
+              metrics.invalidCoordinates++;
+            }
+          } else {
+            const dist = calculateDistance(item.latitude, item.longitude, destCoords.lat, destCoords.lng);
+            if (dist > crossCountryMaxKm) {
+              violations.push(`P0.6: "${item.title}" is ${dist.toFixed(0)}km from destination (cross-country?)`);
+              metrics.invalidCoordinates++;
+            }
           }
         }
       }
