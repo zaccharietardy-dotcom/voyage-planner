@@ -126,6 +126,31 @@ function cloneJson<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
+function computeHotelMoveCount(trip: Record<string, unknown>): number {
+  const days = Array.isArray(trip.days) ? trip.days as Array<Record<string, unknown>> : [];
+  let count = 0;
+  for (const day of days) {
+    const items = Array.isArray(day.items) ? day.items as Array<Record<string, unknown>> : [];
+    count += items.filter((item) => item?.type === 'checkin').length;
+  }
+  return count;
+}
+
+function computeNightsDistribution(
+  preferences: TripPreferences,
+  trip: Record<string, unknown>,
+): Record<string, number> {
+  const tripPrefs = (trip.preferences || {}) as Partial<TripPreferences>;
+  const cityPlan = (tripPrefs.cityPlan || preferences.cityPlan || [])
+    .filter((stage): stage is { city: string; days: number } => Boolean(stage?.city && Number.isFinite(stage?.days)));
+  if (cityPlan.length > 0) {
+    return Object.fromEntries(cityPlan.map((stage) => [stage.city, stage.days]));
+  }
+  return {
+    [tripPrefs.destination || preferences.destination || 'destination']: Math.max(1, tripPrefs.durationDays || preferences.durationDays || 1),
+  };
+}
+
 export async function POST(request: NextRequest) {
   let activeUserId: string | null = null;
   let requestFingerprintForError: string | null = null;
@@ -373,6 +398,12 @@ export async function POST(request: NextRequest) {
           askedCount: 0,
           autoDefaultCount: 0,
           postDraftAdjustUsed: false,
+          regionalQuestionFlow: {
+            preFetchRegion: { askedCount: 0, autoDefaultCount: 0 },
+            postDraftAdjust: { askedCount: 0, autoDefaultCount: 0 },
+          },
+          regionalScenarioChosen: null as string | null,
+          hotelStayPolicyChosen: null as string | null,
         };
 
         try {
@@ -436,12 +467,22 @@ export async function POST(request: NextRequest) {
             questionFlowStats.askedCount += 1;
             if (question.type === 'post_draft_adjust') {
               questionFlowStats.postDraftAdjustUsed = true;
+              questionFlowStats.regionalQuestionFlow.postDraftAdjust.askedCount += 1;
+            }
+            if (question.type === 'regional_hub_split' || question.type === 'hotel_stay_policy') {
+              questionFlowStats.regionalQuestionFlow.preFetchRegion.askedCount += 1;
             }
 
             return new Promise<string>((resolve) => {
               void persistSession({
                 status: 'question',
-                progress: { label: 'awaiting-answer', questionId: question.questionId, runId },
+                progress: {
+                  label: 'awaiting-answer',
+                  questionId: question.questionId,
+                  questionType: question.type,
+                  questionStage: (question.metadata as Record<string, unknown> | undefined)?.stage || null,
+                  runId,
+                },
                 question: fullQuestion,
                 heartbeat: true,
               });
@@ -451,10 +492,35 @@ export async function POST(request: NextRequest) {
                 (selectedOptionId, meta) => {
                   if (meta.autoDefault) {
                     questionFlowStats.autoDefaultCount += 1;
+                    if (question.type === 'post_draft_adjust') {
+                      questionFlowStats.regionalQuestionFlow.postDraftAdjust.autoDefaultCount += 1;
+                    }
+                    if (question.type === 'regional_hub_split' || question.type === 'hotel_stay_policy') {
+                      questionFlowStats.regionalQuestionFlow.preFetchRegion.autoDefaultCount += 1;
+                    }
+                  }
+                  const selectedOption = question.options.find((option) => option.id === selectedOptionId);
+                  if (question.type === 'regional_hub_split') {
+                    const effect = selectedOption?.effect;
+                    questionFlowStats.regionalScenarioChosen = (effect && effect.type === 'set_city_plan' && effect.scenario)
+                      ? effect.scenario
+                      : selectedOptionId;
+                  }
+                  if (question.type === 'hotel_stay_policy') {
+                    const effect = selectedOption?.effect;
+                    questionFlowStats.hotelStayPolicyChosen = (effect && effect.type === 'set_hotel_policy')
+                      ? effect.value
+                      : selectedOptionId;
                   }
                   void persistSession({
                     status: 'running',
-                    progress: { label: 'question-answered', questionId: question.questionId, runId },
+                    progress: {
+                      label: 'question-answered',
+                      questionId: question.questionId,
+                      questionType: question.type,
+                      questionStage: (question.metadata as Record<string, unknown> | undefined)?.stage || null,
+                      runId,
+                    },
                     question: null,
                     heartbeat: true,
                   });
@@ -481,6 +547,8 @@ export async function POST(request: NextRequest) {
           ]) as unknown as Record<string, unknown>;
 
           const publishGate = evaluatePublishGate(trip);
+          const hotelMoveCount = computeHotelMoveCount(trip);
+          const nightsDistribution = computeNightsDistribution(preferences, trip);
           const diagnostics = ((trip.generationDiagnostics as Record<string, unknown> | undefined) || {});
           trip.generationDiagnostics = {
             ...diagnostics,
@@ -490,6 +558,11 @@ export async function POST(request: NextRequest) {
             qualityGateResult: publishGate.publishable ? 'passed' : 'failed',
             qualityGateFailures: publishGate.gateFailures,
             questionFlow: questionFlowStats,
+            regionalQuestionFlow: questionFlowStats.regionalQuestionFlow,
+            regionalScenarioChosen: questionFlowStats.regionalScenarioChosen || diagnostics.regionalScenarioChosen,
+            questionAutoDefault: questionFlowStats.autoDefaultCount,
+            hotelMoveCount,
+            nightsDistribution,
             quotaStopProvider: undefined,
             budgetStopReason: undefined,
           };

@@ -7,6 +7,13 @@ export type QuestionEffect =
   | { type: 'set_travel_mode'; value: 'single_base' | 'road_trip' }
   | { type: 'set_transport'; value: 'optimal' | 'plane' | 'train' | 'car' | 'bus' }
   | { type: 'set_car_rental'; value: boolean }
+  | {
+    type: 'set_city_plan';
+    value: Array<{ city: string; days: number }>;
+    travelStyle?: 'single_base' | 'road_trip';
+    scenario?: 'single_base' | 'road_trip_light' | 'road_trip_balanced';
+  }
+  | { type: 'set_hotel_policy'; value: 'minimize_changes' | 'balanced' | 'flexible' }
   | { type: 'add_day_trip'; destination: string }
   | { type: 'add_avoid'; name: string }
   | { type: 'adjust_scores'; category: string; delta: number }
@@ -24,7 +31,8 @@ export interface QuestionOption {
 
 export type PipelineQuestionType =
   | 'full_day_activity' | 'day_trip' | 'activity_balance' | 'hotel_area'
-  | 'pre_fetch_llm' | 'post_scoring_llm' | 'travel_style_gate' | 'post_draft_adjust';
+  | 'pre_fetch_llm' | 'post_scoring_llm' | 'travel_style_gate' | 'post_draft_adjust'
+  | 'regional_hub_split' | 'hotel_stay_policy';
 
 export interface PipelineQuestion {
   questionId: string;

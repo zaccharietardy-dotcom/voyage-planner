@@ -218,11 +218,22 @@ export function buildTrip(
   const startDate = preferences.startDate ? new Date(preferences.startDate) : new Date();
   const days: TripDay[] = [];
 
-  // Index hotels by day
-  const hotelByDay = new Map<number, Accommodation>();
+  // Index hotels by city first to avoid daily hotel churn for the same hub.
+  const hotelByCity = new Map<string, Accommodation>();
   for (const hr of hotels) {
-    if (hr.hotel) {
-      hotelByDay.set(hr.hub.day, hr.hotel);
+    const cityKey = hr.hub.city?.trim().toLowerCase();
+    if (!hr.hotel || !cityKey) continue;
+    if (!hotelByCity.has(cityKey)) {
+      hotelByCity.set(cityKey, hr.hotel);
+    }
+  }
+  const hotelByDay = new Map<number, Accommodation>();
+  for (const llmDay of design.days) {
+    const cityKey = llmDay.hub?.trim().toLowerCase();
+    if (!cityKey) continue;
+    const cityHotel = hotelByCity.get(cityKey);
+    if (cityHotel) {
+      hotelByDay.set(llmDay.day, cityHotel);
     }
   }
 
@@ -245,6 +256,10 @@ export function buildTrip(
     const thisDayHotel = hotelByDay.get(llmDay.day);
     if (prevDayHotel && prevDayHotel !== thisDayHotel && llmDay.day > 1) {
       dayItems.push(buildCheckoutItem(prevDayHotel, llmDay.day, orderIndex++));
+      currentTime = '11:00';
+    }
+    if (llmDay.day === design.days.length && thisDayHotel) {
+      dayItems.push(buildCheckoutItem(thisDayHotel, llmDay.day, orderIndex++));
       currentTime = '11:00';
     }
 
@@ -285,8 +300,8 @@ export function buildTrip(
       currentTime = addMinutes(currentTime, 10);
     }
 
-    // Checkin if sleeping here
-    if (thisDayHotel) {
+    // Checkin only when hotel changes (or first day) to avoid repeated daily check-ins.
+    if (thisDayHotel && (llmDay.day === 1 || thisDayHotel !== prevDayHotel)) {
       const checkinTime = timeToMin(currentTime) < 17 * 60 ? '17:00' : currentTime;
       dayItems.push(buildCheckinItem(thisDayHotel, llmDay.day, orderIndex++, checkinTime));
     }

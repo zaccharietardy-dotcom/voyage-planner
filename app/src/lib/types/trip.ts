@@ -125,6 +125,7 @@ export interface TripPreferences {
   // Multi-villes / Road trip
   tripMode?: 'precise' | 'inspired';
   travelStyle?: 'single_base' | 'road_trip' | 'auto';
+  hotelStayPolicy?: 'minimize_changes' | 'balanced' | 'flexible';
   cityPlan?: CityStage[];
 
   // Étape 6 (optionnel) - Détails logistiques
@@ -769,6 +770,20 @@ export interface Trip {
       autoDefaultCount: number;
       postDraftAdjustUsed: boolean;
     };
+    regionalQuestionFlow?: {
+      preFetchRegion: {
+        askedCount: number;
+        autoDefaultCount: number;
+      };
+      postDraftAdjust: {
+        askedCount: number;
+        autoDefaultCount: number;
+      };
+    };
+    regionalScenarioChosen?: 'single_base' | 'road_trip_light' | 'road_trip_balanced';
+    questionAutoDefault?: number;
+    hotelMoveCount?: number;
+    nightsDistribution?: Record<string, number>;
     outsideEnvelopeRejectCount?: number;
     inspiredModeUsed?: boolean;
     mealSemanticReplacements?: number;

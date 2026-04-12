@@ -490,6 +490,28 @@ export function applyEffects(
         console.log(`[SmartQ Effect] Car rental → ${effect.value}`);
         break;
 
+      case 'set_city_plan':
+        if (Array.isArray(effect.value) && effect.value.length > 0) {
+          preferences.cityPlan = effect.value
+            .filter((stage) => stage?.city && Number.isFinite(stage.days) && stage.days > 0)
+            .map((stage) => ({ city: stage.city.trim(), days: Math.max(1, Math.round(stage.days)) }));
+          if ((effect.travelStyle || effect.value.length > 1) && preferences.cityPlan.length > 0) {
+            preferences.travelStyle = effect.travelStyle || (preferences.cityPlan.length > 1 ? 'road_trip' : 'single_base');
+          }
+          if (preferences.travelStyle === 'single_base' && preferences.cityPlan.length > 0) {
+            preferences.destination = preferences.cityPlan[0].city;
+          }
+          console.log(
+            `[SmartQ Effect] City plan → ${preferences.cityPlan.map((stage) => `${stage.city}(${stage.days}j)`).join(' → ')}`
+          );
+        }
+        break;
+
+      case 'set_hotel_policy':
+        preferences.hotelStayPolicy = effect.value;
+        console.log(`[SmartQ Effect] Hotel stay policy → ${effect.value}`);
+        break;
+
       case 'add_day_trip':
         // Add as a pre-purchased ticket so the pipeline properly integrates it as a day trip
         if (!preferences.prePurchasedTickets) preferences.prePurchasedTickets = [];
@@ -573,6 +595,8 @@ function validateEffect(effect: any): QuestionEffect {
     'set_travel_mode',
     'set_transport',
     'set_car_rental',
+    'set_city_plan',
+    'set_hotel_policy',
     'add_day_trip',
     'add_avoid',
     'adjust_scores',

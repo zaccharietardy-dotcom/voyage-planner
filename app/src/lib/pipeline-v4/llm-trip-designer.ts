@@ -23,6 +23,11 @@ function buildPrompt(preferences: TripPreferences): string {
   const groupSize = preferences.groupSize || 2;
   const groupType = GROUP_TYPE_LABELS[preferences.groupType] || preferences.groupType || 'amis';
   const budget = BUDGET_LABELS[preferences.budgetLevel as keyof typeof BUDGET_LABELS]?.label || preferences.budgetLevel || 'modéré';
+  const travelStyle = preferences.travelStyle || 'auto';
+  const hotelStayPolicy = preferences.hotelStayPolicy || 'balanced';
+  const cityPlan = Array.isArray(preferences.cityPlan) && preferences.cityPlan.length > 0
+    ? preferences.cityPlan.map((stage) => `${stage.city} (${stage.days} jours)`).join(' → ')
+    : '';
   const activities = (preferences.activities || [])
     .map(a => ACTIVITY_LABELS[a] || a)
     .join(', ') || 'culture, nature, gastronomie';
@@ -35,6 +40,9 @@ function buildPrompt(preferences: TripPreferences): string {
 Départ de ${origin} en ${transport}. ${startDate ? `Date de départ : ${startDate}.` : ''}
 Groupe : ${groupSize} personnes (${groupType}). Budget : ${budget}.
 Centres d'intérêt : ${activities}.
+Style de voyage: ${travelStyle}.
+Politique hôtel: ${hotelStayPolicy}.
+${cityPlan ? `Répartition villes/nuits imposée: ${cityPlan}.` : ''}
 ${mustSee ? `Incontournables demandés : ${mustSee}.` : ''}
 
 RÈGLES STRICTES :
@@ -50,6 +58,9 @@ RÈGLES STRICTES :
 10. Pour CHAQUE jour : "theme" (titre évocateur 8-12 mots) + "narrative" (2 phrases immersives)
 11. Chaque jour DOIT avoir un déjeuner ET un dîner (vrai restaurant, pas "repas libre")
 12. Petit-déjeuner optionnel (café/boulangerie locale recommandée)
+13. Si "Répartition villes/nuits imposée" est fournie, respecte-la EXACTEMENT
+14. Si style=single_base, propose UNE SEULE ville hub pour tous les jours
+15. Si politique hôtel=minimize_changes, évite les changements quotidiens de logement (minimum 2 nuits/hôtel quand possible)
 
 Réponds UNIQUEMENT en JSON valide :
 {

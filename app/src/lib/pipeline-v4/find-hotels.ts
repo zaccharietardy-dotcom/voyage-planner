@@ -26,14 +26,25 @@ export async function findHotelsForHubs(
     return { hotels: [], latencyMs: 0 };
   }
 
+  // Search one hotel per city, then reuse it across same-city nights.
+  const representativeByCity = new Map<string, LLMTripHub>();
+  for (const hub of sleepHubs) {
+    const key = (hub.city || '').trim().toLowerCase();
+    if (!key) continue;
+    if (!representativeByCity.has(key)) {
+      representativeByCity.set(key, hub);
+    }
+  }
+  const cityRepresentatives = [...representativeByCity.values()];
+
   const startDate = preferences.startDate ? new Date(preferences.startDate) : new Date();
   const resolved = resolveBudget(preferences);
   const budgetPerNight = typeof resolved === 'number'
     ? Math.round(resolved / (preferences.durationDays || 3) * 0.35)
     : undefined;
 
-  const tasks: ValidationTask<HubHotelResult>[] = sleepHubs.map((hub) => ({
-    key: `hotel:${hub.city}:d${hub.day}`,
+  const tasks: ValidationTask<HubHotelResult>[] = cityRepresentatives.map((hub) => ({
+    key: `hotel-city:${hub.city}`,
     provider: 'booking',
     run: async (): Promise<HubHotelResult> => {
       // Resolve hub coords if not already known
@@ -111,19 +122,34 @@ export async function findHotelsForHubs(
     },
   }));
 
-  onProgress?.(`Finding hotels for ${sleepHubs.length} hubs...`);
+  onProgress?.(`Finding hotels for ${cityRepresentatives.length} hubs...`);
   const results = await runValidationTasks(tasks, {
     defaultConcurrency: 3,
     maxRetries: 1,
     hardCapMs: 30000,
   });
 
-  const hotels: HubHotelResult[] = [];
+  const cityResultsByKey = new Map<string, HubHotelResult>();
   for (const [, settled] of results.settledByKey) {
     if (settled.status === 'fulfilled') {
-      hotels.push(settled.value);
+      const cityKey = (settled.value.hub.city || '').trim().toLowerCase();
+      if (cityKey) cityResultsByKey.set(cityKey, settled.value);
     }
   }
+
+  const hotels: HubHotelResult[] = sleepHubs.map((hub) => {
+    const cityKey = (hub.city || '').trim().toLowerCase();
+    const cityResult = cityResultsByKey.get(cityKey);
+    if (!cityResult) {
+      return { hub, hotel: null, alternatives: [], source: 'fallback' as const };
+    }
+    return {
+      hub,
+      hotel: cityResult.hotel,
+      alternatives: cityResult.alternatives,
+      source: cityResult.source,
+    };
+  });
 
   return { hotels, latencyMs: Date.now() - t0 };
 }
