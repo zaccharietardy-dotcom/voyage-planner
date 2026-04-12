@@ -376,6 +376,17 @@ export async function POST(request: NextRequest) {
           }
         }, 10_000);
 
+        const routeHardLimitMs = Math.max(60_000, maxDuration * 1000);
+        const timeoutBufferMs = Math.max(
+          1_000,
+          Number.parseInt(process.env.GENERATE_TIMEOUT_BUFFER_MS || '1800', 10) || 1_800
+        );
+        const generationTimeoutMs = Math.max(30_000, routeHardLimitMs - timeoutBufferMs);
+        const warningDelayMs = Math.min(
+          210_000,
+          Math.max(60_000, generationTimeoutMs - 90_000)
+        );
+
         // Warning SSE before hard timeout (keep user informed on long runs)
         const warningTimeout = setTimeout(() => {
           try {
@@ -388,7 +399,7 @@ export async function POST(request: NextRequest) {
               heartbeat: true,
             });
           } catch { /* stream may be closed */ }
-        }, 210_000);
+        }, warningDelayMs);
 
         // Collect API call timings for profiling (logged on timeout or completion)
         const generationStartMs = Date.now();
@@ -407,10 +418,11 @@ export async function POST(request: NextRequest) {
         };
 
         try {
-          // Timeout explicite très proche de la limite Vercel (5 min),
-          // pour maximiser les chances de terminer sans être kill brutalement.
+          // Timeout explicite calé sur la limite route (maxDuration) avec une petite
+          // marge de flush. Évite un kill brutal sans couper trop tôt.
           const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout: génération trop longue (> 4min57)')), 297_000);
+            const timeoutSec = (generationTimeoutMs / 1000).toFixed(1).replace(/\.0$/, '');
+            setTimeout(() => reject(new Error(`Timeout: génération trop longue (> ${timeoutSec}s)`)), generationTimeoutMs);
           });
 
           const configuredPipeline = process.env.PIPELINE_VERSION || 'v3';

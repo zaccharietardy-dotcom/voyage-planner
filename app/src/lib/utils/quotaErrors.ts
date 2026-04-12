@@ -129,7 +129,7 @@ export function classifyGenerationError(message: string): GenerationErrorClassif
   if (TIMEOUT_PATTERNS.some((pattern) => pattern.test(normalizeText(message)))) {
     return {
       code: 'GENERATION_TIMEOUT',
-      message: 'Generation interrompue car trop longue pour ce run. Reessayez (nous avons augmente la marge de timeout).',
+      message: 'Generation interrompue car trop longue pour ce run. Reessayez dans 1 minute (nous optimisons le pipeline pour eviter ces coupures).',
       httpStatus: 504,
     };
   }

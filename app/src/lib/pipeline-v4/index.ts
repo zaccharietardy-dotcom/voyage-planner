@@ -22,6 +22,7 @@ import { buildTrip } from './build-trip';
 import { resetApiCostTracker, getApiCostSummary } from '../services/apiCostGuard';
 import { storeProfilingData } from '../services/profilingStore';
 import { applyEffects } from '../pipeline/questionDetectors';
+import { isProviderQuotaLikeError } from '../utils/quotaErrors';
 
 // Re-export the entry point
 export type { OnPipelineEvent } from '../pipeline/types';
@@ -361,6 +362,27 @@ function countHotelMoves(trip: Trip): number {
   return trip.days.reduce((sum, day) => sum + day.items.filter((item) => item.type === 'checkin').length, 0);
 }
 
+function isTimeoutLikeErrorMessage(message: string): boolean {
+  const normalized = normalizeText(message);
+  return normalized.includes('timeout')
+    || normalized.includes('deadline')
+    || normalized.includes('trop longue')
+    || normalized.includes('too long');
+}
+
+function shouldFallbackToV3(error: unknown, elapsedMs: number): boolean {
+  const message = error instanceof Error ? error.message : String(error || '');
+  const fallbackMaxElapsedMs = Number.parseInt(process.env.PIPELINE_V4_FALLBACK_MAX_ELAPSED_MS || '150000', 10);
+  const elapsedBudgetMs = Number.isFinite(fallbackMaxElapsedMs) && fallbackMaxElapsedMs > 0
+    ? fallbackMaxElapsedMs
+    : 150_000;
+
+  if (isProviderQuotaLikeError(error)) return false;
+  if (isTimeoutLikeErrorMessage(message)) return false;
+  if (elapsedMs >= elapsedBudgetMs) return false;
+  return true;
+}
+
 /**
  * V4 Pipeline: LLM-first trip generation
  */
@@ -586,10 +608,18 @@ export async function generateTripV2(
   onEvent?: OnPipelineEvent,
   v2Options?: GenerateTripV2Options,
 ): Promise<Trip> {
+  const startMs = Date.now();
   try {
     const trip = await generateTripV4(preferences, onEvent, v2Options);
     return trip;
   } catch (e) {
+    const elapsedMs = Date.now() - startMs;
+    if (!shouldFallbackToV3(e, elapsedMs)) {
+      console.warn('[Pipeline V4] Fallback to V3 skipped:', (e as Error)?.message || e, `(elapsed: ${elapsedMs}ms)`);
+      emitInfo(onEvent, 'v4_fallback_skipped', `V4 failed after ${Math.round(elapsedMs / 1000)}s. Stopping without V3 fallback.`);
+      throw e;
+    }
+
     console.warn('[Pipeline V4] Failed, falling back to V3:', (e as Error).message);
     emitInfo(onEvent, 'v4_fallback', `V4 failed: ${(e as Error).message}. Using classic pipeline...`);
 
