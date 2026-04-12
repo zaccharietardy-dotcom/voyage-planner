@@ -47,28 +47,9 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
   const handleGeolocation = useCallback(async () => {
     setGeoError(null);
 
-    if (typeof window !== 'undefined' && !window.isSecureContext) {
-      setGeoError('La géolocalisation Safari nécessite HTTPS (ou localhost). Ouvrez le site en https puis réessayez.');
-      return;
-    }
-
     if (!navigator.geolocation) {
       setGeoError('La géolocalisation n\'est pas disponible sur votre navigateur.');
       return;
-    }
-
-    // Safari can persist a denied state and skip the popup entirely.
-    // We surface a clear message before attempting getCurrentPosition.
-    try {
-      if (typeof navigator.permissions?.query === 'function') {
-        const permission = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-        if (permission.state === 'denied') {
-          setGeoError('Safari bloque déjà la localisation pour ce site. Ouvre aA > Réglages du site web > Localisation > Demander/Autoriser, puis recharge.');
-          return;
-        }
-      }
-    } catch {
-      // Ignore unsupported Permissions API and continue with direct geolocation request.
     }
 
     setIsLocating(true);
@@ -115,7 +96,7 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     } catch (error) {
       const geoError = error as GeolocationPositionError;
       if (geoError?.code === geoError.PERMISSION_DENIED) {
-        setGeoError('Accès refusé. Safari > aA > Réglages du site web > Localisation > Autoriser, puis réessayez.');
+        setGeoError('Accès à la localisation refusé. Touchez "Autoriser" sur le popup Safari, puis réessayez.');
       } else if (geoError?.code === geoError.TIMEOUT) {
         setGeoError('La localisation a expiré. Vérifiez le GPS/réseau et réessayez.');
       } else {
