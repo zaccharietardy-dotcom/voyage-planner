@@ -13,7 +13,12 @@ import type {
   TransportOptionSummary,
 } from '../../types';
 import { AIRPORTS, calculateDistance } from '../../services/geocoding';
-import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../../services/linkGenerator';
+import {
+  generateFlightLink,
+  generateFlightOmioLink,
+  generateTrainOmioLink,
+  formatDateForUrl,
+} from '../../services/linkGenerator';
 import {
   buildTrainDescription,
   getTransitLegsDurationMinutes,
@@ -113,6 +118,8 @@ export function addOutboundTransportItem(
   // Compute return date for round-trip Aviasales links
   const returnDate = new Date(preferences.startDate);
   returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+  const outboundDateStr = formatDateForUrl(preferences.startDate);
+  const returnDateStr = formatDateForUrl(returnDate);
   const fallbackDistanceKm = preferences.originCoords
     ? calculateDistance(
       preferences.originCoords.lat,
@@ -142,15 +149,15 @@ export function addOutboundTransportItem(
       estimatedCost: flight.price,
       bookingUrl: flight.bookingUrl || generateFlightLink(
         { origin: flight.departureCity, destination: flight.arrivalCity },
-        { date: formatDateForUrl(preferences.startDate), returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
+        { date: outboundDateStr, returnDate: returnDateStr, passengers: preferences.groupSize }
       ),
       aviasalesUrl: generateFlightLink(
         { origin: flight.departureCity, destination: flight.arrivalCity },
-        { date: formatDateForUrl(preferences.startDate), returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
+        { date: outboundDateStr, returnDate: returnDateStr, passengers: preferences.groupSize }
       ),
       omioFlightUrl: generateFlightOmioLink(
         flight.departureCity, flight.arrivalCity,
-        formatDateForUrl(preferences.startDate), preferences.groupSize
+        outboundDateStr, preferences.groupSize
       ),
     };
 
@@ -182,7 +189,12 @@ export function addOutboundTransportItem(
       transportTimeSource: transport.dataSource || 'api',
       imageUrl: '/images/transport/train-sncf-duplex.jpg',
       estimatedCost: transport.totalPrice,
-      bookingUrl: transport.bookingUrl,
+      bookingUrl: transport.bookingUrl || generateTrainOmioLink(
+        preferences.origin,
+        preferences.destination,
+        outboundDateStr,
+        preferences.groupSize
+      ),
     };
 
     day1.items.unshift(trainItem);
@@ -190,8 +202,6 @@ export function addOutboundTransportItem(
     // Fallback: plane recommended but no flight data (API timeout/failure/no results)
     const departMin = parseHHMM('08:00');
     const arrivalMin = departMin + (transport.totalDuration || 180);
-    const outboundDateStr = formatDateForUrl(preferences.startDate);
-
     const flightFallbackItem: TripItem = {
       id: uuidv4(),
       dayNumber: 1,
@@ -209,11 +219,11 @@ export function addOutboundTransportItem(
       estimatedCost: transport.totalPrice,
       bookingUrl: generateFlightLink(
         { origin: preferences.origin, destination: preferences.destination },
-        { date: outboundDateStr, returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
+        { date: outboundDateStr, returnDate: returnDateStr, passengers: preferences.groupSize }
       ),
       aviasalesUrl: generateFlightLink(
         { origin: preferences.origin, destination: preferences.destination },
-        { date: outboundDateStr, returnDate: formatDateForUrl(returnDate), passengers: preferences.groupSize }
+        { date: outboundDateStr, returnDate: returnDateStr, passengers: preferences.groupSize }
       ),
       omioFlightUrl: generateFlightOmioLink(
         preferences.origin, preferences.destination,
@@ -249,7 +259,11 @@ export function addOutboundTransportItem(
       transportTimeSource: 'estimated',
       selectionSource: 'api',
       estimatedCost: transport.totalPrice || estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
-      bookingUrl: transport.bookingUrl,
+      bookingUrl:
+        transport.bookingUrl
+        || (mode === 'train'
+          ? generateTrainOmioLink(preferences.origin, preferences.destination, outboundDateStr, preferences.groupSize)
+          : undefined),
     };
     day1.items.unshift(genericOutbound);
   } else if (!flight && !transport && shouldInjectLonghaulFallback(preferences)) {
@@ -257,27 +271,68 @@ export function addOutboundTransportItem(
     const durationMin = estimateLonghaulDurationMin(mode, fallbackDistanceKm);
     const departMin = parseHHMM('08:00');
     const arriveMin = departMin + durationMin;
-    const fallbackOutbound: TripItem = {
-      id: uuidv4(),
-      dayNumber: 1,
-      startTime: minutesToHHMM(departMin),
-      endTime: minutesToHHMM(Math.min(arriveMin, 23 * 60 + 55)),
-      type: 'transport',
-      title: `${preferences.origin} -> ${preferences.destination}`,
-      description: `Trajet ${mode} estimé (fallback)`,
-      locationName: preferences.origin,
-      latitude: preferences.originCoords?.lat ?? fallbackCoords.lat,
-      longitude: preferences.originCoords?.lng ?? fallbackCoords.lng,
-      orderIndex: 0,
-      duration: durationMin,
-      transportMode: mode === 'plane' ? 'transit' : mode,
-      transportRole: 'longhaul',
-      transportDirection: 'outbound',
-      transportTimeSource: 'estimated_fallback',
-      selectionSource: 'fallback',
-      estimatedCost: estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
-    };
-    day1.items.unshift(fallbackOutbound);
+    if (mode === 'plane') {
+      const fallbackOutboundFlight: TripItem = {
+        id: uuidv4(),
+        dayNumber: 1,
+        startTime: minutesToHHMM(departMin),
+        endTime: minutesToHHMM(Math.min(arriveMin, 23 * 60 + 55)),
+        type: 'flight',
+        title: `Vol ${preferences.origin} -> ${preferences.destination}`,
+        description: 'Réservez votre vol',
+        locationName: preferences.origin,
+        latitude: preferences.originCoords?.lat ?? fallbackCoords.lat,
+        longitude: preferences.originCoords?.lng ?? fallbackCoords.lng,
+        orderIndex: 0,
+        duration: durationMin,
+        selectionSource: 'fallback',
+        transportRole: 'longhaul',
+        transportDirection: 'outbound',
+        transportTimeSource: 'estimated_fallback',
+        imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
+        estimatedCost: estimateLonghaulCostEur('plane', fallbackDistanceKm, preferences.groupSize || 1),
+        bookingUrl: generateFlightLink(
+          { origin: preferences.origin, destination: preferences.destination },
+          { date: outboundDateStr, returnDate: returnDateStr, passengers: preferences.groupSize }
+        ),
+        aviasalesUrl: generateFlightLink(
+          { origin: preferences.origin, destination: preferences.destination },
+          { date: outboundDateStr, returnDate: returnDateStr, passengers: preferences.groupSize }
+        ),
+        omioFlightUrl: generateFlightOmioLink(
+          preferences.origin,
+          preferences.destination,
+          outboundDateStr,
+          preferences.groupSize
+        ),
+      };
+      day1.items.unshift(fallbackOutboundFlight);
+    } else {
+      const fallbackOutbound: TripItem = {
+        id: uuidv4(),
+        dayNumber: 1,
+        startTime: minutesToHHMM(departMin),
+        endTime: minutesToHHMM(Math.min(arriveMin, 23 * 60 + 55)),
+        type: 'transport',
+        title: `${preferences.origin} -> ${preferences.destination}`,
+        description: `Trajet ${mode} estimé (fallback)`,
+        locationName: preferences.origin,
+        latitude: preferences.originCoords?.lat ?? fallbackCoords.lat,
+        longitude: preferences.originCoords?.lng ?? fallbackCoords.lng,
+        orderIndex: 0,
+        duration: durationMin,
+        transportMode: mode,
+        transportRole: 'longhaul',
+        transportDirection: 'outbound',
+        transportTimeSource: 'estimated_fallback',
+        selectionSource: 'fallback',
+        estimatedCost: estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
+        bookingUrl: mode === 'train'
+          ? generateTrainOmioLink(preferences.origin, preferences.destination, outboundDateStr, preferences.groupSize)
+          : undefined,
+      };
+      day1.items.unshift(fallbackOutbound);
+    }
   }
 
   // Re-index order
@@ -297,6 +352,9 @@ export function addReturnTransportItem(
   preferences: TripPreferences,
   fallbackCoords: { lat: number; lng: number }
 ): void {
+  const returnDate = new Date(preferences.startDate);
+  returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+  const returnDateStr = formatDateForUrl(returnDate);
   const fallbackDistanceKm = preferences.originCoords
     ? calculateDistance(
       fallbackCoords.lat,
@@ -307,10 +365,6 @@ export function addReturnTransportItem(
     : 150;
 
   if (returnFlight) {
-    const returnDate = new Date(preferences.startDate);
-    returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
-    const returnDateStr = formatDateForUrl(returnDate);
-
     const flightItem: TripItem = {
       id: uuidv4(),
       dayNumber: lastDay.dayNumber,
@@ -379,7 +433,17 @@ export function addReturnTransportItem(
       transportTimeSource: rebasedReturnLegs?.length ? 'rebased' : 'estimated',
       imageUrl: '/images/transport/train-sncf-duplex.jpg',
       estimatedCost: transport.totalPrice,
-      bookingUrl: normalizeReturnTransportBookingUrl(transport.bookingUrl, returnStart, { swapOmioDirection: true }),
+      bookingUrl: normalizeReturnTransportBookingUrl(
+        transport.bookingUrl
+          || generateTrainOmioLink(
+            preferences.destination,
+            preferences.origin,
+            formatDateForUrl(returnStart),
+            preferences.groupSize
+          ),
+        returnStart,
+        { swapOmioDirection: true }
+      ),
     };
 
     lastDay.items.push(trainItem);
@@ -387,10 +451,6 @@ export function addReturnTransportItem(
     // Fallback: plane recommended but no return flight data
     const returnDepartMin = 17 * 60;
     const returnArrivalMin = returnDepartMin + (transport.totalDuration || 180);
-    const returnDate = new Date(preferences.startDate);
-    returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
-    const returnDateStr = formatDateForUrl(returnDate);
-
     const flightFallbackItem: TripItem = {
       id: uuidv4(),
       dayNumber: lastDay.dayNumber,
@@ -444,7 +504,14 @@ export function addReturnTransportItem(
       transportDirection: 'return',
       transportTimeSource: 'estimated',
       estimatedCost: transport.totalPrice,
-      bookingUrl: normalizeReturnTransportBookingUrl(transport.bookingUrl, lastDay.date, { swapOmioDirection: true }),
+      bookingUrl: normalizeReturnTransportBookingUrl(
+        transport.bookingUrl
+          || (transport.mode === 'train'
+            ? generateTrainOmioLink(preferences.destination, preferences.origin, returnDateStr, preferences.groupSize)
+            : undefined),
+        lastDay.date,
+        { swapOmioDirection: true }
+      ),
     };
 
     lastDay.items.push(trainItem);
@@ -453,27 +520,68 @@ export function addReturnTransportItem(
     const durationMin = estimateLonghaulDurationMin(mode, fallbackDistanceKm);
     const returnDepartMin = 17 * 60;
     const returnArrivalMin = returnDepartMin + durationMin;
-    const fallbackReturn: TripItem = {
-      id: uuidv4(),
-      dayNumber: lastDay.dayNumber,
-      startTime: minutesToHHMM(returnDepartMin),
-      endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 55)),
-      type: 'transport',
-      title: `${preferences.destination} -> ${preferences.origin}`,
-      description: `Trajet ${mode} estimé (fallback)`,
-      locationName: preferences.destination,
-      latitude: fallbackCoords.lat,
-      longitude: fallbackCoords.lng,
-      orderIndex: lastDay.items.length,
-      duration: durationMin,
-      transportMode: mode === 'plane' ? 'transit' : mode,
-      transportRole: 'longhaul',
-      transportDirection: 'return',
-      transportTimeSource: 'estimated_fallback',
-      selectionSource: 'fallback',
-      estimatedCost: estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
-    };
-    lastDay.items.push(fallbackReturn);
+    if (mode === 'plane') {
+      const fallbackReturnFlight: TripItem = {
+        id: uuidv4(),
+        dayNumber: lastDay.dayNumber,
+        startTime: minutesToHHMM(returnDepartMin),
+        endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 55)),
+        type: 'flight',
+        title: `Vol ${preferences.destination} -> ${preferences.origin}`,
+        description: 'Réservez votre vol retour',
+        locationName: preferences.destination,
+        latitude: fallbackCoords.lat,
+        longitude: fallbackCoords.lng,
+        orderIndex: lastDay.items.length,
+        duration: durationMin,
+        selectionSource: 'fallback',
+        transportRole: 'longhaul',
+        transportDirection: 'return',
+        transportTimeSource: 'estimated_fallback',
+        imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
+        estimatedCost: estimateLonghaulCostEur('plane', fallbackDistanceKm, preferences.groupSize || 1),
+        bookingUrl: generateFlightLink(
+          { origin: preferences.destination, destination: preferences.origin },
+          { date: returnDateStr, passengers: preferences.groupSize }
+        ),
+        aviasalesUrl: generateFlightLink(
+          { origin: preferences.destination, destination: preferences.origin },
+          { date: returnDateStr, passengers: preferences.groupSize }
+        ),
+        omioFlightUrl: generateFlightOmioLink(
+          preferences.destination,
+          preferences.origin,
+          returnDateStr,
+          preferences.groupSize
+        ),
+      };
+      lastDay.items.push(fallbackReturnFlight);
+    } else {
+      const fallbackReturn: TripItem = {
+        id: uuidv4(),
+        dayNumber: lastDay.dayNumber,
+        startTime: minutesToHHMM(returnDepartMin),
+        endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 55)),
+        type: 'transport',
+        title: `${preferences.destination} -> ${preferences.origin}`,
+        description: `Trajet ${mode} estimé (fallback)`,
+        locationName: preferences.destination,
+        latitude: fallbackCoords.lat,
+        longitude: fallbackCoords.lng,
+        orderIndex: lastDay.items.length,
+        duration: durationMin,
+        transportMode: mode,
+        transportRole: 'longhaul',
+        transportDirection: 'return',
+        transportTimeSource: 'estimated_fallback',
+        selectionSource: 'fallback',
+        estimatedCost: estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
+        bookingUrl: mode === 'train'
+          ? generateTrainOmioLink(preferences.destination, preferences.origin, returnDateStr, preferences.groupSize)
+          : undefined,
+      };
+      lastDay.items.push(fallbackReturn);
+    }
   }
 
   // Re-index order

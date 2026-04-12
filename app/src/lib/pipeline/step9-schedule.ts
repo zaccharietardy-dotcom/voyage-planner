@@ -1029,6 +1029,9 @@ export function createActivityItem(
 ): TripItem {
   const title = normalizeActivityTitle(activity.name || 'Activity', destination);
   const description = activity.description || generateFallbackDescription(title, activity.type, destination);
+  const rawGeoSource = (activity as any).geoSource;
+  const rawGeoConfidence = (activity as any).geoConfidence || (activity as any).coordinateConfidence;
+  const rawQualityFlags = (activity as any).qualityFlags;
   // Generate Google Maps place URL for every activity
   const googleMapsPlaceUrl = activity.googlePlaceId
     ? `https://www.google.com/maps/place/?q=place_id:${activity.googlePlaceId}`
@@ -1053,6 +1056,22 @@ export function createActivityItem(
     bookingUrl: activity.bookingUrl,
     googleMapsPlaceUrl,
     mustSee: activity.mustSee,
+    geoSource:
+      rawGeoSource === 'place'
+      || rawGeoSource === 'known_product'
+      || rawGeoSource === 'geocode'
+      || rawGeoSource === 'city_fallback'
+        ? rawGeoSource
+        : undefined,
+    geoConfidence:
+      rawGeoConfidence === 'high'
+      || rawGeoConfidence === 'medium'
+      || rawGeoConfidence === 'low'
+        ? rawGeoConfidence
+        : undefined,
+    qualityFlags: Array.isArray(rawQualityFlags)
+      ? Array.from(new Set(rawQualityFlags.filter((flag: unknown) => typeof flag === 'string' && flag.trim().length > 0)))
+      : undefined,
     planningMeta: {
       planningToken: activity.planningToken,
       protectedReason: activity.protectedReason,

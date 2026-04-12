@@ -1449,7 +1449,16 @@ export async function generateTripV2(
           `[Pipeline] Regional blueprint (${regionalBlueprint.source}): mode=${regionalBlueprint.mode}, chosen=${resolvedDecision.chosenStyle}, hubs=${regionalBlueprint.hubs.map((hub) => `${hub.city}(${hub.days}j)`).join(' → ')}`
         );
       } else if (regionAnalysis) {
-        if (regionAnalysis.resolvedCities.length > 1) {
+        if (regionAnalysis.inputType === 'city' && preferences.travelStyle !== 'road_trip') {
+          preferences.travelStyle = 'single_base';
+          preferences.cityPlan = undefined;
+        }
+        // Guardrail: do not silently force road-trip routing when the input is already a city.
+        // For city inputs, keep single-base unless the user explicitly asked for road_trip.
+        const canAutoExpandToCityPlan =
+          regionAnalysis.inputType !== 'city'
+          || preferences.travelStyle === 'road_trip';
+        if (canAutoExpandToCityPlan && regionAnalysis.resolvedCities.length > 1) {
           preferences.cityPlan = regionAnalysis.resolvedCities.map(c => ({
             city: c.name,
             days: c.stayDuration,

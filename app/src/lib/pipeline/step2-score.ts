@@ -544,6 +544,27 @@ export function scoreAndSelectActivities(
     console.log(`[Pipeline V2] Excluded ${beforeViatorGpsFilter - scored.length} Viator activities with unreliable GPS (city-center fallback)`);
   }
 
+  // 5c.1. Reject weak must-see seeds that are not grounded in a verifiable place.
+  // This prevents synthetic/ambiguous labels (e.g. generic "tour de l'horloge")
+  // from surviving when they have neither place_id nor enough social proof.
+  const beforeWeakMustSeeFilter = scored.length;
+  scored = scored.filter((activity) => {
+    if (activity.source !== 'mustsee') return true;
+    if ((activity as any).protectedReason === 'user_forced') return true;
+
+    const googlePlaceId = typeof (activity as any).googlePlaceId === 'string'
+      ? (activity as any).googlePlaceId.trim()
+      : '';
+    const hasPlaceId = googlePlaceId.length > 0;
+    const reviewCount = Number(activity.reviewCount || 0);
+
+    // Keep if strongly grounded, otherwise drop.
+    return hasPlaceId || reviewCount >= 20;
+  });
+  if (scored.length < beforeWeakMustSeeFilter) {
+    console.log(`[Pipeline V2] Excluded ${beforeWeakMustSeeFilter - scored.length} weak must-see seeds (no place_id + low reviews)`);
+  }
+
   // 5c. Validate and filter coordinates using coordinate-validator.
   // Filters out invalid coordinates and auto-corrects swapped lat/lng.
   // Must-see activities use a wider distance cap (500km) to avoid re-rejecting

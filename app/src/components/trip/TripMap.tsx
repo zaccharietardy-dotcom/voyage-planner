@@ -71,10 +71,10 @@ const TYPE_SHAPES: Record<string, { containerCss: string; innerCss: string }> = 
 
 const TYPE_MARKERS: Record<string, string> = {
   activity:   '',
-  restaurant: 'R',
-  hotel:      'H',
-  checkin:    'H',
-  checkout:   'H',
+  restaurant: '🍽',
+  hotel:      '🛏',
+  checkin:    '↘',
+  checkout:   '↗',
   transport:  '↔',
   flight:     '✈',
   parking:    'P',
@@ -692,6 +692,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
               hubs.push({
                 ...seed,
                 id: `macro-hub-${dayNumber}`,
+                type: 'activity',
                 title: `Jour ${dayNumber}`,
                 locationName: seed.locationName || seed.title,
                 latitude: avgLat,
@@ -705,6 +706,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
               hubs.push({
                 ...fallback,
                 id: `macro-hub-${dayNumber}`,
+                type: 'activity',
                 title: `Jour ${dayNumber}`,
                 locationName: fallback.locationName || fallback.title,
               });
@@ -716,7 +718,15 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
 
     // Add markers — only activities get sequential numbers
     // Transport, checkin, checkout, luggage, free_time, parking are hidden from map to reduce clutter
+    const hasActivityWithCoords = mapVisibleItems.some(
+      (item) => item.type === 'activity' && Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
+    );
     const HIDDEN_TYPES = new Set(['transport', 'flight', 'checkin', 'checkout', 'luggage', 'free_time', 'parking']);
+    // Keep map readable: when we already have activities, hide meal/hotel markers to avoid H/R clutter.
+    if (hasActivityWithCoords) {
+      HIDDEN_TYPES.add('restaurant');
+      HIDDEN_TYPES.add('hotel');
+    }
 
     // Pre-compute per-day activity numbering (1-based within each day)
     // so markers show 1, 2, 3 per day instead of global indices across the trip
@@ -753,7 +763,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       bounds.extend([item.latitude, item.longitude]);
     });
 
-    if (!isAllDaysView) {
+    if (!isAllDaysView && !hasActivityWithCoords) {
       // Add hotel marker from checkin/checkout accommodation data
       const hotelAdded = new Set<string>();
       items.forEach((item) => {
