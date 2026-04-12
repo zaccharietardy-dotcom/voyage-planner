@@ -12,7 +12,7 @@ import type {
   Flight,
   TransportOptionSummary,
 } from '../../types';
-import { AIRPORTS } from '../../services/geocoding';
+import { AIRPORTS, calculateDistance } from '../../services/geocoding';
 import { generateFlightLink, generateFlightOmioLink, formatDateForUrl } from '../../services/linkGenerator';
 import {
   buildTrainDescription,
@@ -47,6 +47,58 @@ function parseHHMM(time: string): number {
   return (h || 0) * 60 + (m || 0);
 }
 
+function normalizeText(value: string): string {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function inferFallbackLonghaulMode(preferences: TripPreferences, distanceKm: number): 'car' | 'train' | 'bus' | 'plane' {
+  if (preferences.transport && preferences.transport !== 'optimal') {
+    if (preferences.transport === 'plane') return 'plane';
+    if (preferences.transport === 'train') return 'train';
+    if (preferences.transport === 'car') return 'car';
+    if (preferences.transport === 'bus') return 'bus';
+  }
+  if (distanceKm >= 650) return 'plane';
+  if (distanceKm >= 180) return 'train';
+  if (distanceKm >= 90) return 'bus';
+  return 'car';
+}
+
+function estimateLonghaulDurationMin(mode: 'car' | 'train' | 'bus' | 'plane', distanceKm: number): number {
+  const speedKmh = mode === 'plane'
+    ? 700
+    : mode === 'train'
+      ? 110
+      : mode === 'bus'
+        ? 60
+        : 70;
+  const fixedBuffer = mode === 'plane' ? 120 : 20;
+  const travelMin = Math.max(45, Math.round((distanceKm / Math.max(1, speedKmh)) * 60));
+  return Math.max(75, travelMin + fixedBuffer);
+}
+
+function estimateLonghaulCostEur(mode: 'car' | 'train' | 'bus' | 'plane', distanceKm: number, groupSize: number): number {
+  const perKm = mode === 'plane'
+    ? 0.22
+    : mode === 'train'
+      ? 0.12
+      : mode === 'bus'
+        ? 0.08
+        : 0.18;
+  const base = Math.max(25, Math.round(distanceKm * perKm));
+  const multiplier = mode === 'car' ? 1 : Math.max(1, groupSize || 1);
+  return Math.round(base * multiplier);
+}
+
+function shouldInjectLonghaulFallback(preferences: TripPreferences): boolean {
+  return normalizeText(preferences.origin) !== normalizeText(preferences.destination);
+}
+
 // ============================================
 // Outbound transport
 // ============================================
@@ -58,11 +110,17 @@ export function addOutboundTransportItem(
   preferences: TripPreferences,
   fallbackCoords: { lat: number; lng: number }
 ): void {
-  if (!flight && !transport) return;
-
   // Compute return date for round-trip Aviasales links
   const returnDate = new Date(preferences.startDate);
   returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+  const fallbackDistanceKm = preferences.originCoords
+    ? calculateDistance(
+      preferences.originCoords.lat,
+      preferences.originCoords.lng,
+      fallbackCoords.lat,
+      fallbackCoords.lng,
+    )
+    : 150;
 
   if (flight) {
     const flightItem: TripItem = {
@@ -164,6 +222,62 @@ export function addOutboundTransportItem(
     };
 
     day1.items.unshift(flightFallbackItem);
+  } else if (transport && transport.mode !== 'plane' && !transport.transitLegs) {
+    const departMin = parseHHMM('08:00');
+    const durationMin = Math.max(60, transport.totalDuration || estimateLonghaulDurationMin(
+      transport.mode as 'car' | 'train' | 'bus',
+      fallbackDistanceKm,
+    ));
+    const arriveMin = departMin + durationMin;
+    const mode = (transport.mode as 'car' | 'train' | 'bus');
+    const genericOutbound: TripItem = {
+      id: uuidv4(),
+      dayNumber: 1,
+      startTime: minutesToHHMM(departMin),
+      endTime: minutesToHHMM(Math.min(arriveMin, 23 * 60 + 55)),
+      type: 'transport',
+      title: `${preferences.origin} -> ${preferences.destination}`,
+      description: `Trajet ${mode} estimé`,
+      locationName: preferences.origin,
+      latitude: preferences.originCoords?.lat ?? fallbackCoords.lat,
+      longitude: preferences.originCoords?.lng ?? fallbackCoords.lng,
+      orderIndex: 0,
+      duration: durationMin,
+      transportMode: mode,
+      transportRole: 'longhaul',
+      transportDirection: 'outbound',
+      transportTimeSource: 'estimated',
+      selectionSource: 'api',
+      estimatedCost: transport.totalPrice || estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
+      bookingUrl: transport.bookingUrl,
+    };
+    day1.items.unshift(genericOutbound);
+  } else if (!flight && !transport && shouldInjectLonghaulFallback(preferences)) {
+    const mode = inferFallbackLonghaulMode(preferences, fallbackDistanceKm);
+    const durationMin = estimateLonghaulDurationMin(mode, fallbackDistanceKm);
+    const departMin = parseHHMM('08:00');
+    const arriveMin = departMin + durationMin;
+    const fallbackOutbound: TripItem = {
+      id: uuidv4(),
+      dayNumber: 1,
+      startTime: minutesToHHMM(departMin),
+      endTime: minutesToHHMM(Math.min(arriveMin, 23 * 60 + 55)),
+      type: 'transport',
+      title: `${preferences.origin} -> ${preferences.destination}`,
+      description: `Trajet ${mode} estimé (fallback)`,
+      locationName: preferences.origin,
+      latitude: preferences.originCoords?.lat ?? fallbackCoords.lat,
+      longitude: preferences.originCoords?.lng ?? fallbackCoords.lng,
+      orderIndex: 0,
+      duration: durationMin,
+      transportMode: mode === 'plane' ? 'transit' : mode,
+      transportRole: 'longhaul',
+      transportDirection: 'outbound',
+      transportTimeSource: 'estimated_fallback',
+      selectionSource: 'fallback',
+      estimatedCost: estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
+    };
+    day1.items.unshift(fallbackOutbound);
   }
 
   // Re-index order
@@ -183,7 +297,14 @@ export function addReturnTransportItem(
   preferences: TripPreferences,
   fallbackCoords: { lat: number; lng: number }
 ): void {
-  if (!returnFlight && !transport) return;
+  const fallbackDistanceKm = preferences.originCoords
+    ? calculateDistance(
+      fallbackCoords.lat,
+      fallbackCoords.lng,
+      preferences.originCoords.lat,
+      preferences.originCoords.lng,
+    )
+    : 150;
 
   if (returnFlight) {
     const returnDate = new Date(preferences.startDate);
@@ -327,6 +448,32 @@ export function addReturnTransportItem(
     };
 
     lastDay.items.push(trainItem);
+  } else if (!returnFlight && !transport && shouldInjectLonghaulFallback(preferences)) {
+    const mode = inferFallbackLonghaulMode(preferences, fallbackDistanceKm);
+    const durationMin = estimateLonghaulDurationMin(mode, fallbackDistanceKm);
+    const returnDepartMin = 17 * 60;
+    const returnArrivalMin = returnDepartMin + durationMin;
+    const fallbackReturn: TripItem = {
+      id: uuidv4(),
+      dayNumber: lastDay.dayNumber,
+      startTime: minutesToHHMM(returnDepartMin),
+      endTime: minutesToHHMM(Math.min(returnArrivalMin, 23 * 60 + 55)),
+      type: 'transport',
+      title: `${preferences.destination} -> ${preferences.origin}`,
+      description: `Trajet ${mode} estimé (fallback)`,
+      locationName: preferences.destination,
+      latitude: fallbackCoords.lat,
+      longitude: fallbackCoords.lng,
+      orderIndex: lastDay.items.length,
+      duration: durationMin,
+      transportMode: mode === 'plane' ? 'transit' : mode,
+      transportRole: 'longhaul',
+      transportDirection: 'return',
+      transportTimeSource: 'estimated_fallback',
+      selectionSource: 'fallback',
+      estimatedCost: estimateLonghaulCostEur(mode, fallbackDistanceKm, preferences.groupSize || 1),
+    };
+    lastDay.items.push(fallbackReturn);
   }
 
   // Re-index order

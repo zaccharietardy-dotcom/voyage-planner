@@ -369,6 +369,11 @@ export async function POST(request: NextRequest) {
         const generationStartMs = Date.now();
         const apiTimings: Array<{ label: string; durationMs: number; status: 'ok' | 'error' }> = [];
         const stepTimings: Array<{ step: number; name: string; durationMs: number }> = [];
+        const questionFlowStats = {
+          askedCount: 0,
+          autoDefaultCount: 0,
+          postDraftAdjustUsed: false,
+        };
 
         try {
           // Timeout explicite très proche de la limite Vercel (5 min),
@@ -428,6 +433,10 @@ export async function POST(request: NextRequest) {
           const askUser = (question: Omit<PipelineQuestion, 'sessionId'>): Promise<string> => {
             const fullQuestion: PipelineQuestion = { ...question, sessionId };
             const defaultOption = question.options.find(o => o.isDefault) || question.options[0];
+            questionFlowStats.askedCount += 1;
+            if (question.type === 'post_draft_adjust') {
+              questionFlowStats.postDraftAdjustUsed = true;
+            }
 
             return new Promise<string>((resolve) => {
               void persistSession({
@@ -439,7 +448,10 @@ export async function POST(request: NextRequest) {
               registerQuestion(
                 sessionId,
                 question.questionId,
-                (selectedOptionId) => {
+                (selectedOptionId, meta) => {
+                  if (meta.autoDefault) {
+                    questionFlowStats.autoDefaultCount += 1;
+                  }
                   void persistSession({
                     status: 'running',
                     progress: { label: 'question-answered', questionId: question.questionId, runId },
@@ -477,6 +489,7 @@ export async function POST(request: NextRequest) {
             publishGateResult: publishGate.result,
             qualityGateResult: publishGate.publishable ? 'passed' : 'failed',
             qualityGateFailures: publishGate.gateFailures,
+            questionFlow: questionFlowStats,
             quotaStopProvider: undefined,
             budgetStopReason: undefined,
           };

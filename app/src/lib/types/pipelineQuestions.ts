@@ -5,6 +5,8 @@
 // Effets structurés pour les questions LLM
 export type QuestionEffect =
   | { type: 'set_travel_mode'; value: 'single_base' | 'road_trip' }
+  | { type: 'set_transport'; value: 'optimal' | 'plane' | 'train' | 'car' | 'bus' }
+  | { type: 'set_car_rental'; value: boolean }
   | { type: 'add_day_trip'; destination: string }
   | { type: 'add_avoid'; name: string }
   | { type: 'adjust_scores'; category: string; delta: number }
@@ -22,7 +24,7 @@ export interface QuestionOption {
 
 export type PipelineQuestionType =
   | 'full_day_activity' | 'day_trip' | 'activity_balance' | 'hotel_area'
-  | 'pre_fetch_llm' | 'post_scoring_llm';
+  | 'pre_fetch_llm' | 'post_scoring_llm' | 'travel_style_gate' | 'post_draft_adjust';
 
 export interface PipelineQuestion {
   questionId: string;

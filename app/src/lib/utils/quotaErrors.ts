@@ -33,6 +33,12 @@ const USER_SUBSCRIPTION_PATTERNS: RegExp[] = [
   /trop de generations? recen/i,
 ];
 
+const TIMEOUT_PATTERNS: RegExp[] = [
+  /\btimeout\b/i,
+  /\bdeadline\b/i,
+  /generation trop longue/i,
+];
+
 function normalizeText(value: string): string {
   return value
     .normalize('NFD')
@@ -86,7 +92,7 @@ export function isProviderQuotaLikeError(error: unknown): boolean {
 }
 
 export interface GenerationErrorClassification {
-  code: 'USER_QUOTA_EXCEEDED' | 'PROVIDER_QUOTA_EXCEEDED' | 'BUDGET_OVER_BURST_CAP' | 'ADMISSION_BLOCKED' | 'UNKNOWN_ERROR';
+  code: 'USER_QUOTA_EXCEEDED' | 'PROVIDER_QUOTA_EXCEEDED' | 'BUDGET_OVER_BURST_CAP' | 'ADMISSION_BLOCKED' | 'GENERATION_TIMEOUT' | 'UNKNOWN_ERROR';
   message: string;
   httpStatus: number;
 }
@@ -118,6 +124,13 @@ export function classifyGenerationError(message: string): GenerationErrorClassif
       code: 'ADMISSION_BLOCKED',
       message: 'Generation temporairement bloquee (cooldown, dedupe, ou provider indisponible).',
       httpStatus: 429,
+    };
+  }
+  if (TIMEOUT_PATTERNS.some((pattern) => pattern.test(normalizeText(message)))) {
+    return {
+      code: 'GENERATION_TIMEOUT',
+      message: 'Generation interrompue car trop longue pour ce run. Reessayez (nous avons augmente la marge de timeout).',
+      httpStatus: 504,
     };
   }
   return {

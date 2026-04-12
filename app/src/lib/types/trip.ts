@@ -362,7 +362,7 @@ export interface TripItem {
   parking?: ParkingOption;
   restaurant?: Restaurant;
   restaurantAlternatives?: Restaurant[]; // Top 2-3 restaurants alternatifs classés par qualité/distance
-  selectionSource?: 'pool' | 'api' | 'fallback' | 'gap_fill'; // Source de sélection du restaurant/activité (post-optimisation)
+  selectionSource?: 'pool' | 'api' | 'fallback' | 'gap_fill' | 'verified'; // Source de sélection du restaurant/activité (post-optimisation)
   mealType?: 'breakfast' | 'lunch' | 'dinner'; // Canonical meal slot (title is derived for display)
   accommodation?: Accommodation;
   localTransport?: LocalTransport;
@@ -375,7 +375,7 @@ export interface TripItem {
   transportMode?: 'train' | 'bus' | 'car' | 'ferry' | 'walking' | 'transit' | 'RER' | 'metro';
   transportRole?: 'longhaul' | 'hotel_depart' | 'hotel_return' | 'inter_item' | 'daytrip_outbound' | 'daytrip_return';
   transportDirection?: 'outbound' | 'return' | 'daytrip_outbound' | 'daytrip_return';
-  transportTimeSource?: 'api' | 'rebased' | 'estimated';
+  transportTimeSource?: 'api' | 'rebased' | 'estimated' | 'estimated_fallback';
   // Informations de transport détaillées
   transitInfo?: {
     lines: { number: string; mode: 'bus' | 'metro' | 'tram' | 'train' | 'ferry'; color?: string }[];
@@ -746,6 +746,29 @@ export interface Trip {
     closedWorldActivationRate?: number;
     geoFallbackUsed?: boolean;
     geoScopeSource?: 'nominatim' | 'resolved_cities' | 'fallback_center';
+    travelStyleDecision?: {
+      source: 'user_explicit' | 'auto_scored' | 'user_question';
+      scores: {
+        single_base: number;
+        road_trip: number;
+        delta: number;
+      };
+      questionAsked: boolean;
+      chosenStyle: 'single_base' | 'road_trip';
+    };
+    longhaulInjected?: {
+      required: boolean;
+      outbound: boolean;
+      return: boolean;
+      mode: string;
+      source: 'verified' | 'fallback';
+      distanceKm?: number;
+    };
+    questionFlow?: {
+      askedCount: number;
+      autoDefaultCount: number;
+      postDraftAdjustUsed: boolean;
+    };
     outsideEnvelopeRejectCount?: number;
     inspiredModeUsed?: boolean;
     mealSemanticReplacements?: number;

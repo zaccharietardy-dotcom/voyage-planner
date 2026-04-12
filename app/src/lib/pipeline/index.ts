@@ -44,6 +44,7 @@ export interface GenerateTripV2Options {
   enableRunTrace?: boolean;
   destinationRadiusKm?: number;
   destinationEnvelope?: DestinationEnvelope | null;
+  travelStyleDecision?: TravelStyleDecision;
 }
 import { fetchAllData } from './step1-fetch';
 import { scoreAndSelectActivities } from './step2-score';
@@ -878,15 +879,150 @@ function emptyValidationDiagnosticsSnapshot(): ValidationDiagnosticsSnapshot {
   };
 }
 
+type TravelStyleChoice = 'single_base' | 'road_trip';
+
+interface TravelStyleDecision {
+  source: 'user_explicit' | 'auto_scored' | 'user_question';
+  scores: {
+    single_base: number;
+    road_trip: number;
+    delta: number;
+  };
+  questionAsked: boolean;
+  chosenStyle: TravelStyleChoice;
+}
+
+function computeTravelStyleDecision(
+  preferences: TripPreferences,
+  blueprint: RegionalBlueprint,
+  analysis: DestinationAnalysis | null,
+): TravelStyleDecision {
+  if (preferences.travelStyle === 'single_base' || preferences.travelStyle === 'road_trip') {
+    return {
+      source: 'user_explicit',
+      scores: {
+        single_base: preferences.travelStyle === 'single_base' ? 1 : 0,
+        road_trip: preferences.travelStyle === 'road_trip' ? 1 : 0,
+        delta: 1,
+      },
+      questionAsked: false,
+      chosenStyle: preferences.travelStyle,
+    };
+  }
+
+  let singleBaseScore = 0.5;
+  let roadTripScore = 0.5;
+  const hubCount = blueprint.hubs.length;
+
+  if (hubCount >= 3) roadTripScore += 0.45;
+  else if (hubCount === 2) roadTripScore += 0.25;
+  else singleBaseScore += 0.35;
+
+  if (preferences.durationDays <= 4) singleBaseScore += 0.25;
+  else if (preferences.durationDays >= 7) roadTripScore += 0.2;
+
+  if (preferences.carRental || preferences.transport === 'car') roadTripScore += 0.15;
+  if (preferences.groupType === 'family_with_kids') singleBaseScore += 0.1;
+
+  const citiesWithCoords = (analysis?.resolvedCities || []).filter(
+    (city): city is { name: string; stayDuration: number; highlights: string[]; coords: { lat: number; lng: number } } =>
+      Boolean(city.coords && Number.isFinite(city.coords.lat) && Number.isFinite(city.coords.lng))
+  );
+  if (citiesWithCoords.length >= 2) {
+    let maxDistance = 0;
+    for (let i = 0; i < citiesWithCoords.length; i++) {
+      for (let j = i + 1; j < citiesWithCoords.length; j++) {
+        const dist = calculateDistance(
+          citiesWithCoords[i].coords.lat,
+          citiesWithCoords[i].coords.lng,
+          citiesWithCoords[j].coords.lat,
+          citiesWithCoords[j].coords.lng,
+        );
+        if (dist > maxDistance) maxDistance = dist;
+      }
+    }
+    if (maxDistance >= 120) roadTripScore += 0.35;
+    else if (maxDistance >= 60) roadTripScore += 0.2;
+    else singleBaseScore += 0.15;
+  }
+
+  if ((blueprint.confidence || 0) < 0.45) singleBaseScore += 0.1;
+
+  const total = Math.max(0.01, singleBaseScore + roadTripScore);
+  const normalizedSingle = Number((singleBaseScore / total).toFixed(3));
+  const normalizedRoad = Number((roadTripScore / total).toFixed(3));
+  const delta = Number(Math.abs(normalizedRoad - normalizedSingle).toFixed(3));
+
+  return {
+    source: 'auto_scored',
+    scores: {
+      single_base: normalizedSingle,
+      road_trip: normalizedRoad,
+      delta,
+    },
+    questionAsked: false,
+    chosenStyle: normalizedRoad >= normalizedSingle ? 'road_trip' : 'single_base',
+  };
+}
+
+async function resolveTravelStyleDecision(
+  decision: TravelStyleDecision,
+  askUser: AskUserFn | undefined,
+): Promise<TravelStyleDecision> {
+  if (decision.source === 'user_explicit') return decision;
+  if (decision.scores.delta >= 0.3 || !askUser) return decision;
+
+  const recommended: TravelStyleChoice = decision.scores.road_trip >= decision.scores.single_base
+    ? 'road_trip'
+    : 'single_base';
+  const selectedOptionId = await askUser({
+    questionId: 'travel-style-gate',
+    type: 'travel_style_gate',
+    title: 'Style du voyage',
+    prompt: 'Ton itinéraire est ambigu: tu préfères base unique ou road trip ?',
+    options: [
+      {
+        id: 'single_base',
+        label: 'Base unique (moins de déplacements)',
+        emoji: '🏨',
+        isDefault: recommended === 'single_base',
+        effect: { type: 'set_travel_mode', value: 'single_base' },
+      },
+      {
+        id: 'road_trip',
+        label: 'Road trip (plus de variété)',
+        emoji: '🚗',
+        isDefault: recommended === 'road_trip',
+        effect: { type: 'set_travel_mode', value: 'road_trip' },
+      },
+    ],
+    timeoutMs: 30_000,
+    metadata: {
+      source: 'travel_style_decision_engine',
+      scores: decision.scores,
+    },
+  });
+
+  const chosenStyle: TravelStyleChoice = selectedOptionId === 'road_trip' ? 'road_trip' : 'single_base';
+  return {
+    ...decision,
+    source: 'user_question',
+    questionAsked: true,
+    chosenStyle,
+  };
+}
+
 function applyRegionalBlueprintToPreferences(
   preferences: TripPreferences,
   blueprint: RegionalBlueprint,
+  chosenStyle: TravelStyleChoice,
 ): void {
-  if (blueprint.hubs.length > 1) {
+  if (chosenStyle === 'road_trip' && blueprint.hubs.length > 1) {
     preferences.cityPlan = blueprint.hubs.map((hub) => ({ city: hub.city, days: hub.days }));
     preferences.travelStyle = 'road_trip';
-  } else if (blueprint.hubs.length === 1) {
-    preferences.destination = blueprint.hubs[0].city;
+  } else if (blueprint.hubs.length >= 1) {
+    const primaryHub = [...blueprint.hubs].sort((a, b) => b.days - a.days)[0];
+    preferences.destination = primaryHub?.city || preferences.destination;
     preferences.cityPlan = undefined;
     preferences.travelStyle = 'single_base';
   }
@@ -1209,6 +1345,64 @@ function sanitizeGenericTimelineLabels(days: TripDay[]): number {
   return patched;
 }
 
+function computeOriginDestinationDistanceKm(
+  preferences: TripPreferences,
+  destinationCoords: { lat: number; lng: number } | undefined,
+): number {
+  if (preferences.originCoords && destinationCoords) {
+    return calculateDistance(
+      preferences.originCoords.lat,
+      preferences.originCoords.lng,
+      destinationCoords.lat,
+      destinationCoords.lng,
+    );
+  }
+  const samePlace = normalizePlannerText(preferences.origin) === normalizePlannerText(preferences.destination);
+  return samePlace ? 0 : 31;
+}
+
+function collectLonghaulCoverage(days: TripDay[]): {
+  hasOutbound: boolean;
+  hasReturn: boolean;
+  outboundFallback: boolean;
+  returnFallback: boolean;
+  mode?: string;
+} {
+  let hasOutbound = false;
+  let hasReturn = false;
+  let outboundFallback = false;
+  let returnFallback = false;
+  let mode: string | undefined;
+
+  for (const day of days) {
+    for (const item of day.items) {
+      const isLonghaul =
+        item.type === 'flight'
+        || (item.type === 'transport' && item.transportRole === 'longhaul');
+      if (!isLonghaul) continue;
+      const direction = item.type === 'flight'
+        ? (day.dayNumber === 1 ? 'outbound' : 'return')
+        : (item.transportDirection || undefined);
+      if (direction === 'outbound') {
+        hasOutbound = true;
+        if (item.transportTimeSource === 'estimated_fallback' || item.selectionSource === 'fallback') {
+          outboundFallback = true;
+        }
+      }
+      if (direction === 'return') {
+        hasReturn = true;
+        if (item.transportTimeSource === 'estimated_fallback' || item.selectionSource === 'fallback') {
+          returnFallback = true;
+        }
+      }
+      if (!mode && item.transportMode) mode = item.transportMode;
+      if (!mode && item.type === 'flight') mode = 'plane';
+    }
+  }
+
+  return { hasOutbound, hasReturn, outboundFallback, returnFallback, mode };
+}
+
 /**
  * Generate a trip — routes to V3 single-city or multi-city.
  */
@@ -1228,6 +1422,7 @@ export async function generateTripV2(
   const requestedDestinationInput = preferences.destination;
   let regionAnalysis: DestinationAnalysis | null = null;
   let regionalBlueprint: RegionalBlueprint | null = null;
+  let travelStyleDecision: TravelStyleDecision | undefined;
 
   // Step 0a: Region resolver — classify destination, resolve regions to cities.
   // Also run when cityPlan is a trivial mirror of destination (e.g. [{ city: "Bretagne", days: 5 }]).
@@ -1243,10 +1438,15 @@ export async function generateTripV2(
       regionAnalysis = await resolveDestination(preferences);
       if (regionAnalysis?.inputType && regionAnalysis.inputType !== 'city') {
         regionalBlueprint = await planRegionalBlueprint(preferences, { analysis: regionAnalysis });
-        applyRegionalBlueprintToPreferences(preferences, regionalBlueprint);
-        setRunBudgetProfile('spread');
+        const baseDecision = computeTravelStyleDecision(preferences, regionalBlueprint, regionAnalysis);
+        const resolvedDecision = await resolveTravelStyleDecision(baseDecision, v2Options?.askUser);
+        travelStyleDecision = resolvedDecision;
+        applyRegionalBlueprintToPreferences(preferences, regionalBlueprint, resolvedDecision.chosenStyle);
+        if (resolvedDecision.chosenStyle === 'road_trip') {
+          setRunBudgetProfile('spread');
+        }
         console.log(
-          `[Pipeline] Regional blueprint (${regionalBlueprint.source}): mode=${regionalBlueprint.mode}, hubs=${regionalBlueprint.hubs.map((hub) => `${hub.city}(${hub.days}j)`).join(' → ')}`
+          `[Pipeline] Regional blueprint (${regionalBlueprint.source}): mode=${regionalBlueprint.mode}, chosen=${resolvedDecision.chosenStyle}, hubs=${regionalBlueprint.hubs.map((hub) => `${hub.city}(${hub.days}j)`).join(' → ')}`
         );
       } else if (regionAnalysis) {
         if (regionAnalysis.resolvedCities.length > 1) {
@@ -1264,6 +1464,19 @@ export async function generateTripV2(
       if (isProviderQuotaStopError(e)) throw e;
       console.warn('[Pipeline] Region resolver failed, continuing with original destination:', e);
     }
+  }
+
+  if (!travelStyleDecision && (preferences.travelStyle === 'single_base' || preferences.travelStyle === 'road_trip')) {
+    travelStyleDecision = {
+      source: 'user_explicit',
+      scores: {
+        single_base: preferences.travelStyle === 'single_base' ? 1 : 0,
+        road_trip: preferences.travelStyle === 'road_trip' ? 1 : 0,
+        delta: 1,
+      },
+      questionAsked: false,
+      chosenStyle: preferences.travelStyle,
+    };
   }
 
   // Build a dynamic destination envelope (bbox + center) to keep items in-scope.
@@ -1332,13 +1545,20 @@ export async function generateTripV2(
 
       // Si une question a changé le travelStyle, re-vérifier le routage
       if (preferences.travelStyle === 'road_trip' && !preferences.cityPlan && regionAnalysis?.resolvedCities) {
-        preferences.cityPlan = regionAnalysis.resolvedCities.map(c => ({
-          city: c.name,
-          days: c.stayDuration,
-        }));
+        if (regionalBlueprint?.hubs?.length) {
+          preferences.cityPlan = regionalBlueprint.hubs.map((hub) => ({ city: hub.city, days: hub.days }));
+        } else {
+          preferences.cityPlan = regionAnalysis.resolvedCities.map(c => ({
+            city: c.name,
+            days: c.stayDuration,
+          }));
+        }
       } else if (preferences.travelStyle === 'single_base' && preferences.cityPlan) {
         preferences.destination = preferences.cityPlan[0].city;
         preferences.cityPlan = undefined;
+      }
+      if (preferences.travelStyle === 'road_trip' || (preferences.cityPlan?.length || 0) > 1) {
+        setRunBudgetProfile('spread');
       }
     } catch (e) {
       if (isProviderQuotaStopError(e)) throw e;
@@ -1351,6 +1571,7 @@ export async function generateTripV2(
       ...v2Options,
       destinationRadiusKm,
       destinationEnvelope,
+      travelStyleDecision,
     });
   }
   return generateTripV3(
@@ -1364,6 +1585,7 @@ export async function generateTripV2(
       enableRunTrace: v2Options?.enableRunTrace,
       destinationRadiusKm,
       destinationEnvelope,
+      travelStyleDecision,
     },
     v2Options?.askUser,
   );
@@ -1408,6 +1630,8 @@ export interface GenerateTripV3Options {
   destinationRadiusKm?: number;
   /** Destination geographic envelope for strict in-destination filtering. */
   destinationEnvelope?: DestinationEnvelope | null;
+  /** Travel style decision metadata (single base vs road trip). */
+  travelStyleDecision?: TravelStyleDecision;
 }
 
 export async function generateTripV3(
@@ -2062,6 +2286,9 @@ export async function generateTripV3(
   const realMealCoverage = computeRealMealCoverage(trip.days);
   const hubCoherenceScore = computeHubCoherenceScore(trip.days);
   const plannerAuditStats = summarizePlannerAudit(closedWorldMeta.plannerAudit);
+  const longhaulDistanceKm = computeOriginDestinationDistanceKm(preferences, data.destCoords);
+  const longhaulRequired = longhaulDistanceKm > 30;
+  const longhaulCoverage = collectLonghaulCoverage(trip.days);
   trip.generationDiagnostics = {
     validationLatencyMs:
       (activeBlueprint?.diagnostics?.validationLatencyMs || 0)
@@ -2085,6 +2312,20 @@ export async function generateTripV3(
     geoScopeSource: destinationEnvelope?.source,
     outsideEnvelopeRejectCount: trip.plannerDiagnostics?.outsideEnvelopeRejectCount || 0,
     inspiredModeUsed: preferences.tripMode === 'inspired',
+    travelStyleDecision: options?.travelStyleDecision,
+    questionFlow: {
+      askedCount: 0,
+      autoDefaultCount: 0,
+      postDraftAdjustUsed: false,
+    },
+    longhaulInjected: {
+      required: longhaulRequired,
+      outbound: longhaulCoverage.hasOutbound,
+      return: longhaulCoverage.hasReturn,
+      mode: longhaulCoverage.mode || 'unknown',
+      source: longhaulCoverage.outboundFallback || longhaulCoverage.returnFallback ? 'fallback' : 'verified',
+      distanceKm: Number(longhaulDistanceKm.toFixed(1)),
+    },
     mealSemanticReplacements: trip.plannerDiagnostics?.mealSemanticReplacementCount || 0,
     llmOrderPreservedRate: trip.plannerDiagnostics?.llmOrderPreservedRate,
     requestedDropCount: closedWorldMeta.enabled ? closedWorldMeta.requestedDropCount : undefined,
@@ -2554,6 +2795,23 @@ async function runPipelineFromClusters(
     console.log(`[Pipeline V3] Generic timeline labels sanitized: ${genericLabelPatchCount}`);
   }
 
+  const originDestinationDistanceKm = computeOriginDestinationDistanceKm(preferences, data.destCoords);
+  const requiresLonghaul = originDestinationDistanceKm > 30;
+  const longhaulCoverage = collectLonghaulCoverage(scheduledDays);
+  const longhaulViolations: string[] = [];
+  if (requiresLonghaul) {
+    if (!longhaulCoverage.hasOutbound) {
+      longhaulViolations.push(
+        `P0.11: Missing outbound long-haul transport (${preferences.origin} → ${preferences.destination}, ${originDestinationDistanceKm.toFixed(0)}km)`
+      );
+    }
+    if (!longhaulCoverage.hasReturn) {
+      longhaulViolations.push(
+        `P0.11: Missing return long-haul transport (${preferences.destination} → ${preferences.origin}, ${originDestinationDistanceKm.toFixed(0)}km)`
+      );
+    }
+  }
+
   // Step 10: Validate contracts
   const mustSeeActivitiesForContracts = selectedActivities.filter(a => a.mustSee);
   const mustSeeIds = new Set(mustSeeActivitiesForContracts.map(a => a.id));
@@ -2575,7 +2833,8 @@ async function runPipelineFromClusters(
     ...repairResult.unresolvedViolations.map(v => `REPAIR: ${v}`),
     ...postInjectionMustSeeUnresolved.map(v => `POST_INJECTION_REPAIR: ${v}`),
   ];
-  const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations];
+  const combinedContractViolations = [...unresolvedRepairViolations, ...contractResult.violations, ...longhaulViolations];
+  const contractsPassed = contractResult.invariantsPassed && longhaulViolations.length === 0;
   if (contractsMode === 'strict' && combinedContractViolations.length > 0) {
     const violationPreview = combinedContractViolations.slice(0, 5).join(' | ');
     throw new Error(
@@ -2652,7 +2911,7 @@ async function runPipelineFromClusters(
   trip.pipelineVersion = 'v3';
   trip.qualityMetrics = {
     score: contractResult.score,
-    invariantsPassed: contractResult.invariantsPassed,
+    invariantsPassed: contractsPassed,
     violations: combinedContractViolations,
   };
   trip.qualityWarnings = [
@@ -2687,7 +2946,7 @@ async function runPipelineFromClusters(
     zigzagTurnsTotal,
     routeInefficiencyTotal: Number(routeInefficiencyTotal.toFixed(2)),
     criticalGeoCount,
-    contractsPassed: contractResult.invariantsPassed,
+    contractsPassed,
     rescueStage: 0,
     protectedBreakCount: repairResult.rescueDiagnostics?.protectedBreakCount ?? 0,
     lateMealReplacementCount: totalLateMealReplacements,
@@ -2771,7 +3030,12 @@ export async function generateTripV3MultiCity(
     return generateTripV3(
       preferences,
       onEvent,
-      { onSnapshot: options?.onSnapshot, runId: options?.runId, enableRunTrace: options?.enableRunTrace },
+      {
+        onSnapshot: options?.onSnapshot,
+        runId: options?.runId,
+        enableRunTrace: options?.enableRunTrace,
+        travelStyleDecision: options?.travelStyleDecision,
+      },
     );
   }
 
@@ -2814,6 +3078,7 @@ export async function generateTripV3MultiCity(
           onSnapshot: options?.onSnapshot,
           runId: options?.runId ? `${options.runId}:seg${index + 1}` : undefined,
           enableRunTrace: options?.enableRunTrace,
+          travelStyleDecision: options?.travelStyleDecision,
         },
       )
     )
@@ -2856,6 +3121,9 @@ export async function generateTripV3MultiCity(
       return [String(day.dayNumber), minutes];
     })
   );
+  const mergedLonghaulDistanceKm = computeOriginDestinationDistanceKm(preferences, undefined);
+  const mergedLonghaulRequired = mergedLonghaulDistanceKm > 30;
+  const mergedLonghaulCoverage = collectLonghaulCoverage(mergedDays);
 
   // Build merged Trip
   const mergedTrip: Trip = {
@@ -2974,6 +3242,22 @@ export async function generateTripV3MultiCity(
     geoFallbackUsed: segments.some((segment) => Boolean(segment.generationDiagnostics?.geoFallbackUsed)),
     geoScopeSource: segments.find((segment) => segment.generationDiagnostics?.geoScopeSource)
       ?.generationDiagnostics?.geoScopeSource,
+    travelStyleDecision: options?.travelStyleDecision
+      || segments.find((segment) => Boolean(segment.generationDiagnostics?.travelStyleDecision))
+        ?.generationDiagnostics?.travelStyleDecision,
+    questionFlow: {
+      askedCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.questionFlow?.askedCount || 0), 0),
+      autoDefaultCount: segments.reduce((sum, segment) => sum + (segment.generationDiagnostics?.questionFlow?.autoDefaultCount || 0), 0),
+      postDraftAdjustUsed: segments.some((segment) => Boolean(segment.generationDiagnostics?.questionFlow?.postDraftAdjustUsed)),
+    },
+    longhaulInjected: {
+      required: mergedLonghaulRequired,
+      outbound: mergedLonghaulCoverage.hasOutbound,
+      return: mergedLonghaulCoverage.hasReturn,
+      mode: mergedLonghaulCoverage.mode || 'unknown',
+      source: mergedLonghaulCoverage.outboundFallback || mergedLonghaulCoverage.returnFallback ? 'fallback' : 'verified',
+      distanceKm: Number(mergedLonghaulDistanceKm.toFixed(1)),
+    },
     outsideEnvelopeRejectCount: segments.reduce(
       (sum, segment) => sum + (segment.generationDiagnostics?.outsideEnvelopeRejectCount || 0),
       0

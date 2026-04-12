@@ -7,7 +7,7 @@
  */
 
 interface PendingQuestion {
-  resolve: (selectedOptionId: string) => void;
+  resolve: (selectedOptionId: string, meta: { autoDefault: boolean }) => void;
   timeout: ReturnType<typeof setTimeout>;
 }
 
@@ -17,7 +17,7 @@ const pendingQuestions = new Map<string, PendingQuestion>();
 export function registerQuestion(
   sessionId: string,
   questionId: string,
-  resolve: (selectedOptionId: string) => void,
+  resolve: (selectedOptionId: string, meta: { autoDefault: boolean }) => void,
   timeoutMs: number,
   defaultOptionId: string,
 ): void {
@@ -26,7 +26,7 @@ export function registerQuestion(
   const timeout = setTimeout(() => {
     const entry = pendingQuestions.get(key);
     if (entry) {
-      entry.resolve(defaultOptionId);
+      entry.resolve(defaultOptionId, { autoDefault: true });
       pendingQuestions.delete(key);
     }
   }, timeoutMs);
@@ -44,7 +44,7 @@ export function resolveQuestion(
   if (!entry) return false;
 
   clearTimeout(entry.timeout);
-  entry.resolve(selectedOptionId);
+  entry.resolve(selectedOptionId, { autoDefault: false });
   pendingQuestions.delete(key);
   return true;
 }

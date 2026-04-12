@@ -15,9 +15,9 @@ import type { DayTripSuggestion } from '../services/dayTripSuggestions';
 import type { DestinationIntel, DestinationAnalysis } from './step0-destination-intel';
 import { fetchGeminiWithRetry } from '../services/geminiSearch';
 
-const MAX_QUESTIONS = 3;
+const MAX_QUESTIONS = 2;
 const MAX_PRE_FETCH_QUESTIONS = 3;
-const DEFAULT_TIMEOUT_MS = 15_000;
+const DEFAULT_TIMEOUT_MS = 30_000;
 
 // ---------------------------------------------------------------------------
 // Detector 1: Full-day activities (duration >= 240min)
@@ -104,6 +104,144 @@ function detectBalanceQuestion(activities: ScoredActivity[]): PipelineQuestion |
     timeoutMs: DEFAULT_TIMEOUT_MS,
     metadata: { cultureCount: culture, outdoorCount: outdoor, ratio },
   };
+}
+
+function detectTravelStyleGateQuestion(
+  preferences: TripPreferences,
+  analysis: DestinationAnalysis | null,
+): Omit<PipelineQuestion, 'sessionId'> | null {
+  if (preferences.travelStyle && preferences.travelStyle !== 'auto') return null;
+  const isRegional = analysis?.inputType && analysis.inputType !== 'city';
+  const candidateCities = analysis?.resolvedCities?.length || 0;
+  if (!isRegional && candidateCities <= 1) return null;
+
+  const recommended: 'single_base' | 'road_trip' =
+    preferences.durationDays >= 6 || candidateCities >= 3 || preferences.carRental
+      ? 'road_trip'
+      : 'single_base';
+
+  return {
+    questionId: 'travel-style-gate',
+    type: 'travel_style_gate',
+    title: 'Style du voyage',
+    prompt: 'Tu préfères un séjour avec une base fixe ou un road trip multi-étapes ?',
+    options: [
+      {
+        id: 'single_base',
+        label: 'Base unique (moins de valises)',
+        emoji: '🏨',
+        isDefault: recommended === 'single_base',
+        effect: { type: 'set_travel_mode', value: 'single_base' },
+      },
+      {
+        id: 'road_trip',
+        label: 'Road trip (plus de lieux)',
+        emoji: '🚗',
+        isDefault: recommended === 'road_trip',
+        effect: { type: 'set_travel_mode', value: 'road_trip' },
+      },
+    ],
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+    metadata: {
+      source: 'deterministic_pre_fetch',
+      inputType: analysis?.inputType || 'unknown',
+      candidateCities,
+    },
+  };
+}
+
+function detectMobilityQuestion(
+  preferences: TripPreferences,
+  analysis: DestinationAnalysis | null,
+): Omit<PipelineQuestion, 'sessionId'> | null {
+  if (preferences.transport && preferences.transport !== 'optimal') return null;
+  const isRegional = analysis?.inputType && analysis.inputType !== 'city';
+  const recommendsCar = Boolean(preferences.carRental || isRegional);
+
+  return {
+    questionId: 'mobility-on-site',
+    type: 'pre_fetch_llm',
+    title: 'Mobilité sur place',
+    prompt: 'Sur place, tu veux plutôt transports publics ou voiture ?',
+    options: [
+      {
+        id: 'public',
+        label: 'Transports publics',
+        emoji: '🚆',
+        isDefault: !recommendsCar,
+        effect: { type: 'set_transport', value: 'optimal' },
+      },
+      {
+        id: 'car',
+        label: 'Voiture',
+        emoji: '🚗',
+        isDefault: recommendsCar,
+        effect: { type: 'set_transport', value: 'car' },
+      },
+      {
+        id: 'flex',
+        label: 'Flexible',
+        emoji: '🧭',
+        isDefault: false,
+        effect: { type: 'noop' },
+      },
+    ],
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+    metadata: { source: 'deterministic_pre_fetch' },
+  };
+}
+
+function detectPaceQuestion(preferences: TripPreferences): Omit<PipelineQuestion, 'sessionId'> | null {
+  if (preferences.pace) return null;
+  return {
+    questionId: 'pace-pref',
+    type: 'pre_fetch_llm',
+    title: 'Rythme du séjour',
+    prompt: 'Quel rythme tu préfères pour ce voyage ?',
+    options: [
+      {
+        id: 'relaxed',
+        label: 'Chill / détente',
+        emoji: '🌿',
+        isDefault: false,
+        effect: { type: 'set_preference', key: 'pace', value: 'relaxed' },
+      },
+      {
+        id: 'moderate',
+        label: 'Équilibré',
+        emoji: '⚖️',
+        isDefault: true,
+        effect: { type: 'set_preference', key: 'pace', value: 'moderate' },
+      },
+      {
+        id: 'intensive',
+        label: 'Très actif',
+        emoji: '⚡',
+        isDefault: false,
+        effect: { type: 'set_preference', key: 'pace', value: 'intensive' },
+      },
+    ],
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+    metadata: { source: 'deterministic_pre_fetch' },
+  };
+}
+
+function detectDeterministicPreFetchQuestions(
+  preferences: TripPreferences,
+  analysis: DestinationAnalysis | null,
+): Omit<PipelineQuestion, 'sessionId'>[] {
+  const questions: Omit<PipelineQuestion, 'sessionId'>[] = [];
+  const travelStyleQ = detectTravelStyleGateQuestion(preferences, analysis);
+  if (travelStyleQ) questions.push(travelStyleQ);
+  if (questions.length < MAX_PRE_FETCH_QUESTIONS) {
+    const mobilityQ = detectMobilityQuestion(preferences, analysis);
+    if (mobilityQ) questions.push(mobilityQ);
+  }
+  if (questions.length < MAX_PRE_FETCH_QUESTIONS) {
+    const paceQ = detectPaceQuestion(preferences);
+    if (paceQ) questions.push(paceQ);
+  }
+  return questions.slice(0, MAX_PRE_FETCH_QUESTIONS);
 }
 
 // ---------------------------------------------------------------------------
@@ -218,6 +356,11 @@ export async function detectPreFetchQuestions(
   analysis: DestinationAnalysis | null,
   intel: DestinationIntel | null,
 ): Promise<Omit<PipelineQuestion, 'sessionId'>[]> {
+  const deterministic = detectDeterministicPreFetchQuestions(preferences, analysis);
+  if (deterministic.length >= MAX_PRE_FETCH_QUESTIONS) {
+    return deterministic.slice(0, MAX_PRE_FETCH_QUESTIONS);
+  }
+
   const dest = preferences.destination;
   const analysisContext = analysis
     ? `Type de destination : ${analysis.inputType}. Villes proposées : ${analysis.resolvedCities.map(c => `${c.name} (${c.stayDuration}j — ${c.highlights.join(', ')})`).join(' ; ')}.`
@@ -240,6 +383,8 @@ Génère 2-3 questions COURTES et pertinentes pour affiner ce voyage. Chaque que
 
 TYPES D'EFFETS DISPONIBLES pour chaque option :
 - {"type":"set_travel_mode","value":"single_base"} ou {"type":"set_travel_mode","value":"road_trip"}
+- {"type":"set_transport","value":"optimal|plane|train|car|bus"}
+- {"type":"set_car_rental","value":true|false}
 - {"type":"add_day_trip","destination":"Nom du lieu"}
 - {"type":"add_avoid","name":"Nom à éviter"}
 - {"type":"adjust_scores","category":"culture|nature|adventure|food|nightlife","delta":10} (ou -10)
@@ -280,7 +425,7 @@ Réponds en JSON strict : { "questions": [ { "questionId": string, "title": stri
     if (!parsed || parsed.length === 0) return [];
 
     // Convert to PipelineQuestion format
-    const questions: Omit<PipelineQuestion, 'sessionId'>[] = parsed
+    const llmQuestions: Omit<PipelineQuestion, 'sessionId'>[] = parsed
       .slice(0, MAX_PRE_FETCH_QUESTIONS)
       .map(q => ({
         questionId: `llm-pre-${q.questionId}`,
@@ -298,11 +443,17 @@ Réponds en JSON strict : { "questions": [ { "questionId": string, "title": stri
         metadata: { source: 'llm_pre_fetch' },
       }));
 
-    console.log(`[SmartQ LLM] Generated ${questions.length} pre-fetch questions`);
-    return questions;
+    const merged = [...deterministic];
+    for (const q of llmQuestions) {
+      if (merged.length >= MAX_PRE_FETCH_QUESTIONS) break;
+      if (merged.some(existing => existing.questionId === q.questionId)) continue;
+      merged.push(q);
+    }
+    console.log(`[SmartQ LLM] Generated ${llmQuestions.length} LLM pre-fetch questions (${merged.length} total with deterministic)`);
+    return merged;
   } catch (e) {
     console.warn('[SmartQ LLM] Pre-fetch questions error:', e);
-    return [];
+    return deterministic;
   }
 }
 
@@ -323,6 +474,20 @@ export function applyEffects(
       case 'set_travel_mode':
         preferences.travelStyle = effect.value;
         console.log(`[SmartQ Effect] Travel mode → ${effect.value}`);
+        break;
+
+      case 'set_transport':
+        preferences.transport = effect.value;
+        if (effect.value === 'car') preferences.carRental = true;
+        console.log(`[SmartQ Effect] Transport → ${effect.value}`);
+        break;
+
+      case 'set_car_rental':
+        preferences.carRental = effect.value;
+        if (effect.value && preferences.transport === 'optimal') {
+          preferences.transport = 'car';
+        }
+        console.log(`[SmartQ Effect] Car rental → ${effect.value}`);
         break;
 
       case 'add_day_trip':
@@ -404,7 +569,16 @@ function getCategoryKeywords(category: string): RegExp | null {
 function validateEffect(effect: any): QuestionEffect {
   if (!effect || typeof effect !== 'object') return { type: 'noop' };
 
-  const validTypes = ['set_travel_mode', 'add_day_trip', 'add_avoid', 'adjust_scores', 'set_preference', 'noop'];
+  const validTypes = [
+    'set_travel_mode',
+    'set_transport',
+    'set_car_rental',
+    'add_day_trip',
+    'add_avoid',
+    'adjust_scores',
+    'set_preference',
+    'noop',
+  ];
   if (!validTypes.includes(effect.type)) return { type: 'noop' };
 
   return effect as QuestionEffect;
