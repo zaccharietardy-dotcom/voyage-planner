@@ -11,6 +11,22 @@ interface SuggestionContext {
   durationDays?: number;
 }
 
+interface SuggestionIntent {
+  wantsBeach: boolean;
+  wantsWarmSwim: boolean;
+  wantsSummer: boolean;
+}
+
+type WarmSwimTemplate = Omit<DestinationSuggestion, 'stages' | 'estimatedBudget'> & {
+  stages: Array<{ city: string; minDays: number; weight: number }>;
+  budgetPerDay: {
+    economic: [number, number];
+    moderate: [number, number];
+    comfort: [number, number];
+    luxury: [number, number];
+  };
+};
+
 const GROUP_QUERY_HINTS: Array<{ type: GroupType; patterns: RegExp[] }> = [
   {
     type: 'family_with_kids',
@@ -61,6 +77,252 @@ export function inferGroupTypeFromQuery(query: string): GroupType | null {
   }
   return null;
 }
+
+function normalizeText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const BEACH_ACTIVITY_SET = new Set<ActivityType>(['beach']);
+const SUMMER_KEYWORDS = /\b(ete|été|summer|juillet|aout|août|juin|septembre)\b/i;
+const SWIM_KEYWORDS = /\b(baign|swim|nager|mer chaude|eau chaude|plage)\b/i;
+const COLD_SWIM_KEYWORDS = /\b(surf|vagues?|cold ?water|eau froide|wild swim|eau vivifiante)\b/i;
+const COLD_WATER_DESTINATION_KEYWORDS = /\b(achill|ireland|irlande|connemara|clifden|westport|clare island|ecosse|scotland|islande|iceland|norvege|norway|mer du nord|north sea|faroe|féroé)\b/i;
+
+function inferSuggestionIntent(query: string, context: SuggestionContext): SuggestionIntent {
+  const normalizedQuery = normalizeText(query);
+  const wantsBeach = BEACH_ACTIVITY_SET.has('beach')
+    ? (context.activities || []).includes('beach') || /\b(plage|beach|bord de mer|cotiere?|côtière)\b/i.test(normalizedQuery)
+    : false;
+  const wantsSummer = SUMMER_KEYWORDS.test(normalizedQuery);
+  const swimSignal = SWIM_KEYWORDS.test(normalizedQuery);
+  const explicitColdPreference = COLD_SWIM_KEYWORDS.test(normalizedQuery);
+  return {
+    wantsBeach,
+    wantsSummer,
+    wantsWarmSwim: wantsBeach && (swimSignal || wantsSummer) && !explicitColdPreference,
+  };
+}
+
+function distributeDays(
+  stages: Array<{ city: string; minDays: number; weight: number }>,
+  totalDays: number,
+): Array<{ city: string; days: number }> {
+  const safeDays = Math.max(stages.reduce((sum, stage) => sum + stage.minDays, 0), totalDays || 4);
+  const assigned = stages.map((stage) => ({ city: stage.city, days: stage.minDays, weight: stage.weight }));
+  let remaining = safeDays - assigned.reduce((sum, stage) => sum + stage.days, 0);
+  while (remaining > 0) {
+    assigned.sort((a, b) => b.weight - a.weight);
+    assigned[0].days += 1;
+    remaining -= 1;
+  }
+  return assigned.map(({ city, days }) => ({ city, days }));
+}
+
+function formatBudgetRange(
+  budgetLevel: BudgetLevel | undefined,
+  days: number,
+  budgetPerDay: WarmSwimTemplate['budgetPerDay'],
+): string {
+  const level: BudgetLevel = budgetLevel || 'moderate';
+  const [minPerDay, maxPerDay] = budgetPerDay[level];
+  const safeDays = Math.max(3, days || 4);
+  const min = minPerDay * safeDays;
+  const max = maxPerDay * safeDays;
+  return `${min}-${max}€`;
+}
+
+function suggestionPrimaryKey(suggestion: DestinationSuggestion): string {
+  const firstStage = suggestion.stages?.[0];
+  if (!firstStage?.city) return normalizeText(suggestion.title || '');
+  return normalizeText(firstStage.city);
+}
+
+function isColdWaterSuggestion(suggestion: DestinationSuggestion): boolean {
+  const haystack = `${suggestion.title} ${suggestion.description} ${suggestion.stages.map((stage) => stage.city).join(' ')} ${suggestion.highlights.join(' ')}`;
+  return COLD_WATER_DESTINATION_KEYWORDS.test(normalizeText(haystack));
+}
+
+const WARM_SWIM_TEMPLATES: WarmSwimTemplate[] = [
+  {
+    title: 'Costa del Sol : plage + ambiance andalouse',
+    type: 'single_city',
+    stages: [{ city: 'Málaga', minDays: 4, weight: 3 }],
+    highlights: [
+      'Baignade quotidienne à La Malagueta et Playa de la Misericordia',
+      'Excursion courte à Nerja et ses criques claires',
+      'Vieille ville animée le soir sans gros trajets',
+    ],
+    description: 'Base unique à Málaga pour alterner baignade, tapas et visites culturelles légères sans changer d’hôtel.',
+    bestSeason: 'Mai à septembre',
+    budgetPerDay: {
+      economic: [85, 115],
+      moderate: [120, 165],
+      comfort: [170, 240],
+      luxury: [260, 420],
+    },
+  },
+  {
+    title: 'Algarve détente : Lagos + Faro',
+    type: 'multi_city',
+    stages: [
+      { city: 'Lagos', minDays: 2, weight: 3 },
+      { city: 'Faro', minDays: 2, weight: 2 },
+    ],
+    highlights: [
+      'Plages baignables de Ponta da Piedade et Praia Dona Ana',
+      'Falaises dorées + eau plus chaude que l’Atlantique nord',
+      'Rythme chill avec petits transferts',
+    ],
+    description: 'Un mix mer + villages côtiers avec peu de kilomètres et de vraies journées plage.',
+    bestSeason: 'Juin à septembre',
+    budgetPerDay: {
+      economic: [80, 110],
+      moderate: [115, 160],
+      comfort: [165, 230],
+      luxury: [250, 390],
+    },
+  },
+  {
+    title: 'Majorque : calas turquoise sans road trip lourd',
+    type: 'single_city',
+    stages: [{ city: 'Palma de Majorque', minDays: 4, weight: 3 }],
+    highlights: [
+      'Criques baignables (Cala Pi, Cala Blava, Es Trenc)',
+      'Eau chaude et transparente en plein été',
+      'Option bateau journée vers les calas du sud',
+    ],
+    description: 'Séjour mer orienté baignade avec base pratique et excursions courtes.',
+    bestSeason: 'Mai à octobre',
+    budgetPerDay: {
+      economic: [95, 130],
+      moderate: [130, 185],
+      comfort: [190, 260],
+      luxury: [290, 460],
+    },
+  },
+  {
+    title: 'Crète Ouest : Chania + plages iconiques',
+    type: 'road_trip',
+    stages: [
+      { city: 'La Canée', minDays: 3, weight: 3 },
+      { city: 'Réthymnon', minDays: 1, weight: 1 },
+    ],
+    highlights: [
+      'Baignades à Elafonissi, Balos et Falassarna',
+      'Eau chaude, plages larges, météo très stable en été',
+      'Road trip léger avec transferts cohérents',
+    ],
+    description: 'Parfait pour priorité baignade avec un peu de variété locale sans trajets extrêmes.',
+    bestSeason: 'Juin à septembre',
+    budgetPerDay: {
+      economic: [85, 120],
+      moderate: [120, 170],
+      comfort: [175, 250],
+      luxury: [270, 430],
+    },
+  },
+  {
+    title: 'Costa Blanca : Alicante + criques de Jávea',
+    type: 'road_trip',
+    stages: [
+      { city: 'Alicante', minDays: 2, weight: 2 },
+      { city: 'Jávea', minDays: 2, weight: 2 },
+    ],
+    highlights: [
+      'Plages urbaines + criques limpides baignables',
+      'Temps de route courts entre spots',
+      'Très bon rapport qualité/prix',
+    ],
+    description: 'Un road trip court optimisé baignade avec coûts maîtrisés.',
+    bestSeason: 'Mai à septembre',
+    budgetPerDay: {
+      economic: [80, 110],
+      moderate: [115, 160],
+      comfort: [165, 235],
+      luxury: [250, 390],
+    },
+  },
+  {
+    title: 'Sardaigne Sud : Cagliari + Villasimius',
+    type: 'road_trip',
+    stages: [
+      { city: 'Cagliari', minDays: 2, weight: 2 },
+      { city: 'Villasimius', minDays: 2, weight: 2 },
+    ],
+    highlights: [
+      'Eaux turquoise et plages très baignables',
+      'Ambiance chill avec restos de bord de mer',
+      'Transferts simples et cohérents',
+    ],
+    description: 'Idéal pour se baigner tous les jours tout en gardant un voyage facile à exécuter.',
+    bestSeason: 'Juin à septembre',
+    budgetPerDay: {
+      economic: [95, 130],
+      moderate: [135, 185],
+      comfort: [195, 275],
+      luxury: [300, 480],
+    },
+  },
+];
+
+function buildWarmSwimFallbackSuggestions(context: SuggestionContext): DestinationSuggestion[] {
+  const totalDays = Math.max(3, context.durationDays || 4);
+  return WARM_SWIM_TEMPLATES.map((template) => ({
+    title: template.title,
+    type: template.type,
+    stages: distributeDays(template.stages, totalDays),
+    highlights: template.highlights.slice(0, 3),
+    description: template.description,
+    estimatedBudget: formatBudgetRange(context.budgetLevel, totalDays, template.budgetPerDay),
+    bestSeason: template.bestSeason,
+  }));
+}
+
+function enforceSuggestionQuality(
+  rawSuggestions: DestinationSuggestion[],
+  query: string,
+  context: SuggestionContext,
+): DestinationSuggestion[] {
+  const intent = inferSuggestionIntent(query, context);
+  const deduped: DestinationSuggestion[] = [];
+  const seenPrimary = new Set<string>();
+  for (const suggestion of rawSuggestions) {
+    const key = suggestionPrimaryKey(suggestion);
+    if (!key || seenPrimary.has(key)) continue;
+    seenPrimary.add(key);
+    deduped.push(suggestion);
+  }
+
+  let filtered = deduped;
+  if (intent.wantsWarmSwim) {
+    filtered = filtered.filter((suggestion) => !isColdWaterSuggestion(suggestion));
+  }
+
+  const fallbackPool = intent.wantsWarmSwim
+    ? buildWarmSwimFallbackSuggestions(context)
+    : [];
+  for (const fallback of fallbackPool) {
+    if (filtered.length >= 4) break;
+    const key = suggestionPrimaryKey(fallback);
+    if (!key || seenPrimary.has(key)) continue;
+    seenPrimary.add(key);
+    filtered.push(fallback);
+  }
+
+  return filtered.slice(0, 4);
+}
+
+export const __suggestionsTestables = {
+  inferSuggestionIntent,
+  enforceSuggestionQuality,
+  buildWarmSwimFallbackSuggestions,
+};
 
 export async function generateDurationSuggestion(
   destination: string,
@@ -150,6 +412,10 @@ export async function generateDestinationSuggestions(
   if (inferredGroupType && context.groupType && inferredGroupType !== context.groupType) {
     contextParts.push(`Signal utilisateur prioritaire détecté dans la requête: ${inferredGroupType}`);
   }
+  const intent = inferSuggestionIntent(query, context);
+  if (intent.wantsWarmSwim) {
+    contextParts.push('Contrainte prioritaire: baignade confortable en été (eau chaude), éviter destinations eau froide');
+  }
 
   const prompt = `Tu es un expert en voyage. L'utilisateur a une idée vague de voyage: "${query}".
 ${contextParts.length > 0 ? `Contexte: ${contextParts.join('. ')}.` : ''}
@@ -158,6 +424,10 @@ Contraintes strictes:
 - N'écris PAS de framing romantique/couple si le type de groupe n'est pas "couple".
 - N'inclus jamais d'agence de voyage, office du tourisme, ni point d'information comme "activité".
 - Donne uniquement des étapes plausibles et cohérentes géographiquement.
+- Les 4 suggestions doivent être VRAIMENT différentes (pas 4 variantes quasi identiques de la même zone).
+- Les suggestions doivent avoir 4 villes de départ de circuit différentes (ou au minimum 3 pays différents).
+${intent.wantsWarmSwim ? '- Interdit de proposer eau froide (Irlande/Écosse/Islande/Atlantique nord) sauf demande explicite de surf/eau froide.' : ''}
+${intent.wantsWarmSwim ? '- Priorise Méditerranée et zones baignables chaudes en été.' : ''}
 
 Propose exactement 4 itinéraires concrets et variés. Pour chaque suggestion:
 - Donne un titre accrocheur
@@ -192,7 +462,7 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks):
 
   try {
     const parsed = JSON.parse(text.trim());
-    return (parsed.suggestions || []).map((s: Record<string, unknown>) => ({
+    const suggestions = (parsed.suggestions || []).map((s: Record<string, unknown>) => ({
       title: s.title as string,
       type: s.type as DestinationSuggestion['type'],
       stages: (s.stages as Array<{ city: string; days: number }>).map((st) => ({
@@ -203,12 +473,13 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks):
       description: s.description as string,
       estimatedBudget: s.estimatedBudget as string,
       bestSeason: s.bestSeason as string | undefined,
-    })).slice(0, 4);
+    })).slice(0, 6);
+    return enforceSuggestionQuality(suggestions, query, context);
   } catch {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
-      return (parsed.suggestions || []).map((s: Record<string, unknown>) => ({
+      const suggestions = (parsed.suggestions || []).map((s: Record<string, unknown>) => ({
         title: s.title as string,
         type: s.type as DestinationSuggestion['type'],
         stages: (s.stages as Array<{ city: string; days: number }>).map((st) => ({
@@ -219,7 +490,8 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks):
         description: s.description as string,
         estimatedBudget: s.estimatedBudget as string,
         bestSeason: s.bestSeason as string | undefined,
-      })).slice(0, 4);
+      })).slice(0, 6);
+      return enforceSuggestionQuality(suggestions, query, context);
     }
     throw new Error('Failed to parse destination suggestions response');
   }
