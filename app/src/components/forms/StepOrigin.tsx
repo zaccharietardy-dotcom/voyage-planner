@@ -102,13 +102,13 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-12 max-w-[600px] mx-auto w-full"
+      className="space-y-8 max-w-[500px] mx-auto w-full"
     >
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+      <div className="text-center space-y-3">
+        <h2 className="text-2xl md:text-3xl leading-tight font-serif font-bold tracking-tight text-[#f8fafc]">
           D&apos;où partez-vous ?
         </h2>
-        <p className="text-[17px] text-[#94a3b8] font-light">
+        <p className="text-sm text-[#94a3b8] font-light">
           Pour calculer vos temps de trajet et options de transport.
         </p>
       </div>

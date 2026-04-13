@@ -45,9 +45,9 @@ export function StepPreferences({ data, onChange }: StepPreferencesProps) {
   };
 
   return (
-    <div className="space-y-12 max-w-[650px] mx-auto w-full">
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight text-white">
+    <div className="space-y-8 max-w-[550px] mx-auto w-full">
+      <div className="text-center space-y-3">
+        <h2 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-white">
           {t('plan.pref.title')}
         </h2>
         <p className="text-lg text-muted-foreground font-light">

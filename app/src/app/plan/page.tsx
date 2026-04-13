@@ -599,41 +599,36 @@ export default function PlanPage() {
           </div>
         )}
 
-        {/* Step dots */}
-        <div className="flex items-center justify-center gap-4 mb-8 pt-2">
-          {STEPS.map((step) => (
-            <button
-              key={step.id}
-              onClick={() => {
-                if (step.id < currentStep) {
-                  directionRef.current = -1;
-                  setCurrentStep(step.id);
-                }
-              }}
-              disabled={step.id > currentStep}
-              className="flex flex-col items-center gap-2 group relative"
-            >
-              <div className="relative flex items-center justify-center h-4 w-12">
+        {/* Step dots + current label */}
+        <div className="flex flex-col items-center gap-2 mb-8 pt-2">
+          <div className="flex items-center gap-3">
+            {STEPS.map((step) => (
+              <button
+                key={step.id}
+                onClick={() => {
+                  if (step.id < currentStep) {
+                    directionRef.current = -1;
+                    setCurrentStep(step.id);
+                  }
+                }}
+                disabled={step.id > currentStep}
+                className="group"
+              >
                 <div className={cn(
-                  'h-1.5 rounded-full transition-all duration-500 absolute',
+                  'h-1.5 rounded-full transition-all duration-500',
                   step.id === currentStep ? 'w-8 bg-gold shadow-[0_0_20px_rgba(197,160,89,0.8)]' : 'w-2 bg-white/10 group-hover:bg-white/30',
-                  step.id < currentStep && 'bg-gold/50'
+                  step.id < currentStep && 'bg-gold/50 w-2'
                 )} />
-              </div>
-              <span className={cn(
-                'text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 text-center md:absolute md:-bottom-6 md:w-max',
-                step.id === currentStep
-                  ? 'block mt-1 md:mt-0 text-gold drop-shadow-md'
-                  : 'hidden md:block text-white/20 group-hover:text-white/50'
-              )}>
-                {step.label}
-              </span>
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.25em] text-gold">
+            {STEPS[currentStep - 1]?.label}
+          </span>
         </div>
 
         {/* Step content */}
-        <div className="relative min-h-[400px] md:min-h-[450px] rounded-[2.5rem] border border-white/[0.08] bg-[#020617]/40 backdrop-blur-3xl p-6 sm:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+        <div className="relative rounded-[2.5rem] border border-white/[0.08] bg-[#020617]/40 backdrop-blur-3xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <AnimatePresence mode="wait" custom={directionRef.current}>
             <motion.div
               key={currentStep}

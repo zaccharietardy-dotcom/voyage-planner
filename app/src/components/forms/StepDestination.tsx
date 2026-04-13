@@ -406,7 +406,7 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
     return (
       <div className="space-y-10 max-w-[640px] mx-auto w-full">
         <div className="text-center space-y-4">
-          <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+          <h2 className="text-2xl md:text-3xl leading-tight font-serif font-bold tracking-tight text-[#f8fafc]">
             {t('plan.dest.title')}
           </h2>
           <p className="text-[17px] text-[#94a3b8] font-light">
@@ -578,9 +578,9 @@ export function StepDestination({ data, onChange }: StepDestinationProps) {
   }
 
   return (
-    <div className="space-y-12 max-w-[600px] mx-auto w-full">
+    <div className="space-y-8 max-w-[500px] mx-auto w-full">
       <div className="text-center space-y-4">
-        <h2 className="text-4xl md:text-[3.5rem] leading-none font-serif font-bold tracking-tight text-[#f8fafc]">
+        <h2 className="text-2xl md:text-3xl leading-tight font-serif font-bold tracking-tight text-[#f8fafc]">
           {t('plan.dest.title')}
         </h2>
         <p className="text-[17px] text-[#94a3b8] font-light">
