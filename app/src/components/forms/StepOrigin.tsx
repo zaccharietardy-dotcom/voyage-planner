@@ -52,28 +52,16 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
       return;
     }
 
-    // Check permission status first (if API available)
-    if (navigator.permissions) {
-      try {
-        const status = await navigator.permissions.query({ name: 'geolocation' });
-        if (status.state === 'denied') {
-          setGeoError('La localisation est bloquée. Allez dans les réglages de votre navigateur pour autoriser la localisation sur ce site.');
-          return;
-        }
-      } catch {
-        // permissions API not supported — continue anyway
-      }
-    }
-
     setIsLocating(true);
 
     try {
+      console.log('[Geolocation] Requesting position...');
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: false,
-          timeout: 15000,
-          maximumAge: 300000,
-        });
+        navigator.geolocation.getCurrentPosition(
+          (pos) => { console.log('[Geolocation] Success:', pos.coords.latitude, pos.coords.longitude); resolve(pos); },
+          (err) => { console.error('[Geolocation] Error:', err.code, err.message); reject(err); },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
+        );
       });
 
       const { latitude, longitude } = position.coords;
