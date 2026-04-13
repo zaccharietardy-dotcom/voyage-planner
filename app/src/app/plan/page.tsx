@@ -564,7 +564,7 @@ export default function PlanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] relative">
+    <div className="min-h-screen bg-[#020617] relative overflow-y-auto">
       <PremiumBackground />
       {(isGenerating || generationError) && (
         <GeneratingScreen
