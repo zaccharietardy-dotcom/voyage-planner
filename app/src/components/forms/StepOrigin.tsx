@@ -52,55 +52,58 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
       return;
     }
 
+    // Check permission status first (if API available)
+    if (navigator.permissions) {
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' });
+        if (status.state === 'denied') {
+          setGeoError('La localisation est bloquée. Allez dans les réglages de votre navigateur pour autoriser la localisation sur ce site.');
+          return;
+        }
+      } catch {
+        // permissions API not supported — continue anyway
+      }
+    }
+
     setIsLocating(true);
 
-    const getCurrentPosition = (options: PositionOptions): Promise<GeolocationPosition> =>
-      new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, options));
-
     try {
-      let position: GeolocationPosition;
-      try {
-        // First try: fast + cached location (works better on iOS/Safari in many cases).
-        position = await getCurrentPosition({
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: false,
-          timeout: 12000,
+          timeout: 15000,
           maximumAge: 300000,
         });
-      } catch (firstError) {
-        const first = firstError as GeolocationPositionError;
-        if (first.code !== first.TIMEOUT && first.code !== first.POSITION_UNAVAILABLE) {
-          throw firstError;
-        }
-        // Second try: high accuracy if the fast pass timed out.
-        position = await getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 0,
-        });
-      }
+      });
 
       const { latitude, longitude } = position.coords;
       const res = await fetch(`/api/geocode/reverse?lat=${latitude}&lng=${longitude}`);
       if (res.ok) {
         const data = await res.json();
-        const city = data.city || data.address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        const city = data.city || data.displayName || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
         setQuery(city);
         onChange({
           origin: city,
           homeCoords: { lat: latitude, lng: longitude },
-          homeAddress: data.address,
+          homeAddress: data.displayName,
         });
       } else {
-        setGeoError('Position trouvée, mais impossible de déterminer la ville.');
+        // Position found but reverse geocode failed — use coords directly
+        const fallback = `${latitude.toFixed(3)}, ${longitude.toFixed(3)}`;
+        setQuery(fallback);
+        onChange({
+          origin: fallback,
+          homeCoords: { lat: latitude, lng: longitude },
+        });
       }
     } catch (error) {
-      const geoError = error as GeolocationPositionError;
-      if (geoError?.code === geoError.PERMISSION_DENIED) {
-        setGeoError('Accès à la localisation refusé. Touchez "Autoriser" sur le popup Safari, puis réessayez.');
-      } else if (geoError?.code === geoError.TIMEOUT) {
-        setGeoError('La localisation a expiré. Vérifiez le GPS/réseau et réessayez.');
+      const geoErr = error as GeolocationPositionError;
+      if (geoErr?.code === 1) { // PERMISSION_DENIED
+        setGeoError('Localisation refusée. Autorisez la localisation dans les réglages de votre navigateur, puis réessayez.');
+      } else if (geoErr?.code === 3) { // TIMEOUT
+        setGeoError('Localisation trop lente. Vérifiez votre GPS/réseau et réessayez.');
       } else {
-        setGeoError('Impossible de récupérer votre position actuelle.');
+        setGeoError(`Impossible de vous localiser. Tapez votre ville manuellement.`);
       }
     } finally {
       setIsLocating(false);
