@@ -355,11 +355,6 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
             parts: [{ text: prompt }],
           },
         ],
-        tools: [
-          {
-            googleSearch: {},
-          },
-        ],
         generationConfig: {
           temperature: 0.1, // Moins créatif = plus factuel
           maxOutputTokens: 2000,
@@ -500,7 +495,6 @@ Réponds en JSON:
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
     });
 
@@ -570,7 +564,6 @@ priceLevel: 1 (€) à 4 (€€€€). IMPORTANT: Pas de champ description, ti
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 8000 },
     });
 
@@ -677,7 +670,6 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 3000 },
     });
 
@@ -746,7 +738,6 @@ Si aucun prix trouvé, retourne: { "price": null }`;
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
     });
 
@@ -819,7 +810,6 @@ Si aucun ferry trouvé, retourne: { "price": null }`;
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
     });
 
@@ -880,7 +870,6 @@ Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
     });
 
@@ -966,7 +955,6 @@ If you cannot find this place, return: {"lat": null, "lng": null}`;
   try {
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
-        tools: [{ googleSearch: {} }],
         generationConfig: {
           temperature: 0,
           maxOutputTokens: 200,
