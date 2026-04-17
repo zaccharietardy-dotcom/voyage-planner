@@ -750,7 +750,7 @@ export async function runChunkStage(
       throw new Error(`grounding_rate_too_low:${groundingRate.toFixed(3)}`);
     }
 
-    const trip = buildTrip(
+    const trip = await buildTrip(
       state.artifacts.design,
       validationState.items,
       validationState.drives,

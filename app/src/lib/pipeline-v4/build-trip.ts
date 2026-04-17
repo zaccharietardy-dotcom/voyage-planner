@@ -10,7 +10,11 @@ import type { ValidatedItem, ValidatedDrive, HubHotelResult, LLMTripDesign } fro
 import {
   addOutboundTransportItem,
   addReturnTransportItem,
+  addOutboundTransportItemsFromPlan,
+  addReturnTransportItemsFromPlan,
 } from '../pipeline/utils/transport-items';
+import { buildTransportPlan } from '../pipeline/step4b-transport-plan';
+import { injectHotelBookends } from '../pipeline/utils/hotel-bookends';
 function uuidv4(): string {
   return 'v4-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now().toString(36);
 }
@@ -226,15 +230,26 @@ function buildCheckoutItem(
 // Build complete Trip
 // ---------------------------------------------------------------------------
 
-export function buildTrip(
+export async function buildTrip(
   design: LLMTripDesign,
   validatedItems: ValidatedItem[],
   validatedDrives: ValidatedDrive[],
   hotels: HubHotelResult[],
   preferences: TripPreferences,
-): Trip {
+): Promise<Trip> {
   const startDate = preferences.startDate ? new Date(preferences.startDate) : new Date();
   const days: TripDay[] = [];
+
+  // Drop long-haul LLM drives — they duplicate the TransportPlan legs we inject below.
+  const originLower = (preferences.origin || '').toLowerCase().trim();
+  const isLonghaulDrive = (d: ValidatedDrive): boolean => {
+    if (d.realDistanceKm > 100) return true;
+    if (!originLower) return false;
+    const from = d.original.from.toLowerCase();
+    const to = d.original.to.toLowerCase();
+    return from.includes(originLower) || to.includes(originLower);
+  };
+  const intraCityDrives = validatedDrives.filter(d => !isLonghaulDrive(d));
 
   // Index hotels by city first to avoid daily hotel churn for the same hub.
   const hotelByCity = new Map<string, Accommodation>();
@@ -264,7 +279,7 @@ export function buildTrip(
 
     const dayItems: TripItem[] = [];
     const dayValidatedItems = validatedItems.filter(i => i.dayNumber === llmDay.day);
-    const dayDrives = validatedDrives.filter(d => d.dayNumber === llmDay.day);
+    const dayDrives = intraCityDrives.filter(d => d.dayNumber === llmDay.day);
 
     let orderIndex = 0;
     let currentTime = '08:30';
@@ -357,22 +372,91 @@ export function buildTrip(
     });
   }
 
-  // Inject outbound/return transport items with affiliate links.
-  // V4 doesn't currently fetch real flight data, so pass null + null:
-  // the utility falls back to generating Aviasales/Omio search URLs from preferences.
+  // Inject outbound/return transport: multi-leg TransportPlan when available,
+  // legacy single-item as a defensive fallback if buildTransportPlan throws.
   const firstDay = days[0];
   const lastDay = days[days.length - 1];
-  if (firstDay) {
-    const fallbackCoordsOutbound = firstDay.items.find((it) => it.latitude && it.longitude)
-      ? { lat: firstDay.items.find((it) => it.latitude)!.latitude, lng: firstDay.items.find((it) => it.longitude)!.longitude }
-      : { lat: 48.85, lng: 2.35 };
-    addOutboundTransportItem(firstDay, null, null, preferences, fallbackCoordsOutbound);
+  if (firstDay && lastDay) {
+    const hotelCoords = mainHotel && mainHotel.latitude && mainHotel.longitude
+      ? { lat: mainHotel.latitude, lng: mainHotel.longitude }
+      : undefined;
+    const firstItemCoords = firstDay.items.find(it => it.latitude && it.longitude);
+    const destinationCoords = hotelCoords
+      || (firstItemCoords ? { lat: firstItemCoords.latitude, lng: firstItemCoords.longitude } : undefined);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + Math.max(1, (preferences.durationDays || days.length)) - 1);
+    const transportPref = (preferences.transport && preferences.transport !== 'optimal'
+      ? preferences.transport
+      : 'flexible') as 'plane' | 'train' | 'car' | 'bus' | 'flexible';
+
+    let transportPlan: Awaited<ReturnType<typeof buildTransportPlan>> | null = null;
+    try {
+      transportPlan = await buildTransportPlan({
+        origin: preferences.origin,
+        destination: preferences.destination,
+        startDate,
+        endDate,
+        groupSize: preferences.groupSize || 1,
+        originCoords: preferences.originCoords,
+        destinationCoords,
+        hotelCoords,
+        hotelName: mainHotel?.name,
+        transportPref,
+      });
+    } catch (err) {
+      console.warn('[Pipeline V4] buildTransportPlan failed:', err);
+    }
+
+    if (transportPlan) {
+      addOutboundTransportItemsFromPlan(firstDay, transportPlan, preferences);
+      if (lastDay !== firstDay) {
+        addReturnTransportItemsFromPlan(lastDay, transportPlan, preferences);
+      }
+    } else {
+      const fallbackCoordsOutbound = firstItemCoords
+        ? { lat: firstItemCoords.latitude, lng: firstItemCoords.longitude }
+        : { lat: 48.85, lng: 2.35 };
+      addOutboundTransportItem(firstDay, null, null, preferences, fallbackCoordsOutbound);
+      if (lastDay !== firstDay) {
+        const lastItemCoords = lastDay.items.find(it => it.latitude && it.longitude);
+        const fallbackCoordsReturn = lastItemCoords
+          ? { lat: lastItemCoords.latitude, lng: lastItemCoords.longitude }
+          : { lat: 48.85, lng: 2.35 };
+        addReturnTransportItem(lastDay, null, null, preferences, fallbackCoordsReturn);
+      }
+    }
   }
-  if (lastDay && lastDay !== firstDay) {
-    const fallbackCoordsReturn = lastDay.items.find((it) => it.latitude && it.longitude)
-      ? { lat: lastDay.items.find((it) => it.latitude)!.latitude, lng: lastDay.items.find((it) => it.longitude)!.longitude }
-      : { lat: 48.85, lng: 2.35 };
-    addReturnTransportItem(lastDay, null, null, preferences, fallbackCoordsReturn);
+
+  const bookendStats = injectHotelBookends(days, mainHotel, { verbose: true });
+  console.log(`[Pipeline V4] Hotel bookends: injected ${bookendStats.injected}, skipped ${bookendStats.skipped}`);
+
+  // Drop last-day restaurants/activities located back at origin (LLM artefact).
+  if (lastDay && lastDay !== firstDay && originLower && mainHotel?.latitude && mainHotel?.longitude) {
+    const hotelLat = mainHotel.latitude;
+    const hotelLng = mainHotel.longitude;
+    const TOO_FAR_KM = 50;
+    const before = lastDay.items.length;
+    lastDay.items = lastDay.items.filter(item => {
+      if (item.type !== 'restaurant' && item.type !== 'activity') return true;
+      const name = (item.locationName || item.title || '').toLowerCase();
+      if (name.includes(originLower)) {
+        console.warn(`[Pipeline V4] Dropping ${item.type} "${item.title}" on last day: name matches origin "${preferences.origin}"`);
+        return false;
+      }
+      if (item.latitude && item.longitude) {
+        const dLat = (item.latitude - hotelLat) * 111;
+        const dLng = (item.longitude - hotelLng) * 111 * Math.cos((hotelLat * Math.PI) / 180);
+        const km = Math.sqrt(dLat * dLat + dLng * dLng);
+        if (km > TOO_FAR_KM) {
+          console.warn(`[Pipeline V4] Dropping ${item.type} "${item.title}" on last day: ${km.toFixed(0)} km from hotel`);
+          return false;
+        }
+      }
+      return true;
+    });
+    if (lastDay.items.length < before) {
+      lastDay.items.forEach((it, idx) => { it.orderIndex = idx; });
+    }
   }
 
   // Calculate total cost

@@ -510,7 +510,7 @@ export async function generateTripV4(
   emitInfo(onEvent, 'v4_step', 'Assemblage de votre itinéraire...');
   const buildStartMs = Date.now();
 
-  const trip = buildTrip(design, validatedItems, validatedDrives, hotels, preferences);
+  const trip = await buildTrip(design, validatedItems, validatedDrives, hotels, preferences);
   const buildLatencyMs = Date.now() - buildStartMs;
 
   emit(onEvent, 4, 'Construction', 'step_done', buildLatencyMs);
