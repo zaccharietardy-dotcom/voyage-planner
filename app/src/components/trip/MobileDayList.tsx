@@ -39,9 +39,11 @@ const TRANSPORT_UI_V2_ENABLED = !['0', 'false', 'off'].includes(
 );
 
 const TRANSPORT_MODE_ICONS: Record<NonNullable<TripItem['transportMode']>, React.ElementType> = {
+  plane: Plane,
   train: TrainFront,
   bus: Bus,
   car: Car,
+  taxi: Car,
   ferry: Ship,
   walking: Footprints,
   transit: TramFront,

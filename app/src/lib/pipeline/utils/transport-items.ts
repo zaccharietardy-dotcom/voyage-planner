@@ -17,8 +17,13 @@ import {
   generateFlightLink,
   generateFlightOmioLink,
   generateTrainOmioLink,
+  generateTrainlineLink,
+  generateSNCFLink,
+  generateFlixBusLink,
+  generateGoogleMapsDirectionsLink,
   formatDateForUrl,
 } from '../../services/linkGenerator';
+import type { TransportPlan, TransportLeg, LegMode } from '../types/transport-plan';
 import {
   buildTrainDescription,
   getTransitLegsDurationMinutes,
@@ -588,4 +593,205 @@ export function addReturnTransportItem(
   lastDay.items.forEach((item, idx) => {
     item.orderIndex = idx;
   });
+}
+
+// ============================================
+// Multi-leg transport items (TransportPlan-driven)
+// ============================================
+
+const LEG_IMAGES: Partial<Record<LegMode, string>> = {
+  plane: 'https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=600&h=400&fit=crop',
+  train: '/images/transport/train-sncf-duplex.jpg',
+  high_speed_train: '/images/transport/train-sncf-duplex.jpg',
+  bus: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&h=400&fit=crop',
+  car: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&h=400&fit=crop',
+};
+
+function legModeToTripItemMode(mode: LegMode): NonNullable<TripItem['transportMode']> {
+  switch (mode) {
+    case 'plane': return 'plane';
+    case 'high_speed_train':
+    case 'train': return 'train';
+    case 'bus': return 'bus';
+    case 'car': return 'car';
+    case 'taxi': return 'taxi';
+    case 'ferry': return 'ferry';
+    case 'rer': return 'RER';
+    case 'metro': return 'metro';
+    case 'walk': return 'walking';
+  }
+}
+
+function legIsMainHaul(leg: TransportLeg): boolean {
+  return leg.mode === 'plane' || leg.mode === 'high_speed_train' || leg.mode === 'ferry' || (leg.mode === 'train' && !!leg.from.hub && !!leg.to.hub) || (leg.mode === 'bus' && !!leg.from.hub && !!leg.to.hub) || (leg.mode === 'car' && leg.durationMin > 60);
+}
+
+function buildLegBookingUrls(
+  leg: TransportLeg,
+  preferences: TripPreferences,
+  dateStr: string,
+  returnDateStr: string,
+): { bookingUrl?: string; aviasalesUrl?: string; omioFlightUrl?: string } {
+  const fromName = leg.from.hub?.city || leg.from.hub?.name || leg.from.name;
+  const toName = leg.to.hub?.city || leg.to.hub?.name || leg.to.name;
+  const passengers = preferences.groupSize || 1;
+
+  if (leg.mode === 'plane') {
+    const originForIata = leg.from.hub?.code || fromName;
+    const destForIata = leg.to.hub?.code || toName;
+    const aviasales = generateFlightLink(
+      { origin: originForIata, destination: destForIata },
+      { date: dateStr, returnDate: returnDateStr, passengers },
+    );
+    const omio = generateFlightOmioLink(fromName, toName, dateStr, passengers);
+    return { bookingUrl: aviasales, aviasalesUrl: aviasales, omioFlightUrl: omio };
+  }
+
+  if (leg.mode === 'train' || leg.mode === 'high_speed_train') {
+    const isFrance = /france|france$/i.test(leg.from.hub?.country || '') || /france|france$/i.test(leg.to.hub?.country || '');
+    const primary = isFrance
+      ? generateSNCFLink(fromName, toName, dateStr, passengers)
+      : generateTrainlineLink(fromName, toName, dateStr, passengers);
+    const omio = generateTrainOmioLink(fromName, toName, dateStr, passengers);
+    return { bookingUrl: primary, omioFlightUrl: omio };
+  }
+
+  if (leg.mode === 'bus') {
+    const primary = generateFlixBusLink(fromName, toName, dateStr, passengers);
+    return { bookingUrl: primary };
+  }
+
+  // Transfers (rer, metro, taxi, walk, car) → Google Maps Directions
+  const travelMode: 'transit' | 'driving' | 'walking' = leg.mode === 'walk'
+    ? 'walking'
+    : leg.mode === 'car' || leg.mode === 'taxi' ? 'driving' : 'transit';
+  return {
+    bookingUrl: generateGoogleMapsDirectionsLink(
+      { name: leg.from.name, lat: leg.from.lat, lng: leg.from.lng },
+      { name: leg.to.name, lat: leg.to.lat, lng: leg.to.lng },
+      travelMode,
+    ),
+  };
+}
+
+function legTitle(leg: TransportLeg): string {
+  const from = leg.from.hub?.code || leg.from.name;
+  const to = leg.to.hub?.code || leg.to.name;
+  const prefix = leg.mode === 'plane'
+    ? 'Vol'
+    : leg.mode === 'high_speed_train' ? 'TGV / train rapide'
+    : leg.mode === 'train' ? 'Train'
+    : leg.mode === 'bus' ? 'Bus longue distance'
+    : leg.mode === 'car' ? 'Route'
+    : leg.mode === 'taxi' ? 'Taxi'
+    : leg.mode === 'rer' ? 'RER'
+    : leg.mode === 'metro' ? 'Métro'
+    : leg.mode === 'ferry' ? 'Ferry'
+    : 'Transfert';
+  return `${prefix} ${from} → ${to}`;
+}
+
+function legDescription(leg: TransportLeg): string {
+  const parts: string[] = [];
+  if (leg.provider) parts.push(leg.provider);
+  if (leg.reasoning) parts.push(leg.reasoning);
+  if (parts.length === 0) return '';
+  return parts.join(' · ');
+}
+
+function buildLegItem(
+  leg: TransportLeg,
+  direction: 'outbound' | 'return',
+  dayNumber: number,
+  startTimeMin: number,
+  preferences: TripPreferences,
+  dateStr: string,
+  returnDateStr: string,
+): TripItem {
+  const isMain = legIsMainHaul(leg);
+  const role = isMain ? 'longhaul' : 'transfer_hub';
+  const itemType: TripItem['type'] = leg.mode === 'plane' ? 'flight' : 'transport';
+  const urls = buildLegBookingUrls(leg, preferences, dateStr, returnDateStr);
+  const endTimeMin = startTimeMin + leg.durationMin;
+
+  return {
+    id: uuidv4(),
+    dayNumber,
+    startTime: minutesToHHMM(startTimeMin),
+    endTime: minutesToHHMM(Math.min(endTimeMin, 23 * 60 + 55)),
+    type: itemType,
+    title: legTitle(leg),
+    description: legDescription(leg),
+    locationName: leg.from.hub?.name || leg.from.name,
+    latitude: leg.from.lat,
+    longitude: leg.from.lng,
+    orderIndex: 0,
+    duration: leg.durationMin,
+    imageUrl: LEG_IMAGES[leg.mode],
+    estimatedCost: Math.round(leg.costEur * (preferences.groupSize || 1)),
+    transportMode: legModeToTripItemMode(leg.mode),
+    transportRole: role,
+    transportDirection: direction,
+    transportTimeSource: 'estimated',
+    selectionSource: 'api',
+    bookingUrl: urls.bookingUrl,
+    aviasalesUrl: urls.aviasalesUrl,
+    omioFlightUrl: urls.omioFlightUrl,
+  };
+}
+
+/**
+ * Injects outbound transport items (multiple legs) for day 1.
+ * Replaces addOutboundTransportItem when a TransportPlan is available.
+ */
+export function addOutboundTransportItemsFromPlan(
+  day1: TripDay,
+  plan: TransportPlan,
+  preferences: TripPreferences,
+): void {
+  const returnDate = new Date(preferences.startDate);
+  returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+  const outboundDateStr = formatDateForUrl(preferences.startDate);
+  const returnDateStr = formatDateForUrl(returnDate);
+
+  const sortedLegs = [...plan.outboundLegs].sort((a, b) => a.index - b.index);
+  let cursor = parseHHMM('08:00');
+  const items: TripItem[] = [];
+  for (const leg of sortedLegs) {
+    items.push(buildLegItem(leg, 'outbound', 1, cursor, preferences, outboundDateStr, returnDateStr));
+    cursor += leg.durationMin;
+  }
+
+  // Prepend legs before any existing items (keep activities later in the day)
+  day1.items = [...items, ...day1.items];
+  day1.items.forEach((item, idx) => { item.orderIndex = idx; });
+}
+
+/**
+ * Injects return transport items (multiple legs) for the last day.
+ */
+export function addReturnTransportItemsFromPlan(
+  lastDay: TripDay,
+  plan: TransportPlan,
+  preferences: TripPreferences,
+): void {
+  const returnDate = new Date(preferences.startDate);
+  returnDate.setDate(returnDate.getDate() + preferences.durationDays - 1);
+  const outboundDateStr = formatDateForUrl(preferences.startDate);
+  const returnDateStr = formatDateForUrl(returnDate);
+
+  const sortedLegs = [...plan.returnLegs].sort((a, b) => a.index - b.index);
+  const totalMin = sortedLegs.reduce((s, l) => s + l.durationMin, 0);
+  // Anchor: last leg should arrive around 21:00 local — start accordingly.
+  const targetArrivalMin = parseHHMM('21:00');
+  let cursor = Math.max(parseHHMM('10:00'), targetArrivalMin - totalMin);
+
+  const items: TripItem[] = [];
+  for (const leg of sortedLegs) {
+    items.push(buildLegItem(leg, 'return', lastDay.dayNumber, cursor, preferences, outboundDateStr, returnDateStr));
+    cursor += leg.durationMin;
+  }
+
+  lastDay.items = [...lastDay.items, ...items];
+  lastDay.items.forEach((item, idx) => { item.orderIndex = idx; });
 }

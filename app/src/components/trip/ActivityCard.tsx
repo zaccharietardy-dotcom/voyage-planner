@@ -117,9 +117,11 @@ const TYPE_ICONS: Record<TripItemType, SvgIconComponent> = {
 };
 
 const TRANSPORT_MODE_ICONS: Record<NonNullable<TripItem['transportMode']>, SvgIconComponent> = {
+  plane: Plane,
   train: TrainFront,
   bus: Bus,
   car: Car,
+  taxi: Car,
   ferry: Ship,
   walking: Footprints,
   transit: TramFront,
@@ -945,7 +947,7 @@ function BookingButtons({ item, isCompact = false }: { item: TripItem; isCompact
   const bookingUrl = item.bookingUrl || '';
   const isLocalTransport = item.type === 'transport' && item.transportRole === 'inter_item';
 
-  // Flight — single Aviasales button (prefer aviasalesUrl which includes return date)
+  // Flight — Aviasales primary + Omio secondary
   if (item.type === 'flight') {
     const flightUrl = item.aviasalesUrl || bookingUrl;
     if (flightUrl) {
@@ -953,6 +955,14 @@ function BookingButtons({ item, isCompact = false }: { item: TripItem; isCompact
         label: 'Aviasales',
         url: flightUrl,
         variant: 'primary',
+        icon: <Plane className="h-3 w-3" />,
+      });
+    }
+    if (item.omioFlightUrl && item.omioFlightUrl !== flightUrl) {
+      buttons.push({
+        label: 'Omio',
+        url: item.omioFlightUrl,
+        variant: 'secondary',
         icon: <Plane className="h-3 w-3" />,
       });
     }
@@ -964,16 +974,31 @@ function BookingButtons({ item, isCompact = false }: { item: TripItem; isCompact
     buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <Bed className="h-3 w-3" /> });
   }
 
-  // Transport
+  // Transport (train/bus/transfer)
   if (item.type === 'transport' && bookingUrl) {
     const transportMode = getTransportModeForItem(item) || 'transit';
     const TransportIcon = TRANSPORT_MODE_ICONS[transportMode] || TrainFront;
+    const isTransferHub = item.transportRole === 'transfer_hub';
+    const isHotelBookend = item.transportRole === 'hotel_depart' || item.transportRole === 'hotel_return';
+
     if (!isLocalTransport) {
-      const label = bookingUrl.includes('omio') || bookingUrl.includes('sjv.io') ? 'Omio'
-        : bookingUrl.includes('trainline') ? 'Trainline'
-        : bookingUrl.includes('flixbus') ? 'FlixBus'
-        : 'Réserver';
+      let label: string;
+      if (bookingUrl.includes('omio') || bookingUrl.includes('sjv.io')) label = 'Omio';
+      else if (bookingUrl.includes('trainline')) label = 'Trainline';
+      else if (bookingUrl.includes('sncf-connect')) label = 'SNCF Connect';
+      else if (bookingUrl.includes('flixbus')) label = 'FlixBus';
+      else if (bookingUrl.includes('google.com/maps') && (isTransferHub || isHotelBookend)) label = 'Itinéraire';
+      else label = 'Réserver';
       buttons.push({ label, url: bookingUrl, variant: 'primary', icon: <TransportIcon className="h-3 w-3" /> });
+
+      if (item.omioFlightUrl && item.omioFlightUrl !== bookingUrl) {
+        buttons.push({
+          label: 'Omio',
+          url: item.omioFlightUrl,
+          variant: 'secondary',
+          icon: <TransportIcon className="h-3 w-3" />,
+        });
+      }
     }
   }
 

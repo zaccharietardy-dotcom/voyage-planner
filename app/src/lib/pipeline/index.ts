@@ -59,7 +59,9 @@ import {
   isPointWithinDestinationEnvelope,
   type DestinationEnvelope,
 } from '../services/destinationEnvelope';
-import { addOutboundTransportItem, addReturnTransportItem } from './utils/transport-items';
+import { addOutboundTransportItem, addReturnTransportItem, addOutboundTransportItemsFromPlan, addReturnTransportItemsFromPlan } from './utils/transport-items';
+import { buildTransportPlan } from './step4b-transport-plan';
+import { injectHotelBookends } from './utils/hotel-bookends';
 import { isAppropriateForMeal, isBreakfastSpecialized, getCuisineFamily } from './step4-restaurants';
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 import { anchorTransport } from './step4-anchor-transport';
@@ -2591,10 +2593,44 @@ async function runPipelineFromClusters(
       ? { lat: hotel.latitude, lng: hotel.longitude }
       : data.destCoords;
 
-    addOutboundTransportItem(day1, data.outboundFlight || null, bestTransport, preferences, transportFallbackCoords);
-    addReturnTransportItem(lastDay, data.returnFlight || null, bestTransport, preferences, transportFallbackCoords);
+    // Step 4b : Build a multi-leg transport plan (LLM + deterministic fallback).
+    // Falls back to the legacy single-item injector only if we hit the heuristic
+    // fallback path AND already have Flight / TransportOptionSummary data from the APIs.
+    const hasRealTransportData = !!data.outboundFlight || (bestTransport?.transitLegs && bestTransport.transitLegs.length > 0);
+    let transportPlan: Awaited<ReturnType<typeof buildTransportPlan>> | null = null;
+    try {
+      const endDate = new Date(preferences.startDate);
+      endDate.setDate(endDate.getDate() + preferences.durationDays - 1);
+      transportPlan = await buildTransportPlan({
+        origin: preferences.origin,
+        destination: preferences.destination,
+        startDate: preferences.startDate,
+        endDate,
+        groupSize: preferences.groupSize || 1,
+        originCoords: preferences.originCoords,
+        destinationCoords: data.destCoords,
+        hotelCoords: hotel ? { lat: hotel.latitude, lng: hotel.longitude } : undefined,
+        hotelName: hotel?.name,
+        transportPref: (preferences.transport && preferences.transport !== 'optimal' ? preferences.transport : 'flexible') as 'plane' | 'train' | 'car' | 'bus' | 'flexible',
+      });
+    } catch (err) {
+      console.warn('[Pipeline V3] buildTransportPlan failed:', err);
+    }
+
+    const useLegacyInjector = !transportPlan || (transportPlan.source === 'fallback_heuristic' && hasRealTransportData);
+    if (useLegacyInjector) {
+      addOutboundTransportItem(day1, data.outboundFlight || null, bestTransport, preferences, transportFallbackCoords);
+      addReturnTransportItem(lastDay, data.returnFlight || null, bestTransport, preferences, transportFallbackCoords);
+    } else {
+      addOutboundTransportItemsFromPlan(day1, transportPlan!, preferences);
+      addReturnTransportItemsFromPlan(lastDay, transportPlan!, preferences);
+    }
     injectFirstLastMileTransfers(day1, lastDay);
-    console.log(`[Pipeline V3] Step 11b: Transport items injected (mode: ${bestTransport?.mode || 'none'})`);
+    console.log(`[Pipeline V3] Step 11b: Transport items injected (mode: ${bestTransport?.mode || 'none'}, plan source: ${transportPlan?.source || 'none'})`);
+
+    // Step 11c: inject hotel bookends (hotel_depart au début et hotel_return en fin de chaque jour)
+    const bookendStats = injectHotelBookends(scheduledDays, hotel, { verbose: true });
+    console.log(`[Pipeline V3] Step 11c: Hotel bookends injected (${bookendStats.injected}, skipped ${bookendStats.skipped})`);
 
     // Post-injection safety: remove items past return transport on last day
     const returnFlightItem = lastDay.items.find(i =>

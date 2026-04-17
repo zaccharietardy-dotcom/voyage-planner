@@ -421,6 +421,74 @@ export function toOmioLocationSlug(location: string): string {
 }
 
 /**
+ * Trainline search URL (long-distance train bookings, EU-wide).
+ */
+export function generateTrainlineLink(
+  origin: string,
+  destination: string,
+  date?: string,
+  passengers: number = 1,
+): string {
+  const originSlug = toOmioLocationSlug(origin);
+  const destSlug = toOmioLocationSlug(destination);
+  const params = new URLSearchParams();
+  if (date) params.set('outwardDate', formatDateForUrl(date));
+  if (passengers > 1) params.set('passengers', String(passengers));
+  const qs = params.toString();
+  return `https://www.thetrainline.com/book/results?origin=${originSlug}&destination=${destSlug}${qs ? `&${qs}` : ''}`;
+}
+
+/**
+ * SNCF Connect search URL (France-specific, retail).
+ */
+export function generateSNCFLink(
+  origin: string,
+  destination: string,
+  date?: string,
+  passengers: number = 1,
+): string {
+  const params = new URLSearchParams({
+    origin,
+    destination,
+    travelClass: 'second',
+    passengers: String(passengers),
+  });
+  if (date) params.set('outboundDate', formatDateForUrl(date));
+  return `https://www.sncf-connect.com/app/home/search?${params.toString()}`;
+}
+
+/**
+ * FlixBus search URL (long-distance bus bookings, EU + US).
+ */
+export function generateFlixBusLink(
+  origin: string,
+  destination: string,
+  date?: string,
+  passengers: number = 1,
+): string {
+  const originSlug = toOmioLocationSlug(origin);
+  const destSlug = toOmioLocationSlug(destination);
+  const params = new URLSearchParams();
+  if (date) params.set('departureDate', formatDateForUrl(date));
+  if (passengers > 1) params.set('adult', String(passengers));
+  const qs = params.toString();
+  return `https://www.flixbus.fr/search?departureCity=${originSlug}&arrivalCity=${destSlug}${qs ? `&${qs}` : ''}`;
+}
+
+/**
+ * Lien Google Maps Directions entre deux points nommés (plus lisible que les coords).
+ */
+export function generateGoogleMapsDirectionsLink(
+  from: { name: string; lat?: number; lng?: number },
+  to: { name: string; lat?: number; lng?: number },
+  travelMode: 'transit' | 'driving' | 'walking' | 'bicycling' = 'transit',
+): string {
+  const origin = from.name ? encodeURIComponent(from.name) : (from.lat && from.lng ? `${from.lat},${from.lng}` : '');
+  const destination = to.name ? encodeURIComponent(to.name) : (to.lat && to.lng ? `${to.lat},${to.lng}` : '');
+  return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=${travelMode}`;
+}
+
+/**
  * Convertit un lien Aviasales (ou autre) en lien affilié Travelpayouts
  * Appelle l'API interne /api/affiliate-link
  *

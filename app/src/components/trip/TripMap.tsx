@@ -785,6 +785,41 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       });
     }
 
+    // Always render a distinct gold hotel marker — visible on every day view so users
+    // know the anchor point of their trip. Extracted from any checkin/checkout item.
+    if (!isAllDaysView) {
+      const hotelAnchor = items.find(
+        (it) => (it.type === 'checkin' || it.type === 'checkout') && it.accommodation?.latitude && it.accommodation?.longitude,
+      );
+      const acc = hotelAnchor?.accommodation;
+      if (acc?.latitude && acc?.longitude) {
+        const name = acc.name || hotelAnchor?.title || 'Hôtel';
+        const hotelIcon = L.divIcon({
+          className: 'hotel-anchor-marker',
+          html: `<div style="
+            width:30px;height:30px;
+            border-radius:14px 14px 5px 5px;
+            background:#c5a059;
+            border:2px solid #020617;
+            display:flex;align-items:center;justify-content:center;
+            color:#020617;
+            font-size:14px;
+            font-weight:800;
+            box-shadow:0 4px 12px rgba(197,160,89,0.35), 0 1px 3px rgba(0,0,0,0.25);
+          ">🛏</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
+        });
+        const hotelMarker = L.marker([acc.latitude, acc.longitude], { icon: hotelIcon, interactive: true, zIndexOffset: 500 })
+          .bindPopup(`<div style="text-align:center;font-size:13px;font-weight:600;">Votre hôtel<br/><span style="font-weight:500;">${escapeHtml(name)}</span></div>`, {
+            maxWidth: 240,
+            className: 'clean-popup',
+          });
+        markerLayer.addLayer(hotelMarker);
+        bounds.extend([acc.latitude, acc.longitude]);
+      }
+    }
+
     // NOTE: Departure (origin) coords intentionally NOT added to bounds.
     // But ARRIVAL airport at destination IS added — the user wants to see the route
     // from the airport to the first activity.
@@ -864,9 +899,19 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       usedLabelPositions.push([item.latitude, item.longitude]);
     });
 
+    // Resolve hotel coords once across all days (checkin/checkout are only on day 1 / last day)
+    const globalHotelAnchor = items.find(
+      (item) => (item.type === 'checkin' || item.type === 'checkout') && item.accommodation?.latitude && item.accommodation?.longitude,
+    );
+    const globalHotelCoords = globalHotelAnchor?.accommodation
+      ? [globalHotelAnchor.accommodation.latitude, globalHotelAnchor.accommodation.longitude] as [number, number]
+      : null;
+    const globalHotelName = globalHotelAnchor?.accommodation?.name || globalHotelAnchor?.title || 'Hôtel';
+
     dayEntries.forEach(([dayNum, dayItems]) => {
       if (isAllDaysView) return;
-      // Extract hotel coordinates from checkin/checkout items
+      // Prefer day-scoped anchor (checkin/checkout), else fall back to the global hotel so
+      // mid-trip days (2, 3…) also get their route drawn through the hotel.
       const hotelItem = items.find(
         (item) =>
           (item.type === 'checkin' || item.type === 'checkout') &&
@@ -876,7 +921,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
       );
       const hotelCoords = hotelItem?.accommodation
         ? [hotelItem.accommodation.latitude, hotelItem.accommodation.longitude] as [number, number]
-        : null;
+        : globalHotelCoords;
 
       // Build ordered node list: hotel → activities → hotel
       interface RouteNode {
@@ -950,6 +995,8 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         const fromNode = segmentNodes[i];
         const toNode = segmentNodes[i + 1];
         let nextItem = toNode.item;
+        // Hotel-bookend segments = hotel (no item) ↔ activity. Style as dashed gold.
+        const isHotelBookendSegment = (!fromNode.item && !!toNode.item) || (!!fromNode.item && !toNode.item);
 
         // Determine segment coords: decoded polyline or straight line
         let segmentCoords: [number, number][];
@@ -982,7 +1029,7 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         const halo = L.polyline(segmentCoords, {
           color: isAllDaysView ? getDayColor(dayNum).bg : '#c5a059',
           weight: isAllDaysView ? 4 : 10,
-          opacity: haloOpacity,
+          opacity: isHotelBookendSegment ? Math.max(0.05, haloOpacity * 0.6) : haloOpacity,
           smoothFactor: 2,
           lineJoin: 'round',
           lineCap: 'round',
@@ -992,11 +1039,12 @@ export function TripMap({ items, selectedItemId, onItemClick, hoveredItemId, map
         // Main line
         const polyline = L.polyline(segmentCoords, {
           color: isAllDaysView ? getDayColor(dayNum).bg : '#c5a059',
-          weight: lineWeight,
-          opacity: lineOpacity,
+          weight: isHotelBookendSegment ? Math.max(2, lineWeight - 1) : lineWeight,
+          opacity: isHotelBookendSegment ? Math.max(0.35, lineOpacity * 0.7) : lineOpacity,
           smoothFactor: 2,
           lineJoin: 'round',
           lineCap: 'round',
+          dashArray: isHotelBookendSegment ? '6, 6' : undefined,
         });
         routeLayer.addLayer(polyline);
 
