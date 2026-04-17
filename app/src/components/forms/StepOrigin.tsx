@@ -47,10 +47,31 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
   const handleGeolocation = useCallback(async () => {
     setGeoError(null);
 
-    if (!navigator.geolocation) {
-      setGeoError('La géolocalisation n\'est pas disponible sur votre navigateur.');
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoError("La géolocalisation n'est pas disponible sur votre navigateur.");
       return;
     }
+
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      setGeoError('La géolocalisation nécessite une connexion HTTPS sécurisée.');
+      return;
+    }
+
+    // Safari renvoie PERMISSION_DENIED sans prompter si la permission a déjà été refusée
+    // ou si Services de localisation OS est off. On détecte ça avant l'appel.
+    try {
+      const perms = (navigator as Navigator & { permissions?: { query: (d: { name: PermissionName }) => Promise<PermissionStatus> } }).permissions;
+      if (perms?.query) {
+        const status = await perms.query({ name: 'geolocation' as PermissionName });
+        if (status.state === 'denied') {
+          setGeoError(
+            "Localisation bloquée. Safari : Réglages → Sites web → Position → autorisez ce site. " +
+            "Sur iPhone/Mac, vérifiez aussi : Réglages → Confidentialité → Services de localisation → Safari."
+          );
+          return;
+        }
+      }
+    } catch { /* Permissions API absente (Safari < iOS 16.4) — on continue */ }
 
     setIsLocating(true);
 
@@ -87,11 +108,14 @@ export function StepOrigin({ data, onChange }: StepOriginProps) {
     } catch (error) {
       const geoErr = error as GeolocationPositionError;
       if (geoErr?.code === 1) { // PERMISSION_DENIED
-        setGeoError('Localisation refusée. Autorisez la localisation dans les réglages de votre navigateur, puis réessayez.');
+        setGeoError(
+          "Localisation bloquée par Safari. Réglages → Sites web → Position → autorisez ce site. " +
+          "Sur iPhone/Mac, vérifiez aussi : Réglages → Confidentialité → Services de localisation → Safari."
+        );
       } else if (geoErr?.code === 3) { // TIMEOUT
         setGeoError('Localisation trop lente. Vérifiez votre GPS/réseau et réessayez.');
       } else {
-        setGeoError(`Impossible de vous localiser. Tapez votre ville manuellement.`);
+        setGeoError('Impossible de vous localiser. Tapez votre ville manuellement.');
       }
     } finally {
       setIsLocating(false);
