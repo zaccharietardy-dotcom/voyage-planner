@@ -15,6 +15,7 @@ import {
 } from '../pipeline/utils/transport-items';
 import { buildTransportPlan } from '../pipeline/step4b-transport-plan';
 import { injectHotelBookends } from '../pipeline/utils/hotel-bookends';
+import { validateContracts } from '../pipeline/step11-contracts';
 function uuidv4(): string {
   return 'v4-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now().toString(36);
 }
@@ -482,12 +483,34 @@ export async function buildTrip(
       other: 0,
     },
     qualityMetrics: {
-      score: 0, // Will be computed by contracts
+      score: 0,
       invariantsPassed: true,
       violations: [],
     },
     pipelineVersion: 'v4-llm-first',
   };
+
+  // Report-only contract check: no auto-fix, just visibility on LLM quality issues.
+  try {
+    const firstCoords = days[0]?.items.find(it => it.latitude && it.longitude);
+    const contractDestCoords = mainHotel?.latitude && mainHotel?.longitude
+      ? { lat: mainHotel.latitude, lng: mainHotel.longitude }
+      : firstCoords
+        ? { lat: firstCoords.latitude, lng: firstCoords.longitude }
+        : { lat: 0, lng: 0 };
+    const startDateStr = startDate.toISOString().slice(0, 10);
+    const result = validateContracts(days, startDateStr, new Set(), contractDestCoords);
+    trip.qualityMetrics = {
+      score: result.score,
+      invariantsPassed: result.invariantsPassed,
+      violations: result.violations,
+    };
+    console.log(`[Pipeline V4] Contract check: score=${result.score}/100 violations=${result.violations.length} warnings=${result.qualityWarnings.length}`);
+    for (const v of result.violations) console.warn(`[Pipeline V4][contract]   ${v}`);
+    for (const w of result.qualityWarnings) console.log(`[Pipeline V4][contract-warn]   ${w}`);
+  } catch (err) {
+    console.warn('[Pipeline V4] validateContracts failed (non-fatal):', err);
+  }
 
   return trip;
 }
