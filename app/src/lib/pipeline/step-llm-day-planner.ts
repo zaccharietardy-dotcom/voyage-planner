@@ -908,6 +908,7 @@ async function callPlannerRawText(
             timeoutMs: attemptTimeoutMs,
             maxRetries,
             retryDelayMs: 450,
+            caller: 'day_planner',
           });
 
     if (!(response instanceof Response)) {

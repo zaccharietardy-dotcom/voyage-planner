@@ -178,7 +178,7 @@ async function callGemini(prompt: string): Promise<string | null> {
         temperature: 0.1,
         maxOutputTokens: 2000,
       },
-    }, 2);
+    }, 2, 'step3b_rebalance');
 
     if (!response.ok) {
       console.warn(`[LLM Rebalance] Gemini HTTP ${response.status}`);

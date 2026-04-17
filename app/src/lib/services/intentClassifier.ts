@@ -205,7 +205,7 @@ export async function classifyIntent(
         maxOutputTokens: 500,
         responseMimeType: 'application/json',
       },
-    });
+    }, 3, 'intent_classifier');
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -358,7 +358,7 @@ Réponds UNIQUEMENT en JSON valide:
         maxOutputTokens: 400,
         responseMimeType: 'application/json',
       },
-    });
+    }, 3, 'intent_suggestions');
 
     if (!response.ok) {
       console.warn('[Suggestions] Gemini API error:', response.status);

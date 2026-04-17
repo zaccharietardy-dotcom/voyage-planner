@@ -6,6 +6,7 @@
  */
 
 import type { GroupType, BudgetLevel, ActivityType } from '../types/trip';
+import { callGemini } from './geminiClient';
 
 // ============================================
 // Types
@@ -2429,6 +2430,41 @@ export async function generateDayTripsWithAI(
   }
 
   try {
+    const extractJsonArray = (raw: string): unknown[] | null => {
+      const trimmed = (raw || '').trim();
+      if (!trimmed) return null;
+
+      try {
+        const direct = JSON.parse(trimmed);
+        return Array.isArray(direct) ? direct : null;
+      } catch {
+        // continue
+      }
+
+      const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      if (fenced?.[1]) {
+        try {
+          const parsed = JSON.parse(fenced[1].trim());
+          return Array.isArray(parsed) ? parsed : null;
+        } catch {
+          // continue
+        }
+      }
+
+      const start = trimmed.indexOf('[');
+      const end = trimmed.lastIndexOf(']');
+      if (start >= 0 && end > start) {
+        try {
+          const sliced = JSON.parse(trimmed.slice(start, end + 1));
+          return Array.isArray(sliced) ? sliced : null;
+        } catch {
+          return null;
+        }
+      }
+
+      return null;
+    };
+
     const prompt = `You are a travel expert. Generate 2-3 day trip suggestions from ${destination}.
 
 REQUIREMENTS:
@@ -2456,21 +2492,17 @@ OUTPUT FORMAT - JSON array, no text before or after:
 
     const startTime = Date.now();
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 2048,
-            responseMimeType: 'application/json',
-          },
-        }),
-      }
-    );
+    const response = await callGemini({
+      caller: 'day_trip_suggestions',
+      body: {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.5,
+          maxOutputTokens: 2048,
+          responseMimeType: 'application/json',
+        },
+      },
+    });
 
     const durationMs = Date.now() - startTime;
 
@@ -2490,34 +2522,36 @@ OUTPUT FORMAT - JSON array, no text before or after:
 
     console.debug(`[Day Trips AI] Gemini response received in ${durationMs}ms`);
 
-    // Parse JSON response
-    const rawTrips = JSON.parse(text);
-
-    if (!Array.isArray(rawTrips)) {
-      console.warn('[Day Trips AI] Response is not an array');
+    const rawTrips = extractJsonArray(text);
+    if (!rawTrips) {
+      console.warn('[Day Trips AI] Invalid JSON array response');
       return [];
     }
 
     // Enrich with default values and type-safe fields
-    const enrichedTrips: DayTripSuggestion[] = rawTrips.map((trip) => ({
-      name: trip.name || 'Unknown Day Trip',
-      description: trip.description || '',
-      destination: trip.destination || '',
-      latitude: trip.latitude || destCoords.lat,
-      longitude: trip.longitude || destCoords.lng,
-      distanceKm: trip.distanceKm || 50,
-      transportMode: trip.transportMode || 'bus',
-      transportDurationMin: trip.transportDurationMin || 60,
-      estimatedCostPerPerson: trip.estimatedCostPerPerson || 10,
-      keyAttractions: trip.keyAttractions || [],
-      tags: inferTagsFromAttractions(trip.keyAttractions || []),
-      suitableFor: inferSuitableGroups(preferences.groupType as GroupType),
-      minBudgetLevel: preferences.budgetLevel as BudgetLevel,
-      notes: 'AI-generated suggestion. Verify details before booking.',
-      minDays: trip.minDays || 3,
-      fullDayRequired: trip.fullDayRequired ?? true,
-      fromCity: destination.toLowerCase().trim(),
-    }));
+    const enrichedTrips: DayTripSuggestion[] = rawTrips.map((tripRaw) => {
+      const trip = (tripRaw || {}) as Record<string, any>;
+      const keyAttractions = Array.isArray(trip.keyAttractions) ? trip.keyAttractions : [];
+      return {
+        name: trip.name || 'Unknown Day Trip',
+        description: trip.description || '',
+        destination: trip.destination || '',
+        latitude: trip.latitude || destCoords.lat,
+        longitude: trip.longitude || destCoords.lng,
+        distanceKm: trip.distanceKm || 50,
+        transportMode: trip.transportMode || 'bus',
+        transportDurationMin: trip.transportDurationMin || 60,
+        estimatedCostPerPerson: trip.estimatedCostPerPerson || 10,
+        keyAttractions,
+        tags: inferTagsFromAttractions(keyAttractions),
+        suitableFor: inferSuitableGroups(preferences.groupType as GroupType),
+        minBudgetLevel: preferences.budgetLevel as BudgetLevel,
+        notes: 'AI-generated suggestion. Verify details before booking.',
+        minDays: trip.minDays || 3,
+        fullDayRequired: trip.fullDayRequired ?? true,
+        fromCity: destination.toLowerCase().trim(),
+      };
+    });
 
     return enrichedTrips;
   } catch (error) {

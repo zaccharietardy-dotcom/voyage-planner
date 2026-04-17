@@ -13,13 +13,9 @@ import { Flight } from '../types';
 import { generateFlightLink } from './linkGenerator';
 import { reportProviderQuotaExceeded } from './providerQuotaGuard';
 import { isProviderQuotaLikeMessage } from '../utils/quotaErrors';
+import { callGemini } from './geminiClient';
 
 function getGeminiApiKey() { return process.env.GOOGLE_AI_API_KEY; }
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
-
-function buildGeminiUrl(): string {
-  return `${GEMINI_API_URL}?key=${getGeminiApiKey()}`;
-}
 
 async function detectGeminiQuotaAndThrow(response: Response): Promise<void> {
   if (response.status === 429) {
@@ -74,7 +70,8 @@ export function getGeminiCallCount(): number {
 
 export async function fetchGeminiWithRetry(
   body: Record<string, unknown>,
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  caller: string = 'unknown',
 ): Promise<Response> {
   // Hard cap: prevent runaway costs
   if (geminiCallCount >= GEMINI_MAX_CALLS_PER_RUN) {
@@ -88,16 +85,11 @@ export async function fetchGeminiWithRetry(
     reportProviderQuotaExceeded('gemini', 'circuit_breaker_active');
   }
 
-  const url = buildGeminiUrl();
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const response = await callGemini({ body, caller, retryAttempt: attempt });
     await detectGeminiQuotaAndThrow(response);
 
-    // Retry on 429 (rate limit) or 503 (overloaded)
+    // Retry on 503 (overloaded)
     if (response.status === 503 && attempt < maxRetries) {
       const delay = Math.pow(2, attempt + 1) * 2000; // 4s, 8s, 16s
       console.warn(`[Gemini] Rate limited (${response.status}), retrying in ${delay / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
@@ -106,7 +98,7 @@ export async function fetchGeminiWithRetry(
     }
     return response;
   }
-  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  return callGemini({ body, caller, retryAttempt: maxRetries + 1 });
 }
 
 /**
@@ -121,6 +113,7 @@ export async function fetchGeminiPlannerFast(
     timeoutMs?: number;
     maxRetries?: number;
     retryDelayMs?: number;
+    caller?: string;
   } = {}
 ): Promise<Response> {
   if (Date.now() < quotaExhaustedUntil) {
@@ -130,17 +123,17 @@ export async function fetchGeminiPlannerFast(
   const timeoutMs = Math.max(1500, options.timeoutMs ?? 7000);
   const maxRetries = Math.max(0, options.maxRetries ?? 1);
   const retryDelayMs = Math.max(200, options.retryDelayMs ?? 450);
-  const url = buildGeminiUrl();
+  const caller = options.caller ?? 'planner_fast';
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+      const response = await callGemini({
+        body,
+        caller,
+        retryAttempt: attempt,
         signal: controller.signal,
       });
       await detectGeminiQuotaAndThrow(response);
@@ -359,7 +352,7 @@ Trouve 5-8 vols et réponds UNIQUEMENT avec un JSON valide:
           temperature: 0.1, // Moins créatif = plus factuel
           maxOutputTokens: 2000,
         },
-    });
+    }, 3, 'flights_gemini');
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -496,7 +489,7 @@ Réponds en JSON:
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-    });
+    }, 3, 'verify_place_gemini');
 
     if (!response.ok) return { exists: false };
 
@@ -565,7 +558,7 @@ priceLevel: 1 (€) à 4 (€€€€). IMPORTANT: Pas de champ description, ti
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 8000 },
-    });
+    }, 3, 'restaurants_gemini');
 
     if (!response.ok) {
       console.error('[Gemini Restaurants] API error:', response.status);
@@ -671,7 +664,7 @@ Réponds UNIQUEMENT en JSON (pas de markdown):
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 3000 },
-    });
+    }, 3, 'enrich_restaurants_gemini');
 
     if (!response.ok) return result;
 
@@ -739,7 +732,7 @@ Si aucun prix trouvé, retourne: { "price": null }`;
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-    });
+    }, 3, 'train_price_gemini');
 
     if (!response.ok) {
       console.error('[Gemini] Train API error:', response.status);
@@ -811,7 +804,7 @@ Si aucun ferry trouvé, retourne: { "price": null }`;
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-    });
+    }, 3, 'ferry_info_gemini');
 
     if (!response.ok) {
       console.error('[Gemini] Ferry API error:', response.status);
@@ -871,7 +864,7 @@ Si péages gratuits (ex: Allemagne), retourne: { "toll": 0, "route": "Autobahn (
     const response = await fetchGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 500 },
-    });
+    }, 3, 'toll_cost_gemini');
 
     if (!response.ok) {
       console.error('[Gemini] Toll API error:', response.status);
@@ -959,7 +952,7 @@ If you cannot find this place, return: {"lat": null, "lng": null}`;
           temperature: 0,
           maxOutputTokens: 200,
         },
-    });
+    }, 3, 'geocode_gemini');
 
     if (!response.ok) {
       console.warn(`[Gemini Geocode] API error ${response.status} for "${placeName}"`);

@@ -13,6 +13,11 @@ import type { DestinationAnalysis } from './step0-destination-intel';
 import { fetchGeminiWithRetry } from '../services/geminiSearch';
 import { getCityCenterCoordsAsync } from '../services/geocoding';
 import { resolveCoordinates } from '../services/coordsResolver';
+import {
+  buildDestinationEnvelope,
+  getEnvelopeAdaptiveRadiusKm,
+  type DestinationEnvelope,
+} from '../services/destinationEnvelope';
 import { trackEstimatedCost } from '../services/apiCostGuard';
 import {
   mergeValidationParallelismStats,
@@ -539,7 +544,8 @@ function normalizeBlueprintRaw(
 
 async function canonicalizeAnchors(
   blueprint: RegionalBlueprint,
-  fallbackDestination: string
+  fallbackDestination: string,
+  destinationEnvelope?: DestinationEnvelope | null,
 ): Promise<RegionalBlueprint> {
   if (blueprint.dayAnchors.length === 0) return blueprint;
 
@@ -584,7 +590,11 @@ async function canonicalizeAnchors(
             anchor.stayCity || fallbackDestination,
             center,
             'attraction',
-            { allowPaidFallback: false }
+            {
+              allowPaidFallback: false,
+              destinationEnvelope: destinationEnvelope || undefined,
+              destinationRadiusKm: destinationEnvelope ? getEnvelopeAdaptiveRadiusKm(destinationEnvelope) : undefined,
+            }
           );
           if (!coords) return null;
           return { lat: coords.lat, lng: coords.lng, source: coords.source };
@@ -785,7 +795,7 @@ async function requestBlueprint(prompt: string): Promise<RegionalBlueprintRaw | 
   const response = await fetchGeminiWithRetry({
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig,
-  });
+  }, 3, 'step0_regional');
 
   if (!response.ok) return null;
   const data = await response.json() as GeminiGenerateContentResponse;
@@ -812,6 +822,7 @@ export async function planRegionalBlueprint(
   let feedback: string | undefined;
   let lastCandidate: RegionalBlueprint | null = null;
   let ratioRegenerationCount = 0;
+  const envelope = await buildDestinationEnvelope(preferences.destination);
 
   try {
     for (let attempt = 0; attempt <= MAX_RATIO_REGEN_ATTEMPTS; attempt += 1) {
@@ -823,7 +834,7 @@ export async function planRegionalBlueprint(
       }
 
       const normalized = normalizeBlueprintRaw(raw, preferences, cacheKey, options.analysis);
-      const canonical = await canonicalizeAnchors(normalized, preferences.destination);
+      const canonical = await canonicalizeAnchors(normalized, preferences.destination, envelope);
       const candidate = {
         ...canonical,
         ratioActual: computeBlueprintRatio(canonical),

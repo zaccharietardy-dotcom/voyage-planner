@@ -1472,7 +1472,7 @@ Réponds UNIQUEMENT en JSON valide:
         maxOutputTokens: 600,
         responseMimeType: 'application/json',
       },
-    });
+    }, 3, 'chatbot_issue_report');
 
     if (!response.ok) {
       console.error('[IssueReport] Gemini API error:', response.status);
@@ -1670,7 +1670,7 @@ Réponds de manière concise et utile en français (max 2-3 phrases). Si c'est u
         temperature: 0.2,
         maxOutputTokens: 300,
       },
-    });
+    }, 3, 'chatbot_reply');
 
     if (!response.ok) {
       return "Comment puis-je vous aider avec votre itinéraire ?";

@@ -1,38 +1,12 @@
 import type { ExternalProbeResult } from '@/lib/integrations/types';
+import { probeGeminiModels } from '@/lib/services/geminiClient';
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
 export async function probeGemini(): Promise<ExternalProbeResult> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) return { status: 'not_configured' };
-
-  const start = Date.now();
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-      { signal: AbortSignal.timeout(5000) },
-    );
-
-    const latencyMs = Date.now() - start;
-
-    if (response.status === 429) {
-      return { status: 'quota_exceeded', latencyMs, error: 'Rate limited (429)' };
-    }
-    if (response.status === 403) {
-      return { status: 'error', latencyMs, error: 'API key invalid or disabled (403)' };
-    }
-    if (!response.ok) {
-      return { status: 'error', latencyMs, error: `HTTP ${response.status}` };
-    }
-
-    const data = await response.json();
-    const modelCount = data.models?.length || 0;
-    return { status: 'ok', latencyMs, details: `${modelCount} models available` };
-  } catch (error: unknown) {
-    return { status: 'error', latencyMs: Date.now() - start, error: getErrorMessage(error) };
-  }
+  return probeGeminiModels();
 }
 
 export async function probeRapidApiTripadvisor(): Promise<ExternalProbeResult> {

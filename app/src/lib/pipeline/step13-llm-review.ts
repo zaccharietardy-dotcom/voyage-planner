@@ -56,7 +56,7 @@ export async function llmReviewTrip(
         responseMimeType: 'application/json',
         thinkingConfig: { thinkingBudget: 0 },
       } as any,
-    });
+    }, 3, 'step13_review');
 
     if (!response.ok) {
       console.warn(`[LLM Review] API returned ${response.status} — skipping review`);

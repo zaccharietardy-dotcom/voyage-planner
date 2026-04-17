@@ -100,13 +100,33 @@ pipeline/
 # Pipeline
 PIPELINE_DIRECTIONS_MODE=selective  # selective | all | off (default: selective)
 PIPELINE_LLM_DECOR=off           # on | off (default: off)
+PIPELINE_V4_CATALOG=off          # on | off (Phase 2 — catalog grounding; default: off)
 
 # APIs
 GOOGLE_MAPS_API_KEY=             # Google Places + Directions
-SERPAPI_API_KEY=                  # SerpAPI (restaurants)
+GOOGLE_AI_API_KEY=               # Gemini (all calls go through services/geminiClient.ts)
+SERPAPI_API_KEY=                 # SerpAPI (restaurants)
 RAPIDAPI_KEY=                    # Booking.com
 VIATOR_API_KEY=                  # Viator Partner
 ANTHROPIC_API_KEY=               # Claude (décoration optionnelle)
+```
+
+## Gemini Cost Instrumentation
+
+All Gemini calls are centralised in `src/lib/services/geminiClient.ts` (`callGemini()`).
+Usage is logged with a `caller` tag + token counts + estimated cost.
+
+- Local dev: `.logs/gemini-usage.jsonl` (one JSON per call).
+- Vercel: stdout lines prefixed `[GeminiUsage]` (captured by Drains).
+
+CI guard: `npm run check:gemini-wrapper` fails if `generativelanguage.googleapis.com` appears outside `services/geminiClient.ts`. Run before every push that touches Gemini paths.
+
+Quick triage:
+```bash
+# Sum estimated cost for the current .jsonl log
+jq -s '[.[].estimatedCostEur] | add' .logs/gemini-usage.jsonl
+# Top callers by cost
+jq -s 'group_by(.caller) | map({caller: .[0].caller, eur: [.[].estimatedCostEur] | add, n: length}) | sort_by(-.eur)' .logs/gemini-usage.jsonl
 ```
 
 ## Scoring Activités

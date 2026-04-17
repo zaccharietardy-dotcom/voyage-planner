@@ -19,7 +19,8 @@
     "smoke:collab": "node --import tsx scripts/smoke-collaboration-api.ts",
     "health:dependencies": "node --import tsx scripts/audit-external-integrations.ts --mode=health",
     "smoke:external": "node --import tsx scripts/audit-external-integrations.ts --mode=smoke",
-    "smoke:billing-sandbox": "node --import tsx scripts/audit-external-integrations.ts --mode=billing-sandbox"
+    "smoke:billing-sandbox": "node --import tsx scripts/audit-external-integrations.ts --mode=billing-sandbox",
+    "check:gemini-wrapper": "bash -c '! grep -RE \"generativelanguage\\.googleapis\\.com\" src --include=\"*.ts\" --include=\"*.tsx\" | grep -v \"services/geminiClient.ts\" | grep -v \"^Binary\"' || (echo 'ERROR: Gemini API URL found outside services/geminiClient.ts. All Gemini calls must go through callGemini(). See plan/on-a-un-probleme-wondrous-lake.md' && exit 1)"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

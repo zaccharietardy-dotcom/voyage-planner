@@ -38,6 +38,10 @@ data/luggage-cache/
 app/data/luggage-cache/
 app/test-results/
 
+# Logs
+.logs/
+app/.logs/
+
 # Debug exports
 voyage à debugger/
 *.debug.json

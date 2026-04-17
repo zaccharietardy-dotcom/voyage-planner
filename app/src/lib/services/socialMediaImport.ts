@@ -44,6 +44,7 @@
 
 import type { ImportedPlace } from '../types';
 import { detectCategory } from './googleMapsImport';
+import { callGemini } from './geminiClient';
 import dns from 'node:dns/promises';
 import net from 'node:net';
 import type { LookupAddress } from 'node:dns';
@@ -67,7 +68,6 @@ interface ExtractedPlaceRaw {
   originalMention?: string;
 }
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 const SOCIAL_FETCH_TIMEOUT_MS = 10000;
 const SOCIAL_FETCH_REDIRECT_LIMIT = 3;
 const SOCIAL_USER_AGENT = 'Mozilla/5.0 (compatible; NaraeVoyage/1.0; +https://naraevoyage.com)';
@@ -428,12 +428,9 @@ Contenu à analyser:
 ${text}`;
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const response = await callGemini({
+      caller: 'social_media_import',
+      body: {
         contents: [
           {
             parts: [{ text: prompt }],
@@ -443,7 +440,7 @@ ${text}`;
           temperature: 0.1,
           maxOutputTokens: 2000,
         },
-      }),
+      },
     });
 
     if (!response.ok) {

@@ -133,7 +133,7 @@ IMPORTANT: ne recommande que des lieux ICONIQUES et AUTHENTIQUES. Pas de chaîne
         responseMimeType: 'application/json',
         thinkingConfig: { thinkingBudget: 0 },
       } as any,
-    });
+    }, 3, 'step0_destintel');
 
     if (!response.ok) {
       console.warn(`[Step 0] LLM fallback failed: ${response.status}`);
@@ -381,7 +381,7 @@ Règles :
         responseMimeType: 'application/json',
         thinkingConfig: { thinkingBudget: 0 },
       } as any,
-    });
+    }, 3, 'step0_cityplan_resolver');
 
     if (!response.ok) {
       console.warn(`[Step 0] LLM resolver failed: ${response.status}`);

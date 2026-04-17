@@ -409,7 +409,7 @@ Réponds en JSON strict : { "questions": [ { "questionId": string, "title": stri
         responseMimeType: 'application/json',
         thinkingConfig: { thinkingBudget: 0 },
       } as any,
-    });
+    }, 3, 'question_detectors');
 
     if (!response.ok) {
       console.warn(`[SmartQ LLM] Pre-fetch questions failed: ${response.status}`);

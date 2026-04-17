@@ -45,7 +45,7 @@ ${truncated}`;
         maxOutputTokens: 1024,
         responseMimeType: 'application/json',
       },
-    });
+    }, 3, 'import_booking_parse');
 
     if (!response.ok) {
       return NextResponse.json({ error: 'Gemini API error' }, { status: 500 });

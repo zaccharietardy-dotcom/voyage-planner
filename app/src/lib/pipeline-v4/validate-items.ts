@@ -9,11 +9,46 @@
 
 import type { LLMTripDesign, ValidatedItem, ValidatedDrive, ValidationSource } from './types';
 import type { Restaurant } from '../types';
+import type { Catalog, CatalogEntry } from './catalog-types';
+import { buildCatalogLookup } from './catalog-types';
 import { runValidationTasks, type ValidationTask } from '../pipeline/utils/validation-orchestrator';
 import { geocodeAddress, calculateDistance } from '../services/geocoding';
 import { getDirections } from '../services/directions';
 import { searchRestaurantsNearbyWithFallback } from '../services/serpApiPlaces';
 import { trackApiCost } from '../services/apiCostGuard';
+
+interface FlattenedItemRef {
+  dayNumber: number;
+  hub: string;
+  itemIndex: number;
+  item: LLMTripDesign['days'][number]['items'][number];
+}
+
+interface FlattenedDriveRef {
+  dayNumber: number;
+  driveIndex: number;
+  drive: LLMTripDesign['days'][number]['drives'][number];
+}
+
+export interface ValidationChunkState {
+  phase: 'items' | 'drives' | 'done';
+  itemCursor: number;
+  driveCursor: number;
+  totalItems: number;
+  totalDrives: number;
+  hubCoords: Record<string, { lat: number; lng: number }>;
+  items: ValidatedItem[];
+  drives: ValidatedDrive[];
+  catalogMode?: boolean;
+}
+
+export interface ValidationChunkResult {
+  state: ValidationChunkState;
+  done: boolean;
+  latencyMs: number;
+  processedItems: number;
+  processedDrives: number;
+}
 
 // ---------------------------------------------------------------------------
 // Google Places text search (lightweight — just coords + basic info)
@@ -147,18 +182,43 @@ async function geocodeFallback(
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Validate all items in parallel
-// ---------------------------------------------------------------------------
+function flattenItems(design: LLMTripDesign): FlattenedItemRef[] {
+  const refs: FlattenedItemRef[] = [];
+  for (const day of design.days) {
+    for (let i = 0; i < day.items.length; i += 1) {
+      refs.push({
+        dayNumber: day.day,
+        hub: day.hub,
+        itemIndex: i,
+        item: day.items[i],
+      });
+    }
+  }
+  return refs;
+}
 
-export async function validateItems(
+function flattenDrives(design: LLMTripDesign): FlattenedDriveRef[] {
+  const refs: FlattenedDriveRef[] = [];
+  for (const day of design.days) {
+    for (let i = 0; i < day.drives.length; i += 1) {
+      refs.push({
+        dayNumber: day.day,
+        driveIndex: i,
+        drive: day.drives[i],
+      });
+    }
+  }
+  return refs;
+}
+
+function hubCoordsToMap(state: ValidationChunkState): Map<string, { lat: number; lng: number }> {
+  return new Map(Object.entries(state.hubCoords || {}));
+}
+
+async function resolveHubCoords(
   design: LLMTripDesign,
   onProgress?: (label: string) => void,
-): Promise<{ items: ValidatedItem[]; drives: ValidatedDrive[]; latencyMs: number }> {
-  const t0 = Date.now();
-
-  // First: resolve hub coords (needed for location bias)
-  const hubCoords = new Map<string, { lat: number; lng: number }>();
+): Promise<Record<string, { lat: number; lng: number }>> {
   const hubGeoTasks: ValidationTask<{ lat: number; lng: number } | null>[] = [];
   const hubCities = [...new Set(design.days.map(d => d.hub))];
 
@@ -176,193 +236,318 @@ export async function validateItems(
     maxRetries: 1,
   });
 
+  const coords: Record<string, { lat: number; lng: number }> = {};
   for (const [key, settled] of hubResults.settledByKey) {
     if (settled.status === 'fulfilled' && settled.value) {
-      hubCoords.set(key.replace('hub:', ''), settled.value);
+      coords[key.replace('hub:', '')] = settled.value;
+    }
+  }
+  return coords;
+}
+
+function catalogEntryToValidatedItem(
+  itemRef: FlattenedItemRef,
+  entry: CatalogEntry,
+): ValidatedItem {
+  const { item, dayNumber } = itemRef;
+  return {
+    original: item,
+    dayNumber,
+    validated: true,
+    coords: entry.coords,
+    rating: entry.rating,
+    reviewCount: entry.userRatingCount,
+    photos: entry.photos,
+    openingHours: entry.openingHours,
+    openingHoursByDay: entry.openingHoursByDay,
+    website: entry.website,
+    priceLevel: entry.priceLevel,
+    googlePlaceId: entry.placeId,
+    googleMapsUrl: entry.googleMapsUrl,
+    source: 'catalog',
+  };
+}
+
+async function validateItemRef(
+  itemRef: FlattenedItemRef,
+  nearCoords: { lat: number; lng: number },
+  catalogLookup?: ReturnType<typeof buildCatalogLookup>,
+): Promise<ValidatedItem> {
+  const { item, dayNumber, hub } = itemRef;
+
+  // Catalog mode: if the LLM chose a catalog alias, resolve without hitting Places.
+  if (catalogLookup && item.catalogAlias) {
+    const entry = catalogLookup.byAlias.get(item.catalogAlias);
+    if (entry) {
+      return catalogEntryToValidatedItem(itemRef, entry);
+    }
+    // Alias unknown — LLM cheated. Drop gracefully by falling back below.
+    console.warn(`[V4 Validate] Unknown catalog alias "${item.catalogAlias}" for item "${item.name}"`);
+  }
+
+  const query = item.address
+    ? `${item.name} ${item.address}`
+    : `${item.name} ${hub}`;
+
+  const place = await searchPlaceByText(query, nearCoords);
+
+  if (place) {
+    const dist = calculateDistance(place.lat, place.lng, nearCoords.lat, nearCoords.lng);
+    if (dist < 50) {
+      return {
+        original: item,
+        dayNumber,
+        validated: true,
+        coords: { lat: place.lat, lng: place.lng },
+        rating: place.rating,
+        reviewCount: place.reviewCount,
+        photos: place.photos,
+        openingHours: place.openingHours,
+        openingHoursByDay: place.openingHoursByDay,
+        website: place.website,
+        priceLevel: place.priceLevel,
+        googlePlaceId: place.googlePlaceId,
+        googleMapsUrl: place.googleMapsUrl,
+        source: 'google_places',
+      };
     }
   }
 
-  // Validate each item
-  const itemTasks: ValidationTask<ValidatedItem>[] = [];
-
-  for (const day of design.days) {
-    const nearCoords = hubCoords.get(day.hub) || { lat: 48.85, lng: 2.35 }; // Paris fallback
-
-    for (const item of day.items) {
-      const taskKey = `item:d${day.day}:${item.name.slice(0, 40)}`;
-
-      itemTasks.push({
-        key: taskKey,
-        provider: item.type === 'restaurant' || item.type === 'bar' ? 'serpapi' : 'google_places',
-        run: async (): Promise<ValidatedItem> => {
-          // Try Google Places text search
-          const query = item.address
-            ? `${item.name} ${item.address}`
-            : `${item.name} ${day.hub}`;
-
-          const place = await searchPlaceByText(query, nearCoords);
-
-          if (place) {
-            // Verify it's reasonably close to the hub (< 50km)
-            const dist = calculateDistance(place.lat, place.lng, nearCoords.lat, nearCoords.lng);
-            if (dist < 50) {
-              return {
-                original: item,
-                dayNumber: day.day,
-                validated: true,
-                coords: { lat: place.lat, lng: place.lng },
-                rating: place.rating,
-                reviewCount: place.reviewCount,
-                photos: place.photos,
-                openingHours: place.openingHours,
-                openingHoursByDay: place.openingHoursByDay,
-                website: place.website,
-                priceLevel: place.priceLevel,
-                googlePlaceId: place.googlePlaceId,
-                googleMapsUrl: place.googleMapsUrl,
-                source: 'google_places',
-              };
-            }
-          }
-
-          // Fallback: Nominatim geocoding
-          const geo = await geocodeFallback(item.name, day.hub);
-          if (geo) {
-            return {
-              original: item,
-              dayNumber: day.day,
-              validated: true,
-              coords: geo,
-              source: 'nominatim',
-            };
-          }
-
-          // For restaurants: try SerpAPI nearby search as replacement
-          if (item.type === 'restaurant' || item.type === 'bar') {
-            try {
-              const nearby = await searchRestaurantsNearbyWithFallback(
-                nearCoords,
-                day.hub,
-                { mealType: item.mealType, maxDistance: 2, limit: 1 },
-              );
-              if (nearby.length > 0) {
-                const replacement = nearby[0];
-                return {
-                  original: item,
-                  dayNumber: day.day,
-                  validated: true,
-                  coords: { lat: replacement.latitude, lng: replacement.longitude },
-                  rating: replacement.rating,
-                  reviewCount: replacement.reviewCount,
-                  source: 'fallback_replacement',
-                  replacedWith: replacement.name,
-                  restaurant: replacement,
-                };
-              }
-            } catch { /* ignore */ }
-          }
-
-          // Last resort: unverified with hub coords
-          return {
-            original: item,
-            dayNumber: day.day,
-            validated: false,
-            coords: nearCoords,
-            source: 'unverified',
-          };
-        },
-      });
-    }
+  const geo = await geocodeFallback(item.name, hub);
+  if (geo) {
+    return {
+      original: item,
+      dayNumber,
+      validated: true,
+      coords: geo,
+      source: 'nominatim',
+    };
   }
 
-  onProgress?.(`Validating ${itemTasks.length} items...`);
-  const itemResults = await runValidationTasks(itemTasks, {
-    defaultConcurrency: 6,
-    providerConcurrency: { google_places: 4, serpapi: 3, nominatim: 2 },
-    maxRetries: 1,
-    hardCapMs: 60000, // 60s max for all validations
-  });
-
-  const validatedItems: ValidatedItem[] = [];
-  for (const [, settled] of itemResults.settledByKey) {
-    if (settled.status === 'fulfilled') {
-      validatedItems.push(settled.value);
-    }
-  }
-
-  // Validate drives via OSRM
-  const driveTasks: ValidationTask<ValidatedDrive>[] = [];
-
-  for (const day of design.days) {
-    for (const drive of day.drives) {
-      const fromCoords = hubCoords.get(drive.from)
-        || validatedItems.find(i => i.dayNumber === day.day)?.coords
-        || { lat: 48.85, lng: 2.35 };
-
-      // Try to find destination coords
-      let toCoords = hubCoords.get(drive.to);
-      if (!toCoords) {
-        // Look in next day's hub or in items
-        const nextDay = design.days.find(d => d.day === day.day + 1);
-        toCoords = nextDay ? hubCoords.get(nextDay.hub) : undefined;
+  if (item.type === 'restaurant' || item.type === 'bar') {
+    try {
+      const nearby = await searchRestaurantsNearbyWithFallback(
+        nearCoords,
+        hub,
+        { mealType: item.mealType, maxDistance: 2, limit: 1 },
+      );
+      if (nearby.length > 0) {
+        const replacement = nearby[0];
+        return {
+          original: item,
+          dayNumber,
+          validated: true,
+          coords: { lat: replacement.latitude, lng: replacement.longitude },
+          rating: replacement.rating,
+          reviewCount: replacement.reviewCount,
+          source: 'fallback_replacement',
+          replacedWith: replacement.name,
+          restaurant: replacement,
+        };
       }
-      if (!toCoords) {
-        toCoords = { lat: fromCoords.lat + 0.5, lng: fromCoords.lng + 0.5 }; // rough estimate
-      }
-
-      driveTasks.push({
-        key: `drive:d${day.day}:${drive.from}-${drive.to}`,
-        provider: 'osrm',
-        run: async (): Promise<ValidatedDrive> => {
-          try {
-            const directions = await getDirections({
-              from: fromCoords,
-              to: toCoords!,
-              mode: 'driving',
-            });
-            return {
-              original: drive,
-              dayNumber: day.day,
-              fromCoords,
-              toCoords: toCoords!,
-              realDurationMin: Math.round(directions.duration),
-              realDistanceKm: Math.round(directions.distance * 10) / 10,
-              polyline: directions.overviewPolyline,
-              googleMapsUrl: directions.googleMapsUrl,
-            };
-          } catch {
-            // Fallback: use LLM estimates
-            return {
-              original: drive,
-              dayNumber: day.day,
-              fromCoords,
-              toCoords: toCoords!,
-              realDurationMin: drive.durationMin,
-              realDistanceKm: drive.distanceKm,
-            };
-          }
-        },
-      });
-    }
-  }
-
-  onProgress?.(`Validating ${driveTasks.length} drives...`);
-  const driveResults = await runValidationTasks(driveTasks, {
-    defaultConcurrency: 6,
-    maxRetries: 0,
-    hardCapMs: 30000,
-  });
-
-  const validatedDrives: ValidatedDrive[] = [];
-  for (const [, settled] of driveResults.settledByKey) {
-    if (settled.status === 'fulfilled') {
-      validatedDrives.push(settled.value);
+    } catch {
+      // ignore
     }
   }
 
   return {
-    items: validatedItems,
-    drives: validatedDrives,
+    original: item,
+    dayNumber,
+    validated: false,
+    coords: nearCoords,
+    source: 'unverified',
+  };
+}
+
+async function validateDriveRef(
+  driveRef: FlattenedDriveRef,
+  design: LLMTripDesign,
+  hubCoords: Map<string, { lat: number; lng: number }>,
+  validatedItems: ValidatedItem[],
+): Promise<ValidatedDrive> {
+  const { drive, dayNumber } = driveRef;
+  const fromCoords = hubCoords.get(drive.from)
+    || validatedItems.find(i => i.dayNumber === dayNumber)?.coords
+    || { lat: 48.85, lng: 2.35 };
+
+  let toCoords = hubCoords.get(drive.to);
+  if (!toCoords) {
+    const nextDay = design.days.find(d => d.day === dayNumber + 1);
+    toCoords = nextDay ? hubCoords.get(nextDay.hub) : undefined;
+  }
+  if (!toCoords) {
+    toCoords = { lat: fromCoords.lat + 0.5, lng: fromCoords.lng + 0.5 };
+  }
+
+  try {
+    const directions = await getDirections({
+      from: fromCoords,
+      to: toCoords,
+      mode: 'driving',
+    });
+    return {
+      original: drive,
+      dayNumber,
+      fromCoords,
+      toCoords,
+      realDurationMin: Math.round(directions.duration),
+      realDistanceKm: Math.round(directions.distance * 10) / 10,
+      polyline: directions.overviewPolyline,
+      googleMapsUrl: directions.googleMapsUrl,
+    };
+  } catch {
+    return {
+      original: drive,
+      dayNumber,
+      fromCoords,
+      toCoords,
+      realDurationMin: drive.durationMin,
+      realDistanceKm: drive.distanceKm,
+    };
+  }
+}
+
+export async function initializeValidationChunkState(
+  design: LLMTripDesign,
+  onProgress?: (label: string) => void,
+  catalog?: Catalog,
+): Promise<ValidationChunkState> {
+  const hubCoords = await resolveHubCoords(design, onProgress);
+  const items = flattenItems(design);
+  const drives = flattenDrives(design);
+
+  return {
+    phase: items.length > 0 ? 'items' : (drives.length > 0 ? 'drives' : 'done'),
+    itemCursor: 0,
+    driveCursor: 0,
+    totalItems: items.length,
+    totalDrives: drives.length,
+    hubCoords,
+    items: [],
+    drives: [],
+    catalogMode: !!(catalog && Object.keys(catalog).length > 0),
+  };
+}
+
+export async function runValidationChunk(
+  design: LLMTripDesign,
+  prevState: ValidationChunkState,
+  options?: {
+    itemBatchSize?: number;
+    driveBatchSize?: number;
+    catalog?: Catalog;
+  },
+): Promise<ValidationChunkResult> {
+  const startedAt = Date.now();
+  const itemBatchSize = Math.max(1, options?.itemBatchSize ?? 18);
+  const driveBatchSize = Math.max(1, options?.driveBatchSize ?? 12);
+  const catalogLookup = options?.catalog ? buildCatalogLookup(options.catalog) : undefined;
+  const flattenedItems = flattenItems(design);
+  const flattenedDrives = flattenDrives(design);
+  const hubCoords = hubCoordsToMap(prevState);
+  const nextState: ValidationChunkState = {
+    ...prevState,
+    items: [...(prevState.items || [])],
+    drives: [...(prevState.drives || [])],
+  };
+  let processedItems = 0;
+  let processedDrives = 0;
+
+  if (nextState.phase === 'items') {
+    const start = nextState.itemCursor;
+    const end = Math.min(flattenedItems.length, start + itemBatchSize);
+    const slice = flattenedItems.slice(start, end);
+    const tasks: ValidationTask<ValidatedItem>[] = slice.map((ref, idx) => ({
+      key: `item:${ref.dayNumber}:${start + idx}:${ref.item.name.slice(0, 40)}`,
+      provider:
+        catalogLookup && ref.item.catalogAlias && catalogLookup.byAlias.has(ref.item.catalogAlias)
+          ? 'local'
+          : (ref.item.type === 'restaurant' || ref.item.type === 'bar' ? 'serpapi' : 'google_places'),
+      run: async () => {
+        const nearCoords = hubCoords.get(ref.hub) || { lat: 48.85, lng: 2.35 };
+        return validateItemRef(ref, nearCoords, catalogLookup);
+      },
+    }));
+
+    const itemResults = await runValidationTasks(tasks, {
+      defaultConcurrency: 6,
+      providerConcurrency: { google_places: 4, serpapi: 3, nominatim: 2 },
+      maxRetries: 1,
+      hardCapMs: 30_000,
+    });
+
+    for (const [, settled] of itemResults.settledByKey) {
+      if (settled.status === 'fulfilled') {
+        nextState.items.push(settled.value);
+      }
+    }
+
+    nextState.itemCursor = end;
+    processedItems = slice.length;
+    if (nextState.itemCursor >= flattenedItems.length) {
+      nextState.phase = flattenedDrives.length > 0 ? 'drives' : 'done';
+    }
+  } else if (nextState.phase === 'drives') {
+    const start = nextState.driveCursor;
+    const end = Math.min(flattenedDrives.length, start + driveBatchSize);
+    const slice = flattenedDrives.slice(start, end);
+    const tasks: ValidationTask<ValidatedDrive>[] = slice.map((ref, idx) => ({
+      key: `drive:${ref.dayNumber}:${start + idx}:${ref.drive.from}-${ref.drive.to}`,
+      provider: 'osrm',
+      run: async () => validateDriveRef(ref, design, hubCoords, nextState.items),
+    }));
+
+    const driveResults = await runValidationTasks(tasks, {
+      defaultConcurrency: 6,
+      maxRetries: 0,
+      hardCapMs: 25_000,
+    });
+
+    for (const [, settled] of driveResults.settledByKey) {
+      if (settled.status === 'fulfilled') {
+        nextState.drives.push(settled.value);
+      }
+    }
+
+    nextState.driveCursor = end;
+    processedDrives = slice.length;
+    if (nextState.driveCursor >= flattenedDrives.length) {
+      nextState.phase = 'done';
+    }
+  }
+
+  return {
+    state: nextState,
+    done: nextState.phase === 'done',
+    latencyMs: Date.now() - startedAt,
+    processedItems,
+    processedDrives,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Validate all items in parallel
+// ---------------------------------------------------------------------------
+
+export async function validateItems(
+  design: LLMTripDesign,
+  onProgress?: (label: string) => void,
+  catalog?: Catalog,
+): Promise<{ items: ValidatedItem[]; drives: ValidatedDrive[]; latencyMs: number }> {
+  const t0 = Date.now();
+  let state = await initializeValidationChunkState(design, onProgress, catalog);
+  while (state.phase !== 'done') {
+    const result = await runValidationChunk(design, state, {
+      itemBatchSize: 24,
+      driveBatchSize: 16,
+      catalog,
+    });
+    state = result.state;
+  }
+
+  return {
+    items: state.items,
+    drives: state.drives,
     latencyMs: Date.now() - t0,
   };
 }

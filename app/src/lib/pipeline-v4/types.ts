@@ -17,6 +17,8 @@ export interface LLMTripItem {
   estimatedCost?: number;
   tip?: string;
   mealType?: 'breakfast' | 'lunch' | 'dinner';
+  /** Catalog alias when the item was chosen from the catalog (Phase 2 grounding). */
+  catalogAlias?: string;
 }
 
 export interface LLMTripDrive {
@@ -55,7 +57,9 @@ export type ValidationSource =
   | 'serpapi'
   | 'nominatim'
   | 'fallback_replacement'
-  | 'unverified';
+  | 'unverified'
+  | 'catalog'
+  | 'catalog_auto_injected';
 
 export interface ValidatedItem {
   /** Original LLM item */

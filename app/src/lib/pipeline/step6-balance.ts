@@ -425,7 +425,7 @@ export async function balanceDaysWithGemini(
           temperature: 0.3,
           maxOutputTokens: 2000,
         },
-      }),
+      }, 3, 'step6_balance'),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Gemini timeout (30s)')), 30000)
       ),
