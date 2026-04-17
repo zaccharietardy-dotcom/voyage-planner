@@ -7,6 +7,10 @@
 
 import type { Trip, TripDay, TripItem, TripPreferences, Accommodation } from '../types';
 import type { ValidatedItem, ValidatedDrive, HubHotelResult, LLMTripDesign } from './types';
+import {
+  addOutboundTransportItem,
+  addReturnTransportItem,
+} from '../pipeline/utils/transport-items';
 function uuidv4(): string {
   return 'v4-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now().toString(36);
 }
@@ -34,6 +38,10 @@ function addMinutes(time: string, minutes: number): string {
 // Build TripItem from ValidatedItem
 // ---------------------------------------------------------------------------
 
+function isGooglePlacesBackedSource(source: ValidatedItem['source']): boolean {
+  return source === 'google_places' || source === 'catalog' || source === 'catalog_auto_injected';
+}
+
 function buildActivityItem(
   item: ValidatedItem,
   orderIndex: number,
@@ -41,6 +49,7 @@ function buildActivityItem(
 ): TripItem {
   const start = startTime || item.original.startTime || '10:00';
   const duration = item.original.duration || 60;
+  const placeBacked = isGooglePlacesBackedSource(item.source);
 
   return {
     id: `v4-${item.dayNumber}-${orderIndex}-${uuidv4().slice(0, 8)}`,
@@ -68,10 +77,18 @@ function buildActivityItem(
         ? `https://www.google.com/maps/place/?q=place_id:${item.googlePlaceId}`
         : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.original.name)}`),
     dataReliability: item.validated ? 'verified' : 'estimated',
-    geoSource: item.source === 'google_places' ? 'place' : 'geocode',
-    geoConfidence: item.source === 'google_places' ? 'high' : item.source === 'nominatim' ? 'medium' : 'low',
+    geoSource: placeBacked ? 'place' : 'geocode',
+    geoConfidence: placeBacked ? 'high' : item.source === 'nominatim' ? 'medium' : 'low',
     llmContextTip: item.original.tip,
   };
+}
+
+function inferMealTypeFromStartTime(startTime: string): 'breakfast' | 'lunch' | 'dinner' {
+  const [hStr, mStr] = startTime.split(':');
+  const mins = (Number(hStr) || 12) * 60 + (Number(mStr) || 0);
+  if (mins < 10 * 60 + 30) return 'breakfast';   // before 10:30
+  if (mins < 17 * 60) return 'lunch';            // 10:30–17:00
+  return 'dinner';                                // 17:00+
 }
 
 function buildRestaurantItem(
@@ -79,11 +96,12 @@ function buildRestaurantItem(
   orderIndex: number,
   startTime?: string,
 ): TripItem {
-  const mealType = item.original.mealType || 'dinner';
   const start = startTime || item.original.startTime || '12:30';
+  const mealType = item.original.mealType || inferMealTypeFromStartTime(start);
   const duration = item.original.duration || (mealType === 'breakfast' ? 45 : mealType === 'lunch' ? 75 : 90);
   const mealLabel = mealType === 'breakfast' ? 'Petit-déjeuner' : mealType === 'lunch' ? 'Déjeuner' : 'Dîner';
   const displayName = item.replacedWith || item.original.name;
+  const placeBacked = isGooglePlacesBackedSource(item.source);
 
   return {
     id: `v4-meal-${item.dayNumber}-${mealType}-${uuidv4().slice(0, 8)}`,
@@ -120,8 +138,8 @@ function buildRestaurantItem(
     openingHours: item.openingHours,
     openingHoursByDay: item.openingHoursByDay,
     dataReliability: item.validated ? 'verified' : 'estimated',
-    geoSource: item.source === 'google_places' ? 'place' : 'geocode',
-    geoConfidence: item.source === 'google_places' ? 'high' : 'medium',
+    geoSource: placeBacked ? 'place' : 'geocode',
+    geoConfidence: placeBacked ? 'high' : 'medium',
     llmContextTip: item.original.tip,
     qualityFlags: item.source === 'unverified' ? ['self_meal_fallback'] : [],
   };
@@ -337,6 +355,24 @@ export function buildTrip(
       dayNarrative: llmDay.narrative,
       dailyBudget: { activities: actCost, food: foodCost, transport: transCost, total: actCost + foodCost + transCost },
     });
+  }
+
+  // Inject outbound/return transport items with affiliate links.
+  // V4 doesn't currently fetch real flight data, so pass null + null:
+  // the utility falls back to generating Aviasales/Omio search URLs from preferences.
+  const firstDay = days[0];
+  const lastDay = days[days.length - 1];
+  if (firstDay) {
+    const fallbackCoordsOutbound = firstDay.items.find((it) => it.latitude && it.longitude)
+      ? { lat: firstDay.items.find((it) => it.latitude)!.latitude, lng: firstDay.items.find((it) => it.longitude)!.longitude }
+      : { lat: 48.85, lng: 2.35 };
+    addOutboundTransportItem(firstDay, null, null, preferences, fallbackCoordsOutbound);
+  }
+  if (lastDay && lastDay !== firstDay) {
+    const fallbackCoordsReturn = lastDay.items.find((it) => it.latitude && it.longitude)
+      ? { lat: lastDay.items.find((it) => it.latitude)!.latitude, lng: lastDay.items.find((it) => it.longitude)!.longitude }
+      : { lat: 48.85, lng: 2.35 };
+    addReturnTransportItem(lastDay, null, null, preferences, fallbackCoordsReturn);
   }
 
   // Calculate total cost
