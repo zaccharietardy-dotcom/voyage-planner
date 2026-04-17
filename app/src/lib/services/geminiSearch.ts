@@ -60,10 +60,29 @@ async function detectGeminiQuotaAndThrow(response: Response): Promise<void> {
 // Global quota circuit breaker — skip Gemini for 60s after a quota error
 let quotaExhaustedUntil = 0;
 
+// Global call counter per run — prevents runaway Gemini costs
+let geminiCallCount = 0;
+const GEMINI_MAX_CALLS_PER_RUN = 15;
+
+export function resetGeminiCallCounter(): void {
+  geminiCallCount = 0;
+}
+
+export function getGeminiCallCount(): number {
+  return geminiCallCount;
+}
+
 export async function fetchGeminiWithRetry(
   body: Record<string, unknown>,
   maxRetries: number = 3
 ): Promise<Response> {
+  // Hard cap: prevent runaway costs
+  if (geminiCallCount >= GEMINI_MAX_CALLS_PER_RUN) {
+    console.warn(`[Gemini] Hard cap reached (${geminiCallCount}/${GEMINI_MAX_CALLS_PER_RUN} calls). Blocking.`);
+    return new Response(JSON.stringify({ error: { message: 'Gemini call cap reached', status: 'RESOURCE_EXHAUSTED' } }), { status: 429 });
+  }
+  geminiCallCount++;
+
   // Circuit breaker: if we recently hit quota, return a fake 429 immediately
   if (Date.now() < quotaExhaustedUntil) {
     reportProviderQuotaExceeded('gemini', 'circuit_breaker_active');

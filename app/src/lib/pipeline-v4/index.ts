@@ -20,6 +20,7 @@ import { validateItems } from './validate-items';
 import { findHotelsForHubs } from './find-hotels';
 import { buildTrip } from './build-trip';
 import { resetApiCostTracker, getApiCostSummary } from '../services/apiCostGuard';
+import { resetGeminiCallCounter, getGeminiCallCount } from '../services/geminiSearch';
 import { storeProfilingData } from '../services/profilingStore';
 import { applyEffects } from '../pipeline/questionDetectors';
 import { isProviderQuotaLikeError } from '../utils/quotaErrors';
@@ -393,6 +394,7 @@ export async function generateTripV4(
 ): Promise<Trip> {
   const startTime = Date.now();
   resetApiCostTracker();
+  resetGeminiCallCounter();
   const regionalQuestionFlow = {
     preFetchRegion: { askedCount: 0, autoDefaultCount: 0 },
     postDraftAdjust: { askedCount: 0, autoDefaultCount: 0 },
