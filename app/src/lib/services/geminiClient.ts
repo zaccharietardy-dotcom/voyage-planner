@@ -40,12 +40,68 @@ export function estimateCostEur(model: string, inputTokens: number, outputTokens
 }
 
 // ---------------------------------------------------------------------------
-// Usage logging
+// Usage logging + daily hard cap
 // ---------------------------------------------------------------------------
 
 const LOG_BASE = process.env.VERCEL ? '/tmp' : process.cwd();
 const LOG_DIR = path.join(LOG_BASE, '.logs');
 const LOG_FILE = path.join(LOG_DIR, 'gemini-usage.jsonl');
+
+// In-memory daily cost tracker for hard cap enforcement.
+// Keyed by UTC date (YYYY-MM-DD). Resets at midnight UTC.
+let cachedDay: string | null = null;
+let cachedDayCostEur = 0;
+
+function utcDay(ts: string | Date = new Date()): string {
+  const d = typeof ts === 'string' ? new Date(ts) : ts;
+  return d.toISOString().slice(0, 10);
+}
+
+function hydrateTodayCostFromDisk(today: string): number {
+  if (process.env.VERCEL) return 0; // On Vercel, /tmp is ephemeral; rely on in-process only.
+  try {
+    if (!fs.existsSync(LOG_FILE)) return 0;
+    const lines = fs.readFileSync(LOG_FILE, 'utf-8').split('\n').filter(Boolean);
+    let sum = 0;
+    for (const line of lines) {
+      try {
+        const entry = JSON.parse(line) as { ts?: string; estimatedCostEur?: number };
+        if (!entry.ts || typeof entry.estimatedCostEur !== 'number') continue;
+        if (entry.ts.slice(0, 10) === today) sum += entry.estimatedCostEur;
+      } catch {
+        // Ignore malformed lines.
+      }
+    }
+    return sum;
+  } catch {
+    return 0;
+  }
+}
+
+function refreshDailyCounter(): void {
+  const today = utcDay();
+  if (cachedDay !== today) {
+    cachedDay = today;
+    cachedDayCostEur = hydrateTodayCostFromDisk(today);
+  }
+}
+
+function getDailyCapEur(): number | null {
+  const raw = process.env.GEMINI_DAILY_CAP_EUR;
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+export function getTodayCostEur(): number {
+  refreshDailyCounter();
+  return cachedDayCostEur;
+}
+
+export function resetTodayCostEur(): void {
+  cachedDay = utcDay();
+  cachedDayCostEur = 0;
+}
 
 export interface GeminiUsage {
   ts: string;
@@ -61,6 +117,12 @@ export interface GeminiUsage {
 }
 
 export function logGeminiUsage(usage: GeminiUsage): void {
+  // Update the in-memory daily counter (used by the hard cap).
+  refreshDailyCounter();
+  if (utcDay(usage.ts) === cachedDay) {
+    cachedDayCostEur += usage.estimatedCostEur;
+  }
+
   if (process.env.VERCEL) {
     console.log('[GeminiUsage]', JSON.stringify(usage));
     return;
@@ -111,6 +173,25 @@ export async function callGemini(params: CallGeminiParams): Promise<Response> {
       }),
       { status: 401, headers: { 'Content-Type': 'application/json' } },
     );
+  }
+
+  const dailyCap = getDailyCapEur();
+  if (dailyCap !== null) {
+    refreshDailyCounter();
+    if (cachedDayCostEur >= dailyCap) {
+      console.warn(
+        `[GeminiClient] Daily cost cap reached: €${cachedDayCostEur.toFixed(4)} / €${dailyCap.toFixed(2)} (caller=${caller}). Blocking.`,
+      );
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: `Daily Gemini cost cap reached (€${cachedDayCostEur.toFixed(4)} >= €${dailyCap.toFixed(2)})`,
+            status: 'RESOURCE_EXHAUSTED',
+          },
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
   }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;

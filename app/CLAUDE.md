@@ -105,6 +105,7 @@ PIPELINE_V4_CATALOG=off          # on | off (Phase 2 — catalog grounding; defa
 # APIs
 GOOGLE_MAPS_API_KEY=             # Google Places + Directions
 GOOGLE_AI_API_KEY=               # Gemini (all calls go through services/geminiClient.ts)
+GEMINI_DAILY_CAP_EUR=            # Optional hard cap — blocks calls when today's cost reaches this EUR amount
 SERPAPI_API_KEY=                 # SerpAPI (restaurants)
 RAPIDAPI_KEY=                    # Booking.com
 VIATOR_API_KEY=                  # Viator Partner
@@ -120,6 +121,14 @@ Usage is logged with a `caller` tag + token counts + estimated cost.
 - Vercel: stdout lines prefixed `[GeminiUsage]` (captured by Drains).
 
 CI guard: `npm run check:gemini-wrapper` fails if `generativelanguage.googleapis.com` appears outside `services/geminiClient.ts`. Run before every push that touches Gemini paths.
+
+### Hard cap (`GEMINI_DAILY_CAP_EUR`)
+
+GCP billing "budgets" are notification-only and don't block calls. To truly block Gemini when a daily EUR threshold is reached, set `GEMINI_DAILY_CAP_EUR` in `.env.local`. When today's estimated cost reaches the cap, `callGemini` short-circuits with HTTP 429 / `RESOURCE_EXHAUSTED`.
+
+- Local dev: the cap is hydrated at startup from today's entries in `.logs/gemini-usage.jsonl`, so it survives process restarts.
+- Vercel: the cap is per-process (each Lambda instance starts at 0 — `/tmp` isn't shared). For a global prod cap, pair this with a GCP quota reduction under IAM & Admin → Quotas → Generative Language API.
+- Reset: day rolls at 00:00 UTC; to reset manually, call `resetTodayCostEur()` or delete today's entries from the jsonl.
 
 Quick triage:
 ```bash
